@@ -1,0 +1,183 @@
+// Allow Eggrobo badniks to exist independent of their spawner objects in zones other than SSZ
+// if Knuckles is the main character or if Sonic/Tails are in Death Egg Zone and not Original Mode
+// Function taken from enemies\ssz_eggrobo.lemon
+//# translated(0x091914) end(0x09192a)
+function bool fn091914()
+{
+	if (original_mode && time_attack != 1 && time_attack != 2 && global.zone != 0x0a)
+		return true
+	else if ((eggrobos_knuckles || time_attack == 1 || time_attack == 2) && isMainCharacter(CHARACTER_KNUCKLES) && global.zone != 0x0a)	// check if this is Knuckles and not SSZ
+		return false			// return false to pretend all EggRobo spawners have run
+	else if ((eggrobos_sonictails || time_attack == 1 || time_attack == 2) && (global.zone == 0x0b || global.zone == 0x0c)) // && !isMainCharacter(CHARACTER_KNUCKLES) 
+		return false
+	else
+	{
+		D0.u16 = (objA0.subtype2c & 0xf0) >> 4	// ignore if the EggRobo appears from a tunnel or not
+		D1.u16 = u16[0xfffffa82]	// compare the EggRobo's spawner ID to a table of spawner objects that have run
+		if (D1 & (1 << D0))	
+			return false	// "false" means that the spawner was run already
+
+		Enemy.UnloadDelayed()
+		return true
+	}
+}
+
+
+
+
+// Use subtypes 0x06 and 0x08 for Eggrobos that should never turn around by setting a flag.
+// Function taken from enemies\ssz_eggrobo.lemon
+//# address-hook(0x09185e) end(0x09186a)
+function void fn09185e()
+{
+	if ((objA0.subtype2c & 0x0f) > 0x08)	// This is merely a safety check for any accidents in object subtype settings.
+		objA0.subtype2c = 0x06				// The most likely intent was to set 0x06 as the subtype.
+
+	if ((objA0.subtype2c & 0x0f) > 0x04)	// if the lower 4 bits sum to more than 4
+	{
+		u16[A0 + 0x46] = 1			// This word is typically a child object's parent address. While lasers use it, it's unused on the Eggrobo itself: it IS the parent.
+		objA0.subtype2c -= 0x04		// With our new "no turning around" flag set, we revert the subtype to a normal one.
+	}
+	// Targets:
+	//  - 0x091874	-> (objA0.subtype2c & 0x0f) = 0x00
+	//  - 0x0918c4	-> (objA0.subtype2c & 0x0f) = 0x02
+	//  - 0x0918fc	-> (objA0.subtype2c & 0x0f) = 0x04
+	call tableLookupAddress(0x09186e, objA0.subtype2c & 0x0f)
+}
+
+
+
+
+// Change the firing range for Eggrobo badniks compared to base AIR and use a flag to disallow some Eggrobos from turning around.
+// Function taken from enemies\ssz_eggrobo.lemon
+//# address-hook(0x09159a) end(0x0915d8)
+function void fn09159a()
+{
+	if (original_mode)
+	{
+		base.fn09159a()
+		return
+	}
+	fn091988()
+	objA0.value32 = u16[A0 + 0x30]
+	u16[A0 + 0x30] = objA0.position.y.u16
+	fn0847e6()
+	UpdateMovementStraightSimple()
+
+	A1 = 0xffffb000
+	CheckDistanceToObjectA1()
+	if (!u16[A0 + 0x46])		// new if statement: only tell the object to turn toward the player if this flag isn't set
+		fn084b5c()
+
+#if STANDALONE
+	bool playerNotBehindEggrobo = (((objA0.render_flags & render_flag.FLIP_X) && u16[0xffffb010] > objA0.position.x.u16) || (!(objA0.render_flags & render_flag.FLIP_X) && u16[0xffffb010] < objA0.position.x.u16))
+	// Limit range in x-direction as well, partly to accomodate for earlier spawn in widescreen
+	if (D2.u16 < 0xc0 && D3.u16 <= 0x08 && playerNotBehindEggrobo)	// usual check for D2.u16 is < 0x100. Final check is new and disallows shooting if player has passed.
+#else
+	if (D3.u16 <= 0x08)
+#endif
+	{
+		// Shoot
+		objA0.update_address = 0x0915de
+		objA0.flags38 |= 0x02
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+
+
+// Use the subtype as a flag to make Eggrobo lasers fade away after a moment.
+// Function taken from enemies\ssz_eggrobo.lemon
+//# address-hook(0x0917b4) end(0x0917ba)
+function void fn0917b4()
+{
+	if (original_mode)
+	{
+		base.fn0917b4()
+		return
+	}
+	UpdateMovementStraightSimple()
+	objA0.subtype2c += 4	// Lasers will be drawn with an alpha value of 240 - (2 * (objA0.subtype2c - 128)) (decimal 240 minus subtype)
+	if (objA0.subtype2c >= 0xf0)	// alpha is 0 here, so unload the laser entirely
+	{
+		UnloadObject()
+		return
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+
+// Create more than one Eggrobo in the Knuckles intro scene to set the tone for the game.
+// Functions taken from level\07_mhz\intro_knuckles.lemon
+//# address-hook(0x0638a2) end(0x0638d6)
+function void fn0638a2()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x44]
+	if ((u8[A1 + 0x38] & 0x20) == 0)
+		return
+
+	u8[0xfffffab8] |= 0x04
+	if (allocDynamicObjectStd())
+	{
+		u32[A1] = 0x0639c8
+	}
+
+	if (eggrobos_knuckles)
+	{
+		if (allocDynamicObjectStd())
+		{
+			u32[A1] = 0x0639ca
+		}
+		if (allocDynamicObjectStd())
+		{
+			u32[A1] = 0x0639cc
+		}
+	}
+
+	copyMemory(0xfffffca0, 0x0a973c, 0x20)
+
+	Object.TriggerUnloading()
+}
+
+//# address-hook(0x0639c8) end(0x063a10)
+function void fn0639c8()
+{
+	setupObjectAttributesFull(0x0919a6)
+	objA0.update_address = 0x063a16
+
+	objA0.position.x.u16 = camera.position.x.u16 + 0x0110
+	objA0.position.y.u16 = camera.position.y.u16 - 0x60
+	playMusic(0x19)
+
+	spawnChildObjects(0x0919d0)
+
+	Kosinski.addToDMAQueue(0x17b17e, 0xa000)
+}
+
+// Despite the address hook, this function is a custom version of the above
+//# address-hook(0x0639ca) end(0x063a10)
+function void fn0639ca()
+{
+	setupObjectAttributesFull(0x0919a6)
+	objA0.update_address = 0x063a16
+
+	objA0.position.x.u16 = camera.position.x.u16 + 0x0140
+	objA0.position.y.u16 = camera.position.y.u16 - 0x50
+
+	spawnChildObjects(0x0919d0)
+}
+
+// Despite the address hook, this function is a custom version of the above
+//# address-hook(0x0639cc) end(0x063a10)
+function void fn0639cc()
+{
+	setupObjectAttributesFull(0x0919a6)
+	objA0.update_address = 0x063a16
+
+	objA0.position.x.u16 = camera.position.x.u16 + 0x0170
+	objA0.position.y.u16 = camera.position.y.u16 - 0x40
+
+	spawnChildObjects(0x0919d0)
+}

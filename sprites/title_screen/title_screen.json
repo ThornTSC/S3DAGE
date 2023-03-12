@@ -1,0 +1,5 @@
+{
+	"bg_title_screen_new":    { "File": "title_background.png" },
+	"title_screen_air":  { "File": "TitleScreen_DAGEname.png", "Rect": "0,137,0,10", "Center": "68,5" },
+	"title_screen_air_h":  { "File": "TitleScreen_DAGEnameHighlight.png", "Rect": "0,137,0,10", "Center": "68,5" }
+}

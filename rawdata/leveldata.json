@@ -1,0 +1,249 @@
+{
+  "aiz1_layout": { "File": "../level/AIZ/Layout/1.bin" },
+  "aiz1_objects": { "File": "../level/AIZ/Object Pos/1.bin" },
+  "aiz1_rings": { "File": "../level/AIZ/Ring Pos/1.bin" },
+  "aiz1_chunks_s":  { "File": "../level/AIZ/Chunks/Act 1.bin" },
+
+  "aiz2_layout": { "File": "../level/AIZ/Layout/2.bin" },
+  "aiz2_objects": { "File": "../level/AIZ/Object Pos/2.bin" },
+  "aiz2_rings": { "File": "../level/AIZ/Ring Pos/2.bin" },
+  "aiz2_chunks_s":  { "File": "../level/AIZ/Chunks/Act 2.bin" },
+
+  "hcz_chunks_p":  { "File": "../level/HCZ/Chunks/Primary.bin" },
+
+  "hcz1_layout": { "File": "../level/HCZ/Layout/1.bin" },
+  "hcz1_objects": { "File": "../level/HCZ/Object Pos/1.bin" },
+  "hcz1_rings": { "File": "../level/HCZ/Ring Pos/1.bin" },
+  "hcz1_chunks_s":  { "File": "../level/HCZ/Chunks/Act 1 Secondary.bin" },
+  "hcz1_chunks_s_orig":  { "File": "../level/HCZ/Chunks/Act 1 Secondary_Orig.bin" },
+
+  "hcz2_layout": { "File": "../level/HCZ/Layout/2.bin" },
+  "hcz2_objects": { "File": "../level/HCZ/Object Pos/2.bin" },
+  "hcz2_rings": { "File": "../level/HCZ/Ring Pos/2.bin" },
+  "hcz2_chunks_s":  { "File": "../level/HCZ/Chunks/Act 2 Secondary.bin" },
+
+  "mgz_chunks_p":  { "File": "../level/MGZ/Chunks/Primary.bin" },
+
+  "mgz1_layout": { "File": "../level/MGZ/Layout/1.bin" },
+  "mgz1_objects": { "File": "../level/MGZ/Object Pos/1.bin" },
+  "mgz1_rings": { "File": "../level/MGZ/Ring Pos/1.bin" },
+  "mgz1_chunks_s":  { "File": "../level/MGZ/Chunks/Act 1 Secondary.bin" },
+
+  "mgz2_layout": { "File": "../level/MGZ/Layout/2.bin" },
+  "mgz2_objects": { "File": "../level/MGZ/Object Pos/2.bin" },
+  "mgz2_rings": { "File": "../level/MGZ/Ring Pos/2.bin" },
+  "mgz2_chunks_s":  { "File": "../level/MGZ/Chunks/Act 2 Secondary.bin" },
+
+  "cnz_chunks_p":  { "File": "../level/CNZ/Chunks/Primary.bin" },
+
+  "cnz1_layout": { "File": "../level/CNZ/Layout/1.bin" },
+  "cnz1_objects": { "File": "../level/CNZ/Object Pos/1.bin" },
+  "cnz1_rings": { "File": "../level/CNZ/Ring Pos/1.bin" },
+
+  "cnz2_layout": { "File": "../level/CNZ/Layout/2.bin" },
+  "cnz2_objects": { "File": "../level/CNZ/Object Pos/2.bin" },
+  "cnz2_rings": { "File": "../level/CNZ/Ring Pos/2.bin" },
+
+  "icz_chunks_p":  { "File": "../level/ICZ/Chunks/Primary.bin" },
+
+  "icz1_layout": { "File": "../level/ICZ/Layout/1.bin" },
+  "icz1_objects": { "File": "../level/ICZ/Object Pos/1.bin" },
+  "icz1_rings": { "File": "../level/ICZ/Ring Pos/1.bin" },
+  "icz1_chunks_s":  { "File": "../level/ICZ/Chunks/Act 1 Secondary.bin" },
+
+  "icz2_layout": { "File": "../level/ICZ/Layout/2.bin" },
+  "icz2_objects": { "File": "../level/ICZ/Object Pos/2.bin" },
+  "icz2_rings": { "File": "../level/ICZ/Ring Pos/2.bin" },
+  "icz2_chunks_s":  { "File": "../level/ICZ/Chunks/Act 2 Secondary.bin" },
+
+  "lbz1_layout": { "File": "../level/LBZ/Layout/1.bin" },
+  "lbz1_objects": { "File": "../level/LBZ/Object Pos/1.bin" },
+  "lbz1_rings": { "File": "../level/LBZ/Ring Pos/1.bin" },
+  "lbz1_chunks_s":  { "File": "../level/LBZ/Chunks/Act 1.bin" },
+
+  "lbz2_layout": { "File": "../level/LBZ/Layout/2.bin" },
+  "lbz2_objects": { "File": "../level/LBZ/Object Pos/2.bin" },
+  "lbz2_rings": { "File": "../level/LBZ/Ring Pos/2.bin" },
+  "lbz2_chunks_s":  { "File": "../level/LBZ/Chunks/Act 2.bin" },
+  
+  "mhz_chunks_p":  { "File": "../level/MHZ/Chunks/Primary.bin" },
+
+  "mhz1_layout": { "File": "../level/MHZ/Layout/1.bin" },
+  "mhz1_objects": { "File": "../level/MHZ/Object Pos/1.bin" },
+  "mhz1_rings": { "File": "../level/MHZ/Ring Pos/1.bin" },
+  "mhz1_chunks_s":  { "File": "../level/MHZ/Chunks/Secondary.bin" },
+
+  "mhz2_layout": { "File": "../level/MHZ/Layout/2.bin" },
+  "mhz2_objects": { "File": "../level/MHZ/Object Pos/2.bin" },
+  "mhz2_rings": { "File": "../level/MHZ/Ring Pos/2.bin" },
+  "mhz2_chunks_s":  { "File": "../level/MHZ/Chunks/Secondary.bin" },
+
+  "fbz_chunks_p":  { "File": "../level/FBZ/Chunks/Primary.bin" },
+  "fbz_tiles_p":  { "File": "../level/FBZ/Tiles/Primary.bin" },
+  "fbz_tiles_p_orig":  { "File": "../level/FBZ/Tiles/Primary_Orig.bin" },
+
+  "fbz1_layout": { "File": "../level/FBZ/Layout/1.bin" },
+  "fbz1_objects": { "File": "../level/FbZ/Object Pos/1.bin" },
+  "fbz1_rings": { "File": "../level/FBZ/Ring Pos/1.bin" },
+
+  "fbz2_layout": { "File": "../level/FBZ/Layout/2.bin" },
+  "fbz2_objects": { "File": "../level/FBZ/Object Pos/2.bin" },
+  "fbz2_rings": { "File": "../level/FBZ/Ring Pos/2.bin" },
+
+  "soz_chunks_p":  { "File": "../level/SOZ/Chunks/Primary.bin" },
+
+  "soz1_layout": { "File": "../level/SOZ/Layout/1.bin" },
+  "soz1_objects": { "File": "../level/SOZ/Object Pos/1.bin" },
+  "soz1_rings": { "File": "../level/SOZ/Ring Pos/1.bin" },
+
+  "soz2_layout": { "File": "../level/SOZ/Layout/2.bin" },
+  "soz2_objects": { "File": "../level/SOZ/Object Pos/2.bin" },
+  "soz2_rings": { "File": "../level/SOZ/Ring Pos/2.bin" },
+
+  "lrz_chunks_p":  { "File": "../level/LRZ/Chunks/Primary.bin" },
+
+  "lrz1_layout": { "File": "../level/LRZ/Layout/1.bin" },
+  "lrz1_objects": { "File": "../level/LRZ/Object Pos/1.bin" },
+  "lrz1_rings": { "File": "../level/LRZ/Ring Pos/1.bin" },
+  "lrz1_chunks_s":  { "File": "../level/LRZ/Chunks/Act 1 Secondary.bin" },
+
+  "lrz2_layout": { "File": "../level/LRZ/Layout/2.bin" },
+  "lrz2_objects": { "File": "../level/LRZ/Object Pos/2.bin" },
+  "lrz2_rings": { "File": "../level/LRZ/Ring Pos/2.bin" },
+  "lrz2_chunks_s":  { "File": "../level/LRZ/Chunks/Act 2 Secondary.bin" },
+
+  "hpz_chunks_p":  { "File": "../level/HPZ/Chunks/Primary.bin" },
+
+  "hpz1_layout": { "File": "../level/LRZ/Layout/3.bin" },
+  "hpz1_objects": { "File": "../level/LRZ/Object Pos/3.bin" },
+  "hpz1_rings": { "File": "../level/LRZ/Ring Pos/3.bin" },
+  "hpz1_chunks_s":  { "File": "../level/LRZ/Chunks/Act 3 Secondary.bin" },
+
+  "hpz2_layout": { "File": "../level/HPZ/Layout/1.bin" },
+  "hpz2_objects": { "File": "../level/HPZ/Object Pos/1.bin" },
+  "hpz2_rings": { "File": "../level/HPZ/Ring Pos/1.bin" },
+  "hpz2_chunks_s":  { "File": "../level/HPZ/Chunks/Secondary.bin" },
+
+  "ssz1_chunks_p":  { "File": "../level/SSZ/Chunks/Act 1 Primary.bin" },
+
+  "ssz1_layout": { "File": "../level/SSZ/Layout/1.bin" },
+  "ssz1_objects": { "File": "../level/SSZ/Object Pos/1.bin" },
+  "ssz1_rings": { "File": "../level/SSZ/Ring Pos/1.bin" },
+  "ssz1_chunks_s":  { "File": "../level/SSZ/Chunks/Act 1 Secondary.bin" },
+
+  "ssz2_chunks_p":  { "File": "../level/SSZ/Chunks/Act 2.bin" },
+
+  "dez_chunks_p":  { "File": "../level/DEZ/Chunks/Primary.bin" },
+
+  "dez1_layout": { "File": "../level/DEZ/Layout/1.bin" },
+  "dez1_objects": { "File": "../level/DEZ/Object Pos/1.bin" },
+  "dez1_rings": { "File": "../level/DEZ/Ring Pos/1.bin" },
+
+  "dez2_layout": { "File": "../level/DEZ/Layout/2.bin" },
+  "dez2_objects": { "File": "../level/DEZ/Object Pos/2.bin" },
+  "dez2_rings": { "File": "../level/DEZ/Ring Pos/2.bin" },
+  
+  "ddz1_objects": { "File": "../level/DDZ/Object Pos/1.bin" },
+  "ddz1_rings": { "File": "../level/DDZ/Ring Pos/1.bin" },
+
+// Original Mode
+  "aiz1_origlayout": { "File": "../level/AIZ/Layout/1_Orig.bin" },
+  "aiz1_origobjects": { "File": "../level/AIZ/Object Pos/1_Orig.bin" },
+  "aiz1_origrings": { "File": "../level/AIZ/Ring Pos/1_Orig.bin" },
+
+  "aiz2_origlayout": { "File": "../level/AIZ/Layout/2_Orig.bin" },
+  "aiz2_origobjects": { "File": "../level/AIZ/Object Pos/2_Orig.bin" },
+  "aiz2_origrings": { "File": "../level/AIZ/Ring Pos/2_Orig.bin" },
+
+  "hcz1_origlayout": { "File": "../level/HCZ/Layout/1_Orig.bin" },
+  "hcz1_origobjects": { "File": "../level/HCZ/Object Pos/1_Orig.bin" },
+  "hcz1_origrings": { "File": "../level/HCZ/Ring Pos/1_Orig.bin" },
+
+  "hcz2_origlayout": { "File": "../level/HCZ/Layout/2_Orig.bin" },
+  "hcz2_origobjects": { "File": "../level/HCZ/Object Pos/2_Orig.bin" },
+  "hcz2_origrings": { "File": "../level/HCZ/Ring Pos/2_Orig.bin" },
+
+  "mgz1_origlayout": { "File": "../level/MGZ/Layout/1_Orig.bin" },
+  "mgz1_origobjects": { "File": "../level/MGZ/Object Pos/1_Orig.bin" },
+  "mgz1_origrings": { "File": "../level/MGZ/Ring Pos/1_Orig.bin" },
+
+  "mgz2_origlayout": { "File": "../level/MGZ/Layout/2_Orig.bin" },
+  "mgz2_origobjects": { "File": "../level/MGZ/Object Pos/2_Orig.bin" },
+  "mgz2_origrings": { "File": "../level/MGZ/Ring Pos/2_Orig.bin" },
+
+  "cnz1_origlayout": { "File": "../level/CNZ/Layout/1_Orig.bin" },
+  "cnz1_origobjects": { "File": "../level/CNZ/Object Pos/1_Orig.bin" },
+  "cnz1_origrings": { "File": "../level/CNZ/Ring Pos/1_Orig.bin" },
+
+  "cnz2_origlayout": { "File": "../level/CNZ/Layout/2_Orig.bin" },
+  "cnz2_origobjects": { "File": "../level/CNZ/Object Pos/2_Orig.bin" },
+  "cnz2_origrings": { "File": "../level/CNZ/Ring Pos/2_Orig.bin" },
+
+  "icz1_origlayout": { "File": "../level/ICZ/Layout/1_Orig.bin" },
+  "icz1_origobjects": { "File": "../level/ICZ/Object Pos/1_Orig.bin" },
+  "icz1_origrings": { "File": "../level/ICZ/Ring Pos/1_Orig.bin" },
+
+  "icz2_origlayout": { "File": "../level/ICZ/Layout/2_Orig.bin" },
+  "icz2_origobjects": { "File": "../level/ICZ/Object Pos/2_Orig.bin" },
+  "icz2_origrings": { "File": "../level/ICZ/Ring Pos/2_Orig.bin" },
+
+  "lbz1_origlayout": { "File": "../level/LBZ/Layout/1_Orig.bin" },
+  "lbz1_origobjects": { "File": "../level/LBZ/Object Pos/1_Orig.bin" },
+  "lbz1_origrings": { "File": "../level/LBZ/Ring Pos/1_Orig.bin" },
+
+  "lbz2_origlayout": { "File": "../level/LBZ/Layout/2_Orig.bin" },
+  "lbz2_origobjects": { "File": "../level/LBZ/Object Pos/2_Orig.bin" },
+  "lbz2_origrings": { "File": "../level/LBZ/Ring Pos/2_Orig.bin" },
+
+  "mhz1_origlayout": { "File": "../level/MHZ/Layout/1_Orig.bin" },
+  "mhz1_origobjects": { "File": "../level/MHZ/Object Pos/1_Orig.bin" },
+  "mhz1_origrings": { "File": "../level/MHZ/Ring Pos/1_Orig.bin" },
+
+  "mhz2_origlayout": { "File": "../level/MHZ/Layout/2_Orig.bin" },
+  "mhz2_origobjects": { "File": "../level/MHZ/Object Pos/2_Orig.bin" },
+  "mhz2_origrings": { "File": "../level/MHZ/Ring Pos/2_Orig.bin" },
+
+  "fbz1_origlayout": { "File": "../level/FBZ/Layout/1_Orig.bin" },
+  "fbz1_origobjects": { "File": "../level/FbZ/Object Pos/1_Orig.bin" },
+  "fbz1_origrings": { "File": "../level/FBZ/Ring Pos/1_Orig.bin" },
+
+  "fbz2_origlayout": { "File": "../level/FBZ/Layout/2_Orig.bin" },
+  "fbz2_origobjects": { "File": "../level/FBZ/Object Pos/2_Orig.bin" },
+  "fbz2_origrings": { "File": "../level/FBZ/Ring Pos/2_Orig.bin" },
+
+  "soz1_origlayout": { "File": "../level/SOZ/Layout/1_Orig.bin" },
+  "soz1_origobjects": { "File": "../level/SOZ/Object Pos/1_Orig.bin" },
+  "soz1_origrings": { "File": "../level/SOZ/Ring Pos/1_Orig.bin" },
+
+  "soz2_origlayout": { "File": "../level/SOZ/Layout/2_Orig.bin" },
+  "soz2_origobjects": { "File": "../level/SOZ/Object Pos/2_Orig.bin" },
+  "soz2_origrings": { "File": "../level/SOZ/Ring Pos/2_Orig.bin" },
+
+  "lrz1_origlayout": { "File": "../level/LRZ/Layout/1_Orig.bin" },
+  "lrz1_origobjects": { "File": "../level/LRZ/Object Pos/1_Orig.bin" },
+  "lrz1_origrings": { "File": "../level/LRZ/Ring Pos/1_Orig.bin" },
+
+  "lrz2_origlayout": { "File": "../level/LRZ/Layout/2_Orig.bin" },
+  "lrz2_origobjects": { "File": "../level/LRZ/Object Pos/2_Orig.bin" },
+  "lrz2_origrings": { "File": "../level/LRZ/Ring Pos/2_Orig.bin" },
+
+  "hpz1_origlayout": { "File": "../level/LRZ/Layout/3_Orig.bin" },
+  "hpz1_origobjects": { "File": "../level/LRZ/Object Pos/3_Orig.bin" },
+  "hpz1_origrings": { "File": "../level/LRZ/Ring Pos/3_Orig.bin" },
+
+  "hpz2_origlayout": { "File": "../level/HPZ/Layout/1_Orig.bin" },
+  "hpz2_origobjects": { "File": "../level/HPZ/Object Pos/1_Orig.bin" },
+  "hpz2_origrings": { "File": "../level/HPZ/Ring Pos/1_Orig.bin" },
+
+  "ssz1_origlayout": { "File": "../level/SSZ/Layout/1_Orig.bin" },
+  "ssz1_origobjects": { "File": "../level/SSZ/Object Pos/1_Orig.bin" },
+  "ssz1_origrings": { "File": "../level/SSZ/Ring Pos/1_Orig.bin" },
+
+  "dez1_origlayout": { "File": "../level/DEZ/Layout/1_Orig.bin" },
+  "dez1_origobjects": { "File": "../level/DEZ/Object Pos/1_Orig.bin" },
+  "dez1_origrings": { "File": "../level/DEZ/Ring Pos/1_Orig.bin" },
+
+  "dez2_origlayout": { "File": "../level/DEZ/Layout/2_Orig.bin" },
+  "dez2_origobjects": { "File": "../level/DEZ/Object Pos/2_Orig.bin" },
+  "dez2_origrings": { "File": "../level/DEZ/Ring Pos/2_Orig.bin" }
+}

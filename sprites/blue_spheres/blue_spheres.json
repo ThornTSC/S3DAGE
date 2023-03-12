@@ -1,0 +1,52 @@
+{
+	// Yellow Spheres, renderhooked to allow green spheres to use palette entries
+	"YellowSphere0": { "File": "YellowSphere0.png", "Rect": "0,0,32,32", "Center": "16,16" },
+	"YellowSphere1": { "File": "YellowSphere1.png", "Rect": "0,0,32,32", "Center": "16,16" },
+	"YellowSphere2": { "File": "YellowSphere2.png", "Rect": "0,0,32,32", "Center": "16,16" },
+	"YellowSphere3": { "File": "YellowSphere3.png", "Rect": "0,0,32,32", "Center": "16,16" },
+	"YellowSphere4": { "File": "YellowSphere4.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"YellowSphere5": { "File": "YellowSphere5.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"YellowSphere6": { "File": "YellowSphere6.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"YellowSphere7": { "File": "YellowSphere7.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"YellowSphere8": { "File": "YellowSphere8.png", "Rect": "0,0,16,16", "Center": "8,8" },
+	"YellowSphere9": { "File": "YellowSphere9.png", "Rect": "0,0,16,16", "Center": "8,8" },
+	"YellowSpherea": { "File": "YellowSphereA.png", "Rect": "0,0,16,16", "Center": "8,8" },
+	"YellowSphereb": { "File": "YellowSphereB.png", "Rect": "0,0,16,16", "Center": "8,8" },
+	"YellowSpherec": { "File": "YellowSphereC.png", "Rect": "0,0,8,8", "Center": "4,4" },
+	"YellowSphered": { "File": "YellowSphereD.png", "Rect": "0,0,8,8", "Center": "4,4" },
+	"YellowSpheree": { "File": "YellowSphereE.png", "Rect": "0,0,8,8", "Center": "4,4" },
+	"YellowSpheref": { "File": "YellowSphereF.png", "Rect": "0,0,8,8", "Center": "4,4" },
+
+	// Sonic & Knuckles Logo (in Green Spheres mode background)
+	"sklogo": { "File": "sklogo_green.png", "Rect": "0,0,96,64", "Center": "48,32" },
+
+	// Digits and seconds symbols (Blue Sphere)
+	"BlueSphere_digit_0": { "File": "BlueSphere_digits.png", "Rect":   "0,0,16,16" },
+	"BlueSphere_digit_1": { "File": "BlueSphere_digits.png", "Rect":  "16,0,16,16" },
+	"BlueSphere_digit_2": { "File": "BlueSphere_digits.png", "Rect":  "32,0,16,16" },
+	"BlueSphere_digit_3": { "File": "BlueSphere_digits.png", "Rect":  "48,0,16,16" },
+	"BlueSphere_digit_4": { "File": "BlueSphere_digits.png", "Rect":  "64,0,16,16" },
+	"BlueSphere_digit_5": { "File": "BlueSphere_digits.png", "Rect":  "80,0,16,16" },
+	"BlueSphere_digit_6": { "File": "BlueSphere_digits.png", "Rect":  "96,0,16,16" },
+	"BlueSphere_digit_7": { "File": "BlueSphere_digits.png", "Rect": "112,0,16,16" },
+	"BlueSphere_digit_8": { "File": "BlueSphere_digits.png", "Rect": "128,0,16,16" },
+	"BlueSphere_digit_9": { "File": "BlueSphere_digits.png", "Rect": "144,0,16,16" },
+		
+	"BlueSphere_char_seconds": { "File": "BlueSphere_digits.png", "Rect": "160,0,5,5" },
+	
+	// Digits and seconds symbols (Blue Sphere small)
+	"BlueSphere_smalldigit_0": { "File": "BlueSphere_digits_small.png", "Rect":   "0,0,12,12" },
+	"BlueSphere_smalldigit_1": { "File": "BlueSphere_digits_small.png", "Rect":  "12,0,12,12" },
+	"BlueSphere_smalldigit_2": { "File": "BlueSphere_digits_small.png", "Rect":  "24,0,12,12" },
+	"BlueSphere_smalldigit_3": { "File": "BlueSphere_digits_small.png", "Rect":  "36,0,12,12" },
+	"BlueSphere_smalldigit_4": { "File": "BlueSphere_digits_small.png", "Rect":  "48,0,12,12" },
+	"BlueSphere_smalldigit_5": { "File": "BlueSphere_digits_small.png", "Rect":  "60,0,12,12" },
+	"BlueSphere_smalldigit_6": { "File": "BlueSphere_digits_small.png", "Rect":  "72,0,12,12" },
+	"BlueSphere_smalldigit_7": { "File": "BlueSphere_digits_small.png", "Rect":  "84,0,12,12" },
+	"BlueSphere_smalldigit_8": { "File": "BlueSphere_digits_small.png", "Rect":  "96,0,12,12" },
+	"BlueSphere_smalldigit_9": { "File": "BlueSphere_digits_small.png", "Rect": "108,0,12,12" },
+		
+	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_small.png", "Rect": "120,0,5,4" },
+	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_small.png", "Rect":  "0,12,44,12" },
+	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_small.png", "Rect": "33,12,44,12" }
+}

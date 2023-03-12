@@ -1,0 +1,200 @@
+{
+	//Numbers for Score and Lives
+	"numbers.0":  { "File": "font.png", "Rect": "139,41,7,7"}, //0
+
+	"numbers.1":  { "File": "font.png", "Rect": "140,12,4,7"}, //1
+	"numbers.2":  { "File": "font.png", "Rect": "147,12,7,7"}, //2
+	"numbers.3":  { "File": "font.png", "Rect": "155,12,7,7"}, //3
+
+	"numbers.4":  { "File": "font.png", "Rect": "138,21,7,7"}, //4
+	"numbers.5":  { "File": "font.png", "Rect": "147,21,7,7"}, //5
+	"numbers.6":  { "File": "font.png", "Rect": "156,21,7,7"}, //6
+
+	"numbers.7":  { "File": "font.png", "Rect": "138,31,7,7"}, //7
+	"numbers.8":  { "File": "font.png", "Rect": "147,31,7,7"}, //8
+	"numbers.9":  { "File": "font.png", "Rect": "156,31,7,7"}, //9
+
+
+	//Each sprite is named based on the numerical value assigned to the character by Sonic 3 AIR.
+	//This is the value returned by the getchar() function.
+	//Up until 127, this seems to match basic ASCII, but I had some issues with £.
+
+	//Space is blank, we don't NEED a sprite
+	//"letters.32":  { "File": "font.png", "Rect": "95,16,5,7"},
+
+	//Exclamation
+	"letters.33":  { "File": "font.png", "Rect": "12,67,3,7"},
+
+	//Double Quotes will be interpreted differently by the script language.
+	//Use two single quotes instead
+	//"letters.34":  { "File": "font.png", "Rect": "17,67,4,7"},
+
+	//Hash or Pound
+	"letters.35":  { "File": "font.png", "Rect": "23,67,8,7"},
+
+	//Dollar
+	"letters.36":  { "File": "font.png", "Rect": "32,66,7,9", "Center": "0,1" },
+
+	//Percent
+	"letters.37":  { "File": "font.png", "Rect": "39,58,10,7"},
+
+	//Ampersand
+	"letters.38":  { "File": "font.png", "Rect": "48,67,8,7"},
+
+	//Single Quote
+	"letters.39":  { "File": "font.png", "Rect": "17,67,2,7"},
+
+	//Open Parenthesis
+	"letters.40":  { "File": "font.png", "Rect": "58,67,4,7"},
+
+	//Close Parenthesis
+	"letters.41":  { "File": "font.png", "Rect": "65,67,4,7"},
+
+	//Asterisk
+	"letters.42":  { "File": "font.png", "Rect": "71,67,4,7"},
+
+	//Plus
+	"letters.43":  { "File": "font.png", "Rect": "77,67,6,7"},
+
+	//Comma 
+	"letters.44":  { "File": "font.png", "Rect": "17,62,2,8"},
+
+	//Dash 
+	"letters.45":  { "File": "font.png", "Rect": "85,67,5,7"},
+
+	//Full Stop/Period
+	"letters.46":  { "File": "font.png", "Rect": "93,67,2,7"},
+
+	//Forward Slash
+	"letters.47":  { "File": "font.png", "Rect": "11,78,5,7"},
+
+
+	//Number 0 - 9 for custom text
+	"letters.48":  { "File": "font.png", "Rect": "139,41,7,7"}, //0
+
+	"letters.49":  { "File": "font.png", "Rect": "140,12,4,7"}, //1
+	"letters.50":  { "File": "font.png", "Rect": "147,12,7,7"}, //2
+	"letters.51":  { "File": "font.png", "Rect": "155,12,7,7"}, //3
+
+	"letters.52":  { "File": "font.png", "Rect": "138,21,7,7"}, //4
+	"letters.53":  { "File": "font.png", "Rect": "147,21,7,7"}, //5
+	"letters.54":  { "File": "font.png", "Rect": "156,21,7,7"}, //6
+
+	"letters.55":  { "File": "font.png", "Rect": "138,31,7,7"}, //7
+	"letters.56":  { "File": "font.png", "Rect": "147,31,7,7"}, //8
+	"letters.57":  { "File": "font.png", "Rect": "156,31,7,7"}, //9
+
+	//Colon
+	"letters.58":  { "File": "font.png", "Rect": "18,78,2,7"},
+
+	//Semi-colon
+	"letters.59":  { "File": "font.png", "Rect": "23,78,2,8"},
+
+	//Less Than
+	"letters.60":  { "File": "font.png", "Rect": "27,78,5,8"},
+
+	//Equals
+	"letters.61":  { "File": "font.png", "Rect": "34,78,5,8"},
+
+	//Greater Than
+	"letters.62":  { "File": "font.png", "Rect": "42,78,5,8"},
+
+	//Question Mark
+	"letters.63":  { "File": "font.png", "Rect": "48,78,7,7"},
+
+	//"At" symbol
+	"letters.64":  { "File": "font.png", "Rect": "56,78,8,8"},
+
+
+	//Capital Letters, A to Z
+	"letters.65":  { "File": "font.png", "Rect": "4,16,7,7"}, //A
+	"letters.66":  { "File": "font.png", "Rect": "12,16,7,7"}, //B
+	"letters.67":  { "File": "font.png", "Rect": "20,16,7,7"}, //C
+	"letters.68":  { "File": "font.png", "Rect": "28,16,7,7"}, //D
+	"letters.69":  { "File": "font.png", "Rect": "36,16,6,7"}, //E
+	"letters.70":  { "File": "font.png", "Rect": "43,16,6,7"}, //F
+	"letters.71":  { "File": "font.png", "Rect": "50,16,7,7"}, //G
+	"letters.72":  { "File": "font.png", "Rect": "58,16,7,7"}, //H
+	"letters.73":  { "File": "font.png", "Rect": "66,16,5,7"}, //I
+
+	"letters.74":  { "File": "font.png", "Rect": "4,25,7,7"}, //J
+	"letters.75":  { "File": "font.png", "Rect": "12,25,7,7"}, //K
+	"letters.76":  { "File": "font.png", "Rect": "20,25,6,7"}, //L
+	"letters.77":  { "File": "font.png", "Rect": "27,25,8,7"}, //M
+	"letters.78":  { "File": "font.png", "Rect": "36,25,7,7"}, //N
+	"letters.79":  { "File": "font.png", "Rect": "44,25,7,7"}, //O
+	"letters.80":  { "File": "font.png", "Rect": "52,25,7,7"}, //P
+	"letters.81":  { "File": "font.png", "Rect": "60,25,8,8"}, //Q
+	"letters.82":  { "File": "font.png", "Rect": "69,25,7,7"}, //R
+
+	"letters.83":  { "File": "font.png", "Rect": "4,34,7,7"}, //S
+	"letters.84":  { "File": "font.png", "Rect": "12,34,7,7"}, //T
+	"letters.85":  { "File": "font.png", "Rect": "20,34,7,7"}, //U
+	"letters.86":  { "File": "font.png", "Rect": "28,34,7,7"}, //V
+	"letters.87":  { "File": "font.png", "Rect": "36,34,10,7"}, //W
+	"letters.88":  { "File": "font.png", "Rect": "47,34,7,7"}, //X
+	"letters.89":  { "File": "font.png", "Rect": "55,34,7,7"}, //Y
+	"letters.90":  { "File": "font.png", "Rect": "63,34,7,7"}, //Z
+
+	//Open Bracket
+	"letters.91":  { "File": "font.png", "Rect": "66,78,5,7"},
+
+	//Backslash
+	"letters.92":  { "File": "font.png", "Rect": "74,78,5,7"},
+
+	//Close Bracket
+	"letters.93":  { "File": "font.png", "Rect": "80,78,5,7"},
+
+	//Caret
+	"letters.94":  { "File": "font.png", "Rect": "87,78,6,7"},
+
+	//Underscore
+	"letters.95":  { "File": "font.png", "Rect": "94,78,7,7"},
+
+	//Lower Case Letters, a to z
+	"letters.97":  { "File": "font.png", "Rect": "79,122,6,7"}, //a
+	"letters.98":  { "File": "font.png", "Rect": "87,122,6,7"}, //b
+	"letters.99":  { "File": "font.png", "Rect": "95,122,6,7"}, //c
+	"letters.100":  { "File": "font.png", "Rect": "103,122,6,7"}, //d
+	"letters.101":  { "File": "font.png", "Rect": "111,122,6,7"}, //e
+	"letters.102":  { "File": "font.png", "Rect": "120,122,5,7"}, //f
+	"letters.103":  { "File": "font.png", "Rect": "127,122,6,9"}, //g
+	"letters.104":  { "File": "font.png", "Rect": "135,122,6,7"}, //h
+	"letters.105":  { "File": "font.png", "Rect": "145,122,3,7"}, //i
+	"letters.106":  { "File": "font.png", "Rect": "150,122,6,9"}, //j
+
+	"letters.107":  { "File": "font.png", "Rect": "79,136,6,7"}, //k
+	"letters.108":  { "File": "font.png", "Rect": "88,136,4,7"}, //l
+	"letters.109":  { "File": "font.png", "Rect": "94,136,8,7"}, //m
+	"letters.110":  { "File": "font.png", "Rect": "103,136,6,7"}, //n
+	"letters.111":  { "File": "font.png", "Rect": "111,136,6,7"}, //o
+	"letters.112":  { "File": "font.png", "Rect": "119,136,6,9"}, //p
+	"letters.113":  { "File": "font.png", "Rect": "127,136,6,9"}, //q
+	"letters.114":  { "File": "font.png", "Rect": "135,136,6,7"}, //r
+	"letters.115":  { "File": "font.png", "Rect": "143,136,6,7"}, //s
+	"letters.116":  { "File": "font.png", "Rect": "152,136,6,7"}, //t
+
+	"letters.117":  { "File": "font.png", "Rect": "79,149,6,7"}, //u
+	"letters.118":  { "File": "font.png", "Rect": "87,149,6,7"}, //v
+	"letters.119":  { "File": "font.png", "Rect": "94,149,8,7"}, //w
+	"letters.120":  { "File": "font.png", "Rect": "105,149,6,7"}, //x
+	"letters.121":  { "File": "font.png", "Rect": "116,149,6,9"}, //y
+	"letters.122":  { "File": "font.png", "Rect": "128,149,6,7"}, //z
+
+
+	//Open Brace
+	"letters.123":  { "File": "font.png", "Rect": "11,87,5,7"},
+
+	//Vertical Bar
+	"letters.124":  { "File": "font.png", "Rect": "17,87,5,7"},
+
+	//Close Brace
+	"letters.125":  { "File": "font.png", "Rect": "26,87,5,7"},
+
+	//Tilde
+	"letters.126":  { "File": "font.png", "Rect": "33,87,7,7"},
+
+	//British Pound
+	"letters.194":  { "File": "font.png", "Rect": "42,87,7,7"},
+
+}

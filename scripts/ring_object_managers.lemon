@@ -1,0 +1,625 @@
+global u16 rings.state_table_size = 512	// I seem to recall the first or last word of the table being specially marked, so the actual number of rings may be one lower.
+										// The default value is 512 (0x200).
+
+// Move the ring state table from 0xffffe700 to shared memory address 0x820000, freeing the space for the object respawn table.
+// Adjust all pointers that used 0xffff0000 as a base.
+// The following functions are taken from maingame\static_rings.lemon.
+//# address-hook(0x00eb1a) end(0x00eb84)
+function void fn00eb1a()
+{
+	if (!global.in_extra_stage)	// Don't clear when returning from special/bonus stage
+	{
+		zeroMemory(0x820000, 2 * rings.state_table_size)	// usually 0x400
+	}
+
+	zeroMemory(0xffffef80, 0x80)
+
+	if (global.zone == 0x14)
+	{
+		zeroMemory(0xffff8600, 2 * rings.state_table_size)
+	}
+
+	u16 offset = global.zone * 8 + global.act * 4
+	A1 = u32[0x1e3e58 + offset]
+#if STANDALONE
+	LevelRingsTableBuilder.buildRings()
+#endif
+	rings.around.first = A1
+
+	// Count static rings
+	A1 += 4
+	D5 = 0
+	while (D5 < rings.state_table_size)		// this line is a limiter on the ring table size and is typically hardcoded to a size of 0x200
+	{
+		if (u16[(A1+=4)-4] & 0x8000)
+			break
+
+		++D5.u16
+	}
+
+	level.total_rings = D5.u16
+	u16[0xffffff06] = 0
+}
+
+//# address-hook(0x00e8be) end(0x00e940)
+function void InitStaticRings()
+{
+	rings.update_routine += 2
+	fn00eb1a()
+
+	if (global.zone == 0x14)	// Glowing Spheres bonus stage
+	{
+		rings.update_routine += 2
+
+		A1 = rings.around.first
+		A2 = 0xffff8600
+		D4.u16 = camera.position.y.u16 - 8
+		if (D4.s16 <= 0)
+			D1 = 1
+
+		while (D4.u16 > u16[A1 + 2])
+		{
+			A1 += 4
+			A2 += 2
+		}
+		rings.around.first = A1
+		rings.around.first.state = A2.u16
+		D4.u16 += 0xf0
+
+		while (D4.u16 > u16[A1 + 2])
+		{
+			A1 += 4
+		}
+		rings.around.last = A1
+	}
+	else
+	{
+		A1 = rings.around.first
+		A2 = 0x820000
+		D4.u16 = camera.position.x.u16 - 8
+		if (D4.s16 <= 0)
+			D4 = 1
+
+		while (D4.u16 > u16[A1])
+		{
+			A1 += 4
+			A2 += 2
+		}
+		rings.around.first = A1
+		rings.around.first.state = A2.u16
+		D4.u16 += 0x150
+
+		while (D4.u16 > u16[A1])
+		{
+			A1 += 4
+		}
+		rings.around.last = A1
+	}
+}
+
+/# address-hook(0x00e942) end(0x00e992)
+function void UpdateListOfRingsAround_Default()
+{
+	UpdateStaticRingsAnimation()
+
+	s16 borderLeft = 8		// Use 8 pixels of border for the ring radius, so rings don't pop in
+	s16 borderRight = 8
+#if STANDALONE
+	// We can extend that borders a little further, to avoid rings not getting collected when the player outruns the camera
+	if (u16[0xffffb010] < camera.position.x.u16 + 0x20)
+		borderLeft += 0x20
+	if (u16[0xffffb010] >= camera.position.x.u16 + getScreenWidth() - 0x20)
+		borderRight += 0x20
+#endif
+
+	A1 = rings.around.first
+	A2 = 0x820000 + rings.around.first.state
+	if (global.zone == 0x14)
+		A2 = 0xffff0000 + rings.around.first.state
+	D4.u16 = max(s16(camera.position.x.u16) - borderLeft, 1)
+
+	while (D4.u16 > u16[A1])
+	{
+		A1 += 4
+		A2 += 2
+	}
+	while (D4.u16 <= u16[A1 - 4])
+	{
+		A1 -= 4
+		A2 -= 2
+	}
+
+	rings.around.first = A1
+	rings.around.first.state = A2
+	A2 = rings.around.last
+	D4.u16 += getScreenWidth() + borderLeft + borderRight
+
+	while (D4.u16 > u16[A2])
+	{
+		A2 += 4
+	}
+	while (D4.u16 <= u16[A2 - 4])
+	{
+		A2 -= 4
+	}
+	rings.around.last = A2
+}
+
+//# address-hook(0x00e9ca) end(0x00ea1e)
+function void UpdateListOfRingsAround_VerticalLayout()
+{
+	// This function is used e.g. in Glowing Spheres bonus stage
+
+	UpdateStaticRingsAnimation()
+
+	A1 = rings.around.first
+	A2 = 0x820000 + rings.around.first.state
+	if (global.zone == 0x14)
+		A2 = 0xffff0000 + rings.around.first.state
+	D4.u16 = max(s16(camera.position.y.u16) - 8, 1)
+
+	while (D4.u16 > u16[A1 + 2])
+	{
+		A1 += 4
+		A2 += 2
+	}
+	while (D4.u16 <= u16[A1 - 2])
+	{
+		A1 -= 4
+		A2 -= 2
+	}
+
+	rings.around.first = A1
+	rings.around.first.state = A2.u16
+	A2 = rings.around.last
+	D4.u16 += getScreenHeight() + 16		// Add 2x border of 8 pixels for the ring radius
+
+	while (D4.u16 > u16[A2 + 2])
+	{
+		A2 += 4
+	}
+	while (D4.u16 <= u16[A2 - 2])
+	{
+		A2 -= 4
+	}
+	rings.around.last = A2
+}
+
+//# address-hook(0x00eb86) end(0x00ebec)
+function void RenderStaticRings()
+{
+	if (global.game_mode == 0x2c || global.game_mode == 0x4c)
+		return
+		
+	A0 = rings.around.first
+	u32 numRings = (rings.around.last - rings.around.first) / 4
+	if (numRings != 0)
+	{
+		A4 = 0x820000 + rings.around.first.state
+		if (global.zone == 0x14)
+			A4 = 0xffff0000 + rings.around.first.state
+		A1 = 0x00ebee
+		D5.u16 = 0xf0
+		u16 camera_x = u16[A3]		// Usually camera.foreground.x
+		u16 camera_y = u16[A3+4]	// Usually camera.foreground.y
+
+		while (numRings > 0)
+		{
+			u16 ringAnimationState = u16[A4]
+			if (ringAnimationState != 0xffff)
+			{
+				D1.u16 = (u16[A0+2] - camera_y + 8) & level.height.bitmask
+				if (D1.u16 < D5.u16)
+				{
+					D1.u16 += 0x78
+					D0.u16 = u16[A0] - camera_x + 0x80
+
+					u8 animFrame = ringAnimationState & 0xff
+					if (animFrame == 0)
+					{
+						// For non-collected rings, use rotating animation
+						animFrame = static_rings.animframe
+					}
+					u32 src = A1 + animFrame * 8
+
+					u16 px = u16[src + 6] + D0.u16
+					u16 py = u16[src + 0] + D1.u16
+					u8 size = u8[src + 3]
+					u16 index = u16[src + 4]
+
+				#if STANDALONE
+					if ((ringAnimationState & 0xff) == 0)
+					{
+						// Custom smoother ring animations
+						animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
+						if (original_mode)
+							animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
+						u64 key = stringformat("ring_0%d", animFrame)
+						u16 x = D0.u16 - 0x80
+						u16 y = D1.u16 - 0x80
+						Renderer.drawCustomSprite(key, x, y, 0x00, 0, 0xa000)
+					}
+					else
+					{
+						Renderer.drawVdpSprite(px - 0x80, py - 0x80, size, index, 0xc000)
+					}
+				#endif
+
+					u16[A6 + 0] = py
+					 u8[A6 + 2] = size
+					u16[A6 + 4] = index
+					u16[A6 + 6] = px
+					A6 += 8
+					--D7.u16
+				}
+			}
+			A4 += 2
+			A0 += 4
+			--numRings
+		}
+	}
+}
+
+//# address-hook(0x00e994) end(0x00e9c8)
+function void UpdateStaticRingsAnimation()
+{
+	u16 numRings = u16[0xffffef80]
+	u32 ringPointer = 0xffffef82
+	while (numRings > 0)
+	{
+		if (u16[ringPointer] != 0)
+		{
+			A1 = 0x820000 + u16[ringPointer]
+			if (global.zone == 0x14)
+				A1 = 0xffff0000 + u16[ringPointer]
+			--u8[A1]
+			if (u8[A1] == 0)
+			{
+				u8[A1] = 6
+				++u8[A1+1]
+				if (u8[A1+1] == 8)
+				{
+					u16[A1] = 0xffff
+					u16[ringPointer] = 0
+					--u16[0xffffef80]
+				}
+			}
+			--numRings
+		}
+		ringPointer += 2
+	}
+}
+
+
+
+
+
+// When a ring is collected, make sure the pointer to start the animation aims at the new location in shared memory.
+// Function taken from maingame\character.lemon
+//# address-hook(0x00ea20) end(0x00eae4)
+//# translated(0x00eaf0) end(0x00eb18)
+function void SonicUpdateRingCollection()
+{
+	// Shortly after getting hit, you can't collect rings
+	if (char.invuln.countdown >= 90)
+		return
+
+	u16 box.pos.x
+	u16 box.pos.y
+	u16 box.size.x
+	u16 box.size.y
+
+	if (char.bonus_effect & char.bonus.SHIELD_LIGHTNING)
+	{
+		box.pos.x = char.position.x.u16 - 0x40
+		box.pos.y = char.position.y.u16 - 0x40
+		box.size.x = 0x80
+		box.size.y = 0x80
+	}
+	else
+	{
+		box.size.y = char.hitbox_extends.y - 0x03
+		box.pos.x = char.position.x.u16 - 0x08
+		box.pos.y = char.position.y.u16 - box.size.y
+		box.size.x = 0x10
+		box.size.y *= 2
+	}
+
+	// Cycle through list of all rings with x-position in screen area
+	A1 = rings.around.first
+	A2 = rings.around.last
+	A4 = 0x820000 + rings.around.first.state
+	if (global.zone == 0x14)
+		A4 = 0xffff0000 + rings.around.first.state
+
+	while (A1 != A2)
+	{
+		// Check if already collected
+		if (u16[A4] == 0)
+		{
+			u16 ring.x = u16[A1 + 0]
+			u16 ring.y = u16[A1 + 2]
+
+			s16 ring.offset = 6
+			s16 ring.size = 12
+
+			u16 px = ring.x - ring.offset
+			u16 py = ring.y - ring.offset
+
+		#if STANDALONE
+			// Consider vertical level wrap
+			if (level.vertical_wrap == 0xff00)
+			{
+				s16 dy = py - box.pos.y
+				if (dy < -s16(level.height.bitmask)/2)
+				{
+					py += (level.height.bitmask + 1)
+				}
+				else if (dy > level.height.bitmask/2)
+				{
+					py -= (level.height.bitmask + 1)
+				}
+			}
+		#endif
+
+			if (checkBoxOverlap(box.pos.x, box.pos.y, box.size.x, box.size.y, px, py, ring.size, ring.size))
+			{
+				if (char.bonus_effect & char.bonus.SHIELD_LIGHTNING)
+				{
+					if (makeDynamicRing())
+						return
+				}
+
+				// Start ring animation, ring counts as collected now
+				u16[A4] = 0x0604
+
+				// Collect this ring
+				CollectLevelRing()
+
+				// This seems to be some kind of table of the currently animated rings
+				A3 = 0xffffef82
+				while (u16[A3] != 0)
+				{
+					A3 += 2
+				}
+				u16[A3] = A4.u16
+
+				++u16[0xffffef80]
+			}
+		}
+
+		A1 += 4
+		A4 += 2
+	}
+}
+
+
+
+
+
+// Upon entering a bonus stage or special stage, clear out the animations for any rings actively being collected.
+// Function taken from objects\basics\checkpoint.lemon, although objects\basics\giantring.lemon also calls it in fn06185c() when special stage entry whites out the screen.
+//# address-hook(0x01bb7e) end(0x01bbbc)
+function void fn01bb7e()
+{
+	// Reset all respawn entries for the actually instanced objects, so they will respawn when returning to the main game
+	A1 = 0xffffb0de
+	for (u8 i = 0; i < 0x5a; ++i)
+	{
+		A1 += 0x4a
+		if (u32[A1] != 0 && objA1.respawn_entry != 0)
+		{
+			A2 = 0xffff0000 + objA1.respawn_entry
+			u8[A2] &= ~0x80
+		}
+	}
+
+	u32 ringAnimationPointer	// The old code assumed the object respawn table was immediately after the ring state table. Now we use a variable to hold addresses.
+	A2 = 0xffffef80
+	D1.u16 = u16[(A2+=2)-2]
+	while (D1.s16 > 0)
+	{
+		while (true)
+		{
+			D0.u16 = u16[(A2+=2)-2]
+			if (D0.u16 != 0)
+				break
+		}
+
+		ringAnimationPointer = 0x820000 + D0.s16	// used to set A1.s32 = D0.s16, but we need to get into shared memory.
+		u16[ringAnimationPointer] = 0xffff			// used to write a word to the address at A1
+		u16[A2-2] = 0
+		--u16[0xffffef80]
+		--D1.s16
+	}
+}
+
+
+
+
+
+// Correctly handle DDZ horizontal loop (at 0x7400) during final boss.
+// Function taken from bosses\boss_ddz1.lemon
+//# address-hook(0x081726) end(0x08179a)
+function void fn081726()
+{
+	u16[0xfffffaae] = 0
+	D0.u16 = camera.position.x.u16
+	if (D0.u16 >= 0x7400)
+	{
+		D1.u16 = 0x2000		// distance to move camera, boss, and player to the left
+		D0.u16 -= D1.u16
+		camera.position.x.u16 = D0.u16
+		fn01bbbe()
+
+	//	zeroMemory(0xffffe700, 0x400)
+		zeroMemory(0x820000, 2 * rings.state_table_size)
+
+		D0.u16 = (camera.position.x.u16 - 0x80) & 0xff80
+		level.despawn_position.x = D0.u16
+
+		D1.u16 = 0x2000		// distance to move camera, boss, and player to the left
+		u16[0xfffffaae] = D1.u16
+		objA0.position.x.u16 -= D1.u16
+	}
+
+	fn082742()
+	fn082772()
+	fn0828b2()
+
+	D0.u16 = u16[0xfffffabc]
+	D1.u16 = debug_mode.state
+	u16[0xfffffabc] = D1.u16
+	D0.u16 ^= D1.u16
+	if (D0.u16 != 0)
+	{
+		fn08151c()
+	}
+
+	if (D1.u16 == 0)
+	{
+		fn082920()
+		fn0829d2()
+	}
+}
+
+
+
+
+
+// Expand the object respawn table into the old ring state table so that it is no longer limited to 0x300 (decimal 768) bytes (object cap).
+// Function taken from general\objectspawning.lemon
+//# address-hook(0x01b6a8) end(0x01b9fe)
+function void DynamicObjectsLoading.Init()
+{
+	u32 object_respawn_table = (global.zone != 0x0c) ? 0xffffe700 : 0xffffeb00	// Once at 0xffffeb00, this now extends back through the old ring state table.
+																				// However, DDZ final boss seems to be hardcoded in a way that requires the base game structure.
+																				// Checking the zone ID only also covers DEZ2 final boss, but this is not an issue.
+	u16 object_respawn_table_size = (global.zone != 0x0c) ? 0x0700 : 0x0300 	// This can go up to 0x700 (ending at 0xffffedff). This is a LOT of objects!
+																				// Sacrificing unneeded space can open up extra RAM. Again, DDZ requires the base structure.
+
+	// First object type table is used in Sonic 3 levels + FBZ, and the bonus stages
+	// Second object type table is used in MHZ, SOZ and everything afterwards
+	bool useFirstObjectTypeTable = (global.zone < 0x16 && (global.zone <= 0x06 || global.zone >= 0x0e))
+	level.object_type_table = useFirstObjectTypeTable ? 0x094ea2 : 0x0952a2
+
+	dynobjects.routine += 4			// Use "DynamicObjectsLoading.UpdateDefault()"
+	if (global.in_extra_stage == 0)
+	{
+	//	zeroMemory(0xffffeb00, 0x300)								// standard object respawn table
+		zeroMemory(object_respawn_table, object_respawn_table_size)	// new object respawn table location and size
+	}
+
+	// Values for the object table base address (stored into A0):
+	//  - 0x1e44da		-> AIZ 1 (i.e. the technical act 1 = until everything gets set on fire)
+	//  - 0x1e4876		-> AIZ 2
+	//  - 0x1e6090		-> HCZ 1
+	//  - 0x1e6990		-> HCZ 2
+	//  - 0x1e8088		-> MGZ 1
+	//  - 0x1e932c		-> MGZ 2
+	//  - 0x1ea0c2		-> CNZ 1
+	//  - 0x1eac38		-> CNZ 2
+	//  - 0x1ee3ca		-> ICZ 1 (probably only the technical act 1)
+	//  - 0x1ee9a6		-> ICZ 2
+	//  - 0x1efc42		-> LBZ 1
+	//  - 0x1f065c		-> LBZ 2
+	//     ...
+	u8 offset = global.zone * 8 + global.act * 4
+	A0 = u32[0x1e3d98 + offset]
+#if STANDALONE
+	LevelObjectTableBuilder.buildObjects()
+#endif
+
+	bool useDefault = false
+	if (global.zone <= 0x12 && competition_mode.active == 0)
+	{
+		useDefault = true
+	}
+	else if (global.zone == 0x14)
+	{
+		useDefault = true
+	}
+	else if (global.zone >= 0x16 && global.zone_act != 0x1701)
+	{
+		useDefault = true
+	}
+
+	if (useDefault)
+	{
+		dynobjects.addr.begin = A0
+		dynobjects.addr.end = A0
+
+		// u32 defaultA3 = 0xffffeb00				// standard object respawn table
+		u32 defaultA3 = object_respawn_table		// new object respawn table location
+		if (global.zone == 0x14)
+		{
+			// Special handling for Glowing Spheres bonus stage
+			//  -> It uses object spawning (unlike the other bonus stages), but may not change the actual object respawn table
+			zeroMemory(0xffff8400, 0x200)
+			defaultA3 = 0xffff8400
+		}
+
+		A3 = defaultA3
+		D6.u16 = max(0, s16(camera.position.x.u16 - 0x80)) & 0xff80
+		A0 = dynobjects.addr.end
+		while (u16[A0] < D6.u16)
+		{
+			A0 += 6
+			++A3
+		}
+		dynobjects.addr.end = A0
+		dynobjects.respawn.end = A3.u16
+
+		A3 = defaultA3
+		A0 = dynobjects.addr.begin
+		D6.u16 -= 0x80
+		if (D6.s16 >= 0)
+		{
+			while (u16[A0] < D6.u16)
+			{
+				A0 += 6
+				++A3
+			}
+		}
+		dynobjects.addr.begin = A0
+		dynobjects.respawn.begin = A3.u16
+
+		dynobjects.areastart.x = 0xffff
+		dynobjects.areastart.y = camera.position.y.u16 & 0xff80
+
+		DynamicObjectsLoading.UpdateDefault()
+	}
+	else
+	{
+		// Load all objects at once and don't unload them
+		// This is used by:
+		//  - HPZ if entered by giant ring (see check below)
+		//  - Bonus stages GM and SM (but not GS)
+		//  - Competition mode
+		bool isHPZviaGiantRing = (global.zone_act == 0x1701)
+
+		dynobjects.routine += 8		// Empty dynamic objects loading routine
+		if (allocDynamicObjectStd())
+		{
+			A3 = 0xfffff712
+			A4 = level.object_type_table
+			D6.u16 = isHPZviaGiantRing ? 0x1780 : 0x0800
+
+			while (D6.u16 > u16[A0])
+			{
+				ObjectSpawning.SpawnFixedObject()
+				if (!_equal())
+					break
+			}
+		}
+
+		if (isHPZviaGiantRing)
+		{
+			level.despawn_position.x = (camera.position.x.u16 - 0x80) & 0xff80
+		}
+		else
+		{
+			level.despawn_position.x = 0
+		}
+	}
+}

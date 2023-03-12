@@ -1,0 +1,5 @@
+{
+    "flicky_game":  { "File": "flicky_gametimeover.png", "Rect": "0, 0,64,16", "Center": "0,0" },
+    "flicky_time":  { "File": "flicky_gametimeover.png", "Rect": "0,16,64,16", "Center": "0,0" },
+    "flicky_over":  { "File": "flicky_gametimeover.png", "Rect": "0,32,64,16", "Center": "0,0" }
+}

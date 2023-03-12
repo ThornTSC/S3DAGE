@@ -1,0 +1,7 @@
+{
+    "hcz_brick": { "File": "hcz_brick.bmp" },
+    "hcz_backgroundballpillarsection": { "File": "hcz_backgroundballpillarsection.png" },   // sourced from object palette, which is the same in all palette sets
+    "hcz1_turbine": { "File": "hcz1_turbine.png" },
+	"hcz_ceilingshadow":  { "File": "hcz_ceilingshadow.bmp"},
+	"hcz_watertint":  { "File": "hcz_watertint.png"}
+}

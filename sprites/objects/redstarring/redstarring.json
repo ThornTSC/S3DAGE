@@ -1,0 +1,17 @@
+{
+	// Red Star Ring
+	"redstarring_00": { "File": "redstarring.png", "Rect":   "0,0,24,24", "Center": "12,12" },
+	"redstarring_01": { "File": "redstarring.png", "Rect":  "24,0,24,24", "Center": "12,12" },
+	"redstarring_02": { "File": "redstarring.png", "Rect":  "48,0,24,24", "Center": "12,12" },
+	"redstarring_03": { "File": "redstarring.png", "Rect":  "72,0,24,24", "Center": "12,12" },
+	"redstarring_04": { "File": "redstarring.png", "Rect":  "96,0,24,24", "Center": "12,12" },
+	"redstarring_05": { "File": "redstarring.png", "Rect": "120,0,24,24", "Center": "12,12" },
+	"redstarring_06": { "File": "redstarring.png", "Rect": "144,0,24,24", "Center": "12,12" },
+	"redstarring_07": { "File": "redstarring.png", "Rect": "168,0,24,24", "Center": "12,12" },
+	"redstarring_sparkle": { "File": "redstarring_sparkle.png", "Rect": "0,0,0,0", "Center": "8,8" },
+
+	// Character icons
+	"rsr_icon_sonic":           { "File": "lifeicons_noborder.png", "Rect":" 0,0,16,16", "Center": "8,8" },
+	"rsr_icon_tails":           { "File": "lifeicons_noborder.png", "Rect":"16,0,16,16", "Center": "8,8" },
+	"rsr_icon_knuckles":        { "File": "lifeicons_noborder.png", "Rect":"32,0,16,16", "Center": "8,8" }
+}

@@ -1,0 +1,9 @@
+{
+	"EggRobo1": { "File": "EggRobo1.png", "Rect": "0,0,40,48", "Center": "20,24" },
+	"EggRobo2": { "File": "EggRobo2.png", "Rect": "0,0,32,24", "Center": "16,12" },
+	"EggRobo3": { "File": "EggRobo3.png", "Rect": "0,0,48,56", "Center": "20,24" },	// center modified to match sprite 1, which it alternates with
+	"EggRobo4": { "File": "EggRobo4.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"EggRobo5": { "File": "EggRobo5.png", "Rect": "0,0,24,24", "Center": "12,12" },
+	"EggRobo6": { "File": "EggRobo6.png", "Rect": "0,0,24,32", "Center": "12,16" },
+	"EggRobo7": { "File": "EggRobo7.png", "Rect": "0,0,64,8", "Center": "32,4" }
+}

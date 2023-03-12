@@ -1,0 +1,41 @@
+{
+	"flicky_sonic_text":  { "File": "flicky_levelresultsname.png", "Rect": "0,0,80,16", "Center": "9,0" },
+	"flicky_tails_text":  { "File": "flicky_levelresultsname.png", "Rect": "0,16,80,16", "Center": "9,0" },
+	"flicky_miles_text":  { "File": "flicky_levelresultsname.png", "Rect": "0,32,80,16", "Center": "9,0" },
+	"flicky_knuckles_text":  { "File": "flicky_levelresultsname.png", "Rect": "0,48,128,16", "Center": "9,0" },
+	"flicky_super_text_sonic":  { "File": "flicky_levelresultsname.png", "Rect": "0,64,80,16", "Center": "6,0" },
+	"flicky_super_text_tails":  { "File": "flicky_levelresultsname.png", "Rect": "0,80,80,16", "Center": "9,0" },
+	"flicky_super_text_knuckles":  { "File": "flicky_levelresultsname.png", "Rect": "0,96,80,16", "Center": "9,0" },
+	"flicky_hyper_text_sonic":  { "File": "flicky_levelresultsname.png", "Rect": "0,112,80,16", "Center": "6,0" },
+	"flicky_hyper_text_tails":  { "File": "flicky_levelresultsname.png", "Rect": "0,128,80,16", "Center": "9,0" },
+	"flicky_hyper_text_knuckles":  { "File": "flicky_levelresultsname.png", "Rect": "0,144,80,16", "Center": "9,0" },
+
+	"flicky_got_text":  { "File": "flicky_levelresults.png", "Rect": "0,0,48,16", "Center": "-9,0" },
+	"flicky_through_text":  { "File": "flicky_levelresults.png", "Rect": "64,0,112,16", "Center": "0,0" },	// if using usual S3&K alignment, leave Center at 0,0
+
+	"flicky_specialstage_text":  { "File": "flicky_levelresults.png", "Rect": "0,16,208,16", "Center": "104,0" },
+	"flicky_chaosemerald_text":  { "File": "flicky_levelresults.png", "Rect": "0,32,208,16", "Center": "104,0" },
+	"flicky_chaosemeralds_text":  { "File": "flicky_levelresults.png", "Rect": "208,32,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"flicky_superemerald_text":  { "File": "flicky_levelresults.png", "Rect": "0,48,208,16", "Center": "104,0" },
+	"flicky_superemeralds_text":  { "File": "flicky_levelresults.png", "Rect": "208,48,224,16", "Center": "-104,0" },
+	"flicky_can_text":  { "File": "flicky_levelresults.png", "Rect": "0,64,48,16", "Center": "24,0" },
+	"flicky_cangoto_text":  { "File": "flicky_levelresults.png", "Rect": "0,64,144,16", "Center": "64,0" },
+	"flicky_hiddenpalace_text":  { "File": "flicky_levelresults.png", "Rect": "0,80,208,16", "Center": "104,0" },
+	"flicky_gota_text":  { "File": "flicky_levelresults.png", "Rect": "0,96,80,16", "Center": "0,0" },
+	"flicky_gotall_text":  { "File": "flicky_levelresults.png", "Rect": "0,96,112,16", "Center": "0,0" },
+	"flicky_now_text":  { "File": "flicky_levelresults.png", "Rect": "128,96,48,16", "Center": "0,0" },
+	"flicky_be_text":  { "File": "flicky_levelresults.png", "Rect": "192,96,32,16", "Center": "0,0" },
+
+	"flicky_specialstage_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,112,208,16", "Center": "104,0" },
+	"flicky_chaosemerald_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,128,208,16", "Center": "104,0" },
+	"flicky_chaosemeralds_text_super":  { "File": "flicky_levelresults.png", "Rect": "208,128,16,16", "Center": "-104,0" },
+	"flicky_superemerald_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,144,208,16", "Center": "104,0" },
+	"flicky_superemeralds_text_super":  { "File": "flicky_levelresults.png", "Rect": "208,144,16,16", "Center": "-104,0" },
+	"flicky_can_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,160,48,16", "Center": "24,0" },
+	"flicky_cangoto_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,160,144,16", "Center": "64,0" },
+	"flicky_hiddenpalace_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,176,208,16", "Center": "104,0" },
+	"flicky_gota_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,192,80,16", "Center": "0,0" },
+	"flicky_gotall_text_super":  { "File": "flicky_levelresults.png", "Rect": "0,192,112,16", "Center": "0,0" },
+	"flicky_now_text_super":  { "File": "flicky_levelresults.png", "Rect": "128,192,48,16", "Center": "0,0" },
+	"flicky_be_text_super":  { "File": "flicky_levelresults.png", "Rect": "192,192,32,16", "Center": "0,0" }
+}

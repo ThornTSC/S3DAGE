@@ -1,0 +1,105 @@
+// Adjust positions of sprites at inside ends of base game HUD
+// These "sprites" are actually one long sprite, so moving the position alone won't do it.
+// Either the mappings themselves need blank space added or the sprites should be renderhooked.
+// Taken from \scripts\level\special\bluespheres.lemon
+// HUD: Icons next to ring and spheres counters
+
+//# address-hook(0x008df8) end(0x008e2a)
+function void fn008df8()
+{
+	objA0.box_size.x = 0x80
+	objA0.box_size.y = 0x80
+	objA0.sprite_priority = 0
+	objA0.mapping_offset = 0x008e30
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE2 | (SpecialStage.HUDIcons.targetInVRAM >> 5))
+	objA0.position.x.u16 = 0x120 + getScreenExtend()	// - 20		// doesn't work because of the "sprites" being one long sprite
+	objA0.position.y.u16 = 0x94
+	objA0.update_address = 0x008e2a
+	DrawObject()
+}
+
+// Add 46 to character shadow positions for new screen size
+// Taken from \scripts\level\special\bluespheres.lemon
+function void BlueSpheres.renderCustomCharacterShadows()
+{
+	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	{
+		Renderer.drawCustomSprite(getNumPlayers() < 2 ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 142 + getScreenExtend(), 148 + 46, 0x00, 0, 0x3100)
+	}
+	else
+	{
+		Renderer.drawCustomSprite(getNumPlayers() < 2 ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 142 + getScreenExtend(), 148 + 46, 0x00, 0, 0x3100)
+	}
+}
+
+
+// Add 46 to horizon position for new screen size
+// Also affects the HUD position
+// We can only use this function in August 2022 builds or later!
+// Taken from \scripts\level\special\bluespheres.lemon
+function void BlueSpheres.renderCustomGround()
+{
+	// Disable rendering of plane B prio
+	Renderer.enableDefaultPlane(3, false)
+
+	// Render glow effect for background
+	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	{
+		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20 + 46, 0x00, 0, 0x2000)
+	}
+
+	// Manually render the HUD parts of this plane (blue spheres and rings counter)
+	Renderer.setupPlane(0 - 20, 0, 160 + 20, 32, 0x11, 3, 0x2f00)	// 20s to space out the HUD in the new screen size
+	Renderer.setupPlane(getScreenWidth()-160 + 20, 0, 160 + 20, 32, 0x11, 3, 0x2f00)	// 20s to space out the HUD in the new screen size
+
+	// Render our own version of the ground
+	//  -> This only works in combination with a palette set in V-Int, see "fn000c50"
+	string spriteKey1
+	string spriteKey2
+	{
+		Game.setupBlueSpheresGroundSprites()
+
+		u16 px = bluespheres.position.x
+		u16 py = bluespheres.position.y
+		u8 rotation = bluespheres.direction
+		bool isRotating = (rotation & 0x3f) != 0
+		if (isRotating || (rotation & 0x40) == 0)
+			px = (px + 0x80) & 0xff00
+		if (isRotating || (rotation & 0x40) != 0)
+			py = (py + 0x80) & 0xff00
+
+		if (isRotating)
+		{
+			u8 rotationStep = (rotation & 0x3f) / 4
+			spriteKey1 = stringformat("bluespheres_ground_alpha_rotation_0x%02x", rotationStep)
+			spriteKey2 = stringformat("bluespheres_ground_opaque_rotation_0x%02x", rotationStep)
+		}
+		else
+		{
+			u8 movementStep = 0
+			if ((rotation & 0x80) == 0)
+			{
+				movementStep = (0xff - ((rotation & 0x40) ? px : py) & 0xff) / 8
+			}
+			else
+			{
+				movementStep = (((rotation & 0x40) ? px : py) & 0xff) / 8
+			}
+			spriteKey1 = stringformat("bluespheres_ground_alpha_movement_0x%02x", movementStep)
+			spriteKey2 = stringformat("bluespheres_ground_opaque_movement_0x%02x", movementStep)
+		}
+	}
+	Renderer.drawCustomSprite(spriteKey1, 0, 0, 0x100,    0, 0x3000)
+	Renderer.drawCustomSprite(spriteKey2, 0, 0, 0x100, 0x10, 0x3000)		// With flag to draw as fully opaque (rendering optimization)
+
+	// Render glow effect on top
+	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	{
+		Renderer.drawCustomSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30 + 46, 0x00, 0, 0x3100)
+	}
+}
+
+// In main.lemon:
+// * function void BlueSpheres.renderCustomSpheres() needs to have its  + 46 after the "Read sphere properties" comment re-enabled
+// * function void fn0085b0() must have the call to enlarge the screen re-enabled
+// * function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue) must have its commented block for special stage characters re-enabled

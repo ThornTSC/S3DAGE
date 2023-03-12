@@ -1,0 +1,5 @@
+{
+    "saturn_game":  { "File": "saturn_gametimeover.png", "Rect": "0, 0,64,16", "Center": "0,0" },
+    "saturn_time":  { "File": "saturn_gametimeover.png", "Rect": "0,16,64,16", "Center": "0,0" },
+    "saturn_over":  { "File": "saturn_gametimeover.png", "Rect": "0,32,64,16", "Center": "0,0" }
+}

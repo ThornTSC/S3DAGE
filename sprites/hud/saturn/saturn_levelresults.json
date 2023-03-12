@@ -1,0 +1,41 @@
+{
+	"saturn_sonic_text":  { "File": "saturn_levelresultsname.png", "Rect": "0,0,80,16", "Center": "9,0" },
+	"saturn_tails_text":  { "File": "saturn_levelresultsname.png", "Rect": "0,16,80,16", "Center": "9,0" },
+	"saturn_miles_text":  { "File": "saturn_levelresultsname.png", "Rect": "0,32,80,16", "Center": "9,0" },
+	"saturn_knuckles_text":  { "File": "saturn_levelresultsname.png", "Rect": "0,48,128,16", "Center": "9,0" },
+	"saturn_super_text_sonic":  { "File": "saturn_levelresultsname.png", "Rect": "0,64,80,16", "Center": "6,0" },
+	"saturn_super_text_tails":  { "File": "saturn_levelresultsname.png", "Rect": "0,80,80,16", "Center": "9,0" },
+	"saturn_super_text_knuckles":  { "File": "saturn_levelresultsname.png", "Rect": "0,96,80,16", "Center": "9,0" },
+	"saturn_hyper_text_sonic":  { "File": "saturn_levelresultsname.png", "Rect": "0,112,80,16", "Center": "6,0" },
+	"saturn_hyper_text_tails":  { "File": "saturn_levelresultsname.png", "Rect": "0,128,80,16", "Center": "9,0" },
+	"saturn_hyper_text_knuckles":  { "File": "saturn_levelresultsname.png", "Rect": "0,144,80,16", "Center": "9,0" },
+
+	"saturn_got_text":  { "File": "saturn_levelresults.png", "Rect": "0,0,48,16", "Center": "-9,0" },
+	"saturn_through_text":  { "File": "saturn_levelresults.png", "Rect": "64,0,112,16", "Center": "0,0" },	// if using usual S3&K alignment, leave Center at 0,0
+
+	"saturn_specialstage_text":  { "File": "saturn_levelresults.png", "Rect": "0,16,208,16", "Center": "104,0" },
+	"saturn_chaosemerald_text":  { "File": "saturn_levelresults.png", "Rect": "0,32,208,16", "Center": "104,0" },
+	"saturn_chaosemeralds_text":  { "File": "saturn_levelresults.png", "Rect": "208,32,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"saturn_superemerald_text":  { "File": "saturn_levelresults.png", "Rect": "0,48,208,16", "Center": "104,0" },
+	"saturn_superemeralds_text":  { "File": "saturn_levelresults.png", "Rect": "208,48,224,16", "Center": "-104,0" },
+	"saturn_can_text":  { "File": "saturn_levelresults.png", "Rect": "0,64,48,16", "Center": "24,0" },
+	"saturn_cangoto_text":  { "File": "saturn_levelresults.png", "Rect": "0,64,144,16", "Center": "64,0" },
+	"saturn_hiddenpalace_text":  { "File": "saturn_levelresults.png", "Rect": "0,80,208,16", "Center": "104,0" },
+	"saturn_gota_text":  { "File": "saturn_levelresults.png", "Rect": "0,96,80,16", "Center": "0,0" },
+	"saturn_gotall_text":  { "File": "saturn_levelresults.png", "Rect": "0,96,112,16", "Center": "0,0" },
+	"saturn_now_text":  { "File": "saturn_levelresults.png", "Rect": "128,96,48,16", "Center": "0,0" },
+	"saturn_be_text":  { "File": "saturn_levelresults.png", "Rect": "192,96,32,16", "Center": "0,0" },
+
+	"saturn_specialstage_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,112,208,16", "Center": "104,0" },
+	"saturn_chaosemerald_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,128,208,16", "Center": "104,0" },
+	"saturn_chaosemeralds_text_super":  { "File": "saturn_levelresults.png", "Rect": "208,128,16,16", "Center": "-104,0" },
+	"saturn_superemerald_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,144,208,16", "Center": "104,0" },
+	"saturn_superemeralds_text_super":  { "File": "saturn_levelresults.png", "Rect": "208,144,16,16", "Center": "-104,0" },
+	"saturn_can_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,160,48,16", "Center": "24,0" },
+	"saturn_cangoto_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,160,144,16", "Center": "64,0" },
+	"saturn_hiddenpalace_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,176,208,16", "Center": "104,0" },
+	"saturn_gota_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,192,80,16", "Center": "0,0" },
+	"saturn_gotall_text_super":  { "File": "saturn_levelresults.png", "Rect": "0,192,112,16", "Center": "0,0" },
+	"saturn_now_text_super":  { "File": "saturn_levelresults.png", "Rect": "128,192,48,16", "Center": "0,0" },
+	"saturn_be_text_super":  { "File": "saturn_levelresults.png", "Rect": "192,192,32,16", "Center": "0,0" }
+}

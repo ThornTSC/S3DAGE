@@ -1,0 +1,23 @@
+{
+	// Mini Time Stones
+	// Note that these spin the opposite direction of rings. If that's not desired, swap keys 02/03 and 06/07.
+	"minitimestone_00": { "File": "minitimestones.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"minitimestone_01": { "File": "minitimestones.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"minitimestone_02": { "File": "minitimestones.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"minitimestone_03": { "File": "minitimestones.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"minitimestone_04": { "File": "minitimestones.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"minitimestone_05": { "File": "minitimestones.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"minitimestone_06": { "File": "minitimestones.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"minitimestone_07": { "File": "minitimestones.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"minitimestone_sparkle": { "File": "minitimestones_sparkle.bmp", "Rect": "0,0,0,0", "Center": "8,8" }
+
+	// Chaos Rings (used before Mini Time Stones were implemented)
+//	"chaosring_00": { "File": "chaosrings.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+//	"chaosring_01": { "File": "chaosrings.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+//	"chaosring_02": { "File": "chaosrings.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+//	"chaosring_03": { "File": "chaosrings.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+//	"chaosring_04": { "File": "chaosrings.bmp", "Rect": "64,0,16,16", "Center": "8,8" },
+//	"chaosring_05": { "File": "chaosrings.bmp", "Rect": "80,0,16,16", "Center": "8,8" },
+//	"chaosring_06": { "File": "chaosrings.bmp", "Rect": "96,0,16,16", "Center": "8,8" },
+//	"chaosring_07": { "File": "chaosrings.bmp", "Rect":"112,0,16,16", "Center": "8,8" },
+}

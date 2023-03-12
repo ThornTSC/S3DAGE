@@ -1,0 +1,126 @@
+{
+	// When implementing the "true" 3D Blast HUD, align elements as they are in Director's Cut!
+	// For Mobile HUD, move the life counter down 16 pixels to be below the score counter.
+
+
+	// ----- HUD ----- //
+/*
+	// HUD texts
+	"flicky_hud_text_score":	  { "File": "flicky_hud.png", "Rect": "0,0,39,16" },
+	"flicky_hud_text_time":	  { "File": "flicky_hud.png", "Rect": "0,16,39,16" },
+	"flicky_hud_text_time_red":  { "File": "flicky_hud.png", "Rect": "35,20,1,1" },		// Empty pixel
+	"flicky_hud_text_rings":	  { "File": "flicky_hud.png", "Rect": "0,32,39,16" },
+	"flicky_hud_text_rings_red": { "File": "flicky_hud.png", "Rect": "35,20,1,1" },		// Empty pixel
+
+	// Additional texts for level results
+	"flicky_hud_text_ring":  { "File": "flicky_hud.png", "Rect": "0,32,31,16" },
+	"flicky_hud_text_bonus": { "File": "flicky_hud.png", "Rect": "0,48,39,16" },
+	"flicky_hud_text_total": { "File": "flicky_hud.png", "Rect": "0,64,39,16" },
+
+	// Special stage results
+	"flicky_hud_text_score_chaosstage":	{ "File": "flicky_hud.png", "Rect": "44,0,39,16" },
+	"flicky_hud_text_ring_chaosstage":		{ "File": "flicky_hud.png", "Rect": "44,16,31,16" },
+	"flicky_hud_text_bonus_chaosstage":	{ "File": "flicky_hud.png", "Rect": "44,32,39,16" },
+	"flicky_hud_text_perfect_chaosstage":	{ "File": "flicky_hud.png", "Rect": "44,48,55,16" },
+	"flicky_hud_text_continue_chaosstage":	{ "File": "flicky_hud.png", "Rect": "44,64,63,16" },
+	"flicky_hud_text_score_superstage":	{ "File": "flicky_hud.png", "Rect": "108,0,39,16" },
+	"flicky_hud_text_ring_superstage":		{ "File": "flicky_hud.png", "Rect": "108,16,31,16" },
+	"flicky_hud_text_bonus_superstage":	{ "File": "flicky_hud.png", "Rect": "108,32,39,16" },
+	"flicky_hud_text_perfect_superstage":	{ "File": "flicky_hud.png", "Rect": "108,48,55,16" },
+	"flicky_hud_text_continue_superstage":	{ "File": "flicky_hud.png", "Rect": "108,64,63,16" },
+
+	"flicky_hud_bonus_icon_blue":   { "File": "flicky_hud.png", "Rect": "133,152,12,19", "Center": "0,-2" },		// Empty in Flicky hud, S3&K icon in Saturn
+	"flicky_hud_bonus_icon_orange": { "File": "flicky_hud.png", "Rect": "146,152,12,19", "Center": "0,-2" },		// Empty in Flicky hud, S3&K icon in Saturn
+	"flicky_hud_bonus_icon_red":    { "File": "flicky_hud.png", "Rect": "159,152,12,19", "Center": "0,-2" },		// Empty in Flicky hud, S3&K icon in Saturn
+
+	// Digits (for score, time, rings)
+	"flicky_hud_digit_0": { "File": "flicky_hud.png", "Rect":  "0,107,8,16" },
+	"flicky_hud_digit_1": { "File": "flicky_hud.png", "Rect":  "8,107,8,16" },
+	"flicky_hud_digit_2": { "File": "flicky_hud.png", "Rect": "16,107,8,16" },
+	"flicky_hud_digit_3": { "File": "flicky_hud.png", "Rect": "24,107,8,16" },
+	"flicky_hud_digit_4": { "File": "flicky_hud.png", "Rect": "32,107,8,16" },
+	"flicky_hud_digit_5": { "File": "flicky_hud.png", "Rect": "40,107,8,16" },
+	"flicky_hud_digit_6": { "File": "flicky_hud.png", "Rect": "48,107,8,16" },
+	"flicky_hud_digit_7": { "File": "flicky_hud.png", "Rect": "56,107,8,16" },
+	"flicky_hud_digit_8": { "File": "flicky_hud.png", "Rect": "64,107,8,16" },
+	"flicky_hud_digit_9": { "File": "flicky_hud.png", "Rect": "72,107,8,16" },
+
+	// Digits (for running out of time or zero rings, unique to Sonic Advance HUD)
+//	"hud_digit_0_red": { "File": "flicky_hud.png", "Rect":  "0,78,8,13" },
+//	"hud_digit_1_red": { "File": "flicky_hud.png", "Rect":  "8,78,8,13" },
+//	"hud_digit_2_red": { "File": "flicky_hud.png", "Rect": "16,78,8,13" },
+//	"hud_digit_3_red": { "File": "flicky_hud.png", "Rect": "24,78,8,13" },
+//	"hud_digit_4_red": { "File": "flicky_hud.png", "Rect": "32,78,8,13" },
+//	"hud_digit_5_red": { "File": "flicky_hud.png", "Rect": "40,78,8,13" },
+//	"hud_digit_6_red": { "File": "flicky_hud.png", "Rect": "48,78,8,13" },
+//	"hud_digit_7_red": { "File": "flicky_hud.png", "Rect": "56,78,8,13" },
+//	"hud_digit_8_red": { "File": "flicky_hud.png", "Rect": "64,78,8,13" },
+//	"hud_digit_9_red": { "File": "flicky_hud.png", "Rect": "72,78,8,13" },
+
+	// Digits (Chaos Emerald stage results)
+	"flicky_hud_digit_0_chaosstage": { "File": "flicky_hud.png", "Rect":  "0,123,8,16" },
+	"flicky_hud_digit_1_chaosstage": { "File": "flicky_hud.png", "Rect":  "8,123,8,16" },
+	"flicky_hud_digit_2_chaosstage": { "File": "flicky_hud.png", "Rect": "16,123,8,16" },
+	"flicky_hud_digit_3_chaosstage": { "File": "flicky_hud.png", "Rect": "24,123,8,16" },
+	"flicky_hud_digit_4_chaosstage": { "File": "flicky_hud.png", "Rect": "32,123,8,16" },
+	"flicky_hud_digit_5_chaosstage": { "File": "flicky_hud.png", "Rect": "40,123,8,16" },
+	"flicky_hud_digit_6_chaosstage": { "File": "flicky_hud.png", "Rect": "48,123,8,16" },
+	"flicky_hud_digit_7_chaosstage": { "File": "flicky_hud.png", "Rect": "56,123,8,16" },
+	"flicky_hud_digit_8_chaosstage": { "File": "flicky_hud.png", "Rect": "64,123,8,16" },
+	"flicky_hud_digit_9_chaosstage": { "File": "flicky_hud.png", "Rect": "72,123,8,16" },
+
+	// Other characters for time
+	"flicky_hud_char_colon":   { "File": "flicky_hud.png", "Rect": "80,107,8,16" },
+*/
+	"hud_char_minutes": { "File": "angel_minutesseconds.png", "Rect": "0,0,8,12" },
+	"hud_char_seconds": { "File": "angel_minutesseconds.png", "Rect": "8,0,8,12" },
+/*
+	// Continue icons
+	"flicky_continue_icon_sonic":    { "File": "flicky_hud.png", "Rect": "0,82,20,24",  "Center": "12,24" },
+	"flicky_continue_icon_tails":    { "File": "flicky_hud.png", "Rect": "20,82,20,24", "Center": "10,24" },
+	"flicky_continue_icon_knuckles": { "File": "flicky_hud.png", "Rect": "40,82,20,24", "Center": "9,24" },
+
+	// Character icon for lives
+	"flicky_hud_lives_icon_sonic":    { "File": "flicky_hud.png", "Rect":  "148,91,23,16" },
+	"flicky_hud_lives_icon_tails":    { "File": "flicky_hud.png", "Rect": "148,107,23,16" },
+	"flicky_hud_lives_icon_miles":    { "File": "flicky_hud.png", "Rect": "148,107,23,16" },
+	"flicky_hud_lives_icon_knuckles": { "File": "flicky_hud.png", "Rect": "148,123,23,16" },
+
+	// Small digits for lives (not actually small digits in Flicky HUD; repositioned normal digits)
+	"flicky_hud_smalldigit_0": { "File": "flicky_hud.png", "Rect":  "0,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_1": { "File": "flicky_hud.png", "Rect":  "8,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_2": { "File": "flicky_hud.png", "Rect": "16,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_3": { "File": "flicky_hud.png", "Rect": "24,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_4": { "File": "flicky_hud.png", "Rect": "32,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_5": { "File": "flicky_hud.png", "Rect": "40,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_6": { "File": "flicky_hud.png", "Rect": "48,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_7": { "File": "flicky_hud.png", "Rect": "56,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_8": { "File": "flicky_hud.png", "Rect": "64,107,8,16", "Center": "8,8" },
+	"flicky_hud_smalldigit_9": { "File": "flicky_hud.png", "Rect": "72,107,8,16", "Center": "8,8" },
+
+	// HUD elements for Challenges
+	"flicky_hud_text_time_chaosstage":	  { "File": "flicky_hud.png", "Rect": "0,139,31,16" },
+	"flicky_hud_char_colon_chaosstage":   { "File": "flicky_hud.png", "Rect": "80,123,8,16" },
+	"flicky_hud_char_minutes_chaosstage": { "File": "flicky_hud.png", "Rect": "88,123,8,16" },
+	"flicky_hud_char_seconds_chaosstage": { "File": "flicky_hud.png", "Rect": "96,123,8,16" },
+
+	"flicky_hud_text_best":	  { "File": "flicky_hud.png", "Rect": "108,107,31,16" },
+	"flicky_time_stop_bonus": { "File": "flicky_hud.png", "Rect": "0,139,125,16", "Center": "62,8" },
+	"flicky_new_record": { "File": "flicky_hud.png", "Rect": "0,155,85,16", "Center": "43,8" },
+*/
+	"angel_text_dev":  { "File": "angel_text_dev.png"},	// small star medal pictures are stored with challenges menu pictures
+	"angel_text_totalmedals":  { "File": "angel_text_totalmedals.png", "Center": "79,4" },
+
+	"angel_smalldigit_0": { "File": "angel_smallfont.png", "Rect":  "238,0,8,8" },
+	"angel_smalldigit_1": { "File": "angel_smallfont.png", "Rect":  "246,0,8,8" },
+	"angel_smalldigit_2": { "File": "angel_smallfont.png", "Rect":  "254,0,8,8" },
+	"angel_smalldigit_3": { "File": "angel_smallfont.png", "Rect":  "263,0,8,8" },
+	"angel_smalldigit_4": { "File": "angel_smallfont.png", "Rect": "272,0,8,8" },
+	"angel_smalldigit_5": { "File": "angel_smallfont.png", "Rect": "281,0,8,8" },
+	"angel_smalldigit_6": { "File": "angel_smallfont.png", "Rect": "290,0,8,8" },
+	"angel_smalldigit_7": { "File": "angel_smallfont.png", "Rect": "299,0,8,8" },
+	"angel_smalldigit_8": { "File": "angel_smallfont.png", "Rect": "308,0,8,8" },
+	"angel_smalldigit_9": { "File": "angel_smallfont.png", "Rect": "317,0,8,8" },
+	"angel_smallchar_minutes": { "File": "angel_smallfont.png", "Rect": "380,0,8,8" },
+	"angel_smallchar_seconds": { "File": "angel_smallfont.png", "Rect": "388,0,8,8" }
+}

@@ -1,0 +1,3193 @@
+// In Original Mode, the ring counter should always count up regardless of AIR setting.
+// Function taken from level\special\bluespheres.lemon
+//# address-hook(0x00881a) end(0x0088b4)
+function void fn00881a()
+{
+	A1 = 0x0088b6
+	D0.u16 = u16[0xffffe420]
+	if (D0.u8 != u8[0xffffe42c])
+	{
+		u8[0xffffe42c] = D0.u8
+		D0.u16 <<= 3
+		A3 = u32[A1 + D0.s16]
+
+		// Direct VRAM write
+		VDP.setupVRAMWrite(0xc19e)
+		VDP.copyToVRAM(A3 + 0x010e, 0x14)
+
+		A3 += 0x0140
+		u16 vramAddress = 0xc200
+		for (u8 y = 0; y < 0x18; ++y)
+		{
+			VDP.setupVRAMWrite(vramAddress)
+			VDP.copyToVRAM(A3, 0x50)
+			vramAddress += 0x80
+			A3 += 0x50
+		}
+	}
+
+	if (bluespheres.bs_hud_dirty)
+	{
+		bluespheres.bs_hud_dirty = 0
+		D0 = 0x40860003
+		D1.u16 = bluespheres.blue_remaining
+		fn008c5e()
+	}
+
+	if (bluespheres.rings_flags & 0x80)
+	{
+		bluespheres.rings_flags &= ~0x80
+		D0 = 0x40be0003
+		D1.u16 = (!original_mode && (bluespheres.minigame_mode || Game.getSetting(SETTING_BS_COUNTDOWN_RINGS))) ? bluespheres.rings_remaining : bluespheres.rings_collected
+		fn008c5e()
+	}
+}
+
+
+// Direct saving and loading for Green Sphere Game to use custom saved data.
+// Functions taken from general\bluesphere\bluespheregame.lemon
+// We also remove the white screen assumption in fn04c97e(), else the new Perfect results background flashes white on exit.
+//# address-hook(0x04c97e) end(0x04cb18)
+function void fn04c97e()
+{
+	if (!menu_initialized)
+	{
+		debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
+		marathon_timer = 0
+		draw_HUD = false					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
+		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
+		original_mode = 0					// Remove original mode in main menu
+		eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
+		specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
+		restartSpecialStage = 0
+		Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
+		challenges_normalmode = 0
+	}
+
+	if (global.characters >= 0x04 || levelselect.characters >= 0x04)		// We've entered the mode directly from Knuckles & Tails play.
+	{
+		global.characters = 0x01						// If this happens, force Sonic to match what the selection icons in the menu show.
+		levelselect.characters = 0x01					// Here too, else this will replace global.characters when a stage is loaded.
+	}
+	else if (global.characters == 0x00 || levelselect.characters == 0x00)		// We've entered the mode directly from Sonic & Tails play.
+	{
+		global.characters = 0x01						// If this happens, force Sonic to match what the selection icons in the menu show.
+		levelselect.characters = 0x01					// Here too, else this will replace global.characters when a stage is loaded.
+	}
+
+// #if STANDALONE
+	// Assuming a white screen here
+//	globalComponentAddedColorR = 0xff
+//	globalComponentAddedColorG = 0xff
+//	globalComponentAddedColorB = 0xff
+// #endif
+
+	playMusic(MUSIC_CTRL_FADEOUT)
+	FadeOutScreenBlocking()
+
+	fn04c8e4()
+	fn04cca6()
+
+// #if STANDALONE
+	// Try to load progress from SRAM
+//	SRAM.load(0xffffffa6, 0x50, 4)		// Writing to the address of bluespheregame.current_stage
+//	System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+
+	if (green_spheres.active)
+		System.loadPersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
+	else
+		System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+
+	// Switch to the correct seed for this stage
+	BlueSphere.setGeneratedStage(bluespheregame.current_stage)
+// #endif
+
+	A2 = 0xfffffc80
+	fn04cb1a()
+
+	Nemesis.loadDataToVRAM(0x0dde34, 0xb7e0)
+	Nemesis.loadDataToVRAM(0x189c7c, 0x32e0)
+
+	Kosinski.decompress(0x187d1c, 0xffff0000)
+	Kosinski.decompress(0x188f1e, A1)
+	updateSpritePattern(0xffff0000, 0, A1.u16 >> 1)
+
+	Kosinski.decompress(0x1897de, 0xffff4000)
+	updateSpritePattern(0xffff4000, 0xa9c0, 0x06d0)
+
+	Enigma.decompress(0x187cb0, 0xffff8000, 0x2000)
+
+	//copyRectToVRAM(0xffff8000, 0xc380, 0x28, 0x10)	// Should be the same as below, needs to be tested
+	A1 = 0xffff8000
+	D0 = 0x43800003
+	D1 = 0x27
+	D2 = 0x0f
+	CopyRectToVRAM()
+
+	Enigma.decompress(0x189c4e, 0xffff8000, 0x4197)
+
+	//copyRectToVRAM(0xffff8000, 0xe09c, 0x0c, 0x08)	// Should be the same as below, but something is wrong
+	A1 = 0xffff8000
+	D0 = 0x609c0003
+	D1 = 0x0b
+	D2 = 0x07
+	CopyRectToVRAM()
+
+	A1 = 0x04cc62
+	if (u8[0xffffffa1] == 0)
+	{
+		A1 = 0x04cc36
+		levelselect.characters = CHARS_SONIC_ALONE
+		scrolloffset.y.both = 0xfff0fff8
+	}
+
+	D2.u16 = 0x0100
+	D6.u16 = 0x05bf
+	fn05b318()
+	if (bluespheregame.fully_unlocked == 0)
+	{
+		scrolloffset.y.both = 0xfff0fff8
+	}
+
+	u32[0xffffb000] = 0x04ceaa
+	u32[0xffffb04a] = 0x04da30
+	u32[0xffffb094] = 0x04d986
+	UpdateGameObjects()
+	RenderSprites()
+
+	playMusic(0x28)
+
+	VDP.Config.setActiveDisplay(true)
+
+	Menu.FadeInAfterInit()
+
+	while (true)
+	{
+		global.frame_state = 0x1a
+		Kosinski.ProcessDecompressionQueue()
+
+		waitForNextFrame()
+
+		fn04cc96()
+		UpdateGameObjects()
+		RenderSprites()
+		Kosinski.ProcessModules()
+
+		if (global.game_mode != 0x2c)
+			break
+	}
+}
+
+//# address-hook(0x04d488) end(0x04d59e)
+function void fn04d488()
+{
+	fn04d268()
+
+	D0.u16 ^= 0x55
+	D2.u16 = D0.u16
+	D0.u16 &= 0x3f
+	D1 ^= 0xaaaaaaaa
+	D1 = (D1 << 6) + (D1 >> 26)
+	D1 = (D1 << 16) + (D1 >> 16)
+	D3.u16 = (D1.u16 & 0xf800) >> 5
+	D3.u16 |= D0.u16
+	D3.u16 &= 0x07ff
+	D1 = (D1 << 16) + (D1 >> 16)
+	D1 -= 0x01234567
+	D2.u16 &= 0x40
+	if (D2.u16 != 0)
+	{
+		D1 += 0x07654321
+	}
+	D1 &= 0x07ffffff
+	u32[0xffffe400] = D1
+
+	A2 = 0xffffe400
+	D6 = 1
+	fn04d5a0()
+
+	D4.u16 &= 0x07ff
+	if (D3.u16 != D4.u16)
+	{
+		// Entered an invalid code
+		playSound(0xb2)
+	}
+	else
+	{
+		// Code is valid
+		u8[0xffffffab] = 0
+		if (D2.u16 != 0)
+		{
+			D1 -= 0x07654321
+			D1 &= 0x07ffffff
+			u8[0xffffffab] = 0xff
+		}
+
+		bluespheregame.current_stage = D1
+		BlueSphere.setGeneratedStage(bluespheregame.current_stage)
+
+
+	if (green_spheres.active)
+		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
+	else
+	{
+	#if STANDALONE
+		// Save progress to SRAM
+		SRAM.save(0xffffffa6, 0x50, 4)		// Copying from the address of bluespheregame.current_stage
+		System.savePersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+	#endif
+	}
+
+		A2 = 0xfffffc00
+		fn04cb1a()
+
+		playSound(0x63)
+	}
+
+	u8[0xffffffa1] &= 0x7f
+	bluespheregame.menu_selection = 1
+}
+
+function void BlueSphereGame.advanceStages(u8 numStages)
+{
+	bluespheregame.current_stage += numStages
+
+	A2 = 0xffffffa2
+	for (u8 i = 0; i < numStages; ++i)
+	{
+		u32[A2] += 0x01030507
+		u8[A2] &= 0x7f
+		if (u8[A2+1] >= 0x7f)
+			u8[A2+1] -= 0x7f
+		if (u8[A2+2] >= 0x7e)
+			u8[A2+2] -= 0x7e
+		if (u8[A2+3] >= 0x7d)
+			u8[A2+3] -= 0x7d
+	}
+
+	if (green_spheres.active)
+		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
+	else
+	{
+	#if STANDALONE
+		// Save progress to SRAM
+		SRAM.save(0xffffffa6, 0x50, 4)		// Copying from the address of bluespheregame.current_stage
+		System.savePersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+	#endif
+	}
+}
+
+
+
+
+
+function void BlueSphere.setGeneratedStage(u32 number)
+{
+	if (!challenge_greenspheres)
+	{
+		u8[0xffffffa2] = number & 0x7f
+		u8[0xffffffa3] = (number * 3 + 1) % 0x7f
+		u8[0xffffffa4] = (number * 5 + 2) % 0x7e
+		u8[0xffffffa5] = (number * 7 + 3) % 0x7d
+	}
+
+	// Code for Time Attack mode stage generation
+	else
+	{
+		System.loadExternalRawData("GreenSphereTimeAttackStages", 0xffffffa2, (challenge_greenspheres - 1) * 4, 0x04, 1, 1)	// load premade quadrant configurations
+
+	//	u8[0xffffffa2] = (challenge_greenspheres * 4 - 13) & 0x7f		// Create quadrants by creating values that are 3, 0, 2, and 1 modulo 4 based on stage number.
+	//	u8[0xffffffa3] = (challenge_greenspheres * 4 + 48) & 0x7f		// The values are shifted by such arbitrary amounts instead of simply 3, 0 or 4, 1, and 2
+	//	u8[0xffffffa4] = (challenge_greenspheres * 4 - 46) & 0x7f		// so that the first green sphere and generated challenge stages don't share quadrants.
+	//	u8[0xffffffa5] = (challenge_greenspheres * 4 + 21) & 0x7f
+
+	//	challenge_greenspheres = 0
+
+		// The above variable must be zeroed out somewhere!
+		// The palette algorithm still needs to be modified to maximize the number of unique palettes used. It also shows the original sky colors instead of the modded ones.
+	}
+}
+
+
+
+
+// Don't load the emerald in Special Stage Time Attack
+// Function taken from level\special\bluespheres.lemon
+//# address-hook(0x009b62) end(0x009d1c)
+function void fn009b62()
+{
+	if (bluespheres.stage_exit_state == 1)
+	{
+	#if STANDALONE
+		if (bluespheres.rings_remaining == 0)
+		{
+			Game.setAchievementComplete(ACHIEVEMENT_BS_PERFECT)
+		}
+	#endif
+
+		// First lift all the spheres before going on
+		if (bluespheres.lifted_height < 0x100)
+		{
+			if (bluespheres.lifted_height == 0)
+			{
+				playMusic(0x66)
+			}
+			bluespheres.lifted_height += (bluespheres.lifted_height >= 0x7d) ? 4 : (bluespheres.lifted_height >= 0x3e) ? 3 : 2
+			return
+		}
+
+		// Spawn the emerald
+		++bluespheres.stage_exit_state
+		zeroMemory(0xfffff100, 0x400)
+
+		D0.u8 = bluespheres.direction
+		LookupSinCos()
+		D2.u16 = bluespheres.position.x
+		D3.u16 = bluespheres.position.y
+		D0.s16 <<= 3
+		D1.s16 <<= 3
+		D2.u16 -= D0.u16
+		D3.u16 -= D1.u16
+
+		A1 = 0xfffff100
+		D0.u16 = ((D2.u16 + 0x80) >> 8) & 0x1f
+		D1.u16 = ((D3.u16 + 0x80) >> 8) & 0x1f
+		D1.u16 = (D1.u16 << 5) | D0.u16
+		if (!challenge_greenspheres)
+			u8[A1 + D1.s16] = (global.sk_bluespheres) ? 0x0d : 0x0b
+		u16[0xffffe44e] = D1.u16
+		u16[0xffffe428] = 0x0800
+		u8[0xffffe44d] = 0x78
+
+		D0 = (bluespheres.minigame_mode == 0) ? global.next_bluespheres : u8[0xffffffa4]
+		A1 = 0x009d1e + (D0.s16 & 0x07) * 8
+		copyMemory(0xfffffc64, A1, 0x08)
+
+		A1 = (global.sk_bluespheres) ? 0x0ae99e : 0x0ae3ec
+		Kosinski.addToDMAQueue(A1, 0xb4e0)
+	}
+	else if (bluespheres.stage_exit_state == 2)
+	{
+		if (kosinski.waiting_modules == 0)
+		{
+			u16[0xffffe44a] = 0
+			--u8[0xffffe44d]
+			if (u8[0xffffe44d] == 0)
+			{
+				if (challenge_greenspheres)		// if Special Stage Time Attack,
+				{
+					playMusic(MUSIC_CTRL_FADEOUT)	// fade out music
+					return							// do not load the emerald
+				}
+				++bluespheres.stage_exit_state
+				playMusic(0x2b)
+			}
+		}
+	}
+	else if (bluespheres.stage_exit_state == 3)
+	{
+		D0.u16 = ((bluespheres.position.x + 0x80) >> 8) & 0x1f
+		D1.u16 = ((bluespheres.position.y + 0x80) >> 8) & 0x1f
+		D1.u16 = (D1.u16 << 5) | D0.u16
+		if (D1.u16 == u16[0xffffe44e])
+		{
+			D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xe0
+			if (D0.u16 == 0)
+			{
+				if (bluespheres.minigame_mode == 0)
+				{
+					// Update either global.chaos_emeralds or global.super_emeralds
+					A2 = (global.sk_bluespheres) ? 0xffffffb1 : 0xffffffb0
+					if (u8[A2] < 7)
+					{
+						++u8[A2]
+						A1 = 0xffffffb2
+						D0 = global.next_bluespheres
+						u8[A1 + D0.s16] |= 0x01
+					}
+				}
+
+				++bluespheres.stage_exit_state
+				bluespheres.stage_exit_animation = 1
+				global.game_mode = (bluespheres.minigame_mode != 0) ? 0x30 : 0x48
+
+				if (global.stage_type != 0)
+				{
+					global.zone_act = level.backup.zone_act
+					checkpoint.number |= 0x80
+				}
+
+				playSound(0x6a)
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Take the direct call to a new game mode and add cases for D.A. Garden menus
+//# address-hook(0x000418) end(0x000436)
+function void BlueSphereGame()
+{
+#if !STANDALONE
+	call 0x00043a
+	u8[0xffffff9f] = D4.u8
+
+	call 0x00111a
+	call 0x0012ce
+	call 0x0010ae
+#endif
+
+	u8[0xffffffa1] = 0
+	global.game_mode = 0x2c
+	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
+
+	while (true)
+	{
+		if ((global.game_mode & 0x7f) == 0x54)
+		{
+			Game.setUnderwaterAudioEffect(0)
+			// EntryFunctions.dataSelect()
+			loadupCustomMenu()
+			Game.endSkippableCutscene()
+		}
+		else if ((global.game_mode & 0x7f) == 0x58)
+		{
+			Game.setUnderwaterAudioEffect(0)
+			// EntryFunctions.dataSelect()
+			loadupCustomMenu()
+			Game.endSkippableCutscene()
+		}
+		else
+		{
+			// See "GameModeControlLoop" for more information
+			D0.u16 = global.game_mode & 0x7c
+			A0 = u32[0x0004c6 + D0.u16]
+			call A0
+		}
+	}
+}
+
+
+
+
+
+
+
+
+function void greenSphere.discordRPC()
+{
+	Game.setDiscordDetails("D.A. Garden Edition")
+	Game.setDiscordState(stringformat("Green Sphere Level %d", u32[0xffffffa6] + 1))
+
+	Game.setDiscordLargeImage("menus")
+}
+
+
+
+
+
+// If exiting the Blue Sphere game, return to the D.A. Garden menu.
+// Also ensure Original Mode rendering is not happening.
+//# address-hook(0x04d6b8) end(0x04d7a0)
+function void fn04d6b8()
+{
+//	if (original_mode)
+//	{
+//		setting.original_mode = original_mode
+//		original_mode = 0
+//	}
+	greenSphere.discordRPC()
+
+	if ((global.game_mode & 0x7f) == 0x58)
+		return
+
+	if (green_spheres.active)
+		Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+
+	#if STANDALONE
+	// Do the following only once in total, i.e. only for the right object
+	if (objA0.render_flags & 0x01)
+	{
+		if (levelselect.characters == CHARS_TAILS_ALONE)
+		{
+			// Manipulate the palette for Tails
+			BlueSphereGame.applyTailsPalette(0xfffffc00)
+		}
+
+		// Render the BG logo in the right colors again
+		Renderer.drawCustomSprite("sklogo", getScreenWidth() / 2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
+	}
+#endif
+
+	if (bluespheregame.fully_unlocked != 0)
+	{
+		A1 = u32[A0 + 0x30]
+		D0 = bluespheregame.menu_selection * 4
+		D2.u16 = u16[A1 + D0.s16] + getScreenExtend()
+		D3.u16 = u16[A1 + D0.s16 + 2]
+
+		// Update velocity-x
+		bool skipPart = false
+		if (D2.u16 == objA0.position.x.u16)
+		{
+			D0.u16 = objA0.velocity.x + 0x80
+			if (D0.u16 <= 0x0100)
+			{
+				D1 = 0
+				objA0.velocity.x = D1.u16
+				skipPart = true
+			}
+		}
+
+		if (!skipPart)
+		{
+			D1.u16 = 0x40
+			if (D2.s16 < s16[A0 + 0x10])
+			{
+				D1.s16 = -D1.s16
+				if (objA0.velocity.x >= 0)
+				{
+					D1.u16 *= 4
+				}
+			}
+			else
+			{
+				if (objA0.velocity.x < 0)
+				{
+					D1.u16 *= 4
+				}
+			}
+		}
+		objA0.velocity.x += D1.u16
+
+		// Update velocity-y
+		skipPart = false
+		if (D3.u16 == objA0.position.y.u16)
+		{
+			D0.u16 = objA0.velocity.y + 0x0100
+			if (D0.u16 <= 0x0200)
+			{
+				D1 = 0
+				objA0.velocity.y = D1.u16
+				skipPart = true
+			}
+		}
+
+		if (!skipPart)
+		{
+			D1.u16 = 0x80
+			if (D3.s16 < s16[A0 + 0x14])
+			{
+				D1.s16 = -D1.s16
+				if (objA0.velocity.y >= 0)
+				{
+					D1.u16 *= 4
+				}
+			}
+			else
+			{
+				if (objA0.velocity.y < 0)
+				{
+					D1.u16 *= 4
+				}
+			}
+		}
+		objA0.velocity.y += D1.u16
+
+		UpdateMovementStraightSimple()
+	}
+
+	--objA0.animation.timer
+	if (s8(objA0.animation.timer) < 0)
+	{
+		objA0.animation.timer = 2
+		++objA0.animation.sprite
+		objA0.animation.sprite &= 0x07
+	}
+
+#if STANDALONE
+	if (control.pad1.pressed & CONTROL_B || Input.buttonPressed(BUTTON_BACK))
+	{
+		if ((objA0.render_flags & 0x01) == 0)		// Only consider first of the two objects
+		{
+			if (bluespheregame.menu_selection == 1)
+			{
+				// Back to the main menu
+				playSound(0xad)
+				global.game_mode = 0x58
+
+				u32 backupA0 = A0
+				FadeOutScreenBlocking()
+				A0 = backupA0
+
+			//	Game.returnToMainMenu()
+			//	yieldExecution()
+			}
+			else if (bluespheregame.menu_selection == 2)
+			{
+				fn04d488()
+			}
+		}
+		DrawObject()
+		return
+	}
+#endif
+
+	if (control.pad1.pressed & CONTROL_ABC)
+	{
+		D0.u16 = objA0.sprite_attributes
+		if (D0.u16 == 0x8598)
+		{
+			levelselect.characters = CHARS_SONIC_ALONE
+			objA0.sprite_attributes = 0xe598
+		}
+		else
+	#if STANDALONE
+		if (D0.u16 == 0xe598)
+		{
+			levelselect.characters = CHARS_TAILS_ALONE
+			objA0.sprite_attributes = 0xc598
+		}
+		else
+	#endif
+		{
+			levelselect.characters = CHARS_KNUCKLES_ALONE
+			objA0.sprite_attributes = 0x8598
+		}
+	}
+
+	DrawObject()
+}
+
+
+
+
+// Custom function to render the green S&K Logo as a background for the end of stage screens
+function void RenderSKLogoFullBG()
+{
+	if !(green_spheres.active)
+		return
+	
+	Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+
+	Renderer.drawCustomSprite("sklogo", -80, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 48, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 176, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 304, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 432, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 560, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 560, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 688, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+
+	Renderer.drawCustomSprite("sklogo", -144, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", -16, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 112, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 240, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 368, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 496, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+
+	Renderer.drawCustomSprite("sklogo", -80, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 48, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 176, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 304, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 432, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 560, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 688, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+
+	Renderer.drawCustomSprite("sklogo", -144, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", -16, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 112, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 240, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 368, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite("sklogo", 496, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+}
+
+
+
+
+
+
+
+// Insert calls to RenderSKLogoFullBG in functions that draw text on relevant screens.
+// Functions taken from general\bluesphere\bluespheregame.lemon
+// This function draws LEVEL, and we add a check to only use the results screen.
+// However, using this function also causes the original logos to show during the fadeout.
+//# address-hook(0x04d09e) end(0x04d0f0)
+function void fn04d09e()
+{
+	if (global.game_mode == 0x30)	// Perfect results screen
+		RenderSKLogoFullBG()
+	base.fn04d09e()
+}
+
+// This function draws DIFFICULTY. While the Perfect results also uses LEVEL, the game mode
+// for this screen is the same as the blue sphere game menu screen, which also uses LEVEL.
+//# address-hook(0x04e116) end(0x04e15a)
+function void fn04e116()
+{
+	RenderSKLogoFullBG()
+	base.fn04e116()
+}
+
+
+
+
+
+// Green sphere palette setup and a new line to reset the displayed time at the start of a special stage
+// Taken from scripts\level\special\bluespheres.lemon
+//# address-hook(0x0081c6) end(0x00858e)
+function void SpecialStage()
+{
+	if (!original_mode)
+		playMusic(MUSIC_CTRL_FADEOUT)
+	else
+		playMusic(MUSIC_CTRL_STOP)
+
+	kosinski.queue_size = 0
+	zeroMemory(0xffffff10, 0x6c)
+
+	ClearPatternLoadingQueue()
+	FadeScreenToWhiteBlocking()
+
+#if STANDALONE
+	// Add a small artificial delay here
+	u8 delayFrames = original_mode ? 112 : 12
+	for (u8 i = 0; i < delayFrames; ++i)
+		yieldInWhiteScreen()
+#else
+	set_status_register(0x2700)
+#endif
+
+	VDP.Config.enableHInt(false)
+	VDP.Config.setNameTableBasePlaneA(0xc000)
+	VDP.Config.setNameTableBasePlaneB(0xe000)
+	VDP.Config.setPlayfieldSizeInPixels(512, 256)
+	VDP.Config.setupWindowPlane(false, 0)	// Disable window plane
+	VDP.Config.setVerticalScrolling(false, 0)
+	VDP.Config.setBackdropColor(0x20)
+	VDP.Config.setRenderingModeConfiguration(false)
+	water.fullscreen = 0
+
+	fn0011ca()
+
+	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb000, 0x2000)
+	zeroMemory(0xfffffe6e, 0x4c)
+	zeroMemory(0xffffe400, 0x100)
+
+	u32[0xfffffe66] = 0
+	u32[0xfffffe6a] = 0
+
+	fn01aa6e()
+
+	u16[0xfffffb00] = 0
+	u32[0xfffffbfc] = 0xfffffb00
+
+	// Load special stage palette
+	//  -> Character colors is the 8 colors from 0xfffffc90 (for Sonic/Knuckles) and 0xfffffcb0 (for Tails)
+	copyMemory(0xfffffc80, 0x00896e, 0x100)
+	if (global.characters == CHARS_KNUCKLES_ALONE)
+	{
+		copyMemory(0xfffffc90, 0x0089ee, 0x10)
+	}
+
+#if STANDALONE
+	for (u8 player = 0; player < getNumPlayers(); ++player)
+	{
+		u8 character = getPlayerCharacter(player)
+		u64 paletteKey = (character == CHARACTER_SONIC) ? "bluesphere_palette_sonic" : (character == CHARACTER_TAILS) ? "bluesphere_palette_tails" : "bluesphere_palette_knuckles"
+		u16 numColors = System.loadExternalPaletteData(paletteKey, 0, 0x800000, 0x20)
+		if (numColors > 0)
+		{
+			u32 dest = 0x802180 + character * 0x40
+			for (u16 i = 0; i < numColors; ++i)
+			{
+				u16[dest + i * 2] = packColor(u32[0x800000 + i * 4])
+			}
+		}
+	}
+#endif
+
+	Nemesis.loadDataToVRAM(0x0b07b8, 0x0000)
+
+	fn0085b0()
+	if (!original_mode)	// no green sphere palette in original mode
+	{
+		// new code for green spheres
+		// green sphere palette from concept vid, translated by Fred Bronze
+		u32[0xfffffce4] = 0x00c600a0
+		u32[0xfffffce8] = 0x00600020
+		u32[0xfffffcec] = 0x00c600a0
+
+		if (green_sphere_palette == 1)
+		{
+			// green sphere palette closer to Mania palette
+			u32[0xfffffce4] = 0x04e002c0
+			u32[0xfffffce8] = 0x02800040
+			u32[0xfffffcec] = 0x04e002c0
+		}
+	}
+
+	Enigma.decompress(0x0aef54, 0xffff5500, 0x0000)
+	copyRectToVRAM(0xffff5500, 0xc000, 0x28, 0x1c)
+
+	Nemesis.loadDataToVRAM(0x0ad904, 0xd000)
+	Nemesis.loadDataToVRAM(0x0adf60, 0xb4e0)
+	Nemesis.loadDataToVRAM(0x0aeed0, 0xb360)
+	Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
+	Nemesis.loadDataToVRAM(0x0ad5f4, 0xdf00)
+	Nemesis.loadDataToVRAM(0x0ad650, 0xf020)
+
+	A0 = 0x0ad650
+	A4 = 0xffffe020
+	fn0015cc()
+
+	Nemesis.loadDataToVRAM(0x0ad7bc, 0xb120)
+	Nemesis.loadDataToVRAM(0x0ad430, 0xf400)
+
+	copyRectToVRAM(0x008d2c, 0xc084, 0x08, 0x03)
+	copyRectToVRAM(0x008d2c, 0xc0bc, 0x08, 0x03)
+
+	Enigma.decompress(0x0aedb0, 0xffff0000, 0x459b)
+	copyRectToVRAM(0xffff0000, 0xe000, 0x40, 0x20)
+
+	Kosinski.decompress(0x0b2e36, 0xffff0000)
+
+	fn009ea0()
+	fn00a0e6()
+	// copyMemory(0xffffe4f0, 0xffffe4f0, 0x08)	// Copy the mappings pointer for sphere ID 0x0c (touched green sphere) to new slot 0x0e (untouched green sphere)
+												// We're not using this method anymore, instead putting in a check later that says to treat 0x0e as 0x0c when needed.
+
+	global.level_started = 0
+	bluespheres.bs_hud_dirty = 0xff
+	bluespheres.rings_flags = 0x80
+	bluespheres.current_gamespeed = 0x1000	// usually 0x1000
+	bluespheres.speedup_countdown = (BlueSpheres.useGeneratedStages() || challenge_greenspheres) ? 2700 : 1800
+	camera.foreground.x.u16 = 0
+	camera.foreground.y.u16 = 0
+	level.height.bitmask = 0xffff
+	time_attack_end = 0		// new: if we just came out of a Challenge, make sure pausing is re-enabled.
+	BS_displayedTime = 0	// new: resets the time display between stages
+
+	u32[0xffffb000] = 0x008faa	// initialize main character
+	BS_fadeFinished = 0			// new for DAGE: ensure byte 0x3e of the character RAM is clear to lock controls in Original Mode until after fade in completes
+	if (getNumPlayers() >= 2 && !bluespheres.minigame_mode)
+	{
+		u32[0xffffb04a] = 0x009212
+	}
+	u32[0xffffb094] = 0x008df8
+	u32[0xffffb0de] = 0x008e40
+	UpdateGameObjects()
+
+	fn009d9e()
+	fn009dde()
+	RenderSprites()
+
+	BlueSpheres.RenderSpheres()
+	fn009d5e()
+
+	bluespheres.stage_exit_animation = 1
+	global.frame_state = 0x1c
+
+	waitForNextFrame()
+
+	bluespheres.stage_exit_animation = 0
+	VDP.Config.setRenderingModeConfiguration(true)		// Enable shadow/highlight palette mode
+
+	global.demo_countdown = 1800
+	fn0075d2()
+
+#if STANDALONE
+	if (BlueSpheres.useGeneratedStages())
+	{
+		playMusic(0xf8)		// Different music track, one that speeds up the music only every 45 (instead of 30) seconds
+	}
+	else
+#endif
+	{
+		playMusic(0x1c)
+	}
+
+	VDP.Config.setActiveDisplay(true)
+	BlueSpheres.FadeIn()
+
+	while (true)
+	{
+		if (restartSpecialStage == 1)
+		{
+			restartSpecialStage = 0
+			return
+		}
+		UpdateGamePause()
+		global.frame_state = 0x1c
+		Kosinski.ProcessDecompressionQueue()
+
+		waitForNextFrame()
+	@EntryPoint:
+
+		++level.framecounter
+		if (original_mode)
+			BS_fadeFinished = 1			// new for DAGE: set our custom flag to allow controls after fade in in Original Mode
+		UpdateRollingDemo()
+		UpdateGameObjects()
+
+		fn009d9e()
+		fn009dde()
+		RenderSprites()
+
+		BlueSpheres.RenderSpheres()
+		BlueSpheres.RenderCharacterSprites()
+		fn009d5e()
+		fn009b62()
+
+	#if GAMEAPP
+		BlueSpheres.renderCustomGround()
+		BlueSpheres.renderCustomCharacterShadows()
+	#else
+	#if STANDALONE
+		Renderer.setViewport(getScreenExtend(), 0, 320, 224, 0x0000)
+	#endif
+	#endif
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		if (global.rolling_demo && global.demo_countdown == 0)
+			break
+
+		if (global.game_mode != 0x34)	// Blue Spheres game mode
+			break
+
+	#if STANDALONE
+		// Only needed to support restart from the Pause Menu
+		//  -> Not used at the moment, so nevermind
+		if (level.restart)
+		{
+			global.game_mode = 0x0c
+			return
+		}
+	#endif
+	}
+
+	if (global.rolling_demo)
+	{
+		global.game_mode = 0
+	}
+
+	global.demo_countdown = 60
+	palette_fade.range = 0x003f
+	u16[0xfffff794] = 0
+
+	while (true)
+	{
+		global.frame_state = 0x1c
+
+		waitForNextFrame()
+
+		UpdateRollingDemo()
+		UpdateGameObjects()
+
+		fn009d9e()
+		fn009dde()
+		RenderSprites()
+
+		BlueSpheres.RenderSpheres()
+		fn009d5e()
+		fn009b62()
+
+	#if GAMEAPP
+		BlueSpheres.renderCustomGround()
+		BlueSpheres.renderCustomCharacterShadows()
+	#else
+	#if STANDALONE
+		Renderer.setViewport(getScreenExtend(), 0, 320, 224, 0x0000)
+	#endif
+	#endif
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		--u16[0xfffff794]
+		if (s16[0xfffff794] < 0)
+		{
+			u16[0xfffff794] = 2
+			FadePaletteToWhite()
+		}
+
+		if (global.demo_countdown == 0)
+			break
+	}
+}
+
+
+
+// This function runs many ongoing parts of Blue Sphere, such as letting characters jump and controlling when the stage speeds up.
+// We add in calls to update the timer's value each frame and to check for the back and retry buttons.
+//# address-hook(0x00903e) end(0x00919e)
+function void fn00903e()
+{
+	if (BS_displayedTime < 35999 && bluespheres.stage_exit_state == 0)
+		BS_displayedTime++
+/*
+	restart_threshold = 30	// Temporary during testing.
+	exit_threshold = 30		// Actual values will be loaded in on menu.
+
+	if (Input.buttonPressed(BUTTON_Y) && (bluespheres.stage_exit_state <= 2))
+	{
+		restart_timer = 1
+	}
+	else if (Input.buttonDown(BUTTON_Y) && restart_timer >= 1 && (bluespheres.stage_exit_state <= 2))
+	{
+		++restart_timer
+	}
+	else
+	{
+		restart_timer = 0
+	}
+
+	if (restart_threshold > 1)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, restart_timer * 8)
+
+	if (restart_timer == restart_threshold)
+	{
+		restart_timer = 0
+		checkpoint.number = 0
+		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+		level.restart = 1
+	}
+
+	if (Input.buttonPressed(BUTTON_BACK) && (bluespheres.stage_exit_state <= 2))
+	{
+		exit_timer = 1
+	}
+	else if (Input.buttonDown(BUTTON_BACK) && exit_timer >= 1 && (bluespheres.stage_exit_state <= 2))
+	{
+		++exit_timer
+	}
+	else
+	{
+		exit_timer = 0
+	}
+
+	if (exit_threshold > 1 && exit_timer > restart_timer)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, exit_timer * 8)
+
+	if (exit_timer == exit_threshold)
+	{
+		exit_timer = 0
+		checkpoint.number = 0
+	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects
+		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
+		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
+									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
+		return
+	}
+*/
+	base.fn00903e()
+}
+
+
+// This function is here only for script mods that want to change the sound key, e.g. to play a custom music track / sound effect
+
+function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
+{
+	if (sfxId == 0x1c && greenspheres_music && !original_mode)
+	{
+		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
+
+		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
+			soundKey = "greenspheres_speedup"
+	}
+	if (sfxId == 0x2f && ((global.game_mode) & 0x7f) == 0x58 )
+	{
+		soundKey = "mainmenu"
+	}
+	else if (sfxId == 0xf8 && greenspheres_music)
+	{
+		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
+		bool useGeneratedStage = BlueSpheres.useGeneratedStages()
+		bool isGeneratedStageInMainGame = (useGeneratedStage && bluespheres.minigame_mode == 0)
+
+		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
+		
+		if ((KnucklesMainGameRandomGreenSphereStage || bluespheres.minigame_mode == 1 || challenge_greenspheres) && green_spheres.active)
+			soundKey = "greenspheres_speedup45"
+	}
+	
+	// Return base game or lower mod music
+	return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
+}
+
+
+
+
+
+
+
+
+
+
+
+// This function is for compatibility with Mania-Styled Blue Spheres.
+function u64 ManiaSpheres.getSphereSprite(u8 sphereType, u8 form, u8 form16)
+{
+	if (sphereType == 0x0e)
+		return stringformat("GreenSphere_size_%d", form)
+	else
+		return base.ManiaSpheres.getSphereSprite(sphereType, form, form16)
+}
+
+
+
+
+// These functions are for compatibility with Blue Sphere Time Attack.
+// Taken from scripts\standalone\entryfunctions.lemon
+function void EntryFunctions.sharedInit()
+{
+	#if GAMEAPP
+		// Disabled the muffled underwater sound effect in any case
+		specialstages_knuckles.shared = specialstages_knuckles
+		Game.setUnderwaterAudioEffect(0)
+	#endif
+}
+
+function void EntryFunctions.blueSphereGame()
+{
+	green_spheres.active = 0x01		// set flag if entering the Blue Sphere game mode (Green Spheres for DAGE)
+	base.EntryFunctions.blueSphereGame()
+}
+
+function void EntryFunctions.levelSelect()
+{
+	green_spheres.active = 0x01		// set flag if entering the level select. Entering special stages via a level sees the flag set in Standalone.onLevelStart().
+	specialstages_knuckles.shared = specialstages_knuckles
+	EntryFunctions.sharedInit()
+	System.setupCallFrame("GameModeControlLoop", "@EntryPoint")
+	System.setupCallFrame("LevelSelect")
+
+	global.game_mode = 0x1c
+}
+
+
+
+
+
+
+// Remove the sound that plays when first entering Blue Sphere mode, as our custom menu already makes one.
+// Function taken from general\bluesphere\bluespheregame.lemon
+//# address-hook(0x04ceb6) end(0x04cef4)
+function void fn04ceb6()
+{
+#if !STANDALONE
+	if (u8[0x000000] != 0)	// Does this make any sense at all?
+		return
+#endif
+
+	// For standalone, wait briefly (to prevent glitches) instead of requiring A+B+C buttons
+#if STANDALONE
+	if (global.framecounter > 30)
+#else
+	if (control.pad1.state == CONTROL_ABC)
+#endif
+	{
+		control.pad1.pressed = 0
+		D0 = 0xffffffff
+		bluespheres.blue_remaining = D0.u16
+		bluespheres.rings_remaining = D0.u16
+	//	playSound(0x63)
+
+	#if !STANDALONE
+		set_status_register(0x2700)
+	#endif
+		A1 = 0x04cc62
+		D2.u16 = 0x0100
+		D6.u16 = 0x05bf
+		fn05b318()
+	#if !STANDALONE
+		set_status_register(0x2300)
+	#endif
+
+		fn04cef8()
+	}
+}
+
+
+
+// Have certain challenge mode stages call the generated stage algorithm
+// Function taken from level\special\bluespheres.lemon
+function bool BlueSpheres.useGeneratedStages()
+{
+#if STANDALONE
+	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || challenge_greenspheres) && !original_mode)
+		return true
+#endif
+	if (original_mode)
+		return false
+	
+	return (bluespheres.minigame_mode != 0)
+}
+
+
+
+// Create a second set of special stage layouts for Knuckles and set whether green or yellow spheres are used.
+// Also fixes a glitch with how colors are loaded into Sonic 3 Special Stage 4 in Original Mode.
+// Taken from scripts\level\special\bluespheres.lemon
+//# address-hook(0x0085b0) end(0x0087b8)
+function void fn0085b0()
+{
+	u16 reverseStart = 0
+
+	// Renderer.setScreenSize(480, 270)
+
+	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
+	if (challenge_greenspheres)
+		useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
+	bool useGeneratedStage = BlueSpheres.useGeneratedStages()
+	bool isGeneratedStageInMainGame = (useGeneratedStage && bluespheres.minigame_mode == 0)
+
+	u8[0xffffef7c] &= 0xfe		// clear green sphere RAM flag (least significant bit of 0xfffffe7c) and leave other bits alone
+
+	if (!useGeneratedStage)
+	{
+		// Main game stages
+		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)	// new check for Knuckles
+		{
+			Kosinski.decompress(0x2d3ad0, 0xffff0000)	// shift to ROM location of Knuckles' super emerald layouts
+			u8[0xffffef7c] |= 0x01	// set a green sphere flag for mods in the least significant bit of otherwise unused RAM byte 0xffffef7c
+		}
+		else
+			Kosinski.decompress(u32[0x1e4078], 0xffff0000)
+
+		global.next_bluespheres = BlueSpheres.getNextOpenStageIndex()
+
+		// Load level layout, either from S3 or S&K
+		A2 = useSKLayouts ? 0x008590 : 0x25e2d8
+		A2 = u32[A2 + global.next_bluespheres * 4]
+		if (!useSKLayouts)
+		{
+			A2 += 0x200000
+			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && !original_mode)	// new check for Knuckles
+				A2 += 0x0679b0	// shift to ROM location of Knuckles' chaos emerald layouts
+		}
+		
+		
+		
+
+		zeroMemory(0xfffff000, 0x100)
+		copyMemory(0xfffff100, A2, 0x400)
+		zeroMemory(0xfffff500, 0x100)
+		A2 += 0x400
+
+		u16[0xffffe426] = u16[A2]
+		bluespheres.position.x = u16[A2+2]
+		bluespheres.position.y = u16[A2+4]
+		bluespheres.rings_remaining = u16[A2+6]
+
+		// Special check for Original Mode Sonic 3 Secret Special Stage
+		if (original_mode && !useSKLayouts && global.next_bluespheres == 7)
+		{
+			System.loadExternalRawData("S3SS8_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S3SS8_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S3SS8_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S3SS8_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		// Special check for Original Mode Sonic & Knuckles Special Stage 5
+		else if (original_mode && useSKLayouts && global.next_bluespheres == 4)
+		{
+			System.loadExternalRawData("SKSS5_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("SKSS5_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("SKSS5_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("SKSS5_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		// Special check for Original Mode Sonic & Knuckles Special Stage 7
+		else if (original_mode && useSKLayouts && global.next_bluespheres == 6)
+		{
+			System.loadExternalRawData("SKSS7_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("SKSS7_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("SKSS7_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("SKSS7_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// New if statement that activates yellow spheres instead of green spheres outside of Knux's Super Emerald Stages.
+		// 0 was used for testing green spheres being on, so make the flag 1 to disable them.
+//		if (isGeneratedStageInMainGame)
+//			yellow_spheres = 1	// yellow sphere flag enabled
+//		else if (!useSKLayouts || !isMainCharacter(CHARACTER_KNUCKLES) || (isMainCharacter(CHARACTER_KNUCKLES) && !specialstages_knuckles))
+//			yellow_spheres = 1
+//		else
+//			yellow_spheres = 0
+
+		// Find which palette to use
+		A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
+		if (useSKLayouts)
+		{
+			A1 += 0x0130
+		}
+		// new if statement to switch to new Special Stage palette offset
+		if (palette_set >= 2 && !original_mode)
+			A1 += 0x2cb80e	// distance between old and new offsets
+	}
+	else
+	{
+		// Bluespheres mini-game mode
+//		yellow_spheres = 1 // new line to ensure green spheres are not overwriting yellow spheres
+
+		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)
+		if (challenge_greenspheres)	// This is the same result as below. This should be folded into the following extra-long "else if".
+		{
+			System.loadExternalRawData("GreenSphereGame", 0x840000)	// copy green sphere quarter layouts to shared memory (0x840000 is where Time Attack records go!!!)
+			Kosinski.decompress(0x840000, 0xffff0000)				// decompress them
+		}
+		else if (((!specialstages_knuckles && bluespheres.minigame_mode == 0) || (isGeneratedStageInMainGame && (!isMainCharacter(CHARACTER_KNUCKLES) || !useSKLayouts))) || !green_spheres.active)
+		{
+			Kosinski.decompress(u32[0x1e407c], 0xffff0000)	// Loads lookup data for the 0x80 quarter layouts. Total size is 0x900 bytes.
+															// In ROM, u32[0x1e407c] = 0x1fd5ca, which is the address of the blue spheres quarter layouts.
+															// The first 0x80 bytes (uncompressed) give the number of rings in each quarter layout.
+															// The next 0x80 bytes (uncompressed) are the difficulty of each quarter layout.
+															// Next, all 0x80 quarter layouts take up 0x100 bytes (uncompressed) each.
+		}
+		else
+		{
+			System.loadExternalRawData("GreenSphereGame", 0x850000)	// copy green sphere quarter layouts to shared memory (seems to be a length of 0x22b8)
+			Kosinski.decompress(0x850000, 0xffff0000)				// decompress them
+		}
+
+		zeroMemory(0xfffff000, 0x600)
+
+	#if STANDALONE
+		if (challenge_greenspheres)
+			BlueSphere.setGeneratedStage(0)	// the input value doesn't matter, as challenge_greenspheres will override it
+		else if (isGeneratedStageInMainGame)
+		{
+			// Most of the "magic numbers" you see are more or less arbitrary numbers
+			u32 stageNumber = 0x13571113 + u32(global.game_random_base) * 0x09070503 + global.next_bluespheres + global.sk_bluespheres * 8
+
+			// Limit difficulty to a maximum value of 6, as higher ones tend to get kind of unfair if you can't just try them over and over again
+			u8 difficulty = 0xff
+			while (difficulty > 6)
+			{
+				stageNumber += 0x050b030f
+				BlueSphere.setGeneratedStage(stageNumber)
+
+				difficulty = 0
+				for (u8 quarter = 0; quarter < 4; ++quarter)
+				{
+					u16 type = u8[0xffffffa2 + quarter] & 0x7f
+					if (type == 0x6d)		// Do not allow type 0x6d specifically, because it is EVIL!
+						difficulty += 0x10
+					difficulty += u8[0xffff0080 + type]
+				}
+			}
+		}
+
+		if (bluespheres.minigame_mode == 0)
+		{
+			global.next_bluespheres = BlueSpheres.getNextOpenStageIndex()
+		}
+		else
+	#endif
+		{
+			global.next_bluespheres = 0
+		}
+		bluespheres.direction = 0x40
+		bluespheres.position.x = 0x1000
+		bluespheres.position.y = 0x0300
+		
+		// Let's start half of generated stages facing the opposite direction to mix things up!
+		u16 oddSum = 0
+		if (useGeneratedStage)
+			oddSum = (u8[0xffffffa2] + u8[0xffffffa3] + u8[0xffffffa4] + u8[0xffffffa5]) & 0x01
+		reverseStart = (oddSum && !challenge_greenspheres) | (!oddSum && challenge_greenspheres)
+		if (reverseStart && useGeneratedStage)	// These opposite algorithms ensure Level 1 in both Challenge and normal Green Spheres starts forward-facing
+		{
+			bluespheres.direction += 0x80	// start a few stages facing the opposite direction to prevent counterclockwise movement from getting same-y
+//			bluespheres.position.x = 0x1100
+		}
+
+		bluespheres.rings_remaining = 0
+		u16[0xffffffac] = 0
+
+		// To build the generated stage, cycle through 4 quarters that get selected individually
+		for (u8 quarter = 0; quarter < 4; ++quarter)
+		{
+			u16 type = u8[0xffffffa2 + quarter] & 0x7f
+			bluespheres.rings_remaining += u8[0xffff0000 + type]
+			u16[0xffffffac] += u8[0xffff0080 + type]				// Affects the difficulty (stored in upper byte)
+
+			A2 = 0xffff0100 + (type << 8)
+			A1 = 0x0087ba + quarter * 8
+			D3.u16 = u16[A1]
+			D4.u16 = u16[A1+2]
+			D5.u16 = u16[A1+4]
+			D0.u16 = u16[A1+6]
+
+			A3 = 0xfffff100 + D0.u16
+			for (u8 y = 0; y < 0x10; ++y)
+			{
+				u16 offset = D4.u16
+				for (u8 x = 0; x < 0x10; ++x)
+				{
+					u8[A3 + x] = u8[A2 + offset]
+					offset += D3.u16
+				}
+				A3 += 0x20
+				D4.u16 += D5.u16
+			}
+		}
+
+		if (bluespheres.minigame_mode)			// get palette for normal Green Sphere stages
+		{
+			A1 = u32[0x0088ba + (u8[0xffffffa4] & 0x07) * 0x10]
+			if (u8[0xffffffa4] & 0x08)
+			{
+				A1 += 0x0130
+			}
+		}
+		else									// get palette for main game randomly generated special stages or Challenge stages
+		{
+			if (challenge_greenspheres)
+				A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]
+			else
+				A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
+			if (useSKLayouts)
+			{
+				A1 += 0x0130
+			}
+		}
+
+
+		// new if statement to switch to new Special Stage palette offset
+		if (palette_set >= 2 && !original_mode && green_spheres.active)
+			A1 += 0x2cb80e	// distance between old and new offsets
+	}
+
+
+
+	// Load colors
+	u32[0xffffe446] = A1
+	A2 = 0xfffffc80
+	copyMemory(A2 + 0x70, A1, 0x10)			// Ground colors
+/*	
+	if (global.next_bluespheres == 3 && !useSKLayouts && !useGeneratedStage)	// fixes a color glitch in Sonic 3 Special Stage 4 resulting from its start position
+	{																			//  || (reverseStart && useGeneratedStage)
+		u32 colorSwap = u32[0xfffffcf0]
+		u32[0xfffffcf0] = u32[0xfffffcf8]
+		u32[0xfffffcf4] = u32[0xfffffcf8]
+		u32[0xfffffcf8] = colorSwap
+		u32[0xfffffcfc] = colorSwap
+	}
+*/
+	copyMemory(A2 + 0x50, A1 + 0x20, 6)		// Emerald colors
+
+#if STANDALONE
+	if (isGeneratedStageInMainGame && !challenge_greenspheres)
+	{
+		// Overwrite the emerald colors with the correct ones
+		// This actually colors the sky as well: A2 + 0x50 = 0xfffffcd0, the sky colors
+		A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
+		if (useSKLayouts)
+		{
+			A1 += 0x0130
+		}
+		copyMemory(A2 + 0x50, A1 + 0x20, 6)
+	}
+#endif
+}
+
+
+
+// If green spheres replace yellow spheres, then don't let Tails interact with them.
+//# address-hook(0x00927a) end(0x009378)
+function void fn00927a()
+{
+	D0 = 0x0c
+	D1.u16 = bluespheres.movement_speed
+	if (D1.u16 != 0)
+	{
+		D1.s16 >>= 5
+		u16[A0 + 0x24] += D1.u16
+		D0 = objA0.animation.timer
+		if (D0.s8 < 0)
+		{
+			D0.u8 += 0x0c
+		}
+		else if (D0.u8 >= 0x0c)
+		{
+			D0.u8 -= 0x0c
+		}
+	}
+	objA0.animation.timer = D0.u8
+
+	A1 = 0x0091e8
+	if (bluespheres.jumping_flags.player2 != 0)
+	{
+		A1 = 0x009204
+		D1.u16 = bluespheres.movement_speed
+		if (D1.u16 == 0)
+		{
+			D0.u8 = level.framecounter.low
+			D0.u16 &= 0x03
+		}
+	}
+	objA0.animation.sprite = u8[A1 + D0.s16]
+
+	fn009402()
+
+	if (u8[A0 + 0x44] == 0x05 && bluespheres.stage_exit_state == 0 && s8(bluespheres.jumping_flags.player2) >= 0)	// last comparison is new: checks green sphere stage flag
+	{
+		if ((bluespheres.direction & 0x3f) == 0)
+		{
+			u32[A0 + 0x40] = 0xffe80000
+			bluespheres.jumping_flags.player2 = 0x81
+			playSound(0xb1)
+		}
+	}
+
+	fn00937c()
+	D0.u16 &= 0x70
+	if (D0.u16 != 0 && bluespheres.jumping_flags.player2 == 0)
+	{
+		u32[A0 + 0x40] = 0xfff00000
+		bluespheres.jumping_flags.player2 = 0x80
+		playSound(SFX_JUMP)
+	}
+
+	if (s8(bluespheres.jumping_flags.player2) < 0)
+	{
+		D0 = u32[A0 + 0x3c] + u32[A0 + 0x40]
+		if (D0.s32 >= 0)
+		{
+			D0 = 0
+			u32[A0 + 0x40] = 0
+			bluespheres.jumping_flags.player2 = 0
+		}
+		D1.s32 = s16(bluespheres.current_gamespeed) << 4
+		u32[A0 + 0x40] += D1
+		u32[A0 + 0x3c] = D0
+		D0 = (D0 << 16) + (D0 >> 16)
+		D0.u16 -= 0x800
+		u16[A0 + 0x36] = D0.u16
+	}
+
+	fn00953e()
+	DrawObject()
+
+	A2 = 0x2908d2
+	D6 = 0x28f95a
+	D4.u16 = 0xfd60
+	fn0091a2()
+}
+
+
+
+//# address-hook(0x009580) end(0x00972c)
+function void fn009580()
+{
+	if (global.game_mode != 0x34)
+	{
+		if (bluespheres.stage_exit_animation != 0)	// We play the exit animation on returning to main menu, although we still need to get the ground palette to fade to white
+		{
+			if (bluespheres.stage_exit_animation <= 0x60)
+			{
+				// Fast rotation of the stage after collecting the emerald
+				D1 = 8
+				bluespheres.direction += 8
+				++bluespheres.stage_exit_animation
+				return
+			}
+
+			// This seems to be dead code, at least in S3AIR, as "bluespheres.stage_exit_animation" doesn't reach a value above 0x3d
+			D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xe0
+			if (D0.u16 != 0)
+			{
+				bluespheres.stage_exit_animation = 0
+			}
+		}
+	return
+	}
+
+	// Base function starts here, with exception of not accepting control input in Original Mode until the fade-in stops
+	if (bluespheres.stage_exit_animation != 0)
+	{
+		if (bluespheres.stage_exit_animation <= 0x60)
+		{
+			// Fast rotation of the stage after collecting the emerald
+			D1 = 8
+			bluespheres.direction += 8
+			++bluespheres.stage_exit_animation
+			return
+		}
+
+		// This seems to be dead code, at least in S3AIR, as "bluespheres.stage_exit_animation" doesn't reach a value above 0x3d
+		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xe0
+		if (D0.u16 != 0)
+		{
+			bluespheres.stage_exit_animation = 0
+		}
+	}
+
+	D3.u16 = (bluespheres.direction & 0x40) ? bluespheres.position.x : bluespheres.position.y
+	D3.u16 &= 0xe0
+	D2 = 0
+	if (bluespheres.next_direction != 0 && D3.u16 == 0)
+	{
+		if ((bluespheres.jumping_flags.player1 & 0x80) == 0)
+		{
+			bluespheres.direction += bluespheres.next_direction
+			if ((bluespheres.direction & 0x3f) != 0)
+				return
+
+			bluespheres.next_direction = 0
+			if (bluespheres.movement_speed != 0)
+			{
+				u8[0xffffe430] = 1
+			}
+		}
+	}
+	else
+	{
+		if (D3.u16 != 0)
+		{
+			u8[0xffffe430] = 0
+		}
+	}
+
+	D1.u8 = control.pad1.state
+	if (original_mode && !BS_fadeFinished)
+		D1.u8 = 0	// remove control input in Original Mode if the fade in has not finished
+	D2.s16 = bluespheres.movement_speed
+	if (bluespheres.stage_exit_state == 0)
+	{
+		if (bluespheres.hitting_bumper == 0)
+		{
+			if (D1 & CONTROL_UP)
+			{
+				bluespheres.going_forward = 1
+				bluespheres.started_running = 1
+			}
+
+			// Acceleration / deceleration
+			if (bluespheres.going_forward)
+			{
+				bluespheres.movement_speed = min(bluespheres.movement_speed + 0x200, s16(bluespheres.current_gamespeed))
+			}
+			else if (bluespheres.started_running)
+			{
+				if (bluespheres.movement_speed < 0)
+				{
+					bluespheres.movement_speed = max(bluespheres.movement_speed - 0x200, -s16(bluespheres.current_gamespeed))
+				}
+				else
+				{
+					bluespheres.movement_speed = min(bluespheres.movement_speed + 0x200, s16(bluespheres.current_gamespeed))
+				}
+			}
+			D2.s16 = bluespheres.movement_speed
+		}
+
+		if (u8[0xffffe430] == 0)
+		{
+			if (D1 & CONTROL_LEFT)
+			{
+				bluespheres.next_direction = 4
+			}
+			if (D1 & CONTROL_RIGHT)
+			{
+				bluespheres.next_direction = -4
+			}
+		}
+
+		if (bluespheres.hitting_bumper != 0)
+		{
+			D0.u16 = (bluespheres.direction & 0x40) ? bluespheres.position.x : bluespheres.position.y
+			if ((D0.u16 & 0xe0) == 0)
+			{
+				D0.u16 = ((bluespheres.position.x + 0x80) >> 8) & 0x1f
+				D1.u16 = ((bluespheres.position.y + 0x80) >> 8) & 0x1f
+				D1.u16 = (D1.u16 << 5) | D0.u16
+				if (D1.u16 != u16[0xffffe44e])
+				{
+					bluespheres.hitting_bumper = 0
+					bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
+					return
+				}
+			}
+
+			if (bluespheres.movement_speed == 0)
+			{
+				bluespheres.hitting_bumper = 0
+				bluespheres.going_forward = 1
+				bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
+			}
+			else
+			{
+				D2.s16 = -D2.s16
+			}
+		}
+	}
+
+	if (bluespheres.jumping_flags.player1 == 0x81)
+	{
+		D2.s16 *= 2
+	}
+
+	D0.u8 = bluespheres.direction
+	LookupSinCos()
+	D0.s32 = s32(D0.s16) * D2.s16
+	D1.s32 = s32(D1.s16) * D2.s16
+	bluespheres.position.x -= D0 >> 16
+	bluespheres.position.y -= D1 >> 16
+
+	if ((bluespheres.jumping_flags.player1 & 0x80) == 0 && bluespheres.stage_exit_state == 0)
+	{
+		fn00972e()
+	}
+}
+
+
+
+// Handle what happens when green spheres are touched.
+// Also sets the continue and 100-ring sounds to not play in Special Stage Time Attack.
+//# address-hook(0x00972e) end(0x0098ae)
+function void fn00972e()
+{
+	A1 = 0xfffff100
+	D0.u16 = ((bluespheres.position.x + 0x80) >> 8) & 0x1f
+	D1.u16 = ((bluespheres.position.y + 0x80) >> 8) & 0x1f
+	D1.u16 <<= 5
+	D1.u8 |= D0.u8
+	A1 += D1.s16
+	D2.u8 = u8[A1]
+
+	if (D2.u8 == 1)
+	{
+		// Ran into red sphere
+		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xe0
+		if (D0.u16 == 0 && bluespheres.stage_exit_animation == 0)
+		{
+			// Game over
+			bluespheres.stage_exit_animation = 1
+			global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
+			if (global.stage_type != 0)
+			{
+				global.zone_act = level.backup.zone_act
+				checkpoint.number |= 0x80
+			}
+			playSound(0x6a)
+		}
+	}
+	else if (D2.u8 == 2)
+	{
+		// Approaching blue sphere
+		fn009dca()
+		if (_equal())
+		{
+			u8[A2] = 2
+			u32[A2 + 0x04] = A1
+		}
+		playSound(0x65)
+	}
+	else if (D2.u8 == 3)
+	{
+		// Running into bumper
+		if (u8[0xffffe42b] == 0)
+		{
+			u16[0xffffe44e] = D1.u16
+			u8[0xffffe42b] = 1
+			bluespheres.going_forward = 0
+			playSound(0xaa)
+		}
+	}
+	else if (D2.u8 == 4)
+	{
+		// Collecting ring
+		//  -> Gets collected already when approaching the position
+		fn009dca()
+		if (_equal())
+		{
+			u8[A2] = 1
+			u32[A2 + 0x04] = A1
+		}
+
+		if (bluespheres.rings_remaining != 0)
+		{
+			--bluespheres.rings_remaining
+			if (bluespheres.rings_remaining == 0)
+			{
+				playMusic(0x68)
+			}
+		}
+
+		++bluespheres.rings_collected
+		bluespheres.rings_flags |= 0x80
+
+		u8 soundId = 0x33
+		if (bluespheres.minigame_mode == 0 && !challenge_greenspheres)
+		{
+			if (bluespheres.rings_collected >= 50 && (bluespheres.rings_flags & 0x01) == 0)
+			{
+				bluespheres.rings_flags |= 0x01
+				++continues_counter
+				playMusic(0xac)
+
+			#if STANDALONE
+				if (continues_counter >= 5)
+				{
+					Game.setAchievementComplete(ACHIEVEMENT_CONTINUES)
+				}
+			#endif
+				return
+			}
+
+			if (bluespheres.rings_collected >= 100)
+			{
+				bool grantExtraLife = false
+				if ((bluespheres.rings_flags & 0x02) == 0)
+				{
+					bluespheres.rings_flags |= 0x02
+					grantExtraLife = true
+				}
+				else if (bluespheres.rings_collected >= 200 && (bluespheres.rings_flags & 0x04) == 0)
+				{
+					bluespheres.rings_flags |= 0x04
+					grantExtraLife = true
+				}
+
+				if (grantExtraLife)
+				{
+				#if STANDALONE
+					if (Game.getSetting(SETTING_INFINITE_LIVES) && !original_mode)
+					{
+						lives_counter = 3
+					}
+					else
+					{
+						lives_counter = min(lives_counter + 1, 99)
+						soundId = 0xb9
+					}
+				#else
+					++lives_counter
+					soundId = 0xb9
+				#endif
+				}
+			}
+		}
+
+		playSound(soundId)
+	}
+	else if (D2.u8 == 5)
+	{
+		// Yellow spring sphere
+		if (bluespheres.stage_exit_state == 0 && (u8[0xffffe432] & 0x80) == 0)
+		{
+			D0.u8 = bluespheres.direction & 0x3f
+			if (D0.u8 == 0)
+			{
+				u32[A0 + 0x40] = 0xffe80000
+				u8[0xffffe432] = 0x81
+				playSound(0xb1)
+			}
+		}
+	}
+	else if (D2.u8 == 0x0e)	// new section
+	{
+		// Green sphere
+		fn009dca()	// function that determines collision response
+		if (_equal())
+		{
+			u8[A2] = 3
+			u16[A2 + 0x02] = D1.u16
+			u32[A2 + 0x04] = A1
+		}
+		playSound(0x65)	// blue sphere sound
+	}
+}
+
+
+
+
+// Set a new collision response for green spheres
+//# address-hook(0x009dde) end(0x009dfa)
+function void fn009dde()
+{
+	A0 = 0xffffa400
+	D7.u16 = 0x1f
+	while (D7.s16 >= 0)
+	{
+		D0 = u8[A0]
+		if (D0.u8 == 3)		// new: if green sphere ID,
+			TouchGreenSphere()	// branch to new code
+		else if (D0.u8 != 0)
+		{
+			D0.u16 *= 4
+			A1 = u32[0x009df8 + D0.s16]
+			call A1
+		}
+
+		A0 += 8
+		--D7.s16
+	}
+}
+
+
+
+// New function to handle touching green spheres
+function void TouchGreenSphere()
+{
+	A1 = u32[A0 + 0x04]
+	if (u8[A1] == 0x04)	// did this already become a ring?
+	{
+		u32[A0] = 0
+		u32[A0+4] = 0
+		return
+	}
+	if (u8[A1] != 0x0c)
+	{
+		if (u8[A1] == 0x0a)
+		{
+			TouchGreenSphere_CheckPlayerMoved()
+			return
+		}
+		u8[A1] = 0x0c
+		u8[A0 + 0x01] = 3	// usually 9; this is a buffer before the sphere changes	// 3 seems to be the most workable value
+	}
+	else
+	{
+		u8[A0 + 0x01] -= 1
+		if (u8[A0 + 0x01] > 0)
+		{
+			TouchGreenSphere_CheckPlayerMoved()
+			return
+		}
+		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xf0 // 0xf0	// was using 0xf0 for a while, but fixing the double-touch bug may make 0xe0 okay again
+		if (D0.u16 == 0)	// test if the fractional part of character position has any of the high four bits set
+		{
+			u8[A1] = 0x0a	// change this object to a "dummy blue sphere"
+			TouchGreenSphere_CheckPlayerMoved()
+		}
+	}
+}
+
+// New function to ensure the player leaves a green sphere turning blue before the blue sphere can become red
+function void TouchGreenSphere_CheckPlayerMoved()
+{
+	D0.u16 = (bluespheres.position.x + 0x80 >> 8) & 0x1f
+	D1.u16 = (bluespheres.position.y + 0x80 >> 8) & 0x1f
+
+	D1.u16 <<= 5
+	D1.u8 |= D0.u8
+	if (u16[A0 + 0x02] != D1.u16)
+	{
+		u8[A1] = 2
+		u32[A0] = 0
+		u32[A0 + 0x04] = 0
+	}
+}
+
+
+
+// Add green spheres to the blue sphere count
+//# address-hook(0x009ea0) end(0x009eba)
+function void fn009ea0()
+{
+#if STANDALONE
+	if (CHEAT_ONE_BLUE_SPHERE)
+	{
+		bluespheres.blue_remaining = 1
+		return
+	}
+#endif
+
+	// Count the number of blue spheres and green spheres
+	A3 = 0xfffff100
+	D1 = 0
+	D0.u16 = 0x03ff
+	while (D0.s16 >= 0)
+	{
+		if (u8[A3] == 2)
+		{
+			++D1.u16
+		}
+		if (u8[A3] == 0x0e) // green sphere ID
+		{
+			++D1.u16
+		}
+		++A3
+		--D0.s16
+	}
+	bluespheres.blue_remaining = D1.u16
+}
+
+
+
+
+
+//# address-hook(0x009ebc) end(0x009f42)
+function void fn009ebc()
+{
+	// This function creates rings from a region of spheres (when all border spheres got turned red)
+
+	_setZeroFlagByValue(0)	// Default result
+
+	// A1 is the address of the currently collected blue sphere
+	A2 = 0xfffff100		// Pointer to level layout, will stay at this address this whole function
+	D5 = A1 - A2		// Position of the currently collected blue sphere (D5 = x + y * 0x20)
+	fn009f44()
+
+	D6 = 0
+	A4 = 0xffffa500
+	D1 = A5 - A4
+	if (D1 == 0)
+		return
+
+	// Convert region to rings
+	//  -> The words between A4 (inclusive) and A5 (exclusive) are the positions of encapsulated blue spheres
+	//  -> Each one of these will make its 8 neighbors turn into rings, if they are blue or red spheres
+
+	while (D1.u16 > 0)
+	{
+		D5.u16 = u16[A4]
+		A4 += 2
+
+		// Have a look at the eight neighboring positions
+		A3 = 0x00a0ca		// Values stored here as s16: -0x21, -0x20, -0x1f, -0x01, 0x01, 0x01f, 0x20, 0x21
+		for (u8 i = 0; i < 8; ++i)
+		{
+			D2.u16 = (D5.u16 + s16[A3]) & 0x03ff
+			A3 += 2
+			if (u8[A2 + D2.u16] == 0x02 || u8[A2 + D2.u16] == 0x0c)	// Blue sphere or a sphere changing from green to blue? // || (u8[A2 + D2.u16] == 0x0e && u8[A2 + D2.u16 - 3] > 0)
+			{
+				BlueSpheres.OnBlueSphereCollected()
+
+				// Make it a ring
+				u8[A2 + D2.u16] = 0x04
+
+				// Enqueue this position to the end of the list, so its neighbors get converted as well
+				//  -> This mechanism makes this essentially a flood-fill algorithm
+				u16[A5] = D2.u16
+				A5 += 2
+				D1.u16 += 2
+			}
+		}
+		D1.u16 -= 2
+	}
+
+	A4 = 0xffffa500
+	D1 = A5 - A4
+	if (D1 == 0)	// Can this condition ever be true? A5 is definitely larger than A4 here
+		return
+
+	while (D1.u16 > 0)
+	{
+		D5.u16 = u16[A4]
+		A4 += 2
+
+		// Have a look at the eight neighboring positions
+		A3 = 0x00a0ca
+		for (u8 i = 0; i < 8; ++i)
+		{
+			D2.u16 = (u16[A3] + D5.u16) & 0x03ff
+			A3 += 2
+			if (u8[A2 + D2.u16] == 0x01)	// Red sphere?
+			{
+				// Make it a ring
+				u8[A2 + D2.u16] = 0x04
+			}
+		}
+		D1.u16 -= 2
+	}
+
+	playSound(0xb9)
+	D1 = 1
+	_setZeroFlagByValue(1)
+}
+
+
+//# address-hook(0x009f44) end(0x00a0c8)
+function void fn009f44()
+{
+	A5 = 0xffffa500		// Pointer to end of output list, initially empty, will hold positions of all blue spheres turned into rings when returning
+
+	// Look at the neighboring 8 positions
+	//  -> D5 is the position of the currently collected blue sphere
+	{
+		A3 = 0x00a0ca		// Pointer to 8 hard-coded relative offsets of neighbors
+		u8 counter = 0
+		for (u8 i = 0; i < 8; ++i)
+		{
+			D1.u16 = (D5.u16 + s16[A3]) & 0x03ff
+			A3 += 2
+			if (u8[A2 + D1.u16] == 0x0a)		// Is this the blue sphere that gets collected right now?
+			{
+				// Turn into a red sphere
+				//  -> This seems to be dead code?
+				u8[A2 + D1.u16] = 0x01
+			}
+			else if (u8[A2 + D1.u16] == 0x02 || u8[A2 + D1.u16] == 0x0c)	// Is this a different blue sphere?
+			{
+				++counter
+			}
+		}
+
+		// This is the number of blue spheres around, there must be at least 1 to proceed
+		if (counter == 0)
+			return
+	}
+
+	// Count the number of non-empty positions in a straight line along negative and positive x direction
+	//  -> Note that this (somewhat unnecessarily) also counts the current position, and even counts it twice
+	{
+		u8 counter = 0
+		D1.u16 = D5.u16
+		for (u8 i = 0; i < 0x10; ++i)
+		{
+			++counter
+			--D1.u16
+			if (u8[A2 + D1.u16] == 0)
+				break
+		}
+		D1.u16 = D5.u16
+		for (u8 i = 0; i < 0x10; ++i)
+		{
+			++counter
+			++D1.u16
+			if (u8[A2 + D1.u16] == 0)
+				break
+		}
+
+		// To proceed, there must be at least 3 non-empty positions next to each other (comparing to 4 because we counted current position twice)
+		if (counter < 4)
+			return
+	}
+
+	// Same as above, but now in y direction
+	{
+		u8 counter = 0
+		D1.u16 = D5.u16
+		for (u8 i = 0; i < 0x10; ++i)
+		{
+			++counter
+			D1.u16 -= 0x20
+			if (u8[A2 + D1.u16] == 0)
+				break
+		}
+		D1.u16 = D5.u16
+		for (u8 i = 0; i < 0x10; ++i)
+		{
+			++counter
+			D1.u16 += 0x20
+			if (u8[A2 + D1.u16] == 0)
+				break
+		}
+
+		if (counter < 4)
+			return
+	}
+
+	A4 = 0xffffa600		// Buffer for temporary use as a stack, we store data about positions that get marked in the following algorithm
+	u8 stackSize = 0	// Counts number of entries on the stack (see A4)
+
+	// Current state (in addition to states saved on the stack) consists of these three variables:
+	D3 = 0x00			// Offset of a direction in A4, can have values 0x00, 0x02, ..., 0x0a
+	D4 = 0x06			// Offset of a different direction in A4, usually in right angle to D3
+	D0.u16 = D5.u16		// This is still the position of the currently collected blue sphere
+
+	while (true)
+	{
+		// Look at one of the 4 direct neighbor positions to the current position
+		//  -> At 0x00a0da, the following s16 values are stored: -0x01, -0x20, 0x01, 0x20, -0x01, -0x20
+		D1.u16 = (D0.u16 + s16[0x00a0da + D4.u16]) & 0x03ff
+		u8 neighborType = u8[A2 + D1.u16]
+
+		if (neighborType == 0x01)
+		{
+			// Neighbor is a red sphere that is not yet marked
+			bool accepted = true
+			if (stackSize >= 2)		// If we got at most one entry on the stack so far, go on without further checks
+			{
+				// I guess this way, we will ignore circles of 2 * 2 red spheres
+				u16 diff = abs(D1.u16 - u16[A4 - 0x06])
+				accepted = (diff != 0x01 && diff != 0x20)
+			}
+
+			if (accepted)
+			{
+			#if STANDALONE
+				// Check whether there's at least one blue sphere near this red sphere
+				//  -> This is done to avoid the issue that D.A. Garden describes here: https://www.youtube.com/watch?v=e1gfYFq8KkM
+				accepted = false
+				for (u8 i = 0; i < 8; ++i)
+				{
+					u16 position = (D0.u16 + s16[0x00a0ca + i * 2]) & 0x03ff
+					if (u8[A2 + position] == 0x02 || u8[A2 + position] == 0x0c)		// Accept blue spheres only
+					{
+						accepted = true
+						break
+					}
+				}
+				if (accepted)
+			#endif
+				{
+					// Temporarily mark this position; the mark tells us whether the position is on the stack already
+					u8[A2 + D0.u16] |= 0x80
+
+					// Add an entry to the stack
+					u8[A4]    = D3.u8
+					u8[A4+1]  = D4.u8
+					u16[A4+2] = D0.u16
+					A4 += 4
+					++stackSize
+
+					// Continue at the neighbor, and create a new state to check:
+					//  - Starting at the neighbor's position
+					//  - Checking all direction except where we just came from
+					D0.u16 = D1.u16
+					D3.u16 = (D4.u16 - 2) & 0x06	// Limit direction = direction change relative to current direction by 90°
+					D4.u16 = D3.u16 + 4				// Current direction = opposite of new limit direction
+					continue
+				}
+			}
+		}
+		else if (neighborType == 0x8a)
+		{
+			// Reached the currently collected blue sphere again
+			push(A4)
+			push(D4)
+			push(D3)
+			push(D0)
+
+			// Go through the entire stack (except for the entry at the very bottom, which represents the start position)
+			D4.u16 = D5.u16 - D0.u16
+			A4 = 0xffffa600 + 0x06
+			D2.u16 = u16[A4] - D5.u16
+			D3.u16 = D5.u16
+
+			// Find first direction change in the stack
+			while (true)
+			{
+				D0.u16 = u16[A4] - D3.u16
+				A4 += 4
+				if (D0.u16 != D2.u16)
+					break
+
+				D3.u16 += D0.u16
+			}
+
+			if (D4.s16 == D0.s16 || D4.s16 == D2.s16)
+			{
+				// Step into the start position is either:
+				//  - the first turn's direction (e.g. red spheres built something like the edge of an L-shape, and the start position is the inner corner)
+				//  - the start direction (red spheres made a loop that enters the start position straight from behind)
+				//     -> In these cases, the position in direction of first turn is expected to be a blue sphere
+				D0.u16 = D5.u16 + D0.s16
+			}
+			else
+			{
+				// Step into the start position is neither of the above
+				//  -> The position in diagonal direction (namely start direction + first turn) is expected to be a blue sphere
+				D0.u16 = D5.u16 + D0.s16 + D2.s16
+			}
+
+			// Now check if it's really a blue sphere
+			if (u8[A2 + D0.u16] == 0x02 || u8[A2 + D0.u16] == 0x0c)
+			{
+			#if STANDALONE
+				// Perform an additional sanity check, just to be sure - and to solve an original game bug from S&K
+				//  -> This is just a workaround, better fix whatever is wrong with the actual algorithm
+				//  -> I suppose the real bug is that D0.u16 is not necessarily the right position to check, it can be on the wrong side;
+				//      considering whether the red sphere ring is CW or CCW and using that info to decide on where to put D0.u16 could do the trick
+				//  -> In fact, with the following fix that bug is really rare, it only can (but still does) happen when traversing a very large region
+				//      of blue spheres in just the right way
+				bool accepted = true
+				if (Game.getSetting(SETTING_FIX_GLITCHES))
+				{
+					for (u8 i = 0; i < 8; ++i)
+					{
+						u16 position = (D0.u16 + s16[0x00a0ca + i * 2]) & 0x03ff
+						if (u8[A2 + position] == 0)
+						{
+							accepted = false
+							break
+						}
+					}
+				}
+				if (accepted)
+			#endif
+				{
+					BlueSpheres.OnBlueSphereCollected()
+
+					// Make it a ring
+					u8[A2 + D0.u16] = 0x04
+
+					// Store position in the output list
+					u16[A5] = D0.u16
+					A5 += 2
+				}
+			}
+
+			D0 = pop()
+			D3 = pop()
+			D4 = pop()
+			A4 = pop()
+		}
+
+		// Reached a position where it's no use to on, because there's neither a (not yet visited) red sphere nor the currently collected blue sphere; proceed by either:
+		//  - Rotating current direction by 90° and check this one; i.e. do not enter the next while loop at all
+		//  - If all directions got checked for the current position, take the next entry from the stack and continue with it (possibly multiple times if all directions of the top-of-stack already got checked, too)
+		//  - In case the stack is empty, we're done with all checks
+		D4.u16 -= 2
+		while (D4.s16 < D3.s16)
+		{
+			// We're done if stack is empty
+			if (stackSize == 0)
+				return
+
+			// Pop topmost entry from the stack
+			A4 -= 4
+			--stackSize
+			D3     = u8[A4]
+			D4     = u8[A4+1]
+			D0.u16 = u16[A4+2]
+
+			u8[A2 + D0.u16] &= 0x7f		// Remove mark again
+			D4.u16 -= 2
+		}
+	}
+}
+
+
+
+
+
+
+
+// Make green spheres translucent when touched, as AIR does for blue spheres.
+// Add 46 to sphere position for new screen size
+// We also manage the HUD display for time attack here, as the function is called every frame in special stages.
+// Taken from \scripts\general\bluesphere\bluespheres.lemon
+function void BlueSpheres.renderCustomSpheres()
+{
+	if (original_mode && bluespheres.lifted_height == 0)	// The original code is bugged to not draw lifted spheres without custom rendering, unfortunately.
+	{
+		// This is a copy of the portion of BlueSpheres.RenderSpheres() that is called only if NOT the GAMEAPP.
+
+		// Usual case is A0 = 0x009af4, except after all blue spheres got collected
+		A0 = (bluespheres.lifted_height == 0) ? 0x009af4 : 0x009b18
+
+		D5.u16 = (u16[A5 + 0x02] + D1.u16) & u16[A5 + 0x0a]
+		D0.u16 = u16[0xffffe420] * 4
+		A1 = u32[0xffff0000 + D0.u16]		// Pointer to lookup table for sphere positions and distances
+		D6.u16 = u16(u8[0xfffff62c]) * 8
+		D7 = 0x4f - u8[0xfffff62c]
+		A6 = 0xfffff800 + D6.u16
+		D2 = 0x0f
+
+		bool directionFlag = ((bluespheres.direction & 0x40) == 0)
+		while (D2.s16 >= 0)
+		{
+			D0 = (directionFlag ? bluespheres.position.x : bluespheres.position.y) >> 8
+			D4.u16 = (u16[A5] + D0.u16) & u16[A5 + 0x06]
+			D3 = 0x0e
+
+			while (D3.s16 >= 0)
+			{
+				// Distance values are around [0x18, 0x57]
+				u16 distance = u16[A1]
+
+				if (directionFlag)
+					D0.u16 = (D5.u16 << 5) | D4.u8
+				else
+					D0.u16 = (D4.u16 << 5) | D5.u8
+
+				// Sphere types:
+				//  - 0x00 = none / empty
+				//  - 0x01 = red sphere
+				//  - 0x02 = blue sphere
+				//  - 0x03 = bumper sphere
+				//  - 0x04 = ring
+				//  - 0x05 = yellow sphere
+				//  - 0x06 = ring (collected, part 1)
+				//  - 0x07 = ring (collected, part 2)
+				//  - 0x08 = ring (collected, part 3)
+				//  - 0x09 = ring (collected, part 4)
+				//  - 0x0a = blue sphere (during collection)
+				//  - 0x0b = Chaos Emerald
+				u8 sphereType = u8[0xfffff100 + D0.s16]
+
+				D1.u16 = distance & 0x7c
+				if (sphereType != 0 && D1.u16 != 0)
+				{
+					u16 size = (D1.u16 >> 2) - 6
+					if (size < 0x10)		// Filter out what's too small, i.e. completely behind the horizon
+					{
+						D0.u16 = u8(sphereType) * 8
+						A3 = u32[0xffffe480 + D0.s16]
+						D6.u16 = u16[0xffffe480 + D0.s16 + 4]
+						if (distance >= 0x54)	// Draw as non-priority sprite if partly behind the horizon
+						{
+							D6.u16 &= 0x7fff
+						}
+
+						D0.u16 = u16[0xffffe480 + D0.s16 + 6]
+						D1 = (D0.u16 & 0x8000) ? 0 : size
+						D1.u16 += (D0.u16 & 0x7fff)
+						A3 += u16[A3 + D1.s16 * 2]
+
+						// A3 = Pointer to sprite data
+						D1.u16 = u16[A3] - 1
+						A3 += 2
+						if (D1.s16 >= 0)
+						{
+							call A0		// One of "BlueSpheres.RenderSingleSphere*"
+							if (D7.s16 < 0)
+								return
+						}
+					}
+				}
+
+				A1 += 6
+				D4.u16 = (D4.u16 + u16[A5 + 0x04]) & u16[A5 + 0x06]
+				--D3.s16
+			}
+
+			D5.u16 = (D5.u16 + u16[A5 + 0x08]) & u16[A5 + 0x0a]
+			--D2.s16
+		}
+
+	return
+	}
+
+	// From here on is AIR's custom sphere rendering.
+
+	if (bluespheres.minigame_mode == 1)
+		greenSphere.discordRPC()
+/*
+	// Add timer HUD here.
+	u16 px_hud = getScreenWidth() / 2 - 14	// subtract 49 instead for non-small digits without TIME/BEST
+	u16 py_hud = 14	// place the BEST time at getScreenHeight() - 14 - 16. Show either Normal or Perfect best time based on a menu option. Use 12 for non-small digits.
+	u16 renderQueue_hud = 0xe800
+
+	u16 minutes = BS_displayedTime / 3600
+	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+	u16 centiseconds = (frames * 99 + 30) / 59
+
+	// TIME and timer
+	Renderer.drawCustomSprite("BlueSphere_smalltext_time", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+	// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+	py_hud = getScreenHeight() - 14 - 16
+
+	Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	// End of timer HUD code.
+*/
+
+	Game.writeBlueSpheresData()
+
+	u32 ptr = 0x800000
+	u16 count = u16[ptr]
+	ptr += 2
+	for (u16 i = 0; i < count; ++i)
+	{
+		// Read sphere properties
+		u16 px = u16[ptr] + getScreenExtend() - 40
+		u16 py = u16[ptr+2] // + 46	// 46 is for new screen size
+		u16 size = u16[ptr+4]
+
+		u8 sphereType = u8[ptr+6]
+		ptr += 7
+
+		if (sphereType == 0x05)	// used for yellow sphere renderhook
+			size -= 0x20
+
+		// Size of sphere (0 = largest at 32x32, 0x0f = smallest at 8x8, the last ones include 3x 2 duplicates, which makes only 13 different sizes in total, with 2 pixels size difference between them)
+		u8 form
+		if (size < 0x1740)
+			form = 0x0f
+		else if (size < 0x18a0)
+			form = 0x0e
+		else if (size < 0x1a10)
+			form = 0x0d
+		else if (size < 0x1b90)
+			form = 0x0c
+		else if (size < 0x1d30)
+			form = 0x0b
+		else if (size < 0x1f00)
+			form = 0x0a
+		else if (size < 0x2100)
+			form = 0x09
+		else if (size < 0x2330)
+			form = 0x08
+		else if (size < 0x25a0)
+			form = 0x07
+		else if (size < 0x2960)
+			form = 0x06
+		else if (size < 0x2c80)
+			form = 0x05
+		else if (size < 0x3180)
+			form = 0x04
+		else if (size < 0x35c0)
+			form = 0x03
+		else if (size < 0x3c80)
+			form = 0x02
+		else if (size < 0x4500)
+			form = 0x01
+		else
+			form = 0x00
+
+		py -= (16 - form) * 2/3 + 1
+
+		// Lift spheres when stage was won
+		py -= bluespheres.lifted_height
+
+		if (sphereType == 0x05)	// used for yellow sphere renderhook
+			size += 0x20
+
+		bool behindHorizon = (size < 0x1b00)
+
+		u16 renderQueue = (behindHorizon ? 0x2000 : 0x9000) + size / 0x100
+		u8 alpha = ((sphereType == 0x0a || sphereType == 0x0c) && !original_mode) ? 0xa0 : 0xff	// 0x0c check is new for green spheres
+		u32 fog = clamp(s32(0x100000) / size - 0x68, 0, 0x80) * 0x010101
+
+		D0.u16 = u8(sphereType) * 8
+
+		if (sphereType == 0x0e)
+			D0.u16 -= 0x10
+
+		A3 = u32[0xffffe480 + D0.s16]
+		D6.u16 = u16[0xffffe480 + D0.s16 + 4]
+
+		D0.u16 = u16[0xffffe480 + D0.s16 + 6]
+		D1 = (D0.u16 & 0x8000) ? 0 : (form * 2)
+		D1.u16 += D0.u16 * 2
+		A3 += u16[A3 + D1.s16]
+
+		D1.u16 = u16[A3] - 1	// This is always 0, except for Super Emeralds
+		A3 += 2
+
+		while (D1.s16 >= 0)
+		{
+			if (sphereType == 0x05 && !original_mode)
+			{
+				Renderer.drawCustomSprite(stringformat("YellowSphere%x", min(form, 0x0c)), px, py, 0x00, 0, renderQueue)
+				u8[0xffffef7c] = form
+			}
+			else if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+			{
+				Renderer.drawVdpSpriteWithTint(px + u16[A3+4], py + s8[A3], u8[A3+1], u16[A3+2] + D6.u16, renderQueue, (0xffffff - fog) + (u32(alpha) << 24), fog)
+			}
+			else
+			{
+				Renderer.drawVdpSprite(px + u16[A3+4], py + s8[A3], u8[A3+1], u16[A3+2] + D6.u16, renderQueue)
+			}
+			A3 += 6
+			--D1.s16
+		}
+	}
+}
+
+
+
+
+function void BlueSpheres.renderCustomGround()
+{
+	if (original_mode)
+		return
+
+	BlueSpheres.replacePlaneRendering()
+
+	// Render glow effect for background
+	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	{
+		Renderer.drawSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000)
+	}
+
+	// Render our own version of the ground
+	//  -> This only works in combination with a palette set in V-Int, see "fn000c50"
+	string spriteKey1
+	string spriteKey2
+	{
+		Game.setupBlueSpheresGroundSprites()
+
+		u16 px = bluespheres.position.x
+		u16 py = bluespheres.position.y
+		u8 rotation = bluespheres.direction
+		bool isRotating = (rotation & 0x3f) != 0
+		if (isRotating || (rotation & 0x40) == 0)
+			px = (px + 0x80) & 0xff00
+		if (isRotating || (rotation & 0x40) != 0)
+			py = (py + 0x80) & 0xff00
+
+		if (isRotating)
+		{
+			u8 rotationStep = (rotation & 0x3f) / 4
+			spriteKey1 = stringformat("bluespheres_ground_alpha_rotation_0x%02x", rotationStep)
+			spriteKey2 = stringformat("bluespheres_ground_opaque_rotation_0x%02x", rotationStep)
+		}
+		else
+		{
+			u8 movementStep = 0
+			if ((rotation & 0x80) == 0)
+			{
+				movementStep = (0xff - ((rotation & 0x40) ? px : py) & 0xff) / 8
+			}
+			else
+			{
+				movementStep = (((rotation & 0x40) ? px : py) & 0xff) / 8
+			}
+			spriteKey1 = stringformat("bluespheres_ground_alpha_movement_0x%02x", movementStep)
+			spriteKey2 = stringformat("bluespheres_ground_opaque_movement_0x%02x", movementStep)
+		}
+	}
+	Renderer.drawSprite(spriteKey1, 0, 0, 0x100, 0, 0x3000)
+	Renderer.drawSprite(spriteKey2, 0, 0, 0x100, SPRITE_FLAG_FULLY_OPAQUE, 0x3000)		// Draw fully opaque (here meant only as a rendering optimization, primarily for software renderer)
+
+	// Render glow effect on top
+	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	{
+		Renderer.drawSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30, 0x00, 0, 0x3100)
+	}
+}
+
+
+
+
+function void BlueSpheres.renderCustomCharacterShadows()
+{
+	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !original_mode)
+	{
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 142 + getScreenExtend(), 148, 0x00, 0, 0x3100)
+	}
+	else
+	{	// renderQueue value here changed from 0x3100 to 0x4001 since S3&K ground rendering is Plane 1 Prio at 0x4000
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 142 + getScreenExtend(), 148, 0x00, 0x40, 0x4001)
+	}
+}
+
+
+
+
+// In marathon mode, skip blue spheres results screen
+// Function taken from level\special\bs_results.lemon
+//# address-hook(0x02e3da) end(0x02e40e)
+function void fn02e3da()
+{
+	if (time_attack)	// Skip level results and award bonuses directly. The continue is actually awarded the moment 50 rings are collected, not in results.
+	{
+		global.game_mode = 0x0c
+		results.ring_bonus = u32(bluespheres.rings_collected) * 10
+		results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
+		addScore(results.time_bonus + results.ring_bonus)
+		results.time_bonus = 0
+		results.ring_bonus = 0
+		CheckSaveGameSlotAfterBlueSpheres()
+		return
+	}
+
+	A1 = A0 + 0x4a
+	A2 = 0x02e834
+	D1 = 0x12
+	fn02e802()
+
+	results.ring_bonus = u32(bluespheres.rings_collected) * 10
+	results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
+
+	// Wait for six seconds
+	objA0.countdown_value = 360
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Shorten the wait time a bit
+		objA0.countdown_value -= 20
+	}
+#endif
+	objA0.base_state += 2
+}
+
+
+
+// In marathon mode, ignore HPZ special stage entrance scene(s) and jump directly to first unfinished S&K stage
+// Function taken from objects\basics\giantring.lemon
+//# address-hook(0x0618ac) end(0x0618ca)
+function void fn0618ac()	// Here, it's already been determined that we're going to an S&K stage
+{
+	if (time_attack && global.chaos_emeralds)	// marathon mode and you have at least one chaos emerald
+	{
+	//	 if (!global.super_emeralds)		// if no super emeralds
+	//		global.next_bluespheres = 0		// start from first stage
+		for (s8 i = 6; i >= 0; i--)			// step through all collected emeralds and turn any chaos emeralds into inactive super emeralds
+		{
+			if (u8[0xffffffb2 + i] == 1)	// 0xffffffb2 is the first emerald, with others occupying consecutive bytes.
+				u8[0xffffffb2 + i] = 2		// A value of 0 is uncollected, 1 is collected chaos, 2 is inactive super, and 3 is collected super.
+			if (u8[0xffffffb2 + i] == 2)	// Now, if any super emerald is uncollected,
+				global.next_bluespheres = i	// make it the next special stage to do. Since we step through backwards, it becomes the *earliest* unfinished stage.
+		}
+		global.traded_emeralds = 0xff		// mark emeralds as traded from chaos to super
+
+		global.sk_bluespheres = 1
+		global.stage_type = 1
+		global.game_mode = 0x34
+		global.in_extra_stage = 1
+		fn0618d0()
+	}
+	else	// normal play as well as if you try to enter in marathon mode with no chaos emeralds (in AIR, can only happen at MHZ1 start)
+	{
+		global.stage_type = 2
+		global.zone_act = 0x1701
+		global.zone_act.apparent = 0x1701
+		checkpoint.number = 0
+		level.restart.u8 = 1
+		global.in_extra_stage = 1
+		fn0618d0()
+	}
+}
+
+
+
+
+
+
+// In Original Mode, ignore the setting to not advance the special stage on failure and enforce Super/Hyper Tails classic behavior.
+// Function taken from level\special\bluespheres.lemon
+//# address-hook(0x02df64) end(0x02e2be)
+function void fn02df64()
+{
+	playMusic(MUSIC_CTRL_FADEOUT)
+
+	u8[0xffffef6e] = global.next_bluespheres
+
+	bool goToNextStage = true
+#if STANDALONE
+	if (Game.getSetting(SETTING_BS_REPEAT_ON_FAIL) && !original_mode)
+	{
+		// Do not go to next stage if failed this stage
+		goToNextStage = (bluespheres.stage_exit_state != 0)
+	}
+#endif
+	if (goToNextStage)
+	{
+		// Go the next special stage
+		D0.u8 = global.next_bluespheres
+		D1.u8 = u8[0xffffef70]
+		if (D1.u8 != 0)
+		{
+			D0.u8 = D1.u8 & 0x7f
+		}
+		else
+		{
+			++D0.u8
+			if (D0.u8 >= 7)
+				D0 = 0
+		}
+		global.next_bluespheres = D0.u8
+	}
+
+#if !STANDALONE
+	set_status_register(0x2700)
+#endif
+
+	VDP.Config.setActiveDisplay(false)
+	fn0011ca()
+
+	VDP.Config.enableHInt(false)
+	VDP.Config.setNameTableBasePlaneA(0xc000)
+	VDP.Config.setNameTableBasePlaneB(0xe000)
+	VDP.Config.setVerticalScrolling(false, 0xff)
+	VDP.Config.setRenderingModeConfiguration(false)
+	VDP.Config.setPlayfieldSizeInPixels(512, 256)
+
+	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb000, 0x2000)
+
+	u16[0xfffffb00] = 0
+	u32[0xfffffbfc] = 0xfffffb00
+
+	sram.block_interrupts.u16 = 0
+	CheckSaveGameSlotAfterBlueSpheres()
+
+	competition_mode.active = 0
+	u16[0xfffff100] = 0
+	gfx.plane_update_routine = 0
+	hud.dirty.timer = 0
+	global.fade_timer = 0
+	bluespheres.backup.zone_act = global.zone_act
+
+	addPatternLoadingCue(0x02e310)
+
+	Kosinski.addToDMAQueue(0x0d6a62, 0xb700)		// Common results graphics shared
+
+	// Choose text: "Super" or "Hyper"
+	if (isMainCharacter(CHARACTER_SONIC))
+	{
+		A1 = (global.super_emeralds < 7) ? 0x15b374 : 0x15b678
+	}
+	else if (isMainCharacter(CHARACTER_TAILS))
+	{
+	#if STANDALONE
+		if (Game.getSetting(SETTING_HYPER_TAILS) && !original_mode)
+		{
+			A1 = (global.super_emeralds < 7) ? 0x15b374 : 0x15b678
+		}
+		else
+	#endif
+		{
+			A1 = 0x15b374
+		}
+	}
+	else
+	{
+		A1 = (global.super_emeralds < 7) ? 0x15b4f6 : 0x15b7ea
+	}
+	Kosinski.addToDMAQueue(A1, 0xa1e0)		// "Super" or "Hyper" nameplate appropriate for the character and form
+
+	if (isMainCharacter(CHARACTER_SONIC))
+	{
+		A1 = 0x15b95c
+	}
+	else if (isMainCharacter(CHARACTER_TAILS))
+	{
+		A1 = (global.region_code & 0x80) ? 0x39ab6a : 0x39aa18
+	}
+	else
+	{
+		A1 = 0x0d67f0
+	}
+	Kosinski.addToDMAQueue(A1, 0x9e20)		// Character nameplate
+
+	Kosinski.addToDMAQueue(0x15babe, 0xa460)		// Special Stage results graphics
+
+	vint.update_subroutine = 0x02df62
+
+	while (true)
+	{
+		global.frame_state = 0x1e
+		Kosinski.ProcessDecompressionQueue()
+
+		waitForNextFrame()
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		if (kosinski.waiting_modules == 0 && u32[0xfffff680] == 0)
+			break
+	}
+
+#if STANDALONE
+	Renderer.resetSprites()
+#endif
+
+	ResetScoreDisplay()
+	hud.dirty.score = 0x01
+
+	copyMemory(0xfffffc00, 0x02e318, 0x80)
+	copyMemory(0xfffffc80, 0x02e318, 0x80)
+
+#if STANDALONE
+	globalComponentTintColorR = 0xff
+	globalComponentTintColorG = 0xff
+	globalComponentTintColorB = 0xff
+	globalComponentAddedColorR = 0
+	globalComponentAddedColorG = 0
+	globalComponentAddedColorB = 0
+#endif
+
+	fn02e2c0()
+
+	if (global.lock_on_state == 0 && global.sk_bluespheres)
+	{
+		copyMemory(0xfffffc00, 0x02e318, 0x20)
+		copyMemory(0xfffffc20, 0x02e318, 0x20)
+		copyMemory(0xfffffc80, 0x02e318, 0x20)
+		copyMemory(0xfffffca0, 0x02e318, 0x20)
+	#if STANDALONE
+		// This is needed to avoid the red Super Emerald's colors from being corrupted
+		u16[0xfffffc24] = 0x0eee
+		u16[0xfffffc26] = 0x0eee
+		u16[0xfffffc28] = 0x0eee
+	#endif
+
+		fn02e2c0()
+
+		fillMemory_u32(0xfffffc40, 0x40, 0x0ccc0ccc)
+		copyMemory(0xfffffcc0, 0x0a9d5c, 0x40)
+		copyMemory(0xffff8000, 0x0a7924, 0x1000)	// load S3&K HPZ layout
+		if (original_mode)
+			u8[0xffff821d] = 0x7c		// match the original ROM hack's layout just to the left of the leftmost super emerald
+
+		// Load Hidden Palace level blocks and chunks from ROM
+	//	Kosinski.decompress(0x1bfbea, 0xffff0000)	// After this (Primary chunk loading), A1 points to where uncompressed data ends
+		System.loadExternalRawData(stringformat("hpz_chunks_p", global.act + 1), 0x850000)		// copy Primary chunks to shared memory
+		Kosinski.decompress(0x850000, 0xffff0000)												// decompress them to their proper RAM
+
+	//	Kosinski.decompress(0x1c71fe, A1)			// Secondary chunk loading
+		System.loadExternalRawData(stringformat("hpz2_chunks_s", global.act + 1), 0x850000)		// copy Primary chunks to shared memory
+		Kosinski.decompress(0x850000, A1)														// decompress them to their proper RAM
+		
+		Kosinski.decompress(0x1becf8, 0xffff9000)	// Same here (Primary block loading)
+		Kosinski.decompress(0x1c30fc, A1)			// Secondary block loading
+
+		// Load Hidden Palace level tiles from ROM
+		D4.u16 = u16[0x1bee58]
+		Kosinski.addToDMAQueue(0x1bee58, 0x0000)
+		Kosinski.addToDMAQueue(0x1c3f2c, D4.u16)
+
+		requestLoadingPatterns(0x48)	// HPZ object sprites
+
+		global.zone_act = 0x1701
+		camera.position.x.u16 = 0x15a0 - getScreenExtend()
+		camera.position.y.u16 = 0x0240
+		dynobjects.routine = 0
+
+		DynamicObjectsLoading()
+		camera.position.x.u16 = u16[0x02e398 + u8[0xffffef6e] * 2] - getScreenExtend()
+
+	#if !STANDALONE
+		set_status_register(0x2700)
+	#endif
+		InitLevelDisplay()
+	#if !STANDALONE
+		set_status_register(0x2300)
+	#endif
+
+		if (bluespheres.blue_remaining == 0)
+		{
+			D0.u8 = u8[0xffffef6e] | 0x80
+			u8[0xfffffac0] = D0.u8
+			u8[0xfffffac1] = 0xff
+		}
+	}
+
+	fn01aa6e()
+	u16[0xffffef68] = 0x98
+	u8[0xffffef6c] = 0xff
+	u32[0xffffb940] = 0x02e3b8
+
+	VDP.Config.setActiveDisplay(true)
+
+	while (true)
+	{
+		global.frame_state = 0x08
+		Kosinski.ProcessDecompressionQueue()
+
+		waitForNextFrame()
+
+		++level.framecounter
+		D1.u16 = emerald.animframe + 1
+		if (D1.u16 >= 3)
+			D1 = 0
+		emerald.animframe = D1.u16
+
+		UpdateGameObjects()
+		if (global.lock_on_state == 0 && global.sk_bluespheres)
+		{
+			UpdateLevelDisplay()
+		}
+
+		RenderSprites()
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		if (global.fade_timer > 0)
+		{
+			--global.fade_timer
+			FadeInFromWhite()
+		}
+
+		if (global.game_mode != 0x48)
+			break
+	}
+
+	global.zone_act = bluespheres.backup.zone_act
+}
+
+
+
+// In Original Mode, enforce classic Super/Hyper Tails behavior.
+// Function taken from level\special\bs_results.lemon
+//# address-hook(0x02e512) end(0x02e5be)
+function void fn02e512()
+{
+	if (global.lock_on_state == 0 && global.sk_bluespheres && bluespheres.blue_remaining == 0)
+	{
+		objA0.countdown_value = 0x3c
+		objA0.base_state = 0x0e
+		fn02e616()
+		return
+	}
+
+	if (objA0.countdown_value != 0)
+	{
+		--objA0.countdown_value
+		return
+	}
+
+	if (bluespheres.blue_remaining == 0 && global.chaos_emeralds >= 7)
+	{
+		if (isMainCharacter(CHARACTER_TAILS) && (!Game.getSetting(SETTING_HYPER_TAILS) || original_mode))
+		{
+			// Tails
+			if (bluespheres.backup.zone != 4 && bluespheres.backup.zone < 7)
+			{
+				global.game_mode = 0x0c
+				return
+			}
+			objA0.base_state = 0x0a
+		}
+		else
+		{
+			// Sonic, Knuckles (or Tails if using Hyper Tails setting)
+			if (global.lock_on_state == 0)
+			{
+				if (bluespheres.backup.zone == 4 || bluespheres.backup.zone >= 7)
+				{
+					objA0.base_state = 0x0a
+				}
+			}
+		}
+
+		A1 = 0xffffbd96
+		for (u8 i = 0; i < 5; ++i)
+		{
+			objA1.update_address = 0x02ec1e
+			A1 += 0x4a
+		}
+
+		u16[0xffffbe58] = 4
+		u16[0xffffbeec] = 4
+		u16[A0 + 0x30] = 5
+		objA0.base_state += 2
+	}
+	else
+	{
+		global.game_mode = 0x0c
+	}
+}
+
+
+
+
+
+
+
+
+// Don't allow speeding up special stage result point tallies in Original Mode
+// Function taken from level\special\bs_results.lemon
+//# address-hook(0x02e410) end(0x02e4d2)
+function void fn02e410()
+{
+	if (objA0.countdown_value != 0)
+	{
+		// Still waiting
+		--objA0.countdown_value
+		if (objA0.countdown_value == 0 && global.lock_on_state == 0 && global.sk_bluespheres && bluespheres.blue_remaining == 0)
+		{
+			palette_fade.range = 0x003f
+			global.fade_timer = 0x16
+
+			A1 = 0xfffffc00
+			u16[A1 + 0x42] = 0x0eee
+			u16[A1 + 0x44] = 0x0eee
+			u16[A1 + 0x4c] = 0x0eee
+			u16[A1 + 0x62] = 0x0eee
+			u16[A1 + 0x66] = 0x0eee
+			u16[A1 + 0x6e] = 0x0eee
+			u16[A1 + 0x70] = 0x0eee
+			u16[A1 + 0x7c] = 0x0eee
+			u16[A1 + 0x7e] = 0x0eee
+		}
+
+	#if STANDALONE
+		if (objA0.countdown_value == 269)
+	#else
+		if (objA0.countdown_value == 289)
+	#endif
+		{
+			playMusic(MUSIC_LEVELCLEAR)
+		}
+	}
+	else
+	{
+		// Counting bonusses towards score
+		u16 delta = 10
+	#if STANDALONE
+		if (Game.getSetting(SETTING_LEVELRESULT_SCORE) && !original_mode)
+		{
+			// Count faster over time
+			if (results.total_bonus >= 3000)
+				delta = 30
+			else if (results.total_bonus >= 1000)
+				delta = 20
+
+			// Allow for manually (more or less) skipping the counter
+			if (control.pad1.state & (CONTROL_ABC | CONTROL_START))
+			{
+				delta = 200
+			}
+		}
+	#endif
+
+		D0 = 0
+		if (results.time_bonus != 0)
+		{
+			u16 diff = min(delta, results.time_bonus)
+			D0.u16 += diff
+			results.time_bonus -= diff
+		}
+		if (results.ring_bonus != 0)
+		{
+			u16 diff = min(delta, results.ring_bonus)
+			D0.u16 += diff
+			results.ring_bonus -= diff
+		}
+
+	#if STANDALONE
+		// Needed for SETTING_LEVELRESULT_SCORE
+		results.total_bonus += D0.u16
+	#endif
+		if (D0.u16 != 0)
+		{
+			// Still counting
+			AddScore()
+			if ((level.framecounter & 0x03) == 0)
+			{
+				playSound(SFX_CLICK)
+			}
+		}
+		else
+		{
+			playSound(0xb0)
+			objA0.countdown_value = 120
+			objA0.base_state += 2
+			fn02e4d6()
+		}
+	}
+}

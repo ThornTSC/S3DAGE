@@ -1,0 +1,3222 @@
+// Special stage palettes are loaded in main.lemon due to the palette loading code
+// being within the same function as code used to create alternate layouts.
+// [fn0085b0(), near end of function]
+
+
+
+
+
+// Insert a call to draw a background in special stages.
+//# address-hook(0x009580) end(0x00972c)
+/*
+function void fn009580()
+{
+
+	if (u8[0xffffe433] != 0)
+	{
+		if (u8[0xffffe433] < 0x61)
+		{
+			D1 = 8
+			bluespheres.direction += 8
+			++u8[0xffffe433]
+			return
+		}
+
+		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xe0
+		if (D0.u16 != 0)
+		{
+			u8[0xffffe433] = 0
+		}
+	}
+
+	D3.u16 = (bluespheres.direction & 0x40) ? bluespheres.position.x : bluespheres.position.y
+	D3.u16 &= 0xe0
+	D2 = 0
+	if (bluespheres.next_direction != 0 && D3.u16 == 0)
+	{
+		if ((u8[0xffffe432] & 0x80) == 0)
+		{
+			bluespheres.direction += bluespheres.next_direction
+			if ((bluespheres.direction & 0x3f) != 0)
+				return
+
+			bluespheres.next_direction = 0
+			if (bluespheres.movement_speed != 0)
+			{
+				u8[0xffffe430] = 1
+			}
+		}
+	}
+	else
+	{
+		if (D3.u16 != 0)
+		{
+			u8[0xffffe430] = 0
+		}
+	}
+
+	D1.u8 = control.pad1.state
+	D2.s16 = bluespheres.movement_speed
+	if (u8[0xffffe44c] == 0)
+	{
+		if (u8[0xffffe42b] == 0)
+		{
+			if (D1 & CONTROL_UP)
+			{
+				bluespheres.going_forward = 1
+				bluespheres.started_running = 1
+			}
+
+			// Acceleration / deceleration
+			if (bluespheres.going_forward)
+			{
+				bluespheres.movement_speed = min(bluespheres.movement_speed + 0x200, s16(bluespheres.current_gamespeed))
+			}
+			else if (bluespheres.started_running)
+			{
+				if (bluespheres.movement_speed < 0)
+				{
+					bluespheres.movement_speed = max(bluespheres.movement_speed - 0x200, -s16(bluespheres.current_gamespeed))
+				}
+				else
+				{
+					bluespheres.movement_speed = min(bluespheres.movement_speed + 0x200, s16(bluespheres.current_gamespeed))
+				}
+			}
+			D2.s16 = bluespheres.movement_speed
+		}
+
+		if (u8[0xffffe430] == 0)
+		{
+			if (D1 & CONTROL_LEFT)
+			{
+				bluespheres.next_direction = 4
+			}
+			if (D1 & CONTROL_RIGHT)
+			{
+				bluespheres.next_direction = -4
+			}
+		}
+
+		if (u8[0xffffe42b] != 0)
+		{
+			D0.u16 = (bluespheres.direction & 0x40) ? bluespheres.position.x : bluespheres.position.y
+			if ((D0.u16 & 0xe0) == 0)
+			{
+				D0.u16 = ((bluespheres.position.x + 0x80) >> 8) & 0x1f
+				D1.u16 = ((bluespheres.position.y + 0x80) >> 8) & 0x1f
+				D1.u16 = (D1.u16 << 5) | D0.u16
+				if (D1.u16 != u16[0xffffe44e])
+				{
+					u8[0xffffe42b] = 0
+					bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
+					return
+				}
+			}
+
+			if (bluespheres.movement_speed == 0)
+			{
+				u8[0xffffe42b] = 0
+				bluespheres.going_forward = 1
+				bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
+			}
+			else
+			{
+				D2.s16 = -D2.s16
+			}
+		}
+	}
+
+	if (u8[0xffffe432] == 0x81)
+	{
+		D2.s16 *= 2
+	}
+
+	D0.u8 = bluespheres.direction
+	LookupSinCos()
+	D0.s32 = s32(D0.s16) * D2.s16
+	D1.s32 = s32(D1.s16) * D2.s16
+	bluespheres.position.x -= D0 >> 16
+	bluespheres.position.y -= D1 >> 16
+
+	if ((u8[0xffffe432] & 0x80) == 0 && u8[0xffffe44c] == 0)
+	{
+		fn00972e()
+	}
+
+	if (palette_set >= 2 && !original_mode)
+		Renderer.drawCustomSprite("SS_BG_test", getScreenExtend() - 40, (bluespheres.position.y / 32 & 0xFF), 0x00, 0, 0x1100)
+}
+*/
+
+
+
+
+
+
+
+// Correct underwater palette for Sonic and Tails to match new DAGE water palettes
+// Taken from \scripts\maingame\character\character_palette.lemon
+function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVariant)
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.loadCharacterPalette(character, targetAddress, paletteVariant)
+		return
+	}
+
+	// Palette variants:
+	//  - 0 = Normal character palette
+	//  - 1 = Underwater character palette for AIZ
+	//  - 2 = Underwater character palette for ICZ
+	//  - 3 = Underwater character palette for HCZ
+	//  - 4 = Underwater character palette for CNZ and LBZ
+
+	// Only Knuckles makes use of all four underwater palette variants,
+	// the other characters have only two actually different underwater palettes:
+	//     - AIZ and ICZ are identical for S/T
+	//     - HCZ, CNZ, LBZ are identical for S/T
+	// In all cases, CNZ and LBZ share the same underwater character palettes.
+	// Also, there's never differences between the two acts of a zone.
+
+	// Load original character palette from ROM
+	u32 sourceAddress
+	if (paletteVariant == 0)
+	{
+		// Normal palette variant
+		sourceAddress = (character != CHARACTER_KNUCKLES) ? 0x0a8a3c : 0x0a8afc
+		copyMemory(targetAddress, sourceAddress, 0x20)
+	}
+	else
+	{
+		// Underwater palette variant
+		if (paletteVariant == 1 || paletteVariant == 3) // originally only paletteVariant <= 2
+		{
+			sourceAddress = 0x0a8c9c // AIZ1 underwater palette
+		}
+		else
+		{
+			sourceAddress = 0x0a935c // LBZ2 underwater palette	// originally 0x0a8e5c, HCZ1 water palette
+		}
+		copyMemory(targetAddress, sourceAddress, 0x20)
+
+		if (character == CHARACTER_KNUCKLES)
+		{
+			// Copying in Knuckles' colors into underwater palette;
+			// these are in fact mostly different (in palette variant order):
+			//  - AIZ:		0x0a6a, 0x0a2a, 0x0624
+			//  - ICZ:		0x0a4c, 0x0a28, 0x0428
+			//  - HCZ:		0x0e2a, 0x0c0a, 0x0a06
+			//  - CNZ, LBZ: 0x064c, 0x0628, 0x0624
+			if (paletteVariant == 1)
+			{
+				A1 = 0x007a4a
+			}
+			else if (paletteVariant == 2)
+			{
+				A1 = 0x007a4a + 30
+			}
+			else if (paletteVariant == 3)
+			{
+				A1 = 0x007a4a + 6
+			}
+			else
+			{
+				A1 = 0x007a4a + 18
+			}
+			copyMemory(targetAddress + 0x04, A1, 6)
+		}
+	}
+
+	// Allow for loading modded palettes
+	if (EXTENDED_CHARACTER_PALETTES)
+	{
+		u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(character), paletteVariant, 0x800000, 0x20)
+		for (u8 i = 0; i < numColors; ++i)
+		{
+			u32 rgba = u32[0x800000 + i * 4]
+			u16[targetAddress + i * 2] = packColorExt(rgba)
+		}
+
+		if (numColors < 0x20)
+		{
+			// First 16 colors got written in any case
+			numColors = max(numColors, 0x10)
+			zeroMemory(targetAddress + numColors * 2, 0x40 - numColors * 2)
+		}
+	}
+}
+
+
+
+
+
+// Alter the palette loading function to support a second palette set for Knuckles when necessary.
+// Taken from maingame/maingame.lemon
+function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
+{
+	// This function copies palette data from a table in ROM to RAM, index references one of multiple palette descriptors in ROM.
+	// Some noticable values for index:
+	//  - index = 0x03		-> Main palette line 0 (includes characters, Sonic/Tails version)
+	//  - index = 0x04		-> Level Select
+	//  - index = 0x05		-> Main palette line 0 (includes characters, Knuckles version)
+	//  - index = 0x0a		-> AIZ 1 Sonic intro palette (palette lines 1..3)
+	//  - index = 0x0b		-> AIZ 2 level palette
+	//  - index = 0x0c		-> HCZ 1 level palette
+	//  - index = 0x0d		-> HCZ 2 level palette
+	//  - index = 0x0e		-> MGZ 1 level palette
+	//  - index = 0x0f		-> MGZ 2 level palette
+	//  - index = 0x10		-> CNZ 1 level palette
+	//  - index = 0x11		-> CNZ 2 level palette
+	//  - index = 0x12		-> FBZ 1 level palette
+	//  - index = 0x13		-> FBZ 2 level palette
+	//  - index = 0x14		-> ICZ 1 level palette
+	//  - index = 0x15		-> ICZ 2 level palette
+	//  - index = 0x16		-> LBZ 1 level palette
+	//  - index = 0x17		-> LBZ 2 level palette
+	//  - index = 0x18		-> MHZ 1 level palette
+	//  - index = 0x19		-> MHZ 2 level palette
+	//  - index = 0x1a		-> SOZ 1 level palette
+	//  - index = 0x1b		-> SOZ 2 level palette
+	//  - index = 0x1c		-> LRZ 1 level palette
+	//  - index = 0x1d		-> LRZ 2 level palette
+	//  - index = 0x1e		-> SSZ   level palette
+	//  - index = 0x1f		-> Unknown (maybe Knuckles' SSZ act level palette?)
+	//  - index = 0x20		-> DEZ 1 level palette
+	//  - index = 0x21		-> DEZ 2 level palette
+	//  - index = 0x22		-> DDZ   level palette
+	//  - index = 0x25		-> Unknown
+	//  - index = 0x26		-> Competition mode ALZ
+	//  - index = 0x28		-> Competition mode BPZ
+	//  - index = 0x2a		-> AIZ 1 level palette (palette lines 1..3)
+	//  - index = 0x2b		-> AIZ 1 underwater palette (all palette lines)
+	//  - index = 0x2c		-> AIZ 2 underwater palette
+	//  - index = 0x2d		-> LBZ 1 underwater palette -- not used in the game
+	//  - index = 0x2e		-> LBZ 2 underwater palette
+	//  - index = 0x30		-> Used in AIZ // this is the more vibrant fire palette used before the AIZ2 boss
+	//  - index = 0x31		-> HCZ 1 underwater palette
+	//  - index = 0x32		-> HCZ 2 underwater palette
+	//  - index = 0x33		-> GM bonus stage palette (palette lines 1..3)
+	//  - index = 0x34		-> Competition mode DPZ
+	//  - index = 0x35		-> Competition mode CGZ
+	//  - index = 0x36		-> Competition mode EMZ
+	//  - index = 0x37		-> GS bonus stage palette (palette lines 1..3)
+	//  - index = 0x38		-> SM bonus stage palette (palette lines 1..3)
+	//  - index = 0x39		-> ICZ 2 underwater palette (all palette lines)
+	//  - index = 0x3a		-> CNZ 2 underwater palette
+	//  - index = 0x3f		-> HPZ level palette (palette lines 1..3)
+	//  - index = 0x40		-> Unknown
+
+#if STANDALONE
+	if (EXTENDED_CHARACTER_PALETTES)
+	{
+		// We'd usually load Sonic's palette for all characters into palette line 0,
+		// to avoid weird color changes for Knuckles like red CNZ balloons.
+		// There are exceptions, though...
+		if (global.zone_act == 0x1701 && isMainCharacter(CHARACTER_KNUCKLES))
+		{
+			// Fix for leftmost Super Emerald: Use Knuckles' palette in the emerald cave
+			if (index == 0x03)
+			{
+				index = 0x05
+			}
+		}
+		else
+		{
+			// Use Sonic's palette instead of Knuckles's palette outside of Original Mode
+			if (index == 0x05 && !original_mode)
+			{
+				index = 0x03
+			}
+		}
+	}
+#endif
+
+	A1 = 0x0a872c + index * 8
+	u32 source = u32[A1]					// Something between 0x0a893c and 0x0a9d9c
+	u32 dest   = 0xffff0000 + u16[A1+4]		// Either 0xfffffc00 or 0xfffffc20
+	u16 bytes  = (u16[A1+6] + 1) * 4		// Can be 0x20, 0x60, 0x80 (referring to 16, 48 or all 64 palette entries)
+
+	dest += ramAddress - 0xfc00				// With this, dest can be changed to non-faded palette and/or secondary palette
+	copyMemory(dest, source, bytes)
+
+	u32 destRaw = dest		// This is newly introduced to preserve dest for rawdata loading later.
+
+#if STANDALONE
+	if (!Game.isEnduserBuild())
+	{
+		//debugLogColors(stringformat("PaletteDataTable #0x%02x", index), source, bytes / 2)
+
+		if (!ROMDataAnalyser.hasEntry("PaletteDataTable", A1))
+		{
+			ROMDataAnalyser.beginEntry("PaletteDataTable", A1)
+			ROMDataAnalyser.addKeyValue("index",  stringformat("0x%02x", index))
+			ROMDataAnalyser.addKeyValue("source", stringformat("0x%06x", source))
+			ROMDataAnalyser.addKeyValue("dest",   stringformat("0x%04x", u16[A1+4]))
+			ROMDataAnalyser.addKeyValue("bytes",  stringformat("0x%04x", bytes))
+			ROMDataAnalyser.endEntry()
+		}
+	}
+
+	if (EXTENDED_CHARACTER_PALETTES)
+	{
+		u8 paletteVariant = 0xff
+		if (index == 0x03 || index == 0x05)
+		{
+			paletteVariant = 0
+		}
+		else if (index == 0x2b || index == 0x2c)
+		{
+			paletteVariant = 1
+		}
+		else if (index == 0x39)
+		{
+			paletteVariant = 2
+		}
+		else if (index == 0x31 || index == 0x32)
+		{
+			paletteVariant = 3
+		}
+		else if (index == 0x2d  || index == 0x2e || index == 0x3a)
+		{
+			paletteVariant = 4
+		}
+
+		if (paletteVariant != 0xff)
+		{
+			if (paletteVariant == 0)
+			{
+				// Load all characters' normal (non-underwater) palettes, either to fading or non-fading palette buffer
+				dest = (ramAddress == 0xfc00) ? 0x802000 : 0x802180
+				loadCharacterPalette(CHARACTER_SONIC,    dest + 0x00, 0)
+				loadCharacterPalette(CHARACTER_TAILS,    dest + 0x40, 0)
+				loadCharacterPalette(CHARACTER_KNUCKLES, dest + 0x80, 0)
+			}
+			else
+			{
+				// Load all characters' underwater palettes, either to fading or non-fading palette buffer
+				dest = (ramAddress == 0xf080) ? 0x802300 : 0x802480
+				loadCharacterPalette(CHARACTER_SONIC,    dest + 0x00, paletteVariant)
+				loadCharacterPalette(CHARACTER_TAILS,    dest + 0x40, paletteVariant)
+				loadCharacterPalette(CHARACTER_KNUCKLES, dest + 0x80, paletteVariant)
+				// New for Original Mode: copy the appropriate Knuckles underwater palette into the player palette as well
+				if (original_mode && isMainCharacter(CHARACTER_KNUCKLES))
+				{
+					u32 dest2 = (ramAddress == 0xf080) ? 0xfffff080 : 0xfffff000
+					copyMemory(dest2, dest + 0x80, 0x20)
+				}
+			}
+		}
+	}
+#endif
+
+	// New code for loading palettes from rawdata
+	if ((original_mode || palette_set == 1) && index == 0x1a)	// Original ROM Hack has ICZ2 and SOZ1 as exceptions to S3&K palettes (former actually partially hardcoded later, so only SOZ1 here)
+		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
+	
+	else if (palette_set < 2 || original_mode)	// load from ROM normally if S3&K palettes or Original ROM Hack palettes other than the two above
+		return
+
+	else if (index == 0x2a || (index >= 0x0b && index <= 0x22)) // AIZ1 is 0x2a, and most main acts fall in sequence from 0x0b to 0x22
+		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
+	else if (index == 0x2b) // AIZ1 water
+		System.loadExternalRawData("PaletteAIZ1Water", destRaw)
+	else if (index == 0x2c) // AIZ2 water
+		System.loadExternalRawData("PaletteAIZ2Water", destRaw)
+	else if (index == 0x31) // HCZ1 water
+		System.loadExternalRawData("PaletteHCZ1Water", destRaw)
+	else if (index == 0x32) // HCZ2 water
+		System.loadExternalRawData("PaletteHCZ2Water", destRaw)
+	else if (index == 0x3a) // CNZ2 water
+		System.loadExternalRawData("PaletteCNZ2Water", destRaw)
+	else if (index == 0x39) // ICZ2 water
+		System.loadExternalRawData("PaletteICZ2Water", destRaw)
+	else if (index == 0x2e) // LBZ2 water
+		System.loadExternalRawData("PaletteLBZ2Water", destRaw)
+	else if (index == 0x0a)	// AIZ1 Sonic intro
+		System.loadExternalRawData("PaletteAIZIntro", destRaw)
+	else if (index == 0x30) // AIZ2 boss approach
+		System.loadExternalRawData("PaletteAIZ2Boss", destRaw)
+	else if (source == 0x0a9cdc) // LRZ2 boss act before Death Egg ignites it. Unsure of index value.
+		System.loadExternalRawData("PaletteLRZ2Boss", destRaw)
+	else if (source == 0x0a9d3c) // HPZ normal act. Unsure of index value. Disassembly splits level palette into two files.
+	{
+		System.loadExternalRawData("PaletteHPZ1A", destRaw)
+		System.loadExternalRawData("PaletteHPZ1B", destRaw + 0x20)
+	}
+	else if (index == 0x40) // DEZ2 final boss
+		System.loadExternalRawData("PaletteFinalBoss", destRaw)
+
+//	if (isMainCharacter(CHARACTER_KNUCKLES))
+//	{
+		// Load Knux SSZ2 palette. This should eventually get redesigned to use a file and the above function.
+		if (index == 0x1f)
+		{
+			u32[0xfffffcc0] = 0x00000EEE
+			u32[0xfffffcc4] = 0x0AEE068E
+			u32[0xfffffcc8] = 0x066A0646
+			u32[0xfffffccc] = 0x06220424
+		
+			u32[0xfffffcd0] = 0x0EE004C2
+			u32[0xfffffcd4] = 0x04820460
+			u32[0xfffffcd8] = 0x0408040C
+			u32[0xfffffcdc] = 0x004206A0
+		
+			u32[0xfffffce0] = 0x00000CEE
+			u32[0xfffffce4] = 0x0CCE0ACE
+			u32[0xfffffce8] = 0x08CE0AAE
+			u32[0xfffffcec] = 0x0CAE0AAE
+		
+			u32[0xfffffcf0] = 0x0EEE0CEE
+			u32[0xfffffcf4] = 0x0CCC06C6
+			u32[0xfffffcf8] = 0x068402A6
+			u32[0xfffffcfc] = 0x02640220
+
+			// copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+			// copyMemory(0xfffff0c0, 0xfffff040, 0x40)	// set current water palette to match target // definitely not needed here
+		}
+//	}
+}
+
+
+
+
+
+
+
+
+// Fix screen fades in data select when moving from HPZ Emerald Cave --> DAGE Menu --> Data Select
+// Function taken from general\screenfades.lemon
+//# address-hook(0x003b80) end(0x003b94)
+function void SetPaletteFadedOut()
+{
+	if ((global.zone_act == 0x0d01 || global.zone_act == 0x1701) && (global.game_mode & 0x7f) == 0x0c)
+	{
+	#if STANDALONE
+		// Avoid brief glitches while fading in from white into the HPZ emerald cave
+		if (global.zone_act == 0x1701)
+		{
+			palette_fade.range = 0x003f
+		}
+	#endif
+
+		SetPaletteToWhite()
+	}
+	else
+	{
+		SetPaletteToBlack()
+	}
+}
+
+
+
+
+
+
+
+
+// Disables the palette cycles during the AIZ1 intro on the ocean.
+// Also sets redesigned palettes to look elsewhere for waterfall palette cycles.
+//# address-hook(0x0021be) end(0x00227a)
+function void LevelPaletteUpdate.AIZ1()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.LevelPaletteUpdate.AIZ1()
+		return
+	}
+
+//	if (camera.position.x.u16 < 0x0d80 && global.characters <= 1)	// If *Sonic* hasn't scrolled the ocean out of sight,
+//		return														// don't enact palette cycles. 0x0d80 was chosen
+																	// to time the waterfall palette cycle to match
+																	// its initial state when AIZ1 formally starts.
+
+	D0.u8 = u8[0xfffff72e]
+	if (D0.u8 == 0)
+	{
+		--u16[0xfffff634]
+		if (s16[0xfffff634] < 0)
+		{
+			u16[0xfffff634] = 7
+			D0.u16 = u16[0xfffff632]
+			u16[0xfffff632] += 8
+			D0.u16 &= 0x18
+
+			u32[0xfffffc56] = u32[0x2d446c + D0.u16]
+			u32[0xfffffc5a] = u32[0x2d446c + D0.u16 + 4]
+
+			if (u8[0xfffff650] == 0)
+			{
+				D0.u16 = u16[0xfffff652]
+				u16[0xfffff652] = (u16[0xfffff652] >= 42) ? 0 : (u16[0xfffff652] + 6)	// No modulo here, does not verify
+				u32[0xfffffc78] = u32[0x2d456c + D0.s16]
+				u16[0xfffffc7c] = u16[0x2d456c + D0.s16 + 4]
+			}
+		}
+	}
+	else
+	{
+		--u16[0xfffff634]
+		if (s16[0xfffff634] < 0)
+		{
+			u16[0xfffff634] = 9
+			D0.u16 = u16[0xfffff632]
+			u16[0xfffff632] = (u16[0xfffff632] + 8) % 80
+			u32[0xfffffc64] = u32[0x002b16 + D0.s16]
+			u32[0xfffffc68] = u32[0x002b16 + D0.s16 + 4]
+
+			D0.u16 = u16[0xfffff652]
+			u16[0xfffff652] = (u16[0xfffff652] + 6) % 60
+			u32[0xfffffc7a] = u32[0x002b96 + D0.s16]
+			u16[0xfffffc7e] = u16[0x002b96 + D0.s16 + 4]
+		}
+	}
+}
+
+
+
+
+
+
+// AIZ has two palettes set in fn01c46e(), currently in main.lemon due to also affecting level camera boundaries.
+// The function sets the Knuckles altered sky palette and sets the palette as Sonic gets hit by Knuckles.
+// The function comes from level\01_aiz\level_aiz.lemon
+
+
+
+
+
+// Alter AIZ1's AfterBoss_Cleanup function for palette choices. Despite the name, this runs the instant the intro ends in AIZ1.
+// Function taken from bosses\bosses_shared.lemon
+//# address-hook(0x083c7c) end(0x083c8e)
+function void fn083c7c()
+{
+	// Loads palette colors 0x10 .. 0x3f
+	copyMemory(0xfffffc20, 0x0a8b7c, 0x60)
+	if (palette_set >= 2 && !original_mode)
+		System.loadExternalRawData("Palette0000", 0xfffffc20)
+}
+
+
+
+
+
+// This function alters the AIZ1 background for Knuckles, including the sky palette.
+// The function comes from level\01_aiz\level_aiz.lemon
+//# address-hook(0x04fa4c) end(0x04fad6)
+function void fn04fa4c()
+{
+	if (palette_set < 2 || original_mode)	// do not apply the palette patch with redesigned palettes
+	{
+		u32[0xfffffcf0] = u32[0x04fae4]
+		u32[0xfffffcf4] = u32[0x04fae8]
+	}
+
+	fillMemory_u16(0xffff4c70, 0x10, 0x004b)
+	fillMemory_u16(0xffff4cf0, 0x10, 0x004b)
+	fillMemory_u16(0xffff4d70, 0x10, 0x004b)
+	fillMemory_u16(0xffff52f0, 0x10, 0x004b)
+	fillMemory_u16(0xffff4980, 0x10, 0x004b)
+	fillMemory_u16(0xffff4d80, 0x10, 0x004b)
+	fillMemory_u16(0xffff3420, 0x10, 0x004b)
+
+	u16[0xffff3430] = 0x0402
+	fillMemory_u16(0xffff3432, 0x0c, 0x004b)
+
+	u16[0xffff343e] = 0x0002
+	fillMemory_u16(0xffff3fa0, 0x10, 0x004b)
+
+	u16[0xffff3fb4] = 0x000c
+	u16[0xffff3fb6] = 0x0406
+	u16[0xffff3fb8] = 0x004b
+	u16[0xffff3fba] = 0x004b
+
+	u16[0xffff3fbe] = 0x040a
+	u16[0xffff5820] = 0x040b
+	fillMemory_u16(0xffff5822, 0x0c, 0x004b)
+
+	u16[0xffff5834] = 0x000c
+	u16[0xffff5836] = 0x0406
+	fillMemory_u16(0xffff5838, 0x04, 0x004b)
+}
+
+
+
+
+
+// fn01c550() in main.lemon sets AIZ1 colors of some foreground flowers and the sky
+// near the palm tree at the miniboss cutscene. It also handles Knuckles' camera boundaries.
+// Also of note is fn0634ca() in main.lemon, which has a line that takes the AIZ1 object
+// palette directly from a ROM address. Alter this if needed.
+
+
+
+
+// Changes AIZ1 cutscene fire wall palette to include one more increment of blue
+// Functions taken from level\01_aiz\level_aiz.lemon
+//# address-hook(0x04fbea) end(0x04fc42)
+function void fn04fbea()
+{
+	if (palette_set < 2 || original_mode)
+	{
+		base.fn04fbea()
+		return
+	}
+	// Check if fire wall got triggered
+	if (u16[0xffffeec6] == 0)
+	{
+		UpdateBackgroundScrolling.AIZ1()
+		fn04fbf6()
+	}
+	else
+	{
+		u16[0xffffeec6] = 0
+
+		// Set fire wall palette
+		A1 = 0xfffffc62
+		u32[A1]   = 0x024e026e
+		u32[A1+4] = 0x02ae02ce
+		u32[A1+8] = 0x04ee0cee
+
+		camera.background.y = 0x0200000
+		camera.background.y.old = 0x0010
+		level.display_routine = 0x0068
+		gfx.plane_update_routine = 0x04		// Enter vertical scroll mode
+	#if STANDALONE
+		verticalScrollOffsetBias = 0
+	#endif
+		level.scrolling_routine += 4
+
+		fn04fc46()
+	}
+}
+
+//# address-hook(0x04fd62)
+function void fn04fd62()
+{
+	if (palette_set < 2 || original_mode)
+	{
+		base.fn04fd62()
+		return
+	}
+	if (kosinski.waiting_modules == 0)
+	{
+		// Go to second part of act 1
+		//  -> Technically, this is part of act 2 already
+		global.zone_act = 0x0001
+		camera.update_routine = 0
+		dynobjects.routine = 0
+		rings.update_routine = 0
+		level.boss_encounter = 0
+		global.in_extra_stage = 0
+		fn04f8f8()
+
+		push(A3)
+		push(A2)
+		push(A0)
+		push(D7)
+
+		fn01c362()
+		fn0076a6()
+		Level.InitializeWater()
+		Level.loadPaletteData(0x0b)
+
+		D7 = pop()
+		A0 = pop()
+		A2 = pop()
+		A3 = pop()
+
+		AIZ2.LevelInitSpecialty()
+
+		// Set fire wall palette
+		A1 = 0xfffffc62
+		u32[A1]   = 0x024e026e
+		u32[A1+4] = 0x02ae02ce
+		u32[A1+8] = 0x04ee0cee
+
+		D0.u16 = 0x2f00
+		D1.u16 = 0x80
+		u16[0xffffb010] -= D0.u16
+		u16[0xffffb014] -= D1.u16
+		u16[0xffffb05a] -= D0.u16
+		u16[0xffffb05e] -= D1.u16
+		fn04f3a0()
+
+		camera.position.x.u16 -= D0.u16
+		camera.position.y.u16 -= D1.u16
+		camera.foreground.x.u16 -= D0.u16
+		camera.foreground.y.u16 -= D1.u16
+		move_area.left = 0x10
+		move_area.right = 0x10 + getScreenExtend() * 2
+		u32[0xffffee18] = 0x0260
+		move_area.bottom.target = 0x0260
+		u16[0xffffeeb4] = camera.foreground.x.u16
+		u16[0xffffeeb6] = camera.foreground.x.u16
+		Level.GetCameraPosition()
+
+		u16[0xffffeec8] = (D0.u16 + getScreenHeight()) & level.height.tilemask
+		u16[0xffffeeca] = 0x0f
+		level.scrolling_routine = 0
+
+	#if STANDALONE
+		// There's a glitch here that is both hard to reproduce and tricky to solve.
+		// You have to jump at the start of the fire wall moving and land right when the chunks gets exchanged.
+		// There are a few frames between the change of chunk contents and the loading of the chunk layouts (the latter happens right above).
+		// If you're falling down fast enough, you can basically glitch through the tempororily messed up collision.
+		// As a workaround, just check if the main character glitched through, and reposition him.
+		if (u16[0xffffb014] > 0x02fc)
+		{
+			u16[0xffffb014] = 0x02fc
+			u16[0xffffb01a] = 0
+		}
+	#endif
+	}
+
+	fn23b17a()
+	WriteScrollOffsets()
+}
+
+
+
+
+
+// Correctly set the palette post-fire wall in AIZ1
+// Function taken from level\01_aiz\level_aiz.lemon
+//# address-hook(0x05011e) end(0x0501fc)
+function void fn05011e()
+{
+	if (palette_set < 2 || original_mode)	// new check to make sure the original palette is used when desired
+	{
+		base.fn05011e()
+		return
+	}
+
+	fn23b152()
+	fn23b17a()
+	if (level.display_routine == 0)
+	{
+		D0.u16 = camera.background.y.u16 & 0x7f
+		if (D0.u16 < 0x20 || D0.u16 >= 0x30)
+		{
+			WriteScrollOffsets()
+			return
+		}
+
+		D0.u16 += 0x180
+		camera.background.y.u16 = D0.u16
+		camera.background.y.old = (D0.u16 & level.height.tilemask) - 0x10
+		u8[0xffffeed2] = 0xff
+	}
+
+	A6 = 0xffffee90		// Address of camera.background.y
+	A5 = 0xffffee96		// Address of camera.background.y.old
+	D1.u16 = 0x200
+	D6 = 0x20
+	LoadTileContentInDirY()
+
+	if (camera.background.y.u16 >= 0x0310)
+	{
+		// This gets called when fire wall just disappeared
+		push(A3)
+		push(A2)
+		push(A0)
+		push(D7)
+
+		requestLoadingPatterns(0x0c)
+		fn02f77c()
+
+		D7 = pop()
+		A0 = pop()
+		A2 = pop()
+		A3 = pop()
+
+		// Set post-fire wall palette. Perhaps load from rawdata directly to avoid having to
+		// return to this for every future change?
+		A1 = 0xfffffc62
+		u32[A1]   = 0x0aee028a
+		u32[A1+4] = 0x028e024e
+		u32[A1+8] = 0x022e020c
+
+		D0.u16 = 0x6000
+		move_area.right = D0.u16
+		fn23b626()
+		fn04f2f6()
+
+		u16[0xffffeec8] = (D0.u16 + getScreenHeight()) & level.height.tilemask
+		u16[0xffffeeca] = 0x0f
+		gfx.plane_update_routine = 0x0c		// Leave vertical scroll mode again
+		level.scrolling_routine += 4
+		fn050204()
+	}
+	else
+	{
+		fn23b680()
+		A1 = 0xffffe002
+		D0.s16 = -s16(camera.background.x.u16)
+		for (u8 i = 0; i < getScreenHeight(); ++i)
+		{
+			u16[A1] = D0.u16
+			A1 += 4
+		}
+	}
+}
+
+
+
+
+
+// Adjust water palette cycles in AIZ2 for redesigned palettes.
+//# address-hook(0x00227c) end(0x002332)
+function void LevelPaletteUpdate.AIZ2()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.LevelPaletteUpdate.AIZ2()
+		return
+	}
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 5
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] += 8
+		D0.u16 &= 0x18
+
+		u32[0xfffffc78] = u32[0x2d459c + D0.s16]
+		u32[0xfffffc7c] = u32[0x2d459c + D0.s16 + 4]
+		D0.u16 = u16[0xfffff652]
+		u16[0xfffff652] = (u16[0xfffff652] + 6) % 48
+
+		A0 = (camera.position.x.u16 >= 0x3800) ? 0x2d45ec : 0x2d45bc
+
+		u16[0xfffffc48] = u16[A0 + D0.s16]
+		u16[0xfffffc50] = u16[A0 + D0.s16 + 2]
+		u16[0xfffffc76] = u16[A0 + D0.s16 + 4]
+		if (camera.position.x.u16 < 0x1c0)
+			u16[0xfffffc5c] = u16[A0 + D0.s16 + 4]
+		else
+			u16[0xfffffc5c] = 0x0a0e
+	}
+
+	--u16[0xfffff658]
+	if (s16[0xfffff658] < 0)
+	{
+		u16[0xfffff658] = 1
+		D0.u16 = u16[0xfffff654]
+		u16[0xfffff654] = (u16[0xfffff654] + 2) % 52
+
+		A0 = (camera.position.x.u16 >= 0x3800) ? 0x002cda : 0x002ca6
+		u16[0xfffffc62] = u16[A0 + D0.s16]
+	}
+}
+
+
+
+
+
+// This function changes AIZ2's appearance as the boss is approached.
+// Until a more general palette loading issue is fixed, we make a correction here.
+// Function taken from level\01_aiz\level_aiz.lemon
+//# address-hook(0x01c6f6) end(0x01c744)
+function void fn01c6f6()
+{
+#if STANDALONE
+	if (global.zone_act.apparent == 0x0001 && move_area.left < 0x1040)
+	{
+		move_area.left = 0x1040
+	}
+
+	// Don't load the palette and patterns too early, in case the player gets stuck in the tube
+	if (camera.position.x.u16 >= 0x3ec0)
+#else
+	if (camera.position.x.u16 >= 0x3c00)
+#endif
+	{
+		if (kosinski.waiting_modules == 0)
+		{
+			Kosinski.addToDecompressionQueue(0x3b1372, 0xffff9ab8)
+			Kosinski.addToDMAQueue(0x3b48c6, 0x3f80)
+			Kosinski.addToDMAQueue(0x399cc4, 0xa000)
+
+			Level.loadPaletteData(0x30)
+			// temporary until general palette loading issue is fixed
+			if (palette_set >= 2 && !original_mode)
+				System.loadExternalRawData("PaletteAIZ2Boss", 0xfffffc20)
+
+			u8[0xffffeec6] = 0xff
+			camera.update_routine += 2
+		}
+	}
+}
+
+
+
+
+
+
+// Add a murky tint to HCZ water when the option is enabled and repair a missing ceiling shadow in the HCZ1 boss area.
+// Functions taken from level\02_hcz\level_hcz.lemon
+//# address-hook(0x050b8a) end(0x050b8a)
+function void UpdateLevelTiles.HCZ1()
+{
+	LoadTileContentDefault()
+
+	HCZ1_CustomSprites()
+}
+
+//# address-hook(0x050e90) end(0x050e98)
+function void UpdateLevelTiles.HCZ2()
+{
+	camera.foreground.y.u16 += camera.screenshake.offset
+	LoadTileContentDefault()
+
+	HCZ2_CustomSprites()
+}
+
+
+
+
+
+
+
+// Adjust waterfall palette cycles in HCZ1 for redesigned palettes
+//# address-hook(0x002334) end(0x002380)
+function void LevelPaletteUpdate.HCZ1()
+{
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = (u8[0xfffff650] != 0) ? 0 : 7
+		A0 = (palette_set >= 2 && !original_mode) ? 0x2d4684 : 0x002d0e	// new switch here to point to redesigned or original palette cycle
+		D0.u16 = u16[0xfffff632]
+
+		u16[0xfffff632] += 8
+		if (u16[0xfffff632] >= 0x20)
+			u16[0xfffff632] = 0
+
+		u32[0xfffffc46] = u32[A0 + D0.s16]
+		u32[0xfffffc4a] = u32[A0 + D0.s16 + 4]
+		u32[0xfffff0c6] = u32[A0 + D0.s16]
+		u32[0xfffff0ca] = u32[A0 + D0.s16 + 4]
+	}
+}
+
+
+// Add a scrolling plane of rain in front of the MGZ1 background but behind the foreground
+//# address-hook(0x051150) end(0x051154)
+function void UpdateLevelScrolling.MGZ1()
+{
+	MGZ1_CustomSprites()
+
+	call 0x051158 + level.scrolling_routine
+}
+
+
+
+
+
+// Add a scrolling plane of rain in front of the MGZ2 background at the flying boss but behind the foreground.
+// Function taken from level_03_mgz\level_mgz.lemon
+//# address-hook(0x0518f8) end(0x0518fc)
+function void UpdateLevelScrolling.MGZ2()
+{
+	MGZ2_CustomSprites()
+
+	call 0x051900 + level.scrolling_routine
+}
+
+
+
+
+
+
+// Set a sunset palette near the end of MGZ2 on the Sonic/Tails path if palette options allow
+// Functions taken from level\03_mgz\level_mgz.lemon
+//# address-hook(0x0512a6) end(0x0512ba)
+function void InitLevelTiles.MGZ2()
+{
+	if (u16[0xffffb010] > 0x2c80 && u16 [0xffffb014] < 0x01c0 && palette_set >= 2 && !original_mode)
+	{
+		// new sunset palette // should really rewrite this to use a rawdata file
+		u16[0x0fffffcc0] = 0x0446
+		
+		u32[0x0fffffce0] = 0x00000CCE
+		u32[0x0fffffce4] = 0x0AAC088A
+		u32[0x0fffffce8] = 0x06680446
+
+		copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+	}
+	
+	u32[0xffffeee2] = 0
+	u32[0xffffeee6] = 0
+	u16[0xffffeeb4] = 0
+	u16[0xffffeeb8] = 0
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+//# address-hook(0x0512be) end(0x0512d8)
+function void UpdateLevelTiles.MGZ2()
+{
+	if (u16[0xffffb010] > 0x2c80 && u16 [0xffffb014] < 0x01c0)
+	{
+		u8[0xffff8483] = 0x28	// Here, we update two chunks.
+		u8[0xffff8484] = 0x10	// A space is usually left empty to avoid corrupted art falling into the flying boss's ground collapse.
+	
+		if (palette_set >= 2  && !original_mode && u16[0x0fffffcc0] != 0x0446)
+		{
+			// new sunset palette // should really rewrite this to use a rawdata file
+			u16[0x0fffffcc0] = 0x0446
+		
+			u32[0x0fffffce0] = 0x00000CCE
+			u32[0x0fffffce4] = 0x0AAC088A
+			u32[0x0fffffce8] = 0x06680446
+
+			copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+		}
+	}
+
+	camera.foreground.y.u16 += camera.screenshake.offset
+	if (u16[0xffffeeb4] != 0)
+	{
+		camera.screenshake.state.hi = 0xff
+	}
+	fn05127c()
+
+	call 0x0512dc + s16[0xffffeec0]
+}
+
+
+
+
+
+
+// Have redesigned palettes pull from a different ROM location for the MGZ2 end-of-act sunset transition
+//# address-hook(0x06d104) end(0x06d138)
+function void fn06d104()
+{
+#if STANDALONE
+	// Very slightly blend between colors
+	//  -> Doesn't look that great, so it's just for few frames
+	//  -> Maybe this needs some changes to the sunset palettes and timings to work better?
+	u16 offset = objA0.value39
+	u32 src1 = 0x364896 + offset * 0x10
+	if (palette_set >= 2 && !original_mode)	// change for new palettes
+		src1 = 0x2d48e8 + offset * 0x10
+	if (objA0.countdown_value >= 4 || offset == 0x1e)
+	{
+		copyMemory(0xfffffc60, src1, 0x20)
+	}
+	else
+	{
+		u32 src2 = 0x364896 + (offset + 2) * 0x10
+		if (palette_set >= 2 && !original_mode)	// change for new palettes
+			src2 = 0x2d48e8 + (offset + 2) * 0x10
+		for (u8 i = 0; i < 0x20; i += 2)
+		{
+			u16[0xfffffc60 + i] = blendColorsPacked(u16[src2 + i], u16[src1 + i], objA0.countdown_value * 0x40)
+		}
+	}
+
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+#else
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	u16 offset = objA0.value39
+	A1 = 0x364896 + offset * 0x10
+	if (palette_set >= 2 && !original_mode)	// change for new palettes
+		A1 = 0x2d48e8 + offset * 0x10	// in theory this should never be called, since this is for non-standalone only
+	copyMemory(0xfffffc60, A1, 0x20)
+#endif
+
+	objA0.countdown_value = u16[0x06d14c + offset]
+	objA0.value39 += 2
+	if (objA0.value39 >= 0x20)
+	{
+		fn06d13c()
+	}
+}
+
+
+
+
+
+// Start CNZ1 in the dark for Knuckles' path and end CNZ2 in the dark for Sonic's/Tails's path outside of Original Mode
+// Functions taken from level\04_cnz\level_cnz.lemon
+//# address-hook(0x051b94) end(0x051b98)
+function void InitLevelTiles.CNZ1()
+{
+	if (original_mode)
+	{
+		base.InitLevelTiles.CNZ1()
+		return
+	}
+
+	if (u16[0xffffb010] < 0x2170 && u16[0xffffb014] >= 0x0800)	// New check to copy dark palette for Knuckles' path
+	{
+		if (palette_set < 2)	// S3&K palettes or ROM hack palettes
+			copyMemory(0xfffffcc0, 0x066972, 0x40)		// this copies the Sonic/Tails dark palette, starting from 0x40 in the file for 0x40 bytes
+		else
+			System.loadExternalRawData("PaletteCNZ2Dark", 0xfffffcc0, 0x40, 0x40, 1, 1)
+		u8[0xfffffaa3] = 1	// set "lights out" flag
+	}
+
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+//# address-hook(0x052108) end(0x05210c)
+function void InitLevelTiles.CNZ2()
+{
+	if (original_mode)
+	{
+		base.InitLevelTiles.CNZ2()
+		return
+	}
+
+	if (u16[0xffffb010] > 0x2000 && !isMainCharacter(CHARACTER_KNUCKLES))	// New check to copy dark palette for Knuckles' path
+	{
+		if (palette_set < 2)	// S3&K palettes or ROM hack palettes
+			copyMemory(0xfffffcc0, 0x066972, 0x40)		// this copies the Sonic/Tails dark palette, starting from 0x40 in the file for 0x40 bytes
+		else
+			System.loadExternalRawData("PaletteCNZ2Dark", 0xfffffcc0, 0x40, 0x40, 1, 1)
+		u8[0xfffffaa3] = 1	// set "lights out" flag
+	}
+
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+
+
+// Adjust the light switch to load the correct palette in CNZ 1.
+// From cnz2_knuckles_lights_out.lemon
+//# address-hook(0x062480) end(0x0624ca)
+function void fn062480()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	D0 = objA0.value39
+	if (objA0.value39 >= 6)
+	{
+		if (objA0.subtype2c != 0)
+		{
+			if (palette_set < 2 || original_mode)
+			{
+				A1 = 0x0a8fdc
+				copyMemory(0xfffffc40, A1, 0x40)
+			}
+			else
+				System.loadExternalRawData("Palette0300", 0xfffffc40, 0x20, 0x40, 1, 1)
+		}
+
+		UnloadObject()
+	}
+	else
+	{
+		++objA0.value39
+		objA0.countdown_value = u16[0x0624d0 + D0.s16 * 2]
+		if (palette_set < 2 || original_mode)
+		{
+			A1 = (D0 & 0x01) ? 0x066972 : 0x066932
+			copyMemory(0xfffffc40, A1, 0x40)
+		}
+		else
+		{
+			u16 flashOffset = (D0 & 0x01) ? 0x40 : 0x00
+			System.loadExternalRawData("PaletteCNZ2Dark", 0xfffffc40, flashOffset, 0x40, 1, 1)
+		}
+	}
+}
+
+
+
+
+
+// Ignore palette cycles while the lights are off in CNZ.
+//# address-hook(0x002384) end(0x00243e)
+function void LevelPaletteUpdate.CNZ()
+{
+	if (u8[0xfffffaa3] && palette_set >= 2 && !original_mode)	// new check to disable palette cycles
+		return													// in the dark for redesigned palettes
+
+
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 3
+		A0 = 0x002d2e
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] += 6
+		if (u16[0xfffff632] >= 0x60)
+			u16[0xfffff632] = 0
+
+		u32[0xfffffc72] = u32[A0 + D0.s16]
+		u16[0xfffffc76] = u16[A0 + D0.s16 + 4]
+
+		A0 = (palette_set >= 2 && !original_mode) ? 0x2d46a4 : 0x002e82	// new switch here to point to redesigned or original palette cycle
+		u32[0xfffff0f2] = u32[A0 + D0.s16]
+		u16[0xfffff0f6] = u16[A0 + D0.s16 + 4]
+	}
+
+#if STANDALONE
+	// Slow down animation depending on anti-flicker setting
+	if (Game.getSetting(SETTING_GFX_ANTIFLICKER) == 1 && (level.framecounter & 0x01) != 0)
+		return
+	if (Game.getSetting(SETTING_GFX_ANTIFLICKER) == 2 && (level.framecounter & 0x03) != 0)
+		return
+#endif
+
+	A0 = 0x002d8e
+	D0.u16 = u16[0xfffff652]
+	u16[0xfffff652] += 0x06
+	if (u16[0xfffff652] >= 0xb4)
+	{
+		u16[0xfffff652] = 0
+	}
+	u32[0xfffffc52] = u32[A0 + D0.s16]
+	u16[0xfffffc56] = u16[A0 + D0.s16 + 4]
+
+	A0 = 0x002ee2
+	u32[0xfffff0d2] = u32[A0 + D0.s16]
+	u16[0xfffff0d6] = u16[A0 + D0.s16 + 4]
+	--u16[0xfffff658]
+	if (s16[0xfffff658] < 0)
+	{
+		u16[0xfffff658] = 2
+
+		A0 = 0x002e42
+		D0.u16 = u16[0xfffff654]
+		u16[0xfffff654] += 4
+		if (u16[0xfffff654] >= 0x40)
+			u16[0xfffff654] = 0
+
+		u32[0xfffffc4e] = u32[A0 + D0.s16]
+		A0 = 0x002e42
+		u32[0xfffff0ce] = u32[A0 + D0.s16]
+	}
+}
+
+
+
+
+
+// Modify the ICZ1 palette cycles for redesigned palettes.
+//# address-hook(0x00244e) end(0x002506)
+function void LevelPaletteUpdate.ICZ()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.LevelPaletteUpdate.ICZ()
+		return
+	}
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 5
+		A0 = 0x2d4704
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] = (u16[0xfffff632] + 4) % 64
+		u32[0xfffffc5c] = u32[A0 + D0.s16]
+	}
+
+	--u16[0xfffff658]
+	if (s16[0xfffff658] < 0)
+	{
+		u16[0xfffff658] = 9
+		A0 = 0x2d4744
+		D0.u16 = u16[0xfffff652]
+		u16[0xfffff652] = (u16[0xfffff652] + 4) % 72
+		if (u16[0xffffeee8] != 0)
+			u32[0xfffffc7c] = u32[A0 + D0.s16]
+	}
+
+	--u16[0xfffff65a]
+	if (s16[0xfffff65a] < 0)
+	{
+		u16[0xfffff65a] = 7
+		A0 = 0x2d478c
+		D0.u16 = u16[0xfffff654]
+		u16[0xfffff654] = (u16[0xfffff654] + 4) % 24
+		if (u16[0xffffeee8] != 0)
+			u32[0xfffffc78] = u32[A0 + D0.s16]
+
+		A0 = 0x2d47a4
+		D0.u16 = u16[0xfffff656]
+		u16[0xfffff656] = (u16[0xfffff656] + 4) % 64
+		u32[0xfffffc58] = u32[A0 + D0.s16]
+	}
+}
+
+
+
+
+
+// Add a scrolling plane of snow in front of the ICZ1 background but behind the foreground while snowboarding
+//# address-hook(0x053724) end(0x053728)
+function void UpdateLevelScrolling.ICZ1()
+{
+	ICZ1_CustomSprites()
+
+	D0.u16 = level.scrolling_routine
+	call 0x05372c + D0.s16
+}
+
+
+
+// Alter the palette during the ICZ1 snowboarding section
+// and ignore the AIR option to alter it.
+// Here, A1 = 0xfffffc62 (so it starts on the first non-transparent color of the last palette line).
+//# address-hook(0x23de96) end(0x23dec4)
+function void fn23de96()
+{
+	if (palette_set < 2 && !original_mode)	// S3&K palettes or ROM hack palettes, with original mode not using base to ignore "Morning Dawn" palette choice
+	{
+		base.fn23de96()
+		return
+	}
+		if (original_mode)
+		{
+			// Set original S3&K outdoor palette
+			u32[A1 + 0x00] = 0x0eee0eec
+			u32[A1 + 0x04] = 0x0eea0eca
+			u32[A1 + 0x08] = 0x0ec80ea6
+			u32[A1 + 0x0c] = 0x0e860e64
+			u32[A1 + 0x10] = 0x0e400e00
+			u32[A1 + 0x14] = 0x0c000000
+			u32[A1 + 0x18] = 0x0aec0cea
+			u16[A1 + 0x1c] = 0x0e80
+			return
+		}
+		
+		u16[A1 + 0x00] = 0x0cae		// Original: 0x0eec -- S3C: 0x0eee
+		u16[A1 + 0x02] = 0x0caa		// Original: 0x0eea -- S3C: 0x0eec
+		u16[A1 + 0x04] = 0x0c88		// Original: 0x0ee8 -- S3C: 0x0eea
+		u16[A1 + 0x06] = 0x0c68		// Original: 0x0ec8 -- S3C: 0x0ec8
+		u16[A1 + 0x08] = 0x0c66		// Original: 0x0ec6 -- S3C: 0x0ea6
+		u16[A1 + 0x0a] = 0x0c46		// Original: 0x0ea4 -- S3C: 0x0e84
+		u16[A1 + 0x0c] = 0x0a24		// Original: 0x0e84 -- S3C: 0x0c62
+		u16[A1 + 0x0e] = 0x0802		// Original: 0x0e62 -- S3C: 0x0a40
+		u16[A1 + 0x10] = 0x0602		// Original: 0x0e40 -- S3C: 0x0820  
+		u16[A1 + 0x12] = 0x0402		// Original: 0x0e00 -- S3C: 0x0600	
+		u16[A1 + 0x14] = 0x0202		// Original: 0x0c00 -- S3C: 0x0400	
+		u16[A1 + 0x18] = 0x0cac		// Original: 0x0aea -- S3C: 0x0aec
+		u16[A1 + 0x1a] = 0x0c8a		// Original: 0x0ce8 -- S3C: 0x0cea
+		u16[A1 + 0x1c] = 0x0c40		
+
+	// The following palette was used in v1.2.0.
+	// Green and red values subtracted by 2 from the usual night palette except where indicated.
+	//	u16[A1 + 0x00] = 0x0ece		// Original: 0x0eec -- S3C: 0x0eee
+	//	u16[A1 + 0x02] = 0x0eca		// Original: 0x0eea -- S3C: 0x0eec
+	//	u16[A1 + 0x04] = 0x0ea8		// Original: 0x0ee8 -- S3C: 0x0eea
+	//	u16[A1 + 0x06] = 0x0e88		// Original: 0x0ec8 -- S3C: 0x0ec8
+	//	u16[A1 + 0x08] = 0x0e86		// Original: 0x0ec6 -- S3C: 0x0ea6
+	//	u16[A1 + 0x0a] = 0x0e66		// Original: 0x0ea4 -- S3C: 0x0e84
+	//	u16[A1 + 0x0c] = 0x0c44		// Original: 0x0e84 -- S3C: 0x0c62
+	//	u16[A1 + 0x0e] = 0x0a22		// Original: 0x0e62 -- S3C: 0x0a40
+	//	u16[A1 + 0x10] = 0x0802		// Original: 0x0e40 -- S3C: 0x0820  // red not removed; value is normally 0
+	//	u16[A1 + 0x12] = 0x0602		// Original: 0x0e00 -- S3C: 0x0600	// green & red not removed; value is normally 0
+	//	u16[A1 + 0x14] = 0x0402		// Original: 0x0c00 -- S3C: 0x0400	// green & red not removed; value is normally 0
+	//	u16[A1 + 0x18] = 0x0ecc		// Original: 0x0aea -- S3C: 0x0aec
+	//	u16[A1 + 0x1a] = 0x0eaa		// Original: 0x0ce8 -- S3C: 0x0cea
+	//	u16[A1 + 0x1c] = 0x0e60		// value taken from normal palette and then only 2 green removed; AIR does not alter this value for night
+}
+
+
+
+
+
+// Change from the snowboarding section palette to the indoor palette.
+// Here, A1 = 0xfffffc62 (so it starts on the first non-transparent color of the last palette line).
+//# address-hook(0x23ded6) end(0x23def8)
+function void fn23ded6()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.fn23ded6()
+		return
+	}
+
+	// Set indoor palette
+	// This is going into pallete entry $62 in RAM ($42 from a level palette file).
+
+	u32[A1 + 0x00] = 0x0AA00822
+	u32[A1 + 0x04] = 0x0A040602
+	u32[A1 + 0x08] = 0x04000200
+	u32[A1 + 0x0c] = 0x00000A20
+	u32[A1 + 0x10] = 0x0A240602
+	u16[A1 + 0x14] = 0x0202
+
+	// The following palette was used in v1.2.0.
+	// Green values were increased by 2 from the original ICZ1 except where indicated.
+	// u32[A1 + 0x00] = 0x0ee00e60
+	// u32[A1 + 0x04] = 0x0e240c20
+	// u32[A1 + 0x08] = 0x06200200	// second color not altered
+	// u32[A1 + 0x0c] = 0x00000e84  // first color not altered
+	// u32[A1 + 0x10] = 0x0e440a22
+	// u16[A1 + 0x14] = 0x0422
+}
+
+
+
+
+
+// Removes the palette changer object between ICZ1 and 2 if not on S3&K palettes.
+//# address-hook(0x0713e8) end(0x07141a)
+function void fn0713e8()
+{
+	fn085ba8()
+
+	A1 = 0xffff0000 + u16[0xfffffaae]
+	if (u32[A1] == 0x08b660)
+	{
+		u8[A1 + 0x38] |= 0x20
+	}
+
+#if STANDALONE
+	// Check if fighting upper boss (possible in Knuckles & Tails mode with Knuckles as well)
+	if (camera.position.y.u16 < 0x0700 && palette_set == 0)			// S3&K palettes only
+#else
+	if (!isMainCharacter(CHARACTER_KNUCKLES) && palette_set == 0)	// S3&K palettes only
+#endif
+	{
+		// Create object that performs the palette change to daytime
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = 0x071420
+		}
+	}
+
+	spawnChildObjects(0x0719b0)
+}
+
+
+
+
+
+// Adds snow outdoors for Knux in ICZ2 and correct the object palette line after Act 1 miniboss for all characters
+//# address-hook(0x053d54) end(0x053d58)
+function void UpdateLevelScrolling.ICZ2()
+{
+	ICZ2_CustomSprites()
+
+	if (palette_set >= 2 && !original_mode && u16[0xfffffb010] >= 0x0880 && u16[0xfffffb010] < 0x900) // if you've just passed the miniboss,
+		System.loadExternalRawData("Palette0501", 0xfffffc20, 0x00, 0x20, 1, 1)	// reload object palette (which gets reset to ROM version after miniboss)
+
+	// Targets are e.g. fn053d78(), fn053e5c()
+	call 0x053d5c + level.scrolling_routine
+}
+
+
+
+
+
+// Sets the ICZ2 palette and alters the in-cave palette
+//# address-hook(0x23e1aa) end(0x23e1d8)
+function void fn23e1aa()
+{
+	// Probably ICZ specific
+
+	if (palette_set == 0)	// S3&K palettes
+	{
+		base.fn23e1aa()
+		return
+	}
+	else if (palette_set == 1 || original_mode)	// ROM hack palettes
+	{
+		fn23e1aaROM()
+		return
+	}
+
+	System.loadExternalRawData("Palette0501", 0xfffffc20, 0x00, 0x20, 1, 1)	// reload object palette
+	if ((global.game_mode & 0x80) == 0)	// This function sets the palette to change to outdoors from indoors.
+	{
+			A1 = 0xfffffc62
+			u32[(A1+=4)-4] = 0x0ECC0E88
+			u32[(A1+=4)-4] = 0x0C860C64
+			u32[(A1+=4)-4] = 0x0C440A44
+			u32[(A1+=4)-4] = 0x08240622
+			u32[(A1+=4)-4] = 0x02000402		// new line
+			u32[0xfffffc7c] = 0x06020604	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+			objA1.update_address = 0x0a000e00
+		
+
+			A1 = 0xfffffce2
+			u32[(A1+=4)-4] = 0x0ECC0E88
+			u32[(A1+=4)-4] = 0x0C860C64
+			u32[(A1+=4)-4] = 0x0C440A44
+			u32[(A1+=4)-4] = 0x08240622
+			u32[(A1+=4)-4] = 0x02000402		// new line
+			u32[0xfffffc7c] = 0x06020604	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+			objA1.update_address = 0x0a000e00
+
+			// The following palette was used in v1.2.0. These lines need to be copied to similar instances below if they're to be reintroduced at any point.
+		//	A1 = 0xfffffc62
+		//	u32[(A1+=4)-4] = 0x0eec0cc6
+		//	u32[(A1+=4)-4] = 0x0c800c60
+		//	u32[(A1+=4)-4] = 0x0c400a40
+		//	u32[(A1+=4)-4] = 0x08200620
+		//	u32[(A1+=4)-4] = 0x02000600		// new line
+		//	u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+		//	objA1.update_address = 0x0a000e00
+		
+
+		//	A1 = 0xfffffce2
+		//	u32[(A1+=4)-4] = 0x0eec0cc6
+		//	u32[(A1+=4)-4] = 0x0c800c60
+		//	u32[(A1+=4)-4] = 0x0c400a40
+		//	u32[(A1+=4)-4] = 0x08200620
+		//	u32[(A1+=4)-4] = 0x02000600		// new line
+		//	u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+		//	objA1.update_address = 0x0a000e00
+	
+	}
+}
+
+
+
+
+
+//# address-hook(0x23e1da) end(0x23e20c)
+function void fn23e1da()
+{
+	if (palette_set == 0)	// S3&K palettes
+	{
+		base.fn23e1da()
+		if ((global.game_mode & 0x80) == 0)
+			copyMemory(0xfffffc20, 0x0a91bc, 0x20)	// reload object palette, which may have been changed by Knux cutscene
+		return
+	}
+	else if (palette_set == 1 || original_mode)	// ROM hack palettes
+	{
+		fn23e1daROM()
+		return
+	}
+
+	// Set indoor palette
+	// Green values increased by 2 except where indicated.
+
+	if ((global.game_mode & 0x80) == 0)
+	{
+			System.loadExternalRawData("Palette0501", 0xfffffc20, 0x00, 0x20, 1, 1)	// reload object palette, which may have been changed by Knux cutscene
+			A1 = 0xfffffc62
+			u32[(A1+=4)-4] = 0x0AA00822
+			u32[(A1+=4)-4] = 0x0A040602
+			u32[(A1+=4)-4] = 0x04000200 
+			u32[(A1+=4)-4] = 0x00000A20	
+			u32[(A1+=4)-4] = 0x0A240602
+			u16[A1] = 0x0202
+
+			// The following palette was used in v1.2.0. These lines need to be copied to similar instances below if they're to be reintroduced at any point.
+		//	A1 = 0xfffffc62
+		//	u32[(A1+=4)-4] = 0x0ee20e44	// first color unaltered
+		//	u32[(A1+=4)-4] = 0x0e240e22
+		//	u32[(A1+=4)-4] = 0x04220200 // second color unaltered
+		//	u32[(A1+=4)-4] = 0x0e40		// first (untyped) color unaltered
+		//	u32[(A1+=4)-4] = 0x0e600860
+		//	u16[A1] = 0x0620
+		
+	}
+		A1 = 0xfffffce2
+		u32[(A1+=4)-4] = 0x0AA00822	
+		u32[(A1+=4)-4] = 0x0A040602
+		u32[(A1+=4)-4] = 0x04000200 
+		u32[(A1+=4)-4] = 0x00000A20	
+		u32[(A1+=4)-4] = 0x0A240602
+		u16[A1] = 0x0202
+}
+
+
+
+
+
+// Sets the initial ICZ2 palette loaded when outdoors
+//# address-hook(0x23e20e) end(0x23e23c)
+function void fn23e20e()
+{
+	// Probably ICZ specific
+
+	if (palette_set == 0)	// S3&K palettes
+	{
+		base.fn23e20e()
+		return
+	}
+	else if (palette_set == 1 || original_mode)	// ROM hack palettes
+	{
+		fn23e20eROM()
+		return
+	}
+
+	System.loadExternalRawData("Palette0501", 0xfffffc20, 0x00, 0x20, 1, 1)	// reload object palette
+	if ((global.game_mode & 0x80) == 0)
+	{
+	
+			A1 = 0xfffffc62
+			u32[(A1+=4)-4] = 0x0ECC0E88
+			u32[(A1+=4)-4] = 0x0C860C64
+			u32[(A1+=4)-4] = 0x0C440A44
+			u32[(A1+=4)-4] = 0x08240622
+			u32[(A1+=4)-4] = 0x02000402		// new line
+			u32[0xfffffc7c] = 0x06020604	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+	
+		objA1.update_address = 0x02000600
+	}
+		A1 = 0xfffffce2
+		u32[(A1+=4)-4] = 0x0ECC0E88
+		u32[(A1+=4)-4] = 0x0C860C64
+		u32[(A1+=4)-4] = 0x0C440A44
+		u32[(A1+=4)-4] = 0x08240622
+		u32[(A1+=4)-4] = 0x02000402		// new line
+		u32[0xfffffc7c] = 0x06020604	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+	objA1.update_address = 0x02000600
+}
+
+
+
+
+//////////////////////////////////////////////
+// Original ROM Hack ICZ2 palette functions //
+//////////////////////////////////////////////
+
+// Sets the ICZ2 palette to nighttime
+//# address-hook(0x23e1aa) end(0x23e1d8)
+function void fn23e1aaROM()
+{
+	// Probably ICZ specific
+
+	if ((global.game_mode & 0x80) == 0)	// This function sets the palette to change to outdoors from indoors.
+	{
+		A1 = 0xfffffc62
+		u32[(A1+=4)-4] = 0x0eec0cc6
+		u32[(A1+=4)-4] = 0x0c800c60
+		u32[(A1+=4)-4] = 0x0c400a40
+		u32[(A1+=4)-4] = 0x08200620
+		u32[(A1+=4)-4] = 0x02000600		// new line
+		if (!original_mode)
+		{
+			u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+		}
+		objA1.update_address = 0x0a000e00
+	}
+
+	A1 = 0xfffffce2
+	u32[(A1+=4)-4] = 0x0eec0cc6
+	u32[(A1+=4)-4] = 0x0c800c60
+	u32[(A1+=4)-4] = 0x0c400a40
+	u32[(A1+=4)-4] = 0x08200620
+	u32[(A1+=4)-4] = 0x02000600			// new line
+	if (!original_mode)
+	{
+		u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+	}
+	objA1.update_address = 0x0a000e00
+}
+//# address-hook(0x23e1da) end(0x23e20c)
+function void fn23e1daROM()
+{
+	// Probably ICZ specific
+
+	if ((global.game_mode & 0x80) == 0)
+	{
+		copyMemory(0xfffffc20, 0x0a91bc, 0x20)	// reload object palette, which may have been changed by Knux cutscene
+		A1 = 0xfffffc62
+		u32[(A1+=4)-4] = 0x0ee20e24
+		u32[(A1+=4)-4] = 0x0e040e02
+		u32[(A1+=4)-4] = 0x04020200
+		u32[(A1+=4)-4] = 0x0e20
+		u32[(A1+=4)-4] = 0x0e400840
+		u16[A1] = 0x0600
+	}
+
+	A1 = 0xfffffce2
+	u32[(A1+=4)-4] = 0x0ee20e24
+	u32[(A1+=4)-4] = 0x0e040e02
+	u32[(A1+=4)-4] = 0x04020200
+	u32[(A1+=4)-4] = 0x0e20
+	u32[(A1+=4)-4] = 0x0e400840
+	u16[A1] = 0x0600
+}
+//# address-hook(0x23e20e) end(0x23e23c)
+function void fn23e20eROM()
+{
+	// Probably ICZ specific
+
+	if ((global.game_mode & 0x80) == 0)
+	{
+		A1 = 0xfffffc62
+		u32[(A1+=4)-4] = 0x0eec0cc6
+		u32[(A1+=4)-4] = 0x0c800c60
+		u32[(A1+=4)-4] = 0x0c400a40
+		u32[(A1+=4)-4] = 0x08200620
+		u32[(A1+=4)-4] = 0x02000600		// new line
+		if (!original_mode)
+		{
+			u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+		}
+		objA1.update_address = 0x02000600
+	}
+
+	A1 = 0xfffffce2
+	u32[(A1+=4)-4] = 0x0eec0cc6
+	u32[(A1+=4)-4] = 0x0c800c60
+	u32[(A1+=4)-4] = 0x0c400a40
+	u32[(A1+=4)-4] = 0x08200620
+	u32[(A1+=4)-4] = 0x02000600		// new line
+	if (!original_mode)
+	{
+		u32[0xfffffc7c] = 0x0c600ea4	// new line, corrects original S3&K glitch with brightest two colors in background reflections on water
+	}
+	objA1.update_address = 0x02000600
+}
+
+////////////////////////////////////////////////
+// End of Original ROM Hack palette functions //
+////////////////////////////////////////////////
+
+
+
+
+
+// Enable rotating palette underwater for LBZ2 launchers.
+// Euka accepted this as a contribution to the base game, so this is only here for legacy purposes.
+// It may need to be changed in the future if the actual rotation of the palette is changed.
+//# address-hook(0x002516) end(0x002544)
+function void LevelPaletteUpdate.LBZ_shared()
+{
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 3
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] = (u16[0xfffff632] + 6) % 18
+		u32[0xfffffc50] = u32[A0 + D0.s16]
+		u16[0xfffffc54] = u16[A0 + D0.s16 + 4]
+
+		// new for underwater palettes
+		if (!original_mode || camera.position.x.u16 > 0x37b0)
+		{
+			u32[0xfffff0d0] = u32[A0 + D0.s16]
+			u16[0xfffff0d4] = u16[A0 + D0.s16 + 4]
+		}
+	}
+}
+
+
+
+
+
+// Adjusts the palette fade after the second LBZ2 boss (before Big Arms loads).
+// This isn't altered yet, but it could be if the fade should be changed.
+// The following function in this script alters the returning palette fade.
+// Using a dummy address
+// //# address-hook(0x07305a)
+// function void fn07305a()
+// {
+//	// Handling for Big Arms fight on Sonic's path:
+//	//  Music change, fade to dark sky
+//	if (u16[A0 + 0x48] == 0)
+//	{
+//		playMusic(MUSIC_CTRL_FADEOUT)
+//	}
+//	else if (u16[A0 + 0x48] == 120)
+//	{
+//		playMusic(0x30)
+//		level.boss_encounter = 2	// Usually only 0 or 1, but we're using a value of 2 here for "chooseFittingMusic"
+//	}
+//
+//	// Sky palette fade steps
+//	if (u16[A0 + 0x48] == 16)
+//	{
+//		u16[0xfffffc00 + 0x3b * 2] = 0x0cac
+//		u16[0xfffffc00 + 0x3c * 2] = 0x0c68
+//		u16[0xfffffc00 + 0x3d * 2] = 0x0c46
+//		u16[0xfffffc00 + 0x3e * 2] = 0x0a44
+//	}
+//	else if (u16[A0 + 0x48] == 32)
+//	{
+//		u16[0xfffffc00 + 0x3b * 2] = 0x0a88
+//		u16[0xfffffc00 + 0x3c * 2] = 0x0a46
+//		u16[0xfffffc00 + 0x3d * 2] = 0x0824
+//		u16[0xfffffc00 + 0x3e * 2] = 0x0622
+//	}
+//	else if (u16[A0 + 0x48] == 48)
+//	{
+//		u16[0xfffffc00 + 0x3b * 2] = 0x0844
+//		u16[0xfffffc00 + 0x3c * 2] = 0x0622
+//		u16[0xfffffc00 + 0x3d * 2] = 0x0400
+//		u16[0xfffffc00 + 0x3e * 2] = 0x0200
+//	}
+//
+//	++u16[A0 + 0x48]
+//	if (u16[A0 + 0x48] <= 120)
+//		return
+//
+//	if (allocDynamicObjectStd())
+//	{
+//		// Spawn Big Arms
+//		objA1.update_address = 0x074262
+//	}
+//	fn0852ae()
+// }
+
+
+
+
+
+// Adjust the reloading of the sky palette after the Big Arms boss right
+#if STANDALONE
+//# address-hook(0x072e30)
+function void fn072e30()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or original ROM hack palettes
+	{
+		base.fn072e30()
+		return
+	}
+
+	// Sky palette fade steps
+	if (u16[A0 + 0x48] == 16)
+	{
+		u16[0xfffffc00 + 0x3b * 2] = 0x0a88
+		u16[0xfffffc00 + 0x3c * 2] = 0x0a46
+		u16[0xfffffc00 + 0x3d * 2] = 0x0824
+		u16[0xfffffc00 + 0x3e * 2] = 0x0622
+	}
+	else if (u16[A0 + 0x48] == 32)
+	{
+		u16[0xfffffc00 + 0x3b * 2] = 0x0cac
+		u16[0xfffffc00 + 0x3c * 2] = 0x0c68
+		u16[0xfffffc00 + 0x3d * 2] = 0x0c46
+		u16[0xfffffc00 + 0x3e * 2] = 0x0a44
+	}
+	else if (u16[A0 + 0x48] == 48)
+	{
+		u16[0xfffffc00 + 0x3b * 2] = 0x0ece
+		u16[0xfffffc00 + 0x3c * 2] = 0x0cce // originally 0x0e8a
+		u16[0xfffffc00 + 0x3d * 2] = 0x0eac // originally 0x0e48
+		u16[0xfffffc00 + 0x3e * 2] = 0x0ea8 // originally 0x0e46
+		Object.TriggerUnloading()
+	}
+	++u16[A0 + 0x48]
+}
+#endif
+
+
+
+
+
+// Handle the addition of a winter palette when loading from the star post at the boss area in MHZ2
+//# address-hook(0x054d30) end(0x054d88)
+function void InitLevelTiles.MHZ2()
+{
+	if (camera.position.x.u16 < 0x3600 && u16[0xffffeee8] == 0)
+	{
+		move_area.left = (u16[0xffffb014] >= 0x05c0) ? max(s16(0x98 - getScreenExtend() * 2), 0) : 0x0380
+	}
+
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.InitLevelTiles.MHZ2()
+		return
+	}
+
+	u16[0xffffeec0] = 0x04
+	u16[0xffffeee8] = 0
+	u8[0xfffff7c1] = 0xff
+
+	if (u16[0xffffb010] < 0x09c0 && u16[0xffffb014] >= 0x0600)
+	{
+		u8[0xffffeed6] = 0
+		u8[0xfffff7c1] = 0
+	//	A1 = 0x0a945c
+		System.loadExternalRawData("Palette0700", 0xfffffcc0, 0x20, 0x40, 1, 1)
+	}
+	else if (u16[0xffffb010] < 0x2940)
+	{
+		u8[0xffffeed6] = 0xff
+	//	A1 = 0x0a94bc
+		System.loadExternalRawData("Palette0701", 0xfffffcc0, 0x20, 0x40, 1, 1)
+	}
+	else if (u16[0xffffb010] < 0x3900)
+	{
+	//	A1 = 0x0550fe
+		System.loadExternalRawData("PaletteMHZ2Autumn", 0xfffffcc0)	// notice that this file has no object palette!
+	}
+	else
+	{
+		// new winter palette // should really rewrite this to use a rawdata file
+		u32[0x0fffffcc0] = 0x00000224
+		u32[0x0fffffcc4] = 0x02240248
+		u32[0x0fffffcc8] = 0x026A04AC
+		u32[0x0fffffccc] = 0x06CC0EEC
+		
+		u32[0x0fffffcd0] = 0x0EA80864
+		u32[0x0fffffcd4] = 0x0ACA08C6
+		u32[0x0fffffcd8] = 0x0A820242
+		u32[0x0fffffcdc] = 0x02220002
+		
+		u32[0x0fffffce0] = 0x000008AA
+		u32[0x0fffffce4] = 0x048A0268
+		u32[0x0fffffce8] = 0x00460246
+		u32[0x0fffffcec] = 0x02240222
+		
+		u32[0x0fffffcf0] = 0x06AA0866
+		u32[0x0fffffcf4] = 0x0CCC0A86
+		u32[0x0fffffcf8] = 0x0CAA0644
+		u32[0x0fffffcfc] = 0x020004EE
+
+	//	copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+			
+	//	Level.GetCameraPosition()
+	//	Level.InitialTilesFill()
+
+	//	return
+	}
+
+//	A5 = 0xfffffc40
+//	A6 = 0xfffffcc0
+//	D0 = 0x0f
+//	while (D0.s16 >= 0)
+//	{
+//		u32[(A5+=4)-4] = u32[A1]
+//		u32[(A6+=4)-4] = u32[(A1+=4)-4]
+//		--D0.s16
+//	}
+
+	copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+
+
+
+
+// Set the winter palette and handles weather in MHZ2, and sets a chunk at the winter area entrance
+// Function taken from level\07_mhz\level_mhz.lemon
+//# address-hook(0x054d8c) end(0x054d98)
+function void UpdateLevelTiles.MHZ2()
+{
+	if (original_mode)
+	{
+		base.UpdateLevelTiles.MHZ2()
+		return
+	}
+	if (u16[0xffffb010] > 0x3500)	// Check if player x position is above 0x3500.
+		u8[0xffff8524] = 0x8b	// This tile at the entrance to the winter sequence tries to change to 0x46. Force it to be 0x8b.
+	else
+		u8[0xffff8524] = 0x5a	// However, the level size is altered at the start of the winter sequence. A check for what this RAM *usually* refers to is needed.
+
+	if (palette_set < 2)	// S3&K palettes or ROM hack palettes (Original Mode already handled above)
+	{
+		base.UpdateLevelTiles.MHZ2()
+		return
+	}
+
+	// if and else if are new for palette change
+	if (camera.position.x.u16 >= 0x3680 && camera.position.x.u16 <= 0x3900 && camera.position.y.u16 <= 0x0480 && u16[0x0fffffcd0] != 0x0EA8)	// approaching boss, winter palette not set
+	{
+		u32[0x0fffffcc0] = 0x00000224
+		u32[0x0fffffcc4] = 0x02240248
+		u32[0x0fffffcc8] = 0x026A04AC
+		u32[0x0fffffccc] = 0x06CC0EEC
+	
+		u32[0x0fffffcd0] = 0x0EA80864
+		u32[0x0fffffcd4] = 0x0ACA08C6
+		u32[0x0fffffcd8] = 0x0A820242
+		u32[0x0fffffcdc] = 0x02220002
+	
+		u32[0x0fffffce0] = 0x000008AA
+		u32[0x0fffffce4] = 0x048A0268
+		u32[0x0fffffce8] = 0x00460246
+		u32[0x0fffffcec] = 0x02240222
+	
+		u32[0x0fffffcf0] = 0x06AA0866
+		u32[0x0fffffcf4] = 0x0CCC0A86
+		u32[0x0fffffcf8] = 0x0CAA0644
+		u32[0x0fffffcfc] = 0x020004EE
+
+		copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target palette.
+	}
+	else if (camera.position.x.u16 >= 0x3680 && camera.position.y.u16 > 0x0480)		// at bottom of final pulley
+	{
+		System.loadExternalRawData("PaletteMHZ2Autumn", 0xfffffcc0)	// notice that this file has no object palette!
+		copyMemory(0xfffffc40, 0xfffffcc0, 0x40)	// set current standard palette to match target
+	}
+	
+	MHZ2_CustomSprites()
+
+	camera.foreground.x.u16 += camera.screenshake.offset
+	call 0x054d9c + s16[0xffffeec0]
+}
+
+
+
+
+
+// This function accepts the offset of MHZ2 non-object palette lines to load in A1.
+// We leave the original copyMemory in the first "if" and introduce rawdata loading in "else".
+// Function from level\07_mhz\level_mhz.bin
+//# address-hook(0x0550c4) end(0x0550d0)
+function void fn0550c4()
+{
+	if (palette_set < 2 || original_mode)
+		copyMemory(0xfffffc40, A1, 0x40)
+	else
+	{
+		if (A1 == 0x0a945c)
+			System.loadExternalRawData("Palette0700", 0xfffffc40, 0x20, 0x40, 1, 1)
+		else if (A1 == 0x0a94bc)
+			System.loadExternalRawData("Palette0701", 0xfffffc40, 0x20, 0x40, 1, 1)
+		else if (A1 == 0x0550fe)
+			System.loadExternalRawData("PaletteMHZ2Autumn", 0xfffffc40)	// notice that this file has no object palette!
+	}
+}
+
+
+
+
+
+// Handles the start of the MHZ2 boss when it is hit while planted in the ground. A palette change happens here.
+// Function taken from bosses\boss_mhz2.lemon
+//# address-hook(0x07654a) end(0x076602)
+function void fn07654a()
+{
+	if (u8[A0 + 0x28] != 0)
+	{
+		--objA0.countdown_value
+		if (objA0.countdown_value < 0)
+		{
+			GetRandomNumber()
+			D0.u16 &= 0x0f
+			D0.u16 += 0x08
+			objA0.countdown_value = D0.u16
+			playSound(0x89)
+		}
+		Enemy.DrawDynamicObject()
+		return
+	}
+
+	objA0.update_address = 0x08565e
+	objA0.countdown_value = 0x3f
+	objA0.countdown_callback = 0x0852a0	// Address of "Object.TriggerUnloading()"
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	u8[A1 + 0x38] |= 0x04
+
+	copyMemory(0xfffffc80, 0xfffffc00, 0x20)
+	copyMemory(0xfffffca0, 0x0769d4, 0x20)
+	if (palette_set < 2 || original_mode)	// S3&K or ROM hack palettes
+		copyMemory(0xfffffcc0, 0x0a945c, 0x40)
+	else					// redesigned palettes
+		System.loadExternalRawData("Palette0700", 0xfffffcc0, 0x20, 0x40, 1, 1)
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x085e64
+		u8[A1 + 0x2c] = 0xff
+		u16[A1 + 0x3a] = 0x03
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x085b30
+		u8[A1 + 0x2c] = 0x19
+	}
+
+	spawnSimpleChildObjects(0x083fee)
+	u8[0xfffff7c1] = 0
+}
+
+
+
+
+
+// Adjust sky palette when initially loading FBZ1
+//# address-hook(0x05285c) end(0x0528ba)
+function void InitLevelScrolling.FBZ1()
+{
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x052d10
+	}
+
+	if (u16[0xffffb010] < 0x0180)
+	{
+		u8[0xffffeed6] = 0xff
+		A1 = 0x052dd0
+		A5 = 0xfffffce4
+		u32[(A5+=4)-4] = u32[(A1+=4)-4]
+		u32[(A5+=4)-4] = u32[(A1+=4)-4]
+		u32[(A5+=4)-4] = u32[(A1+=4)-4]
+		u32[(A5+=4)-4] = u32[(A1+=4)-4]
+		if (palette_set >= 2 && !original_mode)	// we've just set the S3&K palette above
+			System.loadExternalRawData("PaletteFBZSky", 0xfffffce4)	// set the redesigned palette
+//		u32[0xfffffce4] = 0x0ccc0acc
+//		u32[0xfffffce8] = 0x0aaa0a88
+//		u32[0xfffffcec] = 0x0c660a44
+//		u32[0xfffffcf0] = 0x0cee0ecc
+
+		fn052a2a()
+		fn04f2f6()
+
+		D1.u16 = 0x0200
+		D0 = 0
+		Level.InitialTilesFill()
+
+		A4 = 0x052d6e
+		A5 = 0xffffa800
+		fn04f0ce()
+	}
+	else
+	{
+		fn052a2a()
+		fn04f2f6()
+
+		D1 = 0
+		Level.InitialTilesFill()
+
+		A4 = 0x052d28
+		A5 = 0xffffa800
+		fn04f0ce()
+	}
+}
+
+
+
+
+
+
+// This function gets called during some transitions between indoors and outdoors in FBZ.
+// A1 contains the ROM address for those two palettes.
+//# address-hook(0x052c42) end(0x052c70)
+function void fn052c42()
+{
+	A5 = 0xfffffc64
+	u32 paletteSource = A1
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	level.scrolling_routine = D0.u16
+	if (palette_set >= 2 && !original_mode)
+	{
+		if (paletteSource == 0x052dd0)
+			System.loadExternalRawData("PaletteFBZSky", 0xfffffc64)		// set the redesigned outdoor palette
+		else if (paletteSource == 0x052dc0)
+			System.loadExternalRawData("PaletteFBZIndoor", 0xfffffc64)	// set the redesigned indoor palette
+	}
+	fn052a2a()
+	fn04f2f6()
+
+	u16[0xffffeec8] = D6.u16
+	u16[0xffffeeca] = 0x1f
+
+	signalMultiReturn()
+	if (level.scrolling_routine == 0x0c)
+	{
+		fn05292a()
+	}
+	else
+	{
+		fn052950()
+	}
+}
+
+
+
+
+
+// This function gets called during some transitions between indoors and outdoors in FBZ.
+// A1 contains the ROM address for those two palettes.
+//# translated(0x052cd8) end(0x052d0c)
+function void fn052cd8()
+{
+	A5 = 0xfffffc64
+	u32 paletteSource = A1
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	level.scrolling_routine = D0.u16
+	if (palette_set >= 2 && !original_mode)
+	{
+		if (paletteSource == 0x052dd0)
+			System.loadExternalRawData("PaletteFBZSky", 0xfffffc64)		// set the redesigned outdoor palette
+		else if (paletteSource == 0x052dc0)
+			System.loadExternalRawData("PaletteFBZIndoor", 0xfffffc64)	// set the redesigned indoor palette
+	}
+	fn052a2a()
+	fn04f2f6()
+
+	D0.u16 = (D0.u16 + D6.u16) & level.height.tilemask
+	u16[0xffffeec8] = D0.u16
+	u16[0xffffeeca] = 0x0f
+
+	signalMultiReturn()
+
+	if (level.scrolling_routine == 0x04)
+	{
+		fn0528de()
+	}
+	else
+	{
+		fn052904()
+	}
+}
+
+
+
+
+
+// This function gets called during some transitions between indoors and outdoors in FBZ.
+// A1 contains the ROM address for those two palettes.
+//# address-hook(0x05327e) end(0x0532b2)
+function void fn05327e()
+{
+	A5 = 0xfffffc64
+	u32 paletteSource = A1
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	level.scrolling_routine = D0.u16
+	if (palette_set >= 2 && !original_mode)
+	{
+		if (paletteSource == 0x052dd0)
+			System.loadExternalRawData("PaletteFBZSky", 0xfffffc64)		// set the redesigned outdoor palette
+		else if (paletteSource == 0x052dc0)
+			System.loadExternalRawData("PaletteFBZIndoor", 0xfffffc64)	// set the redesigned indoor palette
+	}
+	fn052a2a()
+	fn04f2f6()
+
+	D0.u16 = (D0.u16 + D6.u16) & level.height.tilemask
+	u16[0xffffeec8] = D0.u16
+	u16[0xffffeeca] = 0x0f
+
+	signalMultiReturn()
+	if (level.scrolling_routine == 0x08)
+	{
+		fn05303c()
+	}
+	else
+	{
+		fn053060()
+	}
+}
+
+
+
+
+
+// Adjust ending of FBZ2 to be at sunset.
+// This function is only called after the laser miniboss.
+// Different functions handle the sky palette switcher elsewhere.
+// The character palette line transparency color is also made to match the sky color to prevent camera shenanigans from showing a black void.
+//# address-hook(0x052f32) end(0x052f9e)
+function void fn052f32()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.fn052f32()
+		u16[0xfffffc00] = u16[0xfffffc6e]	// set character transparency color to sky color
+		u16[0xfffffc80] = u16[0xfffffcee]	// set character transparency color to sky color
+		return
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x0532b6
+		if (allocDynamicObjectAfterA1())
+		{
+			objA1.update_address = 0x0533ce
+			zeroMemory(0xffffeeea, 0x14)
+
+			A5 = 0xffffeeea		// Start address of vertical scroll offsets
+			D1 = 9
+			while (D1.s16 >= 0)
+			{
+				if (!allocDynamicObjectAfterA1())
+					break
+
+				u16[(A5+=2)-2] = A1.u16
+				objA1.update_address = 0x0534c6
+				u16[A1 + 0x2e] = D1.u16
+				--D1.s16
+			}
+		}
+	}
+	// Set sunset palette
+	u16[0xfffffc62] = 0x0aee
+	u32[0xfffffc64] = 0x0cee0aee
+	u32[0xfffffc68] = 0x08ce06ae
+	u32[0xfffffc6c] = 0x028e046e
+	u32[0xfffffc70] = 0x0cee08ee
+	u16[0xfffffc00] = u16[0xfffffc6e]	// set character transparency color to sky color
+	u16[0xfffffce2] = 0x0aee
+	u32[0xfffffce4] = 0x0cee0aee
+	u32[0xfffffce8] = 0x08ce06ae
+	u32[0xfffffcec] = 0x028e046e
+	u32[0xfffffcf0] = 0x0cee08ee
+	u16[0xfffffc80] = u16[0xfffffcee]	// set character transparency color to sky color
+
+}
+
+
+
+
+
+// For SOZ2 lighting changes, pull from a new ROM location when using redesigned palettes
+//# address-hook(0x002598) end(0x00266a)
+function void LevelPaletteUpdate.SOZ2()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.LevelPaletteUpdate.SOZ2()
+		return
+	}
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		// Change light state every 15 seconds
+		u16[0xfffff634] = 899
+		if (u8[0xfffff7c3] < 5)
+		{
+			// Go to next light state... it's getting darker
+			++u8[0xfffff7c3]
+			if ((u8[0xfffff7c3] & 0x01) == 0)
+			{
+				u8[0xfffff650] = 2
+				u16[0xfffff658] = 0
+			}
+		}
+	}
+
+	bool goto00264e = false
+	if (u8[0xfffff650] != 0)
+	{
+		--u16[0xfffff658]
+		if (s16[0xfffff658] < 0)
+		{
+			u16[0xfffff658] = 3
+			if (s8[0xfffff650] >= 0)
+			{
+				--u8[0xfffff650]
+				u16[0xfffff652] += 0x34
+				++u16[0xfffff656]
+			}
+			else
+			{
+				++u8[0xfffff650]
+				u16[0xfffff652] -= 0x34
+				--u16[0xfffff656]
+			}
+
+			A0 = 0x2d47e4 + s16[0xfffff652]
+			copyMemory(0xfffffc42, A0, 0x16)
+			A0 += 0x16
+			copyMemory(0xfffffc62, A0, 0x1e)
+
+			D0.u16 = u16[0xfffff654]
+			goto00264e = true
+		}
+	}
+
+	--u16[0xfffff65a]
+	if (s16[0xfffff65a] < 0)
+	{
+		u16[0xfffff65a] = 5
+
+		D0.u16 = u16[0xfffff654]
+		u16[0xfffff654] += 8
+		if (u16[0xfffff654] >= 0x20)
+			u16[0xfffff654] = 0
+
+		goto00264e = true
+	}
+
+	if (goto00264e)
+	{
+		D1.u16 = u16[0xfffff656] * 32
+		A0 = 0x0030da + D1.s16	// What is at 0x0030da? Sand slides and falls, perhaps? Act 1 also uses data from here.
+		u32[0xfffffc58] = u32[A0 + D0.s16]
+		u32[0xfffffc5c] = u32[A0 + D0.s16 + 4]
+	}
+}
+
+
+
+
+
+// Ignore loading the alternate rock ground palette at the LRZ1 boss.
+// This function is from boss_lrz1.lemon.
+// The alternate palette is kept at 0x078e2a (which is where A1 points).
+// 0x78e6a contains a copy of the last two LRZ2 palette lines; a different call to fn078b38() loads these.
+//# address-hook(0x078528) end(0x078536)
+function void fn078528()
+{
+	objA0.update_address = 0x078538
+	if (palette_set < 2 || original_mode)	// only create the alternate palette for S3&K and ROM hack modes
+	{
+		A1 = 0x078e2a
+		fn078b38()
+	}
+}
+
+
+
+
+
+// Load the LRZ2 intro palette directly from its normal palette data
+//# address-hook(0x078b08) end(0x078b32)
+function void fn078b08()
+{
+	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
+	{
+		base.fn078b08()
+		return
+	}
+	if (camera.position.x.u16 < 0x02c0)
+	{
+		u16[0xfffffc52] = 0x0202	// adjustment to make hardened lava surface match LRZ2 palette
+		return
+	}
+
+	move_area.left = 0x02c0
+//	copyMemory(0xfffffc20, 0x0a96dc, 0x20)
+
+//	A1 = 0x0a96dc + 0x20 // normally 0x078e6a, which contains a copy of the last two LRZ2 palette lines.
+//	fn078b38()
+
+	System.loadExternalRawData("Palette0901", 0xfffffc20)		// Load LRZ2 palette
+
+	UnloadObject()
+}
+
+
+
+
+
+// Place a player palette line alteration in a simple LRZ2 function.
+// Since the player objects in AIR use unique data, this only edits other objects sharing the palette.
+// Here, that's the background behind the pulleys in LRZ2, which should share another background color.
+//# address-hook(0x056ff8) end(0x056ffc)
+function void UpdateLevelScrolling.LRZ2()
+{
+	if (palette_set >= 2 && !original_mode)		// not for S3&K or ROM hack palettes
+		u16[0xfffffc1e] = u16[0xfffffc52] 		// new line that changes final player palette entry
+	call 0x057000 + level.scrolling_routine
+}
+
+
+
+
+
+// Fix by Alieneer in the S3AIR Discord to use all LRZ2 palette cycle colors
+// This is already in AIR proper, but original mode may disable the fix if desired
+
+//# address-hook(0x0026f2) end(0x00277c)
+function void LevelPaletteUpdate.LRZ2()
+{
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 0x0f
+
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] += 8
+		if (u16[0xfffff632] >= 128)
+			u16[0xfffff632] = 0
+
+		A0 = 0x00327e
+		u32[0xfffffc42] = u32[A0 + D0.s16]
+		u32[0xfffffc46] = u32[A0 + D0.s16 + 4]
+
+		D0.u16 = u16[0xfffff652]
+		u16[0xfffff652] += 4
+		if (u16[0xfffff652] >= 28)
+			u16[0xfffff652] = 0
+
+		A0 = 0x0032fe
+		u32[0xfffffc62] = u32[A0 + D0.s16]
+	}
+
+	--u16[0xfffff658]
+	if (s16[0xfffff658] < 0)
+	{
+		u16[0xfffff658] = 0x0f
+
+		D0.u16 = u16[0xfffff654]
+		u16[0xfffff654] += 8
+		if (u16[0xfffff654] >= 256)
+			u16[0xfffff654] = 0
+
+		// Fixed palette cycle, #contributed by Alieneer
+		if (!original_mode)
+			copyMemory(0xfffffc76, 0x003344 + D0.u16, 8)
+		else
+		{
+			A0 = 0x003344
+			u32[0xfffffc76] = u32[A0 + D0.s16]
+			u32[0xfffffc7a] = u32[A0 + D0.s16]
+		}
+	}
+}
+
+
+
+
+
+// Set the palette to shift to when the Death Egg lights the LRZ2 boss area on fire
+// Function taken from lrz_deatheggstarting.lemon
+//# address-hook(0x079416) end(0x079480)
+function void fn079416()
+{
+	objA0.update_address = 0x079486
+	u8[0xfffff650] = 0x80
+	objA0.countdown_value = 0x0f
+	playSound(0x9f)
+
+	copyMemory(0xfffffc80, 0xfffffc00, 0x20)
+	copyMemory(0xfffffca0, 0x079726, 0x60)
+	if (palette_set >= 2 && !original_mode)
+		System.loadExternalRawData("PaletteLRZ2BossFire", 0xfffffca0)
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x085e64
+		u16[A0 + 0x44] = A1.u16
+		u16[A1 + 0x3a] = 0x03
+	}
+
+	Kosinski.addToDMAQueue(0x17093c, 0x8480)
+
+	addPatternLoadingCue(0x083d64)
+}
+
+
+
+
+// Call the chosen palette if restarting from the star post in the LRZ2 boss.
+//# address-hook(0x059a7e) end(0x059afe)
+function void InitLevelTiles.LRZ_Boss()
+{
+	move_area.right = getScreenExtend() * 2
+	A1 = 0xffffb000
+	if (objA1.position.x.u16 >= 0x0480)
+	{
+		copyMemory(0xfffffca0, 0x079726, 0x60)
+		if (palette_set >= 2 && !original_mode)
+			System.loadExternalRawData("PaletteLRZ2BossFire", 0xfffffca0)
+
+		A1 = 0xfffffd00
+		objA1.position.x.u16 = 0x09c0
+		objA1.position.y.u16 = 0x036c
+
+		D0.u16 = 0x0920
+		camera.foreground.x.u16 = D0.u16
+		camera.position.x.u16 = D0.u16
+		camera.position.x.frac = 0
+		move_area.left = D0.u16
+		move_area.right = D0.u16
+
+		D0.u16 = 0x02f0
+		camera.foreground.y.u16 = D0.u16
+		camera.position.y.u16 = D0.u16
+		camera.position.y.frac = 0
+		level.vertical_wrap = D0.u16
+		move_area.bottom.current = D0.u16
+		move_area.bottom.target = D0.u16
+
+		level.special_scrolling = 0x14
+		level.display_routine = 0x10
+		u16[0xffffeed4] = 0x2d
+		u16[0xffffeec0] = 0x0c
+	}
+
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+
+
+
+// Change the art_tile value of the stationary platforms in the LRZ2 boss lava fall
+// to correct a call to the wrong palette line.
+// Function taken from objects\10_lrz\lrz_lavafallplatform.lemon.
+//# address-hook(0x079cb4) end(0x079ccc)
+//# address-hook(0x079c72) end(0x079ccc)
+//# address-hook(0x079cf8) end(0x079d02)
+function void fn079cf8()
+{
+	setupObjectAttributesFull(0x07a178)
+	if (!original_mode)
+		objA0.sprite_attributes = 0x4001	// render using the prior palette line (can also be done by injecting 0x40 at 0x07a17c)
+	objA0.update_address = 0x079d08
+	fn079d08()
+}
+
+
+
+
+
+// Alter when the purples are swapped for yellows in HPZ
+//# address-hook(0x0656a8) end(0x0656d0)
+function void fn0656a8()
+{
+	if (original_mode)
+	{
+		base.fn0656a8()
+		return
+	}
+
+	D0.u16 = u16[A0 + 0x3a]
+	D1 = (camera.position.x.u16 >= 0x0280) ? 4 : 0
+	u16[A0 + 0x3a] = D1.u16
+	if (D1.u16 != D0.u16)
+	{
+		A1 = u32[0x0656d2 + D1.s16]
+		copyMemory(0xfffffc20, A1, 0x60)
+		if (palette_set >= 2&& D1 == 4)
+		{
+			System.loadExternalRawData("PaletteHPZ2A", 0xfffffc20)
+			System.loadExternalRawData("PaletteHPZ2B", 0xfffffc40)
+		}
+		else if (palette_set >= 2 && D1 == 0)
+		{
+			System.loadExternalRawData("PaletteHPZ1A", 0xfffffc20)
+			System.loadExternalRawData("PaletteHPZ1B", 0xfffffc40)
+		}
+	}
+}
+
+
+
+
+
+// Set the chosen palette when entering HPZ via a giant ring.
+// Function taken from level\11_hpz\hpz_emeraldcave.lemon
+//# address-hook(0x090964) end(0x090a70)
+function void fn090964()
+{
+	Kosinski.addToDMAQueue(0x1759ac, 0x9580)
+	Kosinski.addToDMAQueue(0x17588a, 0x9100)
+
+	A1 = (global.characters == CHARS_KNUCKLES_ALONE) ? 0x0a8a3c : 0x066912
+	copyMemory(0xfffffca0, A1, 0x20)
+	copyMemory(0xfffffcc0, 0x0669f2, 0x40)
+	if (palette_set >= 2 && !original_mode)	// load the redesigned palette if needed
+		System.loadExternalRawData("PaletteHPZ2B", 0xfffffcc0)
+
+	u32[0xfffffce2] = 0x06a00660
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x0906a0
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x045528
+		objA1.position.x.u16 = 0x1640
+		objA1.position.y.u16 = 0x03c7
+		u16[A0 + 0x44] = A1.u16
+	}
+
+	if (u16[0xffffef6c] != 0)
+	{
+		D2 = 0
+		D3 = 6
+		while (D3.s16 >= 0)
+		{
+			allocDynamicObjectStd()
+			objA1.update_address = 0x090774
+			u8[A1 + 0x2c] = D2.u8
+			++D2.u16
+			--D3.s16
+		}
+
+		UnloadObject()
+		return
+	}
+
+	objA0.update_address = 0x090a72
+	objA0.countdown_value = 0x1f
+	A2 = 0xffffffb2
+	D1 = 2
+	D2 = 0
+	D3 = 6
+	while (D3.s16 >= 0)
+	{
+		if (D1.u8 <= u8[(A2+=1)-1])
+		{
+			allocDynamicObjectStd()
+			objA1.update_address = 0x090774
+			u8[A1 + 0x2c] = D2.u8
+		}
+		++D2.u16
+		--D3.s16
+	}
+
+	A1 = 0xffffb000
+	fn090a4c()
+
+	A1 = 0xffffb04a
+	fn090a4c()
+}
+
+
+function void fn090a4c()
+{
+	u8[A1 + 0x0a] |= 0x80
+	objA1.position.x.u16 = 0x1640
+	objA1.position.y.u16 = 0x03a3
+	objA1.state = char.state.DISAPPEARED
+	u8[A1 + 0x22] = 0
+	u8[A1 + 0x2e] = 0x83
+}
+
+
+
+
+
+// Manually force two background colors during the fade to HPZ from special stage results.
+// These colors do not work in DAGE for reasons unknown.
+// Function taken from level\special\bs_results.lemon
+//# address-hook(0x02e410) end(0x02e4d2)
+function void fn02e410()
+{
+	if (original_mode)
+	{
+		base.fn02e410()
+		return
+	}
+	if (objA0.countdown_value != 0)
+	{
+		// Still waiting
+		--objA0.countdown_value
+		if (objA0.countdown_value == 0 && global.lock_on_state == 0 && global.sk_bluespheres && bluespheres.blue_remaining == 0)
+		{
+			palette_fade.range = 0x003f
+			global.fade_timer = 0x16
+
+			A1 = 0xfffffc00
+			u16[A1 + 0x42] = 0x0eee
+			u16[A1 + 0x44] = 0x0eee
+			u16[A1 + 0x46] = 0x0eee	// new line
+			u16[A1 + 0x4c] = 0x0eee
+			u16[A1 + 0x62] = 0x0eee
+			u16[A1 + 0x66] = 0x0eee
+			u16[A1 + 0x68] = 0x0eee	// new line
+			u16[A1 + 0x6e] = 0x0eee
+			u16[A1 + 0x70] = 0x0eee
+			u16[A1 + 0x7c] = 0x0eee
+			u16[A1 + 0x7e] = 0x0eee
+		}
+
+	#if STANDALONE
+		if (objA0.countdown_value == 269)
+	#else
+		if (objA0.countdown_value == 289)
+	#endif
+		{
+			playMusic(MUSIC_LEVELCLEAR)
+		}
+	}
+	else
+	{
+		// Counting bonuses towards score
+		u16 delta = 10
+	#if STANDALONE
+		if (Game.getSetting(SETTING_LEVELRESULT_SCORE))
+		{
+			// Count faster over time
+			if (results.total_bonus >= 3000)
+				delta = 30
+			else if (results.total_bonus >= 1000)
+				delta = 20
+
+			// Allow for manually (more or less) skipping the counter
+			if (control.pad1.state & (CONTROL_ABC | CONTROL_START))
+			{
+				delta = 200
+			}
+		}
+	#endif
+
+		D0 = 0
+		if (results.time_bonus != 0)
+		{
+			u16 diff = min(delta, results.time_bonus)
+			D0.u16 += diff
+			results.time_bonus -= diff
+		}
+		if (results.ring_bonus != 0)
+		{
+			u16 diff = min(delta, results.ring_bonus)
+			D0.u16 += diff
+			results.ring_bonus -= diff
+		}
+
+	#if STANDALONE
+		// Needed for SETTING_LEVELRESULT_SCORE
+		results.total_bonus += D0.u16
+	#endif
+		if (D0.u16 != 0)
+		{
+			// Still counting
+			AddScore()
+			if ((level.framecounter & 0x03) == 0)
+			{
+				playSound(SFX_CLICK)
+			}
+		}
+		else
+		{
+			playSound(0xb0)
+			objA0.countdown_value = 120
+			objA0.base_state += 2
+			fn02e4d6()
+		}
+	}
+}
+
+
+
+
+// Correct the issue with the GHZ boss chain link palette only when not in original mode
+// Function taken from bosses\boss_ssz_mid1.lemon
+//# address-hook(0x07a4ec) end(0x07a4fa)
+function void fn07a4ec()
+{
+	fn07a634()
+	objA0.value3a = 0x04
+	setupObjectAttributesFull(0x07a66c)
+	if (!original_mode)
+		objA0.sprite_attributes -= sprite_attribute.PALETTE.LINE1	// Fix for wrong palette line usage, #contributed by Legobouwer
+}
+
+
+
+
+// Remove an AIR palette load timing tweak in the SSZ intro in Original Mode
+// Function taken from scripts\level\12_ssz\ssz_start.lemon
+//# address-hook(0x06594a) end(0x0659b0)
+function void fn06594a()
+{
+	fn065fde()
+	fn08459c()
+
+	s16 dx = camera.position.x.u16 - 0x80
+	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+	if (dx <= s16(objA0.position.x.u16) && dy <= 0x0200)
+	{
+	#if STANDALONE
+		// Perform palette change earlier
+		if ((dx > s16(objA0.position.x.u16) - 0x40 - getScreenExtend() * 2) && !original_mode)
+		{
+			copyMemory(0xfffffc20, 0xfffffca0, 0x20)
+		}
+	#endif
+		return
+	}
+
+	// Change palette (e.g. for rings) and let Knuckles disappear
+
+	checkpoint.number = 1
+	checkpoint.x = 0x0140
+	checkpoint.y = 0x0c6c
+	Checkpoint.SaveCurrentState()
+
+	copyMemory(0xfffffc20, 0xfffffca0, 0x20)
+
+	addPatternLoadingCue(0x083d48)
+	fn0851e4()
+	Object.TriggerUnloading()
+}
+
+
+
+
+// Alter how palettes are loaded when the Death Egg first appears in SSZ's background.
+// The change here was made for new palettes, but it doesn't seem to harm the old palettes at all.
+// Function taken from scripts\level\12_ssz\ssz_start.lemon
+//# address-hook(0x0659cc) end(0x065a2c)
+function void fn0659cc()
+{
+	setupObjectAttributesFull(0x0664aa)
+	objA0.update_address = 0x065a30
+
+	objA0.position.x.u16 = 0x0200
+	objA0.position.y.u16 = 0x0c68
+	objA0.velocity.y = 0x0c68
+	u16[A0 + 0x40] = 0xffc0
+	objA0.countdown_value = 0x0100
+	global.random.seed = global.framecounter
+
+	spawnChildObjects(0x0665c4)
+
+	copyMemory(0xfffffce0, 0xfffffc60, 0x20)
+
+	A1 = 0x0669b2 + 0x10	// addition usually not present
+	A2 = 0xfffffc70	// usually fc60
+	D0 = 0x07		// usually 0x0f
+	while (D0.s16 >= 0)
+	{
+		D1.u16 = u16[(A1+=2)-2]
+		if (D1.u16 != 0)
+		{
+			u16[A2] = D1.u16
+		}
+		A2 += 2
+		--D0.s16
+	}
+
+	fn065a30()
+}
+
+
+
+
+
+
+
+// Switch some palette colors around for background trickery during the ending of SSZ1
+//# address-hook(0x057eba) end(0x057eba)
+function void fn057eba()
+{
+	if (palette_set >= 2 && !original_mode)	// only for new palettes
+		u16[0xfffffc5e] = u16[0xfffffc6c] // new line to apply the sky background color to the glass circles and "foreground background"
+	fn057eca()
+}
+
+
+
+
+
+// Revert the above change after the "foreground background" is gone but before the glass circles are shown
+//# address-hook(0x0583a0) end(0x0583a0)
+function void fn0583a0()
+{
+	if (palette_set >= 2 && !original_mode)	// only for new palettes
+		u16[0xfffffc5e] = 0x0e44	// new line to return the glass circle color
+	objA0.update_address = 0x0583a6
+	fn0583a6()
+}
+
+
+
+
+
+// Swap the target palette after a fade to white in SSZ2
+// Option 1: during the transition between bosses
+// Taken from \scripts\bosses\boss_ssz_supermecha.lemon
+// //# address-hook(0x07d0a8) end(0x07d0de)
+// function void fn07d0a8()
+// {
+//	// Screen fade to white
+//
+//	--objA0.countdown_value
+//	if (objA0.countdown_value < 0)
+//	{
+//		objA0.countdown_value = 0x05
+//		fadePaletteToWhiteUniform()
+//
+//		--objA0.value39
+//		if (s8[A0 + 0x39] < 0)
+//		{
+//			objA0.update_address = 0x07d0e0
+//			objA0.value39 = 0x02
+//			objA0.countdown_value = 0x1d
+//			copyMemory(0xfffffcc0, 0x0a97bc, 0x40)	//move standard SSZ2 colors into target palette RAM lines 3 and 4
+//		}
+//	}
+//}
+//
+//
+// Option 2: during the transition from final boss to ending cutscene
+//# address-hook(0x05e70e) end(0x05e804)
+function void fn05e70e()
+{
+	setupObjectAttributesFull(0x0600c2)
+	objA0.countdown_value = 299
+
+	A1 = 0xffffb000
+	u8[A1 + 0x2e] = 0x83
+	u8[A1 + 0x22] = 0
+
+	player1.camera_lock = 0xff
+	u8[0xfffffab8] = 0
+	global.level_started = 0
+	camera.screenshake.state = 0
+	timer.alldata = 0
+
+	objA0.position.x.u16 = camera.position.x.u16 + 0xc0
+	objA0.position.y.u16 = camera.position.y.u16 + 0x0110
+
+	spawnChildObjects(0x0601ba)
+	u32[A0 + 0x30] = 0x060236
+
+	fn05fe82()
+
+	if (outro.ending_type >= 0)
+	{
+		objA0.animation.sprite = 0x04
+		u32[A0 + 0x30] = 0x06023f
+
+		spawnChildObjects(0x0601b2)
+
+		Kosinski.addToDMAQueue(0x17fcba, 0xa5c0)
+
+		if (outro.ending_type != 0)
+		{
+			hud.dirty.timer = 0x01
+			super.palettefx.state = 0xff
+			super.palettefx.timer = 0x0f
+			super.active = 1
+			super.ring_dec.frames = 0x7fff
+		}
+	}
+
+	copyMemory(0xfffffca0, 0x0a8a3c, 0x20)
+	copyMemory(0xfffffcc0, 0x0a97bc, 0x40)	// move standard SSZ2 colors into target palette RAM lines 3 and 4
+	u32[0xfffffcaa] = 0xee0088
+
+	Kosinski.addToDMAQueue(0x163b9a, 0x6200)
+	Kosinski.addToDMAQueue(0x163418, 0x3c60)
+	Kosinski.addToDMAQueue(0x162914, 0x4dc0)
+
+#if STANDALONE
+	if (!original_mode)
+		Game.startSkippableCutscene()
+
+	if (Game.isNormalGame())
+		Game.setAchievementComplete(ACHIEVEMENT_LONGPLAY)
+#endif
+}
+
+
+
+
+
+// A minor palette change after the DEZ1 boss must be redone for new palettes.
+// Function taken from bosses\boss_dez1.lemon
+//# address-hook(0x07e4a2) end(0x07e4c8)
+function void fn07e4a2()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	// Slight palette change
+	copyMemory(0xfffffc20, 0x07f01c, 0x20)
+	if (palette_set >= 2 && !original_mode)
+		System.loadExternalRawData("PaletteDEZ2Boss", 0xfffffc20)
+
+	u8[0xffffb02e] = 0
+	player1.control_override = 0
+	player2.control_override = 0
+	UnloadObject()
+}
+
+
+
+
+
+// In main.lemon, fn0593ec() has a check to prevent redesigned palette reloading when the DEZ1 act results appear.
+
+
+
+
+
+
+
+
+
+
+
+// In main.lemon, UpdateLevelScrolling.DEZ2() has palette effects as the background is swapped in DEZ2.
+
+
+
+
+
+// Select which palette cycle to use in DEZ2 based on which background is in use
+//# address-hook(0x0027b2) end(0x002818)
+function void LevelPaletteUpdate.DEZ2()
+{
+	if (u16[0xfffffc62] == u16[0x0a98bc + 0x42] && global.act == 0x01)	// In Act 2, check differing colors between background palettes to find which background is present.
+	{																	// This entire section is a copy of LevelPaletteUpdate.DEZ1(), which normally ends calling the Act 2 function.
+		--u16[0xfffff65a]
+		if (s16[0xfffff65a] < 0)
+		{
+			u16[0xfffff65a] = 0x0f
+	
+			D0.u16 = u16[0xfffff654]
+			u16[0xfffff654] += 8
+			if (u16[0xfffff654] >= 0x30)
+				u16[0xfffff654] = 0
+	
+			A0 = 0x00349c
+			u32[0xfffffc78] = u32[A0 + D0.s16]
+			u32[0xfffffc7c] = u32[A0 + D0.s16 + 4]
+		}
+	}
+
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		u16[0xfffff634] = 4
+
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] += 4
+		if (u16[0xfffff632] >= 48)
+			u16[0xfffff632] = 0
+
+		A0 = 0x003444
+		u32[0xfffffc5a] = u32[A0 + D0.s16]
+	}
+
+	--u16[0xfffff658]
+	if (s16[0xfffff658] < 0)
+	{
+		u16[0xfffff658] = 0x13
+
+		D0.u16 = u16[0xfffff652]
+		u16[0xfffff652] += 10
+		if (u16[0xfffff652] >= 40)
+			u16[0xfffff652] = 0
+
+		A0 = 0x003474 + D0.s16
+		A1 = 0xfffffc50
+		u32[(A1+=4)-4] = u32[(A0+=4)-4]
+		u32[(A1+=4)-4] = u32[(A0+=4)-4]
+		u16[(A1+=2)-2] = u16[(A0+=2)-2]
+	}
+}
+
+
+
+
+
+// Set final boss background image based on which palette is chosen.
+//# address-hook(0x05a544) end(0x05a554)
+function void UpdateLevelScrolling.DEZ_Boss()
+{
+	DEZBoss_CustomSprites()
+
+	A3 = 0xffff8008
+	D7.u16 = 0xc000
+	fn05a76c()
+
+	D0.u16 = level.scrolling_routine
+	call 0x05a558 + D0.s16
+}

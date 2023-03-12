@@ -1,0 +1,366 @@
+// Custom Text Display mod by ElspethThePict.
+// Mod available for public use as long as credit is given.
+
+//Current Message
+
+global u64 letters.string = 0
+global u16 letters.time = 0
+global u16 letters.offset.x = 0
+global u16 letters.offset.y = 0
+
+
+//Message Settings, used for movement and flashing
+
+global s16 letters.scroll.x = 0
+global s16 letters.scroll.y = 0
+global s16 letters.tick.x = 0
+global s16 letters.tick.y = 0
+
+global u8 letters.flash = 0
+
+
+//Message Queue
+
+global u64 letters.string.1 = 0
+global u16 letters.time.1 = 0
+
+global u64 letters.string.2 = 0
+global u16 letters.time.2 = 0
+
+global u64 letters.string.3 = 0
+global u16 letters.time.3 = 0
+
+global u64 letters.string.4 = 0
+global u16 letters.time.4 = 0
+
+
+
+
+//This works by saving strings as global variables, and having a setup within RenderHUD() to display them, and clkear them when it's done.
+//The code takes the string, goes along it, and determines the correct sprite for each character it finds.
+
+
+
+// DAGE has its own RenderHud() modifications, so we instead call Letters.Main() from elsewhere.
+/*
+// //# address-hook(0x00db44) end(0x00dbb2)
+function void RenderHUD()
+{
+
+	//This function will display the numerical value of the first character in the given string.
+	//If you want to add support for a character not yet supported, start here to figure out what char value you need.
+	//Character.Test("£")
+	
+	Letters.Main()
+	base.RenderHUD()
+	
+}
+*/
+
+function void Letters.ClearAll()
+{
+	letters.string = 0
+	letters.time = 0
+	letters.offset.x = 0
+	letters.offset.y = 0
+	letters.scroll.x = 0
+	letters.scroll.y = 0
+	letters.tick.x = 0
+	letters.tick.y = 0
+	letters.flash = 0
+	letters.string.1 = 0
+	letters.time.1 = 0
+	letters.string.2 = 0
+	letters.time.2 = 0
+	letters.string.3 = 0
+	letters.time.3 = 0
+	letters.string.4 = 0
+	letters.time.4 = 0
+}
+
+function void Letters.Main()
+{
+	//Main function that triggers the drawing of the messages.
+	//Typically, this is called by RenderHUD()
+	//Call it elsewhere if you need to display text somewhere the HUD isn't up.
+
+
+	if (letters.string == 0) //No message waiting?
+	{
+		if (letters.string.1 != 0)	//Are there any queued?
+		{
+			letters.string = letters.string.1	//Move each queued message down the queue.
+			letters.time = letters.time.1
+
+			letters.string.1 = letters.string.2
+			letters.time.1 = letters.time.2
+
+			letters.string.2 = letters.string.3
+			letters.time.2 = letters.time.3
+
+			letters.string.3 = letters.string.4
+			letters.time.3 = letters.time.4
+
+			letters.string.4 = 0
+			letters.time.4 = 0
+		}
+
+	}
+
+	if (letters.string != 0)	//Message waiting
+	{
+		letters.drawString(letters.string, letters.offset.x, letters.offset.y) // Show it
+
+		if (letters.time > 0)	
+		{
+			//Reduce the timer by 1 if it's still going
+
+			letters.time -= 1  
+		}
+		else
+		{
+			//Out of time, clear the message
+
+			letters.string = 0
+		}
+		
+	}
+	
+}
+
+
+function void letters.drawString(u64 key, u16 offset.x, u16 offset.y)
+{
+	//This function is called by the main HUD function.
+	//It goes through the provided string, and determines which character sprites are needed.
+
+	u16 character.space = 0
+	u8 char
+	u64 spritekey
+	u32 str.length
+
+	for (u16 i = 0; i < strlen(key); i++)
+	{
+
+		char = getchar(key, i)
+
+		//Invalid Characters are changed to a question mark.
+		if (char < 32 || char == 34 || (char > 126 && char != 194)) 
+		{
+			char = 63
+
+			//Sound for debugging
+			//playSound(SFX_UNDERWATER_BELL)
+		}
+
+		//Values above 127 seem to leave behind a second character. This fixes it, but 194 is the only character above 127 currently used.
+		else if (char == 194)
+			i++
+
+		//Convert Lower Case to Upper. Commented out as lower case is now supported.
+		//else if (char >= 97 && char <= 122)
+			//char -= 32
+		
+
+		//The ` character acts as a line break
+		if (char == 96)
+		{
+			character.space = 0
+			offset.y += 8
+		}
+
+		//No sprite for a space, but we still move right
+		else if (char == 32)
+		{
+			character.space += 5
+		}
+
+		//If not a line break or a space, display the character sprite
+		else
+		{
+			spritekey = stringformat("letters.%02d",char)
+			if (global.framecounter.low & 0x10 || letters.flash == 0)
+			{
+				Renderer.drawCustomSprite(spritekey, offset.x + character.space + letters.tick.x, offset.y + letters.tick.y, 0, SPRITE_FLAG_PRIO, 0xe000)
+			}
+
+
+			//Move right before displaying another letter
+			character.space += Letters.Spacing(char)
+
+		}
+	}
+
+	//Finally, make the movements based on the scroll values for the next frame.
+	letters.tick.x += letters.scroll.x
+	letters.tick.y += letters.scroll.y
+
+}
+
+
+
+function void Letters.Show(u64 words, u16 frames, u16 off.x, u16 off.y)
+{
+	//This is the function that sets the input to the global variables that will be displayed.
+	//It will also clear the queue, to prevent queued messages appearing after the new one.
+
+	letters.string = words
+	letters.time = frames
+	letters.offset.x = off.x
+	letters.offset.y = off.y
+	letters.flash = 0
+	letters.scroll.x = 0
+	letters.scroll.y = 0
+	letters.tick.x = 0
+	letters.tick.y = 0
+
+	Letters.Clear()
+}
+
+function void Letters.Show.Next(u64 words, u16 frames)
+{
+	//Find an empty queue slot, and fill it.
+	//If there are no slots free, text is abandoned.
+	//Adding more slots should be easy enough, remember to update
+	//RenderHUD() at the top if you do.
+
+	if (letters.string.1 == 0)
+	{
+		//playSound(SFX_UNDERWATER_BELL)
+		letters.string.1 = words
+		letters.time.1 = frames
+	}
+	else if (letters.string.2 == 0)
+	{
+		letters.string.2 = words
+		letters.time.2 = frames
+	}
+	else if (letters.string.3 == 0)
+	{
+		letters.string.3 = words
+		letters.time.3 = frames
+	}
+	else if (letters.string.4 == 0)
+	{
+		letters.string.4 = words
+		letters.time.4 = frames
+	}
+	
+}
+
+
+function void Letters.Clear()
+{
+	//Take each of the queue entries, and make sure they're zero.
+
+	letters.string.1 = 0
+	letters.time.1 = 0
+
+	letters.string.2 = 0
+	letters.time.2 = 0
+
+	letters.string.3 = 0
+	letters.time.3 = 0
+
+	letters.string.4 = 0
+	letters.time.4 = 0
+}
+
+
+function void Character.Test(u64 key)
+{
+	//Get the numerical value of a character printed in the displayline	
+	//This should match normal ASCII. Seems it goes off script past 128 though.
+
+	
+	u8 char = getchar(key,0)
+	System.writeDisplayLine(stringformat("%02d",char))
+	return
+}
+
+
+function void Letters.Test()
+{
+	//An easy way to display all available characters, to see what the font is like and to make sure the functions are working.
+
+	//Letters.Show("Letters Test``ABCDEFGHIJKLMNOPQRSTUVWXYZ`abcdefghijklmnopqrstuvwxyz`1234567890`| < > . , ! ? / \ : ; @ ' ~ #`{ } [  ] £ $ % ^ & * ( ) _ - + = ", 120, 200, 10)
+	//return
+
+	Letters.Show("Upper Case``ABCDEFGHI`JKLMNOPQR`STUVWXYZ", 120, 170, 10)
+	Letters.Show.Next("Lower Case``abcdefghij`klmnopqrst`uvwxyz", 120)
+	Letters.Show.Next("Numbers``123`456`789`0", 120)
+	Letters.Show.Next("Symbols``!'#$%&()*+-.`/:;<=>?@[\]^_`{|}~£", 120)
+	Letters.Show.Next("Spaces``These words are`separated by spaces.", 120)
+
+}
+
+
+function u16 Letters.Spacing(u8 char)
+{
+	//Basically a list to return a character's width.
+	//This is used to make sure the next character is placed correctly to the right.
+	//It's split into sections to try and minimise the number of checks each character goes through.
+
+	//Start by filtering lower case letters
+	if (char >= 97 && char <= 122)
+	{
+		if (char == 105)
+			return 3
+		else if (char == 108)
+			return 4
+		else if (char == 102)
+			return 5
+		else if (char == 109 || char == 119)
+			return 8
+		else
+			return 6
+
+	}
+
+	//Upper case letters are next
+	else if (char >= 65 && char <= 90)
+	{
+		if (char == 73)
+			return 5
+		else if (char == 69 || char == 70 || char ==  76)
+			return 6
+		else if (char == 77 || char ==  81)
+			return 8
+		else if (char == 87)
+			return 10
+		else
+			return 7
+	}
+
+	//Check for numbers next
+	else if (char >= 48 && char <= 57)
+	{
+			
+		if (char == 34 || (char >= 40 && char <= 42) || (char == 49 && !letters_marathonhud))	// || char == 49 spaces out the number 1 differently, but we want monospace for our HUD
+			return 4
+		else
+			return 7
+	}
+
+	//And the rest
+	else
+	{
+			if (char == 39 || char == 44 || char == 46 || char == 58 || char == 59)
+				return 2
+			else if (char == 33)
+				return 3
+			else if (char == 34 || (char >= 40 && char <= 42))
+				return 4
+			else if (char == 43 || char == 94)
+				return 6
+			else if (char == 36 || char == 63 || char == 95 || char == 126 || char == 194)
+				return 7
+			else if (char == 35 || char == 38 || char == 64)
+				return 8
+			else if (char == 37)
+				return 10
+			else // if (char == 45 || char == 47 || (char >= 60 && char <= 62) || (char >= 91 && char <= 93) || (char >= 123 && char <= 125))
+				return 5
+	}
+
+}

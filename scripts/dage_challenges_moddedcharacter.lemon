@@ -1,0 +1,30 @@
+// Fillable template for single-character mods in Challenges mode
+
+// Replace YourModNameHere with your character mod's name (from mod.json). Do not remove the quotation marks.
+global u64 DAGE_characterModName = "YourModNameHere"
+
+// Replace YourCharacterHere with your character's name without spaces. Do not remove the quotation marks.
+global u64 DAGE_characterName = "YourCharacterHere"
+
+// Replace 1 with your character's internal ID. 1 is for Sonic replacements, 2 for Tails, 3 for Knuckles.
+global u8 DAGE_characterID = 1
+
+// Replace continue_icon_sonic with the sprite key of your character's continue sprite.
+// Do not remove the quotation marks.
+global u64 DAGE_continueSpriteName = "continue_icon_sonic"
+
+
+
+// Copy and "include" this file in your character mod with variables filled out as stated.
+// These variables allow D.A. Garden Edition (DAGE) to recognize it.
+// DAGE will create persistent data for records in both Challenge modes and
+// show your character in the Act Select / Challenges menu.
+// DAGE will also disable medals / dev times, and disable access to Classic Mode
+// so your mods do not need to support more features than necessary.
+
+// This file is NOT a substitute for testing for compatibility!
+// Ensure your character displays properly in the Challenges menu and saves best times.
+// If you have functions outside of adding sprites and moves, ensure your character
+// can finish every level in Normal Game and Time Attack / Time Stone Trial.
+// Ensure that cutscenes/bosses do not appear in Time Attack / Time Stone Trial or either Speedrun mode.
+// Most can be disabled by replacing Game.isTimeAttack() with System.getGlobalVariableValueByName("time_attack").

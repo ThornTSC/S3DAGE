@@ -1,0 +1,903 @@
+// If using a custom menu, don't allow Start to open the AIR pause menu.
+// Also prevent the Start button from skipping the Sonic intro in Original Mode.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x0013e4) end(0x0014e4)
+
+function void UpdateGamePause()
+{
+//	if (pause_menu && !original_mode)
+//	{
+//		base.UpdateGamePause()
+//		return
+//	}
+
+	if (time_attack_end)
+		return
+
+#if !GAMEAPP
+	// This is only used in outro; and there's no actual need to prevent game pause there
+	if (global.pause_disabled)
+		return
+#endif
+
+	if (lives_counter <= 0)
+	{
+		global.game.paused = false
+		return
+	}
+
+	// AIR pausing: the whole script execution is paused. Used for Comeptition Mode.
+	if ((pause_menu || (global.zone >= 0x0e && global.zone <= 0x12)) && (control.pad1.pressed & CONTROL_START))
+	{
+		global.game.paused = true
+		bool canRestart = !global.pause_disabled && (global.game_mode == 0x0c && global.stage_type == 0 && u8[0xffffb000 + 0x05] <= 0x04) && !competition_mode.active && !original_mode
+		Game.onGamePause(canRestart)
+
+		global.frame_state = 0x10
+		waitForNextFrame()
+
+		Standalone.onResumeAfterPause()
+		global.game.paused = false
+
+		// Fix for brief glitch in Blue Spheres special stage
+		if (global.game_mode == 0x34)
+			BlueSpheres.replacePlaneRendering()
+		
+		return
+	}
+
+	// Everything from here on out is classic pausing.
+	// We can build on this to create our own pause menu instead of using the AIR menu.
+	// The code to skip the AIZ 1 Sonic intro should be included down here too!
+	if (!global.game.paused)
+	{
+		// Start button pressed?
+		if ((control.pad1.pressed & CONTROL_START) == 0)
+			return
+
+		// Entering game pause
+		global.game.paused = true
+		pause_menu_selection = 0
+		clean_screenshot = false
+	}
+
+	syncZ80_variantB(0x01)
+
+
+	bool pause_fast_forward = false
+	if (fast_forward)
+	{
+		pause_fast_forward = true
+		Game.endSkippableCutscene()
+	}
+	fast_forward = false
+
+	while (true)
+	{
+		if (global.game_mode >= 0x54)
+			return
+
+	//	Renderer.resetSprites()
+
+		global.frame_state = 0x10
+		waitForNextFrame()
+
+	@EntryPoint:
+
+        u32 backupA0 = A0
+
+		if (global.game_mode == 0x0c)
+		{
+			if (global.game_mode == 0x0c && isSonicIntro() && global.level_started == 0 && !original_mode)
+			{
+				// Skip AIZ 1 Sonic intro
+				//  -> Note that the Knuckles intro has its own handler
+				timer.alldata = 0
+				checkpoint.number = 1
+				checkpoint.x = 0x13a0
+				checkpoint.y = 0x041a
+				Checkpoint.SaveCurrentState()
+				checkpoint.camera.x = 0x1308
+				checkpoint.camera.y = 0x0390
+				level.restart = 1
+				break
+			}
+
+			if (Input.buttonPressed(BUTTON_Y) && clean_screenshot == false)
+			{
+				clean_screenshot = true
+				continue
+			}
+			else if ((Input.buttonPressed(BUTTON_Y) || (control.pad1.pressed & 0xff)) && clean_screenshot == true)
+			{
+				clean_screenshot = false
+				continue
+			}
+
+			A0 = 0xffffb000
+			D7 = 0x6d
+			updateGameObjectLoopRenderPaused()
+			RenderSprites()
+			PauseMenu_RenderLevelResultsBonuses()
+			PauseMenu_DrawCustomSprites()
+            A0 = backupA0
+
+			Audio.playOverride("silence", AudioContext.CONTEXT_MUSIC, 1, 0)	// create a track that is a fraction of a second of silence, and restart it every frame
+
+			if (!clean_screenshot)
+			{
+				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
+				{
+					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+
+					customMenu.countMedals()
+				}
+
+				if ((original_mode || global.pause_disabled) && PauseMenu_Basic())
+					break
+                else if (global.pause_disabled)
+				{
+					PauseMenu_ChangeTheme()
+                    continue
+				}
+				else if ((time_attack == 1 || time_attack == 2) && PauseMenu_Challenges())
+					break
+				else if ((time_attack != 1 && time_attack != 2) && !original_mode && PauseMenu_Normal())
+					break
+			}
+		}
+		else if (global.game_mode == 0x34)
+		{
+			// if (!original_mode)
+			//	BlueSpheres.replacePlaneRendering()
+			BlueSpheres.RenderSpheres()
+			BlueSpheres.renderCustomCharacterShadows()
+			BlueSpheres.renderCustomGround()
+
+			if (Input.buttonPressed(BUTTON_Y) && clean_screenshot == false)
+			{
+				clean_screenshot = true
+				continue
+			}
+			else if ((Input.buttonPressed(BUTTON_Y) || (control.pad1.pressed & 0xff)) && clean_screenshot == true)
+			{
+				clean_screenshot = false
+				continue
+			}
+			
+			A0 = 0xffffb000
+			D7 = 0x04
+			updateGameObjectLoopRenderPaused()
+			RenderSprites()
+            A0 = backupA0
+
+			Audio.playOverride("silence", AudioContext.CONTEXT_MUSIC, 1, 0)	// create a track that is a fraction of a second of silence, and restart it every frame
+			if (!clean_screenshot)
+			{
+				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
+				{
+					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+
+					customMenu.countMedals()
+				}
+
+				if (bluespheres.minigame_mode == 1)
+				{
+					if (PauseMenu_BlueSphere())
+						break
+				}
+				else if (PauseMenu_Basic())
+					break
+			}
+		}
+
+//		if (pausecheats.unlocked)
+//		{
+//			if (control.pad1.pressed & CONTROL_A)
+//			{
+//				global.game_mode = 0x58		// 0x04 for SEGA screen
+//				break
+//			}
+//
+//			if (control.pad1.state & CONTROL_B || control.pad1.pressed & CONTROL_C)
+//			{
+//				// Single step
+//				global.game.paused = true
+//				syncZ80_variantB(0x80)
+//				return
+//			}
+//		}
+
+		// In competition mode, button B during pause quits the stage
+		if (global.zone >= 0x0e && global.zone <= 0x12)
+		{
+			if ((control.pad1.pressed & CONTROL_B) && (competition_mode.game_mode < 0))
+			{
+				global.game_mode = 0xc0
+				break
+			}
+		}
+
+	//	if (control.pad1.pressed & CONTROL_START)
+	//	{
+	//		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+	//		break
+	//	}
+
+		PauseMenu_ChangeTheme()
+	}
+
+	syncZ80_variantB(0x80)
+
+	if (pause_fast_forward)
+	{
+		fast_forward = true
+		Game.startSkippableCutscene()
+	}
+	global.game.paused = false
+	clean_screenshot = false
+
+
+}
+
+
+function void PauseMenu_ChangeTheme()
+{
+	if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
+	{
+		if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_RIGHT))
+		{
+			theme.hud += 1
+			if (theme.hud == 3)
+				theme.hud = 0
+			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
+			{
+				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			}
+		}
+		else if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_LEFT))
+		{
+			if (theme.hud == 0)
+				theme.hud = 2
+			else
+				theme.hud -= 1
+			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
+			{
+				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			}
+		}
+	}
+}
+
+
+function u8 PauseMenu_Normal()
+{
+	if (u8[0xffffb005] == 0x06) 	// If the player character is dying,
+		return PauseMenu_Basic()	// remove the restart options until the life counter ticks down by 1.
+
+	if (pause_menu_selection >= 3 && pause_menu_selection <= 5)
+		return PauseMenu_Normal_Restart()
+	else if (pause_menu_selection >= 6)
+		return PauseMenu_ExitGame()
+
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 1
+		if (pause_menu_selection < 0)
+			pause_menu_selection = 2
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 1
+		if (pause_menu_selection > 2)
+			pause_menu_selection = 0
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Flicky.PauseMenu_Normal()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Saturn.PauseMenu_Normal()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_restart_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		pause_menu_selection = 3
+		return 0
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	{
+		pause_menu_selection = 6
+		return 0
+	}
+
+	return 0
+
+}
+
+
+function u8 PauseMenu_Normal_Restart()
+{
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 1
+		if (pause_menu_selection < 3)
+			pause_menu_selection = 5
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 1
+		if (pause_menu_selection > 5)
+			pause_menu_selection = 3
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Flicky.PauseMenu_Restart()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Saturn.PauseMenu_Restart()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("normal_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_star_post_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("normal_act_start_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 3) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		pause_menu_selection = 1
+		return 0
+	}
+
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 4)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue.
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		restartAtCheckpoint()
+		global.game.paused = false
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 5)
+	{
+		checkpoint.number = 0
+		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+
+		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue.
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		level.restart = 1
+		global.game.paused = false
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+
+	return 0
+
+}
+
+
+function u8 PauseMenu_ExitGame()
+{
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 1
+		if (pause_menu_selection < 6)
+			pause_menu_selection = 8
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 1
+		if (pause_menu_selection > 8)
+			pause_menu_selection = 6
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			Flicky.PauseMenu_ExitGame()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			Saturn.PauseMenu_ExitGame()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("main_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("air_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 6) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		if (time_attack == 1 || time_attack == 2)
+			pause_menu_selection = 3	// Challenge menu EXIT GAME
+		else
+			pause_menu_selection = 2	// Normal menu EXIT GAME
+		return 0
+	}
+
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 7)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		restart_timer = 0
+		exit_timer = 0
+		checkpoint.number = 0
+		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+		global.stage_type = 0
+		global.in_extra_stage = 0
+
+		if (global.game_mode == 0x34)
+		{
+			// bluespheres.movement_speed = 0
+			restartSpecialStage = 1
+			bluespheres.stage_exit_animation = 1
+		}
+
+		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue.
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+		zeroMemory(0xfffff100, 0x500)	// Clear out data used when loading level patterns, else the main game may try to access special stage data or vice versa.
+
+		global.game_mode = 0x58
+		global.game.paused = false
+
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 8)
+	{
+		restart_timer = 0
+		exit_timer = 0
+		checkpoint.number = 0
+		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+		global.stage_type = 0
+		global.in_extra_stage = 0
+
+		if (global.game_mode == 0x34)
+			restartSpecialStage = 1
+
+		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue.
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		global.game.paused = false
+
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent the A.I.R. menu music from playing
+		playMusic (0x2f)		// force this to be the current active music, else the level music and menu music play at the same time
+		exitGame = 1
+//		Game.returnToMainMenu()
+//		yieldExecution()
+		return 1
+	}
+
+	return 0
+
+}
+
+
+function u8 PauseMenu_Basic()
+{
+	if (pause_menu_selection >= 6)
+		return PauseMenu_ExitGame()
+
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 2
+		if (pause_menu_selection < 0)
+			pause_menu_selection = 2
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 2
+		if (pause_menu_selection > 2)
+			pause_menu_selection = 0
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			Flicky.PauseMenu_Basic()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			Saturn.PauseMenu_Basic()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	{
+		pause_menu_selection = 6
+		return 0
+	}
+
+	return 0
+
+}
+
+
+
+function u8 PauseMenu_BlueSphere()
+{
+	if (pause_menu_selection >= 6)
+		return PauseMenu_ExitGame()
+
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 1
+		if (pause_menu_selection < 0)
+			pause_menu_selection = 2
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 1
+		if (pause_menu_selection > 2)
+			pause_menu_selection = 0
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Flicky.PauseMenu_BlueSphere()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Saturn.PauseMenu_BlueSphere()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("ss_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("ss_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("ss_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		global.game.paused = false
+
+		if (global.game_mode == 0x34)
+		{
+			restartSpecialStage = 1
+			SpecialStage()
+		}
+
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	{
+		pause_menu_selection = 6
+		return 0
+	}
+
+	return 0
+
+}
+
+
+
+
+
+function u8 PauseMenu_Challenges()
+{
+	if (pause_menu_selection >= 6)
+		return PauseMenu_ExitGame()
+
+	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	{
+		pause_menu_selection -= 1
+		if (pause_menu_selection < 0)
+			pause_menu_selection = 3
+		playSound(0x5b)
+	}
+	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	{
+		pause_menu_selection += 1
+		if (pause_menu_selection > 3)
+			pause_menu_selection = 0
+		playSound(0x5b)
+	}
+
+	if (!clean_screenshot)
+	{
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Flicky.PauseMenu_Challenges()
+		}
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			Saturn.PauseMenu_Challenges()
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("challenge_pause_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("challenge_pause_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 6
+			Renderer.drawCustomSprite(stringformat("challenge_pause_select_act_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 6
+			Renderer.drawCustomSprite(stringformat("challenge_pause_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+		}
+	}
+
+	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	{
+	//	time_attack_end = 0			// Moving this to Standalone.onLevelStart() to avoid medal times showing for one frame after restarting a time attack.
+									// However, we now must consider what happens if we don't go to a *level* next (e.g., Green Sphere).
+		restart_timer = 0
+		exit_timer = 0
+		checkpoint.number = 0
+		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+
+		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue
+
+		level.restart = 1
+		global.game.paused = false
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	{
+	//	time_attack_end = 0			// Moving this to Standalone.onLevelStart() to avoid medal times showing for one frame after exiting a time attack.
+									// However, we now must consider what happens if we don't go to a *level* next (e.g., Green Sphere).
+	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects
+
+		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue
+
+		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
+		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
+									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
+
+		global.game.paused = false
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		return 1
+	}
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 3)
+	{
+		pause_menu_selection = 6
+		return 0
+	}
+
+	return 0
+
+}
+
+function void PauseMenu_RenderLevelResultsBonuses()
+{
+	for (u32 i = 0; i <= 0x6d; i++)
+	{
+		u32 objAddress = 0xffffb000 + (0x4a * i)
+		if (u32[objAddress] == 0x02dda2)
+		{
+			A0 = objAddress
+			D0.u16 = results.time_bonus
+			fn02ddbe()
+		}
+		else if (u32[objAddress] == 0x02ddac)
+		{
+			A0 = objAddress
+			D0.u16 = results.ring_bonus
+			fn02ddbe()
+		}
+		else if (u32[objAddress] == 0x02ddb6)
+		{
+			A0 = objAddress
+			D0.u16 = results.total_bonus
+			fn02ddbe()
+		}
+	}
+}
+
+// Render the level results from VRAM instead of as images in Original Mode
+// Functions taken from maingame\hud\levelresults.lemon
+//# address-hook(0x02ddbe)
+function void fn02ddbe()
+{
+	fn02ddc6()
+
+	if (original_mode)
+		DrawObject()
+}
+
+//# address-hook(0x02ddc6) end(0x02de02)
+function void fn02ddc6()
+{
+#if STANDALONE
+	// Exclude Blue Sphere results (for now)
+	u16 renderQueue = (objA0.update_address < 0x02ea5a) ? 0xe000 : 0
+#endif
+
+	u16[A0 + 0x16] = 7
+	fn02de50()
+
+	D1 = (D1 << 4) + (D1 >> 28)
+	A1 = A0 + 0x18
+	D2.u16 = objA0.position.x.u16 - 0x38
+	D3.u16 = objA0.position.y.u16
+	D4 = 0
+
+	for (u8 i = 0; i < 7; ++i)
+	{
+		u16[A1] = D2.u16
+		u16[A1+2] = D3.u16
+		D1 = (D1 << 4) + (D1 >> 28)
+		D0.u16 = D1 & 0x0f
+		if (D0.u16 != 0)
+			D4 = 1
+		D0.u16 += D4.u16
+		u8[A1+5] = D0.u8
+
+		if (!original_mode)
+		{
+			// Render the score digits directly right here
+			if (renderQueue != 0 && D0.u16 > 0)
+			{
+				HUD.drawDigit(D0.u16 - 1, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
+			}
+		}
+
+		A1 += 6
+		D2.u16 += 8
+	}
+
+	if (!original_mode)
+	{
+		// Render the additional 0 at the end
+		if (renderQueue != 0)
+		{
+			HUD.drawDigit(0, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
+		}
+	}
+}
+
+
+
+
+
+function void PauseMenu_DrawCustomSprites()
+{
+	if (global.zone_act == 0x0000)
+		AIZ1_CustomSprites()
+	else if (global.zone_act == 0x0100)
+		HCZ1_CustomSprites()
+	else if (global.zone_act == 0x0101)
+		HCZ2_CustomSprites()
+	else if (global.zone_act == 0x0200)
+		MGZ1_CustomSprites()
+	else if (global.zone_act == 0x0201)
+		MGZ2_CustomSprites()
+	else if (global.zone_act == 0x0400)
+		FBZ1_CustomSprites()
+	else if (global.zone_act == 0x0401)
+		FBZ2_CustomSprites()
+	else if (global.zone_act == 0x0500)
+		ICZ1_CustomSprites()
+	else if (global.zone_act == 0x0501)
+		ICZ2_CustomSprites()
+	else if (global.zone_act == 0x0701)
+		MHZ2_CustomSprites()
+	else if (global.zone_act == 0x0800)
+		SOZ1_CustomSprites()
+	else if (global.zone_act == 0x0801)
+		SOZ2_CustomSprites()
+	else if (global.zone_act == 0x0a00)
+		SSZ_CustomSprites()
+	else if (global.zone_act == 0x0b00)
+		DEZ1_CustomSprites()
+	else if (global.zone_act == 0x0b01)
+		DEZ2_CustomSprites()
+	else if (global.zone_act == 0x1700)
+		DEZBoss_CustomSprites()
+
+    else if (global.zone == 0x15)
+        BonusSM.RenderRotatingMaze()
+}
+
+
+
+// Function related to general\update_general.lemon ,  function void updateGameObjectLoopRenderOnly()
+//# address-hook(0x01ab1a) end(0x01ab30)
+function void updateGameObjectLoopRenderPaused()
+{
+	while (D7.s32 >= 0)
+	{
+		D0 = u32[A0]
+		if (D0 != 0)
+		{
+			bool invisObject = (D0 == 0x01ec6c || D0 == 0x01f45e || D0 == 0x01f4c4 || D0 == 0x01f528 || D0 == 0x01f606 || D0 == 0x01f66c || D0 == 0x01f6d0)
+			bool ignoreRender = (D0 == 0x03984e || (invisObject && !debug_mode.state))	// snowboard, invisible elements
+			if (!ignoreRender && super.active)
+				ignoreRender = (D0 == 0x019602 || D0 == 0x019732 || D0 == 0x019922 || D0 == 0x01952a)	// shields while super is active
+			// Only objects that are visible on screen
+			if ((objA0.render_flags & render_flag.VISIBLE) && !ignoreRender)
+			{
+				DrawObject()
+			}
+		}
+
+		// Go on to next object
+		A0 += 0x4a
+		--D7.s32
+	}
+}

@@ -1,0 +1,47 @@
+{
+    "titlecard_yellowbar":  { "File": "TitleCard_YellowBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_bluebar":  { "File": "TitleCard_BlueBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_orangebar":  { "File": "TitleCard_OrangeBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_new":  { "File": "TitleCard_RedBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_dage":  { "File": "TitleCard_DAGEname.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_dage_orig":  { "File": "TitleCard_DAGEname_Orig.bmp", "Rect": "0,48,64,176", "Center": "0,0" },
+    // To move text right, subtract from x center. To move down, subtract from y center.
+    "titlecard_act1":  { "File": "Title_Act1.png", "Rect": "0,0,77,48", "Center": "22,-64" }, 
+    "titlecard_act2":  { "File": "Title_Act2.png", "Rect": "0,0,77,48", "Center": "22,-64" },
+    "titlecard_singleact":  { "File": "Title_Act.png", "Rect": "0,0,77,48", "Center": "22,-64" },
+    "titlecard_whitebars":  { "File": "Title_WhiteBars.png", "Rect": "0,0,47,21", "Center": "38,-64" },
+  
+    "titlecard_zone0":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "19,-16" },  // Rect3 - Center1 = 152 for all entries
+    "titlecard_zone1":  { "File": "Title_HCZ.png", "Rect": "0,0,139,66", "Center": "-13,-16" }, // in order to right-align them all
+    "titlecard_zone2":  { "File": "Title_MGZ.png", "Rect": "0,0,196,66", "Center": "44,-16" },
+    "titlecard_zone3":  { "File": "Title_CNZ.png", "Rect": "0,0,194,66", "Center": "42,-16" },
+    "titlecard_zone4":  { "File": "Title_FBZ.png", "Rect": "0,0,192,66", "Center": "40,-16" },
+    "titlecard_zone5":  { "File": "Title_ICZ.png", "Rect": "0,0,100,66", "Center": "-52,-16" },
+    "titlecard_zone6":  { "File": "Title_LBZ.png", "Rect": "0,0,167,66", "Center": "15,-16" },
+    "titlecard_zone7":  { "File": "Title_MHZ.png", "Rect": "0,0,201,66", "Center": "49,-16" },
+    "titlecard_zone8":  { "File": "Title_SOZ.png", "Rect": "0,0,150,66", "Center": "-2,-16" },
+    "titlecard_zone9":  { "File": "Title_LRZ.png", "Rect": "0,0,138,66", "Center": "-14,-16" },
+    "titlecard_zone10":  { "File": "Title_SSZ.png", "Rect": "0,0,194,66", "Center": "42,-16" },
+    "titlecard_zone11":  { "File": "Title_DEZ.png", "Rect": "0,0,141,66", "Center": "-11,-16" },
+    "titlecard_zone12":  { "File": "Title_DDZ.png", "Rect": "0,0,180,66", "Center": "28,-16" },
+    "titlecard_zone13":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "34,-16" },
+    "titlecard_bonus":  { "File": "Title_Bonus.png", "Rect": "0,0,76,57", "Center": "-42,-16" },
+    "titlecard_stage":  { "File": "Title_Stage.png", "Rect": "0,0,73,57", "Center": "-22,-16" },
+
+    // Same as above, but with proper centers rather than centers meant for title card alignment.
+    // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.
+    "titlecard_zone00_menu":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "86,33" },
+    "titlecard_zone01_menu":  { "File": "Title_HCZ.png", "Rect": "0,0,139,66", "Center": "70,33" },
+    "titlecard_zone02_menu":  { "File": "Title_MGZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
+    "titlecard_zone03_menu":  { "File": "Title_CNZ.png", "Rect": "0,0,194,66", "Center": "97,33" },
+    "titlecard_zone04_menu":  { "File": "Title_ICZ.png", "Rect": "0,0,100,66", "Center": "50,33" },
+    "titlecard_zone05_menu":  { "File": "Title_LBZ.png", "Rect": "0,0,167,66", "Center": "84,33" },
+    "titlecard_zone06_menu":  { "File": "Title_MHZ.png", "Rect": "0,0,201,66", "Center": "101,33" },
+    "titlecard_zone07_menu":  { "File": "Title_FBZ.png", "Rect": "0,0,192,66", "Center": "96,33" },
+    "titlecard_zone08_menu":  { "File": "Title_SOZ.png", "Rect": "0,0,150,66", "Center": "75,33" },
+    "titlecard_zone09_menu":  { "File": "Title_LRZ.png", "Rect": "0,0,138,66", "Center": "69,33" },
+    "titlecard_zone0a_menu":  { "File": "Title_SSZ.png", "Rect": "0,0,194,66", "Center": "97,33" },
+    "titlecard_zone0b_menu":  { "File": "Title_DEZ.png", "Rect": "0,0,141,66", "Center": "71,33" },
+    "titlecard_zone0c_menu":  { "File": "Title_DDZ.png", "Rect": "0,0,180,66", "Center": "90,33" },
+    "titlecard_zoneHPZ_menu":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "93,33" }
+}

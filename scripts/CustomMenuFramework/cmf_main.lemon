@@ -1,0 +1,2146 @@
+/*
+
+	This script file is part of the Sonic 3 A.I.R. Modders Resource. The Modders
+	Resource is a free resource library for any 3 A.I.R. modder, and for any
+	non-commercial purpose. No permission to use needed, no crediting required!
+
+	Come check it out at https://github.com/AirWay1/3AIR-Mod-Resources!
+
+*/
+
+// Author Notes
+/*
+
+	This script file contains custom menu code that allows for
+	easier creation of custom menus and game modes.
+	
+	The way this works is by setting up new Call Frames. Call
+	Frames are basically the same as calling a function.
+	Call frames are used when you press Start Game in the main menu
+	and get transported into the Data Select.
+	
+	I left some other comments around explaining it more,
+	but thats the basic explanation of it.
+
+	In this example, you can move the hud sprite around by
+	pressing the directional buttons. To exit to the DataSelect
+	menu press button A or Start. To exit to the A.I.R. menu
+	press button C.
+
+	It is recommended to make your code in
+	CustomMenu.MainLogicLoop() to keep everything nice,
+	tidy, and clean. Though it is not the standard and you are
+	free to as you wish.
+
+	When rendering, it is important to keep in mind that
+	position 0,0 is at the top left corner, and adding to it
+	makes it go towards the bottom right corner.
+	
+	So for example, setting the position of a sprite to 100,100
+	will move it from the top left corner by 100 pixels right
+	and 100 pixels down.
+
+	DataSelect.drawCustomPlanes() contains the background sprite
+	rendering.
+
+*/
+
+// Keeps track of menus. Set to 0 when it boots up the Data Select.
+global u8 menuScreen = 0
+
+// Tracks which menu option has been selected.
+global s8 selectedMenuOption
+global s8 selectedMenuOption.main
+global s8 selectedMenuOptionLast
+global s8 selectedMenuOptionLast.main
+global s8 selectedGameType
+global u8 setting.levelselect.characters = 1
+global bool challenges_normalmode
+
+// Tracks the currently selected zone and act.
+global u16 selectedZoneAct
+
+// include framework		// This is already included in main.lemon
+
+function void customMenu.mainLogicLoop()
+{
+	exit_threshold = restart_threshold	// set outside of option 4 in case an old version of the game with separate options caused a desync
+	
+	if (global.game_mode == 0x58)
+	{
+		customMenu.mainLogicLoop.main()
+		return
+	}
+
+	if (selectedMenuOption == 0)
+		customMenu.selectZone()
+	else if (selectedMenuOption == 1 || selectedMenuOption == 6)
+		customMenu.selectAct()
+	else if (selectedMenuOption == 2)
+		customMenu.selectTAMode()
+	else if (selectedMenuOption == 3 && time_attack)
+		customMenu.selectHudPosition()
+	else if (selectedMenuOption == 3)	// not time attack
+		customMenu.selectGameType()
+	else if (selectedMenuOption == 4 && time_attack)
+	{
+		restart_threshold = customMenu.selectRetryAndExit(restart_threshold)
+		exit_threshold = restart_threshold
+	}
+	else if (selectedMenuOption == 4)	// not time attack
+		customMenu.selectSidekick()
+//	else if (selectedMenuOption == 5)
+//		exit_threshold = customMenu.selectRetryAndExit(exit_threshold)
+	
+	customMenu.matchActToSelection()
+	customMenu.displayTimes()
+	customMenu.countMedals()
+
+//	else if (selectedMenuOption == 6)
+//		customMenu.selectCharacter()
+
+	/*
+	// Handle vertical position by checking states.
+	if (control.pad1.state & CONTROL_UP)
+		--Sonic.Y	// Instead of doing Sonic.Y = Sonic.Y - 1, you can do --Sonic.Y and have cleaner code.
+	else if (control.pad1.state & CONTROL_DOWN)
+		++Sonic.Y	// Same thing here, just add onto it instead.
+
+	// Horizontal direction. Basically the same as the last condition checks.
+	if (control.pad1.state & CONTROL_RIGHT)
+		++Sonic.X
+	else if (control.pad1.state & CONTROL_LEFT)
+		--Sonic.X
+
+	// Render our custom sprite.
+	Renderer.drawCustomSprite("hud_lives_icon_sonic", Sonic.X, Sonic.Y, 0x80, 0, 0xf000)
+	*/
+
+	// These two if condtions allow exiting to different locations.
+	// It is recommended to put one of these somewhere in your scripts so players do not get soft-locked.
+
+	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
+	{
+		if (selectedMenuOption == 6)
+		{
+			// Difficulty menu for Knuckles in Normal Game
+		//	bool menuReady = false
+			pause_menu_selection = 0
+
+			while (!setting.original_mode && !time_attack && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
+			{
+				global.frame_state = 0x10
+				waitForNextFrame()
+
+			@EntryPoint:
+				timer.alldata = 0
+
+				u32 backupA0 = A0
+				A0 = 0xffffb000
+				D7 = 0x6d
+				updateGameObjectLoopRenderPaused()
+				RenderSprites()
+				DataSelect.drawCustomPlanes()
+				customMenu.displayTimes()
+				customMenu.countMedals()
+				A0 = backupA0
+
+				Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
+				Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
+				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+				Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+				Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+
+			//	if (menuReady == true)
+			//	{
+					if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
+					{
+						menuScreen = 1
+						global.game_mode = 0x54
+						return
+					}
+					
+					if (Input.buttonPressed(BUTTON_UP))
+					{
+						pause_menu_selection -= 2
+						if (pause_menu_selection < 0)
+							pause_menu_selection = 2
+						playSound(0x5b)
+					}
+					else if (Input.buttonPressed(BUTTON_DOWN))
+					{
+						pause_menu_selection += 2
+						if (pause_menu_selection > 2)
+							pause_menu_selection = 0
+						playSound(0x5b)
+					}
+
+					if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+					{
+						eggrobos_knuckles = 0
+						specialstages_knuckles = 0
+						break
+					}
+					else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+					{
+						eggrobos_knuckles = 1
+						specialstages_knuckles = 1
+						break
+					}
+			//	}
+			//	else
+			//		menuReady = true
+			}
+			
+			// Clear out the text display queue so it doesn't show for one frame in levels.
+			Letters.ClearAll()
+
+			// Start level.
+			global.game_mode = 0x8c
+
+			playSound(0xaf)
+			LevelSelect.startGame()		// initialize some game values
+			checkpoint.number = 0
+			checkpoint.x = 0
+			checkpoint.y = 0
+
+			// Fade out the screen.
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Save TA settings
+			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
+
+			// Set initial values for modded characters.
+			if (System.getGlobalVariableValueByName("DAGE_characterName"))
+			{
+				setting.levelselect.characters = System.getGlobalVariableValueByName("DAGE_characterID")
+//				u8[0xffffe654] = System.getGlobalVariableValueByName("DAGE_XtraChar")	// unnecessary; this is handled in the framework
+			}
+
+			if (setting.levelselect.characters == 1 && sidekick && !setting.time_attack)
+				setting.levelselect.characters = 0
+			else if (setting.levelselect.characters == 3 && sidekick && !setting.original_mode && !setting.time_attack)
+				setting.levelselect.characters = 4
+
+			original_mode = (setting.time_attack) ? 0 : setting.original_mode
+			if (original_mode)
+				Renderer.setScreenSize(320, 224)
+			else
+				Renderer.setScreenSize(400, 224)
+			
+			if (!setting.time_attack)
+				challenges_normalmode = 1
+			Standalone.onRestartAtCheckpoint()	// using this instead of Standalone.onLevelStart() because it properly resets "fake checkpoints" in time attack modes
+		//	level.restart = 1
+		//	GameMode.MainGame()
+		//	System.setupCallFrame("GameModeControlLoop", "@EntryPoint")	// This enters a level due to the game mode.
+																		// Be aware of time_attack.lemon, initializeMainGame(), comment "this may need to be adjusted for other game modes and for menus"
+			// You can setup Call Frames at any point. This is to go into the Data Select.
+			//	System.setupCallFrame("loadupDataSelect")
+
+			menuScreen = 0
+		}
+		else
+		{
+			selectedMenuOptionLast = selectedMenuOption
+			selectedMenuOption = 6
+			if (System.getGlobalVariableValueByName("DAGE_characterName"))
+			{
+				setting.levelselect.characters = System.getGlobalVariableValueByName("DAGE_characterID")
+		//		u8[0xffffe654] = System.getGlobalVariableValueByName("DAGE_XtraChar")
+			}
+			if (!setting.time_attack)
+				challenges_normalmode = 1
+			playSound(0x63)
+		}
+	}
+	// This code exits to the base D.A. Garden menu.
+	else if (control.pad1.pressed & CONTROL_B || Input.buttonPressed(BUTTON_BACK))
+	{
+		playSound(0xad)
+		if (selectedMenuOption == 6)
+		{
+			selectedMenuOption = selectedMenuOptionLast
+		}
+		else
+		{
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Save TA settings
+			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
+
+			global.game_mode = 0x58
+
+			// Do not fade out music in this case, Data Select music is meant to kept playing
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+	}
+	else if (control.pad1.pressed & CONTROL_UP)
+	{
+		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
+		if (selectedMenuOption == 4 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots"))  && setting.time_attack == 0)
+		{
+			selectedMenuOption = 2
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption > 0 && selectedMenuOption <= maxSettingsOption)		// used to be 5 when retry and exit were separate
+		{
+			selectedMenuOption -= 1
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == 0)
+		{
+			selectedMenuOption = maxSettingsOption		// used to be 5 when retry and exit were separate
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
+		{
+			setting.levelselect.characters -= 1
+			if (setting.levelselect.characters == 0)
+				setting.levelselect.characters = 3
+			playSound(0x5b)
+		}
+	}
+	else if (control.pad1.pressed & CONTROL_DOWN)
+	{
+		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
+		if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && setting.time_attack == 0)
+		{
+			selectedMenuOption = 4
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption < maxSettingsOption)			// used to be 5 when retry and exit were separate
+		{
+			selectedMenuOption += 1
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == maxSettingsOption)	// used to be 5 when retry and exit were separate
+		{
+			selectedMenuOption = 0
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
+		{
+			setting.levelselect.characters += 1
+			if (setting.levelselect.characters >= 4)
+				setting.levelselect.characters = 1
+			playSound(0x5b)
+		}
+	}
+}
+
+function void customMenu.selectZone()
+{
+	// Select an act.
+	if (control.pad1.pressed & CONTROL_RIGHT)
+	{
+		if (selectedZoneAct >= 0x0b00)		// Pressed right on DEZ?
+		{
+			selectedZoneAct -= 0x0b00		// Make selection become AIZ
+		}
+		else if (selectedZoneAct == 0x0901)	// Pressed right on LRZ2?
+		{
+			selectedZoneAct = 0x0a00		// Make selection become HPZ
+		}
+		else if (selectedZoneAct == 0x0a00)	// Pressed right on HPZ?
+		{
+			selectedZoneAct = 0x0a01		// Make selection become SSZ
+		}
+		else if (selectedZoneAct == 0x0a01)	// Pressed right on SSZ?
+		{
+			selectedZoneAct = 0x0b00		// Make selection become DEZ1
+		}
+		else
+		{
+			selectedZoneAct += 0x0100
+		}
+		playSound(0x5b)
+		customMenu.matchActToSelection()
+	}
+	else if (control.pad1.pressed & CONTROL_LEFT)
+	{
+		if (selectedZoneAct <= 0x0001)		// Pressed left on AIZ?
+		{
+			selectedZoneAct += 0x0b00		// Make selection become DEZ
+		}
+		else if (selectedZoneAct == 0x0a01)	// Pressed right on SSZ?
+		{
+			selectedZoneAct = 0x0a00		// Make selection become HPZ
+		}
+		else if (selectedZoneAct == 0x0b00)	// Pressed left on DEZ1?
+		{
+			selectedZoneAct = 0x0a01		// Make selection become SSZ
+		}
+		else
+		{
+			selectedZoneAct -= 0x0100
+		}
+		playSound(0x5b)
+		customMenu.matchActToSelection()
+	}
+}
+
+function void customMenu.selectAct()
+{
+	// Select an act.
+	if (control.pad1.pressed & CONTROL_RIGHT)
+	{
+		if (selectedZoneAct == 0x0b01)		// Pressed right on DEZ2?
+		{
+			selectedZoneAct = 0x0000		// Make selection become AIZ1
+		}
+		else
+		{
+			selectedZoneAct += 1
+			if (selectedZoneAct & 0x0002)	// Act value has become 2?
+				selectedZoneAct += 0xfe		// Make selection become next zone's Act 1
+		}
+		playSound(0x5b)
+		customMenu.matchActToSelection()
+	}
+	else if (control.pad1.pressed & CONTROL_LEFT)
+	{
+		if (selectedZoneAct == 0x0000)		// Pressed left on AIZ1?
+		{
+			selectedZoneAct = 0x0b01		// Make selection become DEZ2
+		}
+		else
+		{
+			selectedZoneAct -= 1
+			if (selectedZoneAct & 0x00f0)	// Act value has underflowed to 0xff?
+				selectedZoneAct -= 0xfe		// Make selection become previous zone's Act 2
+		}
+		playSound(0x5b)
+		customMenu.matchActToSelection()
+	}
+}
+
+
+function void customMenu.matchActToSelection()
+{
+	// Set level to play
+	global.zone_act = selectedZoneAct
+	if (global.zone == 0x07)								// FBZ was selected
+		global.zone = 0x04									// align with in-game ID
+	else if (global.zone >= 0x04 && global.zone <= 0x06)	// ICZ, LBZ, or MHZ was selected
+		global.zone += 1									// align these with in-game IDs
+	else if (global.zone_act == 0x0a00)						// HPZ was selected
+		global.zone_act = 0x1601							// switch menu ID for in-game ID
+	else if (global.zone_act == 0x0a01)						// SSZ was selected
+		global.zone_act = 0x0a00							// switch menu ID for in-game ID
+}
+
+
+function void customMenu.selectTAMode()
+{
+	if (control.pad1.pressed & CONTROL_LEFT)
+	{
+		if (time_attack == 0)
+			time_attack = 2
+		else
+			time_attack--
+		setting.time_attack = time_attack
+		playSound(0x5b)
+	}
+	else if (control.pad1.pressed & CONTROL_RIGHT)
+	{
+		if (time_attack == 2)
+			time_attack = 0
+		else
+			time_attack++
+		setting.time_attack = time_attack
+		playSound(0x5b)
+	}
+}
+
+function void customMenu.selectHudPosition()
+{
+	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	{
+		if (time_attack_hud == 0)
+			time_attack_hud = 1
+		else
+			time_attack_hud = 0
+		playSound(0x5b)
+	}
+}
+
+function void customMenu.selectGameType()
+{
+	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	{
+		if (setting.original_mode == 0)
+			setting.original_mode = 1
+		else
+			setting.original_mode = 0
+		playSound(0x5b)
+	}
+}
+
+function void customMenu.selectSidekick()
+{
+	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	{
+		if (sidekick == 0)
+			sidekick = 1
+		else
+			sidekick = 0
+		playSound(0x5b)
+	}
+}
+
+function u8 customMenu.selectRetryAndExit(u8 shortcut_threshold)
+{
+	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	{
+		if (shortcut_threshold == 1)
+			shortcut_threshold = 30
+		else
+			shortcut_threshold = 1
+		playSound(0x5b)
+	}
+
+	return shortcut_threshold
+}
+
+// This function does nothing right now, as pressing up and down is handled in customMenu.mainLogicLoop().
+/*
+function void customMenu.selectCharacter()
+{
+}
+*/
+
+function void customMenu.displayTimes()
+{	
+	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && setting.time_attack != 0)
+	{
+		customMenu.displayTimes3D2DGlitches()
+		return
+	}
+	if (System.getGlobalVariableValueByName("DAGE_characterName"))
+	{
+		customMenu.displayTimesModded()
+		return
+	}
+
+	loadMedalTimes()
+
+	u16 px = 250	// horizontal position of all times
+	u16 py = 52		// vertical position of best Sonic time
+
+	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
+	best_time_address = (global.zone >= 0x0c) ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	best_time_address += 0x840000
+	if (time_attack == 2)
+		best_time_address += 0x120
+	
+	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone) + global.act	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	redstarring_address += 0x840280
+
+	for (u8 i = 0; i <= 2; i++)
+	{
+		best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+		best_time_minutes = u8[best_time_address + 1]
+		best_time_seconds = u8[best_time_address + 2]
+		best_time_frames = u8[best_time_address + 3]
+
+		u16 minutes = best_time_minutes
+		u16 seconds = best_time_seconds
+		u16 frames = best_time_frames
+		u16 centiseconds = (frames * 99 + 30) / 59
+
+		if (time_attack)
+		{
+			if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
+			{
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+			else if (best_time <= u32[0x840240 + (0x10 * i)])
+			{
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+			else
+			{
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+		}
+		
+		// Draw character continue icon, shifted left if a medal has been earned
+		u64 charKey = "continue_icon_sonic"
+		if (i == 1)
+			charKey = "continue_icon_tails"
+		else if (i == 2)
+			charKey = "continue_icon_knuckles"
+
+		u16 medal_change_X = ((time_attack && u8[best_time_address] > 0)) ? 16 : 0	// subtract 16 pixels from character X position to make medal fit if needed
+		u16 normalgame_change_X = 0
+		u16 normalgame_change_Y = 0
+		bool drawSidekick = sidekick
+		if ((setting.original_mode && i == 2))
+			drawSidekick = 0
+
+		if (!time_attack)
+		{
+			normalgame_change_X = 40
+			normalgame_change_Y = -2
+			if (drawSidekick && i != 1)
+				normalgame_change_X -= 8
+			if (setting.original_mode || debug_mode.enabled || (i != 1 && sidekick) || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				normalgame_change_Y = 12
+		}
+		Renderer.drawCustomSprite(charKey, getScreenWidth()/2 + 77 - medal_change_X + normalgame_change_X, 44 + (68 * i) + normalgame_change_Y, 0, SPRITE_FLAG_PRIO, 0xf003)
+		if (i != 1 && drawSidekick && !time_attack)
+			Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 77 + normalgame_change_X + 16, 44 + (68 * i) + normalgame_change_Y, 0, SPRITE_FLAG_PRIO, 0xf003)
+
+		// Draw appropriate medal if relevant
+		if (time_attack && u8[best_time_address] > 0 && u8[best_time_address] <= 3)	// medal earned (should always be 3 or less, but adding upper bound for safety)
+		{
+			// Commented code would draw a "stack" of medals, showing all earned medals instead of the best one.
+			// This ultimately looked strange enough to not be worth doing even if it makes more sense for the "total stars" counter.
+			if (u8[best_time_address] == 3)
+			{
+				Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 278 + 12 - 4, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 278 + 12    , 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 278 + 12 + 4, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+			}
+			else if (u8[best_time_address] == 2)
+			{
+				Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 278 + 12 - 2, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 278 + 12 + 2, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+			}
+			else
+				Renderer.drawCustomSprite(stringformat("medal_%02d_00", u8[best_time_address]), getScreenExtend() - 40 + 278 + 12, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003)	// (12, 12) is center of medal
+		}
+
+		// Draw Dev time and Medal times
+		u16 medal_px = px + 80	// horizontal position of dev times and medal times
+		for (u8 j = 0; j <= 3; j++)
+		{
+			u16 medal_py = py	// vertical position of silver medal time
+			if (j == 0)
+				medal_py -= 24	// vertical position of dev time
+			else if (j == 1)
+				medal_py -= 8	// vertical position of gold medal time
+			else if (j == 3)
+				medal_py += 8	// vertical position of bronze medal time
+
+			u32 medal_time_address = 0x840240 + (0x10 * i) + (0x04 * j)
+			u16 medal_time_minutes = u8[medal_time_address + 1]
+			u16 medal_time_seconds = u8[medal_time_address + 2]
+			u16 medal_time_frames = u8[medal_time_address + 3]
+			u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
+
+			if (time_attack && !(j == 0 && u8[best_time_address] < 3))	// if we aren't about to draw dev times without a gold medal earned
+			{
+				if (j == 0)
+				{
+					Renderer.drawCustomSprite("text_devtime_centered", getScreenExtend() - 40 + medal_px - 4 + 30, medal_py - 8 + 4, 0, SPRITE_FLAG_PRIO, 0xf003)	// draw "DEV TIME" text
+				}
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("S3D_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+		}
+
+		// Draw Red Star Rings (collected and uncollected)
+		u32 alpha
+		u64 ringKey
+		if (!setting.time_attack && !setting.original_mode && !debug_mode.enabled && (!sidekick || i == 1) && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			if (u8[redstarring_address] & 0x01)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 70, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x02)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 94, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x04)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 118, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x08)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 142, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x10)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 166, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
+/*
+			if (u8[redstarring_address] & 0x01)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 - 101, getScreenHeight()/2 + 31, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x8000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x02)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 - 89, getScreenHeight()/2 + 31, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x8000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x04)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 - 77, getScreenHeight()/2 + 31, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x8000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x08)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 - 65, getScreenHeight()/2 + 31, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x8000)	// (12, 12) is center of medal
+
+			if (u8[redstarring_address] & 0x10)
+			{
+				alpha = 0xffffffff
+				ringKey = "redstarring_00"
+			}
+			else
+			{
+				alpha = 0x80c0c0c0
+				ringKey = "medal_02_00"
+			}
+			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 - 53, getScreenHeight()/2 + 31, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x8000)	// (12, 12) is center of medal
+*/
+		}
+
+		py += 68							// vertical distance between character data displays in menu
+		if (i < 2)
+		{
+			best_time_address += 0x60		// iterate to next character's data, but not if all data has already been considered
+			redstarring_address += 24		// iterate to next character's data, but not if all data has already been considered
+		}
+		else
+		{
+			best_time_address -= 0x60 * (3 - setting.levelselect.characters)	// subtract off 0xc0 for Sonic and 0x60 for Tails to find the true best_time_address when done
+			redstarring_address -= 24 * (3 - setting.levelselect.characters)	// subtract off 48 for Sonic and 24 for Tails to find the true best_time_address when done
+		}
+	}
+}
+
+
+
+function void customMenu.displayTimes3D2DGlitches()
+{
+	u16 px = 250	// horizontal position of all times
+	u16 py = 52		// vertical position of best Sonic time
+
+	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
+	best_time_address = global.zone >= 0x0c ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	best_time_address += 0x840000
+	if (time_attack == 2)
+		best_time_address += 0x120
+
+	for (u8 i = 0; i <= 2; i++)
+	{
+		best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+		best_time_minutes = u8[best_time_address + 1]
+		best_time_seconds = u8[best_time_address + 2]
+		best_time_frames = u8[best_time_address + 3]
+
+		u16 minutes = best_time_minutes
+		u16 seconds = best_time_seconds
+		u16 frames = best_time_frames
+		u16 centiseconds = (frames * 99 + 30) / 59
+
+		if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
+		{
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend()+ px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		}
+		else if (best_time <= u32[0x840240 + (0x10 * i)])
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", minutes % 10), getScreenExtend() + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds / 10), getScreenExtend() + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds % 10), getScreenExtend() + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds / 10), getScreenExtend() + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds % 10), getScreenExtend() + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		}
+		else
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", minutes % 10), getScreenExtend() + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds / 10), getScreenExtend() + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds % 10), getScreenExtend() + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds / 10), getScreenExtend() + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds % 10), getScreenExtend() + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		}
+		
+		// Draw character continue icon
+		u64 charKey = "continue_icon_sonic"
+		if (i == 1)
+			charKey = "continue_icon_tails"
+		else if (i == 2)
+			charKey = "continue_icon_knuckles"
+		Renderer.drawCustomSprite(charKey, getScreenWidth()/2 + 117, 44 + (68 * i), 0, SPRITE_FLAG_PRIO, 0xf003)
+
+		py += 68							// vertical distance between character data displays in menu
+		if (i < 2)
+			best_time_address += 0x60		// iterate to next character's data, but not if all data has already been considered
+		else
+			best_time_address -= 0x60 * (3 - setting.levelselect.characters)	// subtract off 0xc0 for Sonic and 0x60 for Tails to find the true best_time_address when done
+	}
+}
+
+
+
+
+function void customMenu.displayTimesModded()
+{
+	u16 px = 250			// horizontal position of all times
+	u16 py = 52 + 68		// vertical position of best Tails time (center of screen)
+
+	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
+	best_time_address = global.zone >= 0x0c ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	best_time_address += 0x840000
+	if (time_attack == 2)
+		best_time_address += 0x120
+
+	best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+	best_time_minutes = u8[best_time_address + 1]
+	best_time_seconds = u8[best_time_address + 2]
+	best_time_frames = u8[best_time_address + 3]
+
+	u16 minutes = best_time_minutes
+	u16 seconds = best_time_seconds
+	u16 frames = best_time_frames
+	u16 centiseconds = (frames * 99 + 30) / 59
+
+	u16 dy = 0	// added to continue sprite y position if Normal Game is selected
+
+	if (best_time > 0x93b3b && setting.time_attack)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
+	{
+		Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	}
+	else if (setting.time_attack)
+	{
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", minutes % 10), getScreenExtend() + px, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds / 10), getScreenExtend() + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds % 10), getScreenExtend() + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds / 10), getScreenExtend() + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds % 10), getScreenExtend() + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	}
+	else
+		dy = 12
+
+	bool drawSidekick = sidekick * 8
+	if (setting.original_mode || moddedTailsCharacter || time_attack)
+		drawSidekick = 0
+
+	// Draw character continue icon, shifted left if a medal has been earned
+	u64 charKey = (System.getGlobalVariableValueByName("DAGE_continueSpriteName"))
+	Renderer.drawCustomSprite(charKey, getScreenWidth()/2 + 117 - drawSidekick, 44 + 68 + dy, 0, SPRITE_FLAG_PRIO, 0xf003)
+	if (drawSidekick)
+		Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 117 + drawSidekick, 44 + 68 + dy, 0, SPRITE_FLAG_PRIO, 0xf003)
+}
+
+
+
+
+
+
+
+function void customMenu.countMedals()
+{
+	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
+	{
+		string character_name = System.getGlobalVariableValueByName("DAGE_characterName")
+		if (character_name == 0)	// using 3D2D Glitches or ESCU
+		{
+			if (u8[0xffffe654])
+				character_name = "Extra Slot Character"
+			else
+				character_name = "3D2D Glitches"
+		}
+		Game.setDiscordDetails("D.A. Garden Edition Challenges")
+		Game.setDiscordState(character_name)		
+		Game.setDiscordLargeImage("menus")
+		return
+	}
+
+	u16 x_offset = 0
+	u16 y_offset = 0
+	u16 renderQueue = 0xf003
+	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34)
+	{
+		x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
+		y_offset = 2
+		renderQueue = 0xfff1
+	}
+	u16 starCount = 0
+	u32 medalAddress = 0x840000
+	u32 medalArrayEnd = medalAddress + 0x240
+	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
+	{
+		starCount += u8[medalAddress]
+	}
+	u32 rsrAddress = 0x840280
+	u32 rsrArrayEnd = rsrAddress + 72
+	for (rsrAddress; rsrAddress < rsrArrayEnd; rsrAddress++)
+	{
+		if (u8[rsrAddress] & 0x01)
+			++starCount
+		if (u8[rsrAddress] & 0x02)
+			++starCount
+		if (u8[rsrAddress] & 0x04)
+			++starCount
+		if (u8[rsrAddress] & 0x08)
+			++starCount
+		if (u8[rsrAddress] & 0x10)
+			++starCount
+	}
+
+	u8 spriteFlags = (global.game.paused) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
+
+	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
+		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
+	else if (theme.hud == theme.s3k && renderQueue == 0xfff1)	// done here since Saturn is default for menus and Angel/S3K has no script yet
+	{
+		Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+		if (starCount / 100 != 0)
+		{
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// tens (even if 0)
+		}
+		else if ((starCount / 10) % 10 != 0)
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue) // non-zero tens
+		
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// ones (even if 0)
+	}
+	else	// Saturn theme, also used in menus
+	{
+		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+		if (starCount / 100 != 0)
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
+		}
+		else if ((starCount / 10) % 10 != 0)
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
+		
+		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+	}
+	Game.setDiscordDetails("D.A. Garden Edition Challenges")
+	Game.setDiscordState(stringformat("Total Stars: %03d/792", starCount))
+	Game.setDiscordLargeImage("menus")
+}
+
+
+
+
+// When playing Sonic 3 A.I.R. with Discord on, custom messages will be displayed.
+function void customMenu.discordRPC()	// this is only called in the main menu at the moment; the Challenges menu sets RPC in the previous function
+{
+// For more information on Discord RPC, refer to the modding manual.
+	Game.setDiscordDetails("D.A. Garden Edition")
+	Game.setDiscordState("Main Menu")
+	// ^ This previously used a stringformat to convert a variable into a usable string.
+
+	Game.setDiscordLargeImage("menus")
+	// Game.setDiscordSmallImage("character_sonic")
+}
+
+// The stock "bg_dataselect" sprite does not work for our purposes, thanks to it being a palettised sprite,
+// so I used a new sprite defined as "custom_background" that uses component colours instead
+function void DataSelect.drawCustomPlanes()
+{
+	// Check for the screen the menu is on.
+	if ((global.game_mode & 0x7f) == 0x54)
+	{
+		// If you are wondering why I didn't do CustomMenu.drawCustomPlanes(), it didn't load quite as fast as I would like it to.
+
+		// Create a value to make arrows move back and forth at a steady rate.
+		s8 arrowShift = (level.framecounter.low & 0x18) / 8 - 1
+		if (arrowShift == 2)
+			arrowShift = 0
+		if (arrowShift == 3)
+			arrowShift == -1
+
+		// Make sure the queue for string display is empty, else it may show the main menu text for one frame at the end of a Challenge
+		Letters.ClearAll()
+		
+		// Render the background and dim it
+		Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
+		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xf001, 0, 95)							// background dimming (37.5% opacity)
+
+		// Render the border rectangles around the options and best times
+		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// options border rectangle (80% opacity)
+		Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 82 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Tails/mod best times border rectangle (80% opacity)
+		if (!System.getGlobalVariableValueByName("DAGE_characterName"))
+		{
+			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 14 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Sonic best times border rectangle (80% opacity)
+			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Knuckles best times border rectangle (80% opacity)
+		}
+
+		// Render options
+		u64 zoneKey = stringformat("titlecard_zone%02x_menu", selectedZoneAct/ 0x100)
+		if (selectedZoneAct == 0x0a00)	// HPZ
+			zoneKey = "titlecard_zoneHPZ_menu"
+		Renderer.drawCustomSprite(zoneKey, getScreenExtend() - 40 + 133, 47, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// Zone name image
+		if (selectedMenuOption == 0)
+		{
+			Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 14 + 7 - arrowShift, 30 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ZONE left arrow
+			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 216 + 7 + arrowShift, 30 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ZONE right arrow
+		}
+
+		u64 actKey = stringformat("titlecard_act%01x", (selectedZoneAct & 0x0001) + 1)
+		if ((selectedZoneAct & 0xff00) == 0x0a00)	// HPZ or SSZ
+			actKey = "titlecard_singleact"
+		if (selectedZoneAct == 0x0a01 && System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// special check for Chaos the Impostor SSZ1
+			actKey = "titlecard_act1"
+		Renderer.drawCustomSprite(actKey, getScreenExtend() - 40 + 84 + 22, 88 - 64, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// ACT X image, shifted due to Center in key
+		if (selectedMenuOption == 1)
+		{
+			Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 62 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
+			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 169 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
+		}
+
+		if (time_attack == 0)
+			Renderer.drawCustomSprite("text_option_NG", getScreenExtend() - 40 + 78 + 43, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// NORMAL GAME text
+		if (time_attack == 1)
+			Renderer.drawCustomSprite("text_option_TA", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// TIME ATTACK text
+		else if (time_attack == 2)
+			Renderer.drawCustomSprite("text_option_TST", getScreenExtend() - 40 + 62 + 60, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// TIME STONE TRIAL text
+		if (selectedMenuOption == 2)
+		{
+			Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + 45 + 4 - arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type left arrow
+			Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + 190 + 4 + arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type right arrow
+		}
+
+		if (time_attack)
+		{
+			Renderer.drawCustomSprite("text_hudposition", getScreenExtend() - 40 + 54 + 47, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HUD POSITION text
+			if (time_attack_hud == 0)
+				Renderer.drawCustomSprite("text_option_left", getScreenExtend() - 40 + 170 + 15, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// LEFT text
+			else
+				Renderer.drawCustomSprite("text_option_center", getScreenExtend() - 40 + 162 + 23, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// CENTER text
+			if (selectedMenuOption == 3)
+			{
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HUD POSITION left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HUD POSITION right arrow
+			}
+
+		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
+			if (restart_threshold == 1)
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// PRESS text
+			else
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HOLD text
+			if (selectedMenuOption == 4)
+			{
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// RETRY EXIT right arrow
+			}
+		}
+		else
+		{
+			if (!System.getGlobalVariableValueByName("DAGE_characterID") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))
+			{
+				Renderer.drawCustomSprite("text_gametype", getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HUD POSITION text
+				if (setting.original_mode == 0)
+					Renderer.drawCustomSprite("text_option_revisited", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// LEFT text
+				else
+					Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + 140 + 25, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// CENTER text
+				if (selectedMenuOption == 3)
+				{
+					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// GAME TYPE left arrow
+					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// GAME TYPE right arrow
+				}
+			}
+		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
+			if (System.getGlobalVariableValueByName("DAGE_characterID") != 2)
+			{
+				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// RETRY/EXIT text
+				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, 209, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
+				if (sidekick == 1)
+					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// PRESS text
+				else
+					Renderer.drawCustomSprite("text_option_no", getScreenExtend() - 40 + 158 + 7, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// HOLD text
+				if (selectedMenuOption == 4)
+				{
+					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// SIDEKICK left arrow
+					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// SIDEKICK right arrow
+				}
+			}
+		}
+		// Old selectedMenuOption of 5 no longer exists! Free to use for anything else if needed.
+	//	Renderer.drawCustomSprite("text_backbuttonexit", getScreenExtend() - 40 + 34 + 64, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// BACK BUTTON EXIT text
+	//	if (exit_threshold == 1)
+	//		Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 180 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// PRESS text
+	//	else
+	//		Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 183 + 16, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// HOLD text
+	//	if (selectedMenuOption == 5)
+	//	{
+	//		Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 168 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// BACK BUTTON EXIT left arrow
+	//		Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 226 + 1 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// BACK BUTTON EXIT right arrow
+	//	}
+
+		if (selectedMenuOption == 6)
+		{
+			u64 rectKey = (level.framecounter.low & 0x08) ? "rect_charoption_yellow" : "rect_charoption_red"	// change rectangle color every 8 frames
+			u16 rectYPos = 11 + (68 * (setting.levelselect.characters - 1))
+			if (System.getGlobalVariableValueByName("DAGE_characterName"))
+				rectYPos = 11 + 68
+			Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 241, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection
+		}
+//		Renderer.drawCustomSprite("continue_icon_sonic", getScreenWidth()/2 + 77, 44, 0, SPRITE_FLAG_PRIO, 0xf003)
+//		Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 78, 112, 0, SPRITE_FLAG_PRIO, 0xf003)
+//		Renderer.drawCustomSprite("continue_icon_knuckles", getScreenWidth()/2 + 78, 180, 0, SPRITE_FLAG_PRIO, 0xf003)
+
+//		Renderer.drawCustomSprite("text_devtime", getScreenExtend() - 40 + 326 + 30, 20 + 4, 0, SPRITE_FLAG_PRIO, 0xf003)
+//		Renderer.drawCustomSprite("text_devtime", getScreenExtend() - 40 + 326 + 30, 88 + 4, 0, SPRITE_FLAG_PRIO, 0xf003)
+//		Renderer.drawCustomSprite("text_devtime", getScreenExtend() - 40 + 326 + 30, 156 + 4, 0, SPRITE_FLAG_PRIO, 0xf003)
+
+		u32 extra_char_address = 0x8fe677 + (u8(selectedZoneAct >> 0x08) * 0x02 + u8(selectedZoneAct)) * 0x03
+		extra_char_address += 0x48 * time_attack
+
+		if (!System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !u8[0xffffe654] && time_attack)
+		{
+			if (!(u8[extra_char_address + 0x00] > 0x00 && Renderer.hasCustomSprite(stringformat("dataSel_slot%d", u8[extra_char_address + 0x00]))))
+			{
+				Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 318, 44, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 318, 52, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 318, 60, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+			
+			if (!(u8[extra_char_address + 0x01] > 0x00 && Renderer.hasCustomSprite(stringformat("dataSel_slot%d", u8[extra_char_address + 0x01]))))
+			{
+				Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 318, 112, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 318, 120, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 318, 128, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+			
+			if (!(u8[extra_char_address + 0x02] > 0x00 && Renderer.hasCustomSprite(stringformat("dataSel_slot%d", u8[extra_char_address + 0x02]))))
+			{
+				Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 318, 180, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 318, 188, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 318, 196, 0, SPRITE_FLAG_PRIO, 0xf003)
+			}
+		}
+	}
+//	else if ((global.game_mode & 0x7f) == 0x58)
+//	{
+//		
+//	}
+	else
+	{
+		// Draw our own widescreen version of the background
+		// TODO: The actual background still gets rendered, though it's not visible at all
+		//  -> Maybe the plane W is used here?
+		if (original_mode || palette_set < 2)
+			Renderer.drawCustomSprite("bg_dataselect", getScreenExtend() - 40, 0, 0x00, 0, 0x2000)
+		else
+		{
+			DataSelect.drawRevisitedSprites()
+		}
+
+		// Custom rendering of plane B (which is not the background here) to ignore the wrapping
+		s16 px = s16(camera.foreground.x.u16)
+		if (px < 0)
+		{
+			Renderer.enableDefaultPlane(2, false)
+			Renderer.setupPlane(-px, 0, getScreenWidth() + px, getScreenHeight(), 0x10, 0, 0x3000)
+		}
+		else if (px > 0x400 - getScreenWidth())
+		{
+			Renderer.enableDefaultPlane(2, false)
+			Renderer.setupPlane(0, 0, 0x400 - px, getScreenHeight(), 0x10, 0, 0x3000)
+		}
+	}
+}
+
+function void DataSelect.drawRevisitedSprites()
+{
+	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffff80e0, 0x10000)		// tinted background 0xffff8080
+//	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
+	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
+	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art
+	Renderer.drawCustomSprite("text_dataselect", getScreenWidth()/2, 206, 0x00, SPRITE_FLAG_PRIO, 0x2010, 0, 0xffffff00, 0x10000)	// DATA SELECT text	// 0xff40ffff yellow
+	if (time_attack == 4)
+	{
+		Letters.Main()
+		Letters.Show("Any% Speedrun", 1, getScreenWidth()/2 - 41, getScreenHeight() - 9)
+	}
+	else if (time_attack == 3)
+	{
+		Letters.Main()
+		Letters.Show("100% Speedrun", 1, getScreenWidth()/2 - 41, getScreenHeight() - 9)
+	}
+}
+
+function void GameModeControlLoop()
+{
+#if !STANDALONE
+	call 0x00043a
+	global.lock_on_state = D1.u16
+
+	call 0x000558
+	call 0x00111a
+	call 0x0012ce
+	call 0x0010ae
+#endif
+
+	InitSaveSlots()
+	global.game_mode = 0
+
+	while (true)
+	{
+	@EntryPoint:
+	//	if (!menu_initialized && (global.game_mode != 0x00 && global.game_mode != 0x04 && !(global.game_mode >= 0x38 && global.game_mode <= 0x44) && global.game_mode != 0x50))
+	//	{
+	//		global.game_mode = 0x58		// go to D.A. Garden Edition main menu
+	///	}
+		if (exitGame && AIR_menu_run)
+			break
+		
+		if (global.game_mode == 0x89)	// Blue Spheres Time Attack. That mode should go *above* DAGE and have its own GameModeControlLoop() take over.
+			global.game_mode == 0x2c	// But if it doesn't, redirect to standard Blue Sphere to avoid an assert and reset.
+
+		if ((global.game_mode & 0x7f) == 0x54)
+		{
+			Game.setUnderwaterAudioEffect(0)
+			// EntryFunctions.dataSelect()
+			loadupCustomMenu()
+			Game.endSkippableCutscene()
+		}
+		else if ((global.game_mode & 0x7f) == 0x58)
+		{
+			Game.setUnderwaterAudioEffect(0)
+			// EntryFunctions.dataSelect()
+			loadupCustomMenu()
+			Game.endSkippableCutscene()
+		}
+		else
+		{
+
+		#if STANDALONE
+			// Restart on invalid game mode
+			if (global.game_mode & 0x03 || (global.game_mode & 0x7f) > 0x58)
+			{
+				assert(false, stringformat("Invalid game mode: 0x%02x", global.game_mode))
+				global.game_mode = 0
+			}
+
+		#if GAMEAPP
+			Game.setUnderwaterAudioEffect(0)
+		#endif
+		#endif
+
+			// Targets:
+			//  - 0x003e2a	-> global.game_mode = 0x00				-> Initialization
+			//  - 0x003e32	-> global.game_mode = 0x04				-> SEGA logo, Intro, Title Screen
+			//  - 0x005fb2	-> global.game_mode = 0x08				-> Rolling Demo (handled by Main Game)
+			//  - 0x005fb2	-> global.game_mode = 0x0c				-> Main Game
+			//  - 0x00051a	-> global.game_mode = 0x10, 0x18		-> "JumpToSegaScreen" according to s3unlocked, does not seem to be used?
+			//  - 0x05c2e0	-> global.game_mode = 0x14				-> Continue Screen
+			//  - 0x007a74	-> global.game_mode = 0x1c, 0x24, 0x28	-> Level Select
+			//  - 0x05d868	-> global.game_mode = 0x20				-> Credits screen in Sonic 3
+			//  - 0x04c97e	-> global.game_mode = 0x2c				-> Blue Sphere game: Menu
+			//  - 0x04da7e	-> global.game_mode = 0x30				-> Blue Sphere game: Results Screen
+			//  - 0x0081c6	-> global.game_mode = 0x34				-> Special Stage
+			//  - 0x00a85e	-> global.game_mode = 0x38				-> Competition Mode: Main Menu
+			//  - 0x00b2cc	-> global.game_mode = 0x3c				-> Competition Mode: Player Selection
+			//  - 0x00ab90	-> global.game_mode = 0x40				-> Competition Mode: Level Selection
+			//  - 0x00b74e	-> global.game_mode = 0x44				-> Competition Mode: Results Screen
+			//  - 0x02df64	-> global.game_mode = 0x48				-> Special Stage results
+			//  - 0x00c570	-> global.game_mode = 0x4c				-> Data Select
+			//  - 0x00bc08	-> global.game_mode = 0x50				-> Competition Mode: Records Screen
+			//	New			-> global.game_mode = 0x54				-> Custom Menu: Act Select / Challenges
+			//	New			-> global.game_mode = 0x54				-> Custom Menu: Main Menu
+
+			D0.u16 = global.game_mode & 0x7c
+			A0 = u32[0x0004c6 + D0.u16]
+			call A0
+
+		#if STANDALONE
+			// Game mode changes definitely end any cutscene
+			Game.endSkippableCutscene()
+		#endif
+		}
+	}
+}
+
+function void customMenu.mainLogicLoop.main()
+{
+	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xffff8080, 0x10000)					// background
+	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)
+
+	// Specific check for The ECSU Framework
+	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
+	{
+		Letters.Main()
+		Letters.Show("`````Extra Character Slots (ECSU) must be placed at a higher`priority than D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
+		{
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Do not fade out music in this case. Data Select music is meant to kept playing
+			exitGame = 1
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+		return
+	}
+
+	// Specific check for the 3D2D Glitches mod
+	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && Mods.getModPriority("3D2D Glitches: Sonic 3 With Bluckles") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
+	{
+		Letters.Main()
+		Letters.Show("`````Character mods must be placed at a higher priority than`D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
+		{
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Do not fade out music in this case. Data Select music is meant to kept playing
+			exitGame = 1
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+		return
+	}
+
+	// Check for character mods and ensure they are higher priority. This only works on the highest-priority character mod.
+	u64 characterModName = System.getGlobalVariableValueByName("DAGE_characterModName")
+	if ((characterModName || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")) && selectedGameType == 1)
+	{
+		selectedGameType = 0
+		setting.original_mode = 0
+		original_mode = 0
+	}
+	if (Mods.isModActive(characterModName) && Mods.getModPriority(characterModName) < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
+	{
+		Letters.Main()
+		Letters.Show("`````Character mods must be placed at a higher priority than`D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
+		{
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Do not fade out music in this case. Data Select music is meant to kept playing
+			exitGame = 1
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+		return
+	}
+
+	// Create a value to make arrows move back and forth at a steady rate.
+	s8 arrowShift = (level.framecounter.low & 0x18) / 8 - 1
+	if (arrowShift == 2)
+		arrowShift = 0
+	if (arrowShift == 3)
+		arrowShift == -1
+/*
+	Renderer.drawCustomSprite(stringformat("text_option_normalgame_%d", selectedMenuOption.main), getScreenExtend() - 40 + 25, 12, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+	Renderer.drawCustomSprite(stringformat("text_option_normalgametype_%d", selectedGameType), getScreenExtend() - 40 + 300, 20, 0x00, SPRITE_FLAG_PRIO, 0xe000)	// centered in json
+	Renderer.drawCustomSprite(stringformat("text_option_challenges_%d", selectedMenuOption.main), getScreenExtend() - 40 + 24, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+	Renderer.drawCustomSprite(stringformat("text_option_greensphere_%d", selectedMenuOption.main), getScreenExtend() - 40 + 24, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+	Renderer.drawCustomSprite(stringformat("text_option_airmenu_%d", selectedMenuOption.main), getScreenExtend() - 40 + 25, 180, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+*/	
+
+	Renderer.drawCustomSprite(stringformat("text_option_normalgametype_%d", selectedGameType), getScreenExtend() - 40 + 300, 20, 0x00, SPRITE_FLAG_PRIO, 0xe000)	// centered in json
+	u32 alpha = 0xffffffff	// full display
+	if (selectedMenuOption.main == 0)
+		alpha = 0xff40ffff	// 0xff40ffff yellow
+	Renderer.drawCustomSprite("text_option_normalgame", getScreenExtend() - 40 + 25, 12, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)	// 0xff40ffff yellow
+	alpha = 0xffffffff
+	if (selectedMenuOption.main == 1)
+		alpha = 0xff40ffff
+	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + 24, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
+	alpha = 0xffffffff
+	if (selectedMenuOption.main == 2)
+		alpha = 0xff40ffff
+	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + 24, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
+	alpha = 0xffffffff
+	if (selectedMenuOption.main == 3)
+		alpha = 0xff40ffff
+	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + 25, 180, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
+
+	if (selectedMenuOption.main == 0)
+	{
+		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + 230 + 4 - arrowShift, 12 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type left arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + 361 + 4 + arrowShift, 12 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type right arrow
+	}
+
+	Letters.Main()
+	Letters.Show("Play Sonic 3 & Knuckles with new level layouts, special stage`layouts, and colour schemes for a fresh take on a classic.``````Play any act or try to earn medals in two challenging modes!`Find the fastest route and race to the goal in Time Attack!`Freeze the clock and try not to get hurt in Time Stone Trial!``````Play the classic Blue Sphere game with a tricky twist.``````Return to the A.I.R. menu to change options or exit the game.", 1, getScreenExtend() - 40 + 32, 36)
+//	Renderer.drawCustomSprite("mainmenu_descriptions", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+
+	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
+	{
+		if (selectedMenuOption.main == 0)	// Normal Game was selected
+		{
+			playSound(0x63)
+			global.game_mode = 0x4c			// Data Select
+			time_attack = 0
+			if (selectedGameType == 1)
+				original_mode = 1
+			else if (selectedGameType == 2)
+				time_attack = 4
+			else if (selectedGameType == 3)
+				time_attack = 3
+			return
+		}
+		else if (selectedMenuOption.main == 1)	// Challenges was selected
+		{
+			playSound(0x63)
+			global.game_mode = 0x54		// Challenges
+	//		if (setting.time_attack != 1 && setting.time_attack != 2)		// no longer needed as Challenges also contains Act Select
+	//			setting.time_attack = 1
+			selectedMenuOption = 0				// Force challenges menu selection to zone select (as leaving via pause menu from a challenge can start the cursor on characters)
+			time_attack = setting.time_attack
+			return
+		}
+		else if (selectedMenuOption.main == 2)	// Green Sphere was selected
+		{
+			playSound(0xaf)
+			u8[0xffffffa1] = 0
+			global.game_mode = 0x2c		// Blue Sphere
+			time_attack = 0
+			green_spheres.active = 0x01		// set flag if entering the Blue Sphere game mode (Green Spheres for DAGE)
+			specialstages_knuckles.shared = specialstages_knuckles
+
+			if (setting.levelselect.characters == 0)
+				setting.levelselect.characters = CHARS_SONIC_ALONE
+			else if (setting.levelselect.characters == 4)
+				setting.levelselect.characters = CHARS_KNUCKLES_ALONE
+
+			if (!Mods.isModActive("Blue Sphere Time Attack"))	// if Blue Spheres Time Attack is not active,
+				fn04ceb6()	// call the function that bypasses the initial "NO WAY" and movement of sprites, as animation breaks without running this early
+			else
+				global.game_mode = 0x89
+
+			// EntryFunctions.blueSphereGame()
+			return
+		}
+		else if (selectedMenuOption.main == 3)	// A.I.R. Menu was selected
+		{
+			playSound(0xad)
+			time_attack = 0
+
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Do not fade out music in this case. Data Select music is meant to kept playing
+			exitGame = 1
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+	}
+	// This code exits to the SEGA Screen. (B button or Back button was pressed.)
+	else if (control.pad1.pressed & CONTROL_B || Input.buttonPressed(BUTTON_BACK))
+	{
+		playSound(0xad)
+		
+		u32 backupA0 = A0
+		FadeOutScreenBlocking()
+		A0 = backupA0
+
+		global.game_mode = 0x04
+
+		// Do not fade out music in this case, Data Select music is meant to kept playing
+	//	Game.returnToMainMenu()
+	//	yieldExecution()
+
+	}
+	else if (control.pad1.pressed & CONTROL_UP)
+	{
+		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 3)
+		{
+			selectedMenuOption.main -= 1
+		}
+		else if (selectedMenuOption.main == 0)
+		{
+			selectedMenuOption.main = 3
+		}
+		playSound(0x5b)
+	}
+	else if (control.pad1.pressed & CONTROL_DOWN)
+	{
+		if (selectedMenuOption.main < 3)
+		{
+			selectedMenuOption.main += 1
+		}
+		else if (selectedMenuOption.main == 3)
+		{
+			selectedMenuOption.main = 0
+		}
+		playSound(0x5b)
+	}
+	else if ((control.pad1.pressed & CONTROL_LEFT) && selectedMenuOption.main == 0)
+	{
+		if (selectedGameType == 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
+		{
+			selectedGameType = 0
+		}
+		else if (selectedGameType > 0 && selectedGameType <= 3)
+		{
+			selectedGameType -= 1
+		}
+		else if (selectedGameType == 0)
+		{
+			selectedGameType = 3
+		}
+		playSound(0x5b)
+	}
+	else if ((control.pad1.pressed & CONTROL_RIGHT) && selectedMenuOption.main == 0)
+	{
+		if (selectedGameType == 0 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
+		{
+			selectedGameType = 2
+		}
+		else if (selectedGameType < 3)
+		{
+			selectedGameType += 1
+		}
+		else if (selectedGameType == 3)
+		{
+			selectedGameType = 0
+		}
+		playSound(0x5b)
+	}
+}
+
+
+
+
+
+// Send players who back out of the data select to the D.A. Garden Menu.
+// Functions taken from menus\dataselect.lemon
+
+function void DataSelect.update()
+{
+	while (true)
+	{
+		global.frame_state = 0x1e
+		waitForNextFrame()
+	@EntryPoint:
+
+	#if STANDALONE
+		DataSelect.drawCustomPlanes()
+
+		// Quick scroll-in effect
+		//if (u8[0xffffffff] > 0)
+		//{
+		//	--u8[0xffffffff]
+		//	camera.foreground.x.u16 += 30
+		//}
+	#endif
+	
+		++level.framecounter
+		UpdateGameObjects()
+		u16[0xffffe002] = -camera.foreground.x.u16
+		RenderSprites()
+
+		A0 = 0xfffffc42
+		++u16[0xffffe666]
+		if (u16[0xffffe666] >= 3)
+			u16[0xffffe666] = 0
+
+	#if STANDALONE
+		if (Game.getSetting(SETTING_GFX_ANTIFLICKER) >= 1)
+		{
+			// This version is a bit less flickery
+			copyMemory(A0, 0x00ca9a, 0x1e)
+			if (u16[0xffffe666] != 0)
+			{
+				for (u8 i = 0; i < 0x1e; i += 2)
+				{
+					u16 weight = abs(s16[0xffffe666] - 2) + 1
+
+					// Mix color with white
+					u16 r = u16[A0+i] & 0x0e
+					u16 g = (u16[A0+i] >> 4) & 0x0e
+					u16 b = (u16[A0+i] >> 8) & 0x0e
+					r = (r * weight + 0x0e * (3 - weight)) / 3
+					g = (g * weight + 0x0e * (3 - weight)) / 3
+					b = (b * weight + 0x0e * (3 - weight)) / 3
+					u16[A0+i] = r + (g << 4) + (b << 8)
+				}
+			}
+		}
+		else
+	#endif
+		if (u16[0xffffe666] == 0)
+		{
+			fillMemory_u16(A0, 0x1e, 0x0eee)
+		}
+		else
+		{
+			copyMemory(A0, 0x00ca9a, 0x1e)
+		}
+
+		if (global.game_mode != 0x4c)
+			break
+	}
+
+	if ((global.game_mode & 0x7f) != 0x58)	// new check to not play warp sound when returning to D.A. Garden menu
+		playSound(0xaf)
+}
+
+//# address-hook(0x00d1fa) end(0x00d30a)
+function void fn00d1fa()
+{
+#if STANDALONE
+	if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
+#else
+	if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL))
+#endif
+	{
+		// Back to the intro / title screen
+	//	global.game_mode = 0x04
+		global.game_mode = 0x58
+
+	#if STANDALONE
+		playSound(0xad)
+
+		u32 backupA0 = A0
+		FadeOutScreenBlocking()
+		A0 = backupA0
+
+		// Do not fade out music in this case, Data Select music is meant to kept playing
+	//	Game.returnToMainMenu()
+	//	yieldExecution()
+	#endif
+	}
+	else if (u16[0xffffeee2] == 0)
+	{
+		bool skipPart = false
+		if (u16[A0 + 0x30] == 0)
+		{
+			D0 = 0
+			if (control.pad1.pressed & CONTROL_LEFT)
+			{
+				if (u16[0xffffeee4] == 0 || dataselect.slot_selected != 1)
+				{
+					if (dataselect.slot_selected != 0)
+					{
+						--dataselect.slot_selected
+						u8 sfx = (u16[0xffffeee4] != 0) ? 0x7b : 0xb7
+						playSound(sfx)
+						D0 = -8
+					}
+				}
+			}
+
+			if (control.pad1.pressed & CONTROL_RIGHT)
+			{
+				if (dataselect.slot_selected != 9)
+				{
+					++dataselect.slot_selected
+					u8 sfx = (u16[0xffffeee4] != 0) ? 0x7b : 0xb7
+					playSound(sfx)
+					D0 = 8
+				}
+			}
+
+			objA0.countdown_value = D0.u16
+			if (objA0.countdown_value != 0)
+			{
+				u16[A0 + 0x30] = 0x0d
+			}
+			else
+			{
+				skipPart = true
+			}
+		}
+
+		if (!skipPart)
+		{
+			D0.u16 = u16[A0 + 0x12]		// Position of cursor on screen
+			s16 moveStep = objA0.countdown_value
+
+			D0.s16 += moveStep
+			if (moveStep >= 0)
+			{
+				if (D0.s16 > s16(0x120 + getScreenExtend()))
+				{
+					camera.foreground.x.u16 += moveStep
+					if (s16(camera.foreground.x.u16) > s16(0x2c0 - getScreenExtend()))
+					{
+						camera.foreground.x.u16 -= moveStep
+					}
+					else
+					{
+						D0.s16 -= moveStep
+					}
+				}
+			}
+			else
+			{
+				if (D0.s16 < s16(0x120 + getScreenExtend()))
+				{
+					camera.foreground.x.u16 += moveStep
+					if (s16(camera.foreground.x.u16) < -s16(getScreenExtend()))
+					{
+						camera.foreground.x.u16 -= moveStep
+					}
+					else
+					{
+						D0.s16 -= moveStep
+					}
+				}
+			}
+
+			u16[A0 + 0x12] = D0.u16
+			--u16[A0 + 0x30]
+		}
+	}
+
+	D2 = 0
+	if (dataselect.slot_selected == 0)
+	{
+		D2.s16 = 8
+	}
+	else if (dataselect.slot_selected == 9)
+	{
+		D2.s16 = -8
+	}
+
+	D2.u16 += u16[A0 + 0x12]
+	objA0.position.x.u16 = D2.u16
+
+	// Determine size of the cursor (large or small)
+	objA0.animation.sprite = (D2.u16 >= 0xf0 + getScreenExtend() && D2.u16 <= 0x148 + getScreenExtend()) ? 1 : 2
+
+	if (level.framecounter.low & 0x04)
+	{
+		DrawObject()
+	}
+}
+
+//# address-hook(0x00d42c) end(0x00d69a)
+function void fn00d42c()
+{
+	u8 acceptButtons = DataSelect.CONTROLS_ACCEPT
+	if (original_mode)
+		acceptButtons = 0xe0	// AIR does not allow C (controller left face button) as an accept button
+
+	objA0.compound.count = 0
+	A1 = u32[A0 + 0x30]
+	u32 backupA1 = A1	// make a backup, as this gets changed when the Knuckles difficulty menu is called
+
+	D0.u8 = dataselect.slot_selected - 1
+	if (D0.u8 != objA0.flags2e)
+	{
+		u8[A0 + 0x37] = u8[A1 + 0x03]
+		u16[A0 + 0x38] = 0
+	}
+	else
+	{
+		u8 result = fn00d458()
+		if (result == 0)
+		{
+			if (control.pad1.pressed & acceptButtons)
+			{
+				levelselect.characters = u16[A0 + 0x34]
+
+				bool menuReady = false		// we make this true after one frame so that acceptance inputs don't instantly make the difficulty menu accept as well
+				pause_menu_selection = 0
+
+				while (global.game_mode == 0x0c && !original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
+				{
+					global.frame_state = 0x10
+					waitForNextFrame()
+
+				@EntryPoint:
+					timer.alldata = 0
+
+					u32 backupA0 = A0
+					A0 = 0xffffb000
+					D7 = 0x6d
+					updateGameObjectLoopRenderPaused()
+					RenderSprites()
+					DataSelect.drawRevisitedSprites()
+					A0 = backupA0
+
+					Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
+					Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
+					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+					Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+					Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+
+					if (menuReady == true)
+					{
+						if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
+						{
+							result = 2
+							global.game_mode = 0x4c
+
+							objA0.animation.sprite = u16[A0 + 0x34] + 4		// these two lines from end of function where result = 2
+							fn00d69e()
+
+							return
+						}
+						
+						if (Input.buttonPressed(BUTTON_UP))
+						{
+							pause_menu_selection -= 2
+							if (pause_menu_selection < 0)
+								pause_menu_selection = 2
+							playSound(0x5b)
+						}
+						else if (Input.buttonPressed(BUTTON_DOWN))
+						{
+							pause_menu_selection += 2
+							if (pause_menu_selection > 2)
+								pause_menu_selection = 0
+							playSound(0x5b)
+						}
+
+						if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+						{
+							eggrobos_knuckles = 0
+							specialstages_knuckles = 0
+							break
+						}
+						else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+						{
+							eggrobos_knuckles = 1
+							specialstages_knuckles = 1
+							break
+						}
+					}
+					else
+						menuReady = true
+				}
+			}
+
+			return
+		}
+
+		if (result == 1)
+		{
+			if (control.pad1.pressed & acceptButtons)
+			{
+				levelselect.characters = u16[A0 + 0x34]
+
+				bool menuReady = false		// we make this true after one frame so that acceptance inputs don't instantly make the difficulty menu accept as well
+				pause_menu_selection = 0
+
+				while (!original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
+				{
+					global.frame_state = 0x10
+					waitForNextFrame()
+
+				@EntryPoint:
+					timer.alldata = 0
+
+					u32 backupA0 = A0
+					A0 = 0xffffb000
+					D7 = 0x6d
+					updateGameObjectLoopRenderPaused()
+					RenderSprites()
+					DataSelect.drawRevisitedSprites()
+					A0 = backupA0
+
+					Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
+					Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
+					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+					Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+					Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+
+					if (menuReady == true)
+					{
+						if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
+						{
+							result = 2
+							global.game_mode = 0x4c
+
+							objA0.animation.sprite = u16[A0 + 0x34] + 4		// these two lines from end of function where result = 2
+							fn00d69e()
+
+							return
+						}
+						
+						if (Input.buttonPressed(BUTTON_UP))
+						{
+							pause_menu_selection -= 2
+							if (pause_menu_selection < 0)
+								pause_menu_selection = 2
+							playSound(0x5b)
+						}
+						else if (Input.buttonPressed(BUTTON_DOWN))
+						{
+							pause_menu_selection += 2
+							if (pause_menu_selection > 2)
+								pause_menu_selection = 0
+							playSound(0x5b)
+						}
+
+						if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+						{
+							eggrobos_knuckles = 0
+							specialstages_knuckles = 0
+							break
+						}
+						else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+						{
+							eggrobos_knuckles = 1
+							specialstages_knuckles = 1
+							break
+						}
+					}
+					else
+						menuReady = true
+				}
+
+				// Initialize the new save state
+				A1 = backupA1	// restore the backup changed by the Knuckles difficulty menu
+				u32[A1] = 0
+				 u8[A1 + 0x02] = (levelselect.characters << 4)
+				u32[A1 + 0x04] = 0
+				u16[A1 + 0x08] = 0x0300
+
+				DataSelect.sharedNewGameStartup()
+				global.active_saveslot = A1
+				DataSelect.SharedGameSlotContinue()
+
+			#if STANDALONE
+				u8[A1 + 0x01] = global.game_random_base
+			#endif
+
+				sram.block_interrupts.u8 = 0xff
+				SaveGameSlot()
+
+				DrawObject()
+				return
+			}
+
+			D0.u16 = u16[A0 + 0x34]
+			fn00d6d0()
+			u16[A0 + 0x34] = D0.u16
+
+			objA0.compound.count = (level.framecounter.low & 0x10) ? 1 : 0
+		}
+	}
+
+	objA0.animation.sprite = u16[A0 + 0x34] + 4
+	fn00d69e()
+}
+
+
+// Character icon for "No Save"
+
+//# address-hook(0x00d30c) end(0x00d39a)
+function void fn00d30c()
+{
+	objA0.compound.sprite1.animation.sprite = 0x0f
+	objA0.animation.sprite = dataselect.nosave_characters + 4
+
+	if (dataselect.slot_selected == 0 && u16[0xffffb04a + 0x2e] == 0 && u16[0xffffeee4] == 0)
+	{
+		if (control.pad1.pressed & DataSelect.CONTROLS_ACCEPT)
+		{
+			levelselect.characters = dataselect.nosave_characters
+
+		//	bool menuReady = false		// we make this true after one frame so that acceptance inputs don't instantly make the difficulty menu accept as well
+			pause_menu_selection = 0
+
+			while (!original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone_act != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))	// Knux, not Original Mode, not SSZ or DEZ
+			{
+				global.frame_state = 0x10
+				waitForNextFrame()
+
+			@EntryPoint:
+				timer.alldata = 0
+
+				u32 backupA0 = A0
+				A0 = 0xffffb000
+				D7 = 0x6d
+				updateGameObjectLoopRenderPaused()
+				RenderSprites()
+				DataSelect.drawRevisitedSprites()
+				A0 = backupA0
+
+				Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
+				Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
+				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+				Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+				Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+
+			//	if (menuReady == true)
+			//	{
+					if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
+					{
+						global.game_mode = 0x4c
+
+						objA0.animation.sprite = u16[A0 + 0x34] + 4		// these two lines from end of function where result = 2
+						fn00d69e()
+
+						return
+					}
+					
+					if (Input.buttonPressed(BUTTON_UP))
+					{
+						pause_menu_selection -= 2
+						if (pause_menu_selection < 0)
+							pause_menu_selection = 2
+						playSound(0x5b)
+					}
+					else if (Input.buttonPressed(BUTTON_DOWN))
+					{
+						pause_menu_selection += 2
+						if (pause_menu_selection > 2)
+							pause_menu_selection = 0
+						playSound(0x5b)
+					}
+
+					if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+					{
+						eggrobos_knuckles = 0
+						specialstages_knuckles = 0
+						break
+					}
+					else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+					{
+						eggrobos_knuckles = 1
+						specialstages_knuckles = 1
+						break
+					}
+			//	}
+			//	else
+			//		menuReady = true
+			}
+
+			DataSelect.sharedNewGameStartup()
+
+			global.active_saveslot = 0
+			DataSelect.SharedGameSlotContinue()
+
+			DrawObject()
+			return
+		}
+
+		D0.u16 = dataselect.nosave_characters
+		fn00d6d0()
+		dataselect.nosave_characters = D0.u16
+
+		objA0.animation.sprite = D0.u8 + 4
+		objA0.compound.count = 1
+		if (level.framecounter.low & 0x10)
+		{
+			fn00d69e()
+			return
+		}
+	}
+
+	objA0.compound.count = 0
+	fn00d69e()
+}

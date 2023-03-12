@@ -1,0 +1,104 @@
+// Functions for taking screenshots without the HUD or character via debug mode.
+
+
+// Don't draw the character in debug mode
+//# address-hook(0x092ab0) end(0x092ace)
+function void DebugMode.Update()
+{
+	DebugMode.GetObjectTable()
+	DebugMode.EvaluateInput()
+	// DrawObject()
+}
+
+
+
+
+
+// Don't render the HUD
+//# address-hook(0x00db44) end(0x00dbb2)
+function void RenderHUD()
+{
+}
+
+
+
+
+
+// Prevent horizontal path swappers from being drawn in debug mode
+//# address-hook(0x01cef2) end(0x01cf14)
+function void PathSwapperBaseUpdateHorizontal()
+{
+	if (debug_mode.state == 0)
+	{
+		D1.u16 = objA0.position.y.u16
+		A2 = A0 + 0x34
+
+		A1 = 0xffffb000
+		PathSwapperUpdateHorizontal()
+
+		A1 = 0xffffb04a
+		PathSwapperUpdateHorizontal()
+
+		CheckForUnloadObject()
+	}
+/*	else
+	{
+		DrawOrUnloadObject()
+
+	#if STANDALONE
+		debugDrawRect(objA0.position.x.u16 - objA0.value32, objA0.position.y.u16 - 0x08, objA0.value32 * 2, 0x10, 0xa0ffff80)
+	#endif
+	} */
+}
+
+// Prevent vertical path swappers from being drawn in debug mode
+//# address-hook(0x01cd8a) end(0x01cdac)
+function void PathSwapperBaseUpdateVertical()
+{
+	if (debug_mode.state == 0)
+	{
+		D1.u16 = objA0.position.x.u16
+		A2 = A0 + 0x34
+
+		// Update for Sonic
+		A1 = 0xffffb000
+		PathSwapperUpdateVertical()
+
+		// Update for Tails
+		A1 = 0xffffb04a
+		PathSwapperUpdateVertical()
+
+		CheckForUnloadObject()
+	}
+/*	else
+	{
+		DrawOrUnloadObject()
+
+	#if STANDALONE
+		debugDrawRect(objA0.position.x.u16 - 0x08, objA0.position.y.u16 - objA0.value32, 0x10, objA0.value32 * 2, 0xa0ffff80)
+	#endif
+	} */
+}
+
+
+
+
+
+// Prevent invisible solid or damaging/killing objects from being drawn in debug mode
+function void BlockerElement.checkForUnloadAndDebugRender(u32 color)
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > 0x0280)
+	{
+		Object.DespawnAndUnload()
+	}
+/*	else if (debug_mode.state)
+	{
+		DrawObject()
+
+	#if STANDALONE
+		debugDrawOutlineRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, color)
+		debugDrawRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, (color & 0xffffff) + (((color >> 24) / 2) << 24))
+	#endif
+	} */
+}

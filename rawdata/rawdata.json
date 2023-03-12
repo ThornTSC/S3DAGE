@@ -1,0 +1,73 @@
+{  
+  // Zone palettes
+  "Palette0000":  { "File": "palettes/PaletteAIZ1.bin" },
+  "Palette0001":  { "File": "palettes/PaletteAIZ2.bin" },
+  "Palette0100":  { "File": "palettes/PaletteHCZ1.bin" },
+  "Palette0101":  { "File": "palettes/PaletteHCZ2.bin" },
+  "Palette0200":  { "File": "palettes/PaletteMGZ.bin" },
+  "Palette0201":  { "File": "palettes/PaletteMGZ.bin" },
+  "Palette0300":  { "File": "palettes/PaletteCNZ.bin" },
+  "Palette0301":  { "File": "palettes/PaletteCNZ.bin" },
+  "Palette0400":  { "File": "palettes/PaletteFBZ.bin" },
+  "Palette0401":  { "File": "palettes/PaletteFBZ.bin" },
+  "Palette0500":  { "File": "palettes/PaletteICZ1.bin" },
+  "Palette0501":  { "File": "palettes/PaletteICZ2.bin" },
+  "Palette0600":  { "File": "palettes/PaletteLBZ1.bin" },
+  "Palette0601":  { "File": "palettes/PaletteLBZ2.bin" },
+  "Palette0700":  { "File": "palettes/PaletteMHZ1.bin" },
+  "Palette0701":  { "File": "palettes/PaletteMHZ2Summer.bin" },
+  "Palette0800":  { "File": "palettes/PaletteSOZ1.bin" },
+  "Palette0801":  { "File": "palettes/PaletteSOZ2.bin" },
+  "Palette0900":  { "File": "palettes/PaletteLRZ1.bin" },
+  "Palette0901":  { "File": "palettes/PaletteLRZ2.bin" },
+  "Palette0a00":  { "File": "palettes/PaletteSSZ1.bin" },
+  "Palette0a01":  { "File": "palettes/PaletteSSZ2.bin" }, // needs to be made
+  "Palette0b00":  { "File": "palettes/PaletteDEZ1.bin" },
+  "Palette0b01":  { "File": "palettes/PaletteDEZ1.bin" }, // PaletteDEZ2.bin is an older, greener palette
+  "Palette0c00":  { "File": "palettes/PaletteDDZ.bin" },
+
+  "PaletteHPZ1A":  { "File": "palettes/PaletteHPZ1A.bin" },
+  "PaletteHPZ1B":  { "File": "palettes/PaletteHPZ1B.bin" },
+  "PaletteHPZ2A":  { "File": "palettes/PaletteHPZ2A.bin" },
+  "PaletteHPZ2B":  { "File": "palettes/PaletteHPZ2B.bin" },
+
+  // Zone water palettes
+  "PaletteAIZ1Water":  { "File": "palettes/PaletteAIZ1Water.bin" },
+  "PaletteAIZ2Water":  { "File": "palettes/PaletteAIZ2Water.bin" },
+  "PaletteHCZ1Water":  { "File": "palettes/PaletteHCZ1Water.bin" },
+  "PaletteHCZ2Water":  { "File": "palettes/PaletteHCZ2Water.bin" },
+  "PaletteCNZ2Water":  { "File": "palettes/PaletteCNZ2Water.bin" },
+  "PaletteICZ2Water":  { "File": "palettes/PaletteICZ2Water.bin" },
+  "PaletteLBZ2Water":  { "File": "palettes/PaletteLBZ2Water.bin" },
+
+  // Zone-specific palette changes
+  "PaletteAIZIntro":  { "File": "palettes/PaletteAIZIntro.bin" },
+  "PaletteAIZ2Boss":  { "File": "palettes/PaletteAIZ2Boss.bin" },
+  
+  "PaletteCNZ2Dark":  { "File": "palettes/PaletteCNZ2Dark.bin" },
+
+  "PaletteMHZ2Autumn":  { "File": "palettes/PaletteMHZ2Autumn.bin" },
+
+  "PaletteFBZSky":  { "File": "palettes/PaletteFBZSky.bin" },
+  "PaletteFBZIndoor":  { "File": "palettes/PaletteFBZIndoor.bin" },
+
+  "PaletteLRZ2Boss":  { "File": "palettes/PaletteLRZ2Boss.bin" },
+  "PaletteLRZ2BossFire":  { "File": "palettes/PaletteLRZ2Fire.bin" },
+  
+  "PaletteDEZ2Boss":  { "File": "palettes/PaletteDEZ2Boss.bin" },
+  "PaletteFinalBoss":  { "File": "palettes/PaletteFinalBoss.bin" },
+
+  // Original special stage layouts
+  "S3SS8_Orig":  { "File": "S3SS8_Orig.bin" },
+  "SKSS5_Orig":  { "File": "SKSS5_Orig.bin" },
+  "SKSS7_Orig":  { "File": "SKSS7_Orig.bin" },
+
+  // Green Sphere game quarter layouts
+  "GreenSphereGame":  { "File": "SKSS2.bin" },
+
+  // Green Sphere premade quarter layout combinations for Time Attack
+  "GreenSphereTimeAttackStages": { "File": "GreenSphereTimeAttackStages.bin"},
+
+  // Medal and Dev times
+  "MedalTimes":  { "File": "MedalTimes.bin" }
+}

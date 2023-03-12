@@ -1,0 +1,28 @@
+{
+	// Challenge menu backgrounds
+	// Note these are sorted by player order rather than internal order (with HPZ/SSZ as exceptions)
+	"bg_0000": { "File": "AIZ1.png" },
+	"bg_0001": { "File": "AIZ2.png" },
+	"bg_0100": { "File": "HCZ1.png" },
+	"bg_0101": { "File": "HCZ2.png" },
+	"bg_0200": { "File": "MGZ1.png" },
+	"bg_0201": { "File": "MGZ2.png" },
+	"bg_0300": { "File": "CNZ1.png" },
+	"bg_0301": { "File": "CNZ2.png" },
+	"bg_0400": { "File": "ICZ1.png" },
+	"bg_0401": { "File": "ICZ2.png" },
+	"bg_0500": { "File": "LBZ1.png" },
+	"bg_0501": { "File": "LBZ2.png" },
+	"bg_0600": { "File": "MHZ1.png" },
+	"bg_0601": { "File": "MHZ2.png" },
+	"bg_0700": { "File": "FBZ1.png" },
+	"bg_0701": { "File": "FBZ2.png" },
+	"bg_0800": { "File": "SOZ1.png" },
+	"bg_0801": { "File": "SOZ2.png" },
+	"bg_0900": { "File": "LRZ1.png" },
+	"bg_0901": { "File": "LRZ2.png" },
+	"bg_0a00": { "File": "HPZ.png" },		// Despite the order of these two keys,
+	"bg_0a01": { "File": "SSZ.png" },		// HPZ time data is saved in SSZ's act 2 slot.
+	"bg_0b00": { "File": "DEZ1.png" },
+	"bg_0b01": { "File": "DEZ2.png" }
+}

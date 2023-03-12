@@ -1,0 +1,911 @@
+{
+  // Starting water heights for levels
+  "StartingWaterHeights": {
+    "File": "StartingWaterHeights.bin",
+    "RomInject": "0x006d2c"
+  },
+
+  // Palette replacements
+
+  // Replaces Angel Island Zone Act 1 Palette
+  "PaletteAIZ1Cycles": {
+    "File": "PaletteAIZ1Cycles.bin",
+    "RomInject": "0x2d446c" // "0x002af6"
+  },
+/*  "PaletteAIZIntro": {
+    "File": "PaletteAIZIntro.bin",
+    "RomInject": "0x0a8b1c"
+  },
+  "PaletteAIZ1": {
+    "File": "PaletteAIZ1.bin",
+    "RomInject": "0x0a8b7c"
+  },
+  "PaletteAIZ1Water": {
+    "File": "PaletteAIZ1Water.bin",
+    "RomInject": "0x0a8c9c"
+  },
+  "PaletteAIZ1KnuxPatch": {
+    "File": "PaletteAIZ1KnuxPatch.bin",
+    "RomInject": "0x04fae4"
+  },
+*/  // Replaces Angel Island Zone Act 2 Palette
+  "PaletteAIZ2Cycles": {
+    "File": "PaletteAIZ2Cycles.bin",
+    "RomInject": "0x2d459c" // "0x002c26"
+  },
+/*  "PaletteAIZ2-1": {
+    "File": "PaletteAIZ2.bin",
+    "RomInject": "0x0a8bdc"
+  },
+  "PaletteAIZ2-2": { // Sonic 3 alone version
+    "File": "PaletteAIZ2.bin",
+    "RomInject": "0x28c3d4"
+  },
+  "PaletteAIZ2Water": {
+    "File": "PaletteAIZ2Water.bin",
+    "RomInject": "0x0a8d1c"
+  },
+  "PaletteAIZ2BossArea1": {
+    "File": "PaletteAIZ2Boss.bin",
+    "RomInject": "0x0a8c3c"
+  },
+  "PaletteAIZ2BossArea2": { // Sonic 3 alone ersion
+    "File": "PaletteAIZ2Boss.bin",
+    "RomInject": "0x28c434"
+  },
+
+  // Replaces Hydrocity Zone Act 1 Palette
+*/  "PaletteHCZ1Cycles": {
+    "File": "PaletteHCZ1Cycles.bin",
+    "RomInject": "0x2d4684" // "0x002d0e"
+  },
+/*  "PaletteHCZ1": {
+    "File": "PaletteHCZ1.bin",
+    "RomInject": "0x0a8d9c"
+  },
+  "PaletteHCZ1Water": {
+    "File": "PaletteHCZ1Water.bin",
+    "RomInject": "0x0a8e5c"
+  },
+*/  // Changes the ending x-coordinate of the conveyor with ID $0A in HCZ1
+  // There is a full table of start and end x-coordinates at 0x31124: one word start, one word end
+//  "HCZ1Conveyor0ACoordinates": {
+//    "File": "HCZ1Conveyor0ACoordinates.bin",
+//    "RomInject": "0x03114c"
+//  },
+
+/*  // Replaces Hydrocity Zone Act 2 Palette
+  "PaletteHCZ2": {
+    "File": "PaletteHCZ2.bin",
+    "RomInject": "0x0a8dfc"
+  },
+  "PaletteHCZ2Water": {
+    "File": "PaletteHCZ2Water.bin",
+    "RomInject": "0x0a8edc"
+  },
+
+
+
+
+  // Replaces Marble Garden Zone Main Palette
+  "PaletteMGZ": {
+    "File": "PaletteMGZ.bin",
+    "RomInject": "0x0a8f5c"
+  },
+*/  // Partially replace MGZ transition palette from day to night
+  "PaletteMGZEnding": {
+    "File": "PaletteMGZEnding.bin",
+    "RomInject": "0x2d48e8" // "0x364896"
+  },
+
+
+
+  // Replaces Carnival Night Zone Main Palette
+/*  "PaletteCNZ": {
+    "File": "PaletteCNZ.bin",
+    "RomInject": "0x0a8fbc"
+  },
+  "PaletteCNZ2Water": {
+    "File": "PaletteCNZ2Water.bin",
+    "RomInject": "0x0a901c"
+  },
+  "PaletteCNZ2Dark": {
+    "File": "PaletteCNZ2Dark.bin",
+    "RomInject": "0x066932"
+  },
+  "PaletteCNZ2DarkKnux": {
+    "File": "PaletteCNZ2DarkKnux.bin",
+    "RomInject": "0x2d1a8c"
+  },
+*/
+  "PaletteCNZCycle4": {
+    "File": "PaletteCNZCycle4.bin",
+    "RomInject": "0x2d46a4" // "0x002e82"
+  },
+
+
+  // Replaces Icecap Zone Act 1 Palette
+//  "PaletteICZ1": {
+//    "File": "PaletteICZ1.bin",
+//    "RomInject": "0x0a915c"
+//  },
+  "PaletteICZ1Cycles": {
+    "File": "PaletteICZ1Cycles.bin",
+    "RomInject": "0x2d4704" // "0x002fd6"
+  },
+  // Replaces Icecap Zone Act 2 Palette
+/*  "PaletteICZ2": {
+    "File": "PaletteICZ2.bin",
+    "RomInject": "0x0a91bc"
+  },
+  "PaletteICZ2Water": {
+    "File": "PaletteICZ2Water.bin",
+    "RomInject": "0x0a921c"
+  },
+
+
+
+
+  // Replaces Launch Base Zone Act 1 Palette
+  "PaletteLBZ1": {
+    "File": "PaletteLBZ1.bin",
+    "RomInject": "0x0a929c"
+  },
+  // Replaces Launch Base Zone Act 2 Palette
+  "PaletteLBZ2": {
+    "File": "PaletteLBZ2.bin",
+    "RomInject": "0x0a92fc"
+  },
+  "PaletteLBZ2Water": {
+    "File": "PaletteLBZ2Water.bin",
+    "RomInject": "0x0a935c"
+  },
+
+
+
+  // Replaces Mushroom Hill Zone Act 1 Palette
+  "PaletteMHZ1": {
+    "File": "PaletteMHZ1.bin",
+    "RomInject": "0x0a943c"
+  },
+  // Replaces Mushroom Hill Zone Act 2 Palettes
+  "PaletteMHZ2Summer": {
+    "File": "PaletteMHZ2Summer.bin",
+    "RomInject": "0x0a949c"
+  },
+  "PaletteMHZ2Autumn": {
+    "File": "PaletteMHZ2Autumn.bin",
+    "RomInject": "0x0550fe"
+  },
+
+
+
+
+
+
+  // Replaces Flying Battery Zone Palettes
+  // Acts 1 and 2 share palette data but have separate regions in ROM
+  "PaletteFBZSky": {
+    "File": "PaletteFBZSky.bin",
+    "RomInject": "0x052dd0"
+  },
+  "PaletteFBZIndoor": {
+    "File": "PaletteFBZIndoor.bin",
+    "RomInject": "0x052dc0"
+  },
+  "PaletteFBZ1": {
+    "File": "PaletteFBZ.bin",
+    "RomInject": "0x0a909c"
+  },
+  "PaletteFBZ2": {
+    "File": "PaletteFBZ.bin",
+    "RomInject": "0x0a90fc"
+  },
+
+
+  // Replaces Sandopolis Zone Palettes
+  "PaletteSOZ1": {
+    "File": "PaletteSOZ1.bin",
+    "RomInject": "0x0a94fc"
+  },
+  "PaletteSOZ2": {
+    "File": "PaletteSOZ2.bin",
+    "RomInject": "0x0a955c"
+  },
+*/  "PaletteSOZ2Cycles": { // also contains lighting changes
+    "File": "PaletteSOZ2Cycles.bin",
+    "RomInject": "0x2d47e4" // "0x00317a"
+  },
+
+  // Replaces Lava Reef Zone Act 1 Palette
+/*  "PaletteLRZ1": {
+    "File": "PaletteLRZ1.bin",
+    "RomInject": "0x0a967c"
+  },
+  // Replaces Lava Reef Zone Act 2 Palettes
+  "PaletteLRZ2": {
+    "File": "PaletteLRZ2.bin",
+    "RomInject": "0x0a96dc"
+  },
+  "PaletteLRZ2Boss": {
+    "File": "PaletteLRZ2Boss.bin",
+    "RomInject": "0x0a9cdc"
+  },
+  "PaletteLRZ2BossFire": {
+    "File": "PaletteLRZ2BossFire.bin",
+    "RomInject": "0x079726" // as seen in lrz_deatheggstarting.lemon
+  },
+  // Changes the art_tile value for stationary platforms in the LRZ2 boss fight
+ // "LRZPlatformPaletteFix": {
+ //   "File": "LRZPlatformPaletteFix.bin",
+ //   "RomInject": "0x07a17c"
+ //  },
+
+
+
+  // Replaces Hidden Palace Palettes and layout (for special stage hub).
+  // The zone's palette is actually made of an intro and a main palette, each
+  // with two consecutive sections. In level_hpz.lemon, the last function, fn0656a8(),
+  // switches from the first palette to the second at x-coordinate 0x0460.
+  "PaletteHPZ1A": {
+    "File": "PaletteHPZ1A.bin",
+    "RomInject": "0x0a9d3c"
+  },
+  "PaletteHPZ1B": {
+    "File": "PaletteHPZ1B.bin",
+    "RomInject": "0x0a9d5c"
+  },
+  "PaletteHPZ2A": {
+    "File": "PaletteHPZ2A.bin",
+    "RomInject": "0x0669d2"
+  },
+  "PaletteHPZ2B": {
+    "File": "PaletteHPZ2B.bin",
+    "RomInject": "0x0669f2"
+  },
+*/
+  "LayoutHPZ": {
+    "File": "LayoutHPZ.bin",
+    "RomInject": "0x0a7924"
+  },
+
+
+/*
+  // Replaces Sky Sanctuary Palettes
+  "PaletteSSZ1": {
+    "File": "PaletteSSZ1.bin",
+    "RomInject": "0x0a973c"
+  },
+ // "PaletteSSZ2": {
+ //   "File": "PaletteSSZ2.bin",
+ //   "RomInject": "0x0a97bc" // this is actually palette line 2, and it comes from General\Ending\Palettes\Objects.bin
+ // },
+
+
+
+  // Replaces Death Egg Zone Palettes
+  "PaletteDEZ1": {
+    "File": "PaletteDEZ1.bin",
+    "RomInject": "0x0a98bc"
+  },
+  //  "PaletteDEZ1Boss": {  // unneeded
+  //    "File": "PaletteDEZ1Boss.bin",
+  //    "RomInject": "0x07effc"
+  //  },
+  "PaletteDEZ2": {
+    "File": "PaletteDEZ1.bin",  // using the same file as Act 1 for the new palettes
+    "RomInject": "0x0a991c"
+  },
+  "PaletteDEZ2Boss": {
+    "File": "PaletteDEZ2Boss.bin",
+    "RomInject": "0x07f01c"
+  },
+  "PaletteFinalBoss": {
+    "File": "PaletteFinalBoss.bin",
+    "RomInject": "0x0a9d9c"
+  },
+
+  // Replaces The Doomsday Zone Palette
+  "PaletteDDZ": {
+    "File": "PaletteDDZ.bin",
+    "RomInject": "0x0a997c"
+  },
+
+  // Replaces ending cutscene palette (lower sky and clouds, ocean)
+ // "PaletteEnding": {
+ //   "File": "PaletteEnding.bin",
+ //   "RomInject": "0x0a97fc"
+ // },
+*/  
+
+
+  // Replaces Gumball Bonus Palette
+  // This is inactive simply to be consistent with the removal of the other bonus palettes
+  //  "PaletteGumball": {
+  //    "File": "PaletteGumball.bin",
+  //    "RomInject": "0x0a9bbc"
+  // },
+  // Replaces Magnetic Spheres Bonus Palette
+  // This is inactive because changing the wall colors affects ring item balls
+  //  "PaletteMagneticSpheres": {
+  //    "File": "PaletteMagneticSpheres.bin",
+  //    "RomInject": "0x0a9c1c"
+  //  },
+  // Replaces Slots Bonus Palette
+  // This is inactive because any changes will affect the color-changing blocks
+  //  "PaletteSlots": {
+  //    "File": "PaletteSlots.bin",
+  //    "RomInject": "0x0a9c7c"
+  //  },
+
+  // Replaces Sonic 3 Special Stage 1 Palette
+  "S3Palette1": {
+    "File": "PaletteS3SS1.bin",
+    "RomInject": "0x2d420c" // "0x0089fe"
+  },
+
+  // Replaces Sonic 3 Special Stage 2 Palette
+  "S3Palette2": {
+    "File": "PaletteS3SS2.bin",
+    "RomInject": "0x2d4232" // "0x008a24"
+  },
+
+  // Replaces Sonic 3 Special Stage 3 Palette
+  "S3Palette3": {
+    "File": "PaletteS3SS3.bin",
+    "RomInject": "0x2d4258" // "0x008a4a"
+  },
+
+  // Replaces Sonic 3 Special Stage 4 Palette
+  "S3Palette4": {
+    "File": "PaletteS3SS4.bin",
+    "RomInject": "0x2d427e" // "0x008a70"
+  },
+
+  // Replaces Sonic 3 Special Stage 5 Palette
+  "S3Palette5": {
+    "File": "PaletteS3SS5.bin",
+    "RomInject": "0x2d42a4" // "0x008a96"
+  },
+
+  // Replaces Sonic 3 Special Stage 6 Palette
+  "S3Palette6": {
+    "File": "PaletteS3SS6.bin",
+    "RomInject": "0x2d42ca" // "0x008abc"
+  },
+
+  // Replaces Sonic 3 Special Stage 7 Palette
+  "S3Palette7": {
+    "File": "PaletteS3SS7.bin",
+    "RomInject": "0x2d42f0" // "0x008ae2"
+  },
+
+  // Replaces Sonic 3 Special Stage 8 Palette
+  "S3Palette8": {
+    "File": "PaletteS3SS8.bin",
+    "RomInject": "0x2d4316" // "0x008b08"
+  },
+
+  // Replaces S&K Special Stage 1 Palette
+  "SKPalette1": {
+    "File": "PaletteSKSS1.bin",
+    "RomInject": "0x2d433c" // "0x008b2e"
+  },
+
+  // Replaces S&K Special Stage 2 Palette
+  "SKPalette2": {
+    "File": "PaletteSKSS2.bin",
+    "RomInject": "0x2d4362" // "0x008b54"
+  },
+
+  // Replaces S&K Special Stage 3 Palette
+  "SKPalette3": {
+    "File": "PaletteSKSS3.bin",
+    "RomInject": "0x2d4388" // "0x008b7a"
+  },
+
+  // Replaces S&K Special Stage 4 Palette
+  "SKPalette4": {
+    "File": "PaletteSKSS4.bin",
+    "RomInject": "0x2d43ae" // "0x008ba0"
+  },
+
+  // Replaces S&K Special Stage 5 Palette
+  "SKPalette5": {
+    "File": "PaletteSKSS5.bin",
+    "RomInject": "0x2d43d4" // "0x008bc6"
+  },
+
+  // Replaces S&K Special Stage 6 Palette
+  "SKPalette6": {
+    "File": "PaletteSKSS6.bin",
+    "RomInject": "0x2d43fa" // "0x008bec"
+  },
+
+  // Replaces S&K Special Stage 7 Palette
+  "SKPalette7": {
+    "File": "PaletteSKSS7.bin",
+    "RomInject": "0x2d4420" // "0x008c12"
+  },
+
+  // Replaces S&K Special Stage 8 Palette
+  "SKPalette8": {
+    "File": "PaletteSKSS8.bin",
+    "RomInject": "0x2d4446" // "0x008c38"
+  },
+
+
+  // Function to add EggRobo to the Sonic 3 object table with ID 0xd1 EggRoboS3ObjectTablePointer.bin
+  "EggRoboS3ObjectTablePointer": {
+    "File": "EggRoboS3ObjectTablePointer.bin",
+    "RomInject": "0x0951e6"
+  },
+  "ChaosRingObjectTablePointerS3": {
+   "File": "ChaosRingObjectTablePointer.bin",
+   "RomInject": "0x0951ea" // object ID 0xD2
+  },
+  "ChaosRingObjectTablePointerSK": {
+    "File": "ChaosRingObjectTablePointer.bin",
+    "RomInject": "0x09542a" // object ID 0x62
+  },
+  "RedStarRingObjectTablePointerS3": {
+    "File": "RedStarRingObjectTablePointer.bin",
+    "RomInject": "0x0951ee" // object ID 0xD3
+  },
+  "RedStarRingObjectTablePointerSK": {
+     "File": "RedStarRingObjectTablePointer.bin",
+     "RomInject": "0x09542e" // object ID 0x63
+  },
+
+
+  // Level tile/block/chunk/start replacements and other miscellaneous changes to level functions
+  // Chunks are now loaded from rawdata and commented out.
+
+  // Replaces AIZ Chunks
+/*
+  "ChunksAIZ1": {
+    "File": "AIZ1Chunks.bin",
+    "RomInject": "0x3abc40"
+  },
+  "ChunksAIZ2": {
+    "File": "AIZ2Chunks.bin",
+    "RomInject": "0x3b51e8"
+  },
+*/
+
+  // Replaces HCZ Chunks, Act 1 Sonic/Tails start location, and Act 1 water currents
+/*
+  "ChunksHCZP": {
+    "File": "HCZPChunks.bin",
+    "RomInject": "0x3ba2aa"
+  },
+  "ChunksHCZ1": {
+    "File": "HCZ1SChunks.bin",
+    "RomInject": "0x3bd0cc"
+  },
+  "ChunksHCZ2": {
+    "File": "HCZ2SChunks.bin",
+    "RomInject": "0x3c18ee"
+  },
+*/
+  "HCZ1SonicStart": {
+    "File": "HCZ1SonicStart.bin",
+    "RomInject": "0x1e3c20"
+  },
+  "HCZ1WaterCurrentRemover": {
+    "File": "HCZ1WaterCurrentRemover.bin",
+    "RomInject": "0x00705e"
+  },
+  "HCZ1WaterCurrentRemover2": {
+    "File": "HCZ1WaterCurrentRemover.bin",
+    "RomInject": "0x2054c4"
+  },
+
+  // Replaces MGZ Chunks and Act 1 start locations
+  // and replaces transparency color in MGZ
+  "PaletteTransparentMGZ": {
+    "File": "PaletteTransparentMGZ.bin",
+    "RomInject": "0x0a8f7c"
+  },
+/*
+  "ChunksMGZP": {
+    "File": "MGZPChunks.bin",
+    "RomInject": "0x3c6460"
+  },
+  "ChunksMGZ1": {
+    "File": "MGZ1SChunks.bin",
+    "RomInject": "0x3c9452"
+  },
+  "ChunksMGZ2": {
+    "File": "MGZ2SChunks.bin",
+    "RomInject": "0x3cb1c4"
+  },
+*/
+  "ChunksMGZQ": {
+    "File": "MGZQChunks.bin",
+    "RomInject": "0x3cbbb4" // added via fn0517d6() and fn0517ea() in level\03_mgz\level_mgz.lemon
+  },
+  "MGZ1SonicStart": {
+    "File": "MGZ1SonicStart.bin",
+    "RomInject": "0x1e3c28"
+  },
+  "MGZ1KnucklesStart": {
+    "File": "MGZ1KnucklesStart.bin",
+    "RomInject": "0x1e3ce8"
+  },
+
+  // Replaces CNZ Chunks, Act 1 start locations, and spiral tube coordinates
+/*
+  "ChunksCNZ": {
+    "File": "CNZChunks.bin",
+    "RomInject": "0x3d0e96"
+  },
+*/
+ // "CNZ1SonicStart": {
+ //   "File": "CNZ1SonicStart.bin",
+ //   "RomInject": "0x1e3c30"
+ // },
+ // "CNZ1KnucklesStart": {
+ //   "File": "CNZ1KnucklesStart.bin",
+ //   "RomInject": "0x1e3cf0"
+ // },
+  "CNZSpiralTubeCoordinates": {
+    "File": "CNZSpiralTubeCoordinates.bin",
+    "RomInject": "0x033328"
+ },
+
+  // Replaces ICZ Chunks
+  // Palette data is left here for reference but is set via code.
+/*
+  "ChunksICZP": {
+    "File": "ICZPChunks.bin",
+    "RomInject": "0x3d56a8"
+  },
+  "ChunksICZ1": {
+    "File": "ICZ1SChunks.bin",
+    "RomInject": "0x3d844a"
+  },
+  //"ICZ1KnucklesStart": {  // commented out; we'll handle this in scripts instead
+  //  "File": "ICZ1KnucklesStart.bin",
+  //  "RomInject": "0x1e3cf0"
+  //  },
+  "ChunksICZ2": {
+    "File": "ICZ2SChunks.bin",
+    "RomInject": "0x3dcfbc"
+  },
+*/
+
+  // Replaces LBZ Chunks and Act 2 start locations
+  // and adjusts vertical size of Act 1
+/*
+  "ChunksLBZ1": {
+    "File": "LBZ1Chunks.bin",
+    "RomInject": "0x3e2fa0"
+  },
+  "ChunksLBZ2": {
+    "File": "LBZ2Chunks.bin",
+    "RomInject": "0x3eaf04"
+  },
+*/
+  "LBZ1Size": {
+    "File": "LBZ1Size.bin",
+    "RomInject": "0x01bd2a"
+  },
+  // "BlocksLBZ2S": {
+  //   "File": "LBZ2SBlocks.bin",
+  //   "RomInject": "0x3e5f70"
+  //},
+  //"TilesLBZ2S": {
+  //   "File": "LBZ2STiles.bin",
+  //   "RomInject": "0x3e77d0"
+  // },
+  "LBZ2SonicStart": {
+    "File": "LBZ2SonicStart.bin",
+    "RomInject": "0x1e3c4c"
+  },
+  "LBZ2KnucklesStart": {
+    "File": "LBZ2KnucklesStart.bin",
+    "RomInject": "0x1e3d0c"
+  },
+
+  // Replaces MHZ Chunks and Act 2 boss layout and palette swap areas
+  "ChunksMHZC": {
+    "File": "MHZCChunks.bin",
+    "RomInject": "0x1a30e8"
+  },
+/*
+  "ChunksMHZP": {
+    "File": "MHZPChunks.bin",
+    "RomInject": "0x19d044"
+  },
+  "ChunksMHZS": {
+    "File": "MHZSChunks.bin",
+    "RomInject": "0x19f8a6"
+  },
+*/
+  "MHZ2BossLayout": {
+    "File": "MHZ2BossLayout.bin",
+    "RomInject": "0x0a8044"
+  },
+  "MHZ2PalSwaps": {
+    "File": "MHZ2PalSwaps.bin",
+    "RomInject": "0x05513e"
+  },
+
+  // Replaces FBZ Chunks, Blocks, and Tiles and Act 1 start locations
+  // and edits the ranges for the layout swaps
+/*
+  "ChunksFBZP": {
+    "File": "FBZPChunks.bin",
+    "RomInject": "0x1974a2"
+  },
+*/
+  "BlocksFBZP": {
+    "File": "FBZPBlocks.bin",
+    "RomInject": "0x194400"
+  },
+  "TilesFBZP": {
+    "File": "FBZPTiles.bin",
+    "RomInject": "0x195040"
+  },
+  "FBZ1SonicStart": {
+    "File": "FBZ1SonicStart.bin",
+    "RomInject": "0x1e3c38"
+  },
+  "FBZ1KnucklesStart": {
+    "File": "FBZ1KnucklesStart.bin",
+    "RomInject": "0x1e3cf8"
+  },
+  "FBZ1LayoutChangeRangeEdit": {
+    "File": "FBZ1LayoutChangeRangeEdit.bin",
+    "RomInject": "0x052844"
+  },
+
+  // Replaces SOZ Chunks, palette, collision, Act 1 Sonic/Tails start location, and Act 2 Blocks
+/*
+  "ChunksSOZP": {
+    "File": "SOZPChunks.bin",
+    "RomInject": "0x1a773a"
+  },
+*/
+  "BlocksSOZP": {
+    "File": "SOZPBlocks.bin",
+    "RomInject": "0x1a3568"
+  },
+  "CollisionSOZ": {
+    "File": "SOZCollision.bin",
+    "RomInject": "0x0993c0"
+  },
+  "SOZ1KnucklesStart": {
+    "File": "SOZ1KnucklesStart.bin",
+    "RomInject": "0x1e3d18"
+  },
+  "BlocksSOZ2S": {
+    "File": "SOZ2SBlocks.bin",
+    "RomInject": "0x1ad68e"
+  },
+
+  // Replaces LRZ Chunks, Blocks, and collision
+/*
+  "ChunksLRZP": {
+    "File": "LRZPChunks.bin",
+    "RomInject": "0x1b1aa4"
+  },
+*/
+  "BlocksLRZP": {
+    "File": "LRZPBlocks.bin",
+    "RomInject": "0x1b0fc2"
+  },
+/*
+  "ChunksLRZ1S": {
+    "File": "LRZ1SChunks.bin",
+    "RomInject": "0x1b5cd6"
+  },
+*/
+  "BlocksLRZ1S": {
+    "File": "LRZ1SBlocks.bin",
+    "RomInject": "0x1b1b14"
+  },
+  "RocksLRZ1S": {
+    "File": "LRZ1Rocks.bin",
+    "RomInject": "0x0cad06"
+  },
+/*
+  "ChunksLRZ2S": {
+    "File": "LRZ2SChunks.bin",
+    "RomInject": "0x1bc738"
+  },
+*/
+  "BlocksLRZ2S": {
+    "File": "LRZ2SBlocks.bin",
+    "RomInject": "0x1b8a96"
+  },
+/*
+  "ChunksLRZ3S": {
+    "File": "LRZ3SChunks.bin",
+    "RomInject": "0x1c290c"
+  },
+*/
+  "BlocksLRZ3S": {
+    "File": "LRZ3SBlocks.bin",
+    "RomInject": "0x1bfcca"
+  },
+  "CollisionLRZ1": {
+    "File": "LRZ1Collision.bin",
+    "RomInject": "0x0999c0"
+  },
+  "CollisionLRZ2": {
+    "File": "LRZ2Collision.bin",
+    "RomInject": "0x099fc0"
+  },
+
+  // Replaces HPZ Chunks
+/*
+  "ChunksHPZP": {
+    "File": "HPZPChunks.bin",
+    "RomInject": "0x1bfbea"
+  },
+  "ChunksHPZS": {
+    "File": "HPZSChunks.bin",
+    "RomInject": "0x1c71fe"
+  },
+*/
+
+  // Replaces SSZ Chunks
+/*
+  "ChunksSSZ1P": {
+    "File": "SSZ1PChunks.bin",
+    "RomInject": "0x1c8e00"
+  },
+  "ChunksSSZ1S": {
+    "File": "SSZ1SChunks.bin",
+    "RomInject": "0x1cbda2"
+  },
+  "ChunksSSZ2": {
+    "File": "SSZ2Chunks.bin",
+    "RomInject": "0x1d17a6"
+  },
+*/
+
+  // Replaces DEZ Chunks and Act 1 start locations
+  // and sets DEZ1 level size to support looping
+/*
+  "ChunksDEZ": {
+    "File": "DEZChunks.bin",
+    "RomInject": "0x1d5068"
+  },
+*/
+  "DEZ1SonicStart": {
+    "File": "DEZ1SonicStart.bin",
+    "RomInject": "0x1e3c70"
+  },
+  "DEZ1KnucklesStart": {
+    "File": "DEZ1KnucklesStart.bin",
+    "RomInject": "0x1e3d30"
+  },
+  "DEZ1Size": {
+    "File": "DEZ1Size.bin",
+    "RomInject": "0x01bd7a"
+  },
+
+  // Blank tiles used to clean up outro graphics
+  // and new ending logo graphics.
+  // Should really convert the blanks to a function to clear VRAM!
+  "BlankTiles": {
+    "File": "BlankTilesNemesis.bin",
+    "RomInject": "0x2d1800"
+  },
+  "BlankTiles2": {
+    "File": "BlankTilesNemesis2.bin",
+    "RomInject": "0x2d18e0"
+  },
+  "EndingLogoAdjustment": {
+    "File": "EndingLogoAdjustment.bin",
+    "RomInject": "0x2d1920"
+  },
+
+
+  // Pointer for green sphere
+  "GreenSpherePointer": {
+    "File": "GreenSpherePointer.bin",
+    "RomInject": "0x00a16e"
+  },
+
+
+  // Replaces Sonic 3 Special Stage 1
+  "S3Stage1": {
+    "File": "S3SS1.bin",
+    "RomInject": "0x26a0e0"
+  },
+  "S3Stage1K": {
+    "File": "S3SS1K.bin",
+    "RomInject": "0x2d1a90"
+  },
+  // Replaces Sonic 3 Special Stage 2
+  "S3Stage2": {
+    "File": "S3SS2.bin",
+    "RomInject": "0x26a4e8"
+  },
+  "S3Stage2K": {
+    "File": "S3SS2K.bin",
+    "RomInject": "0x2d1e98"
+  },
+  // Replaces Sonic 3 Special Stage 3
+  "S3Stage3": {
+    "File": "S3SS3.bin",
+    "RomInject": "0x26a8f0"
+  },
+  "S3Stage3K": {
+    "File": "S3SS3K.bin",
+    "RomInject": "0x2d22a0"
+  },
+  // Replaces Sonic 3 Special Stage 4
+  "S3Stage4": {
+    "File": "S3SS4.bin",
+    "RomInject": "0x26acf8"
+  },
+  "S3Stage4K": {
+    "File": "S3SS4K.bin",
+    "RomInject": "0x2d26a8"
+  },
+  // Replaces Sonic 3 Special Stage 5
+  "S3Stage5": {
+    "File": "S3SS5.bin",
+    "RomInject": "0x26b100"
+  },
+  "S3Stage5K": {
+    "File": "S3SS5K.bin",
+    "RomInject": "0x2d2ab0"
+  },
+  // Replaces Sonic 3 Special Stage 6
+  "S3Stage6": {
+    "File": "S3SS6.bin",
+    "RomInject": "0x26b508"
+  },
+  "S3Stage6K": {
+    "File": "S3SS6K.bin",
+    "RomInject": "0x2d2eb8"
+  },
+  // Replaces Sonic 3 Special Stage 7
+  "S3Stage7": {
+    "File": "S3SS7.bin",
+    "RomInject": "0x26b910"
+  },
+  "S3Stage7K": {
+    "File": "S3SS7K.bin",
+    "RomInject": "0x2d32c0"
+  },
+  // Replaces Sonic 3 Special Stage 8
+  "S3Stage8": {
+    "File": "S3SS8.bin",
+    "RomInject": "0x26bd18"
+  },
+  "S3Stage8K": {
+    "File": "S3SS8K.bin",
+    "RomInject": "0x2d36c8"
+  },
+//  "S3Stage8K": {
+//    "File": "S3SS8K.bin",
+//    "RomInject": "0x2d36c8"
+//  },
+  // Replaces S&K Special Stages
+  "SKStageSet1": {
+    "File": "SKSS1.bin",
+    "RomInject": "0x1fcf2a"
+  },
+  "SKStageSet1K": {
+    "File": "SKSS1K.bin",
+    "RomInject": "0x2d3ad0"
+  },
+//  "SKStageSet2": {  // commented out; this file actually affects blue sphere game data and thus randomly generated stages
+//    "File": "SKSS2.bin",
+//    "RomInject": "0x1fd5ca"
+//  }
+
+  // Sonic 3 Title Screen Menu Nemesis Art
+  "S3TitleMenu": {
+    "File": "S3TitleMenu.bin",
+    "RomInject": "0x2d55e4" // length 0x268 ending at 0x2d584c, which is exactly where the unused S3 song data ends. Supposedly some spare space before this? DEZ1 rotating palettes in way?
+  }
+}
+

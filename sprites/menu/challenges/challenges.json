@@ -1,0 +1,88 @@
+{
+	// Menu border rectangles
+	"blackscreen_optionsdim":  { "File": "blackscreen_optionsdim.png", "Center": "114,30" },
+	"blackscreen_besttimesdim":  { "File": "blackscreen_besttimesdim.png", "Center": "76,32" },
+	"blackscreen_besttimesdim_rect":  { "File": "blackscreen_besttimesdim_rect.png", "Center": "74,30" },
+
+	// Challenge menu options, arrows, and base text
+	"leftarrow_large":  { "File": "leftarrow_large.png", "Center": "7,14" },
+	"rightarrow_large":  { "File": "rightarrow_large.png", "Center": "7,14" },
+	"text_option_NG":  { "File": "text_option_NG.png", "Center": "43,8" },
+	"text_option_TA":  { "File": "text_option_TA.png", "Center": "42,8" },
+	"text_option_TST":  { "File": "text_option_TST.png", "Center": "60,8" },
+	"leftarrow_medium":  { "File": "leftarrow_medium.png", "Center": "4,8" },
+	"rightarrow_medium":  { "File": "rightarrow_medium.png", "Center": "4,8" },
+	"text_hudposition":  { "File": "text_hudposition.png", "Center": "47,4" },
+	"leftarrow_small":  { "File": "leftarrow_small.png", "Center": "2,4" },
+	"rightarrow_small":  { "File": "rightarrow_small.png", "Center": "2,4" },
+	"text_option_left":  { "File": "text_option_left.png", "Center": "15,4" },
+	"text_option_center":  { "File": "text_option_center.png", "Center": "23,4" },
+	"text_retryexit":  { "File": "text_retryexit.png", "Center": "64,4" },
+	// "text_superbuttonretry":  { "File": "text_superbuttonretry.png", "Center": "74,4" },	// no longer in use
+	"text_option_press":  { "File": "text_option_press.png", "Center": "19,4" },
+	"text_option_hold":  { "File": "text_option_hold.png", "Center": "16,4" },
+	// "text_backbuttonexit":  { "File": "text_backbuttonexit.png", "Center": "64,4" },	// no longer in use
+	"text_gametype":  { "File": "text_gametype.png", "Center": "39,4" },
+	"text_option_revisited":  { "File": "text_option_revisited.png", "Center": "32,4" },	
+	"text_option_classic":  { "File": "text_option_classic.png", "Center": "25,4" },
+	"text_sidekick":  { "File": "text_sidekick.png", "Center": "38,4" },
+	"text_option_yes":  { "File": "text_option_yes.png", "Center": "11,4" },	
+	"text_option_no":  { "File": "text_option_no.png", "Center": "7,4" },
+	"text_devtime":  { "File": "text_devtime.png"},		// left for compatibility with ECSU
+	"text_devtime_centered":  { "File": "text_devtime.png", "Center": "30,4" },
+	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "78,4" },
+	"rect_charoption_yellow":  { "File": "rect_charoption_yellow.png"},
+	"rect_charoption_red":  { "File": "rect_charoption_red.png"},
+	
+	// Stars
+	"star_gold":  { "File": "star_gold.png"},
+	"star_silver":  { "File": "star_silver.png"},
+	"star_bronze":  { "File": "star_bronze.png"},
+	"star_red":  { "File": "star_red.png"},
+
+	// Digits, dash, and minutes/seconds symbols (Sonic 3D tall)
+	"S3D_digit_0": { "File": "Sonic3D_digits_tall.png", "Rect":  "0,0,8,16" },
+	"S3D_digit_1": { "File": "Sonic3D_digits_tall.png", "Rect":  "8,0,8,16" },
+	"S3D_digit_2": { "File": "Sonic3D_digits_tall.png", "Rect": "16,0,8,16" },
+	"S3D_digit_3": { "File": "Sonic3D_digits_tall.png", "Rect": "24,0,8,16" },
+	"S3D_digit_4": { "File": "Sonic3D_digits_tall.png", "Rect": "32,0,8,16" },
+	"S3D_digit_5": { "File": "Sonic3D_digits_tall.png", "Rect": "40,0,8,16" },
+	"S3D_digit_6": { "File": "Sonic3D_digits_tall.png", "Rect": "48,0,8,16" },
+	"S3D_digit_7": { "File": "Sonic3D_digits_tall.png", "Rect": "56,0,8,16" },
+	"S3D_digit_8": { "File": "Sonic3D_digits_tall.png", "Rect": "64,0,8,16" },
+	"S3D_digit_9": { "File": "Sonic3D_digits_tall.png", "Rect": "72,0,8,16" },
+	
+	"S3D_char_minutes": { "File": "Sonic3D_digits_tall.png", "Rect": "80,0,8,16" },
+	"S3D_char_seconds": { "File": "Sonic3D_digits_tall.png", "Rect": "88,0,8,16" },
+	"S3D_char_dash": { "File": "Sonic3D_digits_tall.png", "Rect": "96,0,8,16" },
+
+	"S3D_digit_0_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect":  "0,0,8,16" },
+	"S3D_digit_1_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect":  "8,0,8,16" },
+	"S3D_digit_2_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "16,0,8,16" },
+	"S3D_digit_3_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "24,0,8,16" },
+	"S3D_digit_4_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "32,0,8,16" },
+	"S3D_digit_5_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "40,0,8,16" },
+	"S3D_digit_6_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "48,0,8,16" },
+	"S3D_digit_7_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "56,0,8,16" },
+	"S3D_digit_8_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "64,0,8,16" },
+	"S3D_digit_9_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "72,0,8,16" },
+	
+	"S3D_char_minutes_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "80,0,8,16" },
+	"S3D_char_seconds_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "88,0,8,16" },
+	"S3D_char_dash_rainbow": { "File": "Sonic3D_digits_tall_rainbow.png", "Rect": "96,0,8,16" },
+
+	// Digits, dash, and minutes/seconds symbols (Sonic 3D small)
+	"S3D_smalldigit_0": { "File": "Sonic3D_digits_small.png", "Rect":  "0,0,8,8" },
+	"S3D_smalldigit_1": { "File": "Sonic3D_digits_small.png", "Rect":  "8,0,8,8" },
+	"S3D_smalldigit_2": { "File": "Sonic3D_digits_small.png", "Rect": "16,0,8,8" },
+	"S3D_smalldigit_3": { "File": "Sonic3D_digits_small.png", "Rect": "24,0,8,8" },
+	"S3D_smalldigit_4": { "File": "Sonic3D_digits_small.png", "Rect": "32,0,8,8" },
+	"S3D_smalldigit_5": { "File": "Sonic3D_digits_small.png", "Rect": "40,0,8,8" },
+	"S3D_smalldigit_6": { "File": "Sonic3D_digits_small.png", "Rect": "48,0,8,8" },
+	"S3D_smalldigit_7": { "File": "Sonic3D_digits_small.png", "Rect": "56,0,8,8" },
+	"S3D_smalldigit_8": { "File": "Sonic3D_digits_small.png", "Rect": "64,0,8,8" },
+	"S3D_smalldigit_9": { "File": "Sonic3D_digits_small.png", "Rect": "72,0,8,8" },
+		
+	"S3D_smallchar_minutes": { "File": "Sonic3D_digits_small.png", "Rect": "80,0,8,8" },
+	"S3D_smallchar_seconds": { "File": "Sonic3D_digits_small.png", "Rect": "88,0,8,8" }
+}

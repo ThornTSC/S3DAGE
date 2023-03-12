@@ -1,0 +1,11 @@
+{
+  "rain0":  { "File": "Rain0.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "rain0_light":  { "File": "Rain0_light.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "rain0_heavy":  { "File": "Rain0_heavy.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "rain1":  { "File": "Rain1.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "rain1_light":  { "File": "Rain1_light.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "rain1_heavy":  { "File": "Rain1_heavy.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "snow0":  { "File": "Snow0_light.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "snow0_light":  { "File": "Snow0.png", "Rect": "0,768,0,512", "Center": "0,256" },
+  "snow0_heavy":  { "File": "Snow0_heavy.png", "Rect": "0,768,0,512", "Center": "0,256" }
+}

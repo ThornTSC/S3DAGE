@@ -1,0 +1,151 @@
+{
+	"Metadata":
+	{
+		"Name": "Sonic 3: D.A. Garden Edition",
+		"Author": "D.A. Garden (game), Thorn (port + features)",
+		"Description": "A port of Sonic 3: D.A. Garden Edition v1.02 to Sonic 3 A.I.R. with new features and widescreen adaptations.",
+		"URL": "https://gamebanana.com/mods/151029",
+		"ModVersion": "1.8.0.0",
+		"GameVersion": "22.09.10.0"
+	},
+	"Settings":
+	{
+		"List":
+  		[
+			{
+				"InternalName": "PauseMenu",
+				"DisplayName": "Pause Menu",
+				"Variable": "pause_menu",
+				"DefaultValue": "0",
+			 	"Category": "Pause Menu",
+				"Options":
+				{
+					"0": "D.A. Garden (default)",
+					"1": "A.I.R."
+				}
+			},
+			{
+				"InternalName": "PaletteChoice",
+				"DisplayName": "Visuals and Weather",
+				"Variable": "palette_set",
+				"DefaultValue": "2",
+			 	"Category": "Appearance",
+				"Options":
+				{
+					"0": "Sonic 3 & Knuckles",
+					"1": "Classic",
+					"2": "Revisited (default)"
+				}
+			},
+  			{
+				"InternalName": "WeatherIntensity",
+				"DisplayName": "Weather Intensity",
+				"Variable": "rain_intensity",
+				"DefaultValue": "1",
+			 	"Category": "Appearance",
+				"Options":
+				{
+					"0": "None",
+					"1": "Normal (default)",
+					"2": "Heavy",
+					"3": "Very Heavy"
+				}
+			},
+			{
+				"InternalName": "HCZMurkyWater",
+				"DisplayName": "Hydrocity Water",
+				"Variable": "hcz_murkiness",
+				"DefaultValue": "127",
+			 	"Category": "Appearance",
+				"Options":
+				{
+					"0": "Clear",
+					"127": "Murky (default)"
+				}
+			},
+			{
+				"InternalName": "GreenSphereBrightness",
+				"DisplayName": "Green Sphere Brightness",
+				"Variable": "green_sphere_palette",
+				"DefaultValue": "0",
+			 	"Category": "Appearance",
+				"Options":
+				{
+					"0": "Sonic Origins (default)",
+					"1": "Sonic Mania"
+				}
+			},
+			{
+				"InternalName": "GreenSphereMusic",
+				"DisplayName": "Green Sphere Music",
+				"Variable": "greenspheres_music",
+				"DefaultValue": "1",
+				"Category": "Appearance",
+				"Options":
+				{
+					"0": "Sonic 3 & Knuckles",
+					"1": "New Music (default)"
+				}
+			},
+			{
+				"InternalName": "DisplayInputs",
+				"DisplayName": "Input Tutorials",
+				"Variable": "display_inputs",
+				"DefaultValue": "1",
+			  	"Category": "Appearance",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
+				"InternalName": "SonicMoves",
+				"DisplayName": "Sonic Peelout & Drop Dash",
+				"Variable": "sonic_moves",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
+				"InternalName": "RollUncurlBehavior",
+				"DisplayName": "Roll Uncurl Behavior",
+				"Variable": "roll_maintain",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Classic",
+					"1": "Lenient (default)"
+				}
+			},
+			{
+				"InternalName": "ScreenWidth",
+				"DisplayName": "Revisited Mode Resolution",
+				"Variable": "screen_width",
+				"DefaultValue": "400",
+			 	"Category": "Unsupported Options",
+				"Options":
+				{
+					"320": "320x224",
+					"336": "336x224",
+					"352": "352x224",
+					"368": "368x224",
+					"384": "384x224",
+					"400": "400x224 (default)",
+					"416": "416x224 (not supported)",
+					"432": "432x224 (not supported)",
+					"448": "448x224 (not supported)",
+					"464": "464x224 (not supported)",
+					"480": "480x224 (not supported)",
+					"496": "496x224 (not supported)"
+				}
+			}
+	  	]
+	}
+}
+

@@ -1,0 +1,209 @@
+// Script file contains some of the backend stuff you will most likely not be editing.
+
+// Load up our own custom menu instead of the Data Select by overwriting this script with our own code.
+
+global u8 setting.time_attack
+global u8 setting.original_mode
+global u16 moddedTailsCharacter = 0				// Becomes 8 if Tails is modded
+global u16 maxNormalGameSettingsOption = 4		// Becomes 3 if Tails is modded
+
+function void EntryFunctions.dataSelect()
+{
+//	yieldExecution()
+//	if (original_mode)
+//		setting.original_mode = original_mode	// save the original_mode setting in case the Challenges menu alters it
+	
+	u8[0xffffef7d] = 1		// set a flag that says the call frames for the custom menu are already set
+	if (((global.game_mode & 0x7f) != 0x54) && ((global.game_mode & 0x7f) != 0x58))
+		global.game_mode = 0x58	// 0x54 for time attack menu
+	EntryFunctions.sharedInit()
+	System.setupCallFrame("GameModeControlLoop", "@EntryPoint")
+
+	// Loadup the custom menu. Usually "loadupDataSelect".
+	System.setupCallFrame("loadupCustomMenu")
+}
+
+
+// Setup custom menu.
+function void loadupCustomMenu()
+{
+	// Go to our custom menu.
+	customMenu.setup()
+//	Menu.FadeInAfterInit()
+//	FadeOutScreenBlocking()
+
+	// Load Challenge and Red Star Ring data
+	loadBestActTimes()
+	loadRSR()
+
+	if (global.game_mode == 0x58)	// main menu, not Challenges menu
+	{
+		playMusic(0x2f)
+		customMenu.update.main()
+		return
+	}
+
+	// Challenges menu starts here.
+	playMusic(0x2d)		// play Competition Mode menu music
+
+//	if (time_attack != 1 && time_attack != 2)	// If the time_attack variable is set for standard/Marathon modes, alter it now.
+//	{
+//		setting.time_attack = time_attack	// Save the time_attack setting in case the Challenges menu alters it.
+//		time_attack = 1		// The variable will be restored upon leaving the Challenges menu, or it resets automatically when leaving the A.I.R. menu.
+//	}
+//	if (time_attack != 2)	// If the time_attack variable is set for standard/Marathon modes, alter it now. (This catches an already-set time attack value, but it's harmless.)
+//		time_attack = 1		// The variable will be restored upon leaving the Challenges menu, or it resets automatically when leaving the A.I.R. menu.
+	
+	if (setting.levelselect.characters == 0)
+		setting.levelselect.characters = 1
+	else if (setting.levelselect.characters >= 4)
+		setting.levelselect.characters = 3
+
+	// Check if Tails is modded. If so, don't show sidekick options and move the game type option downward by 8 pixels.
+	if (System.getGlobalVariableValueByName("DAGE_characterID") == 2)
+	{
+		moddedTailsCharacter = 8
+		maxNormalGameSettingsOption = 2
+	}
+
+	loadTASettings()
+
+	customMenu.update()
+}
+
+// Modified data select code to remove unnecessary stuff but still keep the good ol' rendering.
+function void customMenu.setup()
+{
+	menu_initialized = 1				// mark that the game has been entered through the main menu
+	global.active_saveslot = 0			// do not allow a save slot to be active
+	debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
+	marathon_timer = 0
+	draw_HUD = false					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
+	water.fullscreen = 0				// Set in case we quit the game while totally underwater.
+	original_mode = 0					// Remove original mode in main menu
+	eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
+	specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
+	restartSpecialStage = 0
+	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
+	challenges_normalmode = 0
+
+	if (global.pause_disabled)
+	{
+		global.pause_disabled = 0
+		global.zone_act = 0x0000
+	}
+
+	// We avoid messing with the VDP, as it screws with saving. We only reset level.framecounter.
+//	VDP.Config.setActiveDisplay(false)
+//	fn0011ca()
+
+//	VDP.Config.setActiveDisplay(true)
+//	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb000, 0x2000)		// this must stay active, else the player's x position can be after a time attack goal pole for a frame, saving 0'00"00 as a best time.
+
+//	VDP.Config.enableHInt(false)
+//	VDP.Config.setNameTableBasePlaneA(0xe000)
+//	VDP.Config.setNameTableBasePlaneB(0xc000)
+//	VDP.Config.setNameTableBasePlaneW(0xe000)
+
+//	VDP.Config.setVerticalScrolling(false, 0)	// Horizontal scrolling mode without scroll mask
+//	VDP.Config.setRenderingModeConfiguration(false)
+//	VDP.Config.setPlayfieldSizeInPixels(1024, 256)
+
+	level.framecounter = 0
+	level.start_location = 0	// remove any alternate start locations set by previous levels
+
+	// Aiming to load Extra Slot Mighty palettes, but not achieving the desired effect. Must fix.
+//	if (System.getGlobalVariableValueByName("DAGE_characterName") == "ExtraSlotMighty")
+//	{
+//		loadCharacterPalette(3, 0x802240, 0)
+//		System.callFunctionByName("Mightys_Grays")
+//	}
+}
+
+// Where most of the magic happens. Dreams do indeed come true!
+function void customMenu.update()
+{
+	// Because setting up a new frame_state causes fading in to break, we have to setup our own fade in.
+	FadeOutScreenBlocking()
+
+	// Main loop
+	while (true && ((global.game_mode & 0x7f) == 0x54))
+	{
+		FadeInFromWhite()
+
+		// Basic stuff you'll pretty much always want, do not delete.
+		waitForNextFrame()
+	@EntryPoint:
+
+		// Reset sprites so they go away and refresh every frame, this needs to be kept as well
+		Renderer.resetSprites()
+
+		// Render background.
+		DataSelect.drawCustomPlanes()			// This instance of DataSelect.drawCustomPlanes() is NECESSARY, even though the main menu one can crash the game.
+									// This renders everything other than times, medals, character sprites, and the medal counter.
+
+		++level.framecounter
+		// ---------------
+		// Recommended to leave the above code alone unless you have a good reason to do so.
+		// ---------------
+
+		// To keep the code clean, I'm putting all logic in here. Do however you want though!
+
+		customMenu.mainLogicLoop()
+		
+	//	customMenu.discordRPC()
+	}
+
+	// GameMode.MainGame()
+	// System.setupCallFrame("GameModeControlLoop", "@EntryPoint")
+}
+
+// Where most of the magic happens. Dreams do indeed come true!
+function void customMenu.update.main()
+{	
+	// Because setting up a new frame_state causes fading in to break, we have to setup our own fade in.
+	FadeOutScreenBlocking()
+
+	// Main loop
+	while (true && ((global.game_mode & 0x7f) == 0x58) && !exitGame)
+	{
+		FadeInFromWhite()
+
+		// Basic stuff you'll pretty much always want, do not delete.
+		waitForNextFrame()
+	@EntryPoint:
+
+		// Reset sprites so they go away and refresh every frame, this needs to be kept as well
+		Renderer.resetSprites()
+
+		// Render background.
+//		DataSelect.drawCustomPlanes()		// Do NOT uncomment this! This may have been useful in the original framework, but here it can cause a crash
+											// if the player enters Challenges, enters a level, uses Back or Select Act to return, and backs out to main menu.
+											// This crash is in OpenGL Software only. It's not necessary here due to how the main menu is rendered.
+
+		++level.framecounter
+		// ---------------
+		// Recommended to leave the above code alone unless you have a good reason to do so.
+		// ---------------
+
+		// To keep the code clean, I'm putting all logic in here. Do however you want though!
+
+		customMenu.mainLogicLoop()
+		
+		customMenu.discordRPC()
+	}
+
+	// GameMode.MainGame()
+	// System.setupCallFrame("GameModeControlLoop", "@EntryPoint")
+}
+
+function void loadTASettings()
+{
+	if !System.loadPersistentData(0x840270, "DAGE_TASettings", 0x03)	// load time attack mode settings, with a 0 returned if they don't exist
+	{
+		time_attack_hud = 1
+		restart_threshold = 30
+		exit_threshold = 30
+	}
+}
