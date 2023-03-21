@@ -5218,6 +5218,106 @@ function void fn00d6d0()
 
 
 
+// Function taken from maingame\hud\levelresults.lemon
+//# address-hook(0x02dae6) end(0x02dbc8)
+function void fn02dae6()
+{
+	playMusic(MUSIC_CTRL_FADEOUT)
+
+	Kosinski.addToDMAQueue(0x0d6a62, 0xa400)
+	if (global.zone_act != 0x1600 && global.act.apparent == 0)
+	{
+		// Any Act 1
+		A1 = 0x0d6d84
+		D0 = 0
+	}
+	else
+	{
+		// Any Act 2, incl. Lava Reef Boss Act
+		A1 = 0x0d6e46
+		D0 = 0xffffffff
+	}
+
+	u16[A0 + 0x2c] = D0.u16
+	Kosinski.addToDMAQueue(A1, 0xad00)
+
+	if (isMainCharacter(CHARACTER_SONIC))
+	{
+		// Sonic
+		A1 = 0x15b95c
+	}
+	else if (isMainCharacter(CHARACTER_TAILS))
+	{
+		// Tails - or Miles
+		A1 = (global.region_code & 0x80) ? 0x39ab6a : 0x39aa18
+	}
+	else
+	{
+		// Knuckles
+		A1 = 0x0d67f0
+	}
+	D2.u16 = (u16[A0 + 0x2c] != 0) ? 0xb400 : 0xaf00
+	Kosinski.addToDMAQueue(A1, D2.u16)
+
+	hud.dirty.timer = 0
+	u32 seconds = timer.seconds + u32(timer.minutes) * 60
+	if (seconds == 599)
+	{
+		// Special time bonus for 9:59
+		results.time_bonus = 10000
+	}
+	else
+	{
+		// Time bonus		  Original	   S3AIR
+		//  - 0:00 .. 0:59	-> 50.000	-> 50.000
+		//  - 1:00 .. 1:29	-> 10.000	-> 10.000
+		//  - 1:30 .. 1:59	->  5.000	-> 10.000
+		//  - 2:00 .. 2:29	->  4.000	->  5.000
+		//  - 2:30 .. 2:59	->  3.000	->  5.000
+		//  - 3:00 .. 3:29	->  1.000	->  3.000
+		//  - 3:30 .. 3:59	->    100	->  3.000
+		//  - 4:00 .. 4:59	->    100	->  2.000
+		//  - 5:00 .. 5:59	->    100	->  1.000
+		//  - 6:00 .. 6:59	->    100	->    500
+		//  - 7:00 .. 9:58	->    100	->      0
+		if (!original_mode)
+		{
+			if (seconds < 60)
+				results.time_bonus = 5000
+			else if (seconds < 120)
+				results.time_bonus = 1000
+			else if (seconds < 180)
+				results.time_bonus = 500
+			else if (seconds < 240)
+				results.time_bonus = 300
+			else if (seconds < 300)
+				results.time_bonus = 200
+			else if (seconds < 360)
+				results.time_bonus = 100
+			else if (seconds < 420)
+				results.time_bonus = 50
+			else
+				results.time_bonus = 0
+		}
+		else
+		{
+			u16 offset = min(seconds / 30, 7)
+			results.time_bonus = u16[0x02deaa + offset * 2]
+		}
+	}
+
+	results.ring_bonus = u32(ring_counter) * 10
+	results.total_bonus = 0
+	objA0.countdown_value = 360
+	u16[A0 + 0x30] = 12
+	objA0.base_state += 2
+}
+
+
+
+
+
+
 
 
 
