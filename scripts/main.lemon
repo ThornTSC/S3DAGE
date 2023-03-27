@@ -150,7 +150,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffef74, 4)
+//	debugWatch(0xffffb012, 2)
 }
 
 // This function is the final one of any frame.
@@ -14533,6 +14533,80 @@ function void fn059fdc()
 		u32[A1 + 0x10] += D0
 	}
 }
+
+
+
+
+
+
+
+
+
+// Change exit position from the LRZ2 tube on the top path to lessen subpixel issues on the following quarterpipe.
+// Function taken from objects\06_lbz\lbz_boostertube.lemon but is used for LRZ2 tubes as well.
+//# address-hook(0x0296d4) end(0x029766)
+function void fn0296d4()
+{
+	--u8[A4 + 0x02]
+	if (s8[A4 + 0x02] <= 0)
+	{
+		A2 = u32[A4 + 0x06]
+		D4.u16 = u16[(A2+=2)-2]
+		objA1.position.x.u16 = D4.u16
+		D5.u16 = u16[(A2+=2)-2]
+		objA1.position.y.u16 = D5.u16
+		if (s8[A0 + 0x2c] < 0)
+		{
+			A2 -= 8
+		}
+		u32[A4 + 0x06] = A2
+		u16[A4 + 0x04] -= 4
+		if (u16[A4 + 0x04] != 0)
+		{
+			D4.u16 = u16[(A2+=2)-2]
+			D5.u16 = u16[(A2+=2)-2]
+			D2.u16 = 0x1000
+			fn029818()
+			return
+		}
+
+		u8[A4] += 2
+		u8[A4 + 0x02] = 0x02
+		objA1.position.y.u16 &= 0x0fff
+		if ((objA0.subtype2c & 0x40) == 0)
+		{
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+		}
+
+		playSound(0x81)		// tube exit SFX
+
+		if (objA0.subtype2c & 0x20)
+		{
+			A2 = A1
+			if (allocDynamicObjectAfterA0())
+			{
+				objA1.update_address = 0x029896
+				objA1.position.x.u16 = u16[A2 + 0x10]
+				objA1.position.y.u16 = u16[A2 + 0x14]
+				objA1.velocity.x = u16[A2 + 0x18]
+				objA1.velocity.y = u16[A2 + 0x1a]
+			}
+			A1 = A2
+		}
+		if (global.zone_act == 0x0901 && objA1.position.x.u16 == 0x2448 && objA1.position.y.u16 == 0x01f0 && !original_mode)	// right end of pipe in LRZ2 with quarterpipe afterward
+		{
+			objA1.position.x.u16 += 2	// minor position shift
+			objA1.position.x.frac = 0x0000		// set subpixels
+			objA1.position.y.u16 += 2	// minor position shift
+			objA1.position.y.frac = 0x0000		// set subpixels
+		}
+	}
+
+	fn029768()
+}
+
+
 
 
 
