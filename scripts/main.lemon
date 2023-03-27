@@ -5217,7 +5217,7 @@ function void fn00d6d0()
 
 
 
-
+// Use classic time bonuses for Original Mode
 // Function taken from maingame\hud\levelresults.lemon
 //# address-hook(0x02dae6) end(0x02dbc8)
 function void fn02dae6()
