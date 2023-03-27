@@ -14612,6 +14612,25 @@ function void fn0296d4()
 
 
 
+// Shift the camera to the right when approaching the LRZ2 Knuckles scene to prevent flying under it and softlocking.
+// Function taken from level\10_lrz\lrz_knucklescutscene.lemon
+//# address-hook(0x063c66) end(0x063c7a)
+function void fn063c66()
+{
+	if (move_area.left < 0x3800)
+	{
+		move_area.left &= 0xfffe	// set final bit of camera position to 0
+		move_area.left += 2			// move camera position to next even number
+	}
+	base.fn063c66()
+}
+
+
+
+
+
+
+
 
 
 // Enforce 8 hits on LRZ2 boss in Original Mode
