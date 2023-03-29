@@ -112,7 +112,8 @@ constant u8 theme.s3k    = 0
 constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
 
-
+// Memory address constants
+constant u32 KosinskiRawdataBuffer = 0x840300
 
 
 // This is the first function called in a frame.
@@ -423,14 +424,14 @@ function void fn01c2b0()
 	key = stringformat("%s_chunks_p", getZoneInitials(global.zone))
 	if (global.zone_act == 0x0a00 && System.hasExternalRawData("ssz1_chunks_p"))					// SSZ uses Primary and Secondary in Act 1 and unique Primary only in Act 2
 	{
-		System.loadExternalRawData("ssz1_chunks_p", 0x850000)		// copy Primary chunks to shared memory
-		Kosinski.decompress(0x850000, A1)							// decompress them to their proper RAM
+		System.loadExternalRawData("ssz1_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
 //		debugLog(stringformat("Primary chunks: ssz%d_chunks_p", global.act + 1))
 	}
 	else if (System.hasExternalRawData(key))				// only try to load Primary chunks if they exist for the act
 	{
-		System.loadExternalRawData(key, 0x850000)			// copy Primary chunks to shared memory
-		Kosinski.decompress(0x850000, A1)					// decompress them to their proper RAM
+		System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
 //		debugLog(stringformat("Primary chunks: %s", key))
 	}
 	else if (global.zone_act == 0x0a01 || global.zone >= 0x0c)	// load from ROM for SSZ2 or Doomsday + later zone IDs (LRZ3 and HPZ are already covered above)
@@ -446,13 +447,13 @@ function void fn01c2b0()
 	key = stringformat("%s_chunks_s", getZoneActInitials(global.zone_act))
 	if (global.zone_act == 0x0100 && original_mode && System.hasExternalRawData("hcz1_chunks_s_orig"))	// undo HCZ1 background chunk fixes in Original Mode
 	{
-		System.loadExternalRawData("hcz1_chunks_s_orig", 0x850000)		// copy Primary chunks to shared memory
-		Kosinski.decompress(0x850000, A1)								// decompress them to their proper RAM		
+		System.loadExternalRawData("hcz1_chunks_s_orig", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM		
 	}
 	else if (System.hasExternalRawData(key))		// only try to load Secondary chunks if they exist for the act
 	{
-		System.loadExternalRawData(key, 0x850000)			// copy Secondary chunks to shared memory
-		Kosinski.decompress(0x850000, A1)					// decompress them to their proper RAM
+		System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Secondary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
 //		debugLog(stringformat("Secondary chunks: %s", key))
 	}
 	else	// load from ROM
@@ -7147,8 +7148,8 @@ function void fn04fc46()
 		push(D7)
 
 	//	Kosinski.addToDecompressionQueue(0x3b51e8, 0xffff0000)	// Act 2 chunks
-		System.loadExternalRawData(stringformat("aiz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff0000)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("aiz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0000)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x3b0052, 0xffff9000)
 		Kosinski.addToDecompressionQueue(0x3b08f2, 0xffff9ab8)
@@ -8304,8 +8305,8 @@ function void fn050bce()
 		u32 backupA3 = A3
 
 	//	Kosinski.addToDecompressionQueue(0x3c18ee, 0xffff0a00)	// Act 2 chunks
-		System.loadExternalRawData(stringformat("hcz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff0a00)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("hcz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0a00)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x3bf17c, 0xffff9558)
 
@@ -8843,8 +8844,8 @@ function void fn051160()
 		push(D7)
 
 	//	Kosinski.addToDecompressionQueue(0x3cb1c4, 0xffff6b00)	// Act 2 chunks
-		System.loadExternalRawData(stringformat("mgz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff6b00)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("mgz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff6b00)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x3c9cd2, 0xffff9c60)
 
@@ -10482,8 +10483,8 @@ function void fn05382c()
 		push(D7)
 
 	//	Kosinski.addToDecompressionQueue(0x3dcfbc, 0xffff0a00)		// Act 2 Chunks
-		System.loadExternalRawData(stringformat("icz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff0a00)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("icz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0a00)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x3da26a, 0xffff9408)
 
@@ -11623,8 +11624,8 @@ function void fn054200()
 		u32 backupA3 = A3
 
 	//	Kosinski.addToDecompressionQueue(0x3eaf04, 0xffff0000)		// Act 2 Chunks
-		System.loadExternalRawData(stringformat("lbz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff0000)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("lbz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0000)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x3e5f70, 0xffff96b8)
 
@@ -14270,8 +14271,8 @@ function void fn056bd2()
 		u32 backupA3 = A3
 
 	//	Kosinski.addToDecompressionQueue(0x1bc738, 0xffff0180)	// Act 2 chunks
-		System.loadExternalRawData(stringformat("lrz2_chunks_s", global.act + 1), 0x850000)		// copy Secondary chunks to shared memory
-		Kosinski.addToDecompressionQueue(0x850000, 0xffff0180)									// decompress them to their proper RAM (see above)
+		System.loadExternalRawData(stringformat("lrz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Secondary chunks to shared memory
+		Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0180)									// decompress them to their proper RAM (see above)
 
 		Kosinski.addToDecompressionQueue(0x1b8a96, 0xffff9128)
 
@@ -16906,8 +16907,8 @@ function void fn05adc0()
 	push(D7)
 
 //	Kosinski.addToDecompressionQueue(0x1d17a6, 0xffff0000)	// SSZ2 chunks
-	System.loadExternalRawData(stringformat("ssz2_chunks_p", global.act + 1), 0x850000)		// copy Primary chunks to shared memory
-	Kosinski.addToDecompressionQueue(0x850000, 0xffff0000)									// decompress them to their proper RAM (see above)
+	System.loadExternalRawData(stringformat("ssz2_chunks_p", global.act + 1), KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+	Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0000)									// decompress them to their proper RAM (see above)
 
 	Kosinski.addToDecompressionQueue(0x1cf2d4, 0xffff9000)
 

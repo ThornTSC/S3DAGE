@@ -1346,10 +1346,10 @@ function void fn0085b0()
 //		yellow_spheres = 1 // new line to ensure green spheres are not overwriting yellow spheres
 
 		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)
-		if (challenge_greenspheres)	// This is the same result as below. This should be folded into the following extra-long "else if".
+		if (challenge_greenspheres)	// This is the same result as normal Green Sphere stages. We keep it separate for now just in case it requires special functionality later.
 		{
-			System.loadExternalRawData("GreenSphereGame", 0x840000)	// copy green sphere quarter layouts to shared memory (0x840000 is where Time Attack records go!!!)
-			Kosinski.decompress(0x840000, 0xffff0000)				// decompress them
+			System.loadExternalRawData("GreenSphereGame", KosinskiRawdataBuffer)	// copy green sphere quarter layouts to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
 		}
 		else if (((!specialstages_knuckles && bluespheres.minigame_mode == 0) || (isGeneratedStageInMainGame && (!isMainCharacter(CHARACTER_KNUCKLES) || !useSKLayouts))) || !green_spheres.active)
 		{
@@ -1361,8 +1361,8 @@ function void fn0085b0()
 		}
 		else
 		{
-			System.loadExternalRawData("GreenSphereGame", 0x850000)	// copy green sphere quarter layouts to shared memory (seems to be a length of 0x22b8)
-			Kosinski.decompress(0x850000, 0xffff0000)				// decompress them
+			System.loadExternalRawData("GreenSphereGame", KosinskiRawdataBuffer)	// copy green sphere quarter layouts to shared memory (seems to be a length of 0x22b8)
+			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
 		}
 
 		zeroMemory(0xfffff000, 0x600)
@@ -2945,12 +2945,12 @@ function void fn02df64()
 
 		// Load Hidden Palace level blocks and chunks from ROM
 	//	Kosinski.decompress(0x1bfbea, 0xffff0000)	// After this (Primary chunk loading), A1 points to where uncompressed data ends
-		System.loadExternalRawData(stringformat("hpz_chunks_p", global.act + 1), 0x850000)		// copy Primary chunks to shared memory
-		Kosinski.decompress(0x850000, 0xffff0000)												// decompress them to their proper RAM
+		System.loadExternalRawData(stringformat("hpz_chunks_p", global.act + 1), KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)												// decompress them to their proper RAM
 
 	//	Kosinski.decompress(0x1c71fe, A1)			// Secondary chunk loading
-		System.loadExternalRawData(stringformat("hpz2_chunks_s", global.act + 1), 0x850000)		// copy Primary chunks to shared memory
-		Kosinski.decompress(0x850000, A1)														// decompress them to their proper RAM
+		System.loadExternalRawData(stringformat("hpz2_chunks_s", global.act + 1), KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)														// decompress them to their proper RAM
 		
 		Kosinski.decompress(0x1becf8, 0xffff9000)	// Same here (Primary block loading)
 		Kosinski.decompress(0x1c30fc, A1)			// Secondary block loading
