@@ -6484,6 +6484,34 @@ function void fn013efc()
 
 
 
+// Add ROM manipulations to support correct AIZ1 Knuckles intro animals
+// These will be provided in future AIR versions but are needed for compatibility with older versions
+// Functions taken from standalone\rom_manipulations.lemon
+function void ApplyROMManipulations()
+{
+	ROMManipulation.RepairSpriteMappings()
+	ROMManipulation.RepairAnimations()
+	ROMManipulation.CutsceneKnucklesPalette()
+	ROMManipulation.AIZ1.KnucklesIntroCritters()
+	ROMManipulation.AIZ2.StartPosition()
+	ROMManipulation.AIZ2.BlimpSequenceBombs()
+	ROMManipulation.BonusSM.Probabilities()
+	ROMManipulation.ALZ.MusicFix()
+	ROMManipulation.DPZ.LoopBugFix()
+	ROMManipulation.RollingDemoFix()
+}
+
+function void ROMManipulation.AIZ1.KnucklesIntroCritters()
+{
+	// Use AIZ critters and not the MHZ critters in Knuckles' intro, #contributed by iCloudius
+	//  -> Also requires some additional initialization code, search for the comment above to find that one
+	s16[0x06370f] = 0x5000
+	s16[0x063713] = -0x45fb
+}
+
+
+
+
 
 
 
@@ -6609,7 +6637,7 @@ function void fn06364e()
 		for (u32 address = 0xffffb128; address < 0xffffcfcb; address += 0x4a)
 		{
 			A1 = address
-			if (objA1.update_address == 0x063720 || objA1.update_address == 0x063750 || objA1.update_address == 0x063682)
+			if (objA1.update_address == 0x063682) // originally includes "objA1.update_address == 0x063720 || objA1.update_address == 0x063750 ||" to remove animals
 			{
 				unloadObjectAt(A1)
 			}

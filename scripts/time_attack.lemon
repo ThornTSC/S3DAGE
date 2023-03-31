@@ -709,12 +709,18 @@ function void initializeMainGame()
 		}
 		if (isKnucklesIntro)
 		{
-			// This loads the critters graphics, though it does not seem to make a difference if this is done or not...
+			// This loads the critters graphics
 		#if !STANDALONE
 			set_status_register(0x2700)
-		#endif
+
+			// Use AIZ critters and not the MHZ critters in Knuckles' intro, #contributed by iCloudius
+			//  -> Also requires a ROM manipulation, search for the comment above to find that one
 			Nemesis.loadDataToVRAM(0x1935a8, 0xb000)
 			Nemesis.loadDataToVRAM(0x193308, 0xb240)
+		#else
+			Nemesis.loadDataToVRAM(0x1931d6, 0xb000)	// This line and the next swap data addresses compared to AIR commit 8e17d44,
+			Nemesis.loadDataToVRAM(0x193308, 0xb240)	// as the commit loaded Flicky into Ricky's VRAM and vice versa.
+		#endif
 			isAnyIntro = true
 		}
 
