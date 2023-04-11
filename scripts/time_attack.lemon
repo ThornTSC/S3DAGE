@@ -742,18 +742,20 @@ function void initializeMainGame()
 				if (u16[0xffffb298] == 0 && u32[0xfffff680] == 0)
 					break
 			}
-				// Artifical delay in Original Mode
-				u8 delay = 58	// measured from entering AIZ2 from Level Select
-				if (global.zone >= 0x13 && global.zone <= 0x15)
-					delay = 38	// Bonus stages have a smaller delay. This is estimated, mot measured.
-				if (global.zone == 0x0c || global.zone_act == 0x1700 || global.zone_act == 0x0a01)	// Final boss stages load few plane graphics and thus load fast. Estimated delay.
-					delay = 18
-				if (original_mode)	// Original Mode, not Doomsday, not DEZ2 final boss
-					for (u8 i = 0; i < delay; i++)	
-						waitForNextFrame()
 		}
 
 		level.skip_titlecard = false
+
+		// Artifical delay in Original Mode
+		u8 delay = 58	// measured from entering AIZ2 from Level Select
+		if (global.zone >= 0x13 && global.zone <= 0x15)
+			delay = 38	// Bonus stages have a smaller delay. This is estimated, mot measured.
+		if (global.zone == 0x0c || global.zone_act == 0x1700 || global.zone_act == 0x0a01)	// Final boss stages load few plane graphics and thus load fast. Estimated delay.
+			delay = 18
+		if (original_mode)	// Original Mode, not Doomsday, not DEZ2 final boss
+			for (u8 i = 0; i < delay; i++)	
+				waitForNextFrame()
+
 	#if !STANDALONE
 		set_status_register(0x2700)
 	#endif
