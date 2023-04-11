@@ -6533,7 +6533,7 @@ function void ApplyROMManipulations()
 {
 	ROMManipulation.RepairSpriteMappings()
 	ROMManipulation.RepairAnimations()
-	ROMManipulation.CutsceneKnucklesPalette()
+	//	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
 	ROMManipulation.AIZ1.KnucklesIntroCritters()
 	ROMManipulation.AIZ2.StartPosition()
 	ROMManipulation.AIZ2.BlimpSequenceBombs()

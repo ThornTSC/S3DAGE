@@ -161,7 +161,14 @@ function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVa
 {
 	if (palette_set < 2 || original_mode)	// S3&K palettes or ROM hack palettes
 	{
-		base.loadCharacterPalette(character, targetAddress, paletteVariant)
+		if (original_mode && (targetAddress == 0x802080 || targetAddress == 0x802200) && global.characters < 3 && (global.game_mode & 0x7f) == 0x0c)	// cutscene Knuckles character palette in Original Mode
+		{
+			copyMemory(targetAddress, 0x066912, 0x20)
+			if (global.zone_act == 0x1601)	// HPZ, for Knuckles boss fight
+				u16[0x80208c] = 0x0088		// Knuckles lacks a shade of red here in S3&K to not ruin the ring palette, so we manually create dark yellow
+		}
+		else
+			base.loadCharacterPalette(character, targetAddress, paletteVariant)
 		return
 	}
 
