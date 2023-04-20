@@ -3118,7 +3118,7 @@ function void Character.UpdateNormalState.Sonic()
 	}
 
 #if STANDALONE
-	if (Game.getSetting(SETTING_DROPDASH) && !competition_mode.active)
+	if (sonic_moves && !competition_mode.active)
 	{
 		if (sonic.dropdash_counter > 0)
 		{
