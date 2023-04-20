@@ -753,8 +753,152 @@ function void Character.updateUprightOnGround()
 	Character.sharedUpdateOnGround()
 }
 
+// Functions taken from objects\07_mhz\mhz_stickyvine.lemon
+//# address-hook(0x03eb26) end(0x03eb4c)
+function void fn03eb26()
+{
+	A1 = u32[A0 + 0x2e]
+	if (u8[A1 + 0x3d] != 0)		// Check spindash charge of the character
+	{
+		u8[A0 + 0x3d] = 0x01
+		u8[A0 + 0x3e] = 0x10
+	}
 
+#if STANDALONE
+	// Also react to drop dash
+	if (u8[A1 + 0x38] == CHARACTER_SONIC && sonic_moves && u8[A1 + 0x25] > 0)
+	{
+		u8[A0 + 0x3d] = 0x02
+		u8[A0 + 0x3e] = 0x10
+	}
+#endif
 
+	D0 = u32[A1 + 0x10]
+	D1 = u32[A1 + 0x14]
+
+	fn03ec2a()
+	fn03ec66()
+	fn03ebf8()
+}
+
+//# address-hook(0x03ec66) end(0x03ed08)
+function void fn03ec66()
+{
+	D1 = (D1 << 16) + (D1 >> 16)
+	D2 = (D2 << 16) + (D2 >> 16)
+	D3.u16 = abs(D1.s16)
+	D4.u16 = abs(D2.s16)
+	D3.u16 = (D3.u16 + D4.u16) * 2
+	LookupAngleByVector()
+	LookupSinCos()
+	D1.s32 = s32(D1.s16) * D3.s16
+	D1.s32 <<= 2
+	D0.s32 = s32(D0.s16) * D3.s16
+	D0.s32 <<= 1
+
+	u32[A1 + 0x10] -= D1
+	if (u8[A1 + 0x2a] & char.flag.IN_AIR)
+	{
+		u32[A1 + 0x14] -= D0
+		if (objA1.velocity.y >= 0)
+		{
+			objA1.velocity.x >>= 1
+		}
+	}
+	else
+	{
+		D1.s32 >>= 8
+		D1.s16 = abs(D1.s16)
+		D0.u16 = abs(s16[A1 + 0x1c])
+		if (D0.u16 >= 0x0200)
+		{
+			D0.u16 -= 0x10
+			if (D0.u16 < D1.u16)
+			{
+				s16[A1 + 0x1c] >>= 1
+			}
+		}
+	}
+
+	// Release by spindash (or drop dash):
+	//  - u8[A0 + 0x3d] gets set to 1 when starting a spindash
+	//  - u8[A1 + 0x3d] is "char.spindash" and gets 0 on spindash release
+	bool release = false
+#if STANDALONE
+	if (u8[A0 + 0x3d] == 1)
+	{
+		release = (u8[A1 + 0x3d] == 0)
+	}
+	else if (u8[A0 + 0x3d] == 2)
+	{
+		release = (u8[A1 + 0x38] == CHARACTER_SONIC && sonic_moves && u8[A1 + 0x25] == 0)
+	}
+#else
+	release = (u8[A0 + 0x3d] != 0 && u8[A1 + 0x3d] == 0)
+#endif
+
+	if (release)
+	{
+		--u8[A0 + 0x3e]
+		if (u8[A0 + 0x3e] == 0)
+		{
+			u32[A0 + 0x30] = u32[A1 + 0x10]
+			objA0.countdown_callback = u32[A1 + 0x14]
+			objA0.velocity.y = -0x600
+			u8[A0 + 0x3d] = 0
+			u8[A0 + 0x3e] = 0
+			objA0.update_address = 0x03eb50
+		}
+	}
+
+	u8[A1 + 0x2a] &= ~char.flag.PUSHING
+}
+
+// Function taken from objects\basics\monitor.lemon
+//# address-hook(0x01d696) end(0x01d6be)
+function void MonitorIntact.CheckBlocking()
+{
+	u8 bit = (1 << D6.u8)
+	if (objA0.flags2a & bit)
+	{
+		fn01d6dc()
+	}
+	else
+	{
+		// Note that "Character.OnCollisionWithDynamicObject" does the same checks again
+
+		bool canOpenMonitor = false
+		if (objA1.state == char.state.ROLLING)
+		{
+			canOpenMonitor = true
+		}
+	#if STANDALONE
+		else if (sonic_moves && u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.SONIC_DROPDASH)
+		{
+			canOpenMonitor = true
+		}
+		else if (objA1.state == char.state.SPINDASH)
+		{
+			canOpenMonitor = true
+		}
+		else if (objA0.velocity.y != 0)
+		{
+			canOpenMonitor = true
+		}
+	#endif
+		else if (u8[A1 + 0x38] == CHARACTER_KNUCKLES)
+		{
+			// Check if Knuckles glides into the monitor
+			canOpenMonitor = (u8[A1 + 0x2f] == 1 || u8[A1 + 0x2f] == 3)
+		}
+
+		if (!canOpenMonitor)
+		{
+			// Block character movement
+			fn01df90()
+		}
+	}
+}
 
 
 // Makes Tails' tails invisible when using the spiral cylinder animation
