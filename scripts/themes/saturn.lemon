@@ -204,17 +204,17 @@ function bool Saturn.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
-			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
 		{
-			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c) // exclude HPZ, SSZ, and DDZ from drawing act numbers
 		{
-			Renderer.drawCustomSprite(stringformat("saturn_titlecard_act%d", global.act.apparent + 1), px + 6 , py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite(stringformat("saturn_titlecard_act%d", global.act.apparent + 1), px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		// Originally the word "zone", now white bars
