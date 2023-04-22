@@ -97,6 +97,12 @@ function void fn04c97e()
 		System.loadPersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
 	else
 		System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+		
+	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
+	loadBestActTimes()
+	loadRSR()
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+		theme.hud = theme.saturn								// else use the theme matching the menu
 
 	// Switch to the correct seed for this stage
 	BlueSphere.setGeneratedStage(bluespheregame.current_stage)

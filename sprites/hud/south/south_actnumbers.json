@@ -1,0 +1,4 @@
+{
+	"south_titlecard_act1":  { "File": "south_actnumbers.png", "Rect": "0,0,43,24", "Center": "0,0" },
+	"south_titlecard_act2":  { "File": "south_actnumbers.png", "Rect": "0,24,43,24", "Center": "0,0" }
+}

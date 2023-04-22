@@ -1,0 +1,124 @@
+{
+	// ----- HUD ----- //
+
+	// HUD texts
+	"south_hud_text_score":	  { "File": "south_hud.png", "Rect": "0,0,40,12"},
+	"south_hud_text_time":	  { "File": "south_hud.png", "Rect": "0,12,40,12" },
+	"south_hud_text_time_red":  { "File": "south_hud.png", "Rect": "109,84,40,12" },		// Empty pixel
+	"south_hud_text_rings":	  { "File": "south_hud.png", "Rect": "0,24,40,12" },
+	"south_hud_text_rings_red": { "File": "south_hud.png", "Rect": "109,96,40,12" },		// Empty pixel
+
+	// Additional texts for level results
+	"south_hud_text_ring":  { "File": "south_hud.png", "Rect": "0,24,33,12" },
+	"south_hud_text_bonus": { "File": "south_hud.png", "Rect": "0,36,41,12" },
+	"south_hud_text_total": { "File": "south_hud.png", "Rect": "0,48,41,12" },
+
+	// Special stage results
+	"south_hud_text_score_chaosstage":	{ "File": "south_hud.png", "Rect": "44,0,41,12" },
+	"south_hud_text_ring_chaosstage":		{ "File": "south_hud.png", "Rect": "44,12,33,12" },
+	"south_hud_text_bonus_chaosstage":	{ "File": "south_hud.png", "Rect": "44,24,41,12" },
+	"south_hud_text_perfect_chaosstage":	{ "File": "south_hud.png", "Rect": "44,36,57,12" },
+	"south_hud_text_continue_chaosstage":	{ "File": "south_hud.png", "Rect": "44,48,63,12" },
+	"south_hud_text_score_superstage":	{ "File": "south_hud.png", "Rect": "108,0,41,12" },
+	"south_hud_text_ring_superstage":		{ "File": "south_hud.png", "Rect": "108,12,33,12" },
+	"south_hud_text_bonus_superstage":	{ "File": "south_hud.png", "Rect": "108,24,41,12" },
+	"south_hud_text_perfect_superstage":	{ "File": "south_hud.png", "Rect": "108,36,57,12" },
+	"south_hud_text_continue_superstage":	{ "File": "south_hud.png", "Rect": "108,48,63,12" },
+
+	"south_hud_bonus_icon_blue":   { "File": "south_hud.png", "Rect": "0,64,16,16", "Center": "7,-4" },
+	"south_hud_bonus_icon_orange": { "File": "south_hud.png", "Rect": "16,64,16,16", "Center": "7,-4" },
+	"south_hud_bonus_icon_red":    { "File": "south_hud.png", "Rect": "32,64,16,16", "Center": "7,-4" },
+	"south_hud_bonus_icon_special":    { "File": "south_hud.png", "Rect": "48,64,16,16", "Center": "7,-4" },
+
+	// Digits (for score, time, rings)
+	"south_hud_digit_0": { "File": "south_hud.png", "Rect":  "0,108,8,12" },
+	"south_hud_digit_1": { "File": "south_hud.png", "Rect":  "8,108,8,12" },
+	"south_hud_digit_2": { "File": "south_hud.png", "Rect": "16,108,8,12" },
+	"south_hud_digit_3": { "File": "south_hud.png", "Rect": "24,108,8,12" },
+	"south_hud_digit_4": { "File": "south_hud.png", "Rect": "32,108,8,12" },
+	"south_hud_digit_5": { "File": "south_hud.png", "Rect": "40,108,8,12" },
+	"south_hud_digit_6": { "File": "south_hud.png", "Rect": "48,108,8,12" },
+	"south_hud_digit_7": { "File": "south_hud.png", "Rect": "56,108,8,12" },
+	"south_hud_digit_8": { "File": "south_hud.png", "Rect": "64,108,8,12" },
+	"south_hud_digit_9": { "File": "south_hud.png", "Rect": "72,108,8,12" },
+
+	// Digits (Chaos Emerald stage results)
+	"south_hud_digit_0_chaosstage": { "File": "south_hud.png", "Rect":  "0,120,8,12" },
+	"south_hud_digit_1_chaosstage": { "File": "south_hud.png", "Rect":  "8,120,8,12" },
+	"south_hud_digit_2_chaosstage": { "File": "south_hud.png", "Rect": "16,120,8,12" },
+	"south_hud_digit_3_chaosstage": { "File": "south_hud.png", "Rect": "24,120,8,12" },
+	"south_hud_digit_4_chaosstage": { "File": "south_hud.png", "Rect": "32,120,8,12" },
+	"south_hud_digit_5_chaosstage": { "File": "south_hud.png", "Rect": "40,120,8,12" },
+	"south_hud_digit_6_chaosstage": { "File": "south_hud.png", "Rect": "48,120,8,12" },
+	"south_hud_digit_7_chaosstage": { "File": "south_hud.png", "Rect": "56,120,8,12" },
+	"south_hud_digit_8_chaosstage": { "File": "south_hud.png", "Rect": "64,120,8,12" },
+	"south_hud_digit_9_chaosstage": { "File": "south_hud.png", "Rect": "72,120,8,12" },
+
+	// Digits (Time Stone Trial — Chaos Emerald stage digits are not very legible)
+	"south_hud_digit_0_tst": { "File": "south_hud.png", "Rect":  "0,156,8,12" },
+	"south_hud_digit_1_tst": { "File": "south_hud.png", "Rect":  "8,156,8,12" },
+	"south_hud_digit_2_tst": { "File": "south_hud.png", "Rect": "16,156,8,12" },
+	"south_hud_digit_3_tst": { "File": "south_hud.png", "Rect": "24,156,8,12" },
+	"south_hud_digit_4_tst": { "File": "south_hud.png", "Rect": "32,156,8,12" },
+	"south_hud_digit_5_tst": { "File": "south_hud.png", "Rect": "40,156,8,12" },
+	"south_hud_digit_6_tst": { "File": "south_hud.png", "Rect": "48,156,8,12" },
+	"south_hud_digit_7_tst": { "File": "south_hud.png", "Rect": "56,156,8,12" },
+	"south_hud_digit_8_tst": { "File": "south_hud.png", "Rect": "64,156,8,12" },
+	"south_hud_digit_9_tst": { "File": "south_hud.png", "Rect": "72,156,8,12" },
+
+	// Other characters for time
+	"south_hud_char_colon":   { "File": "south_hud.png", "Rect": "80,108,8,12" },
+	"south_hud_char_minutes": { "File": "south_hud.png", "Rect": "88,108,8,12" },
+	"south_hud_char_seconds": { "File": "south_hud.png", "Rect": "96,108,8,12" },
+/*
+	// Continue icons
+	"south_continue_icon_sonic":    { "File": "south_hud.png", "Rect": "0,82,20,24",  "Center": "12,24" },
+	"south_continue_icon_tails":    { "File": "south_hud.png", "Rect": "20,82,20,24", "Center": "10,24" },
+	"south_continue_icon_knuckles": { "File": "south_hud.png", "Rect": "40,82,20,24", "Center": "9,24" },
+*/
+	// Character icon for lives
+	"south_hud_lives_icon_sonic":    { "File": "south_life_sprites.png", "Rect": "0,16,48,16" },
+	"south_hud_lives_icon_tails":    { "File": "south_life_sprites.png", "Rect": "0,32,48,16" },
+	"south_hud_lives_icon_knuckles": { "File": "south_life_sprites.png", "Rect": "0,48,48,16" },
+	"south_hud_lives_icon_miles":    { "File": "south_life_sprites.png", "Rect": "0,64,48,16" },
+
+	// Small digits for lives
+	"south_hud_smalldigit_0": { "File": "south_life_sprites.png", "Rect": "0,0,8,8" },
+	"south_hud_smalldigit_1": { "File": "south_life_sprites.png", "Rect": "8,0,8,8" },
+	"south_hud_smalldigit_2": { "File": "south_life_sprites.png", "Rect": "16,0,8,8" },
+	"south_hud_smalldigit_3": { "File": "south_life_sprites.png", "Rect": "24,0,8,8" },
+	"south_hud_smalldigit_4": { "File": "south_life_sprites.png", "Rect": "32,0,8,8" },
+	"south_hud_smalldigit_5": { "File": "south_life_sprites.png", "Rect": "0,8,8,8" },
+	"south_hud_smalldigit_6": { "File": "south_life_sprites.png", "Rect": "8,8,8,8" },
+	"south_hud_smalldigit_7": { "File": "south_life_sprites.png", "Rect": "16,8,8,8" },
+	"south_hud_smalldigit_8": { "File": "south_life_sprites.png", "Rect": "24,8,8,8" },
+	"south_hud_smalldigit_9": { "File": "south_life_sprites.png", "Rect": "32,8,8,8" },
+
+	// HUD elements for Challenges
+	"south_hud_text_time_chaosstage":	  { "File": "south_hud.png", "Rect": "0,132,31,12", "Center": "-1,0" },
+//	"south_hud_char_colon_chaosstage":   { "File": "south_hud.png", "Rect": "80,120,8,12" },
+	"south_hud_char_minutes_chaosstage": { "File": "south_hud.png", "Rect": "88,120,8,12" },
+	"south_hud_char_seconds_chaosstage": { "File": "south_hud.png", "Rect": "96,120,8,12" },
+//	"south_hud_char_colon_tst":   { "File": "south_hud.png", "Rect": "80,156,8,12" },
+	"south_hud_char_minutes_tst": { "File": "south_hud.png", "Rect": "88,156,8,12" },
+	"south_hud_char_seconds_tst": { "File": "south_hud.png", "Rect": "96,156,8,12" },
+
+	"south_hud_text_best":	  { "File": "south_hud.png","Rect": "109,108,32,12" },
+	"south_time_stop_bonus": { "File": "south_hud.png", "Rect": "0,132,125,12", "Center": "62,8" },
+	"south_new_record": { "File": "south_hud.png", "Rect": "0,144,86,12", "Center": "43,8" },
+	"south_text_dev":  { "File": "south_text_dev.png", "Center": "0,1" },	// small star medal pictures are stored with challenges menu pictures
+	"south_text_totalmedals":  { "File": "south_text_totalmedals.png", "Center": "79,5" },
+
+	"south_smalldigit_0": { "File": "south_hud.png", "Rect":  "75,64,8,8", "Center": "0,1" },
+	"south_smalldigit_1": { "File": "south_hud.png", "Rect":  "83,64,8,8", "Center": "0,1" },
+	"south_smalldigit_2": { "File": "south_hud.png", "Rect":  "91,64,8,8", "Center": "0,1" },
+	"south_smalldigit_3": { "File": "south_hud.png", "Rect":  "99,64,8,8", "Center": "0,1" },
+	"south_smalldigit_4": { "File": "south_hud.png", "Rect": "107,64,8,8", "Center": "0,1" },
+	"south_smalldigit_5": { "File": "south_hud.png", "Rect": "115,64,8,8", "Center": "0,1" },
+	"south_smalldigit_6": { "File": "south_hud.png", "Rect": "123,64,8,8", "Center": "0,1" },
+	"south_smalldigit_7": { "File": "south_hud.png", "Rect": "131,64,8,8", "Center": "0,1" },
+	"south_smalldigit_8": { "File": "south_hud.png", "Rect": "139,64,8,8", "Center": "0,1" },
+	"south_smalldigit_9": { "File": "south_hud.png", "Rect": "147,64,8,8", "Center": "0,1" },
+	"south_smallchar_minutes": { "File": "south_hud.png", "Rect": "155,64,8,8", "Center": "0,1" },
+	"south_smallchar_seconds": { "File": "south_hud.png", "Rect": "163,64,8,8", "Center": "0,1" }
+}

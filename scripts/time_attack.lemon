@@ -1085,6 +1085,12 @@ function void LevelSelect()
 	else
 		Renderer.setScreenSize(400, 224)
 
+	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
+	loadBestActTimes()
+	loadRSR()
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+		theme.hud = theme.saturn								// else use the theme matching the menu
+
 #if !STANDALONE
 	set_status_register(0x2700)
 #endif
@@ -2297,6 +2303,10 @@ function void RenderHUD_Challenges()
 			{
 				Saturn.BestText(px, py, renderQueue)
 			}
+			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			{
+				South.BestText(px, py, renderQueue)
+			}
 			else
 				Renderer.drawCustomSprite("hud_text_best", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
 
@@ -2368,6 +2378,8 @@ function void RenderHUD_MedalTimes()
 				Flicky.DevText(medal_py)
 			else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				Saturn.DevText(medal_py)
+			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				South.DevText(medal_py)
 			else
 				Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
 
@@ -2397,6 +2409,8 @@ function void RenderHUD_MedalTimes()
 				Flicky.TargetTime(medal_px, medal_py, medalOffset)
 			else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				Saturn.TargetTime(medal_px, medal_py, medalOffset)
+			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				South.TargetTime(medal_px, medal_py, medalOffset)
 			else
 			{
 				u32 medal_time_address = 0x840240 + (0x10 * (setting.levelselect.characters - 1)) + medalOffset
@@ -2801,6 +2815,12 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 			Saturn.HUD.drawSprite(theme_key, px, py, renderQueue)
 			return
 		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			theme_key = stringformat("%s%s", "south_", key)
+			South.HUD.drawSprite(theme_key, px, py, renderQueue)
+			return
+		}
 	}
 
     u16 inputY = py
@@ -2855,6 +2875,11 @@ function void HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue
 	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 	{
 		Saturn.HUD.drawDigit_Challenges(digit, px, py, renderQueue)
+		return
+	}
+	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	{
+		South.HUD.drawDigit_Challenges(digit, px, py, renderQueue)
 		return
 	}
 
@@ -7134,6 +7159,8 @@ function void Challenge.showEndInterface()
 			Flicky.NewRecordText()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			Saturn.NewRecordText()
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			South.NewRecordText()
 		else
 			Renderer.drawCustomSprite("new_record", getScreenWidth() / 2, 0x2e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
@@ -7145,6 +7172,8 @@ function void Challenge.showEndInterface()
 			Flicky.TimeStopBonusText()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			Saturn.TimeStopBonusText()
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			South.TimeStopBonusText()
 		else
 			Renderer.drawCustomSprite("time_stop_bonus", getScreenWidth() - 62 - 16, 0x0e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
 	}
@@ -7182,6 +7211,8 @@ function void Challenge.manageEndMenu()
 		Flicky.TAEndMenu()
 	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		Saturn.TAEndMenu()
+	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		South.TAEndMenu()
 	else if (TA_menu_selection < 3)
 	{
 		Renderer.drawCustomSprite(stringformat("ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)

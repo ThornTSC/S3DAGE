@@ -1,0 +1,5 @@
+{
+    "south_game":  { "File": "south_gametimeover.png", "Rect": "0, 0,62,16", "Center": "0,0" },
+    "south_time":  { "File": "south_gametimeover.png", "Rect": "0,16,54,16", "Center": "-8,0" },
+    "south_over":  { "File": "south_gametimeover.png", "Rect": "0,32,62,16", "Center": "0,0" }
+}

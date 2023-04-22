@@ -10,6 +10,7 @@
 
 	// Change theme text
 	"change_theme": {"File": "change_theme.png"},
+	"25_stars": {"File": "25_stars.png"},
 
 //	"select_difficulty":  { "File": "select_difficulty.png", "Center": "115,8" },
 

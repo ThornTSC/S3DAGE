@@ -132,6 +132,8 @@ function void UpdateGamePause()
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					if (total_stars < theme.south.unlock)
+						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
 					customMenu.countMedals()
 				}
@@ -183,6 +185,8 @@ function void UpdateGamePause()
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					if (total_stars < theme.south.unlock)
+						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
 					customMenu.countMedals()
 				}
@@ -249,12 +253,18 @@ function void UpdateGamePause()
 
 function void PauseMenu_ChangeTheme()
 {
+	
+	if (total_stars < theme.south.unlock)
+		theme.max = 2
+	else
+		theme.max = 3
+
 	if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 	{
 		if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_RIGHT))
 		{
 			theme.hud += 1
-			if (theme.hud == 3)
+			if (theme.hud == theme.max + 1)
 				theme.hud = 0
 			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
 			{
@@ -264,7 +274,7 @@ function void PauseMenu_ChangeTheme()
 		else if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_LEFT))
 		{
 			if (theme.hud == 0)
-				theme.hud = 2
+				theme.hud = theme.max
 			else
 				theme.hud -= 1
 			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
@@ -310,6 +320,10 @@ function u8 PauseMenu_Normal()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			Saturn.PauseMenu_Normal()
+		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			South.PauseMenu_Normal()
 		}
 		else
 		{
@@ -369,6 +383,10 @@ function u8 PauseMenu_Normal_Restart()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			Saturn.PauseMenu_Restart()
+		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			South.PauseMenu_Restart()
 		}
 		else
 		{
@@ -444,6 +462,10 @@ function u8 PauseMenu_ExitGame()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		{
 			Saturn.PauseMenu_ExitGame()
+		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			South.PauseMenu_ExitGame()
 		}
 		else
 		{
@@ -553,6 +575,10 @@ function u8 PauseMenu_Basic()
 		{
 			Saturn.PauseMenu_Basic()
 		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+		{
+			South.PauseMenu_Basic()
+		}
 		else
 		{
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
@@ -609,6 +635,10 @@ function u8 PauseMenu_BlueSphere()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			Saturn.PauseMenu_BlueSphere()
+		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			South.PauseMenu_BlueSphere()
 		}
 		else
 		{
@@ -682,6 +712,10 @@ function u8 PauseMenu_Challenges()
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			Saturn.PauseMenu_Challenges()
+		}
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			South.PauseMenu_Challenges()
 		}
 		else
 		{

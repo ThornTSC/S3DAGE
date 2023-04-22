@@ -25,6 +25,7 @@ global u8 green_sphere_palette
 global u8 greenspheres_music
 global u8 pause_menu
 define u8 theme.hud = u8[0x840273]
+global u8 theme.max
 global u16 screen_width
 global bool challenge_greenspheres
 global bool sonic_moves
@@ -72,11 +73,13 @@ global bool sidekick
 global s16 pole.x
 global s16 pole.y
 
+// Define memory location to store star count
+define u16 total_stars = u8[0x8402fe]
+
 global bool exitGame
 global bool AIR_menu_run
 global bool draw_HUD = 1
 global bool letters_marathonhud
-
 
 // Include other script files
 // string_display is Custom Text Display mod by ElspethThePict, allowed for other mods with credit given
@@ -111,6 +114,10 @@ include menu_pause
 constant u8 theme.s3k    = 0
 constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
+constant u8 theme.south  = 3
+
+// Number of stars for unlocks
+constant u16 theme.south.unlock = 455
 
 // Memory address constants
 constant u32 KosinskiRawdataBuffer = 0x840300
@@ -3473,10 +3480,16 @@ function void UpdateCameraPositionY()
 
 
 
-
-
-
-
+// Allow the South theme to edit the movement of title card text.
+// Function taken from maingame\hud\titlecard.lemon
+//# address-hook(0x02d95c) end(0x02d99a)
+function void TitleCard.TextElement.Update()
+{
+	if (theme.hud == theme.south)
+		South.TitleCard.TextElement.Update()
+	else
+		base.TitleCard.TextElement.Update()
+}
 
 
 
@@ -3497,6 +3510,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Flicky.TitleCardBar(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)
 				return Saturn.TitleCardBar(px, py, renderQueue)
+			else if (theme.hud == theme.south)
+				return South.TitleCardBar(px, py, renderQueue)
 			else
 				Renderer.drawCustomSprite("titlecard_redbar_dage", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
 		}
@@ -3513,6 +3528,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Flicky.TitleCardText(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)
 				return Saturn.TitleCardText(px, py, renderQueue)
+			else if (theme.hud == theme.south)
+				return South.TitleCardText(px, py, renderQueue)
 		}
 		else 
 			return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
@@ -3572,6 +3589,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Flicky.LevelResults(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)
 				return Saturn.LevelResults(px, py, renderQueue)
+			else if (theme.hud == theme.south)
+				return South.LevelResults(px, py, renderQueue)
 		}
 		
 		if (objA0.animation.sprite == 0x0b)
@@ -3617,6 +3636,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Flicky.GameTimeOver(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)
 				return Saturn.GameTimeOver(px, py, renderQueue)
+			else if (theme.hud == theme.south)
+				return South.GameTimeOver(px, py, renderQueue)
 		}
 
 		return false			// no renderhook in standard theme
@@ -3839,6 +3860,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Flicky.SpecialStageResults(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)
 				return Saturn.SpecialStageResults(px, py, renderQueue)
+			else if (theme.hud == theme.south)
+				return South.SpecialStageResults(px, py, renderQueue)
 		}
 
 		bool isSKStage = (global.lock_on_state == 0 && global.sk_bluespheres)
@@ -3928,6 +3951,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return Flicky.SpecialStageResultsContinue(px, py, renderQueue)
 		else if (theme.hud == theme.saturn)
 			return Saturn.SpecialStageResultsContinue(px, py, renderQueue)
+		else if (theme.hud == theme.south)
+			return South.SpecialStageResultsContinue(px, py, renderQueue)
 		else
 		{
 			string key = getCharacterContinueIcon(getMainCharacter())
