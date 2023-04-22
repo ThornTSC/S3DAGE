@@ -117,7 +117,7 @@ constant u8 theme.saturn = 2
 constant u8 theme.south  = 3
 
 // Number of stars for unlocks
-constant u16 theme.south.unlock = 455
+constant u16 theme.south.unlock = 25
 
 // Memory address constants
 constant u32 KosinskiRawdataBuffer = 0x840300
