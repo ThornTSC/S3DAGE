@@ -6724,6 +6724,10 @@ function void Challenge.checkRestartShortcut()
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 		time_attack_end = 0			// This isn't needed in theory, but better safe than sorry!
 		level.restart = 1
@@ -6756,6 +6760,10 @@ function void Challenge.checkExitShortcut()
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects

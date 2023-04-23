@@ -240,6 +240,8 @@ function void customMenu.mainLogicLoop()
 			// You can setup Call Frames at any point. This is to go into the Data Select.
 			//	System.setupCallFrame("loadupDataSelect")
 
+			u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+			
 			menuScreen = 0
 		}
 		else
@@ -330,6 +332,50 @@ function void customMenu.mainLogicLoop()
 			if (setting.levelselect.characters >= 4)
 				setting.levelselect.characters = 1
 			playSound(0x5b)
+		}
+	}
+
+	// Chaos needs extra menu functionality in levels where the Chaos Path allows
+	// for either the Sonic or Knuckles start location.
+	if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+	{
+		System.setGlobalVariableValueByName("Chaos.KnuxStage", 0)
+		System.setGlobalVariableValueByName("ChaosForm", 0)
+		camera.position.y.u16 = 0   // Chaos's TitleCard.Init() will used an old saved y position and retrigger the Chaos.KnuxStage flag erroneously
+
+		bool multiStartLoc = (global.zone_act == 0x0001 || global.zone_act == 0x0100 || global.zone_act == 0x0200 || global.zone_act == 0x0300 || global.zone_act == 0x0501)
+		if (!multiStartLoc)
+		{
+			level.start_location = 0
+			return
+		}
+		else if (level.start_location == 0)
+			level.start_location = (global.zone_act == 0x0300) ? 2 : 1
+
+		if (selectedMenuOption == 6 && (global.game_mode & 0x7f) == 0x54)
+		{
+			if (control.pad1.pressed & (CONTROL_UP | CONTROL_DOWN))
+			{
+				if (level.start_location == 2)
+					level.start_location = 1
+				else
+					level.start_location = 2
+				playSound(0x5b)
+			}
+
+			u32 alphaSonic = (level.start_location != 2) ? 0xffff00ff : 0x666666ff
+			u32 alphaKnuckles = (level.start_location == 2) ? 0xffff00ff : 0x666666ff
+			if (global.zone_act == 0x0300)  // CNZ1 reverses level.start_location's meaning in order to use the flying and running intros in DAGE
+			{
+				u32 temp = alphaSonic
+				alphaSonic = alphaKnuckles
+				alphaKnuckles = temp
+			}
+
+			Renderer.drawText("sonic3_fontB", getScreenWidth()/2 + 117, 168, "SELECT START:", 0xffffffff, 5, 0, 0xffff, 0)
+			Renderer.drawText("sonic3_fontB", getScreenWidth()/2 + 117, 180, "SONIC", alphaSonic, 5, 0, 0xffff, 0)
+			Renderer.drawText("sonic3_fontB", getScreenWidth()/2 + 117, 192, "KNUCKLES", alphaKnuckles, 5, 0, 0xffff, 0)
+			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Knuckles best times border rectangle (80% opacity)
 		}
 	}
 }

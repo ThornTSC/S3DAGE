@@ -411,6 +411,9 @@ function u8 PauseMenu_Normal_Restart()
 		camera.background.y = 0		// fix for the AIZ1 background issue.
 		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
 
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
+
 		restartAtCheckpoint()
 		global.game.paused = false
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
@@ -529,6 +532,9 @@ function u8 PauseMenu_ExitGame()
 		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue.
 		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 		global.game.paused = false
 
@@ -744,6 +750,10 @@ function u8 PauseMenu_Challenges()
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 		level.restart = 1
 		global.game.paused = false
@@ -758,6 +768,10 @@ function u8 PauseMenu_Challenges()
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
+		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+
+		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
