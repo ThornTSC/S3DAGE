@@ -138,6 +138,7 @@ function void letters.drawString(u64 key, u16 offset.x, u16 offset.y)
 	u8 char
 	u64 spritekey
 	u32 str.length
+	u16 renderQueue = 0xe000
 
 	for (u16 i = 0; i < strlen(key); i++)
 	{
@@ -167,6 +168,7 @@ function void letters.drawString(u64 key, u16 offset.x, u16 offset.y)
 		{
 			character.space = 0
 			offset.y += 8
+			renderQueue++	// By incrementing the renderQueue, capital letters on lower lines will render in front of letters that fall below the above line
 		}
 
 		//No sprite for a space, but we still move right
@@ -181,7 +183,7 @@ function void letters.drawString(u64 key, u16 offset.x, u16 offset.y)
 			spritekey = stringformat("letters.%02d",char)
 			if (global.framecounter.low & 0x10 || letters.flash == 0)
 			{
-				Renderer.drawCustomSprite(spritekey, offset.x + character.space + letters.tick.x, offset.y + letters.tick.y, 0, SPRITE_FLAG_PRIO, 0xe000)
+				Renderer.drawCustomSprite(spritekey, offset.x + character.space + letters.tick.x, offset.y + letters.tick.y, 0, SPRITE_FLAG_PRIO, renderQueue)
 			}
 
 
