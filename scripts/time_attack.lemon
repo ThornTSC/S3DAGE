@@ -2151,7 +2151,7 @@ function void RenderHUD_Marathon()
 		if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 			py -= 16	// move above Red Star Ring
 
-	Letters.Show(stringformat("Chaos: %01d/7`Super: %01d/7", global.chaos_emeralds, global.super_emeralds), 1, getScreenWidth() - 72, py)
+	Letters.Show(stringformat("Chaos: %01d/7`Super: %01d/7", global.chaos_emeralds, global.super_emeralds), 1, getScreenWidth() - 73, py)
 	letters_marathonhud = false
 
 //	RenderMarathonTimer()
