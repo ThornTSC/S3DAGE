@@ -3337,8 +3337,11 @@ function void Standalone.onLevelStart()
 	draw_HUD = true
 	System.setGlobalVariableValueByName("ChaosPath", 0)	// At the moment there are some incompatibilities with Chaos starting from the AIZ1 Knuckles start.
 														// If these are resolved, ChaosPath must be considered as 0 for Challenges and Marathon modes.
-	camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
-	camera.background.y = 0		// fix for the AIZ1 background issue
+	if (global.zone_act != 0x0301)	// Standalone.onLevelStart() is run in Marathon modes between CNZ1 and CNZ2, and the following background camera lines cause a visual glitch
+	{
+		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
+		camera.background.y = 0		// fix for the AIZ1 background issue
+	}
 
 	if (time_attack >= 3 && original_mode)
 	{

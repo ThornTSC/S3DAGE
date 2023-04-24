@@ -10077,25 +10077,13 @@ function void fn031e96()
 
 // Modify the lowest possible camera position in CNZ2 to disallow seeing below the level background
 // Function taken from level\04_cnz\level_cnz.lemon
-//# address-hook(0x052204) end(0x052220)
-function void InitLevelScrolling.CNZ2()
+//# address-hook(0x052224) end(0x052228)
+function void UpdateLevelScrolling.CNZ2()
 {
-	if (!original_mode)
+	if (!original_mode && move_area.bottom.target == 0x1000)
 		move_area.bottom.target = 0x0b70	// going more than a few pixels lower than this reveals the background's lower edge
-
-	level.scrolling_routine = 8
-	UpdateBackground.CNZ1()
-	fn04f2f6()
-
-	D1 = 0
-	Level.InitialTilesFill()
-
-	A4 = 0x0520fe
-	A5 = 0xffffa800
-	fn04f0ce()
+	base.UpdateLevelScrolling.CNZ2()
 }
-
-
 
 
 // In Original Mode, do not use AIR's camera adjustment after the CNZ1 boss
