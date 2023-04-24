@@ -2004,6 +2004,23 @@ function void TouchGreenSphere_CheckPlayerMoved()
 }
 
 
+//# address-hook(0x009e88) end(0x009e9e)
+function void BlueSpheres.OnBlueSphereCollected()
+{
+	bluespheres.bs_hud_dirty = 0xff
+	--bluespheres.blue_remaining
+	if (bluespheres.blue_remaining == 0)
+	{
+		bluespheres.stage_exit_state = 1
+		if (bluespheres.hitting_bumper != 0)
+		{
+			bluespheres.hitting_bumper = 0
+			bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
+			return
+		}
+	}
+}
+
 
 // Add green spheres to the blue sphere count
 //# address-hook(0x009ea0) end(0x009eba)
