@@ -1528,7 +1528,7 @@ function void customMenu.mainLogicLoop.main()
 	}
 
 	Letters.Main()
-	Letters.Show("Play Sonic 3 & Knuckles with new level layouts, special stage`layouts, and colour schemes for a fresh take on a classic.``````Play any act or try to earn medals in two challenging modes!`Find the fastest route and race to the goal in Time Attack!`Freeze the clock and try not to get hurt in Time Stone Trial!``````Play the classic Blue Sphere game with a tricky twist.``````Return to the A.I.R. menu to change options or exit the game.", 1, getScreenExtend() - 40 + 32, 36)
+	Letters.Show("Play Sonic 3 & Knuckles with new level layouts, special stage`layouts, and colour schemes for a fresh take on a classic.`Bring Tails along, or go solo and seek out Red Star Rings!`````Play any act or try to earn stars in two challenging modes!`Find the fastest route and race to the goal in Time Attack, or`freeze the clock and try not to get hurt in Time Stone Trial!`Go for the gold!`````Play the classic Blue Sphere game with a tricky twist.`Green Spheres become Blue Spheres when touched.`````Return to the A.I.R. menu to change options or exit the game.", 1, getScreenExtend() - 40 + 32, 36)
 //	Renderer.drawCustomSprite("mainmenu_descriptions", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
 	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
