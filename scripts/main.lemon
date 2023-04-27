@@ -13236,7 +13236,10 @@ function void FBZ1_CustomSprites()
 	}
 
 	// Display pipe along which piston moves
-	Renderer.drawCustomSprite("fbz_pipe256", 0x1400 - camera.foreground.x.u16, 0x07b0 - camera.foreground.y.u16, 0, 0, 0x2100)
+	if (!original_mode)
+	{
+		Renderer.drawCustomSprite("fbz_pipe256", 0x1400 - camera.foreground.x.u16, 0x07b0 - camera.foreground.y.u16, 0, 0, 0x2100)
+	}
 }
 
 
