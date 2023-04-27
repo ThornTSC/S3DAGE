@@ -1808,7 +1808,7 @@ function void SonicPressedJumpInMidAir()
 			}
 
 			camera.locktime.player1 = 0x2000
-			if (!original_mode)
+			// if (!original_mode)		// position backup removal still needed to prevent wild Hyper Dash camera movement in Classic Mode
 				ClearPositionBackup()
 
 			char.double_jump_state = 1
