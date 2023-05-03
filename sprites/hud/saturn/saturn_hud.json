@@ -70,7 +70,7 @@
 	"saturn_hud_digit_9_chaosstage": { "File": "saturn_hud.png", "Rect": "72,123,8,16" },
 
 	// Other characters for time
-	"saturn_hud_char_colon":   { "File": "saturn_hud.png", "Rect": "79,107,8,16" },	// usually 80 in x, but shifting one to handle alignment on numbers
+	"saturn_hud_char_colon":   { "File": "saturn_hud.png", "Rect": "80,107,8,16" },	// usually 80 in x, but shifting one to handle alignment on numbers
 	"saturn_hud_char_minutes": { "File": "saturn_hud.png", "Rect": "88,107,8,16" },
 	"saturn_hud_char_seconds": { "File": "saturn_hud.png", "Rect": "96,107,8,16" },
 /*
@@ -99,7 +99,7 @@
 
 	// HUD elements for Challenges
 	"saturn_hud_text_time_chaosstage":	  { "File": "saturn_hud.png", "Rect": "0,139,31,16" },
-	"saturn_hud_char_colon_chaosstage":   { "File": "saturn_hud.png", "Rect": "79,123,8,16" },	// usually 80 in x, but shifting one to handle alignment on numbers
+	"saturn_hud_char_colon_chaosstage":   { "File": "saturn_hud.png", "Rect": "80,123,8,16" },	// usually 80 in x, but shifting one to handle alignment on numbers
 	"saturn_hud_char_minutes_chaosstage": { "File": "saturn_hud.png", "Rect": "88,123,8,16" },
 	"saturn_hud_char_seconds_chaosstage": { "File": "saturn_hud.png", "Rect": "96,123,8,16" },
 
