@@ -370,7 +370,42 @@ function void TitleCard.Init()
 }
 
 
+// Load tiles as rawdata into shared memory and then decompress instead of using a ROM injection.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x007812) end(0x007890)
+function void fn007812()
+{
+	A4 = MainGame.getLevelDataPointer()
+	A1 = u32[A4] & 0x00ffffff
+	if (global.zone == 0x04)
+	{
+		u64 key  = (original_mode) ? "fbz_tiles_p_orig" : "fbz_tiles_p"
+		System.loadExternalRawData(key, 0x860000)		// copy Primary blocks to shared memory
+		A1 = 0x860000
+	}
+	u32 firstSource = A1
+	D4.u16 = u16[A1]
 
+	Kosinski.addToDMAQueue(A1, 0x0000)
+
+	A1 = u32[A4+4] & 0x00ffffff
+	if (A1 != firstSource && global.zone != 0x04)
+	{
+		Kosinski.addToDMAQueue(A1, D4.u16)
+	}
+
+	while (true)
+	{
+		global.frame_state = 0x0c
+		Kosinski.ProcessDecompressionQueue()
+		waitForNextFrame()
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+		if (kosinski.waiting_modules == 0)
+			break
+	}
+}
 
 
 // Load chunks as rawdata into shared memory and then decompress instead of using a ROM injection.
