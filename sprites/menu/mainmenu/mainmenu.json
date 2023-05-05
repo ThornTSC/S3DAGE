@@ -2,18 +2,31 @@
 	// Main menu options, background, and text
 	"bg_main": { "File": "mainmenu_background.png" },
 
-	"text_option_normalgame":  { "File": "text_option_normalgame.png"},
+	"dagelogo": { "File": "dagelogo.png" },
 
-	"text_option_normalgametype_0":  { "File": "text_option_revisitedmode.png", "Center": "52,8" },
-	"text_option_normalgametype_1":  { "File": "text_option_classicmode.png", "Center": "45,8" },
-	"text_option_normalgametype_2":  { "File": "text_option_anyspeedrun.png", "Center": "53,8" },
-	"text_option_normalgametype_3":  { "File": "text_option_100speedrun.png", "Center": "53,8" },
+	"text_option_revisitedmode":  { "File": "text_option_revisitedmode.png" },
+	"text_option_classicmode":  { "File": "text_option_classicmode.png"},
+	"text_option_speedrunmode":  { "File": "text_option_speedrunmode.png"},
+
+	"text_option_100":  { "File": "text_option_100.png" },
+	"text_option_any":  { "File": "text_option_any.png" },
 
 	"text_option_actselectchallenges":  { "File": "text_option_actselectchallenges.png"},
-
-	"text_option_challenges":  { "File": "text_option_challenges.png"},
-
+	
 	"text_option_greensphere":  { "File": "text_option_greensphere.png"},
+
+//	"text_option_normalgame":  { "File": "text_option_normalgame.png"},
+
+//	"text_option_normalgametype_0":  { "File": "text_option_revisitedmode.png", "Center": "52,8" },
+//	"text_option_normalgametype_1":  { "File": "text_option_classicmode.png", "Center": "45,8" },
+//	"text_option_normalgametype_2":  { "File": "text_option_anyspeedrun.png", "Center": "53,8" },
+//	"text_option_normalgametype_3":  { "File": "text_option_100speedrun.png", "Center": "53,8" },
+
+//	"text_option_actselectchallenges_large":  { "File": "text_option_actselectchallenges_large.png"},
+
+//	"text_option_challenges":  { "File": "text_option_challenges.png"},
+
+//	"text_option_greensphere":  { "File": "text_option_greensphere.png"},
 
 	"text_option_airmenu":  { "File": "text_option_airmenu.png"}
 }

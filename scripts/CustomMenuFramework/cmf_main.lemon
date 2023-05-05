@@ -1502,7 +1502,52 @@ function void customMenu.mainLogicLoop.main()
 	Renderer.drawCustomSprite(stringformat("text_option_greensphere_%d", selectedMenuOption.main), getScreenExtend() - 40 + 24, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 	Renderer.drawCustomSprite(stringformat("text_option_airmenu_%d", selectedMenuOption.main), getScreenExtend() - 40 + 25, 180, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 */	
+	u16 option_x = 12
+	u32 nonSelectionTint = 0xffffffff
+	u32 selectionTint = 0xffc0ff00	// 0xff40ffff in older DAGE versions
+	u32 modeSelectionTint = 0xffff90ff
 
+	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+
+	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 88, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_speedrunmode", getScreenExtend() - 40 + option_x, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 2) ? selectionTint : nonSelectionTint, 0x10000)
+
+	if (selectedMenuOption.main == 2)
+	{
+		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 116 - arrowShift, 116, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 176 + arrowShift, 116, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
+		if (selectedGameType == 0)
+			Renderer.drawCustomSprite("text_option_100", getScreenExtend() - 40 + option_x + 130, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+		else
+			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+	}
+	
+	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 136, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	
+	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + option_x, 164, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 4) ? selectionTint : nonSelectionTint, 0x10000)
+	
+	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + option_x, 196, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 5) ? selectionTint : nonSelectionTint, 0x10000)
+
+	Letters.Main()
+	if (selectedMenuOption.main == 0)
+		Letters.Show("Play Sonic 3 & Knuckles`with new level layouts,`special stage layouts,`and colour schemes for`a fresh take on a classic.``Bring Tails along, or go solo`and seek out Red Star Rings!``Attempt a harder game`with Knuckles: more enemies`and tricky special stages!", 1, getScreenExtend() - 40 + 212, 68)
+	else if (selectedMenuOption.main == 1)
+		Letters.Show("Experience the original`Sonic 3: D.A. Garden Edition`ROM hack as released in`October 2015.``(v1.02)", 1, getScreenExtend() - 40 + 212, 68)
+	else if (selectedMenuOption.main == 2)
+		Letters.Show("Tackle Revisited Mode in`a streamlined game with`fewer cutscenes and no`level results. Choose a`100% (14-emerald) run`or an Any% (no emerald)`run and go! It's nonstop`gameplay from start to`finish!``Pair the game with a timer`and submit your best runs to`www.speedrun.com/s3airdag`to compete with others!``(Runs with non-audio mods`are invalid for submission.)", 1, getScreenExtend() - 40 + 212, 68)
+	else if (selectedMenuOption.main == 3)
+		// Letters.Show("Play any act in the game`in either Revisited or`Classic Mode, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!`Be quick, precise, and`above all careful!", 1, getScreenExtend() - 40 + 212, 68)
+		Letters.Show("Play any act, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!``Submit your best runs to`www.speedrun.com/s3airdag`to compete with others!", 1, getScreenExtend() - 40 + 212, 68)
+	else if (selectedMenuOption.main == 4)
+		Letters.Show("Tackle the classic`Blue Sphere game with`a tricky twist.``Touch Green Spheres to`turn them into Blue`Spheres. Plan your moves`carefully to create rings`and avoid red spheres!", 1, getScreenExtend() - 40 + 212, 68)
+	else if (selectedMenuOption.main == 5)
+		Letters.Show("Return to the A.I.R. menu`to change options or`exit the game.", 1, getScreenExtend() - 40 + 212, 68)
+
+		
+
+	// Old main menu display
+/*
 	Renderer.drawCustomSprite(stringformat("text_option_normalgametype_%d", selectedGameType), getScreenExtend() - 40 + 300, 20, 0x00, SPRITE_FLAG_PRIO, 0xe000)	// centered in json
 	u32 alpha = 0xffffffff	// full display
 	if (selectedMenuOption.main == 0)
@@ -1529,24 +1574,24 @@ function void customMenu.mainLogicLoop.main()
 
 	Letters.Main()
 	Letters.Show("Play Sonic 3 & Knuckles with new level layouts, special stage`layouts, and colour schemes for a fresh take on a classic.`Bring Tails along, or go solo and seek out Red Star Rings!`````Play any act or try to earn stars in two challenging modes!`Find the fastest route and race to the goal in Time Attack, or`freeze the clock and try not to get hurt in Time Stone Trial!`Go for the gold!`````Play the classic Blue Sphere game with a tricky twist.`Green Spheres become Blue Spheres when touched.`````Return to the A.I.R. menu to change options or exit the game.", 1, getScreenExtend() - 40 + 32, 36)
-//	Renderer.drawCustomSprite("mainmenu_descriptions", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+*/
 
 	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
 	{
-		if (selectedMenuOption.main == 0)	// Normal Game was selected
+		if (selectedMenuOption.main <= 2)	// Revisited or Classic Mode was selected
 		{
 			playSound(0x63)
 			global.game_mode = 0x4c			// Data Select
 			time_attack = 0
-			if (selectedGameType == 1)
+			if (selectedMenuOption.main == 1)
 				original_mode = 1
-			else if (selectedGameType == 2)
+			else if (selectedMenuOption.main == 2 && selectedGameType == 0)
 				time_attack = 4
-			else if (selectedGameType == 3)
+			else if (selectedMenuOption.main == 2)	// selectedGameType == 1
 				time_attack = 3
 			return
 		}
-		else if (selectedMenuOption.main == 1)	// Challenges was selected
+		else if (selectedMenuOption.main == 3)	// Challenges was selected
 		{
 			playSound(0x63)
 			global.game_mode = 0x54		// Challenges
@@ -1556,7 +1601,7 @@ function void customMenu.mainLogicLoop.main()
 			time_attack = setting.time_attack
 			return
 		}
-		else if (selectedMenuOption.main == 2)	// Green Sphere was selected
+		else if (selectedMenuOption.main == 4)	// Green Sphere was selected
 		{
 			playSound(0xaf)
 			u8[0xffffffa1] = 0
@@ -1578,7 +1623,7 @@ function void customMenu.mainLogicLoop.main()
 			// EntryFunctions.blueSphereGame()
 			return
 		}
-		else if (selectedMenuOption.main == 3)	// A.I.R. Menu was selected
+		else if (selectedMenuOption.main == 5)	// A.I.R. Menu was selected
 		{
 			playSound(0xad)
 			time_attack = 0
@@ -1611,29 +1656,35 @@ function void customMenu.mainLogicLoop.main()
 	}
 	else if (control.pad1.pressed & CONTROL_UP)
 	{
-		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 3)
+		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 5)
 		{
 			selectedMenuOption.main -= 1
 		}
 		else if (selectedMenuOption.main == 0)
 		{
-			selectedMenuOption.main = 3
+			selectedMenuOption.main = 5
 		}
 		playSound(0x5b)
 	}
 	else if (control.pad1.pressed & CONTROL_DOWN)
 	{
-		if (selectedMenuOption.main < 3)
+		if (selectedMenuOption.main < 5)
 		{
 			selectedMenuOption.main += 1
 		}
-		else if (selectedMenuOption.main == 3)
+		else if (selectedMenuOption.main == 5)
 		{
 			selectedMenuOption.main = 0
 		}
 		playSound(0x5b)
 	}
-	else if ((control.pad1.pressed & CONTROL_LEFT) && selectedMenuOption.main == 0)
+	else if (((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT)) && selectedMenuOption.main == 2)
+	{
+		selectedGameType = (selectedGameType + 1) & 0x01	// change 0 to 1 or vice versa
+		playSound(0x5b)
+	}
+/*
+	else if ((control.pad1.pressed & CONTROL_LEFT) && selectedMenuOption.main == 2)
 	{
 		if (selectedGameType == 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
 		{
@@ -1665,6 +1716,7 @@ function void customMenu.mainLogicLoop.main()
 		}
 		playSound(0x5b)
 	}
+*/
 }
 
 

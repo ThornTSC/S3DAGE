@@ -19,8 +19,8 @@ global u64 DAGE_continueSpriteName = "continue_icon_sonic"
 // These variables allow D.A. Garden Edition (DAGE) to recognize it.
 // DAGE will create persistent data for records in both Challenge modes and
 // show your character in the Act Select / Challenges menu.
-// DAGE will also disable medals / dev times, and disable access to Classic Mode
-// so your mods do not need to support more features than necessary.
+// DAGE will also disable star medals and dev times so your mods
+// do not need to support more features than necessary.
 
 // This file is NOT a substitute for testing for compatibility!
 // Ensure your character displays properly in the Challenges menu and saves best times.
