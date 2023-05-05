@@ -17049,7 +17049,60 @@ function void fn05adc0()
 
 
 
-// Move Hyper Sonic end game cutscene and force original AIZ1 palette
+// Move Hyper Sonic end game cutscene, force original AIZ1 palette, and load external chunk data
+// Functions taken from scripts\level\outro\level_outro.lemon
+//# address-hook(0x05abc0) end(0x05ac6c)
+function void fn05abc0()
+{
+	u32 backupA0 = A0
+	FadeOutPalette()
+	A0 = backupA0
+
+	--u16[0xffffeeda]
+	if (s16[0xffffeeda] >= 0)
+	{
+		LoadTileContentDefault()
+		return
+	}
+
+	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb04a, 0x1fb4)
+
+	if (global.super_emeralds < 7)
+	{
+		u16[0xffffeec0] = 0x24
+		fn05adc0()
+		return
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x05dfee
+	}
+
+	push(A3)
+	push(A2)
+	push(A0)
+	push(D7)
+
+	// Kosinski.addToDecompressionQueue(0x3abc40, 0xffff0000)	// load chunks
+	System.loadExternalRawData("aiz1_chunks_s", KosinskiRawdataBuffer)		// copy chunks to shared memory
+	Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0000)		// queue to decompress them to their proper RAM
+	Kosinski.addToDecompressionQueue(0x3a374a, 0xffff9000)
+	Kosinski.addToDecompressionQueue(0x3a458a, 0xffff9268)
+
+	Kosinski.addToDMAQueue(0x3a566a, 0x0000)
+	Kosinski.addToDMAQueue(0x3a944e, 0x17c0)
+
+	D7 = pop()
+	A0 = pop()
+	A2 = pop()
+	A3 = pop()
+
+	u16[0xffffeec0] += 4
+	fn05ac70()
+}
+
 //# address-hook(0x05ac70) end(0x05acf8)
 function void fn05ac70()
 {
