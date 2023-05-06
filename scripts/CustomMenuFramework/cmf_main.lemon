@@ -1533,7 +1533,7 @@ function void customMenu.mainLogicLoop.main()
 	if (selectedMenuOption.main == 0)
 		Letters.Show("Play Sonic 3 & Knuckles`with new level layouts,`special stage layouts,`and colour schemes for`a fresh take on a classic.``Bring Tails along, or go solo`and seek out Red Star Rings!``Attempt a harder game`with Knuckles: more enemies`and tricky special stages!", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 1)
-		Letters.Show("Experience the original`Sonic 3: D.A. Garden Edition`ROM hack as released in`October 2015.``(v1.02)", 1, getScreenExtend() - 40 + 212, 68)
+		Letters.Show("Experience the original`Sonic 3: D.A. Garden Edition`ROM hack (v1.02) as`released in October 2015.", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 2)
 		Letters.Show("Tackle Revisited Mode in`a streamlined game with`fewer cutscenes and no`level results. Choose a`100% (14-emerald) run`or an Any% (no emerald)`run and go! It's nonstop`gameplay from start to`finish!``Pair the game with a timer`and submit your best runs to`www.speedrun.com/s3airdag`to compete with others!``(Runs with non-audio mods`are invalid for submission.)", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 3)
@@ -1586,9 +1586,9 @@ function void customMenu.mainLogicLoop.main()
 			if (selectedMenuOption.main == 1)
 				original_mode = 1
 			else if (selectedMenuOption.main == 2 && selectedGameType == 0)
-				time_attack = 4
-			else if (selectedMenuOption.main == 2)	// selectedGameType == 1
 				time_attack = 3
+			else if (selectedMenuOption.main == 2)	// selectedGameType == 1
+				time_attack = 4
 			return
 		}
 		else if (selectedMenuOption.main == 3)	// Challenges was selected
