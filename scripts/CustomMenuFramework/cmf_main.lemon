@@ -1510,7 +1510,8 @@ function void customMenu.mainLogicLoop.main()
 	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
 	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
-	Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 88, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
+	if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
+		Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 88, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
 	Renderer.drawCustomSprite("text_option_speedrunmode", getScreenExtend() - 40 + option_x, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 	if (selectedMenuOption.main == 2)
@@ -1659,6 +1660,8 @@ function void customMenu.mainLogicLoop.main()
 		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 5)
 		{
 			selectedMenuOption.main -= 1
+			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
+				selectedMenuOption.main -= 1
 		}
 		else if (selectedMenuOption.main == 0)
 		{
@@ -1671,6 +1674,8 @@ function void customMenu.mainLogicLoop.main()
 		if (selectedMenuOption.main < 5)
 		{
 			selectedMenuOption.main += 1
+			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
+				selectedMenuOption.main += 1
 		}
 		else if (selectedMenuOption.main == 5)
 		{
