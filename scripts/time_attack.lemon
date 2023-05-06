@@ -2148,10 +2148,11 @@ function void RenderHUD_Marathon()
 
 	u16 py = 201	// height without Red Star Rings HUD
 	if (time_attack == 3 && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00 && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails))	// Marathon with emeralds
+	{
 		if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 			py -= 16	// move above Red Star Ring
-
-	Letters.Show(stringformat("Chaos: %01d/7`Super: %01d/7", global.chaos_emeralds, global.super_emeralds), 1, getScreenWidth() - 73, py)
+		Letters.Show(stringformat("Chaos: %01d/7`Super: %01d/7", global.chaos_emeralds, global.super_emeralds), 1, getScreenWidth() - 73, py)
+	}
 	letters_marathonhud = false
 
 //	RenderMarathonTimer()
