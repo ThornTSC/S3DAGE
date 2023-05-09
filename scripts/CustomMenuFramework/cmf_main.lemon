@@ -1467,7 +1467,7 @@ function void customMenu.mainLogicLoop.main()
 	u64 characterModName = System.getGlobalVariableValueByName("DAGE_characterModName")
 	if ((characterModName || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")) && selectedGameType == 1)
 	{
-		selectedGameType = 0
+		// selectedGameType = 0		// no longer needed
 		setting.original_mode = 0
 		original_mode = 0
 	}
