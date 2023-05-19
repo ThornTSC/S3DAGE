@@ -7294,6 +7294,164 @@ function void fn01bc60()
 
 
 
+
+// Correct an issue with A.I.R.'s widescreen settings for the AIZ1 hollow tree in Classic Mode / low
+// screen widths in which going too fast would make the player crash into a wall and fall down.
+// Functions taken from objects\01_aiz\aiz_hollowtree.lemon
+//# address-hook(0x01f752)
+function void fn01f752()
+{
+	fn01f7b8()
+
+	if ((objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)) == 0 && u16[A0 + 0x38] != 0)
+	{
+		--u16[A0 + 0x38]
+		if (u16[A0 + 0x38] == 0)
+		{
+			move_area.left = 0x1300
+			move_area.right = 0x4000
+		}
+		else
+		{
+			if (move_area.left != 0x1300)
+			{
+				if (u16[0xffffb000 + 0x10] >= 0x2d00)
+				{
+					move_area.left = 0x1300
+				}
+				else
+				{
+					move_area.left -= 4
+				}
+			}
+			if (move_area.right != 0x4000)
+			{
+				if (u16[0xffffb000 + 0x10] < 0x2d00)
+				{
+					move_area.right = 0x4000
+				}
+				else
+				{
+					move_area.right += 4
+				}
+			}
+		}
+	}
+	else if (!original_mode && getScreenWidth() > 320)
+	{
+		if (camera.position.x.u16 < 0x2c00 && camera.position.y.u16 >= 0x0360)
+		{
+			move_area.right = 0x2c54 + getScreenExtend()
+		}
+		else if (camera.position.y.u16 < 0x0320)
+		{
+			move_area.right = 0x4000
+		}
+	}
+
+	// Dirty hack to refresh parts of the screen and avoid visual glitches
+	if (!original_mode)
+		fillPlaneA_Default(0x2d80, 0x02e0, 512, 512)
+
+	CheckForUnloadObject()
+}
+
+function void fn01f7ce()
+{
+#if STANDALONE
+	if (debug_mode.state)
+		return
+#endif
+
+	u8 bit = (1 << D6.u8)
+
+	if ((objA0.flags2a & bit) == 0)
+	{
+		if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+			s16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+			s16 dy = objA1.position.y.u16 - objA0.position.y.u16
+			if (dx >= 0 && dx < 0x40 && dy >= -0x5a && dy <= 0xa0)
+			{
+				if (objA1.velocity.x >= 0x600 && u8[A1 + 0x2e] == 0)
+				{
+					LetSonicClimbOnObject()
+
+					u32[A2] = 0
+					u8[A1 + 0x20] = char.state.RUNNING
+					u8[A1 + 0x2e] |= 0x42
+					if (A1 == 0xffffb000)
+					{
+						if (allocDynamicObjectAfterA0())
+						{
+							objA1.update_address = 0x04fa0c
+						}
+
+						if (!original_mode && getScreenWidth() > 320)
+						{
+							move_area.left = 0x2c54 - getScreenExtend()
+							move_area.right = 0x2c54 + getScreenExtend()
+						}
+						else
+						{
+							move_area.left = 0x2c60
+							move_area.right = 0x2c60
+						}
+						u16[A0 + 0x38] = 0x3c
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		D0.u16 = abs(s16[A1 + 0x1c])
+		if (D0.u16 >= 0x600)
+		{
+			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+				D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x90
+				if (D0.s16 >= 0 && D0.u16 <= 0x130)
+				{
+					fn01f914()
+					return
+				}
+			}
+			else
+			{
+				if (objA1.position.x.u16 < 0x2c99)
+				{
+					objA1.position.x.u16 = 0x2c99
+					objA1.velocity.x = 0x400
+				}
+				if (objA1.position.x.u16 >= 0x2d66)
+				{
+					objA1.position.x.u16 = 0x2d66
+					objA1.velocity.x = -0x400
+				}
+			}
+		}
+		else
+		{
+			if (u16[A2] < 0x400)
+			{
+				u32 backupA1 = A1
+				u32 backupD6 = D6
+				fn01f914()
+				A1 = backupA1
+				D6 = backupD6
+			}
+		}
+
+		fn01f8b4()
+	}
+}
+
+
+
+
+
+
 // Add a call in AIZ1 to draw the sprite to cover up the tree trunk to the right of the miniboss cutscene
 // Function taken from level\01_aiz\level_aiz.lemon
 //# address-hook(0x04f912) end(0x04fa0a)
