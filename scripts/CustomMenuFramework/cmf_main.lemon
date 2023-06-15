@@ -60,7 +60,136 @@ global bool challenges_normalmode
 // Tracks the currently selected zone and act.
 global u16 selectedZoneAct
 
+// Used for creating scrolling in menus via holding the direction button
+constant u8 held_time.needed = 30
+constant u8 repeat_scroll_delay = 10
+global u8 held_time.up
+global u8 held_time.down
+global u8 held_time.left
+global u8 held_time.right
+
 // include framework		// This is already included in main.lemon
+
+function bool customMenu.scrollUp()
+{
+	if Input.buttonPressed(BUTTON_UP)
+	{
+		held_time.up++
+		held_time.down = 0
+		held_time.right = 0
+		held_time.left = 0
+		return true
+	}
+	
+	if (Input.buttonDown(BUTTON_UP))
+	{
+		held_time.up++
+		if (held_time.up < held_time.needed)
+			return false
+		
+		held_time.up -= repeat_scroll_delay
+		held_time.down = 0
+		held_time.right = 0
+		held_time.left = 0
+		return true
+	}
+
+	if (!Input.buttonPressed(BUTTON_UP))
+		held_time.up = 0
+	
+	return false
+}
+
+function bool customMenu.scrollDown()
+{
+	if Input.buttonPressed(BUTTON_DOWN)
+	{
+		held_time.down++
+		held_time.up = 0
+		held_time.right = 0
+		held_time.left = 0
+		return true
+	}
+	
+	if (Input.buttonDown(BUTTON_DOWN))
+	{
+		held_time.down++
+		if (held_time.down < held_time.needed)
+			return false
+		
+		held_time.down -= repeat_scroll_delay
+		held_time.up = 0
+		held_time.right = 0
+		held_time.left = 0
+		return true
+	}
+
+	if (!Input.buttonPressed(BUTTON_DOWN))
+		held_time.down = 0
+	
+	return false
+}
+
+function bool customMenu.scrollLeft()
+{
+	if Input.buttonPressed(BUTTON_LEFT)
+	{
+		held_time.left++
+		held_time.down = 0
+		held_time.right = 0
+		held_time.up = 0
+		return true
+	}
+	
+	if (Input.buttonDown(BUTTON_LEFT))
+	{
+		held_time.left++
+		if (held_time.left < held_time.needed)
+			return false
+		
+		held_time.left -= repeat_scroll_delay
+		held_time.down = 0
+		held_time.right = 0
+		held_time.up = 0
+		return true
+	}
+
+	if (!Input.buttonPressed(BUTTON_LEFT))
+		held_time.left = 0
+	
+	return false
+}
+
+function bool customMenu.scrollRight()
+{
+	if Input.buttonPressed(BUTTON_RIGHT)
+	{
+		held_time.right++
+		held_time.down = 0
+		held_time.up = 0
+		held_time.left = 0
+		return true
+	}
+	
+	if (Input.buttonDown(BUTTON_RIGHT))
+	{
+		held_time.right++
+		if (held_time.right < held_time.needed)
+			return false
+		
+		held_time.right -= repeat_scroll_delay
+		held_time.down = 0
+		held_time.up = 0
+		held_time.left = 0
+		return true
+	}
+
+	if (!Input.buttonPressed(BUTTON_RIGHT))
+		held_time.right = 0
+	
+	return false
+}
+
 
 function void customMenu.mainLogicLoop()
 {
@@ -160,14 +289,14 @@ function void customMenu.mainLogicLoop()
 						return
 					}
 					
-					if (Input.buttonPressed(BUTTON_UP))
+					if (customMenu.scrollUp())
 					{
 						pause_menu_selection -= 2
 						if (pause_menu_selection < 0)
 							pause_menu_selection = 2
 						playSound(0x5b)
 					}
-					else if (Input.buttonPressed(BUTTON_DOWN))
+					else if (customMenu.scrollDown())
 					{
 						pause_menu_selection += 2
 						if (pause_menu_selection > 2)
@@ -282,7 +411,7 @@ function void customMenu.mainLogicLoop()
 		//	yieldExecution()
 		}
 	}
-	else if (control.pad1.pressed & CONTROL_UP)
+	else if (customMenu.scrollUp())
 	{
 		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
 		if (selectedMenuOption == 4 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots"))  && setting.time_attack == 0)
@@ -308,7 +437,7 @@ function void customMenu.mainLogicLoop()
 			playSound(0x5b)
 		}
 	}
-	else if (control.pad1.pressed & CONTROL_DOWN)
+	else if (customMenu.scrollDown())
 	{
 		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
 		if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && setting.time_attack == 0)
@@ -383,7 +512,7 @@ function void customMenu.mainLogicLoop()
 function void customMenu.selectZone()
 {
 	// Select an act.
-	if (control.pad1.pressed & CONTROL_RIGHT)
+	if (customMenu.scrollRight())
 	{
 		if (selectedZoneAct >= 0x0b00)		// Pressed right on DEZ?
 		{
@@ -408,7 +537,7 @@ function void customMenu.selectZone()
 		playSound(0x5b)
 		customMenu.matchActToSelection()
 	}
-	else if (control.pad1.pressed & CONTROL_LEFT)
+	else if (customMenu.scrollLeft())
 	{
 		if (selectedZoneAct <= 0x0001)		// Pressed left on AIZ?
 		{
@@ -434,7 +563,7 @@ function void customMenu.selectZone()
 function void customMenu.selectAct()
 {
 	// Select an act.
-	if (control.pad1.pressed & CONTROL_RIGHT)
+	if (customMenu.scrollRight())
 	{
 		if (selectedZoneAct == 0x0b01)		// Pressed right on DEZ2?
 		{
@@ -449,7 +578,7 @@ function void customMenu.selectAct()
 		playSound(0x5b)
 		customMenu.matchActToSelection()
 	}
-	else if (control.pad1.pressed & CONTROL_LEFT)
+	else if (customMenu.scrollLeft())
 	{
 		if (selectedZoneAct == 0x0000)		// Pressed left on AIZ1?
 		{
@@ -484,7 +613,7 @@ function void customMenu.matchActToSelection()
 
 function void customMenu.selectTAMode()
 {
-	if (control.pad1.pressed & CONTROL_LEFT)
+	if (customMenu.scrollLeft())
 	{
 		if (time_attack == 0)
 			time_attack = 2
@@ -493,7 +622,7 @@ function void customMenu.selectTAMode()
 		setting.time_attack = time_attack
 		playSound(0x5b)
 	}
-	else if (control.pad1.pressed & CONTROL_RIGHT)
+	else if (customMenu.scrollRight())
 	{
 		if (time_attack == 2)
 			time_attack = 0
@@ -506,7 +635,7 @@ function void customMenu.selectTAMode()
 
 function void customMenu.selectHudPosition()
 {
-	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
 		if (time_attack_hud == 0)
 			time_attack_hud = 1
@@ -518,7 +647,7 @@ function void customMenu.selectHudPosition()
 
 function void customMenu.selectGameType()
 {
-	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
 		if (setting.original_mode == 0)
 			setting.original_mode = 1
@@ -530,7 +659,7 @@ function void customMenu.selectGameType()
 
 function void customMenu.selectSidekick()
 {
-	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
 		if (sidekick == 0)
 			sidekick = 1
@@ -542,7 +671,7 @@ function void customMenu.selectSidekick()
 
 function u8 customMenu.selectRetryAndExit(u8 shortcut_threshold)
 {
-	if ((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT))
+	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
 		if (shortcut_threshold == 1)
 			shortcut_threshold = 30
@@ -1655,7 +1784,7 @@ function void customMenu.mainLogicLoop.main()
 	//	yieldExecution()
 
 	}
-	else if (control.pad1.pressed & CONTROL_UP)
+	else if (customMenu.scrollUp())
 	{
 		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 5)
 		{
@@ -1669,7 +1798,7 @@ function void customMenu.mainLogicLoop.main()
 		}
 		playSound(0x5b)
 	}
-	else if (control.pad1.pressed & CONTROL_DOWN)
+	else if (customMenu.scrollDown())
 	{
 		if (selectedMenuOption.main < 5)
 		{
@@ -1683,13 +1812,13 @@ function void customMenu.mainLogicLoop.main()
 		}
 		playSound(0x5b)
 	}
-	else if (((control.pad1.pressed & CONTROL_LEFT) || (control.pad1.pressed & CONTROL_RIGHT)) && selectedMenuOption.main == 2)
+	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 2)
 	{
 		selectedGameType = (selectedGameType + 1) & 0x01	// change 0 to 1 or vice versa
 		playSound(0x5b)
 	}
 /*
-	else if ((control.pad1.pressed & CONTROL_LEFT) && selectedMenuOption.main == 2)
+	else if (customMenu.scrollLeft() && selectedMenuOption.main == 2)
 	{
 		if (selectedGameType == 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
 		{
@@ -1705,7 +1834,7 @@ function void customMenu.mainLogicLoop.main()
 		}
 		playSound(0x5b)
 	}
-	else if ((control.pad1.pressed & CONTROL_RIGHT) && selectedMenuOption.main == 0)
+	else if (customMenu.scrollRight() && selectedMenuOption.main == 0)
 	{
 		if (selectedGameType == 0 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
 		{
@@ -1832,7 +1961,7 @@ function void fn00d1fa()
 		if (u16[A0 + 0x30] == 0)
 		{
 			D0 = 0
-			if (control.pad1.pressed & CONTROL_LEFT)
+			if (control.pad1.pressed & CONTROL_LEFT)	// not using new held button scroll here. Using classic Data Select behavior.
 			{
 				if (u16[0xffffeee4] == 0 || dataselect.slot_selected != 1)
 				{
@@ -1846,7 +1975,7 @@ function void fn00d1fa()
 				}
 			}
 
-			if (control.pad1.pressed & CONTROL_RIGHT)
+			if (control.pad1.pressed & CONTROL_RIGHT)	// not using new held button scroll here. Using classic Data Select behavior.
 			{
 				if (dataselect.slot_selected != 9)
 				{
@@ -1996,14 +2125,14 @@ function void fn00d42c()
 							return
 						}
 						
-						if (Input.buttonPressed(BUTTON_UP))
+						if (customMenu.scrollUp())
 						{
 							pause_menu_selection -= 2
 							if (pause_menu_selection < 0)
 								pause_menu_selection = 2
 							playSound(0x5b)
 						}
-						else if (Input.buttonPressed(BUTTON_DOWN))
+						else if (customMenu.scrollDown())
 						{
 							pause_menu_selection += 2
 							if (pause_menu_selection > 2)
@@ -2076,14 +2205,14 @@ function void fn00d42c()
 							return
 						}
 						
-						if (Input.buttonPressed(BUTTON_UP))
+						if (customMenu.scrollUp())
 						{
 							pause_menu_selection -= 2
 							if (pause_menu_selection < 0)
 								pause_menu_selection = 2
 							playSound(0x5b)
 						}
-						else if (Input.buttonPressed(BUTTON_DOWN))
+						else if (customMenu.scrollDown())
 						{
 							pause_menu_selection += 2
 							if (pause_menu_selection > 2)
@@ -2194,14 +2323,14 @@ function void fn00d30c()
 						return
 					}
 					
-					if (Input.buttonPressed(BUTTON_UP))
+					if (customMenu.scrollUp())
 					{
 						pause_menu_selection -= 2
 						if (pause_menu_selection < 0)
 							pause_menu_selection = 2
 						playSound(0x5b)
 					}
-					else if (Input.buttonPressed(BUTTON_DOWN))
+					else if (customMenu.scrollDown())
 					{
 						pause_menu_selection += 2
 						if (pause_menu_selection > 2)

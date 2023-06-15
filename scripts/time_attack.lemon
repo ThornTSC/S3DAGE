@@ -7206,7 +7206,7 @@ function void Challenge.showEndInterface()
 
 function void Challenge.manageEndMenu()
 {
-	if (Input.buttonPressed(BUTTON_UP))
+	if (customMenu.scrollUp())
 	{
 		TA_menu_selection -= 1
 		if (TA_menu_selection < 0)
@@ -7215,7 +7215,7 @@ function void Challenge.manageEndMenu()
 			TA_menu_selection = 8
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN))
+	else if (customMenu.scrollDown())
 	{
 		TA_menu_selection += 1
 		if (TA_menu_selection == 3)
@@ -7284,7 +7284,7 @@ function void Challenge.manageEndMenu()
 		return
 	}
 
-	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 6 || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 6 || (TA_menu_selection >= 6 && (control.pad1.pressed & CONTROL_B)))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		TA_menu_selection = 2
 	}

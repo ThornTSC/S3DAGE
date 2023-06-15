@@ -261,7 +261,7 @@ function void PauseMenu_ChangeTheme()
 
 	if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 	{
-		if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_RIGHT))
+		if ((control.pad1.state & CONTROL_B) && customMenu.scrollRight())
 		{
 			theme.hud += 1
 			if (theme.hud == theme.max + 1)
@@ -271,7 +271,7 @@ function void PauseMenu_ChangeTheme()
 				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
 			}
 		}
-		else if ((control.pad1.state & CONTROL_B) && (control.pad1.pressed & CONTROL_LEFT))
+		else if ((control.pad1.state & CONTROL_B) && customMenu.scrollLeft())
 		{
 			if (theme.hud == 0)
 				theme.hud = theme.max
@@ -296,14 +296,14 @@ function u8 PauseMenu_Normal()
 	else if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 2)
@@ -359,14 +359,14 @@ function u8 PauseMenu_Normal()
 
 function u8 PauseMenu_Normal_Restart()
 {
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 3)
 			pause_menu_selection = 5
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 5)
@@ -441,14 +441,14 @@ function u8 PauseMenu_Normal_Restart()
 
 function u8 PauseMenu_ExitGame()
 {
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 6)
 			pause_menu_selection = 8
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 8)
@@ -556,14 +556,14 @@ function u8 PauseMenu_Basic()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 2
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 2
 		if (pause_menu_selection > 2)
@@ -617,14 +617,14 @@ function u8 PauseMenu_BlueSphere()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 2)
@@ -694,14 +694,14 @@ function u8 PauseMenu_Challenges()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (Input.buttonPressed(BUTTON_UP) && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot)
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 3
 		playSound(0x5b)
 	}
-	else if (Input.buttonPressed(BUTTON_DOWN) && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot)
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 3)
