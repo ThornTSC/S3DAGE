@@ -8852,31 +8852,6 @@ function void fn030834()
 
 
 
-// Display control inputs when a Mega Chopper is attached to the player character
-// Function taken from enemies\hcz_piranha.lemon
-//# address-hook(0x088062) end(0x088138)
-function void fn088062()
-{
-	base.fn088062()
-
-	if (display_inputs && A1 == 0xffffb000 && !original_mode)	// u16[A0 + 0x44] holds the last two bytes of the character's object address. It would be 0x004a for sidekick Tails.
-	{
-		if (level.framecounter.low & 0x08)	// display alternating left and right inputs
-			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		else
-			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		/*	
-		Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 - 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 + 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		*/
-	}
-}
-
-
 
 
 
@@ -14550,7 +14525,7 @@ function void fn04301c()
 
 
 
-// Revert behavior for enemies that drain rings in Original Mode
+// Revert behavior for enemies that drain rings in Original Mode, and display control inputs when relevant
 // Function taken from script\enemies\hcz_piranha.lemon, but it is much more noticeable on an LRZ Toxomister
 //# address-hook(0x0881fe) end(0x08826a)
 function void fn0881fe()
@@ -14564,6 +14539,21 @@ function void fn0881fe()
 	else
 #endif
 	{
+		if (display_inputs && A1 == 0xffffb000 && !original_mode)	// u16[A0 + 0x44] holds the last two bytes of the character's object address. It would be 0x004a for sidekick Tails.
+		{
+			if (level.framecounter.low & 0x08)	// display alternating left and right inputs
+				Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			else
+				Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			/*	
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 - 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 + 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			*/
+		}
 		--objA0.countdown_value
 		if (objA0.countdown_value < 0)
 		{
