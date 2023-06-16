@@ -15981,6 +15981,135 @@ function void fn0459b4()
 
 
 
+// Ignore an A.I.R. function to reduce movement area of boss, as we have widened the arena in DAGE.
+// Function taken from bosses\boss_ssz_mecha.lemon
+function void BossMecha1.setBossArea()
+{
+	level.bossarea.left  = camera.position.x.u16 + 0x20
+	level.bossarea.right = camera.position.x.u16 + getScreenWidth() - 0x20
+	level.bossarea.top   = camera.position.y.u16 + 0x30
+
+	#if STANDALONE
+		if (getScreenWidth() >= 400 && original_mode)	// only possible with Dev Mode or mods
+		{
+			// Reduce move area of the boss, so he does not stand too close to the edge
+			level.bossarea.left += 0x0f
+			level.bossarea.right -= 0x0f
+		}
+	#endif
+}
+
+
+
+
+// Improve the "imprecise" x velocity calculations for large screen widths in some of Mecha Sonic's attacks.
+// These are still very imprecise. The method of base + extend * coefficient is likely not practical.
+// Functions taken from bosses\boss_ssz_mecha.lemon
+//# address-hook(0x07b544) end(0x07b574)
+function void fn07b544()
+{
+	// Start backslide
+	objA0.base_state = 0x10
+#if STANDALONE
+	if (getScreenWidth() > 400)
+		D0.s16 = 0x820 + getScreenExtend() * 8
+	else
+		D0.s16 = 0x820 + getScreenExtend() * 5		// Not very precise, but works for both 320 and 400 pixels
+#else
+	D0.s16 = 0x820
+#endif
+	D1.s16 = -0x20
+	if (objA0.render_flags & render_flag.FLIP_X)
+	{
+		D0.s16 = -D0.s16
+		D1.s16 = -D1.s16
+	}
+	objA0.velocity.x = D0.u16
+	u16[A0 + 0x40] = D1.u16
+	objA0.velocity.y = 0
+	objA0.flags38 |= 0x04
+
+	// "spawnSimpleChildObjects(0x07d486)" replaced by:
+	spawnSimpleChildObjects(0x07c8fe, 2)
+}
+
+//# address-hook(0x07b63a) end(0x07b67a)
+function void fn07b63a()
+{
+	fn08459c()
+	UpdateMovementSimple()
+	if (objA0.velocity.y < 0)
+		return
+
+	// Start mid-air dash
+	objA0.base_state = 0x18
+#if STANDALONE
+	if (getScreenWidth() > 464)
+		D0.s16 = 0x7a0 + getScreenExtend() * 5		// increased base speed, since 0x780 juuuuust doesn't reach the screen edge
+	else if (getScreenWidth() > 400)
+		D0.s16 = 0x780 + getScreenExtend() * 5
+	else
+		D0.s16 = 0x780 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
+#else
+	D0.s16 = 0x780
+#endif
+	D1.s32 = -0x20
+	if ((objA0.render_flags & render_flag.FLIP_X) == 0)
+	{
+		D0.s16 = -D0.s16
+		D1.s16 = -D1.s16
+	}
+	objA0.velocity.x = D0.s16
+	s16[A0 + 0x40] = D1.s16
+	objA0.velocity.y = 0
+
+	playSound(SFX_SPINDASH_RELEASE)
+}
+
+//# address-hook(0x07b790) end(0x07b7b8)
+function void fn07b790()
+{
+	// Start spindash / drop dash
+	objA0.base_state = 0x24
+#if STANDALONE
+	if (getScreenWidth() > 400)
+		D0.s16 = 0x640 + getScreenExtend() * 5
+	else
+		D0.s16 = 0x640 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
+#else
+	D0.s16 = 0x640
+#endif
+	D1.u16 = -0x20
+	if (objA0.velocity.x >= 0)
+	{
+		D0.s16 = -D0.s16
+		D1.s16 = -D1.s16
+	}
+	objA0.velocity.x = D0.u16
+	u16[A0 + 0x40] = D1.u16
+	playSound(SFX_SPINDASH_RELEASE)
+}
+
+
+
+
+// When the final boss music starts in Knux SSZ2, edit the level layout for ultrawide resolutions.
+// The level wrap causes the chunks to load one row too high past the normal right edge of the level.
+// We edit a few chunks from the level's left edge since they're no longer accessible to remove this issue.
+// Function taken from bosses\boss_ssz_supermecha.lemon
+//# address-hook(0x07b996) end(0x07b9cc)
+function void fn07b996()
+{
+	u8[0xffff80d9] = 0x07
+	u8[0xffff80da] = 0x04
+	u16[0xffff80e2] = 0x0605
+
+	base.fn07b996()
+}
+
+
+
+
 // Let Mecha Sonic get destroyed no matter what after Knux SSZ2 in Original Mode
 // Function taken from bosses\boss_ssz_supermecha.lemon
 //# address-hook(0x07bc32) end(0x07bc6a)
