@@ -121,7 +121,7 @@ function bool customMenu.scrollDown()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_DOWN) && held_time.up)
+	if (Input.buttonDown(BUTTON_DOWN) && held_time.down)
 	{
 		held_time.down++
 		if (held_time.down < held_time.needed)
