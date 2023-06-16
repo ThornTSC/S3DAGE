@@ -3,88 +3,33 @@
 	"saturn_paused":  { "File": "saturn_smallmenu.png", "Rect": "0, 160, 96,16", "Center": "49,8" },
 
 	// Normal game pause menu
-	"saturn_normal_continue_0":	  { "File": "saturn_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,7" },	// selected
-	"saturn_normal_continue_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	"saturn_normal_continue_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	
-	"saturn_normal_restart_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,7" },
-	"saturn_normal_restart_1":	  { "File": "saturn_smallmenu.png", "Rect": "80, 96, 56,16", "Center": "29,7" },	// selected
-	"saturn_normal_restart_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,7" },
-	
-	"saturn_normal_exit_game_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_normal_exit_game_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_normal_exit_game_2":	  { "File": "saturn_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,7" },	// selected
+	"saturn_normal_continue":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
+	"saturn_normal_restart":	  { "File": "saturn_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,7" },
+	"saturn_normal_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 
 	// Normal game pause menu for Restart
-	"saturn_normal_cancel_3":	  { "File": "saturn_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,7" },	// selected
-	"saturn_normal_cancel_4":	  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
-	"saturn_normal_cancel_5":	  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
-	
-	"saturn_normal_star_post_3":	  { "File": "saturn_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,7" },
-	"saturn_normal_star_post_4":	  { "File": "saturn_smallmenu.png", "Rect": "80, 112, 72,16", "Center": "37,7" },	// selected
-	"saturn_normal_star_post_5":	  { "File": "saturn_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,7" },
-	
-	"saturn_normal_act_start_3":	  { "File": "saturn_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,7" },
-	"saturn_normal_act_start_4":	  { "File": "saturn_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,7" },
-	"saturn_normal_act_start_5":	  { "File": "saturn_smallmenu.png", "Rect": "80, 128, 72,16", "Center": "37,7" },	// selected
+	"saturn_normal_cancel":	  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
+	"saturn_normal_star_post":	  { "File": "saturn_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,7" },
+	"saturn_normal_act_start":	  { "File": "saturn_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,7" },
 
 	// Pause menu for Exit Game
-	"saturn_cancel_6":		  { "File": "saturn_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,7" },	// selected
-	"saturn_cancel_7":		  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
-	"saturn_cancel_8":		  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
-	
-	"saturn_main_menu_6":	  { "File": "saturn_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,7" },
-	"saturn_main_menu_7":	  { "File": "saturn_smallmenu.png", "Rect": "80, 64, 72,16", "Center": "37,7" },	// selected
-	"saturn_main_menu_8":	  { "File": "saturn_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,7" },
-	
-	"saturn_air_menu_6":	  { "File": "saturn_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,7" },
-	"saturn_air_menu_7":	  { "File": "saturn_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,7" },
-	"saturn_air_menu_8":	  { "File": "saturn_smallmenu.png", "Rect": "80, 80, 68,16", "Center": "35,7" },	// selected
+	"saturn_cancel":		  { "File": "saturn_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,7" },
+	"saturn_main_menu":	  { "File": "saturn_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,7" },
+	"saturn_air_menu":	  { "File": "saturn_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,7" },
 
 	// Special Stage pause menu
-	"saturn_ss_continue_0":	  { "File": "saturn_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,7" },	// selected
-	"saturn_ss_continue_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	"saturn_ss_continue_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	
-	"saturn_ss_retry_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	"saturn_ss_retry_1":	  { "File": "saturn_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "21,7" },	// selected
-	"saturn_ss_retry_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	
-	"saturn_ss_exit_game_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_ss_exit_game_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_ss_exit_game_2":	  { "File": "saturn_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,7" },	// selected
+	"saturn_ss_continue":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
+	"saturn_ss_retry":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
+	"saturn_ss_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 
 	// Challenges pause menu
-	"saturn_challenge_pause_continue_0":	  { "File": "saturn_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,7" },	// selected
-	"saturn_challenge_pause_continue_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	"saturn_challenge_pause_continue_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-	"saturn_challenge_pause_continue_3":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
-
-	"saturn_challenge_pause_retry_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	"saturn_challenge_pause_retry_1":	  { "File": "saturn_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "21,7" },	// selected
-	"saturn_challenge_pause_retry_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	"saturn_challenge_pause_retry_3":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	
-	"saturn_challenge_pause_select_act_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	"saturn_challenge_pause_select_act_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	"saturn_challenge_pause_select_act_2":	  { "File": "saturn_smallmenu.png", "Rect": "80, 16, 80,16", "Center": "41,7" },	// selected
-	"saturn_challenge_pause_select_act_3":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	
-	"saturn_challenge_pause_exit_game_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_challenge_pause_exit_game_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_challenge_pause_exit_game_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_challenge_pause_exit_game_3":	  { "File": "saturn_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,7" },	// selected
+	"saturn_challenge_pause_continue":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
+	"saturn_challenge_pause_retry":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
+	"saturn_challenge_pause_select_act":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
+	"saturn_challenge_pause_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 
 	// End of Time Attack / Time Stone Trial menu
-	"saturn_ta_retry_0":		  { "File": "saturn_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "21,7" },	// selected
-	"saturn_ta_retry_1":		  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	"saturn_ta_retry_2":		  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
-	
-	"saturn_ta_select_act_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	"saturn_ta_select_act_1":	  { "File": "saturn_smallmenu.png", "Rect": "80, 16,80,16", "Center": "41,7" },	// selected
-	"saturn_ta_select_act_2":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	
-	"saturn_ta_exit_game_0":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_ta_exit_game_1":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
-	"saturn_ta_exit_game_2":	  { "File": "saturn_smallmenu.png", "Rect": "80,32, 72,16", "Center": "37,7" }	// selected
+	"saturn_ta_retry":		  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
+	"saturn_ta_select_act":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
+	"saturn_ta_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 }

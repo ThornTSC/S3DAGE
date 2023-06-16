@@ -270,6 +270,7 @@ function void PauseMenu_ChangeTheme()
 			{
 				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
 			}
+			playSound(0x5b)
 		}
 		else if ((control.pad1.state & CONTROL_B) && customMenu.scrollLeft())
 		{
@@ -281,6 +282,7 @@ function void PauseMenu_ChangeTheme()
 			{
 				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
 			}
+			playSound(0x5b)
 		}
 	}
 }

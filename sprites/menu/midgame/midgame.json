@@ -15,11 +15,11 @@
 //	"select_difficulty":  { "File": "select_difficulty.png", "Center": "115,8" },
 
 	// Difficulty menu
-	"difficulty_normal_0":  { "File": "difficulty_menu.png", "Rect": "48, 16, 48,16", "Center": "25,8" },
-	"difficulty_normal_2":  { "File": "difficulty_menu.png", "Rect": "0, 16, 48,16", "Center": "25,8" },
+//	"difficulty_normal_0":  { "File": "difficulty_menu.png", "Rect": "48, 16, 48,16", "Center": "25,8" },
+	"difficulty_normal":  { "File": "difficulty_menu.png", "Rect": "0, 16, 48,16", "Center": "25,8" },
 	
-	"difficulty_hard_0":  { "File": "difficulty_menu.png", "Rect": "96, 16, 32,16", "Center": "17,8" },
-	"difficulty_hard_2":  { "File": "difficulty_menu.png", "Rect": "128, 16, 32,16", "Center": "17,8" },
+	"difficulty_hard":  { "File": "difficulty_menu.png", "Rect": "96, 16, 32,16", "Center": "17,8" },
+//	"difficulty_hard_2":  { "File": "difficulty_menu.png", "Rect": "128, 16, 32,16", "Center": "17,8" },
 
 //	"difficulty_normal_0":  { "File": "normal_selected.png", "Center": "25,6" },
 //	"difficulty_normal_2":  { "File": "normal.png", "Center": "25,6" },

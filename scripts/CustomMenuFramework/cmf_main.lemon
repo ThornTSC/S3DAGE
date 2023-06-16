@@ -69,9 +69,12 @@ global u8 held_time.left
 global u8 held_time.right
 
 // Used for tinting selected/non-selected menu options
-constant u32 nonSelectionTint = 0xffffe890 // 0xffffffff in v1.8.1.1
-constant u32 selectionTint = 0xff84d4f4 // 0xffc0ff00 in v1.8.1.1	// 0xff40ffff in older DAGE versions
+constant u32 nonSelectionTint = 0xffffff40 // 0xffffffff in v1.8.1.1
+constant u32 selectionTint = 0xff50c0ff // 0xffc0ff00 in v1.8.1.1	// 0xff40ffff in older DAGE versions
 constant u32 modeSelectionTint = 0xffff98f4
+// constant u32 nonSelectionTint = 0xffffe890 // 0xffffffff in v1.8.1.1
+// constant u32 selectionTint = 0xff84d4f4 // 0xffc0ff00 in v1.8.1.1	// 0xff40ffff in older DAGE versions
+// constant u32 modeSelectionTint = 0xffff98f4
 constant u32 dim = 0xffd0d0d0
 constant u32 noDim = 0xffffffff
 
@@ -284,8 +287,8 @@ function void customMenu.mainLogicLoop()
 				Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
 				Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-				Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
-				Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 			//	if (menuReady == true)
 			//	{
@@ -1261,7 +1264,7 @@ function void DataSelect.drawCustomPlanes()
 		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xf001, 0, 95)							// background dimming (37.5% opacity)
 
 		// Render the border rectangles around the options and best times
-		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// options border rectangle (80% opacity)
+		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
 		Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 82 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Tails/mod best times border rectangle (80% opacity)
 		if (!System.getGlobalVariableValueByName("DAGE_characterName"))
 		{
@@ -1311,7 +1314,7 @@ function void DataSelect.drawCustomPlanes()
 			if (time_attack_hud == 0)
 				Renderer.drawCustomSprite("text_option_left", getScreenExtend() - 40 + 170 + 15, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// LEFT text
 			else
-				Renderer.drawCustomSprite("text_option_center", getScreenExtend() - 40 + 162 + 23, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// CENTER text
+				Renderer.drawCustomSprite("text_option_center", getScreenExtend() - 40 + 162 + 23, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)	// CENTER text
 			if (selectedMenuOption == 3)
 			{
 				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// HUD POSITION left arrow
@@ -1320,16 +1323,16 @@ function void DataSelect.drawCustomPlanes()
 
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
 			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
-			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			if (restart_threshold == 1)
-				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
 				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
 			if (selectedMenuOption == 4)
 			{
 				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT right arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
 			}
 		}
 		else
@@ -2117,8 +2120,8 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
 					Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
 					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-					Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
-					Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 					if (menuReady == true)
 					{
@@ -2197,8 +2200,8 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
 					Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
 					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-					Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
-					Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 					if (menuReady == true)
 					{
@@ -2316,8 +2319,8 @@ function void fn00d30c()
 				Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
 				Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-				Renderer.drawCustomSprite(stringformat("difficulty_normal_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
-				Renderer.drawCustomSprite(stringformat("difficulty_hard_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, 255)
+				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 			//	if (menuReady == true)
 			//	{
