@@ -246,8 +246,10 @@ function void UpdateGamePause()
 	}
 	global.game.paused = false
 	clean_screenshot = false
-
-
+	held_time.up = 0
+	held_time.down = 0
+	held_time.right = 0
+	held_time.left = 0
 }
 
 

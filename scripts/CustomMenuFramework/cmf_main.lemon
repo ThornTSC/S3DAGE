@@ -91,7 +91,7 @@ function bool customMenu.scrollUp()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_UP))
+	if (Input.buttonDown(BUTTON_UP) && held_time.up)
 	{
 		held_time.up++
 		if (held_time.up < held_time.needed)
@@ -121,7 +121,7 @@ function bool customMenu.scrollDown()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_DOWN))
+	if (Input.buttonDown(BUTTON_DOWN) && held_time.up)
 	{
 		held_time.down++
 		if (held_time.down < held_time.needed)
@@ -151,7 +151,7 @@ function bool customMenu.scrollLeft()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_LEFT))
+	if (Input.buttonDown(BUTTON_LEFT) && held_time.up)
 	{
 		held_time.left++
 		if (held_time.left < held_time.needed)
@@ -181,7 +181,7 @@ function bool customMenu.scrollRight()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_RIGHT))
+	if (Input.buttonDown(BUTTON_RIGHT) && held_time.up)
 	{
 		held_time.right++
 		if (held_time.right < held_time.needed)

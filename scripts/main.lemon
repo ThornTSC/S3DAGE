@@ -200,6 +200,10 @@ function void endOfFrame()
 function void MainMenuBG.Run()
 {
 	AIR_menu_run = 1
+	held_time.up = 0
+	held_time.down = 0
+	held_time.right = 0
+	held_time.left = 0
 	
 	global.game_mode = 0x0c
 	global.zone_act = 0x0d01

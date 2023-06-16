@@ -86,6 +86,10 @@ function void customMenu.setup()
 	restartSpecialStage = 0
 	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
 	challenges_normalmode = 0
+	held_time.up = 0
+	held_time.down = 0
+	held_time.right = 0
+	held_time.left = 0
 
 	if (global.pause_disabled)
 	{
