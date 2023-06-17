@@ -7071,8 +7071,9 @@ function void Challenge.applyTimeStopBonus()
 function void Challenge.setEndCameraPosition()
 {
 	s16 py = s16[0xffffb014]
-	move_area.left = pole.x - (getScreenWidth() / 2)		// This currently causes some rendering issues if a spin dash delays the camera right at the pole.
-														// We redraw plane A later to correct this, but that's not possible at the end of FBZ2 due to the quake rendering.
+	if (global.zone_act != 0x0401)
+		move_area.left = pole.x - (getScreenWidth() / 2)		// This currently causes some rendering issues if a spin dash delays the camera right at the pole.
+																// We redraw plane A later to correct this, but that's not possible at the end of FBZ2 due to the quake rendering.
 
 	// These vertical positions will need to be adapted to each act, or can be done through boss arena scripts.
 	if (global.zone_act.apparent == 0x0101)							// HCZ2 needs a screen lock since it doesn't end in the boss area
