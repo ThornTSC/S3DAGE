@@ -11152,9 +11152,11 @@ function void fn08a5e4()
 
 // Add to a function that runs every frame in ICZ2 to check for when
 // a character should enter the falling animation after the Knux scene.
+// Also adjust the camera to make obstacles and bottomless pits more visible when crossing platforms on the water.
 //# address-hook(0x053ccc) end(0x053ccc)
 function void UpdateLevelTiles.ICZ2()
 {
+	// Falling animation checks for Knux cutscene
 	if (u16[0xffffb010] > 0x3980 && u16[0xffffb010] < 0x3a00 && u16[0xffffb014] > 0x0680 && u16[0xffffb014] < 0x0688 && !original_mode)
 	{
 		if (u8[0xffffb020] == char.state.RUNNING || u8[0xffffb020] == char.state.STANDING)	// Check Sonic
@@ -11170,8 +11172,35 @@ function void UpdateLevelTiles.ICZ2()
 			u8[0xffffb074] |= char.flag.IN_AIR
 		}
 	}
-	
-	LoadTileContentDefault()
+
+	// Camera adjustment for crossing platforms on the water
+	if (!original_mode)
+	{
+		if ((u16[0xffffb010] >= 0x22b0 && u16[0xffffb010] < 0x2800) || (u16[0xffffb010] >= 0x3800 && u16[0xffffb010] <= 0x3e00))
+		{
+			if (move_area.bottom.target != 0x0a10 || move_area.bottom.target != 0x0a30)
+			{
+				if (u16[0xffffb010] < 0x2800)	// Knux water crossing area
+				{
+					move_area.bottom.current = max(0x0a10, (camera.position.y.u16 - 4) & 0xfffc)	// set to next lowest multiple of 4 in case of camera scroll glitches
+					move_area.bottom.target = 0x0a10
+				}
+				else	// Sonic/Tails water crossing area
+				{
+					move_area.bottom.current = 0x0a30	// must be set right away, as the usual routing to match current match target is slower than the fall from the cutscene
+					move_area.bottom.target = move_area.bottom.current
+				}
+			}
+		}
+		else if (u16[0xffffb010] < 0x22b0 || (u16[0xffffb010] >= 0x2800 && u16[0xffffb010] < 0x3800) || (u16[0xffffb010] > 0x3e00  && u16[0xffffb010] < 0x4000))	// last one is a window that does NOT stretch to the boss area
+		{
+			move_area.bottom.target = 0x0b20
+			move_area.bottom.current = 0x0b20
+		}
+	}
+
+	// Base function
+	base.UpdateLevelTiles.ICZ2()
 }
 
 
