@@ -79,6 +79,7 @@ function void UpdateGamePause()
 
 	//	Renderer.resetSprites()
 
+		Game.setUnderwaterAudioEffect(0)
 		global.frame_state = 0x10
 		waitForNextFrame()
 
