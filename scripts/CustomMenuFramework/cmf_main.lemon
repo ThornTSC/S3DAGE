@@ -268,7 +268,7 @@ function void customMenu.mainLogicLoop()
 
 			while (!setting.original_mode && !time_attack && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
 			{
-				global.frame_state = 0x10
+				global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 				waitForNextFrame()
 
 			@EntryPoint:
@@ -2088,7 +2088,7 @@ function void fn00d42c()
 
 				while (global.game_mode == 0x0c && !original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
 				{
-					global.frame_state = 0x10
+					global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 					waitForNextFrame()
 
 				@EntryPoint:
@@ -2170,7 +2170,7 @@ function void fn00d42c()
 
 				while (!original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
 				{
-					global.frame_state = 0x10
+					global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 					waitForNextFrame()
 
 				@EntryPoint:
@@ -2291,7 +2291,7 @@ function void fn00d30c()
 
 			while (!original_mode && (levelselect.characters == 3 || levelselect.characters == 4) && global.zone_act != 0x0a && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))	// Knux, not Original Mode, not SSZ or DEZ
 			{
-				global.frame_state = 0x10
+				global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 				waitForNextFrame()
 
 			@EntryPoint:
