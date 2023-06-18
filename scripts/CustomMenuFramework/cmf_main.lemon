@@ -1218,27 +1218,12 @@ function void customMenu.countMedals()
 		
 		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
 	}
-	Game.setDiscordDetails("D.A. Garden Edition")
-	Game.setDiscordState(stringformat("Total Stars: %03d/792", starCount))
-	Game.setDiscordLargeImage("menus")
 
 	total_stars = starCount
 }
 
 
 
-
-// When playing Sonic 3 A.I.R. with Discord on, custom messages will be displayed.
-function void customMenu.discordRPC()	// this is only called in the main menu at the moment; the Challenges menu sets RPC in the previous function
-{
-// For more information on Discord RPC, refer to the modding manual.
-	Game.setDiscordDetails("D.A. Garden Edition")
-	Game.setDiscordState("Main Menu")
-	// ^ This previously used a stringformat to convert a variable into a usable string.
-
-	Game.setDiscordLargeImage("menus")
-	// Game.setDiscordSmallImage("character_sonic")
-}
 
 // The stock "bg_dataselect" sprite does not work for our purposes, thanks to it being a palettised sprite,
 // so I used a new sprite defined as "custom_background" that uses component colours instead
@@ -2123,6 +2108,8 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
+					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
+
 					if (menuReady == true)
 					{
 						if (u16[0xffffeee4] == 0 && (control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
@@ -2202,6 +2189,8 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+
+					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
 					if (menuReady == true)
 					{
@@ -2321,6 +2310,8 @@ function void fn00d30c()
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+
+				global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
 			//	if (menuReady == true)
 			//	{

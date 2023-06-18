@@ -74,7 +74,7 @@ global s16 pole.x
 global s16 pole.y
 
 // Define memory location to store star count
-define u16 total_stars = u8[0x8402fe]
+define u16 total_stars = u16[0x8402fe]
 
 global bool exitGame
 global bool AIR_menu_run
@@ -185,10 +185,153 @@ function void endOfFrame()
 	
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
+
+	discordRPC.main()
 }
 
+function void discordRPC.main()
+{
+	Game.setDiscordDetails("D.A. Garden Edition")
 
+	u8 gameMode = (global.game_mode & 0x7f)
+	// Comeptition mode is handled by the engine, so don't overwrite it.
+	if ((global.zone >= 0x0e && global.zone <= 0x12) || gameMode <= 0x04 || (gameMode >= 0x1c && gameMode <= 0x28) || (gameMode >= 0x38 && gameMode <= 0x44) || gameMode == 0x50)	// competition zone or a game mode A.I.R. handles on its own
+		return
 
+	// The A.I.R. menu is handled by the engine, but everything else must be scripted.
+	if (gameMode == 0x58)
+		discordRPC.mainMenu()
+	else if (gameMode == 0x54 || time_attack == 1 || time_attack == 2)
+		discordRPC.challenges()
+	else if (gameMode == 0x2c || gameMode == 0x30 || (bluespheres.minigame_mode == 1 && gameMode == 0x34))
+		discordRPC.greenSphere()
+	else if (gameMode == 0x4c)
+		discordRPC.dataSelect()
+	else
+		discordRPC.mainGame()
+}
+
+function void discordRPC.greenSphere()
+{
+	Game.setDiscordState(stringformat("Green Sphere Level %d", u32[0xffffffa6] + 1))
+	Game.setDiscordLargeImage("gamemode_bluesphere")
+	if ((global.game_mode & 0x7f) == 0x34)
+		discordRPC.setCharacterImage()
+	else
+		Game.setDiscordSmallImage("null")
+}
+
+function void discordRPC.mainMenu()
+{
+	Game.setDiscordState("Main Menu")
+	Game.setDiscordSmallImage("null")
+	Game.setDiscordLargeImage("menus")
+}
+
+function void discordRPC.dataSelect()	// A.I.R. sometimes forces its "In the Menus" RPC here, but not always
+{
+	Game.setDiscordState("Data Select")
+	Game.setDiscordSmallImage("null")
+	Game.setDiscordLargeImage("menus")
+}
+
+function void discordRPC.challenges()
+{
+	Game.setDiscordState(stringformat("Challenges (%d/792 Stars)", total_stars))
+	if ((global.game_mode & 0x7f) != 0x54)
+	{
+		discordRPC.setCharacterImage()
+		discordRPC.setZoneImage()
+	}
+	else
+	{
+		Game.setDiscordSmallImage("null")
+		Game.setDiscordLargeImage("menus")
+	}
+}
+
+function void discordRPC.mainGame()
+{
+	// Get game type
+	u64 gameType = "Revisited Mode"
+	if (original_mode)
+		gameType = "Classic Mode"
+	else if (time_attack == 3)
+		gameType = "100% Speedrun"
+	// else if (time_attack == 4)	// unused, as it's a special case that won't state emerald count
+	//	gameType = "Any% Speedrun"
+
+	// Get character name. Unused for now.
+	/*
+	u64 character = "Sonic and Tails"
+	if (global.characters == 1)
+		character = "Sonic"
+	else if (global.characters == 2)
+		character = "Tails"
+	else	// if (global.characters == 3)
+		if (useKnucklesAndTails)
+			character = "Knuckles and Tails"
+		else
+			character = "Knuckles"
+	*/
+	
+	if (time_attack == 4)
+		Game.setDiscordState("Any% Speedrun")
+	else
+		Game.setDiscordState(stringformat("%s, %d Emeralds", gameType, global.chaos_emeralds + global.super_emeralds))
+	discordRPC.setCharacterImage()
+	discordRPC.setZoneImage()
+}
+
+function void discordRPC.setCharacterImage()
+{
+	if (global.characters == 0)
+		Game.setDiscordSmallImage("character_sonic_tails")
+	else if (global.characters == 1)
+		Game.setDiscordSmallImage("character_sonic")
+	else if (global.characters == 2)
+		Game.setDiscordSmallImage("character_tails")
+	else	// if (global.characters == 3)
+		if (useKnucklesAndTails)
+			Game.setDiscordSmallImage("character_knuckles_tails")
+		else
+			Game.setDiscordSmallImage("character_knuckles")
+}
+
+global.chaos_emeralds, global.super_emeralds
+
+function void discordRPC.setZoneImage()
+{
+	if (global.zone_act == 0x1700)				// DEZ2 boss
+	{
+		Game.setDiscordLargeImage("zone13_dez")
+		return
+	}
+	else if (global.zone == 0x0d)				// outro
+	{
+		Game.setDiscordLargeImage("sonic3air")
+		return
+	}
+
+	u8 checkpoint.zone = u8[0xfffffe2c]				// first byte of u16 checkpoint.zone_act
+	u8 level.backup.zone = u8[0xfffffe4a]	// first byte of u16 level.backup.zone_act
+	u8 zone = (global.zone >= 0x13 && global.zone <= 0x15) ? checkpoint.zone : global.zone	// if in a bonus stage, use the originating zone
+	if ((global.game_mode & 0x7f) == 0x34 || (global.game_mode & 0x7f) == 0x48 || global.zone_act == 0x1701)
+		zone = level.backup.zone
+	
+	if (zone == 0x16 && checkpoint.zone_act == 0x1601)	// HPZ
+		Game.setDiscordLargeImage("zone11_hpz")
+	else if (zone == 0x16)
+		Game.setDiscordLargeImage("zone10_lrz")
+	else if (zone == 0x04)			// FBZ
+		Game.setDiscordLargeImage("zone08_fbz")
+	else if (zone >= 0x0a && zone <= 0x0c)	// SSZ, DEZ, DDZ
+		Game.setDiscordLargeImage(stringformat("zone%02d_%s", zone + 2, getZoneInitials(zone)))
+	else if (zone >= 0x05 && zone <= 0x07)	// ICZ, LBZ, MHZ
+		Game.setDiscordLargeImage(stringformat("zone%02d_%s", zone , getZoneInitials(zone)))
+	else							// all other levels
+		Game.setDiscordLargeImage(stringformat("zone%02d_%s", zone + 1, getZoneInitials(zone)))
+}
 
 
 

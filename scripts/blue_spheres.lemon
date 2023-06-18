@@ -492,18 +492,6 @@ function void BlueSphereGame()
 
 
 
-function void greenSphere.discordRPC()
-{
-	Game.setDiscordDetails("D.A. Garden Edition")
-	Game.setDiscordState(stringformat("Green Sphere Level %d", u32[0xffffffa6] + 1))
-
-	Game.setDiscordLargeImage("menus")
-}
-
-
-
-
-
 // If exiting the Blue Sphere game, return to the D.A. Garden menu.
 // Also ensure Original Mode rendering is not happening.
 //# address-hook(0x04d6b8) end(0x04d7a0)
@@ -514,7 +502,6 @@ function void fn04d6b8()
 //		setting.original_mode = original_mode
 //		original_mode = 0
 //	}
-	greenSphere.discordRPC()
 
 	if ((global.game_mode & 0x7f) == 0x58)
 		return
@@ -2494,9 +2481,6 @@ function void BlueSpheres.renderCustomSpheres()
 	}
 
 	// From here on is AIR's custom sphere rendering.
-
-	if (bluespheres.minigame_mode == 1)
-		greenSphere.discordRPC()
 /*
 	// Add timer HUD here.
 	u16 px_hud = getScreenWidth() / 2 - 14	// subtract 49 instead for non-small digits without TIME/BEST
