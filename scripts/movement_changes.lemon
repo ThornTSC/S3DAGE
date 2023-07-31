@@ -25,7 +25,7 @@ function void Character.Initialization.shared(u8 character)
 
 // If the character rolls from object to terrain, don't uncurl the character.
 // This check assumes that a short duration in the air means the above situation happened.
-// Functions taken from maingame\character\character.lemon
+// Function taken from maingame\character\character.lemon
 function void Character.LandingOnGroundStandUp()
 {
 	if (roll_maintain && !original_mode && A0 == 0xffffb000 && (char.flags & char.flag.ROLLING) && !char.jumping && air_time < 5) // && abs(last_ground_y_pos - char.position.y.u16) <= 8
@@ -87,64 +87,6 @@ function void Character.LandingOnGroundStandUp()
 		char.state = char.state.RUNNING
 	}
 #endif
-}
-
-function void Character.LandingOnGroundResetState()
-{
-	if (roll_maintain && !original_mode && A0 == 0xffffb000 && (char.flags & char.flag.ROLLING) && !char.jumping && air_time < 5) // && abs(last_ground_y_pos - char.position.y.u16) <= 8
-	{
-		char.flags |= char.flag.ROLLING
-		char.flags &= ~char.flag.IN_AIR
-		char.flags &= ~char.flag.PUSHING
-		// char.hitbox_extends.x = 7
-		// char.hitbox_extends.y = 14
-		char.state = char.state.ROLLING
-
-		// s8 dy = (char.character == CHARACTER_TAILS) ? 1 : 5
-		// char.position.y.u16 += (global.inv_gravity) ? -dy : dy
-
-		// playSound(SFX_ROLL)
-
-		air_time = 0
-//		last_ground_y_pos = 0
-		return
-	}
-	else if (A0 == 0xffffb000)
-	{
-		air_time = 0
-	//	last_ground_y_pos = 0
-	}
-
-	char.flags &= ~char.flag.IN_AIR
-	char.flags &= ~char.flag.PUSHING
-	char.flags &= ~char.flag.CONTROL_LOCK
-	char.jumping = 0
-	score.bonus_counter = 0		// No more increasing bonuses after hitting the ground
-	char.rotation.x = 0
-	u8[A0 + 0x2d] = 0
-	u8[A0 + 0x30] = 0
-	char.look_up_down_timer = 0
-
-	// Check for double jump state
-	if (char.double_jump_state != 0)
-	{
-		if (char.character == CHARACTER_SONIC && !super.active && (char.bonus_effect & char.bonus.SHIELD_BUBBLE))
-		{
-		#if STANDALONE
-			if ((char.bonus_effect & char.bonus.INVINCIBLE) == 0 && sonic.dropdash_counter == 0)
-		#endif
-			{
-				SonicLandingBubbleBounce()
-			}
-		}
-		char.double_jump_state = 0
-	}
-
-	// Check for Knuckles gliding/falling/standup state
-	if (char.character == CHARACTER_KNUCKLES && char.state >= 0x20)
-	{
-		char.state = char.state.RUNNING
-	}
 }
 
 //# address-hook(0x01164e) end(0x0116dc)
