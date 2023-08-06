@@ -9,9 +9,6 @@
 
 // Functions already covered in main.lemon and time_attack.lemon are removed.
 
-
-global bool laser_loaded = 0
-
 //# address-hook(0x06fd16) end(0x06fd28)
 function void fn06fd16()
 {
@@ -21,13 +18,6 @@ function void fn06fd16()
 	//  - 0x06fe00	-> objA0.base_state = 0x04  -> Deploying laser
 	//  - 0x06fe22	-> objA0.base_state = 0x06  -> Short wait time (used in various places, incl. during laser shots)
 	//  - 0x06feb2	-> objA0.base_state = 0x08  -> Charging laser, and wall movement if needed
-
-	if (laser_loaded)	                     // The boss tries to load twice and I cannot for the life of me figure out why.
-    {
-        laser_loaded = 0
-		UnloadObject()						// This is a temporary solution.
-        return
-    }
 
 	call tableLookupAddress(0x06fd2e, objA0.base_state)
 
