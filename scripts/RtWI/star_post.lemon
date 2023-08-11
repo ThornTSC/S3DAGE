@@ -1,0 +1,201 @@
+// Set properties for checkpoint stars in Sonic 2 stages.
+// The star post itself is handled in Checkpoint.Init() in time_attack.lemon
+// Functions taken from objects\basics\checkpoint.lemon
+//# address-hook(0x02d3c8) end(0x02d478)
+function void fn02d3c8()
+{
+	if (unlock_act && (ring_counter < 50 || global.chaos_emeralds >= 7))
+		return
+	
+	// Select bonus stage
+	u8 stage = Checkpoint.selectBonusStage()
+
+	// Spawn stars
+	for (u8 i = 0; i < 4; ++i)
+	{
+		if (!allocDynamicObjectStd())
+			break
+
+		objA1.update_address = objA0.update_address
+		objA1.render_flags = render_flag.WORLD
+		u8[A1 + 0x05] = 8
+		objA1.box_size.x = 8
+		objA1.sprite_priority = objA0.sprite_priority
+		objA1.sprite_attributes = (unlock_act) ? 0x0486 : 0x05ec
+		objA1.mapping_offset = 0x02d3aa
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16 - 0x30
+		objA1.velocity.x = -0x400
+		objA1.velocity.y = 0
+		u8[A1 + 0x22] = 1
+		u16[A1 + 0x30] = objA1.position.x.u16
+		u16[A1 + 0x32] = objA1.position.y.u16
+		u16[A1 + 0x34] = i * 0x40
+
+	#if STANDALONE
+		// Save selected bonus stage, so it makes no difference whether the player collects or loses rings until jumping in
+		u8[A1 + 0x48] = stage
+	#endif
+	}
+
+	if (stage == 0)
+	{
+		// Slot machine
+		A1 = 0x187c4e
+	}
+	else if (stage == 1)
+	{
+		// Glowing spheres
+		A1 = 0x187b8a
+	}
+	else
+	{
+		// Gumball machine
+		A1 = 0x187bec
+	}
+
+	if (!unlock_act)
+		Kosinski.addToDMAQueue(A1, 0xbd80)
+}
+
+//# address-hook(0x02d47e) end(0x02d5c0)
+function void fn02d47e()
+{
+	if (u8[A0 + 0x29] != 0)
+	{
+		// This seems to get entered once for each of the four stars -- is this intended...?
+		if (u8[A0 + 0x29] & 0x01)
+		{
+			global.stage_type = 2
+
+		#if STANDALONE
+			// Use previously selected bonus stage
+			u8 stage = u8[A0 + 0x48]
+		#else
+			u8 stage = Checkpoint.selectBonusStage()
+		#endif
+			if (stage == 0)
+			{
+				// Slot machine
+				D1.u16 = 0x1500
+			}
+			else if (stage == 1)
+			{
+				// Glowing spheres
+				D1.u16 = 0x1400
+			}
+			else
+			{
+				// Gumball machine
+				D1.u16 = 0x1300
+			}
+
+			if (unlock_act)
+			{
+				challenge_greenspheres = global.next_bluespheres + 1
+				fn02d1cc()	// special stage backup for character position, star posts, etc.
+				u16[0xfffffe4c] = checkpoint.x	// use the star post's position,
+				u16[0xfffffe4e] = checkpoint.y	// not the character's position
+				global.game_mode = 0x34
+				playSound(0xaf)
+			}
+			else
+			{
+				global.zone_act = D1.u16
+				global.zone_act.apparent = D1.u16
+			}
+			checkpoint.rings = ring_counter
+			checkpoint.lives_granted = extra_lives_granted
+			if (!unlock_act)
+			{
+				checkpoint.number = 0
+				level.restart.u8 = 1
+			}
+
+			// Backup of shields active before entering the Special Stage
+			D0.u8 = u8[0xffffb000 + 0x2b] & char.bonus.ALL_SHIELDS
+			global.shields_backup_1 = D0.u8
+			global.shields_backup_2 = D0.u8
+//			if (!unlock_act)
+				global.in_extra_stage = 1
+			fn01bb7e()
+		}
+
+		u8[A0 + 0x29] = 0
+	}
+
+	u16[A0 + 0x34] += 10
+	u8 angle = u16[A0 + 0x34]
+	D0.s16 = lookupSin(angle) >> 5
+	D1.s16 = lookupCos(angle) >> 3
+	D3.u16 = D1.u16
+	D2.u16 = (u16[A0 + 0x34] & 0x3e0) >> 5
+	if (D2.s16 > 0x10)
+		D1.s16 = -D1.s16
+
+	D2.u16 &= 0x0f
+	if (D2.s16 > 0x08)
+	{
+		D2.s16 = -D2.s16
+		D2.u16 &= 0x07
+	}
+
+	D4 = 0
+	D5 = 2
+	while (D5.s16 >= 0)
+	{
+		D2.u16 >>= 1
+		if (D2.u16 != 0)
+		{
+			D4.u16 += D1.u16
+		}
+		D1.s16 <<= 1
+		--D5.s16
+	}
+
+	D4.s16 >>= 4
+	D0.u16 += D4.u16
+	++u16[A0 + 0x36]
+	D1.u16 = u16[A0 + 0x36]
+
+	if (D1.u16 != 0x80)
+	{
+		bool goto02d56a = false
+		if (D1.s16 > 0x180)
+		{
+			D1.s16 = 0x200 - D1.s16
+			if (D1.s16 < 0)
+			{
+				UnloadObject()
+				return
+			}
+
+			goto02d56a = true
+		}
+		else if (D1.s16 <= 0x80)
+		{
+			goto02d56a = true
+		}
+
+		if (goto02d56a)
+		{
+			D0.s32 = s32(D0.s16) * D1.s16
+			D3.s32 = s32(D3.s16) * D1.s16
+			D0.s16 >>= 7
+			D3.s16 >>= 7
+		}
+	}
+	else
+	{
+		objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.4x4_2)
+	}
+
+	objA0.position.x.u16 = u16[A0 + 0x30] + D3.u16
+	objA0.position.y.u16 = objA0.value32 + D0.u16
+	++objA0.animation.frame
+	D0.u16 = (objA0.animation.frame & 0x06) >> 1
+	if (D0.u16 == 3)
+		D0 = 1
+	objA0.animation.sprite = D0.u8
+	fn01b662()
+}

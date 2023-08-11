@@ -1,0 +1,78 @@
+function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers in sonic3k.asm from the GitHub disassembly
+{
+	// debugLog(stringformat("D0 = %x", D0))
+	if (!unlock_act) // && !(D0.u16 == 0x01 || D0.u16 == 0x02 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x12))
+	{
+		base.RequestLoadingPatterns()
+		return
+	}
+	if (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07)	// PLC_01 (Sonic), 05 (Knuckles), or 07 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	{
+		// Life icon art needed. Goes to 0xfa80.
+
+		System.loadExternalRawData("s2_numbers_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x9580)
+
+		System.loadExternalRawData("s2_ring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xd780)
+
+		System.loadExternalRawData("s2_hud_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xd940)
+	}
+	// Be aware PLC_01 (Sonic), 05 (Knuckles), or 07 (Tails) will be called after this!
+	if (D0.u16 == 0x12) // 0x0b)	// MGZ1 Primary, now EHZ. 0x0b was used when the AIZ1 level slot was tested.
+	{
+		// Primary
+		System.loadExternalRawData("ehz_waterfall_mappings", s2_mappings_address + 0x0186)
+		System.loadExternalRawData("ehz_waterfall_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x73c0)
+
+		System.loadExternalRawData("ehz_bridge_mappings", s2_mappings_address + 0x002c)
+		System.loadExternalRawData("ehz_bridge_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x76c0)
+		
+		System.loadExternalRawData("buzzer_fireball_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x77c0)
+		
+		System.loadExternalRawData("buzzer_mappings", s2_mappings_address + 0x0336)
+		System.loadExternalRawData("buzzer_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7a40)
+		
+		System.loadExternalRawData("coconuts_mappings", s2_mappings_address + 0x02d2)
+		System.loadExternalRawData("coconuts_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7dc0)
+
+		System.loadExternalRawData("masher_mappings", s2_mappings_address)
+		System.loadExternalRawData("masher_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8280)
+
+		// Secondary
+		System.loadExternalRawData("s2_spikes_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8680)
+
+		System.loadExternalRawData("s2_spring_mappings", s2_mappings_address + 0x0040)
+		System.loadExternalRawData("s2_diagonalspring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8780)
+
+		System.loadExternalRawData("s2_upwardspring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8b80)
+
+		System.loadExternalRawData("s2_sidespring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8e00)
+
+		// Other
+		System.loadExternalRawData("s2_invin_stars_mappings", s2_mappings_address + 0x041a)
+	//	System.loadExternalRawData("s2_invin_stars_art_unc", 0x898000)
+
+		System.loadExternalRawData("s2_starpost_mappings", s2_mappings_address + 0x04c6)	// we'll use the Sonic 3 dust recolored for now, as the characters are from Sonic 3
+		System.loadExternalRawData("s2_starpost_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8f80)
+
+		System.loadExternalRawData("s2_badnikpoints_mappings", s2_mappings_address + 0x046e)
+		System.loadExternalRawData("s2_badnikpoints_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xbc80)
+
+		// Animation scripts for objects. These must be handled after all other art if we intend to use the same address as above.
+		System.loadExternalRawData("masher_animation", s2_decompression_buffer_2)
+	}
+}

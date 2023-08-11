@@ -1,0 +1,67 @@
+// Function taken from level\level_camera.lemon
+//# address-hook(0x01c38a) end(0x01c3f4)
+function void UpdateCameraBoundsInLevel()
+{
+	if (!unlock_act)
+	{
+		base.UpdateCameraBoundsInLevel()
+		return
+	}
+
+	// Emerald Hill Zone camera settings
+	if (level.scrolling_routine != 4)
+	{
+		level.vertical_wrap = 0
+		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420
+		if (camera.position.x.u16 >= 0x6500)
+			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
+		move_area.left = 0
+		move_area.right = 0x66f0 - getScreenExtend() // 0x36b0 in RtWI EHZ1, 0x2a90 in S2 EHZ1
+		if (allocDynamicObjectStd() && u16[0xffffb010] >= 0x6740 && time_attack != 1 && time_attack != 2)
+		{
+			// Spawn signpost
+			objA1.update_address = 0x0837b2
+			objA1.position.x.u16 = 0x6740
+			level.scrolling_routine = 4
+			move_area.left = move_area.right - 0x50
+		}
+	}
+
+	// Settings for all levels
+	D1 = 2
+	D0.s16 = move_area.bottom.target - move_area.bottom.current
+	if (D0.s16 != 0)
+	{
+		if (D0.s16 > 0)
+		{
+			D0.u16 = camera.position.y.u16 + 8
+			if (D0.u16 >= move_area.bottom.current && (u8[0xffffb000 + 0x2a] & char.flag.IN_AIR))
+			{
+				D1.u16 *= 4
+			}
+		}
+		else
+		{
+			D1.s16 = -D1.s16
+			D0.u16 = camera.position.y.u16
+			if (D0.u16 > move_area.bottom.target)
+			{
+				move_area.bottom.current = D0.u16 & 0xfffe
+			}
+		}
+
+		move_area.bottom.current += D1.u16
+		u8[0xffffee32] = 1
+	}
+}
+
+// In unlockable acts, prevent loading some Act 2 data the moment the signpost spawns.
+// Function taken from level\03_mgz\level_mgz.lemon
+//# address-hook(0x0511c8) end(0x051278)
+function void fn0511c8()
+{
+	if (unlock_act)
+		return
+	
+	base.fn0511c8()
+}

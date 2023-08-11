@@ -1,0 +1,127 @@
+// Eventually we will make a function that uses some base number plus the object ID
+// to lead to an address hook for Sonic 2 objects, essentially creating a third
+// object "table". For now, we edit individual objects.
+
+//# address-hook(0x01a51a) end(0x01a524)
+function void fn01a51a()
+{
+	if (unlock_act && objA0.subtype2c == 2)
+		fn02b928()	// bridge support post. This address is an unused ID that points to a debug mode ring. We point it to HCZ bridge support posts.
+	else
+		base.fn01a51a()
+}
+
+//# address-hook(0x01ed26) end(0x01edaa)
+function void fn01ed26()
+{
+	if (unlock_act)
+		Spikes.Init()	// spikes
+	else
+		base.fn01ed26()
+}
+
+//# address-hook(0x01f746) end(0x01f7b2)
+function void fn01f746()
+{
+	if (unlock_act)
+		PathSwapperInit()	// path swapper
+	else
+		base.fn01f746()
+}
+
+//# address-hook(0x021c6e) end(0x021cb6)
+function void AIZZipLine.Init()
+{
+	if (unlock_act)
+		fn0214c4()	// corkscrew bridge
+	else
+		base.AIZZipLine.Init()
+}
+
+//# address-hook(0x024e3c) end(0x024eec)
+function void fn024e3c()
+{
+	if (unlock_act)
+		fn038688()	// bridge. Repurposed from HCZ/ICZ/LRZ, not ported.
+	else
+		base.fn024e3c()
+}
+
+//# address-hook(0x02694e) end(0x026aac)
+function void CupElevator.Init()
+{
+	if (unlock_act)
+		MovingPlatform.Init()
+	else
+		base.CupElevator.Init()
+}
+
+//# address-hook(0x031704) end(0x03174e)
+function void fn031704()
+{
+	if (unlock_act)
+		SpringVertical.BaseUpdate()		// spring. Despite the function name, it handles other types of springs too.
+	else
+		base.fn031704()
+}
+
+//# address-hook(0x0328c4) end(0x0328ca)
+function void fn0328c4()
+{
+	if (unlock_act)
+		EHZwaterfall.BaseUpdate()		// transparent waterfall sprite
+	else
+		base.fn0328c4()
+}
+
+//# address-hook(0x032990) end(0x0329a0)
+function void fn032990()
+{
+	if (unlock_act)
+		Buzzer.BaseUpdate()	// Buzzer
+	else
+		base.fn032990()
+}
+
+//# address-hook(0x03598e) end(0x0359ea)
+function void fn03598e()
+{
+	if (unlock_act)
+		Masher.BaseUpdate()	// Masher
+	else
+		base.fn03598e()
+}
+
+//# address-hook(0x03b2f6) end(0x03b3ba)
+function void fn03b2f6()
+{
+	if (unlock_act)
+	{
+		objA0.update_address = 0x01ec18
+		fn01ec18()	// Invisible solid object
+	}
+	else
+		base.fn03b2f6()
+}
+
+//# address-hook(0x03bab2) end(0x03bb02)
+function void fn03bab2()
+{
+	if (unlock_act)
+	{
+		objA0.update_address = 0x02cfa8
+		Checkpoint.BaseUpdate()	// star post
+	}
+	else
+		base.fn03bab2()
+}
+
+// enemies\mgz_mantis.lemon
+//# address-hook(0x088e60) end(0x088e60)
+function void Mantis.Init()
+{
+	if (unlock_act)
+		Coconuts.BaseUpdate()	// Coconuts
+	else
+		base.Mantis.Init()
+}

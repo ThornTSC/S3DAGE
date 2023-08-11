@@ -235,11 +235,13 @@ function void RenderStaticRings()
 						if (original_mode)
 							animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 						u64 key = stringformat("ring_0%d", animFrame)
+						if (unlock_act)
+							key = stringformat("s2_ring_0%d", animFrame)
 						u16 x = D0.u16 - 0x80
 						u16 y = D1.u16 - 0x80
 						Renderer.drawCustomSprite(key, x, y, 0x00, 0, 0xa000)
 					}
-					else
+					else	// ring is being collected and sparkling
 					{
 						Renderer.drawVdpSprite(px - 0x80, py - 0x80, size, index, 0xc000)
 					}

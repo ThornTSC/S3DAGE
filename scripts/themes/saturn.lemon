@@ -202,6 +202,10 @@ function bool Saturn.TitleCardText(s16 px, s16 py, s16 renderQueue)
 	if (objA0.update_address == 0x02d95c && !original_mode)
 	{
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
+		if (objA0.animation.sprite == 0x02 && unlock_act)
+		{
+			return true	// don't draw anything but prevent the original graphic from showing
+		}
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
 			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
@@ -226,7 +230,10 @@ function bool Saturn.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
-			Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			if (unlock_act)
+				Renderer.drawCustomSprite("saturn_titlecard_ehz", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			else
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		// "Bonus"

@@ -906,6 +906,42 @@
   "S3TitleMenu": {
     "File": "S3TitleMenu.bin",
     "RomInject": "0x2d55e4" // length 0x268 ending at 0x2d584c, which is exactly where the unused S3 song data ends. Supposedly some spare space before this? DEZ1 rotating palettes in way?
+  },
+
+// SONIC 2 FILES
+
+// Sonic 2 invincibility stars
+"S2InvinStars": {
+  "File": "S2InvinStarsArt.bin",
+  "RomInject": "0x348d22"
+},
+
+// Dash and skid dust matching the Sonic 2 palette
+// This is not the actual Sonic 2 dust! The characters are still from Sonic 3.
+"S2Dust": {
+  "File": "S2DustArt.bin",
+  "RomInject": "0x349122"
+},
+
+// Shields matching the Sonic 2 palette
+  "S2InstaShield": {
+    "File": "S2InstaShieldArt.bin",
+    "RomInject": "0x34aba2"
+  },
+  "S2FireShield": {
+    "File": "S2FireShieldArt.bin",
+    "RomInject": "0x34b222"
+  },
+  "S2LightningShield": {
+    "File": "S2LightningShieldArt.bin",
+    "RomInject": "0x34d3c2"
+  },
+  "S2LightningShieldSparks": {
+    "File": "S2LightningShieldSparksArt.bin",
+    "RomInject": "0x34e402"
+  },
+  "S2WaterShield": {
+    "File": "S2WaterShieldArt.bin",
+    "RomInject": "0x34e4a2"
   }
 }
-

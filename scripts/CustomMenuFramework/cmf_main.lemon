@@ -55,6 +55,7 @@ global s8 selectedMenuOptionLast
 global s8 selectedMenuOptionLast.main
 global s8 selectedGameType
 global u8 setting.levelselect.characters = 1
+global u16 setting.unlock_act
 global bool challenges_normalmode
 
 // Tracks the currently selected zone and act.
@@ -336,6 +337,7 @@ function void customMenu.mainLogicLoop()
 
 			// Start level.
 			global.game_mode = 0x8c
+			unlock_act = setting.unlock_act
 
 			playSound(0xaf)
 			LevelSelect.startGame()		// initialize some game values
@@ -524,9 +526,20 @@ function void customMenu.selectZone()
 	// Select an act.
 	if (customMenu.scrollRight())
 	{
-		if (selectedZoneAct >= 0x0b00)		// Pressed right on DEZ?
+		if (setting.unlock_act)				// Pressed right on EHZ?
 		{
-			selectedZoneAct -= 0x0b00		// Make selection become AIZ
+			setting.unlock_act = 0
+			selectedZoneAct = 0x0000		// Make selection become AIZ1
+		}
+		else if (selectedZoneAct >= 0x0b00)	// Pressed right on DEZ?
+		{
+			if (total_stars >= unlock.level.ehz)
+			{
+				setting.unlock_act = 1
+				selectedZoneAct = 0x0200	// Make selection become EHZ
+			}
+			else
+				selectedZoneAct -= 0x0b00	// Make selection become AIZ
 		}
 		else if (selectedZoneAct == 0x0901)	// Pressed right on LRZ2?
 		{
@@ -549,9 +562,20 @@ function void customMenu.selectZone()
 	}
 	else if (customMenu.scrollLeft())
 	{
-		if (selectedZoneAct <= 0x0001)		// Pressed left on AIZ?
+		if (setting.unlock_act)				// Pressed left on EHZ?
 		{
-			selectedZoneAct += 0x0b00		// Make selection become DEZ
+			setting.unlock_act = 0
+			selectedZoneAct = 0x0b00		// Make selection become DEZ1
+		}
+		else if (selectedZoneAct <= 0x0001)	// Pressed left on AIZ?
+		{
+			if (total_stars >= unlock.level.ehz)
+			{
+				setting.unlock_act = 1
+				selectedZoneAct = 0x0200	// Make selection become EHZ
+			}
+			else
+				selectedZoneAct += 0x0b00	// Make selection become DEZ
 		}
 		else if (selectedZoneAct == 0x0a01)	// Pressed right on SSZ?
 		{
@@ -575,9 +599,20 @@ function void customMenu.selectAct()
 	// Select an act.
 	if (customMenu.scrollRight())
 	{
-		if (selectedZoneAct == 0x0b01)		// Pressed right on DEZ2?
+		if (setting.unlock_act)				// Pressed right on EHZ?
 		{
+			setting.unlock_act = 0
 			selectedZoneAct = 0x0000		// Make selection become AIZ1
+		}
+		else if (selectedZoneAct == 0x0b01)	// Pressed right on DEZ2?
+		{
+			if (total_stars >= unlock.level.ehz)
+			{
+				setting.unlock_act = 1
+				selectedZoneAct = 0x0200	// Make selection become EHZ
+			}
+			else
+				selectedZoneAct = 0x0000	// Make selection become AIZ1
 		}
 		else
 		{
@@ -590,9 +625,20 @@ function void customMenu.selectAct()
 	}
 	else if (customMenu.scrollLeft())
 	{
-		if (selectedZoneAct == 0x0000)		// Pressed left on AIZ1?
+		if (setting.unlock_act)				// Pressed left on EHZ?
 		{
+			setting.unlock_act = 0
 			selectedZoneAct = 0x0b01		// Make selection become DEZ2
+		}
+		else if (selectedZoneAct == 0x0000)	// Pressed left on AIZ1?
+		{
+			if (total_stars >= unlock.level.ehz)
+			{
+				setting.unlock_act = 1
+				selectedZoneAct = 0x0200	// Make selection become EHZ
+			}
+			else
+				selectedZoneAct = 0x0b01	// Make selection become DEZ2
 		}
 		else
 		{
@@ -1245,7 +1291,10 @@ function void DataSelect.drawCustomPlanes()
 		Letters.ClearAll()
 		
 		// Render the background and dim it
-		Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
+		if (setting.unlock_act)
+			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
+		else
+			Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
 		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xf001, 0, 95)							// background dimming (37.5% opacity)
 
 		// Render the border rectangles around the options and best times
@@ -1259,7 +1308,9 @@ function void DataSelect.drawCustomPlanes()
 
 		// Render options
 		u64 zoneKey = stringformat("titlecard_zone%02x_menu", selectedZoneAct/ 0x100)
-		if (selectedZoneAct == 0x0a00)	// HPZ
+		if (setting.unlock_act)
+			zoneKey = stringformat("titlecard_unlock%04x_menu", setting.unlock_act)
+		else if (selectedZoneAct == 0x0a00)	// HPZ
 			zoneKey = "titlecard_zoneHPZ_menu"
 		Renderer.drawCustomSprite(zoneKey, getScreenExtend() - 40 + 133, 47, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 0) ? noDim : dim, 0x10000)	// Zone name image
 		if (selectedMenuOption == 0)
@@ -1269,7 +1320,7 @@ function void DataSelect.drawCustomPlanes()
 		}
 
 		u64 actKey = stringformat("titlecard_act%01x", (selectedZoneAct & 0x0001) + 1)
-		if ((selectedZoneAct & 0xff00) == 0x0a00)	// HPZ or SSZ
+		if ((selectedZoneAct & 0xff00) == 0x0a00 || setting.unlock_act)	// HPZ or SSZ, or an unlockable act
 			actKey = "titlecard_singleact"
 		if (selectedZoneAct == 0x0a01 && System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// special check for Chaos the Impostor SSZ1
 			actKey = "titlecard_act1"

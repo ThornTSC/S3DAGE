@@ -1,0 +1,378 @@
+//# address-hook(0x0214c4) end(0x0214ee)
+function void fn0214c4()
+{
+	if (!objA0.base_state)
+		fn0214fa()
+	else
+		fn0214fa()	// objA0.base_state == 2
+	// The if/else should have another call to Obj06_Cylinder for a base state of 4, but we use FBZ's version for that.
+//	D1.u16 = u16[0x0214f4 + D0.s16]
+//	call 0x0214f4 + D1.s16			// Obj06_Init or Obj06_Spiral. We don't use Obj06_Cylinder, as FBZ has that.
+
+	CheckForUnloadObject()
+
+	// From here to the function's end is custom deletion code for the object. We use the standard CheckForUnloadObject().
+/*
+	if (u16[0xffffffd8] != 0)
+	{
+		return
+	}
+	D0.u16 = objA0.position.x.u16 & 0xff80 - u16[0xfffff7da]
+	if (D0.u16 <= 0x0280)
+	{
+		return
+	}
+	call 0x0164e6
+	return
+*/
+}
+
+
+//# address-hook(0x0214fa) end(0x021632)
+// loc_214FA, a.k.a. Obj06_Init
+function void fn0214fa()
+{
+	objA0.base_state += 0x02	// set routine counter to call Obj06_Spiral
+	objA0.box_size.x = 0xd0		// width_pixels
+//	if (s8[A0 + 0x28] < 0)
+//	{
+//		u8[A0 + 0x24] += 0x02	// set routine counter to call Obj06_Cylinder
+//		call 0x021808			// This is the Metropolis mesh cylinder. We just use FBZ's version.
+//		return
+//	}
+	fn021512()
+}
+
+// loc_21512, a.k.a. Obj06_Spiral
+function void fn021512()
+{
+	// Main character
+	A1 = 0xffffb000
+	D6 = 0x03
+	fn021520()
+
+	// Sidekick character
+	A1 = 0xffffb04a
+	++D6.u8
+	fn021520()
+}
+
+function void fn021520()
+{
+	if ((objA0.flags2a & (u8(1) << D6.u8)) == 0)
+	{
+		if ((objA1.flags2a & 0x02) == 0)
+		{
+			if ((objA1.flags2a & 0x08) == 0)
+			{
+				D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+				if (objA1.velocity.x >= 0)
+				{
+					if (D0.s16 > -0xc0)
+					{
+						return
+					}
+					if (D0.s16 < -0xd0)
+					{
+						return
+					}
+				}
+				else
+				{
+					if (D0.s16 < 0xc0)
+					{
+						return
+					}
+					if (D0.s16 > 0xd0)
+					{
+						return
+					}
+				}
+				D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x10
+				if (D1.u16 >= 0x30)
+				{
+					return
+				}
+				if (objA1.flags2e != 0)
+				{
+					return
+				}
+				LetSonicClimbOnObject()
+				return
+			}
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+			if (objA1.velocity.x >= 0)
+			{
+				if (D0.s16 > -0xb0)
+				{
+					return
+				}
+				if (D0.s16 < -0xc0)
+				{
+					return
+				}
+				// call 0x0215a8
+				// copy of loc_215a8 made from the actual code below
+				D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x10
+				if (D1.u16 < 0x30)
+				{
+					LetSonicClimbOnObject()	// loc_19E14
+				}
+				return
+			}
+			if (D0.s16 >= 0xb0)
+			{
+				if (D0.s16 <= 0xc0)
+				{
+					// loc_215a8
+					D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x10
+					if (D1.u16 < 0x30)
+					{
+						LetSonicClimbOnObject()	// loc_19E14
+					}
+				}
+			}
+		}
+		return
+	}
+	D0.u16 = objA1.groundspeed		// objA1.groundspeed is signed, but inertia in Sonic 2 is unsigned. Careful!
+	if (D0.s16 < 0)
+	{
+		D0.s16 = -D0.s16
+	}
+	if (D0.u16 >= 0x0600)
+	{
+		if ((objA1.flags2a & 0x02) == 0)
+		{
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0xd0
+			if (D0.s16 >= 0)
+			{
+				if (D0.u16 < 0x01a0)
+				{
+					fn021602()
+					return
+				}
+			}
+		}
+	}
+
+// loc_215EA, a.k.a. Obj06_Spiral_CharacterFallsOff
+	objA1.flags2a &= ~0x08
+	objA0.flags2a &= ~(u8(1) << D6.u8)
+	u8[A1 + 0x30] = 0		// flips_remaining. No equivalent S3AIR constant.
+	u8[A1 + 0x31] = 0x04	// flip_speed. No equivalent S3AIR constant.
+}
+
+// loc_21602, a.k.a. Obj06_Spiral_MoveCharacter
+function void fn021602()
+{
+	if ((objA1.flags2a & 0x08) == 0)
+	{
+		return
+	}
+	D1.u8 = Obj06_CosineTable[D0.u16]	// Table call used to be s16.
+	D1.s16 = D1.s8
+	D2.u16 = objA0.position.y.u16 + D1.u16
+	D1 = objA1.hitbox_extends.y
+	D1.u16 -= 0x13
+	D2.u16 -= D1.u16
+	objA1.position.y.u16 = D2.u16
+	D0.u16 >>= 3
+	D0.u16 &= 0x3f
+	u8[A1 + 0x27] = Obj06_FlipAngleTable[D0.u16]	// u8[A1 + 0x27] is same in S2 and S3 (flip_angle). Table call used to be s16.
+}
+
+
+
+// byte_21634:
+constant array<u8> Obj06_FlipAngleTable =
+{
+	0,    0,    1,	   1,	// 4
+	0x16,  0x16,  0x16,	 0x16,	// 8
+	0x2C,  0x2C,  0x2C,	 0x2C,	// 12
+	0x42,  0x42,  0x42,	 0x42,	// 16
+	0x58,  0x58,  0x58,	 0x58,	// 20
+	0x6E,  0x6E,  0x6E,	 0x6E,	// 24
+	0x84,  0x84,  0x84,	 0x84,	// 28
+	0x9A,  0x9A,  0x9A,	 0x9A,	// 32
+	0xB0,  0xB0,  0xB0,	 0xB0,	// 36
+	0xC6,  0xC6,  0xC6,	 0xC6,	// 40
+	0xDC,  0xDC,  0xDC,	 0xDC,	// 44
+	0xF2,  0xF2,  0xF2,	 0xF2,	// 48
+	1,    1,    0,	   0	// 52
+}
+// byte_21668:
+/*
+constant array<u8> Obj06_CosineTable =
+{
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,	//  16
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 31, 31,	//  32
+	31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 30, 30, 30,	//  48
+	30, 30, 30, 30, 30, 30, 29, 29, 29, 29, 29, 28, 28, 28, 28, 27,	//  64
+	27, 27, 27, 26, 26, 26, 25, 25, 25, 24, 24, 24, 23, 23, 22, 22,	//  80
+	21, 21, 20, 20, 19, 18, 18, 17, 16, 16, 15, 14, 14, 13, 12, 12,	//  96
+	11, 10, 10,  9,  8,  8,  7,  6,  6,  5,  4,  4,  3,  2,  2,  1,	// 112
+	0, -1, -2, -2, -3, -4, -4, -5, -6, -7, -7, -8, -9, -9,-10,-10,	// 128
+	-11,-11,-12,-12,-13,-14,-14,-15,-15,-16,-16,-17,-17,-18,-18,-19,	// 144
+	-19,-19,-20,-21,-21,-22,-22,-23,-23,-24,-24,-25,-25,-26,-26,-27,	// 160
+	-27,-28,-28,-28,-29,-29,-30,-30,-30,-31,-31,-31,-32,-32,-32,-33,	// 176
+	-33,-33,-33,-34,-34,-34,-35,-35,-35,-35,-35,-35,-35,-35,-36,-36,	// 192
+	-36,-36,-36,-36,-36,-36,-36,-37,-37,-37,-37,-37,-37,-37,-37,-37,	// 208
+	-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,-37,	// 224
+	-37,-37,-37,-37,-36,-36,-36,-36,-36,-36,-36,-35,-35,-35,-35,-35,	// 240
+	-35,-35,-35,-34,-34,-34,-33,-33,-33,-33,-32,-32,-32,-31,-31,-31,	// 256
+	-30,-30,-30,-29,-29,-28,-28,-28,-27,-27,-26,-26,-25,-25,-24,-24,	// 272
+	-23,-23,-22,-22,-21,-21,-20,-19,-19,-18,-18,-17,-16,-16,-15,-14,	// 288
+	-14,-13,-12,-11,-11,-10, -9, -8, -7, -7, -6, -5, -4, -3, -2, -1,	// 304
+	0,  1,  2,  3,  4,  5,  6,  7,  8,  8,  9, 10, 10, 11, 12, 13,	// 320
+	13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21,	// 336
+	21, 22, 22, 23, 23, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26,	// 352
+	27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29,	// 368
+	29, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 31, 31, 31,	// 384
+	31, 31, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,	// 400
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32	// 416
+}
+*/
+constant array<u8> Obj06_CosineTable =
+{
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,	//  16
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 31, 31,	//  32
+	31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 30, 30, 30,	//  48
+	30, 30, 30, 30, 30, 30, 29, 29, 29, 29, 29, 28, 28, 28, 28, 27,	//  64
+	27, 27, 27, 26, 26, 26, 25, 25, 25, 24, 24, 24, 23, 23, 22, 22,	//  80
+	21, 21, 20, 20, 19, 18, 18, 17, 16, 16, 15, 14, 14, 13, 12, 12,	//  96
+	11, 10, 10,  9,  8,  8,  7,  6,  6,  5,  4,  4,  3,  2,  2,  1,	// 112
+	  0,255,254,254,253,252,252,251,250,249,249,248,247,247,246,246,	// 128
+	245,245,244,244,243,242,242,241,241,240,240,239,239,238,238,237,	// 144
+	237,237,236,235,235,234,234,233,233,232,232,231,231,230,230,229,	// 160
+	229,228,228,228,227,227,226,226,226,225,225,225,224,224,224,223,	// 176
+	223,223,223,222,222,222,221,221,221,221,221,221,221,221,220,220,	// 192
+	220,220,220,220,220,220,220,219,219,219,219,219,219,219,219,219,	// 208
+	219,219,219,219,219,219,219,219,219,219,219,219,219,219,219,219,	// 224
+	219,219,219,219,220,220,220,220,220,220,220,221,221,221,221,221,	// 240
+	221,221,221,222,222,222,223,223,223,223,224,224,224,225,225,225,	// 256
+	226,226,226,227,227,228,228,228,229,229,230,230,231,231,232,232,	// 272
+	233,233,234,234,235,235,236,237,237,238,238,239,240,240,241,242,	// 288
+	242,243,244,245,245,246,247,248,249,249,250,251,252,253,254,255,	// 304
+	0,  1,  2,  3,  4,  5,  6,  7,  8,  8,  9, 10, 10, 11, 12, 13,	// 320
+	13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21,	// 336
+	21, 22, 22, 23, 23, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26,	// 352
+	27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29,	// 368
+	29, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 31, 31, 31,	// 384
+	31, 31, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,	// 400
+	32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32	// 416
+}
+
+
+
+// From here on is the Metropolis mesh cylinder.
+// We already have this from FBZ.
+
+/*
+// //# address-hook(0x021808) end(0x02191e)
+function void fn021808()
+{
+	A1 = 0xffffb000
+	A2 = 0xfffff7b2
+	D6 = 0x03
+	call 0x02181e
+	A1 = 0xffffb040
+	A2 = 0xfffff7b3
+	++D6.u8
+	if ((objA0.flags2a & (u8(1) << D6.u8)) == 0)
+	{
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+		if (D0.s16 >= -0xc0)
+		{
+			if (D0.s16 < 0xc0)
+			{
+				D0.u16 = objA0.position.y.u16 + 0x3c
+				D2.u16 = objA1.position.y.u16
+				D1.u8 = objA1.hitbox_extends.y
+				D1.s16 = D1.s8
+				D1.u16 += D2.u16
+				D1.u16 += 0x04
+				D0.u16 -= D1.u16
+				if (D0.u16 <= 0)
+				{
+					if (D0.u16 >= 0xfff0)
+					{
+						if (u8[A1 + 0x24] < 0x06)
+						{
+							D2.u16 += D0.u16
+							D2.u16 += 0x03
+							objA1.position.y.u16 = D2.u16
+							u8[A1 + 0x29] = 0x01
+							LetSonicClimbOnObject()
+							u16[A1 + 0x1c] = 0x01
+							u8[A2] = 0
+							if (objA1.groundspeed == 0)
+							{
+								objA1.groundspeed = 0x01
+							}
+						}
+					}
+				}
+			}
+		}
+		return
+	}
+	if ((objA1.flags2a & 0x02) == 0)
+	{
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0xc0
+		if (D0.s16 >= 0)
+		{
+			if (D0.u16 < 0x0180)
+			{
+				jump 0x0218e0
+			}
+		}
+		objA1.flags2a &= ~0x08
+		objA0.flags2a &= ~(u8(1) << D6.u8)
+		u8[A1 + 0x30] = 0		// already updated to S3 value. No AIR constant.
+		u8[A1 + 0x31] = 0x04	// already updated to S3 value. No AIR constant.
+		objA1.flags2a |= 0x02
+		return
+	}
+	D0.u8 = u8[A2] + 0x20
+	if (D0.u8 < 0x40)
+	{
+		s16[A1 + 0x12] >>= 1
+		call 0x0218a8
+		return
+	}
+	u16[A1 + 0x12] = 0
+	call 0x0218a8
+	return
+	if ((objA1.flags2a & 0x08) == 0)
+	{
+		jump 0x02188a
+	}
+	D0.u8 = u8[A2]
+	call 0x021920
+	D1.s32 = s32(D1.s16) * 0x2800
+	D1 = (D1 << 16) + (D1 >> 16)
+	D2.u16 = objA0.position.y.u16 + D1.u16
+	D1 = objA1.hitbox_extends.y
+	D1.u16 -= 0x13
+	D2.u16 -= D1.u16
+	objA1.position.y.u16 = D2.u16
+	D0.u8 = u8[A2]
+	u8[A1 + 0x27] = D0.u8	// u8[A1 + 0x27] is same in S2 and S3 (flip_angle)
+	u8[A2] += 0x04
+	if (objA1.groundspeed == 0)
+	{
+		objA1.groundspeed = 0x01
+	}
+	return
+}
+
+
+// //# address-hook(0x021920) end(0x021920)
+function void fn021920()
+{
+	call 0x0033b6
+	return
+}
+
+*/

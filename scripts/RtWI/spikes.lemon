@@ -1,0 +1,9 @@
+// Use Sonic 2 spike VRAM location when needed. New mappings are not necessary.
+// Function taken from objects\basics\spikes.lemon
+//# address-hook(0x023f84) end(0x024022)
+function void Spikes.Init()
+{
+	base.Spikes.Init()
+	if (unlock_act)
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE1 | 0x0434)
+}

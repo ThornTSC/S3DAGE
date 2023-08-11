@@ -83,7 +83,7 @@
   "fbz_tiles_p_orig":  { "File": "../level/FBZ/Tiles/Primary_Orig.bin" },
 
   "fbz1_layout": { "File": "../level/FBZ/Layout/1.bin" },
-  "fbz1_objects": { "File": "../level/FbZ/Object Pos/1.bin" },
+  "fbz1_objects": { "File": "../level/FBZ/Object Pos/1.bin" },
   "fbz1_rings": { "File": "../level/FBZ/Ring Pos/1.bin" },
 
   "fbz2_layout": { "File": "../level/FBZ/Layout/2.bin" },
@@ -204,7 +204,7 @@
   "mhz2_origrings": { "File": "../level/MHZ/Ring Pos/2_Orig.bin" },
 
   "fbz1_origlayout": { "File": "../level/FBZ/Layout/1_Orig.bin" },
-  "fbz1_origobjects": { "File": "../level/FbZ/Object Pos/1_Orig.bin" },
+  "fbz1_origobjects": { "File": "../level/FBZ/Object Pos/1_Orig.bin" },
   "fbz1_origrings": { "File": "../level/FBZ/Ring Pos/1_Orig.bin" },
 
   "fbz2_origlayout": { "File": "../level/FBZ/Layout/2_Orig.bin" },
@@ -245,5 +245,76 @@
 
   "dez2_origlayout": { "File": "../level/DEZ/Layout/2_Orig.bin" },
   "dez2_origobjects": { "File": "../level/DEZ/Object Pos/2_Orig.bin" },
-  "dez2_origrings": { "File": "../level/DEZ/Ring Pos/2_Orig.bin" }
+  "dez2_origrings": { "File": "../level/DEZ/Ring Pos/2_Orig.bin" },
+
+// Unlockable acts
+  // Sonic 2 collision and angle data
+  "s2angles":  { "File": "../level/s2angles.bin" },
+  "s2heightmaps":  { "File": "../level/s2heightmaps.bin" },
+  "s2heightmapsrotated":  { "File": "../level/s2heightmapsrotated.bin" },
+
+  // Sonic 2 character palette
+  "s2_character_palette":  { "File": "../level/EHZ/Palette/Character Palette.bin" },
+
+  // Sonic 2 general object art, mappings, and animation
+  "s2_badnikpoints_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Badnik Points Nemesis Art.bin" },
+  "s2_badnikpoints_mappings":  { "File": "../level/EHZ/Object Art/Sonic 2 Badnik Points Mappings.bin" },
+  "s2_explosion_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Explosion Nemesis Art.bin" },
+  "s2_flicky_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Flicky Nemesis Art.bin" },
+  "s2_hud_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 HUD Nemesis Art.bin" },
+  "s2_invin_stars_art_unc":  { "File": "../level/EHZ/Uncompressed Art/Sonic 2 Invincibility Stars Art.bin" },
+  "s2_invin_stars_mappings":  { "File": "../level/EHZ/Uncompressed Art/Sonic 2 Invincibility Stars Mappings.bin" },
+  "s2_numbers_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Numbers Nemesis Art.bin" },
+  "s2_ricky_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Ricky Nemesis Art.bin" },
+  "s2_ring_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Ring Nemesis Art.bin" },
+  "s2_spikes_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Spikes Nemesis Art.bin" },
+  "s2_spikes_mappings":  { "File": "../level/EHZ/Object Art/Sonic 2 Spikes Mappings.bin" }, // unused, as S3&K spikes have suitable mappings
+  "s2_starpost_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Star Post Nemesis Art.bin" },
+  "s2_starpost_mappings":  { "File": "../level/EHZ/Object Art/Sonic 2 Star Post Mappings.bin" },
+  "s2_diagonalspring_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Diagonal Spring Nemesis Art.bin" },
+  "s2_sidespring_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Side Spring Nemesis Art.bin" },
+  "s2_upwardspring_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Upward Spring Nemesis Art.bin" },
+  "s2_spring_mappings":  { "File": "../level/EHZ/Object Art/Sonic 2 Spring Mappings.bin" },
+  "s2_water_shield_art_unc":  { "File": "../level/EHZ/Uncompressed Art/Sonic 2 Water Shield Art.bin" },
+
+  // EHZ
+    // Layout
+    "ehz_layout": { "File": "../level/EHZ/Layout/Full.bin" },
+    "ehz_objects": { "File": "../level/EHZ/Object Pos/Full.bin" },
+    "ehz_rings": { "File": "../level/EHZ/Ring Pos/Full.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "ehz_tiles":  { "File": "../level/EHZ/Tiles/Tiles.bin" },
+    "ehz_animscripts":  { "File": "../level/EHZ/Tiles/Animation Scripts.bin" },
+    "ehz_animtiles":  { "File": "../level/EHZ/Tiles/Animated Tiles.bin" },
+    "ehz_blocks":  { "File": "../level/EHZ/Blocks/Blocks.bin" },
+    "ehz_chunks_p":  { "File": "../level/EHZ/Chunks/Primary.bin" },
+
+    // Collision
+    "ehz_collision":  { "File": "../level/EHZ/Collision/Collision.bin" },
+
+    // Palette
+    "ehz_palette":  { "File": "../level/EHZ/Palette/Palette.bin" },
+    "ehz_palette_s2":  { "File": "../level/EHZ/Palette/S2 Palette.bin" },
+    "ehz_palettecycle":  { "File": "../level/EHZ/Palette/EHZ ARZ Water.bin" },
+
+    // Deformation data (unused, file not in folder)
+    // "ehz_deformdata":  { "File": "../level/EHZ/Deform Data/Deform Data.bin" },
+
+    // Object art, mappings, and animation
+    "ehz_bridge_art_nem":  { "File": "../level/EHZ/Object Art/EHZ Bridge Nemesis Art.bin" },
+    "ehz_bridge_mappings":  { "File": "../level/EHZ/Object Art/EHZ Bridge Mappings.bin" },
+    "ehz_platform_mappings":  { "File": "../level/EHZ/Object Art/EHZ Platform Mappings.bin" },
+    "ehz_waterfall_art_nem":  { "File": "../level/EHZ/Object Art/EHZ Waterfall Nemesis Art.bin" },
+    "ehz_waterfall_mappings":  { "File": "../level/EHZ/Object Art/EHZ Waterfall Mappings.bin" },
+    "buzzer_fireball_art_nem":  { "File": "../level/EHZ/Object Art/Buzzer Fireball Nemesis Art.bin" },
+    "buzzer_art_nem":  { "File": "../level/EHZ/Object Art/Buzzer Nemesis Art.bin" },
+    "buzzer_mappings":  { "File": "../level/EHZ/Object Art/Buzzer Mappings.bin" },
+    "buzzer_animation":  { "File": "../level/EHZ/Object Art/Buzzer Animation.bin" },
+    "coconuts_art_nem":  { "File": "../level/EHZ/Object Art/Coconuts Nemesis Art.bin" },
+    "coconuts_mappings":  { "File": "../level/EHZ/Object Art/Coconuts Mappings.bin" },
+    "coconuts_animation":  { "File": "../level/EHZ/Object Art/Coconuts Animation.bin" },
+    "masher_art_nem":  { "File": "../level/EHZ/Object Art/Masher Nemesis Art.bin" },
+    "masher_mappings":  { "File": "../level/EHZ/Object Art/Masher Mappings.bin" },
+    "masher_animation":  { "File": "../level/EHZ/Object Art/Masher Animation.bin" }
 }

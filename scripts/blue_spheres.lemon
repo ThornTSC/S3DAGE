@@ -359,7 +359,7 @@ function void fn009b62()
 		D0.u16 = ((D2.u16 + 0x80) >> 8) & 0x1f
 		D1.u16 = ((D3.u16 + 0x80) >> 8) & 0x1f
 		D1.u16 = (D1.u16 << 5) | D0.u16
-		if (!challenge_greenspheres)
+		if (!challenge_greenspheres || unlock_act)
 			u8[A1 + D1.s16] = (global.sk_bluespheres) ? 0x0d : 0x0b
 		u16[0xffffe44e] = D1.u16
 		u16[0xffffe428] = 0x0800
@@ -380,7 +380,7 @@ function void fn009b62()
 			--u8[0xffffe44d]
 			if (u8[0xffffe44d] == 0)
 			{
-				if (challenge_greenspheres)		// if Special Stage Time Attack,
+				if (challenge_greenspheres && !unlock_act)		// if Special Stage Time Attack,
 				{
 					playMusic(MUSIC_CTRL_FADEOUT)	// fade out music
 					return							// do not load the emerald
@@ -756,7 +756,7 @@ function void SpecialStage()
 
 #if STANDALONE
 	// Add a small artificial delay here
-	u8 delayFrames = original_mode ? 112 : 12
+	u8 delayFrames = (original_mode || unlock_act) ? 112 : 12
 	for (u8 i = 0; i < delayFrames; ++i)
 		yieldInWhiteScreen()
 #else
@@ -1091,39 +1091,6 @@ function void fn00903e()
 */
 	base.fn00903e()
 }
-
-
-// This function is here only for script mods that want to change the sound key, e.g. to play a custom music track / sound effect
-
-function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
-{
-	if (sfxId == 0x1c && greenspheres_music && !original_mode)
-	{
-		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
-
-		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
-			soundKey = "greenspheres_speedup"
-	}
-	if (sfxId == 0x2f && ((global.game_mode) & 0x7f) == 0x58 )
-	{
-		soundKey = "mainmenu"
-	}
-	else if (sfxId == 0xf8 && greenspheres_music)
-	{
-		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
-		bool useGeneratedStage = BlueSpheres.useGeneratedStages()
-		bool isGeneratedStageInMainGame = (useGeneratedStage && bluespheres.minigame_mode == 0)
-
-		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
-		
-		if ((KnucklesMainGameRandomGreenSphereStage || bluespheres.minigame_mode == 1 || challenge_greenspheres) && green_spheres.active)
-			soundKey = "greenspheres_speedup45"
-	}
-	
-	// Return base game or lower mod music
-	return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
-}
-
 
 
 
@@ -1828,7 +1795,7 @@ function void fn00972e()
 		bluespheres.rings_flags |= 0x80
 
 		u8 soundId = 0x33
-		if (bluespheres.minigame_mode == 0 && !challenge_greenspheres)
+		if (bluespheres.minigame_mode == 0 && !(challenge_greenspheres && !unlock_act))
 		{
 			if (bluespheres.rings_collected >= 50 && (bluespheres.rings_flags & 0x01) == 0)
 			{
@@ -2685,6 +2652,16 @@ function void BlueSpheres.renderCustomGround()
 	}
 }
 
+// From 6 Aug 2023 AIR commit 6a4b5dc
+function void BlueSpheres.replacePlaneRendering()
+{
+	// Disable rendering of plane B prio
+	Renderer.enableDefaultPlane(3, false)
+
+	// Manually render the HUD parts of this plane (blue spheres and rings counter)
+	Renderer.setupPlane(0, 0, 120, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR
+	Renderer.setupPlane(getScreenWidth()-120, 0, 120, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR
+}
 
 
 

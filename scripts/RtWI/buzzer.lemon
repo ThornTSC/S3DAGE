@@ -1,0 +1,238 @@
+define buzzer.parent				= u32[A0 + 0x42]
+define buzzer.parent.A1				= u32[A1 + 0x42]
+define buzzer.move_timer			= s16[A0 + 0x2e]		// objA0.countdown_value
+define buzzer.turn_delay			= s16[A0 + 0x3e]
+define buzzer.turn_delay.A1			= s16[A1 + 0x3e]
+define buzzer.shooting_flag			=  u8[A0 + 0x39]
+define buzzer.shot_timer			= s16[A0 + 0x46]
+
+//# address-hook(0x02d068) end(0x02d072)
+function void Buzzer.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Buzzer.Init()
+	else if (objA0.base_state == 2)
+		Buzzer.Main()
+	else if (objA0.base_state == 4)
+		Buzzer.Flame()
+	else // if (objA0.base_state == 6)
+		Buzzer.Projectile()
+}
+
+
+//# address-hook(0x02d07e) end(0x02d08c)
+function void Buzzer.Projectile()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	A1 = 0x890020					// point this AND THE ONES IN THE .Main and .Flame FUNCTIONS to where the animation script is loaded
+	Object.AnimationUpdate()
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x02d090) end(0x02d0c4)
+function void Buzzer.Flame()
+{
+	A1 = buzzer.parent
+	if (objA1.update_address != 0x032990)	// this should be the update address of the main Buzzer object
+	{
+		UnloadObject()
+		return
+	}
+	if (buzzer.turn_delay.A1 >= 0)
+	{
+		return
+	}
+	// Follow parent Buzzer object
+	objA0.position.x.u16 = objA1.position.x.u16
+	objA0.position.y.u16 = objA1.position.y.u16
+	objA0.flags2a = objA1.flags2a
+	objA0.render_flags = objA1.render_flags
+	A1 = 0x890020					// point this AND THE ONES IN THE .Init, .Projectile, and .Main FUNCTIONS to where the animation script is loaded
+	Object.AnimationUpdate()
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x02d0c8) end(0x02d172)
+function void Buzzer.Init()
+{
+	A1 = 0x890020					// point this AND THE ONES IN THE .Main, .Flame and .Projectile FUNCTIONS to where the animation script is loaded
+	System.loadExternalRawData("buzzer_animation", A1)
+
+	objA0.mapping_offset = 0x880336		// get the mappings offset!
+	objA0.sprite_attributes = 0x03d2
+	objA0.render_flags |= 0x04
+	objA0.collision_attributes = 0x0a
+	// objA0.sprite_priority = 0x0200	// this gets set again later and is likely just a bug in Sonic 2
+	objA0.box_size.x = 0x12
+	objA0.box_size.y = 0x20
+	objA0.hitbox_extends.y = 0x10
+	objA0.hitbox_extends.x = 0x18
+	objA0.sprite_priority = 0x0180
+	objA0.base_state += 0x02
+	if (allocDynamicObjectAfterA0())
+	{
+		objA1.update_address = 0x032990		// this should be the update address of the main Buzzer object
+		objA1.base_state = 0x04
+		objA1.mapping_offset = 0x880336		// get the mappings offset!
+		objA1.sprite_attributes = 0x03d2
+		objA1.sprite_priority = 0x0200
+		objA1.box_size.x = 0x10
+		objA1.box_size.y = 0x10
+		objA1.flags2a = objA0.flags2a
+		objA1.render_flags = objA0.render_flags
+		objA1.state = 0x01
+		buzzer.parent.A1 = A0
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		buzzer.move_timer = 0x0100
+		objA0.velocity.x = -0x0100
+		if (objA0.render_flags & 0x01)
+		{
+			objA0.velocity.x = -objA0.velocity.x
+		}
+	}
+}
+
+
+//# address-hook(0x02d174) end(0x02d18c)
+function void Buzzer.Main()
+{
+	if (u8[A0 + 0x3c] == 0)
+		Buzzer.Roaming()
+	else
+		Buzzer.Shooting()
+
+	A1 = 0x890020					// point this AND THE ONES IN THE .Init, .Projectile. and .Flame FUNCTIONS to where the animation script is loaded
+	Object.AnimationUpdate()
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x02d194) end(0x02d1d4)
+function void Buzzer.Roaming()
+{
+	Buzzer.CheckPlayers()
+	--buzzer.turn_delay
+	D0.u16 = buzzer.turn_delay
+	if (D0.u16 != 0x0f)
+	{
+		if (D0.s16 < 0)
+		{
+			--buzzer.move_timer
+			if (buzzer.move_timer > 0)
+			{
+				UpdateMovementStraightSimple()	// ObjectMove
+				return
+			}
+			buzzer.turn_delay = 0x1e
+		}
+		return
+	}
+	// Obj4B_TurnAround:
+	buzzer.shooting_flag = 0				// sf instruction
+	objA0.velocity.x = -objA0.velocity.x
+	objA0.render_flags ^= 0x01
+	objA0.flags2a ^= 0x01
+	buzzer.move_timer = 0x0100
+}
+
+
+//# address-hook(0x02d1d6) end(0x02d232)
+function void Buzzer.CheckPlayers()
+{
+	if (buzzer.shooting_flag == 0)
+	{
+		D0.u16 = objA0.position.x.u16
+		A1 = 0xffffb000
+		if (u8[0xfffffe0f] & 0x01)	// u8[0xfffffe0f] is V_int_run_count+3. Same in S2 and S3.
+		{
+			A1 = 0xffffb04a
+		}
+		D0.u16 -= objA1.position.x.u16
+		D1.u16 = D0.u16
+		if (D1.s16 < 0)
+		{
+			D0.s16 = -D0.s16
+		}
+		if (D0.s16 >= 0x28)
+		{
+			if (D0.s16 <= 0x30)
+			{
+				if (D1.s16 < 0)
+				{
+					if ((objA0.render_flags & 0x01) == 0)
+					{
+						return
+					}
+					Buzzer.ReadyToShoot()
+					return
+				}
+				if ((objA0.render_flags & 0x01) == 0)
+				{
+					Buzzer.ReadyToShoot()
+				}
+			}
+		}
+	}
+}
+
+
+//# address-hook(0x02d21e)
+function void Buzzer.ReadyToShoot()
+{
+	buzzer.shooting_flag = 0xff
+	u8[A0 + 0x3c] += 0x02
+	objA0.state = 0x03
+	buzzer.shot_timer = 0x32	
+}
+
+
+// //# address-hook(0x02d234) end(0x02d2cc)
+function void Buzzer.Shooting()
+{
+	D0.u16 = buzzer.shot_timer
+	--D0.u16
+	if (D0.s16 >= 0)
+	{
+		buzzer.shot_timer = D0.u16
+		if (D0.u16 == 0x14)
+		{
+			Buzzer.ShootProjectile()
+		}
+		return
+	}
+	u8[A0 + 0x3c] -= 0x02
+}
+
+function void Buzzer.ShootProjectile()
+{
+	if (allocDynamicObjectAfterA0())
+	{
+		objA1.update_address = 0x032990	// this should be the update address of the main Buzzer object
+		objA1.base_state = 0x06
+		objA1.mapping_offset = 0x880336		// get the mappings offset!
+		objA1.sprite_attributes = 0x03d2
+		objA1.sprite_priority = 0x0200
+		objA1.collision_attributes = 0x98
+		objA1.box_size.x = 0x10
+		objA1.box_size.y = 0x10
+		objA1.flags2a = objA0.flags2a
+		objA1.render_flags = objA0.render_flags
+		objA1.state = 0x02
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		objA1.position.y.u16 += 0x18
+		objA0.flags2b |= char.bonus.SHIELD_FIRE		// do not harm players who have a fire shield
+		D0.u16 = 0x0d
+		objA1.velocity.y = 0x0180
+		objA1.velocity.x = -0x0180
+		if (objA1.render_flags & 0x01)
+		{
+			objA1.velocity.x = -objA1.velocity.x
+			D0.s16 = -D0.s16
+		}
+	}
+	objA1.position.x.u16 += D0.u16
+}

@@ -1,0 +1,107 @@
+// Use Sonic 2 spring VRAM location and mappings when needed.
+// Functions taken from objects\basics\spikes.lemon
+//# address-hook(0x022d06) end(0x022d46)
+function void SpringVertical.BaseUpdate()
+{
+	objA0.mapping_offset = (unlock_act) ? 0x880040 : 0x02375c
+	objA0.sprite_attributes = (unlock_act) ? 0x045c : 0x04a4
+	objA0.render_flags |= render_flag.WORLD
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.sprite_priority = 0x200
+	u16[A0 + 0x32] = objA0.position.x.u16
+	u16[A0 + 0x34] = objA0.position.y.u16
+
+	// Targets:
+	//  - 0x022e8e	-> objA0.subtype2c == 0x00 .. 0x0f	-> Vertical spring
+	//  - 0x022db0	-> objA0.subtype2c == 0x10 .. 0x1f	-> Horizontal spring
+	//  - 0x022dee	-> objA0.subtype2c == 0x20 .. 0x2f	-> Vertical spring, pointing down
+	//  - 0x022e28	-> objA0.subtype2c == 0x30 .. 0x3f	-> Diagonal spring pointing up
+	//  - 0x0235d2	-> objA0.subtype2c == 0x40 .. 0x4f	-> Diagonal spring pointing down
+	D0.u16 = (objA0.subtype2c >> 3) & 0x0e
+	call tableLookupAddress(0x022d4a, D0.u16)
+}
+
+//# address-hook(0x022db0) end(0x022dea)
+function void SpringHorizontal.Init()
+{
+	objA0.state = 2
+	objA0.animation.sprite = 3
+	objA0.sprite_attributes = (unlock_act) ? 0x0470 : 0x04b4
+	objA0.box_size.x = 8
+	objA0.update_address = 0x023050
+
+	if (competition_mode.active)
+	{
+		objA0.mapping_offset = 0x023904
+		objA0.sprite_attributes = 0x03ad
+		objA0.update_address = 0x0230de
+	}
+	Spring.SharedInit()
+}
+
+//# address-hook(0x022e28) end(0x022e56)
+function void SpringVertical.InitDiagonal()
+{
+	objA0.state = 0x04
+	objA0.animation.sprite = 0x07
+	objA0.sprite_attributes = 0x043a
+	if (global.zone == 0x02 || global.zone == 0x07)
+	{
+		objA0.sprite_attributes = 0x0478
+	}
+	if (unlock_act)
+	{
+		objA0.sprite_attributes = 0x043c
+	}
+	objA0.update_address = 0x023490
+	Spring.SharedInit()
+}
+
+//# address-hook(0x022e58) end(0x022e8c)
+function void SpringVertical.InitDiagonalFlipped()
+{
+	objA0.state = 0x04
+	objA0.animation.sprite = 0x0a
+	objA0.sprite_attributes = 0x043a
+	if (global.zone == 0x02 || global.zone == 0x07)
+	{
+		objA0.sprite_attributes = 0x0478
+	}
+	if (unlock_act)
+	{
+		objA0.sprite_attributes = 0x043c
+	}
+	objA0.flags2a |= 0x02
+	objA0.update_address = 0x0235d2
+	Spring.SharedInit()
+}
+
+//# address-hook(0x022ec4) end(0x022eee)
+function void Spring.SharedInit()
+{
+	if (objA0.subtype2c & 0x02)
+	{
+		// Yellow spring
+		u16[A0 + 0x30] = -0x0a00
+		objA0.mapping_offset = (competition_mode.active) ? 0x023912 : 0x023772
+		if (unlock_act)
+		{
+			objA0.mapping_offset = 0x880040 + 0x16
+			objA0.sprite_attributes += 0x2000	// next palette line
+		}
+
+	#if STANDALONE
+		// Make springs in HPZ just a little bit stronger	// This affects Original Mode too!
+		if (global.zone_act == 0x1601 && !original_mode)
+		{
+			u16[A0 + 0x30] = -0x0ac0
+		}
+	#endif
+	}
+	else
+	{
+		// Red spring
+		u16[A0 + 0x30] = -0x1000
+	}
+}

@@ -1,0 +1,111 @@
+// We make selective edits to standard Sonic 3 moving platforms and LBZ moving platforms
+// to match Sonic 2 behavior when needed.
+
+//# address-hook(0x025506) end(0x0255ee)
+function void MovingPlatform.Init()
+{
+	if (!unlock_act)
+	{
+		base.MovingPlatform.Init()
+		return
+	}
+
+	objA0.mapping_offset = 0x8802d2		// Dummy value. We're using a bitmap image for platforms.
+	objA0.sprite_attributes = 0x4000
+
+	// Align S2 subtypes with S3 AIZ subtypes and starting positions
+	if (objA0.subtype2c == 1 || objA0.subtype2c == 5)
+	{
+		objA0.subtype2c = 0x22
+		objA0.position.x.u16 -= 0x40
+		objA0.position.y.u16 += 0x10
+	}
+	else if (objA0.subtype2c == 2 || objA0.subtype2c == 6)
+	{
+		objA0.subtype2c = 0x24
+		objA0.position.y.u16 += 0x53	// 0x41
+	}
+	else if (objA0.subtype2c == 3)
+		objA0.subtype2c = 0x2d
+	
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x200
+	// D0 = (u16(objA0.subtype2c) >> 2) & 0x1c
+	// A2 = 0x0254fa + D0.s16
+	objA0.box_size.x = 0x20 // u8[(A2+=1)-1]
+	objA0.box_size.y = (objA0.subtype2c == 3) ? 0x07 : 0x17 // u8[(A2+=1)-1]	// will need a flag if the large moving boxy platforms are used
+	objA0.animation.sprite = 0	// u8[(A2+=1)-1]
+	u16[A0 + 0x30] = objA0.position.x.u16
+	u16[A0 + 0x32] = objA0.position.x.u16
+	u16[A0 + 0x34] = objA0.position.y.u16
+	objA0.flags2e = objA0.flags2a
+	objA0.value42 = 0x280
+	u16[A0 + 0x44] = objA0.position.x.u16
+
+	D0 = (objA0.subtype2c & 0x0f) - 8
+	if (D0.s16 >= 0)
+	{
+		if (D0.u16 < 4)
+		{
+			A2 = 0xfffffe9a + D0.u16 * 4
+			if (s16[A2] < 0)
+			{
+				objA0.flags2e ^= 0x01
+			}
+		}
+		else
+		{
+			objA0.value42 = 0x380
+			u16[A0 + 0x44] += 0x100
+		}
+	}
+
+	objA0.subtype2c = (objA0.subtype2c & 0x0f) * 2
+	objA0.update_address = (objA0.subtype2c == 0x1a) ? 0x024ef2 : 0x0255f4		// falliing platforms reference LBZ's code for this
+	MovingPlatform.Update()
+}
+
+
+//# address-hook(0x024ef2) end(0x024f16)
+function void fn024ef2()
+{
+	if (unlock_act)
+		S2Platform.ReactToPlayer()
+	base.fn024ef2()
+}
+
+//# address-hook(0x0255f4) end(0x02564e)
+function void MovingPlatform.Update()
+{
+	if (unlock_act)
+		S2Platform.ReactToPlayer()
+	base.MovingPlatform.Update()
+}
+
+
+function void S2Platform.ReactToPlayer()
+{
+	// Make a platform sink slightly when a character is standing on it and rise back when the character steps off
+	if ((objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)) != 0)
+	{
+		if (objA0.value3e < 18)
+		{
+			objA0.value3e += 1
+			if (objA0.value3e == 1 || objA0.value3e == 4 || objA0.value3e == 11 || objA0.value3e == 18)
+			{
+				objA0.position.y.u16 += 1
+			}
+		}
+	}
+	else
+	{
+		if (objA0.value3e > 0)
+		{
+			objA0.value3e -= 1
+			if (objA0.value3e == 0 || objA0.value3e == 3 || objA0.value3e == 10 || objA0.value3e == 17)
+			{
+				objA0.position.y.u16 -= 1
+			}
+		}
+	}
+}

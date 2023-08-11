@@ -1,0 +1,63 @@
+// Get mappings and uncompressed art for Sonic 2 invincibility stars when relevant
+// Function taken from objects\basics\shields.lemon
+//# address-hook(0x0187f0) end(0x018862)
+function void fn0187f0()
+{
+	u32 invinStarsArtLoc = (unlock_act) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
+	u16 invinStartArtLength = (unlock_act) ? 0x240 : 0x200
+	updateSpritePattern(invinStarsArtLoc, Shield.targetInVRAM, invinStartArtLength)
+
+	D2 = 0
+	A2 = 0x0187d8
+	A1 = A0
+	for (u8 i = 0; i < 4; ++i)
+	{
+		objA1.update_address = 0x0188e8
+		objA1.render_flags = (render_flag.COMPOUND | render_flag.WORLD)
+		objA1.box_size.x = 0x10
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (Shield.targetInVRAM >> 5)
+		objA1.mapping_offset = (unlock_act) ? 0x88041a : 0x018aea
+		objA1.compound.count = 2
+		objA1.shield.character_address = objA0.shield.character_address
+		u8[A1 + 0x36] = D2.u8
+		u32[A1 + 0x30] = u32[(A2+=4)-4]
+		u16[A1 + 0x34] = u16[(A2+=2)-2]
+		A1 += 0x4a
+		++D2.u16
+	}
+
+	objA0.update_address = 0x018868
+	u8[A0 + 0x34] = 4
+	fn018868()
+}
+
+// Get uncompressed art for Sonic 2 elemental shields when relevant
+// objects\basics\shields.lemon
+function void Shield.sharedInit()
+{
+	if (unlock_act)
+		objA0.shield.art_offset += 0x1beb1e	// shift form S&K data location to S3 alone data location, where versions for Sonic 2's palette are injected
+	base.Shield.sharedInit()
+}
+
+//# address-hook(0x0196c2) end(0x01972c)
+function void LightningShield.Init()
+{
+#if STANDALONE
+	//if (!DIRECT_OBJECT_RENDERING)
+#endif
+	{
+		u32 sparksArtAddress = (unlock_act) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
+		// Load sprite patterns for the sparks
+		updateSpritePattern(sparksArtAddress, 0xf760, 0x50)
+	}
+
+	objA0.mapping_offset = 0x019dc8
+	objA0.shield.art_offset = 0x18e8a4
+	objA0.shield.pattern_offset = 0x019efa
+	Shield.sharedInit()
+
+	objA0.update_address = 0x019732
+	LightningShield.Update()
+}

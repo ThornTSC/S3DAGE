@@ -1,0 +1,26 @@
+// Wait Sonic 2's amount of time during a Time/Game Over so the music can play
+// Function taken from maingame\hud\timeover.lemon
+//# address-hook(0x02d612) end(0x02d636)
+function void fn02d612()
+{
+	u16 targetPositionX = 0x120
+	#if STANDALONE
+		targetPositionX += getScreenExtend()
+	#endif
+
+	s16 diff = targetPositionX - objA0.position.x.u16
+	if (diff != 0)
+	{
+		objA0.position.x.u16 += clamp(diff, -0x10, 0x10)
+		DrawObject()
+	}
+	else
+	{
+		u16[A0 + 0x24] = (unlock_act) ? 0x2d0 : 0x01e0
+		objA0.update_address = 0x02d638
+		#if STANDALONE
+			// Prevent short flicker
+			DrawObject()
+		#endif
+	}
+}

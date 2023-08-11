@@ -85,6 +85,7 @@ function void customMenu.setup()
 	specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 	restartSpecialStage = 0
 	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
+	unlock_act = 0
 	challenges_normalmode = 0
 	held_time.up = 0
 	held_time.down = 0

@@ -1,0 +1,75 @@
+//# address-hook(0x047782)
+function void Masher.BaseUpdate()
+{
+//	call 0x047784 + objA0.base_state
+
+	// Let's do this as we do for other objects.
+	if (objA0.base_state == 0)
+		Masher.Init()
+	else
+		Masher.Main()
+
+	Enemy.DrawOrUnload()
+}
+
+//# address-hook(0x047784)
+function void Masher.Init()	// loc_2D3AA
+{
+	objA0.base_state += 2
+//	System.loadExternalRawData("masher_mappings", 0x880000)	// done with PLC now
+	objA0.mapping_offset = 0x880000		// get mappings Obj5C_MapUnc_2D442 and place in objA0.mapping_offset
+	objA0.sprite_attributes = 0x0414	// get VRAM pointer / 20. Is this objA0.sprite_attributes ?
+	// do not need line for adjusting 2P art pointer in S3&K
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0200	// 0x04 in Sonic 2, but S3&K uses old priority system * 0x80
+	objA0.collision_attributes = 0x09	// same as u8[A0 + 0x28] in other objects. From Touch_Sizes (byte_FF62 in DAGE). In Sonic 2 and 3&K, this is 0x09: $C,$10
+	objA0.box_size.x = 0x10	// width_pixels in disassembly. There is also height_pixels in S3&K.
+	objA0.box_size.y = 0x10	// Added so Mashers that go off the bottom of the screen during their falls don't stop being drawn
+	objA0.velocity.y = -0x0400		// the starting jump isn't as high as the others
+	objA0.value42 = objA0.position.y.u16	// uses objoff_30 in Sonic 2, so we use an arbitrary word here. Note that AIR defines other values as bytes!
+
+	Masher.Main()
+}
+
+//# address-hook(0x047786)
+function void Masher.Main()	// loc_2D3E4
+{
+	// A1 = off_2D430	// animation script. Gets MasherAnimIndices below to see where to look in MasherAnims.
+	A1 = 0x890000
+	System.loadExternalRawData("masher_animation", A1)		// currently decompressing Masher art to this address, but that should occur in Primary PLC before this function runs. Script and animation data in one file.
+	Object.AnimationUpdate()	// in objects\shared.lemon, address hook 0x01abe8. Can also give an address as an input to have it placed in A1 automatically.
+	UpdateMovementStraightSimple()	// ObjectMove, called MoveSprite2 in S3&K. MoveSprite (no 2), called UpdateMovementSimple() in AIR and ObjectMoveAndFall in Sonic 2, adds 0x38 to y velocity for gravity.
+	objA0.velocity.y += 0x18
+	D0.u16 = objA0.value42
+	if (D0.u16 < objA0.position.y.u16)	// the check in ASM is bcc.s, also known as bhs.s: branch if higher or same. We've reversed the check here to avoid a goto.
+	{
+		objA0.position.y.u16 = D0.u16
+		objA0.velocity.y = -0x0500
+	}
+	// From here on is loc_2D40C.
+	objA0.state = 1	// anim(A0) in S2 ASM
+	D0.u16 -= 0xc0
+	if (D0.u16 < objA0.position.y.u16)	// the check in ASM is bcc.s, also known as bhs.s: branch if higher or same. We've reversed the check here to avoid a goto.
+	{
+		objA0.state = (objA0.velocity.y >= 0) ? 2 : 0
+	}
+}
+
+/*
+constant array<u32> MasherAnimIndices =
+{
+	0, 4, 8		// addition to base animation address. Array below has lines sized for each animation.
+}
+
+constant array<u8> MasherAnims =
+{
+	7, 0, 1, 0xff,
+	3, 0, 1, 0xff,
+	7, 0, 0xff, 0	// final 0 comes from an "even" macro in ASM
+}
+
+constant array<u8> MasherMappings = 
+{
+	0x00, 0x04, 0x00, 0x1E, 0x00, 0x03, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xF4, 0xF0, 0x01, 0x00, 0x04, 0x00, 0x02, 0x00, 0x04, 0x00, 0x09, 0x00, 0x0A, 0x00, 0x05, 0xFF, 0xF4, 0x00, 0x03, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xF4, 0xF0, 0x05, 0x00, 0x06, 0x00, 0x03, 0x00, 0x02, 0x00, 0x09, 0x00, 0x10, 0x00, 0x08, 0xFF, 0xF4, 0x00, 0x00
+}
+*/

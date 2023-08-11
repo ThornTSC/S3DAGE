@@ -3,10 +3,6 @@
 
 // constant bool CHEAT_ONE_BLUE_SPHERE = true
 
-// Debug variables for easy watching
-// define u16 CameraLimit = u16[0x860000]
-
-
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
 global u64 DAGE_version = "D.A. Garden Edition v1.8.1.1"
@@ -90,7 +86,9 @@ include time_attack
 include ring_object_managers
 include string_display
 include movement_changes
+include music
 include themes/?
+include RtWI/?
 
 // Only include this when getting clean screenshots without the HUD or character
 // include screenshots
@@ -116,11 +114,22 @@ constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
 constant u8 theme.south  = 3
 
-// Number of stars for unlocks
-constant u16 theme.south.unlock = 25
+// Flag for unlockable levels
+global u16 unlock_act
+
+// Number of stars for unlocks constants
+constant u16 unlock.theme.south = 25
+constant u16 unlock.level.ehz   = 50
 
 // Memory address constants
 constant u32 KosinskiRawdataBuffer = 0x840300
+constant u32 s2_angles_address = 0x854000
+constant u32 s2_heightmaps_address = 0x854100	// s2_angles_address + 0x100
+constant u32 s2_heightmapsrotated_address = 0x855100	// s2_heightmaps_address + 0x1000
+constant u32 s2_decompression_buffer = 0x860000
+constant u32 s2_levelanimation_address = 0x870800
+constant u32 s2_mappings_address = 0x880000
+constant u32 s2_decompression_buffer_2 = 0x890000
 
 
 // This is the first function called in a frame.
@@ -158,7 +167,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffb012, 2)
+//	debugWatch(0xffffb02f, 1)
 }
 
 // This function is the final one of any frame.
@@ -178,11 +187,20 @@ function void endOfFrame()
 		specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 		restartSpecialStage = 0
 		fast_forward = false
+		unlock_act = 0
 
 		menu_initialized = 0
 		Game.returnToMainMenu()
 	}
 	
+	// Handle Extra Slot Amy roll leniency separate from base game characters' roll leniency.
+	// This isn't the ideal place to do this, but every ideal place is already overwritten by Extra Slot Amy itself.
+	if (u8[0xffffe654] == 3)	// Extra Slot character ID is Amy
+		if (u8[0xffffb040])								// player 1 jumping flag
+			air_time = 5
+		else if (u8[0xffffb02a] && char.flag.IN_AIR)	// player 1 status bitfield
+			air_time++
+
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
 
@@ -258,6 +276,9 @@ function void discordRPC.mainGame()
 		gameType = "Classic Mode"
 	else if (time_attack == 3)
 		gameType = "100% Speedrun"
+
+	if (unlock_act)
+		gameType = "Emerald Hill Zone"
 	// else if (time_attack == 4)	// unused, as it's a special case that won't state emerald count
 	//	gameType = "Any% Speedrun"
 
@@ -277,6 +298,10 @@ function void discordRPC.mainGame()
 	
 	if (time_attack == 4)
 		Game.setDiscordState("Any% Speedrun")
+	else if (global.chaos_emeralds + global.super_emeralds == 1)
+	{
+		Game.setDiscordState(stringformat("%s, 1 Emerald", gameType))	// remove "s" when only 1 emerald has been collected
+	}
 	else
 		Game.setDiscordState(stringformat("%s, %d Emeralds", gameType, global.chaos_emeralds + global.super_emeralds))
 	discordRPC.setCharacterImage()
@@ -307,13 +332,13 @@ function void discordRPC.setZoneImage()
 		Game.setDiscordLargeImage("zone13_dez")
 		return
 	}
-	else if (global.zone == 0x0d)				// outro
+	else if (global.zone == 0x0d || unlock_act)	// outro or unlockable act
 	{
 		Game.setDiscordLargeImage("sonic3air")
 		return
 	}
 
-	u8 checkpoint.zone = u8[0xfffffe2c]				// first byte of u16 checkpoint.zone_act
+	u8 checkpoint.zone = u8[0xfffffe2c]		// first byte of u16 checkpoint.zone_act
 	u8 level.backup.zone = u8[0xfffffe4a]	// first byte of u16 level.backup.zone_act
 	u8 zone = (global.zone >= 0x13 && global.zone <= 0x15) ? checkpoint.zone : global.zone	// if in a bonus stage, use the originating zone
 	if ((global.game_mode & 0x7f) == 0x34 || (global.game_mode & 0x7f) == 0x48 || global.zone_act == 0x1701)
@@ -343,6 +368,8 @@ function void discordRPC.setZoneImage()
 function void MainMenuBG.Run()
 {
 	AIR_menu_run = 1
+	unlock_act = 0
+
 	held_time.up = 0
 	held_time.down = 0
 	held_time.right = 0
@@ -517,26 +544,203 @@ function void TitleCard.Init()
 }
 
 
+
+
+
+
+
+
+
+// Allow passing over ceilings in Original Mode.
+// Also support the Sonic 2 angle and height map arrays when needed.
+// Functions taken from maingame\collision.lemon
+function u16 getTileAndAngle()
+{
+	// Inputs:
+	//  - A4 = address of sensor to write result (angle) to -- e.g. 0xfffff768 or 0xfffff76a
+	//  - A5 = algorithm for getting tile address -- usually 0x00eff0
+	//  - D2.u16 = input.y
+	//  - D3.u16 = input.x
+	//  - D5.u8  = layer bit to check -- values between 0x0c and 0x0f
+	//  - D6.u16 = xor bitmask for flipping
+
+#if STANDALONE
+	// Outside the upper border, use topmost valid level collision
+	if (Game.getSetting(SETTING_FIX_GLITCHES) && level.vertical_wrap != 0xff00 && !original_mode)
+	{
+		D2.s16 = max(D2.s16, 0)
+	}
+#endif
+
+	// Output:
+	//  - u8[A4] = sensor value, angle of tile
+	//  - D1.s16 = signed indent of collision inside the hit tile at input position
+
+	// Meanings of layer bits:
+	//  - 0x0c = Path 1 solid from above
+	//  - 0x0d = Path 1 solid from other sides
+	//  - 0x0e = Path 2 solid from above
+	//  - 0x0f = Path 2 solid from other sides
+	u8 layer_bit = D5.u8
+
+	call A5		// This usually calls "fn00eff0()"
+
+	// Tile:
+	//  - Lower bits: tile type
+	//  - Bit 0x0400 = flip horizontally
+	//  - Bit 0x0800 = flip vertically
+	//  - Higher bits: layers
+	u16 tile = u16[A1]
+	u16 tileType = tile & 0x03ff
+
+	if (tileType != 0 && (tile >> layer_bit) & 1)
+	{
+		A2 = u32[0xfffff796]
+		u8 tileForm = u8[A2 + tileType * 2]
+		if (tileForm != 0)
+		{
+			u32 angleArray = (unlock_act) ? 0x854000 : 0x096000
+			u8 angle = u8[angleArray + tileForm]
+			if (tile & 0x0400)	// Flip horizontally
+			{
+				angle = -angle
+			}
+			if (tile & 0x0800)	// Flip vertically
+			{
+				angle = 0x80 - angle
+			}
+			u8[A4] = angle
+
+			return tile
+		}
+	}
+	return 0
+}
+
+function s16 getCollisionIndentX()
+{
+	u16 tile = getTileAndAngle()
+	if (tile != 0)
+	{
+		u16 input.y = D2.u16
+		u8 tileForm = u8[A2 + (tile & 0x3ff) * 2]
+
+		u16 iy = input.y & 0x0f
+		if (tile & 0x0800)	// Flip vertically
+		{
+			iy = 15 - iy
+		}
+
+		u32 xArray = (unlock_act) ? 0x855100 : 0x097100
+		s16 indent = s8[xArray + (tileForm * 0x10) + iy]
+		if (indent != 0)
+		{
+			tile ^= D6.u16
+			if (tile & 0x0400)	// Flip horizontally
+			{
+				indent = -indent
+			}
+			return indent
+		}
+	}
+	return 0
+}
+
+function s16 getCollisionIndentY()
+{
+	u16 tile = getTileAndAngle()
+	if (tile != 0)
+	{
+		u16 input.x = D3.u16
+		u8 tileForm = u8[A2 + (tile & 0x3ff) * 2]
+
+		u16 ix = input.x & 0x0f
+		if (tile & 0x0400)	// Flip horizontally
+		{
+			ix = 15 - ix
+		}
+
+		u32 yArray = (unlock_act) ? 0x854100 : 0x096100
+		s16 indent = s8[yArray + (tileForm * 0x10) + ix]
+		if (indent != 0)
+		{
+			tile ^= D6.u16
+			if (tile & 0x0800)	// Flip vertically
+			{
+				indent = -indent
+			}
+			return indent
+		}
+	}
+	return 0
+}
+
+
+// Load collision as rawdata.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x0076a6) end(0x0076e4)
+function void fn0076a6()
+{
+	System.loadExternalRawData("s2angles", s2_angles_address)
+	System.loadExternalRawData("s2heightmaps", s2_heightmaps_address)
+	System.loadExternalRawData("s2heightmapsrotated", s2_heightmapsrotated_address)
+	if (unlock_act)
+	{
+		D0 = 0x0df370	// location of S2&K object position pointers and data
+		System.loadExternalRawData("ehz_collision", D0)
+	}
+	else
+	{
+		A1 = 0x098100 + global.zone * 8 + global.act * 4
+		D0 = u32[A1]
+	}
+
+	u32[0xfffff7b4] = D0
+	if (D0 >= 0x260000)
+	{
+		D0 += 0x600
+		u32[0xfffff7b8] = D0
+		u32[0xfffff796] = u32[0xfffff7b4]
+	}
+	else
+	{
+		++D0
+		u32[0xfffff7b8] = D0
+		u32[0xfffff796] = u32[0xfffff7b4]
+	}
+}
+
+
+
+
 // Load tiles as rawdata into shared memory and then decompress instead of using a ROM injection.
+// Also ensure Sonic 2 tiles and PLCs are loaded properly.
 // Function taken from maingame\maingame.lemon
 //# address-hook(0x007812) end(0x007890)
 function void fn007812()
 {
 	A4 = MainGame.getLevelDataPointer()
 	A1 = u32[A4] & 0x00ffffff
-	if (global.zone == 0x04)
+//	u32 backupA1 = A1
+	if (unlock_act)
+	{
+		System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary blocks to shared memory
+		A1 = s2_decompression_buffer
+	}
+	else if (global.zone == 0x04)
 	{
 		u64 key  = (original_mode) ? "fbz_tiles_p_orig" : "fbz_tiles_p"
-		System.loadExternalRawData(key, 0x860000)		// copy Primary blocks to shared memory
-		A1 = 0x860000
+		System.loadExternalRawData(key, s2_decompression_buffer)		// copy Primary blocks to shared memory
+		A1 = s2_decompression_buffer
 	}
+//	A1 = backupA1
 	u32 firstSource = A1
 	D4.u16 = u16[A1]
 
 	Kosinski.addToDMAQueue(A1, 0x0000)
 
 	A1 = u32[A4+4] & 0x00ffffff
-	if (A1 != firstSource && global.zone != 0x04)
+	if (A1 != firstSource && global.zone != 0x04 && !unlock_act)	// FBZ loads all tiles at once in the above setup
 	{
 		Kosinski.addToDMAQueue(A1, D4.u16)
 	}
@@ -597,13 +801,24 @@ function void fn01c2b0()
 	// Load Primary blocks
 	D0 = u32[A2+8] & 0x00ffffff
 	D7 = D0
-	Kosinski.decompress(D0, 0xffff9000)
+	if (unlock_act)
+	{
+		System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)				// decompress them to their proper RAM
+	}
+	else
+	{
+		Kosinski.decompress(D0, 0xffff9000)
+	}
 
 	// Load Secondary blocks
-	D0 = u32[A2+12] & 0x00ffffff
-	if (D7 != D0)
+	if (!unlock_act)
 	{
-		Kosinski.decompress(D0, A1)
+		D0 = u32[A2+12] & 0x00ffffff
+		if (D7 != D0)
+		{
+			Kosinski.decompress(D0, A1)
+		}
 	}
 
 	// Load Primary chunks
@@ -611,7 +826,12 @@ function void fn01c2b0()
 	D7 = D0
 	A1 = 0xffff0000
 	key = stringformat("%s_chunks_p", getZoneInitials(global.zone))
-	if (global.zone_act == 0x0a00 && System.hasExternalRawData("ssz1_chunks_p"))					// SSZ uses Primary and Secondary in Act 1 and unique Primary only in Act 2
+	if (unlock_act)
+	{
+		System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
+	}
+	else if (global.zone_act == 0x0a00 && System.hasExternalRawData("ssz1_chunks_p"))					// SSZ uses Primary and Secondary in Act 1 and unique Primary only in Act 2
 	{
 		System.loadExternalRawData("ssz1_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
@@ -632,25 +852,28 @@ function void fn01c2b0()
 	// Load Secondary chunks
 	// A1 = address where the Primary chunk decompression ended (if there were no Primary chunks, then A1 = 0xffff0000)
 	// D7 = address where the Primary chunks were stored compressed in ROM
-	D0 = u32[A2+20] & 0x00ffffff
-	key = stringformat("%s_chunks_s", getZoneActInitials(global.zone_act))
-	if (global.zone_act == 0x0100 && original_mode && System.hasExternalRawData("hcz1_chunks_s_orig"))	// undo HCZ1 background chunk fixes in Original Mode
+	if (!unlock_act)
 	{
-		System.loadExternalRawData("hcz1_chunks_s_orig", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
-		Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM		
-	}
-	else if (System.hasExternalRawData(key))		// only try to load Secondary chunks if they exist for the act
-	{
-		System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Secondary chunks to shared memory
-		Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
-//		debugLog(stringformat("Secondary chunks: %s", key))
-	}
-	else	// load from ROM
-	{
-		if (D7 != D0)
+		D0 = u32[A2+20] & 0x00ffffff
+		key = stringformat("%s_chunks_s", getZoneActInitials(global.zone_act))
+		if (global.zone_act == 0x0100 && original_mode && System.hasExternalRawData("hcz1_chunks_s_orig"))	// undo HCZ1 background chunk fixes in Original Mode
 		{
-			Kosinski.decompress(D0, A1)
-//			debugLog("Secondary chunks: ROM")	
+			System.loadExternalRawData("hcz1_chunks_s_orig", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM		
+		}
+		else if (System.hasExternalRawData(key))		// only try to load Secondary chunks if they exist for the act
+		{
+			System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Secondary chunks to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
+	//		debugLog(stringformat("Secondary chunks: %s", key))
+		}
+		else	// load from ROM
+		{
+			if (D7 != D0)
+			{
+				Kosinski.decompress(D0, A1)
+	//			debugLog("Secondary chunks: ROM")	
+			}
 		}
 	}
 
@@ -660,12 +883,6 @@ function void fn01c2b0()
 	// Load tiles
 	D1.u8 = u8[A2]
 	D0 = u8[A2+4]
-//	if (global.zone == 0x04)	// FBZ
-//	{
-//		u64 tileKey = (original_mode) ? "fbz_tiles_p_orig" : "fbz_tiles_p"	// load old FBZ tiles with green stripe on clouds in Original Mode
-//		System.loadExternalRawData(tileKey, 0x195040)						// (done by forcing a ROM injection here)
-//		debugLog(tileKey)
-//	}
 	if (D0.u8 != 0 && D1.u8 != D0.u8)
 	{
 		requestLoadingPatterns(D0.u8)
@@ -745,32 +962,6 @@ function void fn04e838()
 
 
 
-
-// Support a second set of custom level layouts for Original Mode
-// Function taken from maingame\maingame.lemon
-//# address-hook(0x01c362) end(0x01c388)
-function void fn01c362()
-{
-	// Load content of level chunks
-	//  -> This includes both foreground and background chunks
-	u8 offset = global.zone * 8 + global.act * 4
-	A0 = u32[0x09d5c0 + offset]
-	copyMemory(0xffff8000, A0, 0x1000)
-
-	if (!original_mode)
-		Standalone.loadRawLevelData("%s_layout", global.zone_act, 0xffff8000)
-	else
-	{
-//		if (global.zone_act == 0x1701)	// HPZ emerald cave, which (like normal HPZ) is loading the base S3&K layout
-//		{
-//			u8[0xffff821d] = 0x7c		// make a correction to match the original ROM hack when seeing results after winning the far-left Super Emerald
-//		}
-		Standalone.loadRawLevelData("%s_origlayout", global.zone_act, 0xffff8000)
-	}
-}
-
-
-
 // Do not allow cutscene fast forwarding in Original Mode
 // Functions taken from main_oxygen.lemon
 function void Game.startSkippableCutscene()
@@ -789,6 +980,37 @@ function void Game.endSkippableCutscene()
 }
 
 
+
+
+
+
+// Support a second set of custom level layouts for Original Mode
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x01c362) end(0x01c388)
+function void fn01c362()
+{
+	// Load content of level chunks
+	//  -> This includes both foreground and background chunks
+	u8 offset = global.zone * 8 + global.act * 4
+	A0 = u32[0x09d5c0 + offset]
+	copyMemory(0xffff8000, A0, 0x1000)
+
+	if (unlock_act)
+		Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
+	else if (!original_mode)
+		Standalone.loadRawLevelData("%s_layout", global.zone_act, 0xffff8000)
+	else
+	{
+//		if (global.zone_act == 0x1701)	// HPZ emerald cave, which (like normal HPZ) is loading the base S3&K layout
+//		{
+//			u8[0xffff821d] = 0x7c		// make a correction to match the original ROM hack when seeing results after winning the far-left Super Emerald
+//		}
+		Standalone.loadRawLevelData("%s_origlayout", global.zone_act, 0xffff8000)
+	}
+}
+
+
+
 // Support a second set of custom object positions for Original Mode
 // Function taken from standalone\resources\level_objects\level_objects.lemon
 function void LevelObjectTableBuilder.buildObjects()
@@ -798,7 +1020,9 @@ function void LevelObjectTableBuilder.buildObjects()
 
 	// Load objects from a custom binary file
 	u32 bytes
-	if (!original_mode)
+	if (unlock_act)
+		bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
+	else if (!original_mode)
 		bytes = Standalone.loadRawLevelData("%s_objects", global.zone_act, A0)
 	else
 		bytes = Standalone.loadRawLevelData("%s_origobjects", global.zone_act, A0)
@@ -948,7 +1172,9 @@ function void LevelRingsTableBuilder.buildRings()
 
 	// Load rings from a custom binary file
 	u32 bytes
-	if (!original_mode)
+	if (unlock_act)
+		bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
+	else if (!original_mode)
 		bytes = Standalone.loadRawLevelData("%s_rings", global.zone_act, A1)
 	else
 		bytes = Standalone.loadRawLevelData("%s_origrings", global.zone_act, A1)
@@ -4007,41 +4233,41 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		{
 			if (objA0.value39 == 0)
 			{
-				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0xffffffff, 0x18000)
-				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 2, 0xf005)
+				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0xffffffff, 0x10000)
+				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 2, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x18000)
+				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else if (objA0.animation.sprite == 5)
 		{
 			if (objA0.value39 == 0)
 			{
-				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0xffffffff, 0x18000)
-				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 1, 0xf005)
+				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0xffffffff, 0x10000)
+				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 1, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x18000)
+				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else if (objA0.animation.sprite == 6)
 		{
 			if (objA0.value39 == 0)
 			{
-				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0xffffffff, 0x18000)
-				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 3, 0xf005)
+				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0xffffffff, 0x10000)
+				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 3, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x18000)
+				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else
 		{
 			if (objA0.value39 == 0)
 			{
-				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0xffffffff, 0x18000)
-				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 0, 0xf005)
+				Renderer.drawCustomSprite("redstarring_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0xffffffff, 0x10000)
+				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 0, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x18000)
+				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		return true
 	}
@@ -4050,11 +4276,14 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	if (objA0.update_address >= 0x01d566 && objA0.update_address <= 0x01d61e)
 	{
 		u8 flags = ((objA0.render_flags & 0x02) ? SPRITE_FLAG_FLIP_Y : 0) | ((objA0.sprite_attributes & 0x8000) ? SPRITE_FLAG_PRIO : 0)
+		u64 key
+		bool s2Challenge = time_attack && unlock_act
 		if (objA0.animation.sprite == 11)
 		{
-			if (Game.getSetting(SETTING_MONITOR_STYLE) && !original_mode && !time_attack)
+			if ((Game.getSetting(SETTING_MONITOR_STYLE) || unlock_act) && !original_mode && (!time_attack || s2Challenge))
 			{
-				Renderer.drawCustomSprite("monitor_s2_broken", px, py, 0x00, flags, renderQueue)
+				key = (unlock_act) ? "s2_monitor_s2_broken" : "monitor_s2_broken"
+				Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
 			}
 			else
 			{
@@ -4063,9 +4292,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		}
 		else
 		{
-			if (Game.getSetting(SETTING_MONITOR_STYLE) && !original_mode && !time_attack)
+			if ((Game.getSetting(SETTING_MONITOR_STYLE) || unlock_act) && !original_mode && (!time_attack || s2Challenge))
 			{
-				Renderer.drawCustomSprite("monitor_s2_intact", px, py, 0x00, flags, renderQueue)
+				key = (unlock_act) ? "s2_monitor_s2_intact" : "monitor_s2_intact"
+				Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
 				py += (objA0.render_flags & 0x02) ? 2 : -2
 			}
 			else
@@ -4076,24 +4306,26 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 
 			if (objA0.subtype2c == 0x0f && level.framecounter % 6 > 1)	// use level frame counter to make Time Freeze item flicker
 			{
-				Renderer.drawCustomSprite("monitor_icon_timefreeze", px, py, 0x00, flags, renderQueue + 1)
+				key = (unlock_act) ? "s2_monitor_icon_timefreeze" : "monitor_icon_timefreeze"
+				Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue + 1)
 			}
 
 			else if (objA0.animation.sprite <= 1)
 			{
 				if (objA0.animation.sprite == 1)
 				{
-					Renderer.drawCustomSprite("monitor_icon_static", px, py, 0x00, flags, renderQueue + 1)
+					key = (unlock_act) ? "s2_monitor_icon_static" : "monitor_icon_static"
+					Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue + 1)
 				}
 			}
 			else
 			{
-				u64 key = Monitor.getIconSpriteKey(objA0.subtype2c)
+				key = Monitor.getIconSpriteKey(objA0.subtype2c)
 				if (objA0.subtype2c >= 0x05 && objA0.subtype2c <= 0x07)
 				{
 					if (Monitor.enforceClassicShield())
 					{
-						key = "monitor_icon_classicshield"
+						key = (unlock_act) ? "s2_monitor_icon_classicshield" : "monitor_icon_classicshield"
 					}
 				}
 				if (key != 0)
@@ -4222,6 +4454,24 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return false
 	}
 
+	// HCZ Pointdexter: conditionally do NOT use a renderhook for Original Mode
+	if (objA0.update_address == 0x088282)
+	{
+		if (original_mode)
+		{
+			s8[0x360e8e] = -0x0c
+			s8[0x360e9a] = -0x0c
+			return false
+		}
+		else
+		{
+			s8[0x360e8e] = -0x08
+			s8[0x360e9a] = -0x08
+			Standalone.renderWithKosinskiCompression(px, py, 0x36ad8a, 0xff, renderQueue)
+			return true
+		}
+	}
+
 	// FBZ 2 boss fight Egg Robo head
 	if (objA0.update_address == 0x067b96 && isMainCharacter(CHARACTER_KNUCKLES) && original_mode)
 	{
@@ -4236,6 +4486,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
+		if (unlock_act)
+			key = stringformat("s2_ring_0%d", animFrame)
 		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, 255)
 		return true
 	}
@@ -4252,6 +4504,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			alpha = 255			// no fading out in Original Mode
 		}
 		u64 key = stringformat("ring_0%d", animFrame)
+		if (unlock_act)
+			key = stringformat("s2_ring_0%d", animFrame)
 		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
 		return true
 	}
@@ -4264,6 +4518,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
+		if (unlock_act)
+			key = stringformat("s2_ring_0%d", animFrame)
 		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, 255)
 		return true
 	}
@@ -4319,6 +4575,40 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 */
+
+	// EHZ Platforms
+	if (unlock_act && objA0.update_address == 0x0255f4)
+	{
+		Renderer.drawCustomSprite(stringformat("ehz_platform_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		return true
+	}
+	if (unlock_act && (objA0.update_address == 0x024ef2 || objA0.update_address == 0x0251ae))
+	{
+		Renderer.drawCustomSprite("ehz_platform_fall", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		return true
+	}
+
+	// Sonic 2 Explosion
+	if (unlock_act && objA0.update_address == 0x01e66e && objA0.animation.sprite < 5)
+	{
+		Renderer.drawCustomSprite(stringformat("s2_explosion_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		return true
+	}
+
+	// Sonic 2 Ricky
+	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 1)
+	{
+		Renderer.drawCustomSprite(stringformat("s2_ricky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		return true
+	}
+
+	// Sonic 2 Flicky
+	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 5)
+	{
+		Renderer.drawCustomSprite(stringformat("s2_flicky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		return true
+	}
+
 	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
 }
 
@@ -4361,6 +4651,7 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 
 
 // Allow a DEZ retracting spring in DEZ1 to use correct graphics for its base.
+// Also makes a check from AIR commits after the latest stable build.
 // Function taken from standalone\rendering\renderhooks.lemon
 function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16 renderQueue)
 {
@@ -4369,6 +4660,15 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 	{
 		Renderer.drawCustomSprite("dez_retracting_spring_base", px + 0x10, py + 8, 0, objA0.render_flags, renderQueue + 1)
 		return true
+	}
+
+	// Trees in the background before the AIZ 2 boss. In 6 Aug 2023 AIR commit 6a4b5dc.
+	if (objA0.update_address == 0x05068a)
+	{
+		// Draw trees over the full screen height, to avoid occasional visible gaps there
+		Renderer.drawVdpSprite(px, py+64, size, index, 0x1f00)
+		Renderer.drawVdpSprite(px, py-64, size, index, 0x1f00)
+		return false
 	}
 
 	return base.Standalone.onDrawVdpSprite(px, py, size, index, renderQueue)
@@ -5709,7 +6009,11 @@ function void TriggerNextZone()
 
 
 
-
+constant array<u16> UnlockAct_StartPositionsSonicTails =
+{
+	0x0060, 0x0294,		// not called, as unlock_act starts at 1
+	0x0060, 0x0294		// EHZ
+}
 
 
 
@@ -5750,12 +6054,18 @@ function void SetupCharacterAtStartPosition()
 			D1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x0020 : 0x0010
 			D0 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x0920 : 0x06ac
 		}
-
+		if (unlock_act)
+		{
+			D1 = UnlockAct_StartPositionsSonicTails[unlock_act * 2]
+			D0 = UnlockAct_StartPositionsSonicTails[unlock_act * 2 + 1]
+		}
 		u16[0xffffb010] = D1.u16
 		u16[0xffffb014] = D0.u16
 
+		if (unlock_act)
+			SetupCharacterAtStartPosition.unlockAct()
 
-		if (global.zone_act == 0x0000)
+		else if (global.zone_act == 0x0000)
 		{
 			if (isSonicIntro())
 			{
@@ -6032,6 +6342,11 @@ function void SetupCharacterAtStartPosition()
 }
 
 
+function void SetupCharacterAtStartPosition.unlockAct()
+{
+	// This function does return to the last five lines of the prior function.
+	// For now, it is a completely empty function to prevent any special level starts.
+}
 
 
 
@@ -6176,7 +6491,11 @@ function void fn0067ee()
 
 	A1 = 0xffffb000
 	A2 = 0xffffb04a
-	if (global.zone_act == 0x0000)
+
+	if (unlock_act)
+		fn0067ee.unlockAct()
+
+	else if (global.zone_act == 0x0000)
 	{
 		// Angel Island Zone
 		if (isSonicIntro())
@@ -6367,6 +6686,13 @@ function void fn0067ee()
 		// Hidden Palace Zone
 		u32[0xffffb172] = 0x044a0c
 	}
+}
+
+
+function void fn0067ee.unlockAct()
+{
+	// This function does return to the last five lines of the prior function.
+	// For now, it is a completely empty function to prevent any special level starts.
 }
 
 
@@ -7402,7 +7728,7 @@ function void fn01bc60()
 	u16 maxY = u16[A0+6]
 #if STANDALONE
 	// Some corrections
-	if (global.zone_act == 0x0000)	// AIZ 1
+	if (global.zone_act == 0x0000 && !unlock_act)	// AIZ 1
 	{
 		minX = 0x12e0
 		if (isMainCharacter(CHARACTER_KNUCKLES) && !original_mode) //  || (isMainCharacter(CHARACTER_TAILS) && u8[0xffffef7c] == 0xDA && (u16[0xffffef7c] != 0xDA00 || u16[0xffffef7c] != 0xDA02))
@@ -7416,6 +7742,12 @@ function void fn01bc60()
 		maxX -= getScreenExtend()
 	}
 #endif
+
+	if (unlock_act)
+	{
+		minX = 0
+		maxX = 0x7fff
+	}
 
 	move_area.left = minX
 	move_area.right = maxX
@@ -7534,16 +7866,8 @@ function void fn01f7ce()
 							objA1.update_address = 0x04fa0c
 						}
 
-						if (!original_mode && getScreenWidth() > 320)
-						{
-							move_area.left = 0x2c54 - getScreenExtend()
-							move_area.right = 0x2c54 + getScreenExtend()
-						}
-						else
-						{
-							move_area.left = 0x2c60
-							move_area.right = 0x2c60
-						}
+						move_area.left = 0x2c60 - getScreenExtend()
+						move_area.right = 0x2c60 + getScreenExtend()
 						u16[A0 + 0x38] = 0x3c
 					}
 				}
@@ -8230,7 +8554,7 @@ function void fn069456()
 		if (camera.position.y.u16 < 0x300)
 		{
 			// Sonic/Tails route boss
-			move_area.right = min(move_area.right, 0x4940 + getScreenExtend() * 2)
+			move_area.right = min(move_area.right, 0x4990)
 		}
 		else
 		{
@@ -8411,7 +8735,7 @@ function void fn065c56()
 
 
 
-// Removes special check for HCZ1's first water pool
+// Removes special check for HCZ1's first water pool.
 //# address-hook(0x006c34) end(0x006ca0)
 function void UpdateWater()
 {
@@ -8722,7 +9046,7 @@ function void fn030338()
 
 // After the HCZ1 boss, don't let the waves disappear for one frame.
 // This fix is imported from the first AIR version after v22.09.10.00.
-// Function taken from level\02-hcz\level_hcz.lemon
+// Function taken from level\02_hcz\level_hcz.lemon
 //# address-hook(0x050c4c) end(0x050cfa)
 function void fn050c4c()
 {
@@ -9451,7 +9775,8 @@ function void SetupCharacterAtLastCheckpoint()
 
 
 
-// In MGZ2, force a certain arrow signpost to face the opposite direction after a Relief is shattered
+// In MGZ2, force a certain arrow signpost to face the opposite direction after a Relief is shattered.
+// In EHZ, add a check for bridge support posts.
 // Function taken from objects\level\decorativesprite.lemon
 //# address-hook(0x02b928) end(0x02b962)
 function void fn02b928()
@@ -9459,7 +9784,22 @@ function void fn02b928()
 	if (global.zone_act == 0x0201 && objA0.position.x.u16 == 0x2804 && objA0.position.y.u16 == 0x07f4 && level.trigger0a && !original_mode)
 		objA0.subtype2c = 0x0c	// change from 0x0b (left arrow) to 0x0c (right arrow)
 
-	base.fn02b928()
+	if (!unlock_act)
+	{
+		base.fn02b928()
+		return
+	}
+
+	objA0.mapping_offset = 0x88002c
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x03b2)	// 0x03b6 in Sonic 2, but we ignore the animation sprite shift
+	objA0.render_flags |= render_flag.WORLD
+//	objA0.animation.sprite = objA0.subtype2c
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x04
+	objA0.box_size.y = 0x04
+
+	objA0.update_address = 0x02b962
+	fn02b962()
 }
 
 
@@ -11335,7 +11675,7 @@ function void UpdateLevelTiles.ICZ2()
 				}
 			}
 		}
-		else if (u16[0xffffb010] < 0x22b0 || (u16[0xffffb010] >= 0x2800 && u16[0xffffb010] < 0x3800) || (u16[0xffffb010] > 0x3e00  && u16[0xffffb010] < 0x4000))	// last one is a window that does NOT stretch to the boss area
+		else if ((u16[0xffffb010] >= 0x0bc0 && u16[0xffffb010] < 0x22b0) || (u16[0xffffb010] >= 0x2800 && u16[0xffffb010] < 0x3800) || (u16[0xffffb010] > 0x3e00  && u16[0xffffb010] < 0x4000))	// last one is a window that does NOT stretch to the boss area
 		{
 			move_area.bottom.target = 0x0b20
 			move_area.bottom.current = 0x0b20
@@ -13976,8 +14316,6 @@ function void FBZ2_CustomSprites()
 //# address-hook(0x06fd38) end(0x06fdba)
 function void fn06fd38()
 {
-	laser_loaded = 1	// temporary until bug fix is found
-
 	setupObjectAttributesFull(0x070396)
 
 	if (!original_mode)
@@ -16143,23 +16481,6 @@ function void fn0459b4()
 
 
 
-// Ignore an A.I.R. function to reduce movement area of boss, as we have widened the arena in DAGE.
-// Function taken from bosses\boss_ssz_mecha.lemon
-function void BossMecha1.setBossArea()
-{
-	level.bossarea.left  = camera.position.x.u16 + 0x20
-	level.bossarea.right = camera.position.x.u16 + getScreenWidth() - 0x20
-	level.bossarea.top   = camera.position.y.u16 + 0x30
-
-	#if STANDALONE
-		if (getScreenWidth() >= 400 && original_mode)	// only possible with Dev Mode or mods
-		{
-			// Reduce move area of the boss, so he does not stand too close to the edge
-			level.bossarea.left += 0x0f
-			level.bossarea.right -= 0x0f
-		}
-	#endif
-}
 
 
 
@@ -16170,13 +16491,19 @@ function void BossMecha1.setBossArea()
 //# address-hook(0x07b544) end(0x07b574)
 function void fn07b544()
 {
+	if (getScreenWidth() <= 400)
+	{
+		base.fn07b544()
+		return
+	}
+
 	// Start backslide
 	objA0.base_state = 0x10
 #if STANDALONE
-	if (getScreenWidth() > 400)
+//	if (getScreenWidth() > 400)
 		D0.s16 = 0x820 + getScreenExtend() * 8
-	else
-		D0.s16 = 0x820 + getScreenExtend() * 5		// Not very precise, but works for both 320 and 400 pixels
+//	else
+//		D0.s16 = 0x820 + getScreenExtend() * 5		// Not very precise, but works for both 320 and 400 pixels
 #else
 	D0.s16 = 0x820
 #endif
@@ -16198,6 +16525,12 @@ function void fn07b544()
 //# address-hook(0x07b63a) end(0x07b67a)
 function void fn07b63a()
 {
+	if (getScreenWidth() <= 400)
+	{
+		base.fn07b63a()
+		return
+	}
+
 	fn08459c()
 	UpdateMovementSimple()
 	if (objA0.velocity.y < 0)
@@ -16208,10 +16541,10 @@ function void fn07b63a()
 #if STANDALONE
 	if (getScreenWidth() > 464)
 		D0.s16 = 0x7a0 + getScreenExtend() * 5		// increased base speed, since 0x780 juuuuust doesn't reach the screen edge
-	else if (getScreenWidth() > 400)
+	else	//	else if (getScreenWidth() > 400)
 		D0.s16 = 0x780 + getScreenExtend() * 5
-	else
-		D0.s16 = 0x780 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
+//	else
+//		D0.s16 = 0x780 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
 #else
 	D0.s16 = 0x780
 #endif
@@ -16231,13 +16564,19 @@ function void fn07b63a()
 //# address-hook(0x07b790) end(0x07b7b8)
 function void fn07b790()
 {
+	if (getScreenWidth() <= 400)
+	{
+		base.fn07b790()
+		return
+	}
+
 	// Start spindash / drop dash
 	objA0.base_state = 0x24
 #if STANDALONE
-	if (getScreenWidth() > 400)
+//	if (getScreenWidth() > 400)
 		D0.s16 = 0x640 + getScreenExtend() * 5
-	else
-		D0.s16 = 0x640 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
+//	else
+//		D0.s16 = 0x640 + getScreenExtend() * 3		// Not very precise, but works for both 320 and 400 pixels
 #else
 	D0.s16 = 0x640
 #endif

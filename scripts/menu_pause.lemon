@@ -133,7 +133,7 @@ function void UpdateGamePause()
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					if (total_stars < theme.south.unlock)
+					if (total_stars < unlock.theme.south)
 						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
 					customMenu.countMedals()
@@ -186,7 +186,7 @@ function void UpdateGamePause()
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					if (total_stars < theme.south.unlock)
+					if (total_stars < unlock.theme.south)
 						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
 					customMenu.countMedals()
@@ -257,7 +257,7 @@ function void UpdateGamePause()
 function void PauseMenu_ChangeTheme()
 {
 	
-	if (total_stars < theme.south.unlock)
+	if (total_stars < unlock.theme.south)
 		theme.max = 2
 	else
 		theme.max = 3
@@ -890,7 +890,9 @@ function void fn02ddc6()
 
 function void PauseMenu_DrawCustomSprites()
 {
-	if (global.zone_act == 0x0000)
+	if (unlock_act)
+		EHZ_CustomSprites()
+	else if (global.zone_act == 0x0000)
 		AIZ1_CustomSprites()
 	else if (global.zone_act == 0x0100)
 		HCZ1_CustomSprites()

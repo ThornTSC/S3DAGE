@@ -1,0 +1,245 @@
+define coconuts.timer				 =  s8[A0 + 0x2f]
+define coconuts.climb_table_index	 = u16[A0 + 0x32]
+define coconuts.attack_timer		 =  s8[A0 + 0x39]
+
+//# address-hook(0x037bfa) end(0x037c04)
+function void Coconuts.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Coconuts.Init()
+	else if (objA0.base_state == 2)
+		Coconuts.Idle()
+	else if (objA0.base_state == 4)
+		Coconuts.Climbing()
+	else // if (objA0.base_state == 6)
+		Coconuts.Throwing()
+}
+
+
+//# address-hook(0x037c10) end(0x037c1a)
+function void Coconuts.Init()
+{
+	// call 0x0365f4	// LoadSubObject. We should set these values directly.
+	// This function does not actually flow into the Idle function, and the base state for that is set in LoadSubObject.
+	objA0.mapping_offset = 0x8802d2
+	objA0.sprite_attributes = 0x03ee
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0280
+	objA0.box_size.x = 0x12
+	objA0.box_size.y = 0x20
+	objA0.collision_attributes = 0x09
+	objA0.base_state += 2
+
+	coconuts.timer = 0x10
+}
+
+
+//# address-hook(0x037c1c) end(0x037c7e)
+function void Coconuts.Idle()
+{
+	CheckDistanceToPlayers()		// Obj_GetOrientationToPlayer
+	objA0.render_flags &= ~0x01
+	objA0.flags2a &= ~0x01
+	if (D0.u16 != 0)
+	{
+		objA0.render_flags |= 0x01
+		objA0.flags2a |= 0x01
+	}
+	D2.u16 += 0x60
+	if (D2.u16 < 0xc0)
+	{
+		if (coconuts.attack_timer == 0)
+		{
+			Coconuts.StartThrowing()
+		}
+		--coconuts.attack_timer
+	}
+	--coconuts.timer
+	if (coconuts.timer < 0)
+	{		
+		Coconuts.StartClimbing()
+	}
+	else
+	{
+		Enemy.DrawOrUnload()
+	}
+}
+
+function void Coconuts.StartClimbing()
+{
+	objA0.base_state += 0x02
+	Coconuts.SetClimbingDirection()
+	Enemy.DrawOrUnload()
+}
+
+// loc_37C66
+function void Coconuts.StartThrowing()
+{
+	objA0.base_state = 0x06
+	objA0.animation.sprite = 0x01
+	coconuts.timer = 0x08
+	coconuts.attack_timer = 0x20
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x037c82) end(0x037ca0)
+function void Coconuts.SetClimbingDirection()
+{
+	if (coconuts.climb_table_index >= 0x0c)
+	{
+		coconuts.climb_table_index = 0
+	}
+	objA0.velocity.y = CoconutsClimbData[coconuts.climb_table_index] << 8
+	coconuts.timer = CoconutsClimbData[coconuts.climb_table_index + 1]
+	coconuts.climb_table_index += 2
+}
+
+constant array<u8> CoconutsClimbData =
+{
+	0xff, 0x20,	// 0
+	   1, 0x18,	// 2
+	0xff, 0x10,	// 4
+	   1, 0x28,	// 6
+	0xff, 0x20,	// 8
+	   1, 0x10	// 0x0a
+}
+
+//# address-hook(0x037cae) end(0x037cd0)
+function void Coconuts.Climbing()
+{
+	--coconuts.timer
+	if (coconuts.timer != 0)
+	{
+		UpdateMovementStraightSimple()	// ObjectMove
+		A1 = 0x890012				// point this to where the animation script is loaded
+		System.loadExternalRawData("coconuts_animation", A1)
+		Object.AnimationUpdate()
+		Enemy.DrawOrUnload()
+		return
+	}
+	// Stop climbing
+	objA0.base_state -= 0x02
+	coconuts.timer = 0x10
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x037cd4) end(0x037ce2)
+function void Coconuts.Throwing()
+{
+	if (!u8[A0 + 0x3c])
+		Coconuts.ThrowingHandRaised()
+	else
+		Coconuts.ThrowingHandLowered()
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x037cea) end(0x037d02)
+function void Coconuts.ThrowingHandRaised()
+{
+	--coconuts.timer
+	if (coconuts.timer >= 0)
+	{
+		return
+	}
+	u8[A0 + 0x3c] += 0x02
+	coconuts.timer = 0x08
+	objA0.animation.sprite = 0x02
+	Coconuts.CreateCoconut()
+}
+
+
+//# address-hook(0x037d06) end(0x037d1e)
+function void Coconuts.ThrowingHandLowered()
+{
+	--coconuts.timer
+	if (coconuts.timer >= 0)
+	{
+		return
+	}
+	u8[A0 + 0x3c] = 0
+	objA0.base_state = 0x04
+	coconuts.timer = 0x08
+	Coconuts.SetClimbingDirection()
+}
+
+
+//# address-hook(0x037d22) end(0x037d74)
+function void Coconuts.CreateCoconut()
+{
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x037d24				// load obj98 in S2
+		objA1.animation.sprite = 0x03
+		objA1.subtype2c = 0x20
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		objA1.position.y.u16 -= 0x0d
+/*
+		D0 = 0
+		if ((objA0.render_flags & 0x01) == 0)
+		{
+			D0 = 0x04
+		}
+		A2 = 0x037d76 + D0.s16
+		D0.u16 = u16[(A2+=2)-2]
+		u16[A1 + 0x08] += D0.u16
+		u16[A1 + 0x10] = u16[(A2+=2)-2]
+		u16[A1 + 0x12] = 0xff00
+*/
+		s16 coconut_x_offset = (objA0.render_flags & 0x01) ? -0x0b : 0x0b
+		objA1.position.x.u16 += coconut_x_offset
+		objA1.velocity.x = (objA0.render_flags & 0x01) ? 0x0100 : -0x0100
+		objA1.velocity.y = -0x0100
+
+		playSound(SFX_BOMBFALL)
+
+//		A2 = 0x037d2a		// routine used to move coconut projectile. Used in Sonic2.Projectile.Main()
+//		u32[A1 + 0x2a] = A2
+	}
+}
+
+//# address-hook(0x037d24)
+function void Sonic2.Projectile()	// called LoadSubObject in S2 disassembly
+{
+	if (objA0.base_state == 0)
+		Sonic2.Projectile.Init()
+	else
+		Sonic2.Projectile.Main()
+}
+
+//# address-hook(0x037d26)
+function void Sonic2.Projectile.Init()	// usually in LoadSubObject
+{
+	objA0.mapping_offset = 0x8802d2
+	objA0.sprite_attributes = 0x03ee
+	objA0.render_flags = 0x84
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = 0x08
+	objA0.box_size.y = 0x08
+	objA0.collision_attributes = 0x8b
+	objA0.flags2b |= char.bonus.DEFLECTABLE	// allow projectile to be deflected by insta shield
+	objA0.base_state += 2
+}
+
+//# address-hook(0x037d28)
+function void Sonic2.Projectile.Main()	// usually in LoadSubObject
+{
+//	if (objA0.render_flags > 0x80)
+	if (objA0.position.y.u16 > (camera.position.y.u16 + getScreenHeight() + 20))
+	{
+		UnloadObject()
+		return
+	}
+	Coconuts.Projectile.Move()			// other projectiles need other function calls
+	Enemy.DrawOrUnload()
+}
+
+//# address-hook(0x037d2a)
+function void Coconuts.Projectile.Move()	// usually in LoadSubObject
+{
+	objA0.velocity.y += 0x20
+	UpdateMovementStraightSimple()
+}

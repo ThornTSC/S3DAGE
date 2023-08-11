@@ -1,0 +1,15 @@
+// Update badnik point numbers to use Sonic 2 mappings and positioning when needed.
+// Function taken from objects\effects\floatingpoints.lemon
+//# address-hook(0x02cce0) end(0x02cd06)
+function void FloatingPoints.Init()
+{
+	objA0.mapping_offset = (unlock_act) ? 0x88046e : 0x02cf50
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | 0x05e4)
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 8
+	objA0.velocity.y = -0x300
+
+	objA0.update_address = 0x02cd0c
+	FloatingPoints.Update()
+}

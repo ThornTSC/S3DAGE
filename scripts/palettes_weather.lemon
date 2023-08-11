@@ -346,6 +346,8 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 
 	dest += ramAddress - 0xfc00				// With this, dest can be changed to non-faded palette and/or secondary palette
 	copyMemory(dest, source, bytes)
+	if (unlock_act)
+		System.loadExternalRawData("s2_character_palette", dest)
 
 	u32 destRaw = dest		// This is newly introduced to preserve dest for rawdata loading later.
 
@@ -418,7 +420,15 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 #endif
 
 	// New code for loading palettes from rawdata
-	if ((original_mode || palette_set == 1) && index == 0x1a)	// Original ROM Hack has ICZ2 and SOZ1 as exceptions to S3&K palettes (former actually partially hardcoded later, so only SOZ1 here)
+	if (unlock_act && index == 0x0e)	// && index == 0x2a)
+	{
+		if (palette_set)
+			System.loadExternalRawData("ehz_palette", destRaw)
+		else
+			System.loadExternalRawData("ehz_palette_s2", destRaw)
+	}
+
+	else if ((original_mode || palette_set == 1) && index == 0x1a)	// Original ROM Hack has ICZ2 and SOZ1 as exceptions to S3&K palettes (former actually partially hardcoded later, so only SOZ1 here)
 		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
 	
 	else if (palette_set < 2 || original_mode)	// load from ROM normally if S3&K palettes or Original ROM Hack palettes other than the two above
@@ -518,8 +528,19 @@ function void SetPaletteFadedOut()
 
 
 
+// Direct palette cycle checks to new functions for Sonic 2 levels.
+// Function taken from level\level_palette.lemon
+//# address-hook(0x002142) end(0x002156)
+function void UpdatePaletteEffects.Default()
+{
+	if (unlock_act)
+	{
+		LevelPaletteUpdate.EHZ()
+		return
+	}
 
-
+	 base.UpdatePaletteEffects.Default()
+}
 
 
 // Disables the palette cycles during the AIZ1 intro on the ocean.
@@ -580,7 +601,26 @@ function void LevelPaletteUpdate.AIZ1()
 	}
 }
 
-
+function void LevelPaletteUpdate.EHZ()
+{
+	A0 = 0x870000
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		System.loadExternalRawData("ehz_palettecycle", 0x870000)
+		u16[0xfffff634] = 0x07
+		D0.u16 = u16[0xfffff632]
+		++u16[0xfffff632]
+		D0.u16 &= 0x03
+		D0.u16 <<= 3
+		u32[0xfffffc26] = u32[A0 + D0.s16]
+		u32[0xfffffc3c] = u32[A0 + D0.s16 + 0x04]
+//		u16[0xfffffc26] = EHZPaletteCycle[D0.u16]
+//		u16[0xfffffc27] = EHZPaletteCycle[D0.u16 + 1]
+//		u16[0xfffffc3c] = EHZPaletteCycle[D0.u16 + 2]
+//		u16[0xfffffc3e] = EHZPaletteCycle[D0.u16 + 3]
+	}
+}
 
 
 
@@ -1013,12 +1053,13 @@ function void LevelPaletteUpdate.HCZ1()
 //# address-hook(0x051150) end(0x051154)
 function void UpdateLevelScrolling.MGZ1()
 {
-	MGZ1_CustomSprites()
+	if (unlock_act)
+		EHZ_CustomSprites()
+	else
+		MGZ1_CustomSprites()
 
 	call 0x051158 + level.scrolling_routine
 }
-
-
 
 
 

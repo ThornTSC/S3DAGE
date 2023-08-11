@@ -1,6 +1,29 @@
 {
 // Make new sound keys all lowercase.
 
+// Retro Engine fast files are close to but not exactly 25% speed up (80% length / loop point). This could cause some minor issues.
+
+	"ehz1": { "File": "EmeraldHill.ogg",  "LoopStart": 152750, "Type": "Music"},
+	"ehz1_fast": { "File": "EmeraldHill_F.ogg",  "LoopStart": 122240, "Type": "Music"},
+
+	"ehz2": { "File": "EmeraldHill2.ogg",  "LoopStart": 99572, "Type": "Music"},
+	"ehz2_fast": { "File": "EmeraldHill2_F.ogg",  "LoopStart": 79604, "Type": "Music"},
+
+	"s2_boss": { "File": "S2_Boss.ogg", "Type": "Music"},	// no loop point needed
+
+	"s2_gameover": { "File": "S2_GameOver.ogg", "Type": "Jingle", "ClearMusic": "1" },
+	"s2_continue": { "File": "S2_Continue.ogg", "Type": "Jingle", "ClearMusic": "1" },
+	"s2_actcomplete": { "File": "S2_ActComplete.ogg", "Type": "Jingle", "ClearMusic": "1" },
+
+	"s2_1up": { "File": "S2_1Up.ogg", "Type": "Jingle" },
+
+	"s2_invin": { "File": "S2_Invincibility.ogg",  "LoopStart": 38679, "Type": "Music"},
+	"s2_invin_fast": { "File": "S2_Invincibility_F.ogg",  "LoopStart": 30897, "Type": "Music"},
+
+	"s2_super": { "File": "S2_Super.ogg", "Type": "Music"},	// no loop point needed
+
+	"s2_transform": { "File": "S2_Transform.ogg", "Type": "Sound"},
+
 //	"1c": { "File": "GreenSpheres.smps", "Source": "EmulationDirect", "Type": "Music", "EmulatedID": "1C"},
 	"greenspheres": { "File": "GreenSpheres.ogg",  "LoopStart": 269676, "Type": "Music"},
 	"greenspheres_speedup": { "File": "GreenSpheres_speedup.ogg",  "LoopStart": 5451808, "Type": "Music"},

@@ -71,341 +71,6 @@ function void PrintVersionNumber()
 
 
 
-
-
-
-// Functions from standalone\audio.lemon to implement new audio
-// and to enforce most original tracks for Original Mode
-function void Standalone.playAudio(u8 sfxId)
-{
-	// Handle music control IDs
-	if (sfxId == MUSIC_CTRL_FADEOUT)
-	{
-		Audio.fadeOutChannel(0, 0x200)	// Fade out over 2 seconds
-		return
-	}
-	else if (sfxId == MUSIC_CTRL_STOP)
-	{
-		Audio.stopChannel(0)
-		return
-	}
-	else if (sfxId >= 0xe3 && sfxId <= 0xef)
-	{
-		// Just ignore these
-		return
-	}
-
-	u64 soundKey = sfxId
-
-	// Choose whether it's music, a jingle or a sound effect
-	u8 soundRegType = 0
-	if (sfxId <= 0x24)
-	{
-		soundRegType = SoundRegType.TYPE_MUSIC
-	}
-	else if (sfxId <= 0x2b)
-	{
-		soundRegType = (sfxId == 0x26 || sfxId == 0x28) ? SoundRegType.TYPE_MUSIC : SoundRegType.TYPE_JINGLE
-	}
-	else if (sfxId <= 0x30)
-	{
-		soundRegType = SoundRegType.TYPE_MUSIC
-	}
-	else if (sfxId <= 0x32)
-	{
-		soundRegType = SoundRegType.TYPE_JINGLE
-	}
-	else if (sfxId <= 0xdb || (sfxId >= 0xdd && sfxId <= 0xe0))
-	{
-		soundRegType = SoundRegType.TYPE_SOUND
-	}
-	else
-	{
-		soundRegType = SoundRegType.TYPE_JINGLE
-	}
-
-	// Clear music for level results, emerald jingle, drowning music and outro music
-	if (sfxId == 0x29 || sfxId == 0x2b || sfxId == 0x31 || sfxId == 0xdc)
-	{
-		Audio.stopChannel(0)
-	}
-
-	// Check if a script mod wants to change the sound key
-	u64 moddedSoundKey = Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)
-	if (moddedSoundKey != soundKey)
-	{
-		// Sound key got changed by modded function, so don't run the default logic here;
-		// instead, ask modded scripts if they want to change the sound reg type as well
-		soundKey = moddedSoundKey
-		soundRegType = Standalone.getModdedSoundRegType(soundKey, sfxId, soundRegType)
-	}
-	else
-	{
-		// Hard-coded handling of special sfx IDs
-		if (sfxId == 0x1c)
-		{
-			// Special Stage
-			if (true)	// TODO: Add option to disable the speedup, of course for both music and gameplay
-			{
-				soundKey = "1c_speedup"
-			}
-		}
-		else if (sfxId == 0x1f && !original_mode)
-		{
-			// Knuckles' Theme
-			if (Game.getSetting(SETTING_AUDIO_KNUCKLES_THEME) == 0)
-			{
-				soundKey = "1f_sonic3"
-			}
-			else if (Game.getSetting(SETTING_AUDIO_KNUCKLES_THEME) == 2)
-			{
-				soundKey = "1f_proto"
-			}
-			else if (Game.getSetting(SETTING_AUDIO_KNUCKLES_THEME) == 0x10)
-			{
-				if (!isSonicAndKnucklesZone())
-					soundKey = "1f_sonic3"
-			}
-		}
-		else if (sfxId == 0x25 && !original_mode)
-		{
-			// Title theme
-			if (Game.getSetting(SETTING_AUDIO_TITLE_THEME) == 0)
-			{
-				soundKey = "25_sonic3"
-			}
-		}
-		else if (sfxId == 0x26)
-		{
-			// Outro music
-			if (Game.getSetting(SETTING_AUDIO_OUTRO) == 0 || original_mode)
-			{
-				soundKey = 0x15			// Sky Sanctuary
-			}
-			else if (Game.getSetting(SETTING_AUDIO_OUTRO) == 2)
-			{
-				soundKey = "26_proto"
-			}
-		}
-		else if (sfxId == 0x28 && !original_mode)
-		{
-			// Continue screen music
-			if (Game.getSetting(SETTING_AUDIO_CONTINUE_SCREEN) == 0)
-			{
-				soundKey = "28_sonic3"
-			}
-		}
-		else if (sfxId == 0x2a)
-		{
-			// Extra life jingle
-			if (Game.getSetting(SETTING_AUDIO_EXTRALIFE_JINGLE) == 0 && !original_mode)
-			{
-				soundKey = "2a_sonic3"
-			}
-			else if (Game.getSetting(SETTING_AUDIO_EXTRALIFE_JINGLE) == 0x10 && !original_mode)
-			{
-				if (!isSonicAndKnucklesZone())
-					soundKey = "2a_sonic3"
-			}
-
-			// Special handling for this jingle: Play in channel 1, but mark as override for channel 0 (= music)
-			Audio.playOverride(soundKey, AudioContext.CONTEXT_MUSIC, 1, 0)
-			return
-		}
-		else if (sfxId == 0x2c && !original_mode)
-		{
-			// Invincibility Theme
-			if (global.game_mode != 0x2c)	// In Blue Sphere game's Perfect screen, always use the S&K version
-			{
-				if (Game.getSetting(SETTING_AUDIO_INVINCIBILITY_THEME) == 0)
-				{
-					soundKey = "2c_sonic3"
-				}
-				else if (Game.getSetting(SETTING_AUDIO_INVINCIBILITY_THEME) == 0x10)
-				{
-					if (!isSonicAndKnucklesZone())
-						soundKey = "2c_sonic3"
-				}
-			}
-		}
-		else if (sfxId == 0x2d)	// can  && !original_mode this, but entering Challenges or Competition is naturally outside of Original Mode
-		{
-			// Competition Menu music
-			if (Game.getSetting(SETTING_AUDIO_COMPETITION_MENU) == 1)
-			{
-				soundKey = "2d_proto"
-			}
-		}
-		else if ((sfxId == 0x18 || sfxId == 0x2e))
-		{
-			// Mini-boss music
-			soundKey = 0x18
-			if (Game.getSetting(SETTING_AUDIO_MINIBOSS_THEME) == 0 && !original_mode)
-			{
-				soundKey = "2e_sonic3"
-			}
-			else if (Game.getSetting(SETTING_AUDIO_MINIBOSS_THEME) == 0x10 && !original_mode)
-			{
-				if (!isSonicAndKnucklesZone())
-					soundKey = "2e_sonic3"
-			}
-		}
-		else if (sfxId == 0x33)
-		{
-			// Alternating ring sound
-			alternatingRingSoundState = !alternatingRingSoundState
-			if (!alternatingRingSoundState)
-			{
-				soundKey = 0x34
-			}
-		}
-		else if (sfxId == 0xf0)
-		{
-			// Super Theme
-			soundRegType = SoundRegType.TYPE_MUSIC
-			u8 configOption = Game.getSetting(SETTING_AUDIO_SUPER_THEME)
-			if (original_mode)
-				configOption = 4
-			if (configOption == 0 || configOption == 1)
-			{
-				// Enable the fast level music
-				if (configOption == 1)
-				{
-					Standalone.setFastMusicFlag(FastMusicFlag.SUPER_THEME, true)
-				}
-
-				// Continue normal level music, start it if necessary
-				if (!Audio.isPlayingAudio(level.default_music.u8) && level.default_music.u8 != sfxId)
-				{
-					Standalone.playAudio(level.default_music.u8)
-					return
-				}
-			}
-			else if (configOption == 2)
-			{
-				// Sonic 2 super theme
-				soundKey = "supertheme_sonic2"
-			}
-			else if (configOption == 3)
-			{
-				// Sonic 3 invincibility theme
-				soundKey = "2c_sonic3"
-			}
-			else if (configOption == 4)
-			{
-				// S&K invincibility theme
-				soundKey = 0x2c
-			}
-			else
-			{
-				// Unused track from Sonic 3 prototypes
-				soundKey = "2e_proto"
-			}
-		}
-		else if (sfxId == 0xf2)
-		{
-			// Sonic 1 boss music
-			soundKey = "sonic1_boss"
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf3)
-		{
-			// Sonic 2 boss music
-			soundKey = "sonic2_boss"
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf4)
-		{
-			// Knuckles' Theme (S3 version enforced)
-			soundKey = "1f_sonic3"
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf5)
-		{
-			// Knuckles' Theme (S&K version enforced)
-			soundKey = 0x1f
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf6)
-		{
-			// Mini-boss music (S3 version enforced)
-			soundKey = "2e_sonic3"
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf7)
-		{
-			// Mini-boss music (S&K version enforced)
-			soundKey = 0x18
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		else if (sfxId == 0xf8)
-		{
-			// Special Stage (generated ones, with speed-up only every 45 seconds)
-			if (true)	// TODO: Add option to disable the speedup, of course for both music and gameplay
-			{
-				soundKey = "1c_speedup45"
-				if (!Game.isModdedSound("1c_speedup45") && Game.isModdedSound("1c_speedup30"))
-				{
-					// Prefer modded 30 seconds version variant over the non-modded 45 seconds version
-					soundKey = "1c_speedup30"
-				}
-				soundRegType = SoundRegType.TYPE_MUSIC
-			}
-		}
-		else if (sfxId == MUSIC_KNUCKLES_FORCED_PROTO)
-		{
-			// Knuckles' Theme (S3 prototype version enforced)
-			soundKey = "1f_proto"
-			soundRegType = SoundRegType.TYPE_MUSIC
-		}
-		
-		// Support for Sonic 3 prototype music
-		if (!original_mode)
-		{
-			if (sfxId == 0x07 && (Game.getSetting(SETTING_CNZ_PROTOTYPE_MUSIC) & 0x01))
-			{
-				soundKey = "07_proto"
-			}
-			else if (sfxId == 0x08 && (Game.getSetting(SETTING_CNZ_PROTOTYPE_MUSIC) & 0x02))
-			{
-				soundKey = "08_proto"
-			}
-			else if (sfxId == 0x0b && (Game.getSetting(SETTING_ICZ_PROTOTYPE_MUSIC) & 0x01))
-			{
-				soundKey = "0b_proto"
-			}
-			else if (sfxId == 0x0c && (Game.getSetting(SETTING_ICZ_PROTOTYPE_MUSIC) & 0x02))
-			{
-				soundKey = "0c_proto"
-			}
-			else if (sfxId == 0x0d && (Game.getSetting(SETTING_LBZ_PROTOTYPE_MUSIC) & 0x01))
-			{
-				soundKey = "0d_proto"
-			}
-			else if (sfxId == 0x0e && (Game.getSetting(SETTING_LBZ_PROTOTYPE_MUSIC) & 0x02))
-			{
-				soundKey = "0e_proto"
-			}
-		}
-	}
-
-	if (soundRegType == SoundRegType.TYPE_MUSIC)
-	{
-		if (Audio.isPlayingAudio(soundKey))
-		{
-			// Do not restart music if already playing
-			//  -> But make sure it gets played at full volume (in case it's fading out)
-			Audio.fadeInChannel(0, 0x40)
-			return
-		}
-	}
-
-	u8 audioContext = (soundRegType != SoundRegType.TYPE_SOUND) ? AudioContext.CONTEXT_MUSIC : AudioContext.CONTEXT_SOUND
-	Audio.playAudio(soundKey, audioContext)
-}
-
-
-
 // Ensure the Knuckles AIZ1 intro does not play in time attack modes.
 // Also aids in setting MHZ2 time attack start, setting Original Mode screen size, and other things.
 // Function taken from maingame\maingame.lemon
@@ -445,6 +110,7 @@ function void initializeMainGame()
 		draw_HUD = true					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
+		unlock_act = 0						// Remove unlockable act flag in main menu
 		eggrobos_knuckles = 0				// Default to Normal difficulty
 		specialstages_knuckles = 0			// Default to Normal difficulty
 		restartSpecialStage = 0
@@ -1778,8 +1444,8 @@ function void Checkpoint.Init()
 #endif
 
 	objA0.base_state += 2
-	objA0.mapping_offset = 0x02d348
-	objA0.sprite_attributes = 0x05ec
+	objA0.mapping_offset = (unlock_act) ? 0x8804c6 : 0x02d348
+	objA0.sprite_attributes = (unlock_act) ? 0x047c : 0x05ec
 	objA0.render_flags = render_flag.WORLD
 	objA0.box_size.x = 0x08
 	objA0.box_size.y = 0x28
@@ -5914,19 +5580,20 @@ function void fn048c16()
 //# address-hook(0x0869c6) end(0x0869f4)
 function void StartCharacterWinPose()
 {
-#if STANDALONE
-	if (u8[A1 + 0x2a] & char.flag.ROLLING)
+	if (!original_mode)
 	{
-		// Correct position, so character is not partially in the ground
-		u32 backupA0 = A0
-		A0 = A1
-		Character.LandingOnGroundStandUp()
-		A0 = backupA0
-	}
+		if (u8[A1 + 0x2a] & char.flag.ROLLING)
+		{
+			// Correct position, so character is not partially in the ground
+			u32 backupA0 = A0
+			A0 = A1
+			Character.LandingOnGroundStandUp()
+			A0 = backupA0
+		}
 
-	// Fix for player being able to walk around and do stuff, if carried by Tails when touching ground
-	tails.carrying = 0
-#endif
+		// Fix for player being able to walk around and do stuff, if carried by Tails when touching ground
+		tails.carrying = 0
+	}
 
 	objA1.velocity.x = 0
 	objA1.velocity.y = 0
@@ -6350,7 +6017,7 @@ function void MonitorIntact.Init()
 	objA0.box_size.y = 0x10
 
 #if STANDALONE
-	if (Game.getSetting(SETTING_MONITOR_STYLE) == 1 && !original_mode)
+	if ((Game.getSetting(SETTING_MONITOR_STYLE) == 1 || unlock_act) && !original_mode)
 	{
 		objA0.box_size.x = 0x11
 		objA0.box_size.y = 0x0e
@@ -6579,30 +6246,38 @@ function void ItemEffect.ApplyTimeFreeze()
 
 function u64 Monitor.getIconSpriteKey(u8 type)
 {
+	u64 key
 	if (type == 0)
-		return "monitor_icon_static"
+		key = "monitor_icon_static"
 	else if (type == 0x01)
-		return (getMainCharacter() == CHARACTER_SONIC) ? "monitor_icon_sonic" : (getMainCharacter() == CHARACTER_TAILS) ? "monitor_icon_tails" : "monitor_icon_knuckles"
+		key = (getMainCharacter() == CHARACTER_SONIC) ? "monitor_icon_sonic" : (getMainCharacter() == CHARACTER_TAILS) ? "monitor_icon_tails" : "monitor_icon_knuckles"
 	else if (type == 0x02)
-		return "monitor_icon_robotnik"
+		key = "monitor_icon_robotnik"
 	else if (type == 0x03)
-		return "monitor_icon_ring"
+		key = "monitor_icon_ring"
 	else if (type == 0x04)
-		return "monitor_icon_speedshoes"
+		key = "monitor_icon_speedshoes"
 	else if (type == 0x05)
-		return "monitor_icon_fireshield"
+		key = "monitor_icon_fireshield"
 	else if (type == 0x06)
-		return "monitor_icon_lightningshield"
+		key = "monitor_icon_lightningshield"
 	else if (type == 0x07)
-		return "monitor_icon_bubbleshield"
+		key = "monitor_icon_bubbleshield"
 	else if (type == 0x08)
-		return "monitor_icon_invincibility"
+		key = "monitor_icon_invincibility"
 	else if (type == 0x09)
-		return "monitor_icon_super"
+		key = "monitor_icon_super"
 	else if (type == 0x0b)
-		return "monitor_icon_classicshield"
+		key = "monitor_icon_classicshield"
 	else if (type == 0x0f)
-		return "monitor_icon_timefreeze"
+		key = "monitor_icon_timefreeze"
+
+	if (unlock_act)
+		key = stringformat("s2_%s", key)
+
+	if (key)
+		return key
+
 	return 0
 }
 
@@ -6690,7 +6365,12 @@ function void Standalone.checkTimeAttackFinish()
 	Challenge.checkExitShortcut()
 
 	// Reached the end?
-	if (!Challenge.checkAndRenderFinish())
+	if (unlock_act)
+	{
+		if (!Challenge.checkAndRenderFinish_unlockAct())
+			return										// Only run the rest of this function if the player has actually finished		
+	}
+	else if (!Challenge.checkAndRenderFinish())
 		return										// Only run the rest of this function if the player has actually finished
 
 	Challenge.initializeLevelEnd()
@@ -7013,7 +6693,37 @@ function u16 Challenge.checkAndRenderFinish()
 	return false
 }
 
+function u16 Challenge.checkAndRenderFinish_unlockAct()
+{
+	s16 px = s16[0xffffb010]
+	s16 py = s16[0xffffb014]
+	pole.x = -1
+	pole.y = -1
 
+	// EHZ
+	if (unlock_act == 1)
+	{
+		pole.x = 0x6740
+		pole.y = 0x0444
+	}
+
+	if (pole.x != -1 && pole.y != -1)
+	{
+		// Render the goal pole
+		u64 key = stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1)
+		u8 flags = (global.zone_act.apparent == 0x0a00 || global.zone_act.apparent == 0x0b00 || global.zone_act.apparent == 0x0001 ) ? SPRITE_FLAG_PRIO : 0x00
+		Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00)
+
+
+		move_area.right = pole.x - (getScreenWidth() / 2) + (2 * getScreenExtend()) 	// Set the camera x maximum in a way that centers the goal pole.
+																						// move_area.right always seems to be 0x50 (decimal 80) greater than the camera lock,
+																						// likely due to compensating for widescreen.
+		if (px >= pole.x)
+			return true
+	}
+
+	return false
+}
 
 
 

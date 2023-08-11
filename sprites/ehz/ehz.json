@@ -1,0 +1,118 @@
+{
+	"ehz_background":  { "File": "ehz_background.bmp"},
+
+	"ehz_background_sky_extra":  { "File": "ehz_background.bmp", "Rect": "0,0,1024,16"},			// lines -16 through -1
+	"ehz_background_sky":  { "File": "ehz_background.bmp", "Rect": "0,0,1024,80"},				// lines 0 through 79
+
+	"ehz_background_ocean_reflection":  { "File": "ehz_background.bmp", "Rect": "0,80,1024,22"},	// lines 80 through 101
+	"ehz_background_ocean_line80":  { "File": "ehz_background.bmp", "Rect": "0,80,1024,1"},		// line 80
+	"ehz_background_ocean_line81":  { "File": "ehz_background.bmp", "Rect": "0,81,1024,1"},		// line 81
+	"ehz_background_ocean_line82":  { "File": "ehz_background.bmp", "Rect": "0,82,1024,1"},		// line 82
+	"ehz_background_ocean_line83":  { "File": "ehz_background.bmp", "Rect": "0,83,1024,1"},		// line 83
+	"ehz_background_ocean_line84":  { "File": "ehz_background.bmp", "Rect": "0,84,1024,1"},		// line 84
+	"ehz_background_ocean_line85":  { "File": "ehz_background.bmp", "Rect": "0,85,1024,1"},		// line 85
+	"ehz_background_ocean_line86":  { "File": "ehz_background.bmp", "Rect": "0,86,1024,1"},		// line 86
+	"ehz_background_ocean_line87":  { "File": "ehz_background.bmp", "Rect": "0,87,1024,1"},		// line 87
+	"ehz_background_ocean_line88":  { "File": "ehz_background.bmp", "Rect": "0,88,1024,1"},		// line 88
+	"ehz_background_ocean_line89":  { "File": "ehz_background.bmp", "Rect": "0,89,1024,1"},		// line 89
+	"ehz_background_ocean_line90":  { "File": "ehz_background.bmp", "Rect": "0,90,1024,1"},		// line 90
+	"ehz_background_ocean_line91":  { "File": "ehz_background.bmp", "Rect": "0,91,1024,1"},		// line 91
+	"ehz_background_ocean_line92":  { "File": "ehz_background.bmp", "Rect": "0,92,1024,1"},		// line 92
+	"ehz_background_ocean_line93":  { "File": "ehz_background.bmp", "Rect": "0,93,1024,1"},		// line 93
+	"ehz_background_ocean_line94":  { "File": "ehz_background.bmp", "Rect": "0,94,1024,1"},		// line 94
+	"ehz_background_ocean_line95":  { "File": "ehz_background.bmp", "Rect": "0,95,1024,1"},		// line 95
+	"ehz_background_ocean_line96":  { "File": "ehz_background.bmp", "Rect": "0,96,1024,1"},		// line 96
+	"ehz_background_ocean_line97":  { "File": "ehz_background.bmp", "Rect": "0,97,1024,1"},		// line 97
+	"ehz_background_ocean_line98":  { "File": "ehz_background.bmp", "Rect": "0,98,1024,1"},		// line 98
+	"ehz_background_ocean_line99":  { "File": "ehz_background.bmp", "Rect": "0,99,1024,1"},		// line 99
+	"ehz_background_ocean_line100":  { "File": "ehz_background.bmp", "Rect": "0,100,1024,1"},	// line 100
+	"ehz_background_ocean_line101":  { "File": "ehz_background.bmp", "Rect": "0,101,1024,1"},	// line 101
+	"ehz_background_ocean_static":  { "File": "ehz_background.bmp", "Rect": "0,102,1024,10"},	// lines 102 through 111. Currently all transparency.
+
+	"ehz_background_hills_far":  { "File": "ehz_background.bmp", "Rect": "0,112,1024,16"},		// lines 112 through 127
+	"ehz_background_hills_near":  { "File": "ehz_background.bmp", "Rect": "0,128,1024,16"},		// lines 128 through 143
+
+	"ehz_background_field_line144":  { "File": "ehz_background.bmp", "Rect": "0,144,1024,1"},	// line 144
+	"ehz_background_field_line145":  { "File": "ehz_background.bmp", "Rect": "0,145,1024,1"},	// line 145
+	"ehz_background_field_line146":  { "File": "ehz_background.bmp", "Rect": "0,146,1024,1"},	// line 146
+	"ehz_background_field_line147":  { "File": "ehz_background.bmp", "Rect": "0,147,1024,1"},	// line 147
+	"ehz_background_field_line148":  { "File": "ehz_background.bmp", "Rect": "0,148,1024,1"},	// line 148
+	"ehz_background_field_line149":  { "File": "ehz_background.bmp", "Rect": "0,149,1024,1"},	// line 149
+	"ehz_background_field_line150":  { "File": "ehz_background.bmp", "Rect": "0,150,1024,1"},	// line 150
+	"ehz_background_field_line151":  { "File": "ehz_background.bmp", "Rect": "0,151,1024,1"},	// line 151
+	"ehz_background_field_line152":  { "File": "ehz_background.bmp", "Rect": "0,152,1024,1"},	// line 152
+	"ehz_background_field_line153":  { "File": "ehz_background.bmp", "Rect": "0,153,1024,1"},	// line 153
+	"ehz_background_field_line154":  { "File": "ehz_background.bmp", "Rect": "0,154,1024,1"},	// line 154
+	"ehz_background_field_line155":  { "File": "ehz_background.bmp", "Rect": "0,155,1024,1"},	// line 155
+	"ehz_background_field_line156":  { "File": "ehz_background.bmp", "Rect": "0,156,1024,1"},	// line 156
+	"ehz_background_field_line157":  { "File": "ehz_background.bmp", "Rect": "0,157,1024,1"},	// line 157
+	"ehz_background_field_line158":  { "File": "ehz_background.bmp", "Rect": "0,158,1024,1"},	// line 158
+	
+	"ehz_background_field_line159":  { "File": "ehz_background.bmp", "Rect": "0,159,1024,2"},	// line 159
+	"ehz_background_field_line161":  { "File": "ehz_background.bmp", "Rect": "0,161,1024,2"},	// line 161
+	"ehz_background_field_line163":  { "File": "ehz_background.bmp", "Rect": "0,163,1024,2"},	// line 163
+	"ehz_background_field_line165":  { "File": "ehz_background.bmp", "Rect": "0,165,1024,2"},	// line 165
+	"ehz_background_field_line167":  { "File": "ehz_background.bmp", "Rect": "0,167,1024,2"},	// line 167
+	"ehz_background_field_line169":  { "File": "ehz_background.bmp", "Rect": "0,169,1024,2"},	// line 169
+	"ehz_background_field_line171":  { "File": "ehz_background.bmp", "Rect": "0,171,1024,2"},	// line 171
+	"ehz_background_field_line173":  { "File": "ehz_background.bmp", "Rect": "0,173,1024,2"},	// line 173
+	"ehz_background_field_line175":  { "File": "ehz_background.bmp", "Rect": "0,175,1024,2"},	// line 175
+	
+	"ehz_background_field_line177":  { "File": "ehz_background.bmp", "Rect": "0,177,1024,3"},	// line 177
+	"ehz_background_field_line180":  { "File": "ehz_background.bmp", "Rect": "0,180,1024,3"},	// line 180
+	"ehz_background_field_line183":  { "File": "ehz_background.bmp", "Rect": "0,183,1024,3"},	// line 183
+	"ehz_background_field_line186":  { "File": "ehz_background.bmp", "Rect": "0,186,1024,3"},	// line 186
+	"ehz_background_field_line189":  { "File": "ehz_background.bmp", "Rect": "0,189,1024,3"},	// line 189
+	"ehz_background_field_line192":  { "File": "ehz_background.bmp", "Rect": "0,192,1024,3"},	// line 192
+	"ehz_background_field_line195":  { "File": "ehz_background.bmp", "Rect": "0,195,1024,3"},	// line 195
+	"ehz_background_field_line198":  { "File": "ehz_background.bmp", "Rect": "0,198,1024,3"},	// line 198
+	"ehz_background_field_line201":  { "File": "ehz_background.bmp", "Rect": "0,201,1024,3"},	// line 201
+	"ehz_background_field_line204":  { "File": "ehz_background.bmp", "Rect": "0,204,1024,3"},	// line 204
+	"ehz_background_field_line207":  { "File": "ehz_background.bmp", "Rect": "0,207,1024,3"},	// line 207
+	"ehz_background_field_line210":  { "File": "ehz_background.bmp", "Rect": "0,210,1024,3"},	// line 210
+	"ehz_background_field_line213":  { "File": "ehz_background.bmp", "Rect": "0,213,1024,3"},	// line 213
+	"ehz_background_field_line216":  { "File": "ehz_background.bmp", "Rect": "0,216,1024,3"},	// line 216
+	"ehz_background_field_line219":  { "File": "ehz_background.bmp", "Rect": "0,219,1024,3"},	// line 219
+	"ehz_background_field_line222":  { "File": "ehz_background.bmp", "Rect": "0,222,1024,3"},	// line 222
+	
+	"ehz_background_field_line225":  { "File": "ehz_background.bmp", "Rect": "0,225,1024,4"},	// line 225
+	"ehz_background_field_line229":  { "File": "ehz_background.bmp", "Rect": "0,229,1024,4"},	// line 229
+	"ehz_background_field_line233":  { "File": "ehz_background.bmp", "Rect": "0,233,1024,4"},	// line 233
+	"ehz_background_field_line237":  { "File": "ehz_background.bmp", "Rect": "0,237,1024,4"},	// line 237
+	"ehz_background_field_line241":  { "File": "ehz_background.bmp", "Rect": "0,241,1024,4"},	// line 241
+	"ehz_background_field_line245":  { "File": "ehz_background.bmp", "Rect": "0,245,1024,4"},	// line 245
+	"ehz_background_field_line249":  { "File": "ehz_background.bmp", "Rect": "0,249,1024,4"},	// line 249
+	"ehz_background_field_line253":  { "File": "ehz_background.bmp", "Rect": "0,253,1024,4"},	// line 253
+
+	// Sonic 2 Rings
+	"s2_ring_00": { "File": "s2_rings.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"s2_ring_01": { "File": "s2_rings.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"s2_ring_02": { "File": "s2_rings.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"s2_ring_03": { "File": "s2_rings.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"s2_ring_04": { "File": "s2_rings.bmp", "Rect": "64,0,16,16", "Center": "8,8" },
+	"s2_ring_05": { "File": "s2_rings.bmp", "Rect": "80,0,16,16", "Center": "8,8" },
+	"s2_ring_06": { "File": "s2_rings.bmp", "Rect": "96,0,16,16", "Center": "8,8" },
+	"s2_ring_07": { "File": "s2_rings.bmp", "Rect":"112,0,16,16", "Center": "8,8" },
+
+	// EHZ Platforms
+	"ehz_platform_00": { "File": "ehz_platforms.bmp", "Rect":   "8,8,64,64", "Center": "32,28" },
+	"ehz_platform_01": { "File": "ehz_platforms.bmp", "Rect":  "80,8,64,96", "Center": "32,47" },
+	"ehz_platform_fall": { "File": "ehz_platforms.bmp", "Rect":   "8,8,64,32", "Center": "32,12" },
+
+	// Sonic 2 Explosion
+	"s2_explosion_00": { "File": "s2_explosion.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"s2_explosion_01": { "File": "s2_explosion.bmp", "Rect": "16,0,32,32", "Center": "16,16" },
+	"s2_explosion_02": { "File": "s2_explosion.bmp", "Rect": "48,0,32,32", "Center": "16,16" },
+	"s2_explosion_03": { "File": "s2_explosion.bmp", "Rect": "80,0,32,32", "Center": "16,16" },
+	"s2_explosion_04": { "File": "s2_explosion.bmp", "Rect": "112,0,32,32", "Center": "16,16" },
+
+	// Sonic 2 Ricky
+	"s2_ricky_00": { "File": "s2_ricky.bmp", "Rect":  "0,0,22,15", "Center": "10,7" },
+	"s2_ricky_01": { "File": "s2_ricky.bmp", "Rect":  "22,0,24,16", "Center": "12,8" },
+	"s2_ricky_02": { "File": "s2_ricky.bmp", "Rect":  "46,0,15,24", "Center": "7,8" },
+
+	// Sonic 2 Flicky
+	"s2_flicky_00": { "File": "s2_flicky.bmp", "Rect":  "0,0,16,15", "Center": "8,7" },
+	"s2_flicky_01": { "File": "s2_flicky.bmp", "Rect":  "16,0,16,15", "Center": "8,8" },
+	"s2_flicky_02": { "File": "s2_flicky.bmp", "Rect":  "32,0,15,21", "Center": "8,5" }
+}

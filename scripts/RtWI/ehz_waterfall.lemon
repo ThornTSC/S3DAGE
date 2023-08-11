@@ -1,0 +1,79 @@
+// //# address-hook(0x020b9e) end(0x020ba8)
+function void EHZwaterfall.BaseUpdate()
+{
+	if (!objA0.base_state)
+		EHZwaterfall.Init()
+	else
+		EHZwaterfall.DeleteOrDisplay()
+}
+
+
+// //# address-hook(0x020bb0) end(0x020c4c)
+function void EHZwaterfall.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = 0x880186
+	objA0.sprite_attributes = 0x239e
+	//	call 0x0214be		// Adjust2PArtPointer
+	objA0.render_flags = 0x04
+	objA0.box_size.x = 0x20
+	objA0.box_size.y = 0x80				// new to S3&K to assist with rendering when above or below the object (must have "Load at all Y positions" set)
+	objA0.value32 = objA0.position.x.u16	// game simply holds a spare copy of this value in offset 0x30 (S2)
+	objA0.sprite_priority = 0
+	objA0.hitbox_extends.y = 0x80
+	objA0.render_flags |= 0x10
+	EHZwaterfall.DeleteOrDisplay()
+}
+
+function void EHZwaterfall.DeleteOrDisplay()
+{
+//	if (u16[0xffffffd8] == 0)		// if not two-player mode
+//	{
+	//	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	//	if (D0.u16 <= 0x0280)
+	//	{
+	//		DrawObject()
+	//	}
+		// Original code here seems backwards compared to S3&K.
+		
+		D0.u16 = (objA0.position.x.u16 & 0xff80) - u16[0xfffff7da]
+		if (D0.u16 > 0x0280)
+		{
+			DrawOrUnloadObject()		// DeleteObject	// Just calling UnloadObject() doesn't seem to set the respawn flags properly
+			return
+		}
+		
+//	}
+	EHZwaterfall.Display()
+}
+
+function void EHZwaterfall.Display()
+{
+	D1.u16 = objA0.position.x.u16
+	D2.u16 = D1.u16
+	D1.u16 -= 0x40
+	D2.u16 += 0x40
+	D3.u8 = objA0.subtype2c
+	objA0.animation.sprite = 0
+	D0.u16 = u16[0xffffb010]	// main character's x position
+	if (D0.u16 >= D1.u16)
+	{
+		if (D0.u16 < D2.u16)
+		{
+			objA0.animation.sprite = 0x01
+			objA0.animation.sprite += D3.u8
+			DrawObject()	// DisplaySprite
+			return
+		}
+	}
+	D0.u16 = u16[0xffffb05a]	// second character's x position
+	if (D0.u16 >= D1.u16)
+	{
+		if (D0.u16 < D2.u16)
+		{
+			objA0.animation.sprite = 0x01
+		}
+	}
+	objA0.animation.sprite += D3.u8
+	DrawObject()	// DisplaySprite
+}

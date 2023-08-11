@@ -1,0 +1,177 @@
+//# address-hook(0x23b03e) end(0x23b0d2)
+function void UpdateBackgroundScrolling.AIZ1()
+{
+	if (unlock_act)
+		UpdateBackgroundScrolling.EHZ()
+	else
+		base.UpdateBackgroundScrolling.AIZ1()
+}
+
+function void EHZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.EHZ()
+}
+
+function void UpdateBackgroundScrolling.EHZ()
+{
+	constant array<u8> SwScrl_RippleData =
+	{
+		1,  2,  1,  3,  1,  2,  2,  1,  2,  3,  1,  2,  1,  2,  0,  0,	// 16
+		2,  0,  3,  2,  2,  3,  2,  2,  1,  3,  0,  0,  1,  0,  1,  3,	// 32
+		1,  2,  1,  3,  1,  2,  2,  1,  2,  3,  1,  2,  1,  2,  0,  0,	// 48
+		2,  0,  3,  2,  2,  3,  2,  2,  1,  3,  0,  0,  1,  0,  1,  3,	// 64
+		1,  2	// 66
+	}
+
+//	Renderer.drawCustomSprite("ehz_background", 0, 0, 0, 0, 0x10ff)
+	u16[0xfffffc5e]= 0x00e8
+
+	// Sky
+	s64 parallaxShift = -(camera.position.x.u16 * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s16 yShift = camera.position.y.u16 / 50 - 8							// 50 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point.
+	Renderer.drawCustomSprite("ehz_background_sky_extra", parallaxShift, -16 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_sky", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+
+	// Ocean
+	// Renderer.drawCustomSprite("ehz_background_ocean_reflection", parallaxShift, 80 - yShift, 0, 0, 0x1100)	// replace later with correct reflection shifts
+
+	s64 rippleShiftIndex = (level.framecounter / 8) % 66	// Sonic 2 uses u8[0xfffffe0f], a.k.a. V_int_run_count+3. Same address in S2 and S3. We use level.framecounter since that pauses with DAGE pausing.
+	Renderer.drawCustomSprite("ehz_background_ocean_line80", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 21) % 66], 80 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line81", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 20) % 66], 81 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line82", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 19) % 66], 82 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line83", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 18) % 66], 83 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line84", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 17) % 66], 84 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line85", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 16) % 66], 85 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line86", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 15) % 66], 86 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line87", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 14) % 66], 87 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line88", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 13) % 66], 88 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line89", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 12) % 66], 89 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line90", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 11) % 66], 90 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line91", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 10) % 66], 91 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line92", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  9) % 66], 92 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line93", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  8) % 66], 93 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line94", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  7) % 66], 94 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line95", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  6) % 66], 95 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line96", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  5) % 66], 96 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line97", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  4) % 66], 97 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line98", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  3) % 66], 98 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line99", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  2) % 66], 99 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line100", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 1) % 66], 100 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("ehz_background_ocean_line101", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 0) % 66], 101 - yShift, 0, 0, 0x1100)
+
+	Renderer.drawCustomSprite("ehz_background_ocean_static", 0, 102 - yShift, 0, 0, 0x1100)
+
+	// Hills
+	parallaxShift = -(camera.position.x.u16 * 512 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("ehz_background_hills_far", parallaxShift, 112 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 512 / 0x1540) % 512
+	Renderer.drawCustomSprite("ehz_background_hills_near", parallaxShift, 128 - yShift, 0, 0, 0x1100)
+
+	// Far field (single lines)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x1f8) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line144", parallaxShift, 144 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x1d8) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line145", parallaxShift, 145 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x1c0) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line146", parallaxShift, 146 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x1a8) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line147", parallaxShift, 147 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x190) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line148", parallaxShift, 148 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x180) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line149", parallaxShift, 149 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x16c) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line150", parallaxShift, 150 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x15c) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line151", parallaxShift, 151 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x150) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line152", parallaxShift, 152 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x140) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line153", parallaxShift, 153 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x134) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line154", parallaxShift, 154 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x128) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line155", parallaxShift, 155 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x120) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line156", parallaxShift, 156 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x114) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line157", parallaxShift, 157 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x10a) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line158", parallaxShift, 158 - yShift, 0, 0, 0x1100)
+
+	// Mid field (pairs of lines)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x102) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line159", parallaxShift, 159 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xf2) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line161", parallaxShift, 161 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xe6) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line163", parallaxShift, 163 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xd8) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line165", parallaxShift, 165 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xce) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line167", parallaxShift, 167 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xc4) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line169", parallaxShift, 169 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xba) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line171", parallaxShift, 171 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xb2) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line173", parallaxShift, 173 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xaa) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line175", parallaxShift, 175 - yShift, 0, 0, 0x1100)
+
+	// Near field (triplets of lines)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0xa4) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line177", parallaxShift, 177 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x9a) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line180", parallaxShift, 180 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x92) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line183", parallaxShift, 183 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x8a) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line186", parallaxShift, 186 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x84) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line189", parallaxShift, 189 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x7e) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line192", parallaxShift, 192 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x78) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line195", parallaxShift, 195 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x72) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line198", parallaxShift, 198 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x6e) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line201", parallaxShift, 201 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x6a) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line204", parallaxShift, 204 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x68) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line207", parallaxShift, 207 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x62) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line210", parallaxShift, 210 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x5e) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line213", parallaxShift, 213 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x5a) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line216", parallaxShift, 216 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x58) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line219", parallaxShift, 219 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x56) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line222", parallaxShift, 222 - yShift, 0, 0, 0x1100)
+
+	// Extra-near field (quadruplets of lines, usually not rendered due to being below line 224)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x54) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line225", parallaxShift, 225 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x52) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line229", parallaxShift, 229 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x50) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line233", parallaxShift, 233 - yShift, 0, 0, 0x1100)
+
+	// The current background y shifting formula will not show these lines.
+/*
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x4e) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line237", parallaxShift, 237 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x4c) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line241", parallaxShift, 241 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x4d) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line245", parallaxShift, 245 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x4c) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line249", parallaxShift, 249 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(camera.position.x.u16 * 64 / 0x4b) % 512
+	Renderer.drawCustomSprite("ehz_background_field_line253", parallaxShift, 253 - yShift, 0, 0, 0x1100)
+*/
+}

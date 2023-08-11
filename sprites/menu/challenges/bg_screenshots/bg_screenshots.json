@@ -24,5 +24,6 @@
 	"bg_0a00": { "File": "HPZ.png" },		// Despite the order of these two keys,
 	"bg_0a01": { "File": "SSZ.png" },		// HPZ time data is saved in SSZ's act 2 slot.
 	"bg_0b00": { "File": "DEZ1.png" },
-	"bg_0b01": { "File": "DEZ2.png" }
+	"bg_0b01": { "File": "DEZ2.png" },
+	"bg_unlock0001": { "File": "EHZ.png" }
 }
