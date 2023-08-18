@@ -3,6 +3,9 @@
     "saturn_titlecard_bluebar":  { "File": "saturn_titlecard_bluebar.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "saturn_titlecard_orangebar":  { "File": "saturn_titlecard_orangebar.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "saturn_titlecard_redbar":  { "File": "saturn_titlecard_redbar.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "saturn_titlecard_bluebar_rtwi":  { "File": "saturn_titlecard_bluebar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "saturn_titlecard_orangebar_rtwi":  { "File": "saturn_titlecard_orangebar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "saturn_titlecard_redbar_rtwi":  { "File": "saturn_titlecard_redbar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
 
     "saturn_titlecard_zone_text":  { "File": "saturn_zonenames.png", "Rect": "0,240,64,16", "Center": "4,0" },
   

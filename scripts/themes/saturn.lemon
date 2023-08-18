@@ -191,6 +191,9 @@ function bool Saturn.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 			barKey = "saturn_titlecard_orangebar"
 		else if (global.characters >= 3)
 			barKey = "saturn_titlecard_redbar"
+		
+		if (unlock_act)
+			barKey = stringformat("%s_rtwi", barKey)
 	
 		Renderer.drawCustomSprite(barKey, px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 		return true
