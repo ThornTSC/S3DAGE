@@ -40,6 +40,7 @@ global u8 restartSpecialStage
 
 // Define variables for maintaining roll
 global u8 air_time
+global u8 air_time_p2
 // global u16 last_ground_y_pos
 
 // Define variables for time attack modes
@@ -193,13 +194,10 @@ function void endOfFrame()
 		Game.returnToMainMenu()
 	}
 	
-	// Handle Extra Slot Amy roll leniency separate from base game characters' roll leniency.
-	// This isn't the ideal place to do this, but every ideal place is already overwritten by Extra Slot Amy itself.
-	if (u8[0xffffe654] == 3)	// Extra Slot character ID is Amy
-		if (u8[0xffffb040])								// player 1 jumping flag
-			air_time = 5
-		else if (u8[0xffffb02a] && char.flag.IN_AIR)	// player 1 status bitfield
-			air_time++
+	// Handle roll leniency.
+	// This isn't the ideal place to do this, but every ideal place is already overwritten by many character mods, especially Extra Slot mods.
+	if (roll_maintain && !original_mode)
+		rollLeniency.CountFrames()
 
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
@@ -17067,8 +17065,10 @@ function void fn048fa4()
 {
 	if (u8[A1 + 0x20] == char.state.ROLLING || u8[A1 + 0x20] == char.state.SPINDASH)
 	{
-	//	u16[A1 + 0x14] -= (char.character == CHARACTER_TAILS) ? 1 : 5	// remove character roll height change
-		air_time = 5
+		if (A1 == 0xffffb000)
+			air_time = 5
+		else
+			air_time_p2 = 5
 	}
 	base.fn048fa4()
 }

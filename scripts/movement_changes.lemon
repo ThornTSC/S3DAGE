@@ -17,10 +17,50 @@ function void Character.Initialization.shared(u8 character)
 
 
 
+// Roll leniency functions
+function void rollLeniency.CountFrames()
+{
+	// Player 1
+	if (u8[0xffffb040])								// player 1 jumping flag
+		air_time = 5
+	else if (u8[0xffffb02a] & char.flag.IN_AIR)		// player 1 status bitfield
+		air_time++
 
+	// Player 2
+	if (u8[0xffffb040 + 0x4a])								// player 2 jumping flag
+		air_time_p2 = 5
+	else if (u8[0xffffb02a + 0x4a] & char.flag.IN_AIR)			// player 2 status bitfield
+		air_time_p2++
+}
 
+function bool rollLeniency.CheckMaintainRoll()
+{
+	bool landedInTime = (air_time < 5)
+	if (A0 == 0xffffb04a)
+		landedInTime = (air_time_p2 < 5)
 
+	if ((char.flags & char.flag.ROLLING) && !char.jumping && landedInTime)
+	{
+		char.flags |= char.flag.ROLLING
+		char.flags &= ~char.flag.IN_AIR
+		char.flags &= ~char.flag.PUSHING
+		char.state = char.state.ROLLING
 
+		if (A0 == 0xffffb000)	// main character
+			air_time = 0
+		else					// sidekick
+			air_time_p2 = 0
+		return true
+	}
+	else
+	{
+		if (A0 == 0xffffb000)	// main character
+			air_time = 0
+		else					// sidekick
+			air_time_p2 = 0
+		return false
+	}	
+}
 
 
 // If the character rolls from object to terrain, don't uncurl the character.
@@ -28,50 +68,26 @@ function void Character.Initialization.shared(u8 character)
 // Function taken from maingame\character\character.lemon
 function void Character.LandingOnGroundStandUp()
 {
-	if (roll_maintain && !original_mode && A0 == 0xffffb000 && (char.flags & char.flag.ROLLING) && !char.jumping && air_time < 5) // && abs(last_ground_y_pos - char.position.y.u16) <= 8
+	if (roll_maintain && !original_mode)
+		if rollLeniency.CheckMaintainRoll()
+			return
+	
+	if (!original_mode)
 	{
-		char.flags |= char.flag.ROLLING
-		char.flags &= ~char.flag.IN_AIR
-		char.flags &= ~char.flag.PUSHING
-		// char.hitbox_extends.x = 7
-		// char.hitbox_extends.y = 14
-		char.state = char.state.ROLLING
-
-		// s8 dy = (char.character == CHARACTER_TAILS) ? 1 : 5
-		// char.position.y.u16 += (global.inv_gravity) ? -dy : dy
-
-		// playSound(SFX_ROLL)
-
-		air_time = 0
-//		last_ground_y_pos = 0
+		base.Character.LandingOnGroundStandUp()
 		return
 	}
-	else if (A0 == 0xffffb000)
-	{
-		air_time = 0
-	//	last_ground_y_pos = 0
-	}
 
+	// The following code is the base Character.LandingOnGroundStandUp() with standalone checks removed,
+	// restoring S3&K quirks in Original Mode.
 	D0.u8 = char.hitbox_extends.y		// Setting D0.u8 here is important for some reason
 	char.hitbox_extends.x = char.hitbox.default.x
 	char.hitbox_extends.y = char.hitbox.default.y
 
-#if STANDALONE
-	// Correct position also if Knuckles just started gliding when hitting the ground in the same frame
-	//  -> Yes, this happened, and yes, this can otherwise kill you if there's a killing blocker object in the floor
-	if ((char.flags & char.flag.ROLLING) || (char.character == CHARACTER_KNUCKLES && knuckles.glideclimbstate == 0x02))
-#else
 	if (char.flags & char.flag.ROLLING)
-#endif
 	{
 		char.flags &= ~char.flag.ROLLING
-	#if STANDALONE
-		// Do not change the state while transforming, as this would cause a soft-lock
-		if (char.state != char.state.TRANSFORMING)
-	#endif
-		{
-			char.state = char.state.RUNNING
-		}
+		char.state = char.state.RUNNING
 		D0.u8 -= char.hitbox.default.y
 
 		s16 dy = D0.s8
@@ -79,79 +95,9 @@ function void Character.LandingOnGroundStandUp()
 			dy = -dy
 		char.position.y.u16 += dy
 	}
-
-#if STANDALONE
-	if (char.character == CHARACTER_TAILS && char.state >= char.state.TAILS_FLYDOWN && char.state <= char.state.TAILS_SWIMTIRED && !original_mode)
-	{
-		// Don't keep flying on the object (which only gets corrected otherwise if pressing left or right)
-		char.state = char.state.RUNNING
-	}
-#endif
 }
 
-//# address-hook(0x01164e) end(0x0116dc)
-//# address-hook(0x014e78) end(0x014f06)
-//# address-hook(0x017680) end(0x01770e)
-function void Character.UpdateControlInAir()
-{
-	if (roll_maintain && !original_mode && A0 == 0xffffb000 && !char.jumping && air_time < 5)
-	{
-		air_time++
-//		if (last_ground_y_pos = 0)
-//			last_ground_y_pos = char.position.y.u16
-	}
 
-	
-	u8 input_state = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
-	s16 vx = char.velocity.x
-
-	// Direct control
-	if ((char.flags & char.flag.CONTROL_LOCK) == 0)
-	{
-		s16 maxSpeed = s16[A4]
-		s16 acceleration = s16[A4 + 2] * 2
-
-		if (input_state & CONTROL_LEFT)
-		{
-			char.flags |= char.flag.FACING_LEFT
-			vx -= acceleration
-			if (vx <= -maxSpeed)
-			{
-				vx += acceleration
-				vx = min(vx, -maxSpeed)
-			}
-		}
-		if (input_state & CONTROL_RIGHT)
-		{
-			char.flags &= ~char.flag.FACING_LEFT
-			vx += acceleration
-			if (vx >= maxSpeed)
-			{
-				vx -= acceleration
-				vx = max(vx, maxSpeed)
-			}
-		}
-	}
-
-	// Center camera y-offset again
-	centerCameraYOffset()
-
-	// Air drag
-	if (char.velocity.y < 0 && char.velocity.y >= -0x400)  // Not when falling or going up too fast
-	{
-		s16 drag = vx >> 5		// Do not divide here, as it rounds differently for negative numbers
-		if (drag != 0)
-		{
-			vx -= drag
-			if (drag > 0)
-				vx = max(vx, 0)
-			else
-				vx = min(vx, 0)
-		}
-	}
-
-	char.velocity.x = vx
-}
 
 
 
