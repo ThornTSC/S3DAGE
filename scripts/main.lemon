@@ -15016,6 +15016,52 @@ function void fn08f0ca()
 
 
 
+// In Original Mode, restore one of the Death Egg appearances in the LRZ1 background for Knuckles.
+// Function taken from level\10_lrz\level_lrz.lemon
+//# address-hook(0x056b64) end(0x056bb4)
+function void InitLevelScrolling.LRZ1()
+{
+	D0.u16 = u16[A3]
+	D1.u16 = 0x1c
+	D2 = 0x18
+	while (D2.s16 >= 0)
+	{
+		u16[A3 + D1.s16] = D0.u16
+		D1.u16 += 4
+		--D2.s16
+	}
+
+	if (isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		// This removes the Death Egg usually visible in the background
+		//  -> It is visible in two locations, remove both in standalone
+		A1 = 0xffff0000 + u16[A3 + 0x04]
+		u8[A1 + 0x04] = 0xf6
+		if (!original_mode)
+		{
+			u8[A1 + 0x08] = 0xf6
+		}
+	}
+
+	UpdateBackground.LRZ1()
+	fn04f2f6()
+
+	u32[0xffffa800] = 0
+	u16[0xffffa806] = D2.u16
+	u32[0xffffa808] = 0
+
+	A4 = 0x056f68
+	A5 = 0xffffa800
+	fn04ecec()
+
+	A4 = 0x056f6e
+	A5 = 0xffffa80c
+	fn04f0ce()
+}
+
+
+
+
 
 // Display controls inputs when the character is on a dash elevator
 // Function taken from objects\10_lrz\lrz_dashelevator.lemon
