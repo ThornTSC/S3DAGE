@@ -2,6 +2,7 @@
 	"Metadata":
 	{
 		"Name": "Sonic 3: D.A. Garden Edition",
+		"UniqueID": "thorn-d.a.-garden-edition",
 		"Author": "D.A. Garden (game), Thorn (port + features)",
 		"Description": "A port of Sonic 3: D.A. Garden Edition v1.02 to Sonic 3 A.I.R. with new features and widescreen adaptations.",
 		"URL": "https://github.com/ThornTSC/S3DAGE/releases",
