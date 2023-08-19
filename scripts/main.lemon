@@ -14447,6 +14447,80 @@ function void fn0701b4()
 
 
 
+
+
+
+// In Original Mode, some objects should not get moved when player relocation for FBZ2 boss occurs
+// Function taken from level\08_fbz\level_fbz.lemon
+//# address-hook(0x0530f0) end(0x05318a)
+function void fn0530f0()
+{
+	D7.u16 = 0xc000
+	UpdateBackgroundTiles.General()
+	WriteScrollOffsetsFlipped()
+	fn04f386()
+	UpdateScreenShake()
+	scrolloffset.y.planeA = camera.background.y.u16
+	scrolloffset.y.planeB = camera.foreground.y.u16
+
+	signalMultiReturn()
+
+	if (u16[0xffffeed8] != 0)
+	{
+		u16[0xffffeed8] = 0
+
+		// Move everything (incl. camera and characters) into place
+		s16 moveX = s16[0xffffee98]		// Gets subtracted from X
+		s16 moveY = s16[0xffffee9c]		// Gets added to Y
+		u16[0xffffee98] = 0
+		u16[0xffffee9c] = 0
+
+		u16[0xffffb000 + 0x10] -= moveX
+		u16[0xffffb04a + 0x10] -= moveX
+		if (u8[0xffffb000 + 0x2a] & char.flag.IN_AIR)
+		{
+			u16[0xffffb000 + 0x14] += moveY
+			u16[0xffffb04a + 0x14] += moveY
+		}
+
+		if (!original_mode)
+		{
+			// Don't forget the other stuff like shield effects, Tails' tails and the Super Flickies
+			for (u32 address = 0xffffcbc0; address <= 0xffffce5a; address += 0x4a)
+			{
+				u16[address + 0x10] -= moveX
+				u16[address + 0x14] += moveY
+			}
+		}
+
+		camera.position.x.u16 -= moveX
+		camera.position.y.u16 += moveY
+		camera.foreground.x.u16 -= moveX
+		camera.foreground.y.u16 += moveY
+		level.vertical_wrap += moveY
+		move_area.left -= moveX
+		move_area.right -= moveX
+		move_area.bottom.current += moveY
+		move_area.bottom.target = move_area.bottom.current
+
+		A1 = 0xffff005c + u16[0xffff8034]
+		D0.u16 = u16[0xffff8000] - 0x14
+		D1 = 3
+		while (D1.s16 >= 0)
+		{
+			zeroMemory(A1, 0x14)
+			A1 += D0.u16 + 0x14
+			--D1.s16
+		}
+	}
+}
+
+
+
+
+
+
+
 // Allow the spiked hands of the FBZ2 boss to deal damage after defeat in Original Mode
 // and disable AIR's custom Knuckles boss speed change in Original Mode.
 // Functions taken from bosses\boss_fbz2.lemon
