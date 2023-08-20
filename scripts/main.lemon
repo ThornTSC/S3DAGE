@@ -3991,6 +3991,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Saturn.TitleCardBar(px, py, renderQueue)
 			else if (theme.hud == theme.south)
 				return South.TitleCardBar(px, py, renderQueue)
+			else if (unlock_act)
+				Renderer.drawCustomSprite("titlecard_redbar_dage_rtwi", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
 			else
 				Renderer.drawCustomSprite("titlecard_redbar_dage", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
 		}
@@ -4019,6 +4021,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
+
 		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
 		{
 			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
@@ -4029,18 +4032,38 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			Renderer.drawCustomSprite(stringformat("titlecard_act%d", global.act.apparent + 1), px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
+*/
+		if (objA0.animation.sprite == 0x02 && unlock_act)
+		{
+			return true		// do not render an act number in unlockable acts
+		}
+/*
 		// Originally the word "zone", now white bars
 		else if (objA0.animation.sprite == 0x03)
 		{
 			Renderer.drawCustomSprite("titlecard_whitebars", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
+*/
+		else if (objA0.animation.sprite == 0x03)
+		{
+			Renderer.drawCustomSprite("angel_titlecard_zone", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return true
+		}
+/*
 		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
 			Renderer.drawCustomSprite(stringformat("titlecard_zone%d", objA0.animation.sprite - 4), px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
+*/
+		else if (objA0.animation.sprite == 0x06 && unlock_act)
+		{
+			Renderer.drawCustomSprite(stringformat("angel_titlecard_unlock%04d", unlock_act), px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return true
+		}
+/*
 		// "Bonus"
 		else if (objA0.animation.sprite == 0x12 || objA0.animation.sprite == 0x13)
 		{
@@ -4097,6 +4120,48 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		else if (objA0.animation.sprite == 0x0e)
 		{
 			Renderer.drawCustomSprite("hud_text_time", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x13)
+		{
+			Renderer.drawCustomSprite("angel_sonic_text", px + 36, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x15)
+		{
+			Renderer.drawCustomSprite("angel_tails_text", px + 32, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x14)
+		{
+			Renderer.drawCustomSprite("angel_miles_text", px + 39, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		if (objA0.animation.sprite == 0x16)
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+				px += (global.zone_act == 0x0a00 || unlock_act) ? 26 : 0
+
+			Renderer.drawCustomSprite("angel_knuckles_text", px + 62, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008) // large horizontal shift for Knuckles to center KNUCKLES GOT
+			return true
+		}
+		 else if (objA0.animation.sprite == 0x11)
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+				px += (global.zone_act == 0x0a00 || unlock_act) ? 26 : 0
+
+			Renderer.drawCustomSprite("angel_got_text", px + 22, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x10)
+		{
+			s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? -36 : 0		// show "Zone" in SSZ and unlockable acts, thus shift "Through" left.
+			Renderer.drawCustomSprite("angel_through_text", px + through_x_offset + 57, py + 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ.
+		{
+			Renderer.drawCustomSprite("angel_zone_text", px, py + 24, 0, SPRITE_FLAG_PRIO, 0xe008)
 			return true
 		}
 	//	else if (objA0.animation.sprite == 0x0f && new_title)
@@ -4625,7 +4690,18 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 			for (; px < s16(getScreenWidth()); px += 0x20)
 			{
 				if (!original_mode)
-					Renderer.drawVdpSpriteWithAlpha(px, py, size, index, 0xdfe1, 160)
+				{
+					renderQueue = 0xdfe1
+					for (u8 i = 0; i <= 0x6d; i++)
+					{
+						if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
+						{
+							renderQueue = 0x9fe1	// when in act transition area, do not cover Angel theme zone name, act number, or red bar
+							break
+						}
+					}
+					Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, 160)
+				}
 				else
 				{
 					if (!(((px & 0xffe0) + 0x20 * (level.framecounter.low & 0x01)) % 0x40))
@@ -9201,7 +9277,18 @@ function void HCZ2_CustomSprites()
 		Renderer.drawCustomSprite("hcz_backgroundballpillarsection", 0x478c - camera.foreground.x.u16, 0x0320 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 		Renderer.drawCustomSprite("hcz_backgroundballpillarsection", 0x478c - camera.foreground.x.u16, 0x0340 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 		if (palette_set >= 2)
-			Renderer.drawCustomSprite("hcz_watertint", 0, max(camera.foreground.y.u16, water.height.current + 1) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xdfe0, 0, hcz_murkiness)
+		{
+			u16 renderQueue = 0xdfe1
+			for (u8 i = 0; i <= 0x6d; i++)
+			{
+				if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
+				{
+					renderQueue = 0x9fe1	// when in act transition area, do not cover Angel theme zone name, act number, or red bar
+					break
+				}
+			}
+			Renderer.drawCustomSprite("hcz_watertint", 0, max(camera.foreground.y.u16, water.height.current + 1) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, renderQueue, 0, hcz_murkiness)
+		}
 	}
 }
 

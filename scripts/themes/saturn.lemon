@@ -234,7 +234,7 @@ function bool Saturn.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
 			if (unlock_act)
-				Renderer.drawCustomSprite("saturn_titlecard_ehz", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_unlock%04d", unlock_act), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			else
 				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
@@ -316,13 +316,13 @@ function bool Saturn.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x10)
     {
-        s16 through_x_offset = (global.zone_act == 0x0a00) ? -40 : 0		// show "Zone" in SSZ, thus shift "Through" left.	// ONLY IN FLICKY THEME!
+        s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? -40 : 0		// show "Zone" in SSZ and unlockable acts, thus shift "Through" left.
         Renderer.drawCustomSprite("saturn_through_text", px + through_x_offset, py, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
-    else if (objA0.animation.sprite == 0x0f && global.zone_act == 0x0a00)	// show "Zone" in SSZ.	// ONLY IN FLICKY THEME!
+    else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ and unlockable acts.
     {
-        Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone_text", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
+        Renderer.drawCustomSprite("saturn_titlecard_zone_text", px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
     else if (objA0.animation.sprite == 0x0f)

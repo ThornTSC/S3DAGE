@@ -22,7 +22,9 @@
     "south_titlecard_zone13":  { "File": "south_zonenames.png", "Rect": " 0,208,200,16", "Center": "48,-8" },
 
     "south_titlecard_bonus":   { "File": "south_zonenames.png", "Rect": " 0,224, 80,16", "Center": "0,0" },
-    "south_titlecard_stage":   { "File": "south_zonenames.png", "Rect": "96,224, 80,16", "Center": "0,0" }
+    "south_titlecard_stage":   { "File": "south_zonenames.png", "Rect": "96,224, 80,16", "Center": "0,0" },
+
+    "south_titlecard_unlock0001":     { "File": "south_zonenames.png", "Rect": " 0,256,192,16", "Center": "32,-8" }
 
     // Same as above, but with proper centers rather than centers meant for title card alignment.
     // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.

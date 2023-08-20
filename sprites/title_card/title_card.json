@@ -5,6 +5,10 @@
     "titlecard_redbar_new":  { "File": "TitleCard_RedBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_redbar_dage":  { "File": "TitleCard_DAGEname.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_redbar_dage_orig":  { "File": "TitleCard_DAGEname_Orig.bmp", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_bluebar_rtwi":  { "File": "TitleCard_BlueBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_orangebar_rtwi":  { "File": "TitleCard_OrangeBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_new_rtwi":  { "File": "TitleCard_RedBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_dage_rtwi":  { "File": "TitleCard_DAGEname_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
     // To move text right, subtract from x center. To move down, subtract from y center.
     "titlecard_act1":  { "File": "Title_Act1.png", "Rect": "0,0,77,48", "Center": "22,-64" }, 
     "titlecard_act2":  { "File": "Title_Act2.png", "Rect": "0,0,77,48", "Center": "22,-64" },
@@ -44,5 +48,8 @@
     "titlecard_zone0b_menu":  { "File": "Title_DEZ.png", "Rect": "0,0,141,66", "Center": "71,33" },
     "titlecard_zone0c_menu":  { "File": "Title_DDZ.png", "Rect": "0,0,180,66", "Center": "90,33" },
     "titlecard_zoneHPZ_menu":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "93,33" },
-    "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" }
+    "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" },
+
+    "angel_titlecard_zone":  { "File": "angel_zonenames.png", "Rect": "0,0,72,24", "Center": "36,12" },
+    "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,24,160,24", "Center": "32,12" }
 }

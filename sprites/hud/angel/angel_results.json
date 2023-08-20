@@ -1,0 +1,9 @@
+{
+	"angel_got_text":  { "File": "angel_results.png", "Rect":  "0,0,45,16", "Center": "22,8"},
+	"angel_through_text":  { "File": "angel_results.png", "Rect":  "32,0,110,16", "Center": "55,8"},
+	"angel_zone_text":  { "File": "angel_results.png", "Rect":  "143,0,61,16", "Center": "31,8"},
+	"angel_sonic_text":  { "File": "angel_levelresultsname.png", "Rect":  "0,0,71,16", "Center": "35,8"},
+	"angel_tails_text":  { "File": "angel_levelresultsname.png", "Rect":  "0,16,63,16", "Center": "31,8"},
+	"angel_miles_text":  { "File": "angel_levelresultsname.png", "Rect":  "0,32,66,16", "Center": "33,8"},
+	"angel_knuckles_text":  { "File": "angel_levelresultsname.png", "Rect":  "0,48,116,16", "Center": "58,8"}
+}

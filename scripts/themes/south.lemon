@@ -281,7 +281,9 @@ function bool South.TitleCardText(s16 px, s16 py, s16 renderQueue)
 
 	// We call this via Zone ID later to center-align per zone.
 	u8 index = global.zone
-	if (global.zone_act == 0x1601 || global.zone_act == 0x1701)
+	if (unlock_act)
+		index = 0x00	// EHZ name length matches that of AIZ
+	else if (global.zone_act == 0x1601 || global.zone_act == 0x1701)
 		index = 0x0d	// HPZ
 	else if (global.zone_act == 0x1700)
 		index = 0x0b	// DEZ final bosses
@@ -294,6 +296,10 @@ function bool South.TitleCardText(s16 px, s16 py, s16 renderQueue)
 	if (objA0.update_address == 0x02d95c && !original_mode)
 	{
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
+		if (objA0.animation.sprite == 0x02 && unlock_act)
+		{
+			return true	// don't draw anything but prevent the original graphic from showing
+		}
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
 			Renderer.drawCustomSprite("south_titlecard_act2", px + 8 - center_offset[index], py - 0x22 - 0x20, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
@@ -318,7 +324,10 @@ function bool South.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
-			Renderer.drawCustomSprite(stringformat("south_titlecard_zone%d", objA0.animation.sprite - 4), getScreenWidth() - px - center_offset[index], py - 0x20, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			if (unlock_act)
+				Renderer.drawCustomSprite(stringformat("south_titlecard_unlock%04d", unlock_act), getScreenWidth() - px - center_offset[index], py - 0x20, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			else
+				Renderer.drawCustomSprite(stringformat("south_titlecard_zone%d", objA0.animation.sprite - 4), getScreenWidth() - px - center_offset[index], py - 0x20, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		// "Bonus"
@@ -400,7 +409,7 @@ function bool South.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x10)
     {
-        s16 through_x_offset = (global.zone_act == 0x0a00) ? -40 : 0		// show "Zone" in SSZ, thus shift "Through" left.	// ONLY IN south THEME!
+        s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? -40 : 0		// show "Zone" in SSZ and unlockable acts, thus shift "Through" left.
         Renderer.drawCustomSprite("south_through_text", px + through_x_offset, py, 0, SPRITE_FLAG_PRIO, 0xe008)
 
 		// Render the title card oval
@@ -413,9 +422,9 @@ function bool South.LevelResults(s16 px, s16 py, s16 renderQueue)
 		Renderer.drawCustomSprite(barKey, px + through_x_offset + 0x50, py - 0x18, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe008 - 1)
         return true
     }
-    else if (objA0.animation.sprite == 0x0f && global.zone_act == 0x0a00)	// show "Zone" in SSZ.
+    else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ and unlockable acts.
     {
-        Renderer.drawCustomSprite(stringformat("south_titlecard_zone_text", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
+        Renderer.drawCustomSprite("south_titlecard_zone_text", px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
     else if (objA0.animation.sprite == 0x0f)
