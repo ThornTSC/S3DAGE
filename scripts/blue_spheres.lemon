@@ -50,6 +50,8 @@ function void fn00881a()
 //# address-hook(0x04c97e) end(0x04cb18)
 function void fn04c97e()
 {
+	Renderer.setScreenSize(screen_width, 224)
+
 	if (!menu_initialized)
 	{
 		debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
@@ -60,7 +62,6 @@ function void fn04c97e()
 		eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
 		specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 		restartSpecialStage = 0
-		Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
 		challenges_normalmode = 0
 	}
 
@@ -674,17 +675,14 @@ function void RenderSKLogoFullBG()
 		return
 	
 	Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x16ff)	// hide areas on far right in widescreen using a black cover-up
 
 	Renderer.drawCustomSprite("sklogo", -80, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 48, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 176, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 304, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 432, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 560, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 560, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 688, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
 
-	Renderer.drawCustomSprite("sklogo", -144, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", -16, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 112, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 240, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
@@ -696,10 +694,7 @@ function void RenderSKLogoFullBG()
 	Renderer.drawCustomSprite("sklogo", 176, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 304, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 432, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 560, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 688, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
 
-	Renderer.drawCustomSprite("sklogo", -144, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", -16, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 112, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite("sklogo", 240, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
@@ -734,9 +729,78 @@ function void fn04e116()
 	base.fn04e116()
 }
 
+// Use an image for the PERFECT text on the results screen, as plane mappings wrap improperly in ultrawide resolutions.
+// Functions taken from general\blueshpere\bluespheregame.lemon
+// This first function checks if the plane mappings and extra display time for the PERFECT text should be loaded.
+//# address-hook(0x04df04) end(0x04df50)
+function void fn04df04()
+{
+	--u16[A0 + 0x30]
+	if (s16[A0 + 0x30] < 0)
+	{
+		if (bluespheres.rings_remaining == 0)
+		{
+		// We comment out loading the plane mappings for the PERFECT text.
+	//	#if !STANDALONE
+	//		set_status_register(0x2700)
+	//	#endif
+	//		A1 = 0x04de9a	// "PERFECT"
+	//		D2.u16 = 0x049a
+	//		D6.u16 = (sprite_attribute.PRIORITY | (BlueSphereGame.TextTiles.targetInVRAM >> 5))
+	//		fn05b318()
+	//	#if !STANDALONE
+	//		set_status_register(0x2300)
+	//	#endif
 
+			playSound(0xac)
+			u16[A0 + 0x30] = 0x012c
+		}
+		objA0.update_address = 0x04df52
+	}
 
+	if (bluespheres.rings_remaining != 0 && control.pad1.pressed != 0)
+	{
+		global.game_mode = 0x2c
+	}
+}
 
+// This function shifts the PERFECT text far off the right of the screen by adjusting the horizontal scroll buffer values.
+// We incorporate our image of the text here and only display it when the buffer values indicate the text is within the screen boundaries.
+//# address-hook(0x04df52) end(0x04df84)
+function void fn04df52()
+{
+	if (bluespheres.rings_remaining == 0)
+	{
+		--u16[A0 + 0x30]
+		if (s16[A0 + 0x30] < 0)
+		{
+			global.game_mode = 0x2c
+		}
+	}
+
+	if (control.pad1.pressed != 0)
+	{
+		global.game_mode = 0x2c
+	}
+
+	D0.u8 = global.framecounter.low & 0x0f
+	if (D0.u8 == 0)
+	{
+		A1 = 0xffffe120				// address of first row of pixels of PERFECT text in the horizontal scroll buffer (text draws on Plane 1 High/Prio, renderQueue 0x4000)
+		D1 = 0x0f					// number of lines to affect minus 1
+		while (D1.s16 >= 0)
+		{
+			u16[A1] ^= 0x0100		// Alternately shift the row 0x100 (256 pixels) left or right (between 0x0058 and 0x0158), scrolling it off screen.
+									// Problem: horizontal scrolling loops every 512 pixels and A.I.R. supports 496x224. Lines longer than 16 pixels will loop horizontally!
+			A1 += 4					// Move to the next row.
+			--D1.s16				// Decrement number of rows remaining to shift.
+		}
+	}
+
+	// With the plane mappings gone, we use an image in the text's place that shows if the first byte of the horizontal scroll values is appropriate.
+	if (u8[0xffffe120] == 0)
+		Renderer.drawCustomSprite("results_perfect", getScreenWidth()/2, 81, 0, 0, 0x4001)
+}
 
 // Green sphere palette setup and a new line to reset the displayed time at the start of a special stage
 // Taken from scripts\level\special\bluespheres.lemon
@@ -1210,7 +1274,7 @@ function void fn0085b0()
 {
 	u16 reverseStart = 0
 
-	// Renderer.setScreenSize(480, 270)
+	Renderer.setScreenSize(screen_width, 224)
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 	if (challenge_greenspheres)
@@ -2659,8 +2723,8 @@ function void BlueSpheres.replacePlaneRendering()
 	Renderer.enableDefaultPlane(3, false)
 
 	// Manually render the HUD parts of this plane (blue spheres and rings counter)
-	Renderer.setupPlane(0, 0, 120, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR
-	Renderer.setupPlane(getScreenWidth()-120, 0, 120, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR
+	Renderer.setupPlane(0, 0, 160, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR and 0, 0, 120 in new versions
+	Renderer.setupPlane(getScreenWidth()-160, 0, 160, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR and -120, 0, -120 in new versions.
 }
 
 

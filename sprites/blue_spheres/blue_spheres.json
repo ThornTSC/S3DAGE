@@ -1,4 +1,11 @@
 {
+	// Ultrawide horizon glow, added to S3AIR GitHub Aug 13 2023
+	"bluespheres_glow_background":	{ "File": "bluespheres_glow.png", "Rect": "0,115,496,85", "Center": "248,0" },
+	"bluespheres_glow_foreground":	{ "File": "bluespheres_glow.png", "Rect": "0,0,496,115",  "Center": "248,0" },
+
+	// Perfect text on Green Sphere results, as an image instead of a plane for ultrawide support
+	"results_perfect": { "File": "results_perfect.png", "Rect": "0,0,109,14", "Center": "55,7" },
+
 	// Yellow Spheres, renderhooked to allow green spheres to use palette entries
 	"YellowSphere0": { "File": "YellowSphere0.png", "Rect": "0,0,32,32", "Center": "16,16" },
 	"YellowSphere1": { "File": "YellowSphere1.png", "Rect": "0,0,32,32", "Center": "16,16" },
