@@ -535,6 +535,8 @@ function void UpdatePaletteEffects.Default()
 {
 	if (unlock_act)
 	{
+		UpdatePaletteEffects.SuperForm()	// this must always be called to allow super transformations; a control lock is handled inside
+
 		LevelPaletteUpdate.EHZ()
 		return
 	}

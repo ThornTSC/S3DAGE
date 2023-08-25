@@ -5,7 +5,7 @@
 function void ItemEffect.ApplySuperTransformation()
 {
 	++u16[A2]
-	ring_counter += 50		// Without a check for 999 rings...
+	ring_counter = min(ring_counter + 50, 999)		// Added a check for 999 rings
 	super.palettefx.state = 1
 	super.palettefx.timer = 0x0f
 	super.active = 1

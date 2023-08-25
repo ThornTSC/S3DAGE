@@ -33,7 +33,7 @@ function void fn0187f0()
 }
 
 // Get uncompressed art for Sonic 2 elemental shields when relevant
-// objects\basics\shields.lemon
+// Function taken from objects\basics\shields.lemon
 function void Shield.sharedInit()
 {
 	if (unlock_act)
@@ -60,4 +60,26 @@ function void LightningShield.Init()
 
 	objA0.update_address = 0x019732
 	LightningShield.Update()
+}
+
+// Get uncompressed art for Sonic 2-paletted super stars when relevant.
+// This is not the actual Sonic 2 super stars art or disply pattern, as this is best shown in S3&K style to match S3&K Sonic.
+// Function taken from objects\effects\supersonicstars.lemon
+//# address-hook(0x019156) end(0x01919e)
+function void fn019156()
+{
+	u32 superStarsArtLoc = (unlock_act) ? 0x34f5e2 : 0x18bd44		// should place in actual Sonic 3 location of these stars at some point
+	updateSpritePattern(superStarsArtLoc, Shield.targetInVRAM, 0x01a0)
+
+	objA0.mapping_offset = 0x0192de
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x18
+	objA0.box_size.y = 0x18
+	objA0.sprite_attributes = (Shield.targetInVRAM >> 5)
+	if (u8[0xffffb000 + 0x0a] & 0x80)
+		u8[A0 + 0x0a] |= 0x80
+
+	objA0.update_address = 0x0191a4
+	fn0191a4()
 }
