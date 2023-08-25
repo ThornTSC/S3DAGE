@@ -68,7 +68,7 @@ function void LightningShield.Init()
 //# address-hook(0x019156) end(0x01919e)
 function void fn019156()
 {
-	u32 superStarsArtLoc = (unlock_act) ? 0x34f5e2 : 0x18bd44		// should place in actual Sonic 3 location of these stars at some point
+	u32 superStarsArtLoc = (unlock_act) ? 0x34a862 : 0x18bd44
 	updateSpritePattern(superStarsArtLoc, Shield.targetInVRAM, 0x01a0)
 
 	objA0.mapping_offset = 0x0192de
