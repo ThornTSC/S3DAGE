@@ -107,7 +107,7 @@ function void fn02d47e()
 			// Hard difficulty: 17-23 Chaos, 25-31 Super
 			// Super Emerald stages are not enabled yet!
 			challenge_greenspheres = global.next_bluespheres + 1
-			if (specialstages_knuckles)
+			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 				challenge_greenspheres += 16
 
 			fn02d1cc()	// special stage backup for character position, star posts, etc.
