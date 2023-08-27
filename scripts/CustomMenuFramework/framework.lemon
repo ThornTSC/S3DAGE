@@ -91,6 +91,8 @@ function void customMenu.setup()
 	held_time.down = 0
 	held_time.right = 0
 	held_time.left = 0
+	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
+	unlock_act = 0				// ensure this flag isn't left over from elsewhere
 
 	if (global.pause_disabled)
 	{

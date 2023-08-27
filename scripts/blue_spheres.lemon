@@ -459,6 +459,7 @@ function void BlueSphereGame()
 	u8[0xffffffa1] = 0
 	global.game_mode = 0x2c
 	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
+	unlock_act = 0				// ensure this flag isn't left over from elsewhere
 
 	while (true)
 	{
