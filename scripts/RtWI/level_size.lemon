@@ -12,9 +12,18 @@ function void UpdateCameraBoundsInLevel()
 	if (level.scrolling_routine != 4)
 	{
 		level.vertical_wrap = 0
-		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420
+		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420	// first value is Sonic Act 1 path, second is former Act 2
+		if (u16[0xffffb010] < 0x0e80 && u16[0xffffb014] >= 0x0360)	// check that considers a raised opening in the Knux path
+			move_area.bottom.target = 0x04c0
+		else if (u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x0f00 && u16[0xffffb014] >= 0x03c0)	// checks the Knux path exit
+			move_area.bottom.target = 0x04c0
+
 		if (camera.position.x.u16 >= 0x6500)
 			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
+
+		if (move_area.bottom.current > 0x04c0)
+			move_area.bottom.current = move_area.bottom.target
+
 		move_area.left = 0
 		move_area.right = 0x66f0 - getScreenExtend() // 0x36b0 in RtWI EHZ1, 0x2a90 in S2 EHZ1
 		if (allocDynamicObjectStd() && u16[0xffffb010] >= 0x6740 && time_attack != 1 && time_attack != 2)

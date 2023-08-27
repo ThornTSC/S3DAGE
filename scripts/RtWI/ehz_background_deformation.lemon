@@ -10,6 +10,7 @@ function void UpdateBackgroundScrolling.AIZ1()
 function void EHZ_CustomSprites()
 {
 	UpdateBackgroundScrolling.EHZ()
+	Renderer.addSpriteMaskWorld(0x0900, 0x0560, 0x0040, 0x0040, 0xcf00, 7)	// hide a single set of moving spikes on Knux's path that show in front of low-priority ground
 }
 
 function void UpdateBackgroundScrolling.EHZ()

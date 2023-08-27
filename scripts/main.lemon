@@ -321,8 +321,6 @@ function void discordRPC.setCharacterImage()
 			Game.setDiscordSmallImage("character_knuckles")
 }
 
-global.chaos_emeralds, global.super_emeralds
-
 function void discordRPC.setZoneImage()
 {
 	if (global.zone_act == 0x1700)				// DEZ2 boss
@@ -3161,6 +3159,7 @@ function void KnucklesPressedJumpInMidAir()
 
 
 // Do not allow canceling Super/Hyper transformations in Original Mode.
+// Also prevent playing level music while in win pose (e.g., invincibility wears off).
 // Function taken from maingame\character\character.lemon
 function void Character.updateBonusEffects()
 {
@@ -3202,7 +3201,7 @@ function void Character.updateBonusEffects()
 			if (char.invinc.countdown == 0)
 			{
 				// Back to normal
-				if (!level.boss_encounter && char.drown_countdown >= 12)
+				if (!level.boss_encounter && char.drown_countdown >= 12 && u8[0xffffb020] != char.state.WIN_POSE)
 				{
 					playMusic(level.default_music)
 				}
@@ -3794,6 +3793,7 @@ function void fn083708()
 
 
 // Add more leniency to the camera check for ICZ1's first sliding ice platform.
+// Also allow vertical wrapping in Original Mode.
 // Function taken from general\camera.lemon
 //# address-hook(0x01c11e) end(0x01c236)
 function void UpdateCameraPositionY()
@@ -3810,7 +3810,7 @@ function void UpdateCameraPositionY()
 
 	#if STANDALONE
 		// Prevent the infamous level wrap glitch
-		if (Game.getSetting(SETTING_FIX_GLITCHES) && level.vertical_wrap == 0xff00)
+		if (Game.getSetting(SETTING_FIX_GLITCHES) && !original_mode && level.vertical_wrap == 0xff00)
 		{
 			if (D0.s16 > level.height.bitmask / 2)
 			{
@@ -4748,6 +4748,51 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 	return base.Standalone.onDrawVdpSprite(px, py, size, index, renderQueue)
 }
 
+
+
+
+
+// Make sure digits drawn in act results do not disappear before leaving the screen.
+// Fix from 12 Aug 2023 AIR commit eda7347
+// Function taken from maingame\hud\levelresults.lemon
+//# translated(0x02de04) end(0x02de4e)
+function bool fn02de04()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x48]
+	D0.u16 = u16[A1 + 0x32]
+	if (D0.u16 != 0)
+	{
+	#if STANDALONE
+		// In standalone, we don't call "DrawObject", so the visibility flag does not get updated automatically
+		s16 px = s16(objA0.position.x.u16) - 0x80
+		if (px + objA0.box_size.x >= 0 && px < getScreenWidth())
+			objA0.render_flags |= render_flag.VISIBLE
+		else
+			objA0.render_flags &= ~render_flag.VISIBLE
+	#endif
+
+		if (!(objA0.render_flags & render_flag.VISIBLE))
+		{
+			--u16[A1 + 0x30]
+			UnloadObject()
+			return true
+		}
+
+		if (D0.u8 < u8[A0 + 0x28])
+			return false
+
+		objA0.position.x.u16 += (objA0.base_state != 0) ? 0x20 : -0x20
+	}
+	else
+	{
+		s16 diff = u16[A0 + 0x46] - objA0.position.x.u16
+		if (diff != 0)
+		{
+			objA0.position.x.u16 += clamp(diff, -0x10, 0x10)
+		}
+	}
+	return false
+}
 
 
 
@@ -6085,8 +6130,11 @@ function void TriggerNextZone()
 
 constant array<u16> UnlockAct_StartPositionsSonicTails =
 {
-	0x0060, 0x0294,		// not called, as unlock_act starts at 1
 	0x0060, 0x0294		// EHZ
+}
+constant array<u16> UnlockAct_StartPositionsKnuckles =
+{
+	0x0060, 0x0534		// EHZ
 }
 
 
@@ -6130,8 +6178,13 @@ function void SetupCharacterAtStartPosition()
 		}
 		if (unlock_act)
 		{
-			D1 = UnlockAct_StartPositionsSonicTails[unlock_act * 2]
-			D0 = UnlockAct_StartPositionsSonicTails[unlock_act * 2 + 1]
+			D1 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2]
+			D0 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2 + 1]
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				D1 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2]
+				D0 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2 + 1]
+			}
 		}
 		u16[0xffffb010] = D1.u16
 		u16[0xffffb014] = D0.u16
