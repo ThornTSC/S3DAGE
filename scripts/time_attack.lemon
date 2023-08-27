@@ -3147,6 +3147,35 @@ function void Standalone.onLevelStart()
 	Game.onLevelStart()
 }
 
+
+
+// Copy the v23.08.27.0 version of restartAtCheckpoint() to fix shield saving at star posts in previous A.I.R. versions.
+// Function taken from standalone\enginecallbacks.lemon
+function void restartAtCheckpoint()
+{
+	// This check should always be false, but it's relevant if restart is allowed from within special / bonus stages
+	if (global.stage_type != 0)
+	{
+		global.zone_act = checkpoint.zone_act
+		global.zone_act.apparent = checkpoint.zone_act.apparent
+		checkpoint.number = checkpoint.number.backup
+
+		global.stage_type = 0
+	}
+
+	global.zone_act = global.zone_act.apparent
+	global.in_extra_stage = 0
+	global.shields_backup_1 = 0		// new for v23.08.27.0
+	global.shields_backup_2 = 0		// new for v23.08.27.0
+	level.restart = 1
+
+	Standalone.onRestartAtCheckpoint()
+}
+
+
+
+
+
 function void Standalone.onRestartAtCheckpoint()
 {
 	draw_HUD = true

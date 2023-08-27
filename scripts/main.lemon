@@ -5573,7 +5573,67 @@ function void fn005b42()
 }
 
 
+// Add future A.I.R. version fix to position Sonic properly at all screen widths in the S&K title screen.
+// Function taken from menus\titlescreen_sk.lemon
+//# address-hook(0x00565a) end(0x0056e2)
+function void fn00565a()
+{
+#if STANDALONE
+	// Fix for Sonic's position in widescreen, #contributed by TheMushrunt
+	objA0.position.x.u16 = 0xe8 + getScreenExtend()
+#endif
+	if (objA0.position.y.u16 != 0xf0)
+		++objA0.position.y.u16
 
+	if (u16[0xffffeec0] == 0x03)
+	{
+		objA0.sprite_attributes |= sprite_attribute.PRIORITY
+		if (camera.position.y.u16 >= 0xe0)
+		{
+			if (camera.position.y.u16 == 0xe0)
+			{
+			#if !STANDALONE
+				set_status_register(0x2700)
+			#endif
+				copyRectToVRAM(0xffff8e40, 0xc000, 0x28, 0x1c)
+			#if !STANDALONE
+				set_status_register(0x2300)
+			#endif
+
+				objA0.animation.timer = 6
+			}
+
+			if (camera.position.y.u16 != 0x0100)
+			{
+				camera.position.y.u16 += 8
+			}
+			else
+			{
+				objA0.update_address = 0x0056e8
+				fn0056e8()
+			}
+			return
+		}
+
+		camera.position.y.u16 += 8
+	#if STANDALONE
+		// Timing for standalone needs to be different, as it's loading the data faster
+		if (camera.position.y.u16 == 0xd0)
+	#else
+		if (camera.position.y.u16 == 0xc8)
+	#endif
+		{
+			Kosinski.addToDMAQueue(0x0d0e12, TitleScreenSK.Menu.targetInVRAM)		// This is actually the tiles for Sonic's landing animation, its just using the same VRAM location as the menu
+		}
+
+		A1 = 0xffff8580
+		D0 = 0x40000003
+		D1.u16 = camera.position.y.u16
+		fn005ce8()
+	}
+
+	DrawObject()
+}
 
 
 // Loops SEGA logo and S&K title screen instead of starting demos
@@ -8067,6 +8127,30 @@ function void AIZ1_CustomSprites()
 
 
 
+// Implement future A.I.R. fix to fix sprite culling on AIZ swinging vines.
+// Function taken from objects\01_aiz\aiz_swingingvine.lemon
+//# address-hook(0x02241a) end(0x022440)
+function void fn02241a()
+{
+	objA1.render_flags = render_flag.WORLD
+	objA1.box_size.y = 8
+	if (!original_mode)
+	{
+		// Increase visual bounding box to avoid too early clipping
+		objA1.box_size.x = 16
+		objA1.box_size.y = 16
+	}
+	else
+	{
+		objA1.box_size.x = 8
+		objA1.box_size.y = 8
+	}
+	objA1.sprite_priority = 0x0200
+	objA1.sprite_attributes = 0x041b
+	objA1.mapping_offset = 0x022b9e
+}
+
+
 
 
 
@@ -9770,6 +9854,137 @@ function void fn034574()
 		fn034600()
 	}
 }
+
+
+
+
+// Implement future A.I.R. feature by iCloudius to allow drop dash to trigger MGZ spin wheels (matching Origins)
+// Functions taken from objects\03_mgz\mgz_spinwheeltrigger.lemon
+//# address-hook(0x025d9c) end(0x025ea0)
+function void fn025d9c()
+{
+	D1.u16 = 0x1b
+	D2.u16 = 0x10
+	D4.u16 = objA0.position.x.u16
+	A2 = 0x025f0e
+	fn01dd0e()
+
+	D6 = (D6 << 16) + (D6 >> 16)
+	D6.u16 &= 0x33
+	if (D6.u16 != 0)
+	{
+		D0.u8 = D6.u8 & 0x11
+		if (D0.u8 != 0)
+		{
+			A1 = 0xffffb000
+		#if STANDALONE
+			// Also allow for drop-dashing on the spin wheel, #contributed by iCloudius
+			if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
+		#else
+			if (objA1.state == char.state.SPINDASH)
+		#endif
+			{
+				u16[A0 + 0x30] = 0x3c
+				u8[A0 + 0x32] = 1
+				D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
+				if (D0.u8 == 0)
+				{
+					u8[A0 + 0x32] = 0xff
+				}
+			}
+		}
+
+		D6.u8 &= 0x22
+		if (D6.u8 != 0)
+		{
+			A1 = 0xffffb04a
+			if (objA1.state == char.state.SPINDASH)
+			{
+				u16[A0 + 0x30] = 0x3c
+				u8[A0 + 0x32] = 1
+				D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
+				if (D0.u8 == 0)
+				{
+					u8[A0 + 0x32] = 0xff
+				}
+			}
+		}
+	}
+
+	if (u16[A0 + 0x30] != 0)
+	{
+		D0.u16 = objA0.subtype2c & 0x0f
+		A3 = 0xfffff7e0 + D0.s16
+
+		--u16[A0 + 0x30]
+		if (u16[A0 + 0x30] == 0)
+		{
+			u8[A3] = 0
+			objA0.animation.sprite = 0
+		}
+		else
+		{
+			u8[A3] = 1
+			if (objA0.flags2a & object.flag.P1_ON_OBJECT)
+			{
+				A1 = 0xffffb000
+				fn025ea6()
+			}
+			if (objA0.flags2a & object.flag.P2_ON_OBJECT)
+			{
+				A1 = 0xffffb04a
+				fn025ea6()
+			}
+
+			--objA0.animation.timer
+			if (s8(objA0.animation.timer) < 0)
+			{
+				objA0.animation.timer = 1
+				objA0.compound.sprite1.animation.sprite = (objA0.compound.sprite1.animation.sprite + u8[A0 + 0x32]) & 0x03
+			}
+			objA0.animation.sprite = (objA0.animation.sprite != 0) ? 0 : 4
+		}
+	}
+
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x025ea6) end(0x025f0c)
+function void fn025ea6()
+{
+	D1.u16 = objA0.position.x.u16 - 0x10
+	if (objA0.flags2a & 0x01)
+	{
+		D1.u16 += 0x20
+	}
+	D2.u16 = objA0.position.y.u16 + 0x10
+	D1.u16 -= objA1.position.x.u16
+	D2.u16 -= objA1.position.y.u16
+	LookupAngleByVector()
+	LookupSinCos()
+	D1.s32 = (s32(D1.s16) * -0x0700) >> 8
+	objA1.velocity.x = D1.u16
+	D0.s32 = (s32(D0.s16) * -0x0700) >> 8
+	objA1.velocity.y = D0.u16
+	u8[A1 + 0x2a] |= char.flag.IN_AIR
+	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.ON_OBJECT)
+#if STANDALONE
+	if (objA1.state == char.state.SONIC_DROPDASH)
+	{
+		u8[A1 + 0x40] = 1 // re-enable double jump state
+        u8[A1 + 0x2f] = 1 // re-enable jump flag
+		u8[A1 + 0x40] = 1	// Re-enable double jump state
+		u8[A1 + 0x2f] = 1	// Re-enable jump flag
+	}
+	else
+#endif
+	{
+		u8[A1 + 0x40] = 0
+	}
+	u8[A1 + 0x3d] = 0
+	playSound(0x7b)
+}
+
 
 
 
@@ -15299,8 +15514,8 @@ function void fn04301c()
 function void fn0881fe()
 {
 #if STANDALONE
-	// Invulnerability frames should shake off the piranha
-	if (u8[A1 + 0x34] > 0 && !original_mode)
+	// Invulnerability frames should shake off the piranha / toxomister cloud, as should being dead
+	if ((u8[A1 + 0x34] > 0 || objA1.base_state >= 0x06) && !original_mode)	// base state check: objA1.base_state is base_state.DIED, base_state.INACTIVE, or base_state.DROWNED
 	{
 		D0 = 1
 	}
