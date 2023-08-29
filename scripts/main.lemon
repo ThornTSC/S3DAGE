@@ -8795,7 +8795,8 @@ function void fn01c81e()
 
 		move_area.left = 0x3b80
 		move_area.bottom.target = 0x05da
-		level.vertical_wrap = 0x05da	// new line here disallows upward camera movement
+		if (!original_mode)
+			level.vertical_wrap = 0x05da	// new line here disallows upward camera movement
 		u8[0xffffeec6] = 0xff
 		camera.update_routine += 2
 	}
@@ -14921,14 +14922,17 @@ function void fn0709a8()
 
 		if (!original_mode)
 		{
-			// Let him move faster
-			if (isMainCharacter(CHARACTER_KNUCKLES))
+			if (getScreenExtend() >= 20)
 			{
-				objA0.velocity.x = objA0.velocity.x * 2
-			}
-			else
-			{
-				objA0.velocity.x = objA0.velocity.x * 3/2
+				// Let him move faster in widescreen
+				if (isMainCharacter(CHARACTER_KNUCKLES))
+				{
+					objA0.velocity.x = objA0.velocity.x * 2
+				}
+				else
+				{
+					objA0.velocity.x = objA0.velocity.x * 3/2
+				}
 			}
 		}
 	}
