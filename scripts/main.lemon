@@ -4404,6 +4404,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	u8 gameMode = global.game_mode & 0x7f
 	if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02eac8 || objA0.update_address == 0x02ebcc || objA0.update_address == 0x02ec1e && (gameMode == 0x48 || gameMode == 0x0c))
 	{
+//		if (original_mode)
+//			return false
+		
 		if (!original_mode && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{		
 			if (theme.hud == theme.flicky)
@@ -4419,7 +4422,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		{
 			if (original_mode)
 			{
-				HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", player.score * 10, px + 88, py, renderQueue)	// doesn't actually seem necessary, unlike the RING BONUS and Perfect digit drawing
+				HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", player.score * 10, px + 88, py, renderQueue + 1)	// doesn't actually seem necessary, unlike the RING BONUS and Perfect digit drawing
 				return false
 			}
 
@@ -4469,6 +4472,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		}
 		else if (objA0.animation.sprite == 0x1a || objA0.animation.sprite == 0x34 || objA0.animation.sprite == 0x39)
 		{
+			if (original_mode)
+				return false
+			
 			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
 				HUD.drawSprite("hud_bonus_icon_blue", px+60, py-5, renderQueue-1)
 			else
@@ -4587,6 +4593,71 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
+	// Star post arrows
+	if (objA0.update_address == 0x02cfa8 && checkpoint.number >= (objA0.subtype2c & 0x7f) && objA0.base_state <= 4 && !original_mode)
+	{
+		// Render arrows pointing in the correct direction
+		u16[A0 + 0x36] = min(u16[A0 + 0x36] + 16, 240)	
+		u32 alpha = (u16[A0 + 0x36] << 24)
+		u32 highlight1 = (level.framecounter.low % 32 < 8 ? 0x20b0ff : 0xffffff)
+		u32 highlight2 = ((level.framecounter.low - 8) % 32 < 8 ? 0x20b0ff : 0xffffff)
+		u32 highlight3 = ((level.framecounter.low - 16) % 32 < 8 ? 0x20b0ff : 0xffffff)
+		u32 highlight4 = ((level.framecounter.low - 24) % 32 < 8 ? 0x20b0ff : 0xffffff)
+		if (objA0.subtype2c < 0x80)		// star post respawns player facing right
+		{
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
+		}
+		else	// star post respawns player facing left
+		{
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
+		}
+	}
+
+	// Character sprites for riding the Tornado
+	if (objA0.update_address == 0x05ebb4 || objA0.update_address == 0x05ed18)
+	{
+		u64 key = 0
+		u8 atex = 0
+		u8 character = isMainCharacter(CHARACTER_SONIC) ? CHARACTER_TAILS : isMainCharacter(CHARACTER_TAILS) ? CHARACTER_SONIC : isSecondCharacter(CHARACTER_TAILS) ? CHARACTER_TAILS : CHARACTER_SONIC
+		if (objA0.update_address == 0x05ebb4)
+		{
+			key = stringformat("%s_pilot", getCharacterTornadoSpriteKey(character))
+		}
+		else //if (objA0.update_address == 0x05ed18)
+		{
+			if (objA0.subtype2c != 0)
+				character = getMainCharacter()
+			key = stringformat((objA0.subtype2c == 0) ? "%s_pilot_small" : "%s_small", getCharacterTornadoSpriteKey(character))
+
+			if (objA0.subtype2c != 0 && isMainCharacter(CHARACTER_KNUCKLES) && outro.ending_type < 0)
+			{
+				if (original_mode)
+					return false
+				
+				// Replace Knuckles' smaller tornado sprite with a more fitting sprite in bad ending
+				key = stringformat((global.zone_act == 0x0d01) ? "%s_small_standing" : "%s_small_exhausted", getCharacterTornadoSpriteKey(CHARACTER_KNUCKLES))
+			}
+		}
+
+		atex = 0x40 + character * 0x20
+		if (Renderer.hasCustomSprite(key))
+		{
+			if (objA0.subtype2c != 0 && isMainCharacter(CHARACTER_KNUCKLES) && outro.ending_type >= 0)
+			{
+				// Render the Master Emerald sprite separately
+				Renderer.drawVdpSprite(px-18, py-24, 0x0d, sprite_attribute.PRIORITY | sprite_attribute.FLIP_X | sprite_attribute.PALETTE.LINE2 | 0x02e7, renderQueue-1)
+				Renderer.drawVdpSprite(px-10, py-8, 0x04, sprite_attribute.PRIORITY | sprite_attribute.FLIP_X | sprite_attribute.PALETTE.LINE2 | 0x02ef, renderQueue-1)
+			}
+			Renderer.drawCustomSprite(key, px, py, atex, (objA0.render_flags & render_flag.FLIP_X) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			return true
+		}
+	}
 /*
 	// Characters in special stage. Add 46 to use new screen size.
 	if (objA0.update_address == 0x00903e || objA0.update_address == 0x00927a)
@@ -7662,7 +7733,8 @@ function void fn01caae()
 	if (D1.s16 < 0)
 	{
 		D1.u16 &= 0x7fff
-		// move_area.bottom.current = D1.u16
+		if (original_mode)
+			move_area.bottom.current = D1.u16
 	}
 	move_area.bottom.target = D1.u16
 }
@@ -10107,7 +10179,7 @@ function void Checkpoint.BaseUpdate()
 	// Can lead to:
 	//  - 0x02cfc0	-> objA0.base_state = 0x00	-> Initialization
 	//  - 0x02d012	-> objA0.base_state = 0x02	-> Inactive
-	//  - 0x02d0f8	-> objA0.base_state = 0x04	-> Active
+	//  - 0x02d0f8	-> objA0.base_state = 0x04	-> Active (if called from here; the Inactive function also calls this)
 	//  - 0x02d10a	-> objA0.base_state = 0x06	-> Head spinning (used only by this child object)
 	//  - 0x02d47e	-> objA0.base_state = 0x08	-> Bonus stage stars animating (used only by these child objects)
 	call tableLookupAddress(0x02cfb6, objA0.base_state)
@@ -15121,7 +15193,7 @@ function void SOZ1_CustomSprites()
 		if (time_attack == 1 || time_attack == 2)	// draw the pyramid already in place
 			Renderer.drawCustomSprite("soz1_pyramid", 0x4250 - camera.foreground.x.u16, 0x07c0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 	}
-	else	// somehow these sprite masks from fn055b70() are missed in Original Mode
+	if (original_mode || global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
 	{
 		Renderer.addSpriteMaskWorld(0x4220, 0x0a00, 0x230, 0x40, 0x9f00, 1)
 		Renderer.addSpriteMaskWorld(0x4200, 0x0a08,  0x20, 0x38, 0x9f00, 1)
@@ -15158,15 +15230,69 @@ function void SOZ2_CustomSprites()
 
 
 
-// In Original Mode, raise the SOZ1 pyramid at the original speed
-// Function taken from level\09_soz\level_soz.lemon
+// In Original Mode, raise the SOZ1 pyramid at the original speed.
+// In Marathon Modes, raise the pyramid extremely fast.
+// Only standard Revisited Mode should allow the cutscene to be sped up.
+// Functions taken from level\09_soz\level_soz.lemon
+//# address-hook(0x055a9a) end(0x055b00)
+function void fn055a9a()
+{
+	if (u16[0xffffeec6] != 0)
+	{
+		// Start pyramid rising
+		u16[0xffffeec6] = 0
+		u16[0xffffee9c] = -8
+		camera.screenshake.state.hi = 0xff
+
+		fn055db6()
+		fn04f2f6()
+
+		u16[0xffffeec8] = (D0.u16 + getScreenHeight()) & level.height.tilemask
+		u16[0xffffeeca] = 0x0f
+		level.scrolling_routine += 4
+		fn055b08()
+
+		if (!original_mode && !time_attack)
+			Game.startSkippableCutscene()
+	}
+	else
+	{
+		D0.u16 = (u16[0xffffb000 + 0x10] >= 0x4000) ? 0x0960 : 0x0b20
+		move_area.bottom.current = D0.u16
+		move_area.bottom.target = D0.u16
+		fn055e96()
+		fn055d56()
+
+		A6 = 0xffffee90		// Address of camera.background.y
+		A5 = 0xffffee96		// Address of camera.background.y.old
+		D1 = 0
+		D6 = 0x20
+		LoadTileContentInDirY()
+		fn055df2()
+	}
+}
+
 //# address-hook(0x055d94) end(0x055db0)
 function void fn055d94()
 {
 	// Pyramid rising
 	if (camera.screenshake.state & 0x8000)
 	{
-		if (Game.getSetting(SETTING_SOZ_PYRAMID) && !original_mode)
+		if (time_attack)
+		{
+			// Pyramid rising should be faster than fast forwarding the cutscene
+			u16[0xffffee9c] += 6
+			if (s16[0xffffee9c] >= 0x0280)
+			{
+				camera.screenshake.state = 0x08
+				s16[0xffffee9c] = 0x0280
+
+			#if STANDALONE
+				Game.endSkippableCutscene()
+			#endif
+			}
+		}
+		else if (Game.getSetting(SETTING_SOZ_PYRAMID) && !original_mode)
 		{
 			// Let pyramid rise faster
 			u16[0xffffee9c] += min(level.framecounter & 0x03, 2)

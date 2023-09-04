@@ -1275,7 +1275,8 @@ function void fn0085b0()
 {
 	u16 reverseStart = 0
 
-	Renderer.setScreenSize(screen_width, 224)
+	if (!original_mode)
+		Renderer.setScreenSize(screen_width, 224)
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 	if (challenge_greenspheres)
@@ -2640,7 +2641,7 @@ function void BlueSpheres.renderCustomSpheres()
 				Renderer.drawCustomSprite(stringformat("YellowSphere%x", min(form, 0x0c)), px, py, 0x00, 0, renderQueue)
 				u8[0xffffef7c] = form
 			}
-			else if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+			else if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02 && !original_mode)
 			{
 				Renderer.drawVdpSpriteWithTint(px + u16[A3+4], py + s8[A3], u8[A3+1], u16[A3+2] + D6.u16, renderQueue, (0xffffff - fog) + (u32(alpha) << 24), fog)
 			}
@@ -3174,11 +3175,8 @@ function void fn02e410()
 			u16[A1 + 0x7e] = 0x0eee
 		}
 
-	#if STANDALONE
-		if (objA0.countdown_value == 269)
-	#else
-		if (objA0.countdown_value == 289)
-	#endif
+		u16 countdownCompare = (original_mode ? 289 : 269)
+		if (objA0.countdown_value == countdownCompare)
 		{
 			playMusic(MUSIC_LEVELCLEAR)
 		}

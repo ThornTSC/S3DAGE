@@ -1428,7 +1428,7 @@ function void Character.BaseUpdate.Knuckles()
 
 
 
-// Remove star posts in time attack mode.
+// Remove star posts in time attack mode and widen rendering range to support direction arrows.
 // Function taken from objects\basics\checkpoint.lemon
 // Note that there is a second check in that file to not spawn bonus stage stars in time attack, but it is now obsolete.
 //# address-hook(0x02cfc0) end(0x02d00c)
@@ -1447,7 +1447,7 @@ function void Checkpoint.Init()
 	objA0.mapping_offset = (unlock_act) ? 0x8804c6 : 0x02d348
 	objA0.sprite_attributes = (unlock_act) ? 0x047c : 0x05ec
 	objA0.render_flags = render_flag.WORLD
-	objA0.box_size.x = 0x08
+	objA0.box_size.x = original_mode ? 0x08 : 0x30
 	objA0.box_size.y = 0x28
 	objA0.sprite_priority = 0x280
 
