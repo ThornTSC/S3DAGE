@@ -4796,10 +4796,28 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 
 
 // Allow a DEZ retracting spring in DEZ1 to use correct graphics for its base.
+// Render hyper stars fully opaque in Original Mode.
 // Also makes a check from AIR commits after the latest stable build.
 // Function taken from standalone\rendering\renderhooks.lemon
 function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16 renderQueue)
 {
+	// Hyper Sonic stars
+	if (objA0.update_address == 0x0193ec || objA0.update_address == 0x0193ca)
+	{
+		// Draw not fully opaque
+		u8 alpha = 0xff
+		if (Game.getSetting(SETTING_GFX_ANTIFLICKER) >= 1 && !original_mode)
+		{
+			u8 step = objA0.animation.sprite * 2 + (1 - objA0.animation.timer)	// Ranges from 0 to 5
+			if (Game.getSetting(SETTING_GFX_ANTIFLICKER) == 2)
+				alpha = 0xe0 - step * 0x20
+			else
+				alpha = 0xff - step * 0x18
+		}
+		Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, alpha)
+		return true
+	}
+
 	// DEZ 1 Retractable Spring (the one added for S3AIR specifically)
 	if (objA0.update_address == 0x0480d4 && global.zone_act == 0x0b00 && index >= sprite_attribute.PALETTE.LINE1)	// >= works for now, but if yellow spring art is ever used, this is insufficient
 	{
