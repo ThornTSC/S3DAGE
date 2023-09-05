@@ -8765,7 +8765,7 @@ function void fn050390()
 
 		if (s16[A0 + 0x32] >= 0)
 		{
-			if (allocDynamicObjectAfterA0())
+			if (allocDynamicObjectAfterA0() && u16[A0 + 0x30] != 0x7fff)
 			{
 				// Spawn bomb
 				objA1.update_address = 0x05047c
@@ -8782,6 +8782,8 @@ function void fn050390()
 
 
 // Force Original Mode to use the base S3&K AIZ2 blimp sequence.
+// Revisited Mode uses a simplified version of the A.I.R. sequence that is traversable with the same jumps:
+// bombs spawning at "dummy" position 0x7fff are immediately deleted.
 // Function taken from standalone\rom_manipulations.lemon
 function void ROMManipulation.AIZ2.BlimpSequenceBombs()
 {
@@ -8791,29 +8793,29 @@ function void ROMManipulation.AIZ2.BlimpSequenceBombs()
 	{
 		// New sequence
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3f5c)
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x4e, 0x3f2c)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x4e, 0x7fff)
 
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3f5c)
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3f2c)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3edc)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x30, 0x3eac)
 
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3f5c)
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3f2c)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3edc)
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3eac)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3e5c)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x16, 0x3e2c)
 
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3f5c)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3f2c)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3edc)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3eac)
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3e5c)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x12, 0x3e2c)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
 
-		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
+		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x7fff)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x04, 0x3dec)
 	}
 	else
@@ -8844,6 +8846,19 @@ function void ROMManipulation.AIZ2.BlimpSequenceBombs()
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
 	}
+}
+
+
+
+
+// Bombs that are given "dummy" positions in the bomb drop location table above should be unloaded.
+//# address-hook(0x0504dc) end(0x0504e8)
+function void fn0504dc()
+{
+	if (objA0.position.x.u16 > 0x5000)	// dummy entry in the sequence
+		UnloadObject()
+	else
+		base.fn0504dc()
 }
 
 
