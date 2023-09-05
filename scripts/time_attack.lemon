@@ -3559,7 +3559,8 @@ function void fn06852c()
 
 
 
-// AIZ1 boss (actual, not cutscene): direct time attack check from base game to use DAGE time attack flag
+// AIZ1 boss (actual, not cutscene): direct time attack check from base game to use DAGE time attack flag.
+// Also make boss position character dependent in Original Mode -- yes, this reintroduces the original game's softlock.
 // Function taken from level\01_aiz\level_aiz.lemon
 #if STANDALONE
 function void AIZ1a.checkPreBossArea()
@@ -3570,6 +3571,8 @@ function void AIZ1a.checkPreBossArea()
 
 	// Using the upper or the lower path?
 	bool isOnUpperPath = (camera.position.y.u16 < 0x400)
+	if (original_mode)
+		isOnUpperPath = !isMainCharacter(CHARACTER_KNUCKLES)
 
 	if (isOnUpperPath)
 	{
