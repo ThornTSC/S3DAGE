@@ -4547,6 +4547,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return false	// if in Original Mode, don't use the Eggrobo art for the FBZ2 boss
 	}
 
+	// Tornado in outro, when flying left
+	if (objA0.update_address == 0x05ea52 && char.render_flags & render_flag.FLIP_X)
+	{
+		// Render additional sprite on top
+		if (!original_mode)
+			Renderer.drawCustomSprite("tornado_text_sonic", px-16, py-6, 0, 0x00, renderQueue + 1)
+		return false
+	}
+
 	// Dynamic ring (placed by debug mode, or those in Knuckles' SSZ)
 	if ((objA0.update_address == 0x01a51a) && objA0.base_state == 0x02)
 	{

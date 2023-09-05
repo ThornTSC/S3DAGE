@@ -2355,7 +2355,7 @@ function void fn009f44()
 				//  -> In fact, with the following fix that bug is really rare, it only can (but still does) happen when traversing a very large region
 				//      of blue spheres in just the right way
 				bool accepted = true
-				if (Game.getSetting(SETTING_FIX_GLITCHES))
+				if (Game.getSetting(SETTING_FIX_GLITCHES) && !original_mode)
 				{
 					for (u8 i = 0; i < 8; ++i)
 					{
