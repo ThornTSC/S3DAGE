@@ -2663,12 +2663,49 @@ function void BlueSpheres.renderCustomGround()
 	if (original_mode)
 		return
 
+	u32 tint = 0xffffffff
+
+	// Check the ROM location of the palette, which is written to 0xffffe446, to determine how to tint the horizon
+	if (palette_set >= 2)
+		if (u32[0xffffe446] == 0x2d420c)		// S3 Stage 1
+			tint = 0xffffffff
+		else if (u32[0xffffe446] == 0x2d4232)	// S3 Stage 2
+			tint = 0xff8080ff
+		else if (u32[0xffffe446] == 0x2d4258)	// S3 Stage 3
+			tint = 0xffff80e0
+		else if (u32[0xffffe446] == 0x2d427e)	// S3 Stage 4
+			tint = 0xa0c0ffff
+		else if (u32[0xffffe446] == 0x2d42a4)	// S3 Stage 5
+			tint = 0xffffa0a0
+		else if (u32[0xffffe446] == 0x2d42ca)	// S3 Stage 6
+			tint = 0xffe0ffe0
+		else if (u32[0xffffe446] == 0x2d42f0)	// S3 Stage 7
+			tint = 0xff6060ff
+		else if (u32[0xffffe446] == 0x2d4316)	// S3 Stage Bonus
+			tint = 0xff7070ff
+		else if (u32[0xffffe446] == 0x2d433c)	// S&K Stage 1
+			tint = 0xffffc0ff
+		else if (u32[0xffffe446] == 0x2d4362)	// S&K Stage 2
+			tint = 0xfff0e0ff
+		else if (u32[0xffffe446] == 0x2d4388)	// S&K Stage 3
+			tint = 0xfff0c0ff
+		else if (u32[0xffffe446] == 0x2d43ae)	// S&K Stage 4
+			tint = 0xffff80c0
+		else if (u32[0xffffe446] == 0x2d43d4)	// S&K Stage 5
+			tint = 0xffffc0a0
+		else if (u32[0xffffe446] == 0x2d43fa)	// S&K Stage 6
+			tint = 0xff7090ff
+		else if (u32[0xffffe446] == 0x2d4420)	// S&K Stage 7
+			tint = 0x80d0a080
+		else if (u32[0xffffe446] == 0x2d4446)	// S&K Stage Bonus
+			tint = 0xf0ff6080
+
 	BlueSpheres.replacePlaneRendering()
 
 	// Render glow effect for background
 	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
 	{
-		Renderer.drawSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000)
+		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000, 0, tint, 0x10000)
 	}
 
 	// Render our own version of the ground
@@ -2714,7 +2751,7 @@ function void BlueSpheres.renderCustomGround()
 	// Render glow effect on top
 	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
 	{
-		Renderer.drawSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30, 0x00, 0, 0x3100)
+		Renderer.drawCustomSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30, 0x00, 0, 0x3100, 0, tint, 0x10000)
 	}
 }
 
