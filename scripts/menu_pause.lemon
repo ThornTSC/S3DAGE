@@ -172,7 +172,7 @@ function void UpdateGamePause()
 			}
 			
 			A0 = 0xffffb000
-			D7 = 0x04
+			D7 = 0x05
 			updateGameObjectLoopRenderPaused()
 			RenderSprites()
             A0 = backupA0
