@@ -15869,6 +15869,49 @@ function void fn07871a()
 
 
 
+// Expand a sprite mask to the appropriate size at the LRZ1 boss.
+// Function taken from objects\level\spritemask.lemon
+//# address-hook(0x0862fe) end(0x086302)
+function void fn0862fe()
+{
+	u8[0xffffef3a] = 0xff
+
+	#if STANDALONE
+		s16 px = objA0.position.x.u16 - objA0.box_size.x - 0x80
+		s16 py = objA0.position.y.u16 - objA0.box_size.y
+
+		Renderer.addSpriteMaskWorld(px, py, getScreenWidth(), objA0.box_size.y * 2, 0xa000 - objA0.sprite_priority, 1)	// previously set to 320 instead of getScreenWidth()
+		//debugDrawRect(px, py, 320, objA0.box_size.y * 2, 0xc0c0c0c0)
+
+		checkForUnloadObjectAtPosition(objA0.position.x.u16)
+	#else
+		DrawOrUnloadObject()
+	#endif
+}
+
+// Note that these functions are NOT currently called by typical level routines; they are ONLY called in DAGE pausing!
+// The pause checks here are superfluous but left in for easier calls from a level routine in the future.
+function void LRZ1_CustomSprites()
+{
+	if (global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
+	{
+		Renderer.addSpriteMaskWorld(camera.position.x.u16, 0x0710 + 176, getScreenWidth(), getScreenHeight() - 176, 0x9e00, 1)	
+	}
+}
+
+function void LRZ2_CustomSprites()
+{
+	if (global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
+	{
+		Renderer.addSpriteMaskWorld(camera.position.x.u16, 0x0710 + 176, getScreenWidth(), getScreenHeight() - 176, 0x9e00, 1)	
+	}
+}
+
+
+
+
+
+
 
 // Removes the solidity on the stationary platforms in the LRZ2 boss lava fall (we use invisible objects instead) in non-Original Mode.
 // Function taken from objects\10_lrz\lrz_lavafallplatform.lemon.
