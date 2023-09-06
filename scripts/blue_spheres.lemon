@@ -2271,6 +2271,8 @@ function void fn009f44()
 			#if STANDALONE
 				// Check whether there's at least one blue sphere near this red sphere
 				//  -> This is done to avoid the issue that D.A. Garden describes here: https://www.youtube.com/watch?v=e1gfYFq8KkM
+				// This also removes a bug that could cause the original game to make rings when it shouldn't...
+				// ...so naturally we reintroduce that bug in Original Mode.
 				accepted = false
 				for (u8 i = 0; i < 8; ++i)
 				{
@@ -2281,7 +2283,7 @@ function void fn009f44()
 						break
 					}
 				}
-				if (accepted)
+				if (accepted || original_mode)
 			#endif
 				{
 					// Temporarily mark this position; the mark tells us whether the position is on the stack already
