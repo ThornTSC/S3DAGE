@@ -833,6 +833,11 @@ function void fn01c2b0()
 		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
 //		debugLog(stringformat("Primary chunks: ssz%d_chunks_p", global.act + 1))
 	}
+	else if (global.zone == 0x13 && System.hasExternalRawData("gumball_chunks_p"))	// get ultrawide chunks for Gumball stage
+	{
+		System.loadExternalRawData("gumball_chunks_p", KosinskiRawdataBuffer)	// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
+	}
 	else if (System.hasExternalRawData(key))				// only try to load Primary chunks if they exist for the act
 	{
 		System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Primary chunks to shared memory
@@ -898,6 +903,38 @@ function void fn01c2b0()
 	//	Renderer.setSecondaryPaletteEntryPacked(0x90 + i, u16[0xfffff020 + i * 2])
 	//}
 #endif
+}
+
+
+
+
+// Disable A.I.R.'s custom widescreen fix for the gumball machine, as it doesn't cover ultrawide
+// Function taken from level\bonus_gm\level_gumballmachine.lemon
+//# address-hook(0x23efa2) end(0x23efb2)
+function void UpdateLevelTiles.BonusGM()
+{
+	camera.foreground.x.u16 = 0x60 - getScreenExtend()
+
+	fn23efb6()
+
+	A4 = 0x23efe6
+	A5 = 0xffffa800
+	D6 = 0x0f
+	D5 = 3
+	fn239d1e()
+/*
+#if STANDALONE
+	// Copy some foreground tiles to fill in the outer columns
+	// TODO: This is quite hacked in, better do this in the right way
+	for (u16 base = 0xc000; base < 0xd000; base += 0x80)
+	{
+		setVRAM(base + 0x0c, getVRAM(base + 0x5c))
+		setVRAM(base + 0x0e, getVRAM(base + 0x5e))
+		setVRAM(base + 0x70, getVRAM(base + 0x20))
+		setVRAM(base + 0x72, getVRAM(base + 0x22))
+	}
+#endif
+*/
 }
 
 
@@ -16790,7 +16827,7 @@ function void fn045170()
 function u16 BossMidSSZ1.getMoveTime()
 {
 	// Note that this refers to the move time from center to an edge
-	if (!original_mode)
+	if (getScreenExtend() > 0 && !original_mode)
 	{
 		// Make him cover more distance in widescreen, and take into account the velocity
 		//  -> Using a value of 0x24 instead of the correct 0x20 to avoid a dead spot where boss can't hit you on the left
@@ -16798,16 +16835,16 @@ function u16 BossMidSSZ1.getMoveTime()
 		return distanceToCover * 0x100 / abs(objA0.velocity.x)
 	}
 	else
+	{
 		return 0x20
+	}
 }
 
 //# address-hook(0x07a2fc) end(0x07a32a)
 function void fn07a2fc()
 {
 	objA0.base_state = 0x04
-	objA0.velocity.x = -BossMidSSZ1.getMovementSpeed()
-	if (!original_mode)
-		objA0.velocity.x /= 2
+	objA0.velocity.x = -0x100 // Fixed speed here for the first horizontal movement, independent of screen extend
 
 	// "spawnChildObjects(0x07a69e)" replaced by:
 	spawnChildObject(0x07a558, 0x00, 30, 0)
