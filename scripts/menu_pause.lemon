@@ -138,7 +138,7 @@ function void UpdateGamePause()
 
 					customMenu.countMedals()
 				}
-				if ((original_mode || global.pause_disabled || (global.zone >= 0x13 && global.zone <= 0x15)) && PauseMenu_Basic())
+				if ((original_mode || global.pause_disabled || (global.zone >= 0x13 && global.zone <= 0x15) || global.zone_act == 0x1701) && PauseMenu_Basic())
 					break
                 else if (global.pause_disabled)
 				{
@@ -147,7 +147,7 @@ function void UpdateGamePause()
 				}
 				else if ((time_attack == 1 || time_attack == 2) && PauseMenu_Challenges())
 					break
-				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && PauseMenu_Normal())
+				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && global.zone_act != 0x1701 && PauseMenu_Normal())
 					break
 			}
 		}
@@ -927,6 +927,8 @@ function void PauseMenu_DrawCustomSprites()
 		DEZ2_CustomSprites()
 	else if (global.zone_act == 0x1700)
 		DEZBoss_CustomSprites()
+	else if (global.zone_act == 0x1701)
+		HPZ.hub_CustomSprites()
 
     else if (global.zone == 0x15)
         BonusSM.RenderRotatingMaze()

@@ -16579,6 +16579,40 @@ function void fn063cfc()
 
 
 
+// Draw HUD digits under gray Super Emeralds to indicate S&K special stage order.
+// Function taken from level\11_hpz\hpz_emeraldcave.lemon
+//# address-hook(0x05aa78) end(0x05aa9c)
+function void UpdateLevelScrolling.EC()
+{
+	HPZ.hub_CustomSprites()
+
+	base.UpdateLevelScrolling.EC()
+}
+
+function void HPZ.hub_CustomSprites()
+{
+	constant u8 superemerald.inactive = 2
+	s8 theme.x = (theme.hud == theme.south) ? -1 : 0
+	s8 theme.y = (theme.hud == theme.s3k || theme.hud == theme.south) ? 2 : 0
+	if (!original_mode && global.stage_type == 2 && global.game_mode == 0x0c)
+	{
+		if (u8[0xffffffb2] == superemerald.inactive)
+			HUD.drawDigit(1, 0x1640 - camera.position.x.u16 - 3 + theme.x, 0x0368 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
+		if (u8[0xffffffb3] == superemerald.inactive)
+			HUD.drawDigit(2, 0x15e0 - camera.position.x.u16 - 3 + theme.x, 0x03a0 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0xa000)
+		if (u8[0xffffffb4] == superemerald.inactive)
+			HUD.drawDigit(3, 0x16a0 - camera.position.x.u16 - 3 + theme.x, 0x03a0 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0xa000)
+		if (u8[0xffffffb5] == superemerald.inactive)
+			HUD.drawDigit(4, 0x15a0 - camera.position.x.u16 - 3 + theme.x, 0x0350 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
+		if (u8[0xffffffb6] == superemerald.inactive)
+			HUD.drawDigit(5, 0x16e0 - camera.position.x.u16 - 3 + theme.x, 0x0350 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
+		if (u8[0xffffffb7] == superemerald.inactive)
+			HUD.drawDigit(6, 0x1550 - camera.position.x.u16 - 3 + theme.x, 0x0390 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
+		if (u8[0xffffffb8] == superemerald.inactive)
+			HUD.drawDigit(7, 0x1730 - camera.position.x.u16 - 3 + theme.x, 0x0390 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
+	}
+}
+
 
 
 
