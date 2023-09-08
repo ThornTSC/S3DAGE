@@ -422,8 +422,10 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	// New code for loading palettes from rawdata
 	if (unlock_act && index == 0x0e)	// && index == 0x2a)
 	{
-		if (palette_set)
+		if (palette_set >= 2)
 			System.loadExternalRawData("ehz_palette", destRaw)
+		else if (palette_set == 1)
+			System.loadExternalRawData("ehz_palette_rtwi", destRaw)
 		else
 			System.loadExternalRawData("ehz_palette_s2", destRaw)
 	}

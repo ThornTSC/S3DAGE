@@ -24,15 +24,16 @@ function void UpdateCameraBoundsInLevel()
 		if (move_area.bottom.current > 0x04c0)
 			move_area.bottom.current = move_area.bottom.target
 
+		u16 signpost_loc = 0x6740
 		move_area.left = 0
-		move_area.right = 0x66f0 - getScreenExtend() // 0x36b0 in RtWI EHZ1, 0x2a90 in S2 EHZ1
+		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 		if (allocDynamicObjectStd() && u16[0xffffb010] >= 0x6740 && time_attack != 1 && time_attack != 2)
 		{
 			// Spawn signpost
 			objA1.update_address = 0x0837b2
-			objA1.position.x.u16 = 0x6740
+			objA1.position.x.u16 = signpost_loc
 			level.scrolling_routine = 4
-			move_area.left = move_area.right - 0x50
+			move_area.left = signpost_loc - (getScreenWidth() / 2)
 		}
 	}
 

@@ -296,6 +296,7 @@
     "ehz_collision":  { "File": "../level/EHZ/Collision/Collision.bin" },
 
     // Palette
+    "ehz_palette_rtwi":  { "File": "../level/EHZ/Palette/Palette RtWI.bin" },
     "ehz_palette":  { "File": "../level/EHZ/Palette/Palette.bin" },
     "ehz_palette_s2":  { "File": "../level/EHZ/Palette/S2 Palette.bin" },
     "ehz_palettecycle":  { "File": "../level/EHZ/Palette/EHZ ARZ Water.bin" },
