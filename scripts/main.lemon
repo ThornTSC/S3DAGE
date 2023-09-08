@@ -12194,6 +12194,25 @@ function void UpdateLevelTiles.ICZ2()
 
 
 
+// Move the falling snowflakes that appear at outdoor bosses as if they are blown
+// sideways like the other snow in Knuckles' campaign.
+// These are heavier than the background snowflakes, so they fall faster and aren't blown as much.
+// Function taken from objects\05_icz\icz_snowfall.lemon
+//# address-hook(0x08b73a) end(0x08b750)
+function void fn08b73a()
+{
+	if (!original_mode && palette_set >= 2 && isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		objA0.velocity.x = -0x100
+		if (objA0.position.x.u16 <= (camera.position.x.u16 - 4))	// just off screen to the left
+			objA0.position.x.u16 += (getScreenWidth() + 8)			// wrap to just off screen to the right
+	}
+
+	base.fn08b73a()
+}
+
+
+
 
 // Adjust capsule spawn position in ICZ2 for different screen widths
 // Function taken from bosses\boss_icz2.lemon
