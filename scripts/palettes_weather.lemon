@@ -1080,7 +1080,8 @@ function void UpdateLevelScrolling.MGZ2()
 
 
 
-// Set a sunset palette near the end of MGZ2 on the Sonic/Tails path if palette options allow
+// Set a sunset palette near the end of MGZ2 on the Sonic/Tails path if palette options allow.
+// Also fix ultrawide issues with the MGZ2 flying boss.
 // Functions taken from level\03_mgz\level_mgz.lemon
 //# address-hook(0x0512a6) end(0x0512ba)
 function void InitLevelTiles.MGZ2()
@@ -1108,6 +1109,12 @@ function void InitLevelTiles.MGZ2()
 //# address-hook(0x0512be) end(0x0512d8)
 function void UpdateLevelTiles.MGZ2()
 {
+	if (u32[0xffff8800] == 0 && !original_mode)	// if the ground has collapsed from the MGZ2 boss,
+	{
+		u8[0xffff8804] = 0		// also remove a chunk to the right, which can be stood on in ultrawide...
+		u8[0xffff8884] = 0		// ...and the chunk below so that the player can fall off the screen bottom properly.
+	}
+
 	if (u16[0xffffb010] > 0x2c80 && u16 [0xffffb014] < 0x01c0)
 	{
 		u8[0xffff8483] = 0x28	// Here, we update two chunks.

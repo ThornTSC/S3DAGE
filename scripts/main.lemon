@@ -10623,6 +10623,75 @@ function void fn051b1c()
 
 
 
+// Adjust the camera y lock at the MGZ2 flying boss to accomodate ultrawide.
+// Functions taken from level\03_mgz\level_mgz.lemon
+//# address-hook(0x01c930) end(0x01c96c)
+function void fn01c930()
+{
+	if (original_mode)
+	{
+		base.fn01c930()
+		return
+	}
+
+	if (camera.position.y.u16 >= 0x0600 && camera.position.y.u16 < 0x0700)
+	{
+		if (u16[0xffffb010] >= 0x3aa0)	// formerly if (camera.position.x.u16 >= 0x3a00)
+		{
+			D0.u16 = 0x06a0
+			level.vertical_wrap = D0.u16
+			move_area.top.target = D0.u16
+			move_area.bottom.current = D0.u16
+			move_area.bottom.target = D0.u16
+			D0.u16 = 0x3c80 + ((getScreenExtend() + 0x0f) & 0xfff0)
+			move_area.right = D0.u16
+			move_area.right.target = D0.u16
+			camera.update_routine += 2
+		}
+	}
+}
+
+//# address-hook(0x01c96e) end(0x01c9c6)
+function void fn01c96e()
+{
+	if (original_mode)
+	{
+		base.fn01c96e()
+		return
+	}
+
+	if (u16[0xffffb010] >= 0x3aa0)	// formerly if (camera.position.x.u16 >= 0x3a00)
+	{
+		D0.u16 = 0x3c80 - (getScreenExtend() & 0xfff0)
+		if (D0.u16 > camera.position.x.u16)
+			return
+
+		move_area.left = D0.u16
+		move_area.left.target = D0.u16
+
+		if (allocDynamicObjectStd())
+		{
+			// Trigger boss
+			objA1.update_address = 0x06c31a
+			objA1.position.x.u16 = 0x3d20
+			objA1.position.y.u16 = 0x0668
+		}
+
+		camera.update_routine += 2
+	}
+	else
+	{
+		D0 = 0x1000
+		u32[0xffffee18] = D0	// level.vertical_wrap = 0, move_area.bottom.current = 0x1000
+		u32[0xffffee10] = D0	// move_area.top.target	= 0, move_area.bottom.target = 0x1000
+
+		D0.u16 = 0x6000
+		move_area.right = D0.u16
+		move_area.right.target = D0.u16
+
+		camera.update_routine -= 2
+	}
+}
 
 
 
