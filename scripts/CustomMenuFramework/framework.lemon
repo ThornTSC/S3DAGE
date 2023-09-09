@@ -4,6 +4,7 @@
 
 global u8 setting.time_attack
 global u8 setting.original_mode
+global u8 setting.ehz_music
 global u16 moddedTailsCharacter = 0				// Becomes 8 if Tails is modded
 global u16 maxNormalGameSettingsOption = 4		// Becomes 3 if Tails is modded
 

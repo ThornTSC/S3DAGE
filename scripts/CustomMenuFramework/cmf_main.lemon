@@ -705,10 +705,20 @@ function void customMenu.selectGameType()
 {
 	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
-		if (setting.original_mode == 0)
-			setting.original_mode = 1
+		if (!setting.unlock_act)
+		{
+			if (setting.original_mode == 0)
+				setting.original_mode = 1
+			else
+				setting.original_mode = 0
+		}
 		else
-			setting.original_mode = 0
+		{
+			if (setting.ehz_music == 0)
+				setting.ehz_music = 1
+			else
+				setting.ehz_music = 0
+		}
 		playSound(0x5b)
 	}
 }
@@ -1375,11 +1385,22 @@ function void DataSelect.drawCustomPlanes()
 		{
 			if (!System.getGlobalVariableValueByName("DAGE_characterID") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))
 			{
-				Renderer.drawCustomSprite("text_gametype", getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// HUD POSITION text
-				if (setting.original_mode == 0)
-					Renderer.drawCustomSprite("text_option_revisited", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// LEFT text
+				u64 typeKey = (setting.unlock_act) ? "text_musictype" : "text_gametype" 
+				Renderer.drawCustomSprite(typeKey, getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
+				if (!setting.unlock_act)
+				{
+					if (setting.original_mode == 0)
+						Renderer.drawCustomSprite("text_option_revisited", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// REVISITED text
+					else
+						Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + 140 + 25, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// CLASSIC text
+				}
 				else
-					Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + 140 + 25, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// CENTER text
+				{
+					if (setting.ehz_music == 0)
+						Renderer.drawCustomSprite("text_option_1player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 1 PLAYER text
+					else
+						Renderer.drawCustomSprite("text_option_2player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 2 PLAYER text
+				}
 				if (selectedMenuOption == 3)
 				{
 					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE left arrow

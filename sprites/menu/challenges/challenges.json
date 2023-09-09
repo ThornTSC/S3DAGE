@@ -23,8 +23,11 @@
 	"text_option_hold":  { "File": "text_option_hold.png", "Center": "16,4" },
 	// "text_backbuttonexit":  { "File": "text_backbuttonexit.png", "Center": "64,4" },	// no longer in use
 	"text_gametype":  { "File": "text_gametype.png", "Center": "39,4" },
+	"text_musictype":  { "File": "text_musictype.png", "Center": "43,4" },		// off center to align with text_gametype
 	"text_option_revisited":  { "File": "text_option_revisited.png", "Center": "32,4" },	
 	"text_option_classic":  { "File": "text_option_classic.png", "Center": "25,4" },
+	"text_option_1player":  { "File": "text_option_1player.png", "Center": "30,4" },	// off center to align with selection arrows
+	"text_option_2player":  { "File": "text_option_2player.png", "Center": "32,4" },
 	"text_sidekick":  { "File": "text_sidekick.png", "Center": "38,4" },
 	"text_option_yes":  { "File": "text_option_yes.png", "Center": "11,4" },	
 	"text_option_no":  { "File": "text_option_no.png", "Center": "7,4" },
