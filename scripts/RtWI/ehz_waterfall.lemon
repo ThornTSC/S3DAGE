@@ -49,6 +49,8 @@ function void EHZwaterfall.DeleteOrDisplay()
 
 function void EHZwaterfall.Display()
 {
+	// Much of the code here restricts display due to the size of the sprite.
+	// But A.I.R. can handle it AND needs to display in widescreen, so we comment out these checks.
 	D1.u16 = objA0.position.x.u16
 	D2.u16 = D1.u16
 	D1.u16 -= 0x40
@@ -56,16 +58,18 @@ function void EHZwaterfall.Display()
 	D3.u8 = objA0.subtype2c
 	objA0.animation.sprite = 0
 	D0.u16 = u16[0xffffb010]	// main character's x position
-	if (D0.u16 >= D1.u16)
-	{
-		if (D0.u16 < D2.u16)
-		{
+//	if (D0.u16 >= D1.u16)
+//	{
+//		if (D0.u16 < D2.u16)
+//		{
 			objA0.animation.sprite = 0x01
 			objA0.animation.sprite += D3.u8
 			DrawObject()	// DisplaySprite
 			return
-		}
-	}
+//		}
+//	}
+	// 2P VS code
+/*
 	D0.u16 = u16[0xffffb05a]	// second character's x position
 	if (D0.u16 >= D1.u16)
 	{
@@ -76,4 +80,5 @@ function void EHZwaterfall.Display()
 	}
 	objA0.animation.sprite += D3.u8
 	DrawObject()	// DisplaySprite
+*/
 }
