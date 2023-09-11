@@ -1340,6 +1340,9 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 62 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
 			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 169 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
 		}
+		if (total_stars < unlock.level.ehz)
+			Renderer.drawCustomSprite("50_stars", getScreenExtend() - 40 + 77, 142, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+
 
 
 		if (time_attack == 0)
