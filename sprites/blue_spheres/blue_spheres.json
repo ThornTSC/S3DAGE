@@ -42,18 +42,18 @@
 	"BlueSphere_char_seconds": { "File": "BlueSphere_digits.png", "Rect": "160,0,5,5" },
 	
 	// Digits and seconds symbols (Blue Sphere small)
-	"BlueSphere_smalldigit_0": { "File": "BlueSphere_digits_small.png", "Rect":   "0,0,12,12" },
-	"BlueSphere_smalldigit_1": { "File": "BlueSphere_digits_small.png", "Rect":  "12,0,12,12" },
-	"BlueSphere_smalldigit_2": { "File": "BlueSphere_digits_small.png", "Rect":  "24,0,12,12" },
-	"BlueSphere_smalldigit_3": { "File": "BlueSphere_digits_small.png", "Rect":  "36,0,12,12" },
-	"BlueSphere_smalldigit_4": { "File": "BlueSphere_digits_small.png", "Rect":  "48,0,12,12" },
-	"BlueSphere_smalldigit_5": { "File": "BlueSphere_digits_small.png", "Rect":  "60,0,12,12" },
-	"BlueSphere_smalldigit_6": { "File": "BlueSphere_digits_small.png", "Rect":  "72,0,12,12" },
-	"BlueSphere_smalldigit_7": { "File": "BlueSphere_digits_small.png", "Rect":  "84,0,12,12" },
-	"BlueSphere_smalldigit_8": { "File": "BlueSphere_digits_small.png", "Rect":  "96,0,12,12" },
-	"BlueSphere_smalldigit_9": { "File": "BlueSphere_digits_small.png", "Rect": "108,0,12,12" },
+	"BlueSphere_smalldigit_0": { "File": "BlueSphere_digits_mini.png", "Rect":   "0,0,12,12" },
+	"BlueSphere_smalldigit_1": { "File": "BlueSphere_digits_mini.png", "Rect":  "12,0,12,12" },
+	"BlueSphere_smalldigit_2": { "File": "BlueSphere_digits_mini.png", "Rect":  "24,0,12,12" },
+	"BlueSphere_smalldigit_3": { "File": "BlueSphere_digits_mini.png", "Rect":  "36,0,12,12" },
+	"BlueSphere_smalldigit_4": { "File": "BlueSphere_digits_mini.png", "Rect":  "48,0,12,12" },
+	"BlueSphere_smalldigit_5": { "File": "BlueSphere_digits_mini.png", "Rect":  "60,0,12,12" },
+	"BlueSphere_smalldigit_6": { "File": "BlueSphere_digits_mini.png", "Rect":  "72,0,12,12" },
+	"BlueSphere_smalldigit_7": { "File": "BlueSphere_digits_mini.png", "Rect":  "84,0,12,12" },
+	"BlueSphere_smalldigit_8": { "File": "BlueSphere_digits_mini.png", "Rect":  "96,0,12,12" },
+	"BlueSphere_smalldigit_9": { "File": "BlueSphere_digits_mini.png", "Rect": "108,0,12,12" },
 		
-	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_small.png", "Rect": "120,0,5,4" },
-	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_small.png", "Rect":  "0,12,44,12" },
-	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_small.png", "Rect": "33,12,44,12" }
+	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_mini.png", "Rect": "120,0,5,4" },
+	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_mini.png", "Rect":  "0,12,44,12" },
+	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_mini.png", "Rect": "33,12,44,12" }
 }
