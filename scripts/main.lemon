@@ -2088,7 +2088,7 @@ function bool checkForExtraLifeByRings()
 		Game.setAchievementComplete(ACHIEVEMENT_300_RINGS)
 	}
 
-	if (!Game.getSetting(SETTING_INFINITE_LIVES) || original_mode)
+	if (!Game.getSetting(SETTING_INFINITE_LIVES) && !original_mode)
 	{
 		// Standalone uses upper 7 bits of "extra_lives_granted" differently, to allow for extra lives at 300+ rings as well
 		u16 currentExtraLives = (extra_lives_granted >> 1)
@@ -2099,8 +2099,10 @@ function bool checkForExtraLifeByRings()
 			return true
 		}
 	}
-	return false
+	if (!original_mode)
+		return false
 
+	// Original mode extra lives by rings
 	if (ring_counter >= 100)
 	{
 		if ((extra_lives_granted & 0x02) == 0)
@@ -4786,6 +4788,29 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 5)
 	{
 		Renderer.drawCustomSprite(stringformat("s2_flicky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		return true
+	}
+
+	// Sonic 2 emeralds for special stage results screen
+	if (unlock_act && objA0.update_address == 0x02eaa6)
+	{
+		// objA0.box_size.x contains the emerald's ID (zero-indexed)
+		px = getScreenWidth()/2
+		if (objA0.box_size.x == 1 || objA0.box_size.x == 2)
+			px += 24
+		else if (objA0.box_size.x == 4 || objA0.box_size.x == 5)
+			px -= 24
+		py = getScreenHeight()/2 - 12
+		if (objA0.box_size.x == 0)
+			py -= 24
+		else if (objA0.box_size.x == 1 || objA0.box_size.x == 5)
+			py -= 12
+		else if (objA0.box_size.x == 2 || objA0.box_size.x == 4)
+			py += 12
+		else if (objA0.box_size.x == 3)
+			py += 24
+		
+		Renderer.drawCustomSprite(stringformat("sonic2_emerald_%02x", objA0.box_size.x), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}
 
