@@ -557,6 +557,7 @@ function bool South.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x22)
 		{
 			Renderer.drawCustomSprite(isSKStage ? "south_specialstage_text_super" : "south_specialstage_text", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			Renderer.drawCustomSprite("south_titlecard_yellowbar", getScreenWidth() - px - 32, py - 19, 0, SPRITE_FLAG_PRIO, renderQueue - 0x1000)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x23)
