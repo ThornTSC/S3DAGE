@@ -8056,7 +8056,8 @@ function void fn01c4d0()
 
 
 
-// From maingame\maingame.lemon, a function that corrects AIZ 1 needs to be altered for Knux's path
+// From maingame\maingame.lemon, a function that corrects AIZ 1 needs to be altered for Knux's path.
+// This function sets level sizes by calling a level size array at 0x01bcc6.
 //# address-hook(0x01bc60) end(0x01bcc2)
 function void fn01bc60()
 {
@@ -8093,8 +8094,10 @@ function void fn01bc60()
 
 	if (unlock_act)
 	{
-		minX = 0
-		maxX = 0x7fff
+		minX = UnlockAct.LevelSizes[(unlock_act) * 4 - 4]
+		maxX = UnlockAct.LevelSizes[(unlock_act) * 4 - 3]
+		minY = UnlockAct.LevelSizes[(unlock_act) * 4 - 2]
+		maxY = UnlockAct.LevelSizes[(unlock_act) * 4 - 1]
 	}
 
 	move_area.left = minX
@@ -8118,7 +8121,10 @@ function void fn01bc60()
 	SetupCharacterAtStartPosition()
 }
 
-
+constant array<u16> UnlockAct.LevelSizes =
+{
+	0x0000, 0x7fff, 0x0000, 0x04c0
+}
 
 
 

@@ -21,9 +21,6 @@ function void UpdateCameraBoundsInLevel()
 		if (camera.position.x.u16 >= 0x6500)
 			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
 
-		if (move_area.bottom.current > 0x04c0)
-			move_area.bottom.current = move_area.bottom.target
-
 		u16 signpost_loc = 0x6740
 		move_area.left = 0
 		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
