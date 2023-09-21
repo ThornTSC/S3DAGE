@@ -224,7 +224,7 @@ function void Buzzer.ShootProjectile()
 		objA1.position.x.u16 = objA0.position.x.u16
 		objA1.position.y.u16 = objA0.position.y.u16
 		objA1.position.y.u16 += 0x18
-		objA0.flags2b |= char.bonus.SHIELD_FIRE		// do not harm players who have a fire shield
+		objA1.flags2b |= char.bonus.SHIELD_FIRE		// do not harm players who have a fire shield
 		D0.u16 = 0x0d
 		objA1.velocity.y = 0x0180
 		objA1.velocity.x = -0x0180
