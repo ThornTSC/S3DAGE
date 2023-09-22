@@ -197,7 +197,7 @@ function void Buzzer.Shooting()
 	if (D0.s16 >= 0)
 	{
 		buzzer.shot_timer = D0.u16
-		if (D0.u16 == 0x14)
+		if (D0.u16 == 0x14 && (objA0.render_flags & render_flag.VISIBLE))
 		{
 			Buzzer.ShootProjectile()
 		}

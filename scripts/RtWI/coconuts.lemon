@@ -147,7 +147,10 @@ function void Coconuts.ThrowingHandRaised()
 	u8[A0 + 0x3c] += 0x02
 	coconuts.timer = 0x08
 	objA0.animation.sprite = 0x02
-	Coconuts.CreateCoconut()
+	if (objA0.render_flags & render_flag.VISIBLE)
+	{
+		Coconuts.CreateCoconut()
+	}
 }
 
 
