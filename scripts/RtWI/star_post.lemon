@@ -80,12 +80,9 @@ function void fn02d47e()
 		{
 			global.stage_type = 2
 
-		#if STANDALONE
-			// Use previously selected bonus stage
-			u8 stage = u8[A0 + 0x48]
-		#else
-			u8 stage = Checkpoint.selectBonusStage()
-		#endif
+			u8 stage = u8[A0 + 0x48]	// Use previously selected bonus stage
+			if (original_mode)
+				stage = Checkpoint.selectBonusStage()
 			if (stage == 0)
 			{
 				// Slot machine
@@ -102,15 +99,8 @@ function void fn02d47e()
 				D1.u16 = 0x1300
 			}
 
-			// Set challenge green sphere stage.
-			// Normal difficulty: 1-7 Chaos, 9-15 Super
-			// Hard difficulty: 17-23 Chaos, 25-31 Super
-			// Super Emerald stages are not enabled yet!
-			challenge_greenspheres = global.next_bluespheres + 1
-			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
-				challenge_greenspheres += 16
-
 			fn02d1cc()	// special stage backup for character position, star posts, etc.
+
 			u16[0xfffffe4c] = checkpoint.x	// use the star post's position,
 			u16[0xfffffe4e] = checkpoint.y	// not the character's position
 			global.game_mode = 0x34
@@ -118,6 +108,24 @@ function void fn02d47e()
 
 			checkpoint.rings = ring_counter
 			checkpoint.lives_granted = extra_lives_granted
+
+			// Set challenge green sphere stage.
+			// Normal difficulty: 1-7 Chaos, 9-15 Super
+			// Hard difficulty: 17-23 Chaos, 25-31 Super
+			// Super Emerald stages are not enabled yet!
+			challenge_greenspheres = global.next_bluespheres + 1
+			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			{
+				// Use harder special stages
+				challenge_greenspheres += 0x10
+
+				// As in Sonic 2 in 1992, reset the level and earned bonuses
+				char.bonus_effect &= ~char.bonus.ALL_SHIELDS
+				global.shields_backup_1 = 0
+				global.shields_backup_2 = 0
+				u16[0xfffffe50] = 0		// ring_counter backup
+				u8[0xfffffe61] = 0	// tracks lives given by 100 rings
+			}
 
 			global.in_extra_stage = 1
 			fn01bb7e()

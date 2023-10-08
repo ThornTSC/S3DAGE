@@ -1,3 +1,9 @@
+global u16 BS_remainingTime
+global u16 bluespheres.blue_collected
+global u16 bluespheres.blue_total
+global u8 showTimeGain
+global u8 showTimeGainTarget
+
 // In Original Mode, the ring counter should always count up regardless of AIR setting.
 // Function taken from level\special\bluespheres.lemon
 //# address-hook(0x00881a) end(0x0088b4)
@@ -318,7 +324,8 @@ function void BlueSphere.setGeneratedStage(u32 number)
 
 
 
-// Don't load the emerald in Special Stage Time Attack
+// Don't load the emerald in Special Stage Time Attack.
+// In Sonic 2 stages, use Sonic 2 emerald colors.
 // Function taken from level\special\bluespheres.lemon
 //# address-hook(0x009b62) end(0x009d1c)
 function void fn009b62()
@@ -370,6 +377,59 @@ function void fn009b62()
 		A1 = 0x009d1e + (D0.s16 & 0x07) * 8
 		copyMemory(0xfffffc64, A1, 0x08)
 
+		if (challenge_greenspheres)
+		{
+		// Check the ROM location of the palette, which is written to 0xffffe446, to determine how to color the emerald
+			if ((challenge_greenspheres & 0x07) == 1)			// (u32[0xffffe446] == 0x0089fe || u32[0xffffe446] == 0x2d5384)		// S3 Stage 1
+			{
+				u16[0xfffffc64] = 0x0ee8
+				u16[0xfffffc66] = 0x0ec0
+				u16[0xfffffc68] = 0x0e80
+				u16[0xfffffc6a] = 0x0e40					
+			}
+			else if ((challenge_greenspheres & 0x07) == 2)	// (u32[0xffffe446] == 0x008a24 || u32[0xffffe446] == 0x2d53aa)	// S3 Stage 2
+			{
+				u16[0xfffffc64] = 0x0e6a
+				u16[0xfffffc66] = 0x0c08
+				u16[0xfffffc68] = 0x0806
+				u16[0xfffffc6a] = 0x0604					
+			}
+			else if ((challenge_greenspheres & 0x07) == 3)	// (u32[0xffffe446] == 0x008a4a || u32[0xffffe446] == 0x2d53d0)	// S3 Stage 3
+			{
+				u16[0xfffffc64] = 0x0a6e
+				u16[0xfffffc66] = 0x000e
+				u16[0xfffffc68] = 0x000a
+				u16[0xfffffc6a] = 0x0006
+			}
+			else if ((challenge_greenspheres & 0x07) == 4)	// (u32[0xffffe446] == 0x008a70 || u32[0xffffe446] == 0x2d53f6)	// S3 Stage 4
+			{
+				u16[0xfffffc64] = 0x0eae
+				u16[0xfffffc66] = 0x0e6e
+				u16[0xfffffc68] = 0x0e4e
+				u16[0xfffffc6a] = 0x0e0e
+			}
+			else if ((challenge_greenspheres & 0x07) == 5)	// (u32[0xffffe446] == 0x008a96 || u32[0xffffe446] == 0x2d541c)	// S3 Stage 5
+			{
+				u16[0xfffffc64] = 0x0aee
+				u16[0xfffffc66] = 0x00ce
+				u16[0xfffffc68] = 0x008a
+				u16[0xfffffc6a] = 0x0068					
+			}
+			else if ((challenge_greenspheres & 0x07) == 6)	// (u32[0xffffe446] == 0x008abc || u32[0xffffe446] == 0x2d5442)	// S3 Stage 6
+			{
+				u16[0xfffffc64] = 0x00ea
+				u16[0xfffffc66] = 0x00c6
+				u16[0xfffffc68] = 0x0082
+				u16[0xfffffc6a] = 0x0060
+			}
+			else if ((challenge_greenspheres & 0x07) == 7)	// (u32[0xffffe446] == 0x008ae2 || u32[0xffffe446] == 0x2d5468)	// S3 Stage 7
+			{
+				u16[0xfffffc64] = 0x0ccc
+				u16[0xfffffc66] = 0x0aaa
+				u16[0xfffffc68] = 0x0888
+				u16[0xfffffc6a] = 0x0444
+			}
+		}
 		A1 = (global.sk_bluespheres) ? 0x0ae99e : 0x0ae3ec
 		Kosinski.addToDMAQueue(A1, 0xb4e0)
 	}
@@ -417,6 +477,12 @@ function void fn009b62()
 				++bluespheres.stage_exit_state
 				bluespheres.stage_exit_animation = 1
 				global.game_mode = (bluespheres.minigame_mode != 0) ? 0x30 : 0x48
+
+				if (challenge_greenspheres)
+				{
+					S2Special.swapRingsAndSpheres()
+					bluespheres.blue_remaining = 0		// ensure the results screen sees the special stage as won
+				}
 
 				if (global.stage_type != 0)
 				{
@@ -904,8 +970,18 @@ function void SpecialStage()
 	Nemesis.loadDataToVRAM(0x0ad904, 0xd000)
 	Nemesis.loadDataToVRAM(0x0adf60, 0xb4e0)
 	Nemesis.loadDataToVRAM(0x0aeed0, 0xb360)
-	Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
-	Nemesis.loadDataToVRAM(0x0ad5f4, 0xdf00)
+	if (!challenge_greenspheres)
+	{
+		Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
+		Nemesis.loadDataToVRAM(0x0ad5f4, 0xdf00)
+	}
+	else
+	{
+		VDP.setupVRAMWrite(0xabe0)
+		VDP.zeroVRAM(0xb120 - 0xabe0)	// GET BLUE SPHERES and PERFECT texts should not show in Sonic 2 special stages
+		VDP.setupVRAMWrite(0xdf00)
+		VDP.zeroVRAM(0xe000 - 0xdf00)	// graphics bookending the text should not show
+	}
 	Nemesis.loadDataToVRAM(0x0ad650, 0xf020)
 
 	A0 = 0x0ad650
@@ -932,7 +1008,9 @@ function void SpecialStage()
 	bluespheres.bs_hud_dirty = 0xff
 	bluespheres.rings_flags = 0x80
 	bluespheres.current_gamespeed = 0x1000	// usually 0x1000
-	bluespheres.speedup_countdown = (BlueSpheres.useGeneratedStages() || challenge_greenspheres) ? 2700 : 1800
+	bluespheres.speedup_countdown = BlueSpheres.useGeneratedStages() ? 2700 : 1800
+	if (challenge_greenspheres)
+		bluespheres.speedup_countdown = 1
 	camera.foreground.x.u16 = 0
 	camera.foreground.y.u16 = 0
 	level.height.bitmask = 0xffff
@@ -1091,6 +1169,18 @@ function void SpecialStage()
 
 
 
+
+// If in a Sonic 2 special stage, do not render the HUD graphic sprites.
+//# address-hook(0x008df8) end(0x008e2a)
+function void fn008df8()
+{
+	if (!challenge_greenspheres)
+		base.fn008df8()
+}
+
+
+
+
 // This function runs many ongoing parts of Blue Sphere, such as letting characters jump and controlling when the stage speeds up.
 // We add in calls to update the timer's value each frame and to check for the back and retry buttons.
 //# address-hook(0x00903e) end(0x00919e)
@@ -1098,63 +1188,153 @@ function void fn00903e()
 {
 	if (BS_displayedTime < 35999 && bluespheres.stage_exit_state == 0)
 		BS_displayedTime++
-/*
-	restart_threshold = 30	// Temporary during testing.
-	exit_threshold = 30		// Actual values will be loaded in on menu.
+	if (!bluespheres.stage_exit_state && BS_remainingTime && !bluespheres.stage_exit_state && !bluespheres.stage_exit_animation && bluespheres.started_running)
+		BS_remainingTime--
+	if (showTimeGain)
+		showTimeGain--
+	if (showTimeGainTarget)
+		showTimeGainTarget--
 
-	if (Input.buttonPressed(BUTTON_Y) && (bluespheres.stage_exit_state <= 2))
+	if (challenge_greenspheres && !BS_remainingTime && !bluespheres.stage_exit_animation)
 	{
-		restart_timer = 1
+		// Game over
+		bluespheres.stage_exit_animation = 1
+		global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
+		if (challenge_greenspheres)
+		{
+			S2Special.swapRingsAndSpheres()
+			bluespheres.blue_remaining = 1		// do not let the results screen believe the stage was won
+		}
+		if (global.stage_type != 0)
+		{
+			global.zone_act = level.backup.zone_act
+			checkpoint.number |= 0x80
+		}
+		playSound(0x6a)
 	}
-	else if (Input.buttonDown(BUTTON_Y) && restart_timer >= 1 && (bluespheres.stage_exit_state <= 2))
+
+	if (bluespheres.speedup_countdown != 0)
 	{
-		++restart_timer
+		--bluespheres.speedup_countdown
+		if (bluespheres.speedup_countdown == 0)
+		{
+			// Increase speed (up to four times)
+			bluespheres.speedup_countdown = BlueSpheres.useGeneratedStages() ? 2700 : 1800
+			if (challenge_greenspheres)
+				bluespheres.speedup_countdown = 1
+			if (bluespheres.current_gamespeed < 0x2000)
+			{
+				if (challenge_greenspheres && bluespheres.started_running)	// speedup by 1.5 per frame, rounded down, achieving full speed in about 45.5 seconds
+				{
+					bluespheres.current_gamespeed++
+					if (level.framecounter.low & 0x01 && bluespheres.current_gamespeed < 0x2000)
+						bluespheres.current_gamespeed++
+				}
+				else if (!challenge_greenspheres)
+				{
+					bluespheres.current_gamespeed += 0x400
+				}
+
+				// Tempo values are (in that order):
+				//  0x20, 0x18, 0x10, 0x08
+				//  -> The music speed steps are: normal speed, +1/16, +1/12, +1/8, +1/4
+				//  -> Each for 30 seconds (or 45 seconds for generated stages)
+				D0.u8 = 0x48 - (bluespheres.current_gamespeed >> 8) * 2
+				changeMusicTempo(D0.u8)
+			}
+		}
+	}
+
+	fn009580()
+
+	D0 = 0x0c
+	if (bluespheres.movement_speed != 0)
+	{
+		u16[A0 + 0x24] += bluespheres.movement_speed >> 5
+		D0 = objA0.animation.timer
+		if (D0.s8 < 0)
+		{
+			D0.u8 += 0x0c
+		}
+		else if (D0.u8 >= 0x0c)
+		{
+			D0.u8 -= 0x0c
+		}
+	}
+
+	objA0.animation.timer = D0.u8
+	if (bluespheres.jumping_flags.player1 & 0x80)
+	{
+		A1 = 0x0091f6
+		if (bluespheres.movement_speed == 0)
+		{
+			D0.u16 = level.framecounter.low & 0x03
+		}
 	}
 	else
 	{
-		restart_timer = 0
+		A1 = 0x0091e8
 	}
 
-	if (restart_threshold > 1)
-		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, restart_timer * 8)
-
-	if (restart_timer == restart_threshold)
+	objA0.animation.sprite = u8[A1 + D0.s16]
+	if ((bluespheres.jumping_flags.player1 & 0x80) == 0 && bluespheres.stage_exit_state == 0 && (control.pad1.pressed & CONTROL_ABC))
 	{
-		restart_timer = 0
-		checkpoint.number = 0
-		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
-		level.restart = 1
+		bluespheres.jumping_flags.player1 = 1
 	}
 
-	if (Input.buttonPressed(BUTTON_BACK) && (bluespheres.stage_exit_state <= 2))
+	D0.u8 = bluespheres.direction & 0x3f
+	if (D0.u8 == 0)
 	{
-		exit_timer = 1
+		if (bluespheres.jumping_flags.player1 == 1)
+		{
+			u32[A0 + 0x40] = 0xfff00000
+			bluespheres.jumping_flags.player1 = 0x80
+			bluespheres.next_direction = 0
+			playSound(SFX_JUMP)
+		}
+
+		if (bluespheres.jumping_flags.player1 & 0x80)
+		{
+			D0 = u32[A0 + 0x3c] + u32[A0 + 0x40]
+			if (D0.s32 >= 0)
+			{
+				D0 = 0
+				u32[A0 + 0x40] = 0
+				bluespheres.jumping_flags.player1 = 0
+			}
+
+			u32[A0 + 0x40] += bluespheres.current_gamespeed << 4
+			u32[A0 + 0x3c] = D0
+			D0 = (D0 << 16) + (D0 >> 16)
+			D0.u16 -= 0x800
+			u16[A0 + 0x36] = D0.u16
+		}
 	}
-	else if (Input.buttonDown(BUTTON_BACK) && exit_timer >= 1 && (bluespheres.stage_exit_state <= 2))
+
+	fn00950c()
+	fn00953e()
+	DrawObject()
+
+	if (isMainCharacter(CHARACTER_TAILS))
 	{
-		++exit_timer
+		A2 = 0x2908d2
+		D6 = 0x28f95a
+		D4.u16 = SpecialStage.Tails.targetInVRAM
+	}
+	else if (isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		A2 = 0x0ad31a
+		D6 = 0x0abf22
+		D4.u16 = SpecialStage.Player.targetInVRAM
 	}
 	else
 	{
-		exit_timer = 0
+		A2 = 0x0abe14
+		D6 = 0x0aaa7c
+		D4.u16 = SpecialStage.Player.targetInVRAM
 	}
 
-	if (exit_threshold > 1 && exit_timer > restart_timer)
-		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, exit_timer * 8)
-
-	if (exit_timer == exit_threshold)
-	{
-		exit_timer = 0
-		checkpoint.number = 0
-	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
-	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects
-		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
-		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
-									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
-		return
-	}
-*/
-	base.fn00903e()
+	fn0091a2()
 }
 
 
@@ -1280,7 +1460,13 @@ function void fn0085b0()
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 	if (challenge_greenspheres)
+	{
 		useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
+		BS_remainingTime = S2Special.BonusTime[challenge_greenspheres * 3 - 3] * 60
+		bluespheres.blue_collected = 0
+		showTimeGain = 0
+		showTimeGainTarget = 0
+	}
 	bool useGeneratedStage = BlueSpheres.useGeneratedStages()
 	bool isGeneratedStageInMainGame = (useGeneratedStage && bluespheres.minigame_mode == 0)
 
@@ -1484,19 +1670,25 @@ function void fn0085b0()
 		}
 		else									// get palette for main game randomly generated special stages or Challenge stages
 		{
-			if (challenge_greenspheres)
-				A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]
-			else
-				A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
-			if (useSKLayouts)
+			if (challenge_greenspheres && palette_set >= 2)
 			{
-				A1 += 0x0130
+				A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]	// gets the appropriate DAGE Revisited palette	// 0x2cc986 is distance between base Sonic 3 offset and Sonic 2 offset
+				A1 += 0x2cc986
+				// Note there is currently no palette change for S&K layouts.
+			}
+			else
+			{
+				A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]	// kept separate from above in case of future alterations
+				if (useSKLayouts)
+				{
+					A1 += 0x0130
+				}
 			}
 		}
 
 
 		// new if statement to switch to new Special Stage palette offset
-		if (palette_set >= 2 && !original_mode && green_spheres.active)
+		if (palette_set >= 2 && !original_mode && green_spheres.active && !challenge_greenspheres)
 			A1 += 0x2cb80e	// distance between old and new offsets
 	}
 
@@ -1516,13 +1708,12 @@ function void fn0085b0()
 		u32[0xfffffcfc] = colorSwap
 	}
 */
-	copyMemory(A2 + 0x50, A1 + 0x20, 6)		// Emerald colors
+	copyMemory(A2 + 0x50, A1 + 0x20, 6)		// Sky colors
 
 #if STANDALONE
 	if (isGeneratedStageInMainGame && !challenge_greenspheres)
 	{
-		// Overwrite the emerald colors with the correct ones
-		// This actually colors the sky as well: A2 + 0x50 = 0xfffffcd0, the sky colors
+		// Overwrite the sky colors (A2 + 0x50 = 0xfffffcd0) with the correct ones
 		A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
 		if (useSKLayouts)
 		{
@@ -1532,6 +1723,15 @@ function void fn0085b0()
 	}
 #endif
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1807,6 +2007,11 @@ function void fn00972e()
 			// Game over
 			bluespheres.stage_exit_animation = 1
 			global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
+			if (challenge_greenspheres)
+			{
+				S2Special.swapRingsAndSpheres()
+				bluespheres.blue_remaining = 1		// do not let the results screen believe the stage was won
+			}
 			if (global.stage_type != 0)
 			{
 				global.zone_act = level.backup.zone_act
@@ -1858,12 +2063,33 @@ function void fn00972e()
 		}
 
 		++bluespheres.rings_collected
+		if (challenge_greenspheres)
+		{
+			if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 3])
+			{
+				bluespheres.current_gamespeed = 0x1000
+				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 2] * 60
+				showTimeGainTarget = 180
+				playSound(0x63)
+			}
+			else if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 2])
+			{
+				bluespheres.current_gamespeed = 0x1000
+				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 1] * 60
+				showTimeGainTarget = 180
+				playSound(0x63)
+			}
+			else if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 1])
+			{
+				bluespheres.stage_exit_state = 1
+			}
+		}
 		bluespheres.rings_flags |= 0x80
 
 		u8 soundId = 0x33
-		if (bluespheres.minigame_mode == 0 && !(challenge_greenspheres && !unlock_act))
+		if (bluespheres.minigame_mode == 0)
 		{
-			if (bluespheres.rings_collected >= 50 && (bluespheres.rings_flags & 0x01) == 0)
+			if (bluespheres.rings_collected >= 50 && !challenge_greenspheres && (bluespheres.rings_flags & 0x01) == 0)
 			{
 				bluespheres.rings_flags |= 0x01
 				++continues_counter
@@ -1894,20 +2120,23 @@ function void fn00972e()
 
 				if (grantExtraLife)
 				{
-				#if STANDALONE
-					if (Game.getSetting(SETTING_INFINITE_LIVES) && !original_mode)
+					if (!original_mode)
 					{
-						lives_counter = 3
+						if (Game.getSetting(SETTING_INFINITE_LIVES))
+						{
+							lives_counter = 3
+						}
+						else
+						{
+							lives_counter = min(lives_counter + 1, 99)
+							soundId = 0x2a
+						}
 					}
 					else
 					{
-						lives_counter = min(lives_counter + 1, 99)
+						++lives_counter
 						soundId = 0xb9
 					}
-				#else
-					++lives_counter
-					soundId = 0xb9
-				#endif
 				}
 			}
 		}
@@ -1939,9 +2168,83 @@ function void fn00972e()
 			u32[A2 + 0x04] = A1
 		}
 		playSound(0x65)	// blue sphere sound
+		BS_remainingTime += 30
+		showTimeGain = 30
 	}
 }
 
+
+constant array<u16> S2Special.RingTargets =
+{
+	20, 40, 65,		// S2 Special C-1
+	25, 50, 70,		// S2 Special C-2
+	25, 50, 80,		// S2 Special C-3
+	20, 40, 60,		// S2 Special C-4
+	40, 80, 130,	// S2 Special C-5
+	20, 40, 60,		// S2 Special C-6
+	40, 80, 120,	// S2 Special C-7
+	25, 50, 75,		// S2 Special C-Bonus
+	30, 70, 100,	// S2 Special S-1
+	40, 75, 110,	// S2 Special S-2
+	25, 50, 85,		// S2 Special S-3
+	40, 80, 120,	// S2 Special S-4
+	40, 70, 100,	// S2 Special S-5
+	25, 55, 85,		// S2 Special S-6
+	50, 100, 150,	// S2 Special S-7
+	30, 50, 70,		// S2 Special S-Bonus
+	45, 90, 135,	// S2 Special C-1 Hard
+	20, 40, 55,		// S2 Special C-2 Hard
+	40, 80, 120,	// S2 Special C-3 Hard
+	15, 35, 50,		// S2 Special C-4 Hard
+	50, 100, 140,	// S2 Special C-5 Hard
+	10, 25, 35,		// S2 Special C-6 Hard
+	20, 40, 60,		// S2 Special C-7 Hard
+	70, 140, 210,	// S2 Special C-Bonus Hard
+	15, 30, 45,		// S2 Special S-1 Hard
+	10, 25, 45,		// S2 Special S-2 Hard
+	20, 35, 55,		// S2 Special S-3 Hard
+	25, 50, 75,		// S2 Special S-4 Hard
+	15, 30, 45,		// S2 Special S-5 Hard
+	10, 30, 50,		// S2 Special S-6 Hard
+	15, 35, 50,		// S2 Special S-7 Hard
+	50, 100, 140	// S2 Special S-Bonus Hard
+}
+
+constant array<u8> S2Special.BonusTime = 
+{
+	25, 20, 15,		// S2 Special C-1
+	25, 10, 10,		// S2 Special C-2
+	30, 15, 15,		// S2 Special C-3
+	25, 10, 10,		// S2 Special C-4
+	20, 15, 15,		// S2 Special C-5
+	10, 10, 10,		// S2 Special C-6
+	15, 10, 10,		// S2 Special C-7
+	25, 20, 15,		// S2 Special C-Bonus
+	15, 15, 10,		// S2 Special S-1
+	20, 10, 10,		// S2 Special S-2
+	20, 15, 15,		// S2 Special S-3
+	30, 20, 15,		// S2 Special S-4
+	20, 10, 10,		// S2 Special S-5
+	20, 15, 10,		// S2 Special S-6
+	15, 10, 10,		// S2 Special S-7
+	20, 10, 10,		// S2 Special S-Bonus
+	15, 15, 10,		// S2 Special C-1 Hard
+	10, 10, 10,		// S2 Special C-2 Hard
+	15, 15, 15,		// S2 Special C-3 Hard
+	20, 15, 10,		// S2 Special C-4 Hard
+	20, 15, 15,		// S2 Special C-5 Hard
+	15, 10, 10,		// S2 Special C-6 Hard
+	15, 15, 10,		// S2 Special C-7 Hard
+	10, 10, 10,		// S2 Special C-Bonus Hard
+	25, 20, 15,		// S2 Special S-1 Hard
+	20, 15, 15,		// S2 Special S-2 Hard
+	10, 15, 15,		// S2 Special S-3 Hard
+	20, 15, 10,		// S2 Special S-4 Hard
+	10, 10, 10,		// S2 Special S-5 Hard
+	20, 15, 15,		// S2 Special S-6 Hard
+	20, 15, 15,		// S2 Special S-7 Hard
+	20, 15, 15		// S2 Special S-Bonus Hard
+}
 
 
 
@@ -1998,20 +2301,21 @@ function void TouchGreenSphere()
 			TouchGreenSphere_CheckPlayerMoved()
 			return
 		}
-		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xf0 // 0xf0	// was using 0xf0 for a while, but fixing the double-touch bug may make 0xe0 okay again
-		if (D0.u16 == 0)	// test if the fractional part of character position has any of the high four bits set
-		{
-			u8[A1] = 0x0a	// change this object to a "dummy blue sphere"
-			TouchGreenSphere_CheckPlayerMoved()
-		}
+		// We ignore the test to make a dummy blue sphere, instead choosing to use a short buffer (see above) and rely on moving off the square and specific sphere-to-ring checks to cover for it.
+//		D0.u16 = (bluespheres.position.x | bluespheres.position.y) & 0xf0 	// does not seem accurate enough with the variable speeds/positions in Sonic 2 stages
+//		if (D0.u16 == 0)	// test if the fractional part of character position has any of the high four bits set
+//		{
+//			u8[A1] = 0x0a	// change this object to a "dummy blue sphere"
+//			TouchGreenSphere_CheckPlayerMoved()
+//		}
 	}
 }
 
 // New function to ensure the player leaves a green sphere turning blue before the blue sphere can become red
 function void TouchGreenSphere_CheckPlayerMoved()
 {
-	D0.u16 = (bluespheres.position.x + 0x80 >> 8) & 0x1f
-	D1.u16 = (bluespheres.position.y + 0x80 >> 8) & 0x1f
+	D0.u16 = ((bluespheres.position.x + 0x80) >> 8) & 0x1f
+	D1.u16 = ((bluespheres.position.y + 0x80) >> 8) & 0x1f
 
 	D1.u16 <<= 5
 	D1.u8 |= D0.u8
@@ -2027,9 +2331,36 @@ function void TouchGreenSphere_CheckPlayerMoved()
 //# address-hook(0x009e88) end(0x009e9e)
 function void BlueSpheres.OnBlueSphereCollected()
 {
+	if (!bluespheres.blue_remaining)
+		return
+
 	bluespheres.bs_hud_dirty = 0xff
 	--bluespheres.blue_remaining
-	if (bluespheres.blue_remaining == 0)
+	bluespheres.blue_collected++
+	BS_remainingTime += 30
+	showTimeGain = 30
+
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	if (bluespheres.blue_collected >= continueSpheres && challenge_greenspheres && (bluespheres.rings_flags & 0x01) == 0)
+	{
+		bluespheres.rings_flags |= 0x01
+		++continues_counter
+		if (bluespheres.blue_remaining == 0)
+			playMusic(0x68)
+		else
+			playMusic(0xac)
+
+	#if STANDALONE
+		if (continues_counter >= 5)
+		{
+			Game.setAchievementComplete(ACHIEVEMENT_CONTINUES)
+		}
+	#endif
+		return
+	}
+
+	if (bluespheres.blue_remaining == 0 && !challenge_greenspheres)
 	{
 		bluespheres.stage_exit_state = 1
 		if (bluespheres.hitting_bumper != 0)
@@ -2038,6 +2369,10 @@ function void BlueSpheres.OnBlueSphereCollected()
 			bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
 			return
 		}
+	}
+	else if (bluespheres.blue_remaining == 0)
+	{
+		playMusic(0x68)
 	}
 }
 
@@ -2072,6 +2407,7 @@ function void fn009ea0()
 		--D0.s16
 	}
 	bluespheres.blue_remaining = D1.u16
+	bluespheres.blue_total = bluespheres.blue_remaining
 }
 
 
@@ -2553,6 +2889,191 @@ function void BlueSpheres.renderCustomSpheres()
 	// End of timer HUD code.
 */
 
+	// Draw the HUD in Sonic 2 special stages
+	if (challenge_greenspheres)
+	{
+		// debugLog(stringformat("%d.%02d", BS_remainingTime / 60, ((BS_remainingTime % 60) * 99 + 30) / 59))
+		
+		u16 renderQueue_hud = 0xe800
+		u16 ringsToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.blue_collected : bluespheres.rings_collected
+		u16 spheresToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.rings_collected : bluespheres.blue_collected
+
+		// Draw "GET X RINGS" messages
+		u16 ringTargetFirst = S2Special.RingTargets[challenge_greenspheres * 3 - 3]
+		u16 ringTargetSecond = S2Special.RingTargets[challenge_greenspheres * 3 - 2]
+		u16 ringTargetThird = S2Special.RingTargets[challenge_greenspheres * 3 - 1]
+		u16 ringTargetCurrent = ringTargetFirst
+		if (ringsToDisplay >= ringTargetSecond)
+			ringTargetCurrent = ringTargetThird
+		else if (ringsToDisplay >= ringTargetFirst)
+			ringTargetCurrent = ringTargetSecond
+		s16 px_ringtarget = getScreenWidth()/2
+		s16 py_ringtarget = getScreenHeight()/2 - 8
+
+		u16 alpha = min(u16(showTimeGainTarget) * 17 / 6, 255)	// here, 17 / 6 = 255 / 90, where 90 is half the variable's max.
+		if (BS_displayedTime < 180)
+			alpha = min(u16(180 - BS_displayedTime) * 17 / 6, 255)	// here, 17 / 6 = 255 / 90, where 90 is half the variable's max.
+		
+		if (BS_displayedTime < 180 || showTimeGainTarget)	// normal duration of GET BLUE SPHERES message not reached or the previous ring target was just reached
+		{
+			if (ringTargetCurrent < 100)
+				Renderer.drawCustomSprite("sonic2_getXXrings", px_ringtarget, py_ringtarget, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, alpha)	// two-digit ring target
+			else
+			{
+				Renderer.drawCustomSprite("sonic2_getXXXrings", px_ringtarget, py_ringtarget, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, alpha)	// three-digit ring target
+				px_ringtarget += 4
+			}
+			for (u32 value = ringTargetCurrent;;)
+			{
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", value % 10), px_ringtarget - 11, py_ringtarget - 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha)
+				px_ringtarget -= 8
+				value /= 10
+				if (value == 0)
+					break
+			}
+		}
+
+		// Draw the timer
+		s16 px_timer = getScreenWidth() / 2
+		constant u16 timer_screentop = 12
+		constant u16 timer_screenbottom = 196		// getScreenHeight() of 224, minus 12 for empty space below HUD, minus 16 for height of digits
+		s16 py_timer = timer_screenbottom
+
+		u16 seconds = BS_remainingTime / 60
+		u16 frames = BS_remainingTime - (seconds * 60)
+		u16 centiseconds = (frames * 99 + 30) / 59
+
+		if (seconds > 99)
+		{
+			seconds = 99
+			centiseconds = 99
+		}
+
+		Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		// Normal digits
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	
+		// Sphere time bonus digits
+		if (BS_remainingTime <= 600 && (level.framecounter.low & 0x08) && !bluespheres.stage_exit_state)
+		{
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_red", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+		}
+
+		// Sphere time bonus digits
+		alpha = min(u16(showTimeGain) * 17, 255)	// For sphere time bonus, showTimeGain is set to 30 frames. Full alpha until half done (15), which is 255 / 17. Typecast the u8 to u16 to fit 17 * value.
+		if (showTimeGain)
+		{
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_teal", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_teal", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_teal", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_teal", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_teal", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+		}
+
+		// Ring target time bonus digits
+		if (showTimeGainTarget)
+		{
+			alpha = min(u16(showTimeGainTarget) * 17 / 6, 255)	// here, 17 / 6 = 255 / 90, where 90 is half the variable's max.
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_green", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_green", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_green", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_green", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_green", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+		}
+
+		// Draw the ring counter
+		s16 px_rings = max(getScreenWidth()/2 - 100, 100) - 24
+		s16 py_rings = 12
+		s16 px_ringstext = px_rings - 44	// use - 68 instead of - 44 if using RINGS text instead of a ring icon
+
+		// Renderer.drawCustomSprite("sonic2_rings", px_ringstext, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_ringsicon", px_ringstext, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		for (u32 value = ringsToDisplay;;)
+		{
+			if (ringsToDisplay < ringTargetThird)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", value % 10), px_rings - 4, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			else
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_yellow", value % 10), px_rings - 4, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			px_rings -= 8
+			value /= 10
+			if (value == 0)
+				break
+		}
+
+		if (ringsToDisplay < ringTargetThird)
+			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini", px_ringstext + 48, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)		// use 72 instead of 48 if using RINGS text instead of a ring icon
+		else
+			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini_yellow", px_ringstext + 48, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		px_ringtarget = px_ringstext + 71	// this aligns the rightmost digit, not the leftmost. Use 95 instead of 71 if using RINGS text instead of a ring icon
+		if (ringTargetCurrent < 100)
+			px_ringtarget -= 8
+		for (u32 value = ringTargetCurrent;;)
+		{
+			if (ringsToDisplay < ringTargetThird)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", value % 10), px_ringtarget, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			else
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_yellow", value % 10), px_ringtarget, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+			px_ringtarget -= 8
+			value /= 10
+			if (value == 0)
+				break
+		}
+
+		// Draw the sphere counter
+		s16 px_spheres = getScreenWidth() - px_ringstext - 15	// this aligns the rightmost digits for current and target, not the leftmost
+		if (bluespheres.blue_total >= 100)
+			px_spheres -= 8
+		s16 px_spheresOrig = px_spheres
+		s16 py_spheres = py_rings
+
+		Renderer.drawCustomSprite("sonic2_spheresicon", px_spheresOrig - 57, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		for (u32 value = spheresToDisplay;;)
+		{
+			if (spheresToDisplay < bluespheres.blue_total)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", value % 10), px_spheres - 17, py_spheres, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			else
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_yellow", value % 10), px_spheres - 17, py_spheres, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			px_spheres -= 8
+			value /= 10
+			if (value == 0)
+				break
+		}
+
+		if (spheresToDisplay < bluespheres.blue_total)
+			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini", px_spheresOrig - 9, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		else
+			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini_yellow", px_spheresOrig - 9, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		s16 px_spheretarget = px_spheresOrig + 14
+		if (bluespheres.blue_total < 100)
+			px_spheretarget -= 8
+		for (u32 value = bluespheres.blue_total;;)
+		{
+			if (spheresToDisplay < bluespheres.blue_total)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", value % 10), px_spheretarget, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			else
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_yellow", value % 10), px_spheretarget, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			px_spheretarget -= 8
+			value /= 10
+			if (value == 0)
+				break
+		}
+	}
+		
+
 	Game.writeBlueSpheresData()
 
 	u32 ptr = 0x800000
@@ -2669,6 +3190,7 @@ function void BlueSpheres.renderCustomGround()
 
 	// Check the ROM location of the palette, which is written to 0xffffe446, to determine how to tint the horizon
 	if (palette_set >= 2)
+	{
 		if (u32[0xffffe446] == 0x2d420c)		// S3 Stage 1
 			tint = 0xffffffff
 		else if (u32[0xffffe446] == 0x2d4232)	// S3 Stage 2
@@ -2701,6 +3223,25 @@ function void BlueSpheres.renderCustomGround()
 			tint = 0x80d0a080
 		else if (u32[0xffffe446] == 0x2d4446)	// S&K Stage Bonus
 			tint = 0xf0ff6080
+/*
+		else if (u32[0xffffe446] == 0x2d5384)	// S2 Stage C-1
+			tint = 0xff2080c0
+		else if (u32[0xffffe446] == 0x2d53aa)	// S2 Stage C-2
+			tint = 0xff2080c0
+		else if (u32[0xffffe446] == 0x2d53d0)	// S2 Stage C-3
+			tint = 0xff2080c0
+		else if (u32[0xffffe446] == 0x2d53f6)	// S2 Stage C-4
+			tint = 0xff2080c0
+		else if (u32[0xffffe446] == 0x2d541c)	// S2 Stage C-5
+			tint = 0xff00a020
+		else if (u32[0xffffe446] == 0x2d5442)	// S2 Stage C-6
+			tint = 0xff2080c0
+		else if (u32[0xffffe446] == 0x2d5468)	// S2 Stage C-7
+			tint = 0xff8080a0
+		else if (u32[0xffffe446] == 0x2d548e)	// S2 Stage Bonus
+			tint = 0xffc020c0
+*/
+	}
 
 	BlueSpheres.replacePlaneRendering()
 
@@ -2764,8 +3305,11 @@ function void BlueSpheres.replacePlaneRendering()
 	Renderer.enableDefaultPlane(3, false)
 
 	// Manually render the HUD parts of this plane (blue spheres and rings counter)
-	Renderer.setupPlane(0, 0, 160, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR and 0, 0, 120 in new versions
-	Renderer.setupPlane(getScreenWidth()-160, 0, 160, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR and -120, 0, -120 in new versions.
+	if (!challenge_greenspheres)
+	{
+		Renderer.setupPlane(0, 0, 160, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR and 0, 0, 120 in new versions
+		Renderer.setupPlane(getScreenWidth()-160, 0, 160, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR and -120, 0, -120 in new versions.
+	}
 }
 
 
@@ -2774,18 +3318,28 @@ function void BlueSpheres.renderCustomCharacterShadows()
 {
 	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !original_mode)
 	{
-		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 142 + getScreenExtend(), 148, 0x00, 0, 0x3100)
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 143 + getScreenExtend(), 149, 0x00, 0, 0x3100)
 	}
 	else
 	{	// renderQueue value here changed from 0x3100 to 0x4001 since S3&K ground rendering is Plane 1 Prio at 0x4000
-		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 142 + getScreenExtend(), 148, 0x00, 0x40, 0x4001)
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 143 + getScreenExtend(), 149, 0x00, 0x40, 0x4001)
 	}
 }
 
+function void S2Special.swapRingsAndSpheres()
+{
+	// Swap the rings and spheres counts to represent their normal meanings
+	u16 swap = bluespheres.rings_remaining
+	bluespheres.rings_remaining = bluespheres.blue_remaining
+	bluespheres.blue_remaining = swap
+
+	swap = bluespheres.rings_collected
+	bluespheres.rings_collected = bluespheres.blue_collected
+	bluespheres.blue_collected = swap
+}
 
 
-
-// In marathon mode, skip blue spheres results screen
+// In marathon mode, skip blue spheres results screen.
 // Function taken from level\special\bs_results.lemon
 //# address-hook(0x02e3da) end(0x02e40e)
 function void fn02e3da()
@@ -2794,6 +3348,8 @@ function void fn02e3da()
 	{
 		global.game_mode = 0x0c
 		results.ring_bonus = u32(bluespheres.rings_collected) * 10
+		if (challenge_greenspheres)
+			results.ring_bonus = u32(bluespheres.blue_collected) * 10	// rings and blue spheres were swapped for other results screen checks
 		results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
 		addScore(results.time_bonus + results.ring_bonus)
 		results.time_bonus = 0
@@ -2808,6 +3364,8 @@ function void fn02e3da()
 	fn02e802()
 
 	results.ring_bonus = u32(bluespheres.rings_collected) * 10
+	if (challenge_greenspheres)
+		results.ring_bonus = u32(bluespheres.blue_collected) * 10	// rings and blue spheres were swapped for other results screen checks
 	results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
 
 	// Wait for six seconds
@@ -2821,6 +3379,166 @@ function void fn02e3da()
 #endif
 	objA0.base_state += 2
 }
+
+
+// In Sonic 2 special stages, check for half of blue spheres collected to show CONTINUE and icon in results.
+// Functions taken from level\special\bs_results.lemon
+//# address-hook(0x02e4d6) end(0x02e50e)
+function void fn02e4d6()
+{
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
+	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	if ((!challenge_greenspheres && bluespheres.rings_collected >= 50) || (challenge_greenspheres && bluespheres.rings_collected >= continueSpheres))
+	{
+		if (objA0.countdown_value != 0)
+		{
+			--objA0.countdown_value
+			return
+		}
+
+		u16[0xffffeee0] = 0
+		if (allocDynamicObjectAfterA0())
+		{
+			// Spawn character continue icons
+			u16[0xffffeee0] = A1.u16
+			objA1.update_address = 0x02ebe8
+			objA0.countdown_value = 0x010e
+			playSound(0xac)
+		}
+	}
+
+	objA0.base_state += 2
+	fn02e512()
+}
+
+//# address-hook(0x02e616) end(0x02e744)
+function void fn02e616()
+{
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
+	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+
+	if (objA0.countdown_value != 0)
+	{
+		--objA0.countdown_value
+		return
+	}
+
+	D0.u16 = camera.position.y.u16
+	if (D0.u16 < 0x0320)
+	{
+		++D0.u16
+		camera.position.y.u16 = D0.u16
+		if (D0.u16 != 0x02a0)
+			return
+
+		D0 = 4
+		if ((!challenge_greenspheres && bluespheres.rings_collected >= 50) || (challenge_greenspheres && bluespheres.rings_collected >= continueSpheres))
+		{
+			debugLog(stringformat("collected = %d, threshold = %d, total = %d", bluespheres.blue_collected, continueSpheres, bluespheres.blue_total))
+			debugLog("Passed!")
+			D1.u16 = u16[0xffffeee0]
+			if (D1.u16 != 0)
+			{
+				A1 = 0xffff0000 + D1.u16
+				objA1.update_address = 0x02ec4a
+				u16[A1 + 0x2e] = 0x14
+			}
+			++D0.u16
+		}
+		u16[A0 + 0x30] = D0.u16
+
+		A1 = 0xffffb98a
+		while (D0.s16 >= 0)
+		{
+			objA1.update_address = 0x02ec1e
+			A1 += 0x4a
+			--D0.s16
+		}
+
+		D0 = (global.super_emeralds >= 7) ? 4 : 2
+		u16[A0 + 0x30] += D0.u16
+
+		A1 = 0xffffbd96
+		while (D0.s16 >= 0)
+		{
+			objA1.update_address = 0x02ec1e
+			A1 += 0x4a
+			--D0.s16
+		}
+
+		u16[A0 + 0x30] += 2
+
+		A1 = 0xffffb98a
+		u16[A1 + 0x2e] = 0x08
+		u16[A1 + 0x78] = 0x0c
+		u16[A1 + 0xc2] = 0x0c
+		u16[A1 + 0x010c] = 0x10
+		u16[A1 + 0x0156] = 0x10
+		if ((!challenge_greenspheres && bluespheres.rings_collected >= 50) || (challenge_greenspheres && bluespheres.blue_collected >= continueSpheres))
+		{
+			u16[A1 + 0x01a0] = 0x14
+		}
+		u16[A1 + 0xaa] = 0
+		u16[A1 + 0x013e] = 0
+
+		A1 = 0xffffbd96
+		u16[A1 + 0xc2] = 0x04
+		if (global.super_emeralds >= 7)
+		{
+			u16[A1 + 0x0156] = 0x04
+		}
+	}
+	else
+	{
+		updateSpritePattern(0x18a204, 0xf380, 0x0200)
+
+		if (allocDynamicObjectStd())
+		{
+			D1 = 0
+			D2 = 0
+			D3 = 7
+			while (D3.s16 >= 0)
+			{
+				objA1.update_address = 0x02ecd0
+				u16[A1 + 0x2e] = D1.u16
+				u16[A1 + 0x30] = D2.u16
+				u16[A1 + 0x34] = A0.u16
+				D1.u16 += 0x10
+				++D2.u16
+				if (!allocDynamicObjectAfterA1())
+					break
+
+				--D3.s16
+			}
+		}
+
+		objA0.countdown_value = 0x1e
+		u16[A0 + 0x30] = 0
+		objA0.base_state += 2
+
+		playSound(0xb8)
+	}
+}
+
+//# address-hook(0x02ea7c) end(0x02eaa4)
+function void fn02ea7c()	// CONTINUE text and associated character-colored icon. The character sprite for continues is in the previous functions.
+{
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
+	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	if ((!challenge_greenspheres && bluespheres.rings_collected < 50) || (challenge_greenspheres && bluespheres.rings_collected < continueSpheres))
+	{
+		UnloadObject()
+	}
+	else
+	{
+		fn02ea1e()
+	}
+}
+
+
 
 
 

@@ -2,7 +2,7 @@
 
 function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegType)
 {
-    if (unlock_act && sfxId != 0xf8)
+    if (unlock_act || challenge_greenspheres)
     {
         soundKey = Standalone.getModdedSoundKey.unlockAct(soundKey, sfxId, soundRegType)
     }
@@ -40,6 +40,13 @@ function u64 Standalone.getModdedSoundKey.unlockAct(u64 soundKey, u8 sfxId, u8 s
         soundKey = (setting.ehz_music) ? "ehz2" : "ehz1"
     else if (sfxId == 0x19)
         soundKey = "s2_boss"
+	else if (sfxId == 0x1c && greenspheres_music && !original_mode)
+	{
+		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
+
+		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
+			soundKey = "s2_specialstage"	// _speedup
+	}
     else if (sfxId == 0x27)
         soundKey = "s2_gameover"
     else if (sfxId == 0x28)
@@ -54,6 +61,10 @@ function u64 Standalone.getModdedSoundKey.unlockAct(u64 soundKey, u8 sfxId, u8 s
         soundKey = "s2_transform"
     else if (sfxId == 0xf0)
         soundKey = "s2_super"
+	else if (sfxId == 0xf8 && greenspheres_music)
+	{
+		soundKey = "s2_specialstage"	// _speedup45
+	}
     
     return soundKey
 }

@@ -434,6 +434,101 @@
     "RomInject": "0x2d4446" // "0x008c38"
   },
 
+  // Replaces Sonic 2 Special Stage C-1 Palette
+  "S2Palette1": {
+    "File": "PaletteS2SSC1.bin",
+    "RomInject": "0x2d5384" // "0x0089fe"
+  },
+
+  // Replaces Sonic 2 Special Stage C-2 Palette
+  "S2Palette2": {
+    "File": "PaletteS2SSC2.bin",
+    "RomInject": "0x2d53aa" // "0x008a24"
+  },
+
+  // Replaces Sonic 2 Special Stage C-3 Palette
+  "S2Palette3": {
+    "File": "PaletteS2SSC3.bin",
+    "RomInject": "0x2d53d0" // "0x008a4a"
+  },
+
+  // Replaces Sonic 2 Special Stage C-4 Palette
+  "S2Palette4": {
+    "File": "PaletteS2SSC4.bin",
+    "RomInject": "0x2d53f6" // "0x008a70"
+  },
+
+  // Replaces Sonic 2 Special Stage C-5 Palette
+  "S2Palette5": {
+    "File": "PaletteS2SSC5.bin",
+    "RomInject": "0x2d541c" // "0x008a96"
+  },
+
+  // Replaces Sonic 3 Special Stage C-6 Palette
+  "S2Palette6": {
+    "File": "PaletteS2SSC6.bin",
+    "RomInject": "0x2d5442" // "0x008abc"
+  },
+
+  // Replaces Sonic 2 Special Stage C-7 Palette
+  "S2Palette7": {
+    "File": "PaletteS2SSC7.bin",
+    "RomInject": "0x2d5468" // "0x008ae2"
+  },
+
+  // Replaces Sonic 2 Special Stage C-8 Palette
+  "S2Palette8": {
+    "File": "PaletteS2SSC8.bin",
+    "RomInject": "0x2d548e" // "0x008b08"
+  },
+
+  // Replaces Sonic 2 Special Stage S-1 Palette
+  "S2PaletteS1": {
+    "File": "PaletteSKSS1.bin",
+    "RomInject": "0x2d54b4" // "0x008b2e"
+  },
+
+  // Replaces Sonic 2 Special Stage S-2 Palette
+  "S2PaletteS2": {
+    "File": "PaletteSKSS2.bin",
+    "RomInject": "0x2d54da" // "0x008b54"
+  },
+
+  // Replaces Sonic 2 Special Stage S-3 Palette
+  "S2PaletteS3": {
+    "File": "PaletteSKSS3.bin",
+    "RomInject": "0x2d5500" // "0x008b7a"
+  },
+
+  // Replaces Sonic 2 Special Stage S-4 Palette
+  "S2PaletteS4": {
+    "File": "PaletteSKSS4.bin",
+    "RomInject": "0x2d5526" // "0x008ba0"
+  },
+
+  // Replaces Sonic 2 Special Stage S-5 Palette
+  "S2PaletteS5": {
+    "File": "PaletteSKSS5.bin",
+    "RomInject": "0x2d554c" // "0x008bc6"
+  },
+
+  // Replaces Sonic 2 Special Stage S-6 Palette
+  "S2PaletteS6": {
+    "File": "PaletteSKSS6.bin",
+    "RomInject": "0x2d5572" // "0x008bec"
+  },
+
+  // Replaces Sonic 2 Special Stage S-7 Palette
+  "S2PaletteS7": {
+    "File": "PaletteSKSS7.bin",
+    "RomInject": "0x2d5598" // "0x008c12"
+  },
+
+  // Replaces Sonic 2 Special Stage S-8 Palette
+  "S2PaletteS8": {
+    "File": "PaletteSKSS8.bin",
+    "RomInject": "0x2d55be" // "0x008c38"
+  },
 
   // Function to add EggRobo to the Sonic 3 object table with ID 0xd1 EggRoboS3ObjectTablePointer.bin
   "EggRoboS3ObjectTablePointer": {
