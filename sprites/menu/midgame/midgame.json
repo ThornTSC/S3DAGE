@@ -28,6 +28,11 @@
 //	"difficulty_hard_0":  { "File": "hard.png", "Center": "16,6" },
 //	"difficulty_hard_2":  { "File": "hard_selected.png", "Center": "16,6" },
 
+	"difficulty_normal_description":  { "File": "difficulty_normal_description.png", "Center": "102,0" },
+	"difficulty_hard_description":  { "File": "difficulty_hard_description.png", "Center": "140,0" },
+	"difficulty_hard_description_noemeralds":  { "File": "difficulty_hard_description_noemeralds.png", "Center": "140,0" },
+	"difficulty_hard_description_s2":  { "File": "difficulty_hard_description_s2.png", "Center": "135,0" },
+
 	// Normal game pause menu
 	"normal_continue_0":	  { "File": "smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected
 	"normal_continue_1":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },

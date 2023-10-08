@@ -152,7 +152,7 @@ function bool customMenu.scrollLeft()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_LEFT) && held_time.up)
+	if (Input.buttonDown(BUTTON_LEFT) && held_time.left)
 	{
 		held_time.left++
 		if (held_time.left < held_time.needed)
@@ -182,7 +182,7 @@ function bool customMenu.scrollRight()
 		return true
 	}
 	
-	if (Input.buttonDown(BUTTON_RIGHT) && held_time.up)
+	if (Input.buttonDown(BUTTON_RIGHT) && held_time.right)
 	{
 		held_time.right++
 		if (held_time.right < held_time.needed)
@@ -210,6 +210,12 @@ function void customMenu.mainLogicLoop()
 	{
 		customMenu.mainLogicLoop.main()
 		return
+	}
+
+	if (setting.unlock_act && total_stars < 50)		// Dev cheated to gain stars, selected EHZ, removed stars
+	{
+		setting.unlock_act = 0
+		selectedZoneAct = 0x0000		// Make selection become AIZ1
 	}
 
 	if (selectedMenuOption == 0)
@@ -259,7 +265,23 @@ function void customMenu.mainLogicLoop()
 	// These two if condtions allow exiting to different locations.
 	// It is recommended to put one of these somewhere in your scripts so players do not get soft-locked.
 
-	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
+
+	// Dev cheat code for gaining or losing stars 10 at a time.
+	if (Input.buttonDown(BUTTON_Y))
+	{
+		if ((control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
+		{
+			cheatStars += 10
+			Audio.playAudio("redstarring", AudioContext.CONTEXT_SOUND)
+		}
+		else if ((control.pad1.pressed & CONTROL_B) && cheatStars >= 10)
+		{
+			cheatStars -= 10
+			playSound(0x46)
+		}
+	}
+
+	else if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
 	{
 		if (selectedMenuOption == 6)
 		{
@@ -290,6 +312,12 @@ function void customMenu.mainLogicLoop()
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+				if (pause_menu_selection == 0)
+					Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+				else if (setting.unlock_act)
+					Renderer.drawCustomSprite("difficulty_hard_description_s2", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+				else
+					Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
 			//	if (menuReady == true)
 			//	{
@@ -860,8 +888,6 @@ function void customMenu.displayTimes()
 		// Draw appropriate medal if relevant
 		if (time_attack && u8[best_time_address] > 0 && u8[best_time_address] <= 3)	// medal earned (should always be 3 or less, but adding upper bound for safety)
 		{
-			// Commented code would draw a "stack" of medals, showing all earned medals instead of the best one.
-			// This ultimately looked strange enough to not be worth doing even if it makes more sense for the "total stars" counter.
 			if (u8[best_time_address] == 3)
 			{
 				Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 278 + 12 - 4, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
@@ -1242,6 +1268,10 @@ function void customMenu.countMedals()
 			++starCount
 	}
 
+	starCount += cheatStars
+	// For now, cap stars at 999.
+	starCount = min(starCount, 999)
+
 	u8 spriteFlags = (global.game.paused) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
@@ -1263,6 +1293,8 @@ function void customMenu.countMedals()
 	}
 	else	// Saturn theme, also used in menus
 	{
+		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
+			x_offset -= 6
 		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
 		if (starCount / 100 != 0)
 		{
@@ -1732,7 +1764,7 @@ function void customMenu.mainLogicLoop.main()
 
 	Letters.Main()
 	if (selectedMenuOption.main == 0)
-		Letters.Show("Play Sonic 3 & Knuckles`with new level layouts,`special stage layouts,`and colour schemes for`a fresh take on a classic.``Bring Tails along, or go solo`and seek out Red Star Rings!``Attempt a harder game`with Knuckles: more enemies`and tricky special stages!", 1, getScreenExtend() - 40 + 212, 68)
+		Letters.Show("Play Sonic 3 & Knuckles`with new level layouts,`special stage layouts,`and colour schemes for`a fresh take on a classic.``Bring Tails along, or go solo`and seek out Red Star Rings!``Attempt a harder game`with Knuckles: more Badniks`and tricky special stages!", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 1)
 		Letters.Show("Experience the original`Sonic 3: D.A. Garden Edition`ROM hack (v1.02) as`released in October 2015.", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 2)
@@ -2182,6 +2214,12 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+					if (pause_menu_selection == 0)
+						Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					else if (time_attack == 4)
+						Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					else
+						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
 					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
@@ -2248,7 +2286,7 @@ function void fn00d42c()
 					global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 					waitForNextFrame()
 
-				@EntryPoint:
+				@EntryPoint_2:
 					timer.alldata = 0
 
 					u32 backupA0 = A0
@@ -2264,6 +2302,12 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+					if (pause_menu_selection == 0)
+						Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					else if (time_attack == 4)
+						Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					else
+						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
 					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
@@ -2385,6 +2429,12 @@ function void fn00d30c()
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+				if (pause_menu_selection == 0)
+					Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+				else if (time_attack == 4)
+					Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+				else
+					Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
 				global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 

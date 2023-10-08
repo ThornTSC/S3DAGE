@@ -543,7 +543,7 @@ function u8 PauseMenu_ExitGame()
 		global.game.paused = false
 
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent the A.I.R. menu music from playing
-		playMusic (0x2f)		// force this to be the current active music, else the level music and menu music play at the same time
+		playMusic(0x2f)			// force this to be the current active music, else the level music and menu music play at the same time
 		exitGame = 1
 //		Game.returnToMainMenu()
 //		yieldExecution()

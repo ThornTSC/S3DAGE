@@ -5,8 +5,8 @@
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version = "D.A. Garden Edition v1.8.1.1"
-#define DAGE_running = 0x1811
+global u64 DAGE_version = "D.A. Garden Edition v1.9.0.0"
+#define DAGE_running = 0x1900
 
 // Define variables for in-game settings
 global u8 palette_set
@@ -72,6 +72,9 @@ global s16 pole.y
 
 // Define memory location to store star count
 define u16 total_stars = u16[0x8402fe]
+
+// Dev cheat for gaining stars
+global u16 cheatStars
 
 global bool exitGame
 global bool AIR_menu_run
@@ -373,6 +376,7 @@ function void MainMenuBG.Run()
 	
 	global.game_mode = 0x0c
 	global.zone_act = 0x0d01
+	playMusic(0x2f)
 
 	// Load the required level patterns for the outro
 	//  -> This is essentially the same as "fn007812", but without the call to "waitForNextFrame", and hard-coded 0x1cfb44 to simplify things
@@ -6400,7 +6404,7 @@ function void SetupCharacterAtStartPosition()
 		{
 			D1 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2]
 			D0 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2 + 1]
-			if (isMainCharacter(CHARACTER_KNUCKLES))
+			if (isMainCharacter(CHARACTER_KNUCKLES) && eggrobos_knuckles)	// in Sonic 2 acts, the Eggrobos flag instead sets harder Knuckles paths
 			{
 				D1 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2]
 				D0 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2 + 1]
@@ -7477,6 +7481,34 @@ function void fn013efc()
 
 
 
+// Control what to do after an unlockable act finishes its level results tally.
+// Empty function taken from standalone\gamecallbacks.lemon
+function void Standalone.onLevelFinished()
+{
+	if (!unlock_act)
+	{
+		base.Standalone.onLevelFinished()
+		return
+	}
+
+	// Truncated copy of code used for moving from DAGE pause menu to DAGE main menu
+	restart_timer = 0
+	exit_timer = 0
+	checkpoint.number = 0
+	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+	global.stage_type = 0
+	global.in_extra_stage = 0
+
+	camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
+	camera.background.y = 0		// fix for the AIZ1 background issue.
+	u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
+	zeroMemory(0xfffff100, 0x500)	// Clear out data used when loading level patterns, else the main game may try to access special stage data or vice versa.
+
+	global.game_mode = 0x54
+}
+
+
+
 
 
 // Add ROM manipulations to support correct AIZ1 Knuckles intro animals
@@ -8058,8 +8090,13 @@ function void fn01c4d0()
 
 // From maingame\maingame.lemon, a function that corrects AIZ 1 needs to be altered for Knux's path.
 // This function sets level sizes by calling a level size array at 0x01bcc6.
-//# address-hook(0x01bc60) end(0x01bcc2)
 function void fn01bc60()
+{
+	Level.SetupLevelSize()
+}
+
+//# address-hook(0x01bc60) end(0x01bcc2)
+function void Level.SetupLevelSize()
 {
 	u8[0xffffee30] = 0
 	u8[0xffffee08] = 0
@@ -8321,7 +8358,7 @@ function void fn02241a()
 
 
 
-// Load chunks, blocks, and chunks as the fire wall moves the character from AIZ1 to AIZ2
+// Load tiles, blocks, and chunks as the fire wall moves the character from AIZ1 to AIZ2
 // Function taken from level\01_aiz\level_aiz.lemon
 //# address-hook(0x04fc46) end(0x04fd28)
 function void fn04fc46()
