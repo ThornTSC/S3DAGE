@@ -11,6 +11,31 @@ function void EHZ_CustomSprites()
 {
 	UpdateBackgroundScrolling.EHZ()
 	Renderer.addSpriteMaskWorld(0x0900, 0x0560, 0x0040, 0x0040, 0xcf00, 7)	// hide a single set of moving spikes on Knux's path that show in front of low-priority ground
+
+	if (palette_set >= 2)
+	{
+		EHZ.drawTransparentWaterfall(0x19c0, 0x0000, 2 * 0x40, 15 * 0x40, 0x1fff)
+		EHZ.drawTransparentWaterfall(0x3ad0, 0x0000, 1 * 0x40, 15 * 0x40, 0xc001)
+		EHZ.drawTransparentWaterfall(0x4b30, 0x0000, 1 * 0x40, 10 * 0x40, 0x1fff)
+		EHZ.drawTransparentWaterfall(0x4b80, 0x0000, 1 * 0x40, 10 * 0x40, 0xc001)
+		EHZ.drawTransparentWaterfall(0x5480, 0x0000, 2 * 0x40,  8 * 0x40, 0x1fff)
+	}
+}
+
+function void EHZ.drawTransparentWaterfall(s16 px, s16 py, s16 width, s16 height, u16 renderQueue)
+{
+	if ((camera.position.x.u16 >= (px + width - 32)) || (camera.position.y.u16 >= (py + height - 32)))
+		return
+	if (((camera.position.x.u16 + getScreenWidth() + 32) < px) || ((camera.position.y.u16 + getScreenHeight() + 32) < py))
+		return
+
+	for (u16 count.x = width; count.x > 0; count.x -= 0x40)
+	{
+		for (u16 count.y = height; count.y > 0; count.y -= 0x40)
+		{
+			Renderer.drawCustomSprite("ehz_waterfall_transparent", px + count.x - 0x40, py + count.y - 0x40, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, renderQueue)
+		}
+	}
 }
 
 function void UpdateBackgroundScrolling.EHZ()

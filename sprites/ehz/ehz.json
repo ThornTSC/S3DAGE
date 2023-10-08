@@ -94,6 +94,9 @@
 	"s2_ring_06": { "File": "s2_rings.bmp", "Rect": "96,0,16,16", "Center": "8,8" },
 	"s2_ring_07": { "File": "s2_rings.bmp", "Rect":"112,0,16,16", "Center": "8,8" },
 
+	// EHZ waterfall (transparent)
+	"ehz_waterfall_transparent": { "File": "ehz_waterfall_transparent.bmp", "Center": "32,32" },
+
 	// EHZ Platforms
 	"ehz_platform_00": { "File": "ehz_platforms.bmp", "Rect":   "8,8,64,64", "Center": "32,28" },
 	"ehz_platform_01": { "File": "ehz_platforms.bmp", "Rect":  "80,8,64,96", "Center": "32,47" },
