@@ -376,3 +376,110 @@ function void fn021920()
 }
 
 */
+
+
+
+// If we skid off the corkscrew bridge, clear the rotation flag to make sure running animations play properly.
+// Function taken from maingame\character\character_graphics.lemon
+//# address-hook(0x0113f6) end(0x011480)
+//# address-hook(0x014c20) end(0x014caa)
+//# address-hook(0x017428) end(0x0174b2)
+function void PressedLeftWhileUprightOnGround()
+{
+	D0.u16 = char.groundspeed
+	if (D0.s16 > 0)
+	{
+		D0.u16 -= D4.u16
+		if (D0.s16 < 0)
+			D0.s16 = -0x80
+		char.groundspeed = D0.u16
+
+		// Check for braking (only when rotated upright)
+		D0.u8 = (char.rotation + 0x20) & 0xc0
+		if (D0.u8 == 0 && D0.s16 >= 0x400)
+		{
+			if ((u8[A0 + 0x2d] & 0x80) == 0)
+			{
+				playSound(SFX_BRAKE)
+				char.state = char.state.BRAKING
+				char.rotation.x = 0	// new line for corkscrew bridges
+				char.flags &= ~char.flag.FACING_LEFT
+				if (char.drown_countdown >= 12)
+				{
+					u8[A6 + 0x05] = 0x06
+					u8[A6 + 0x22] = 0x15
+				}
+			}
+		}
+	}
+	else
+	{
+		if ((char.flags & char.flag.FACING_LEFT) == 0)
+		{
+			char.flags |= char.flag.FACING_LEFT
+			char.flags &= ~char.flag.PUSHING
+			char.state.former = char.state.RUNNING2
+		}
+
+		D0.u16 -= D5.u16
+		D1.s16 = -D6.s16
+		if (D0.s16 <= D1.s16)
+		{
+			D0.s16 += D5.s16
+			D0.s16 = min(D0.s16, D1.s16)
+		}
+		char.groundspeed = D0.u16
+		char.state = char.state.RUNNING
+	}
+}
+
+//# address-hook(0x011482) end(0x011506)
+//# address-hook(0x014cac) end(0x014d30)
+//# address-hook(0x0174b4) end(0x017538)
+function void PressedRightWhileUprightOnGround()
+{
+	D0.u16 = char.groundspeed
+	if (D0.s16 < 0)
+	{
+		D0.u16 += D4.u16
+		if (D0.s16 >= 0)
+			D0.s16 = 0x80
+		char.groundspeed = D0.u16
+
+		// Check for braking (only when rotated upright)
+		D0.u8 = (char.rotation + 0x20) & 0xc0
+		if (D0.u8 == 0 && D0.s16 <= -0x400)
+		{
+			if ((u8[A0 + 0x2d] & 0x80) == 0)
+			{
+				playSound(SFX_BRAKE)
+				char.state = char.state.BRAKING
+				char.rotation.x = 0	// new line for corkscrew bridges
+				char.flags |= char.flag.FACING_LEFT
+				if (char.drown_countdown >= 12)
+				{
+					u8[A6 + 0x05] = 0x06
+					u8[A6 + 0x22] = 0x15
+				}
+			}
+		}
+	}
+	else
+	{
+		if (char.flags & char.flag.FACING_LEFT)
+		{
+			char.flags &= ~char.flag.FACING_LEFT
+			char.flags &= ~char.flag.PUSHING
+			char.state.former = char.state.RUNNING2
+		}
+
+		D0.u16 += D5.u16
+		if (D0.s16 >= D6.s16)
+		{
+			D0.u16 -= D5.u16
+			D0.s16 = max(D0.s16, D6.s16)
+		}
+		char.groundspeed = D0.u16
+		char.state = char.state.RUNNING
+	}
+}
