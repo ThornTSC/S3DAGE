@@ -13,55 +13,55 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x21092800	// v21.09.28.0 stable
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v21.09.28.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v21.09.28.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x22051500	// v22.05.15.0 preview
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v22.05.15.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.05.15.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x22070300	// use for old test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v22.07.03.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.07.03.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x22082700	// use for latest preview version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v22.08.27.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.08.27.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x22091000	// use for latest stable version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v22.09.10.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.09.10.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23011500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v23.01.15.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v23.01.15.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23032500	// use for latest test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. v23.03.25.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v23.03.25.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP > 0x23011500	// use for versions that DAGE has not updated to learn yet
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.8.1.1`A.I.R. New Version", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. New Version", 1, px, 193)
 		return
 	#endif
 
 	if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.8.1.1`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
+	Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
 }
 
 
@@ -5799,7 +5799,11 @@ function void UpdateLevelTiles.Outro()		// main outro (falling from sky, ocean)
 		PrintVersionNumber()
 	}
 	if (level.framecounter > 0x2f12 && !original_mode)
-		Renderer.drawCustomSprite("credits", 0, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f12) * 8))
+	{
+		if (getScreenWidth() < 400)
+			Renderer.setScreenSize(400, 224)
+		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f12) * 8))
+	}
 
 	// s16[0xffffeec0] == 0x00	-> First part until Angel Island gets visible
 	// s16[0xffffeec0] == 0x04	-> Second part until the Tornado flies away from Angel Island again
@@ -5897,7 +5901,11 @@ function void UpdateLevelTiles.SSZ_Knuckles()
 		PrintVersionNumber()
 	}
 	if (level.trigger0f && level.framecounter > 0x2f1f && !original_mode)
-		Renderer.drawCustomSprite("credits", 0, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f1f) * 8))
+	{
+		if (getScreenWidth() < 400)
+			Renderer.setScreenSize(400, 224)
+		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f1f) * 8))
+	}
 
 	camera.foreground.y.u16 += camera.screenshake.offset
 	call 0x058ab0 + s16[0xffffeec0]
