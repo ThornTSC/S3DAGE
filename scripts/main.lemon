@@ -14891,7 +14891,7 @@ function void fn03bc92()
 
 // If below the square FBZ blocks that form bridges after coming up from underneath them, don't make the blocks solid.
 // This helps with floor collision oddities and with ensuring Knuckles can climb the walls they touch.
-// Function taken from objects\8_fbz\fbz_platformblock.lemon
+// Function taken from objects\08_fbz\fbz_platformblock.lemon
 //# address-hook(0x03c3ee) end(0x03c410)
 function void fn03c3ee()
 {
@@ -14927,6 +14927,32 @@ function void fn06ef14()
 
 
 
+// Draw signpost in front of FBZ1 boss only in Revisited Mode.
+// Function taken from objects\basics\signpost.lemon
+//# address-hook(0x0837d8) end(0x08382e)
+function void fn0837d8()
+{
+	if (SetupObjectAttributesSlotted(0x083b04))
+		return
+
+	if (u8[0xffffb000 + 0x0a] & 0x80)
+		u8[A0 + 0x0a] |= 0x80
+
+	level.signpost.address = A0.u16
+
+	objA0.hitbox_extends.x = 0x18
+	objA0.hitbox_extends.y = 0x1e
+	u32[A0 + 0x30] = isMainCharacter(CHARACTER_KNUCKLES) ? 0x083b58 : 0x083b4a
+	objA0.position.y.u16 = camera.position.y.u16 - 0x20
+
+	// Move signpost in front of Gapsule in FBZ 1; #contributed by iCloudius
+	if (global.zone_act == 0x0400 && !original_mode)
+		objA0.sprite_priority = 0x180
+	playSound(0xb8)
+
+	// "spawnChildObjects(0x083b2e)" replaced by:
+	spawnChildObject(0x083a24, 0x00, 0, 24)
+}
 
 
 // Adjust camera on the outdoor section on the lowest route of FBZ2
