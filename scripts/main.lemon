@@ -11666,6 +11666,26 @@ function void fn065d8c()
 
 
 
+// In Original Mode, allow gliding over the CNZ2 boss.
+// Function taken from level\04_cnz\level_cnz.lemon
+//# address-hook(0x05227c) end(0x05227c)
+function void fn05227c()
+{
+	UpdateBackground.CNZ1()
+	fn052280()
+
+#if STANDALONE
+	// Limit movement to where the boss area ends, to prevent Knuckles from gliding over the boss
+	if (global.zone_act == 0x0301 && move_area.right == 0x6000 && camera.position.x.u16 >= 0x4500 && camera.position.y.u16 < 0x320 && !original_mode)
+	{
+		move_area.right = 0x47e0
+		level.vertical_wrap = 0x0200
+	}
+#endif
+}
+
+
+
 // Lowers the CNZ2 boss slightly for Knuckles to match DAGE behavior
 // and make Original Mode adjustments.
 // Functions taken from bosses\boss_cnz2.lemon
@@ -12059,6 +12079,7 @@ function void InitLevelTiles.ICZ2()
 
 
 // Adjust the x-coordinates for which background loading can occur to accommodate for the final Sonic/Tails ICZ2 giant ring
+// and reintroduce flying over the ICZ1 boss in Original Mode.
 //# address-hook(0x053cd0) end(0x053d50)
 function void InitLevelScrolling.ICZ2()
 {
@@ -12183,7 +12204,7 @@ function void fn053d78()
 #if STANDALONE
 	// Limit movement to where the boss area ends, to prevent Knuckles from gliding over the upper boss and into Act 2
 	//  -> This can safely applied for the lower boss as well, as it's using the same x-positions
-	if (global.zone_act == 0x0501 && global.zone_act.apparent == 0x0500 && move_area.right == 0x7000)
+	if (global.zone_act == 0x0501 && global.zone_act.apparent == 0x0500 && move_area.right == 0x7000 && !original_mode)	// exception made for Original Mode
 	{
 		move_area.right = 0x06f0
 	}
