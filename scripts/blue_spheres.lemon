@@ -2347,9 +2347,9 @@ function void BlueSpheres.OnBlueSphereCollected()
 		bluespheres.rings_flags |= 0x01
 		++continues_counter
 		if (bluespheres.blue_remaining == 0)
-			playMusic(0x68)
+			Standalone.playAudio(0x68)	// Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
 		else
-			playMusic(0xac)
+			Standalone.playAudio(0xac)	// Same as above.
 
 	#if STANDALONE
 		if (continues_counter >= 5)
@@ -2372,7 +2372,7 @@ function void BlueSpheres.OnBlueSphereCollected()
 	}
 	else if (bluespheres.blue_remaining == 0)
 	{
-		playMusic(0x68)
+		Standalone.playAudio(0x68)	// Same as above.
 	}
 }
 
@@ -2725,7 +2725,7 @@ function void fn009f44()
 			A4 = pop()
 		}
 
-		// Reached a position where it's no use to on, because there's neither a (not yet visited) red sphere nor the currently collected blue sphere; proceed by either:
+		// Reached a position where it's no use to go on, because there's neither a (not yet visited) red sphere nor the currently collected blue sphere; proceed by either:
 		//  - Rotating current direction by 90° and check this one; i.e. do not enter the next while loop at all
 		//  - If all directions got checked for the current position, take the next entry from the stack and continue with it (possibly multiple times if all directions of the top-of-stack already got checked, too)
 		//  - In case the stack is empty, we're done with all checks
