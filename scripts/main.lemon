@@ -3211,6 +3211,7 @@ function void KnucklesPressedJumpInMidAir()
 
 // Do not allow canceling Super/Hyper transformations in Original Mode.
 // Also prevent playing level music while in win pose (e.g., invincibility wears off).
+// Reload lightning shield sparks after cancellation in Sonic 2 acts.
 // Function taken from maingame\character\character.lemon
 function void Character.updateBonusEffects()
 {
@@ -3226,6 +3227,11 @@ function void Character.updateBonusEffects()
 			if (global.zone_act != 0x0c00 && (char.control_flags & 0x40) == 0)
 			{
 				Character.cancelSuperTransformation()
+				// If lightning shield is active in a Sonic 2 act, reload sprite patterns for the sparks. The above function handles this for S3&K acts.
+				if (u32[0xffffcce8] == 0x019732 && unlock_act)
+				{
+					updateSpritePattern(0x34e402, 0xf760, 0x50)
+				}
 				chooseFittingMusic()
 				char.jumping = 0		// Do not allow another transformation until hit the ground
 			}
@@ -3262,6 +3268,11 @@ function void Character.updateBonusEffects()
 				{
 					// Half a second of extra invincibility
 					char.invuln.countdown = max(char.invuln.countdown, 60)
+				}
+				// If lightning shield is active in a Sonic 2 act, reload sprite patterns for the sparks. This is a non-issue in S3&K due to different VRAM locations.
+				if (u32[0xffffcce8] == 0x019732 && unlock_act)
+				{
+					updateSpritePattern(0x34e402, 0xf760, 0x50)
 				}
 			}
 		}

@@ -3,6 +3,6 @@
 //# address-hook(0x018d6a) end(0x018d6a)
 function void fn018d6a()
 {
-	D6 = (unlock_act) ? 0x349122 : 0x18a604		// Dust art in the Sonic 2 palette is injected at the Sonic 3 alone sparks location
+	D6 = (unlock_act) ? 0x349122 : 0x18a604		// Dust art in the Sonic 2 palette is injected at the Sonic 3 alone dust location
 	fn018d70()
 }

@@ -50,7 +50,8 @@ function void LightningShield.Init()
 	{
 		u32 sparksArtAddress = (unlock_act) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
 		// Load sprite patterns for the sparks
-		updateSpritePattern(sparksArtAddress, 0xf760, 0x50)
+		if (!unlock_act || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
+			updateSpritePattern(sparksArtAddress, 0xf760, 0x50)
 	}
 
 	objA0.mapping_offset = 0x019dc8
