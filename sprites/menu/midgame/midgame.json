@@ -10,6 +10,7 @@
 
 	// Change theme text
 	"change_theme": {"File": "change_theme.png"},
+	"change_theme_full": {"File": "change_theme_full.png"},
 	"25_stars": {"File": "25_stars.png"},
 	"50_stars": {"File": "50_stars.png"},
 

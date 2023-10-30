@@ -118,6 +118,9 @@ constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
 constant u8 theme.south  = 3
 
+// Flag for HUD layout
+global u8 hud.layout
+
 // Flag for unlockable levels
 global u16 unlock_act
 
@@ -538,6 +541,11 @@ function void TitleCard.Init()
 	{
 		if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
 			theme.hud = theme.saturn								// else use the theme matching the menu
+		else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
+		{
+			hud.layout = (theme.hud >> 6)
+			theme.hud &= 0x3f		// set HUD to matching theme constant
+		}
 	}
 
 	base.TitleCard.Init()
@@ -19520,8 +19528,8 @@ function void RedStarRing()
 	}
 	else if (global.characters == 3 && objA0.subtype2c < 0x80)						// min subtype for Knux's red star rings
 	{
-		s8[A0 + 0x26] = -48	// assume a Tails red star ring, 24 bytes ahead
-		if (objA0.subtype2c <= 0x30 && (u8[redstarring_address - 48] & ringNum))	// a TSonic red star ring
+		s8[A0 + 0x26] = -48	// assume a Sonic red star ring, 48 bytes prior
+		if (objA0.subtype2c <= 0x30 && (u8[redstarring_address - 48] & ringNum))	// a Sonic red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return

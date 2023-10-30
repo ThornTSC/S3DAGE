@@ -189,7 +189,7 @@
 
 	// Sonic 2 special stage HUD elements
 	"sonic2_rings": { "File": "Sonic2_rings.png"},
-	"sonic2_ringsicon": { "File": "Sonic2_ringsicon.png"},
+	// "hud_ring_s2" is identical in special stages and in a Sonic 2 main act
 	"sonic2_spheresicon": { "File": "Sonic2_spheresicon.png"},
 	"sonic2_timeframe": { "File": "Sonic2_timeframe.png", "Center": "26,14"},
 	"sonic2_getXXrings": { "File": "Sonic2_getXXrings.png", "Center": "47,7"},

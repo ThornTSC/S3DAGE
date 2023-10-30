@@ -129,10 +129,20 @@ function void UpdateGamePause()
 			{
 				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 				{
-					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c)
+					{
+						Renderer.drawCustomSprite("change_theme_full", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 71, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 56, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 93, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					}
+					else
+					{
+						Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					}
 					if (total_stars < unlock.theme.south)
 						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
@@ -235,6 +245,8 @@ function void UpdateGamePause()
 	//	}
 
 		PauseMenu_ChangeTheme()
+		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c)
+			PauseMenu_ChangeLayout()
 	}
 
 	syncZ80_variantB(0x80)
@@ -255,7 +267,6 @@ function void UpdateGamePause()
 
 function void PauseMenu_ChangeTheme()
 {
-	
 	if (total_stars < unlock.theme.south)
 		theme.max = 2
 	else
@@ -268,10 +279,11 @@ function void PauseMenu_ChangeTheme()
 			theme.hud += 1
 			if (theme.hud == theme.max + 1)
 				theme.hud = 0
-			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
-			{
-				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-			}
+
+			theme.hud += (hud.layout << 6)		// combine theme and layout values…
+			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+
 			playSound(0x5b)
 		}
 		else if ((control.pad1.state & CONTROL_B) && customMenu.scrollLeft())
@@ -280,12 +292,43 @@ function void PauseMenu_ChangeTheme()
 				theme.hud = theme.max
 			else
 				theme.hud -= 1
-			if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))		// no HUD themes for Extra Character Slot characters
-			{
-				System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-			}
+
+			theme.hud += (hud.layout << 6)		// combine theme and layout values…
+			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+
 			playSound(0x5b)
 		}
+	}
+}
+
+function void PauseMenu_ChangeLayout()
+{
+	if ((control.pad1.state & CONTROL_B) && customMenu.scrollUp())
+	{
+		if (hud.layout == 0) 
+			hud.layout = 2
+		else
+			hud.layout -= 1
+
+		theme.hud += (hud.layout << 6)		// combine theme and layout values…
+		System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+		theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+
+		playSound(0x5b)
+	}
+	else if ((control.pad1.state & CONTROL_B) && customMenu.scrollDown())
+	{
+		if (hud.layout == 2) 
+			hud.layout = 0
+		else
+			hud.layout += 1
+
+		theme.hud += (hud.layout << 6)		// combine theme and layout values…
+		System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+		theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+
+		playSound(0x5b)
 	}
 }
 
@@ -300,14 +343,14 @@ function u8 PauseMenu_Normal()
 	else if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 2)
@@ -363,14 +406,14 @@ function u8 PauseMenu_Normal()
 
 function u8 PauseMenu_Normal_Restart()
 {
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 3)
 			pause_menu_selection = 5
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 5)
@@ -445,14 +488,14 @@ function u8 PauseMenu_Normal_Restart()
 
 function u8 PauseMenu_ExitGame()
 {
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 6)
 			pause_menu_selection = 8
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 8)
@@ -560,14 +603,14 @@ function u8 PauseMenu_Basic()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 2
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 2
 		if (pause_menu_selection > 2)
@@ -621,14 +664,14 @@ function u8 PauseMenu_BlueSphere()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 2)
@@ -698,14 +741,14 @@ function u8 PauseMenu_Challenges()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (customMenu.scrollUp() && !clean_screenshot)
+	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 3
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot)
+	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
 		if (pause_menu_selection > 3)

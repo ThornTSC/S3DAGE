@@ -1,0 +1,4 @@
+{
+	"hud_ring":  { "File": "hud_ring.png", "Rect": "0,0,16,16" },
+	"hud_ring_s2":  { "File": "hud_ring.png", "Rect": "16,0,16,16" }
+}
