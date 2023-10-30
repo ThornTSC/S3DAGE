@@ -504,7 +504,10 @@ function void MainMenuBG.Run()
 		}
 
 		Renderer.drawCustomSprite("sonic3air_logo", MainMenuBG.logoPosition, 11, 0, 0, 0xa000)
-		Renderer.drawCustomSprite("title_screen_air", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
+		if (palette_set >= 2)
+			Renderer.drawCustomSprite("title_screen_air_new", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
+		else
+			Renderer.drawCustomSprite("title_screen_air", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
 
 		PrintVersionNumber()
 
@@ -5653,14 +5656,20 @@ function void fn0048dc()
 
 	u16 px = getScreenWidth() / 2
 	u16 py = objA0.position.y.u16 - 53
-	Renderer.drawCustomSprite("title_screen_air", px, py - 4, 0x00, SPRITE_FLAG_PRIO, 0xa000)	// Angel Island Revisited. Subtracted 4 from y position in DAGE.
+	if (palette_set >= 2)
+		Renderer.drawCustomSprite("title_screen_air_new", px, py - 5, 0x00, SPRITE_FLAG_PRIO, 0xa000)
+	else
+		Renderer.drawCustomSprite("title_screen_air", px, py - 4, 0x00, SPRITE_FLAG_PRIO, 0xa000)	// Angel Island Revisited. Subtracted 4 from y position in DAGE.
 
 	if (time > 0)
 	{
 		if (time < 65)
 		{
 			u8 alpha = (time < 20) ? (time * 255 / 20) : ((65 - time) * 255 / 45)
-			Renderer.drawCustomSprite("title_screen_air_h", px, py - 4, 0x00, SPRITE_FLAG_PRIO, 0xa001, 0, alpha)	// Angel Island Revisited flash. Subtracted 4 from y position in DAGE.
+			if (palette_set >= 2)
+				Renderer.drawCustomSprite("title_screen_air_new_h", px, py - 5, 0x00, SPRITE_FLAG_PRIO, 0xa001, 0, alpha)	// Angel Island Revisited flash. Subtracted 4 from y position in DAGE.
+			else
+				Renderer.drawCustomSprite("title_screen_air_h", px, py - 4, 0x00, SPRITE_FLAG_PRIO, 0xa001, 0, alpha)	// Angel Island Revisited flash. Subtracted 4 from y position in DAGE.
 		}
 
 	//	Renderer.drawCustomSprite("title_screen_start", getScreenWidth() / 2, 208 + max((50 - time) * 2, 0), 0x00, 0, 0x9f7e)	// don't draw START GAME in DAGE
