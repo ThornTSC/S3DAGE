@@ -1559,7 +1559,49 @@ function void RenderMarathonTimer()
 
 
 
-// Have all calls to RenderHUD() conditionally consider RenderHUD_Challenges() and RenderHUD_Marathon().
+// Create functions that decrement and increment the timer to align the in-game display and the actual data.
+// AIR's one-frame shift can cause visible timer rollback when pausing or finishing a Time Stone Trial just as freeze_time reaches zero.
+// This realignment alters the displayed time to negate that without editing the frequently-modded RenderHUD().
+function void DecrementTimerDisplay()
+{
+	if (global.game.paused || !hud.dirty.timer)
+		return
+
+	timer.frames--
+	if (timer.frames == 0xff)
+	{
+		timer.frames = 59
+		timer.seconds--
+		if (timer.seconds == 0xff)
+		{
+			timer.seconds = 59
+			--timer.minutes
+		}
+	}
+}
+
+function void IncrementTimerDisplay()
+{
+	if (global.game.paused || !hud.dirty.timer)
+		return
+
+	timer.frames++
+	if (timer.frames == 60)
+	{
+		timer.frames = 0
+		timer.seconds++
+		if (timer.seconds == 60)
+		{
+			timer.seconds = 0
+			timer.minutes++
+		}
+	}
+}
+
+
+
+
+// Have all calls to RenderHUD() conditionally consider RenderHUD_Challenges() and RenderHUD_Marathon(), and insert calls to the above functions.
 // We also make sure special LRZ sprites do not render on the Data Select, as we don't always have the AIR menu to reset displays for us.
 // Function taken from general\rendering.lemon
 //# address-hook(0x01ad20) end(0x01af68)
@@ -1591,14 +1633,18 @@ function void RenderSprites()
 		else if (draw_HUD && time_attack != 1 && time_attack != 2 && !((global.game_mode & 0x7f) == 0x4c || (global.game_mode & 0x7f) == 0x2c || global.game_mode == 0x8c))
 		{
 			RenderHUD_RedRings()
+			DecrementTimerDisplay()
 			RenderHUD()
+			IncrementTimerDisplay()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else if (!((global.game_mode & 0x7f) == 0x4c || (global.game_mode & 0x7f) == 0x2c || global.game_mode == 0x8c))
 		{
 			RenderHUD_RedRings()
+			DecrementTimerDisplay()
 			RenderHUD_Challenges()
+			IncrementTimerDisplay()
 		}
 
 
@@ -1684,14 +1730,18 @@ function void fn00db3c()
 			RenderHUD_Orig()
 		else if (time_attack != 1 && time_attack != 2)
 		{
+			DecrementTimerDisplay()
 			RenderHUD()
+			IncrementTimerDisplay()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else
 		{
 			RenderHUD_RedRings()
+			DecrementTimerDisplay()
 			RenderHUD_Challenges()
+			IncrementTimerDisplay()
 		}
 		Renderer.setLogicalSpriteSpace(Space.WORLD)
 	}
@@ -1703,14 +1753,18 @@ function void fn00db3c()
 		else if (time_attack != 1 && time_attack != 2)
 		{
 			RenderHUD_RedRings()
+			DecrementTimerDisplay()
 			RenderHUD()
+			IncrementTimerDisplay()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else
 		{
 			RenderHUD_RedRings()
+			DecrementTimerDisplay()
 			RenderHUD_Challenges()
+			IncrementTimerDisplay()
 		}
 	}
 #endif
@@ -6471,7 +6525,17 @@ function void Standalone.checkTimeAttackFinish()
 	else if (!Challenge.checkAndRenderFinish())
 		return										// Only run the rest of this function if the player has actually finished
 
-	Challenge.initializeLevelEnd()
+	if (hud.dirty.timer)
+	{
+		Challenge.initializeLevelEnd()
+		return
+	}
+	else if (!time_attack_end)
+	{
+		playMusic(MUSIC_LEVELCLEAR)
+		time_attack_end = 1
+	}
+
 	Challenge.setEndCameraPosition()
 	Challenge.setEndPlayerPosition()
 	Challenge.saveMedalsAndRecords()
@@ -6829,8 +6893,6 @@ function void Challenge.initializeLevelEnd()
 {
 	if (hud.dirty.timer)
 	{
-		time_attack_end = 1
-		playMusic(MUSIC_LEVELCLEAR)
 		hud.dirty.timer = 0
 		freeze_time_bonus = 0	// initialize the freeze_time_bonus this frame
 		timer.alldata_copy = timer.alldata 	// save the timer data before applying any bonus
