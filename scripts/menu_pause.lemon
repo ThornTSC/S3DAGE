@@ -245,7 +245,7 @@ function void UpdateGamePause()
 	//	}
 
 		PauseMenu_ChangeTheme()
-		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c)
+		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && !original_mode)
 			PauseMenu_ChangeLayout()
 	}
 
@@ -603,14 +603,14 @@ function u8 PauseMenu_Basic()
 	if (pause_menu_selection >= 6)
 		return PauseMenu_ExitGame()
 
-	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
+	if (customMenu.scrollUp() && !clean_screenshot && !(!original_mode && (control.pad1.state & CONTROL_B)))
 	{
 		pause_menu_selection -= 2
 		if (pause_menu_selection < 0)
 			pause_menu_selection = 2
 		playSound(0x5b)
 	}
-	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
+	else if (customMenu.scrollDown() && !clean_screenshot && !(!original_mode && (control.pad1.state & CONTROL_B)))
 	{
 		pause_menu_selection += 2
 		if (pause_menu_selection > 2)
