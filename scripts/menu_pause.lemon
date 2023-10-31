@@ -131,7 +131,7 @@ function void UpdateGamePause()
 				{
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c)
+					if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && global.zone_act != 0x1701)
 					{
 						Renderer.drawCustomSprite("change_theme_full", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 						Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 71, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
@@ -245,7 +245,7 @@ function void UpdateGamePause()
 	//	}
 
 		PauseMenu_ChangeTheme()
-		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && !original_mode)
+		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && !original_mode && global.zone_act != 0x1701)
 			PauseMenu_ChangeLayout()
 	}
 
