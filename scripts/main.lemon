@@ -12354,7 +12354,7 @@ function void UpdateLevelTiles.ICZ2()
 		{
 			if (move_area.bottom.target != 0x0a10 || move_area.bottom.target != 0x0a30)
 			{
-				if (u16[0xffffb010] < 0x2800)	// Knux water crossing area
+				if (u16[0xffffb010] < 0x2800 && u16[0xffffb014] > 0x700)	// Knux water crossing area
 				{
 					move_area.bottom.current = max(0x0a10, (camera.position.y.u16 - 4) & 0xfffc)	// set to next lowest multiple of 4 in case of camera scroll glitches
 					move_area.bottom.target = 0x0a10
