@@ -1633,18 +1633,28 @@ function void RenderSprites()
 		else if (draw_HUD && time_attack != 1 && time_attack != 2 && !((global.game_mode & 0x7f) == 0x4c || (global.game_mode & 0x7f) == 0x2c || global.game_mode == 0x8c))
 		{
 			RenderHUD_RedRings()
-			DecrementTimerDisplay()
-			RenderHUD()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else if (!((global.game_mode & 0x7f) == 0x4c || (global.game_mode & 0x7f) == 0x2c || global.game_mode == 0x8c))
 		{
 			RenderHUD_RedRings()
-			DecrementTimerDisplay()
-			RenderHUD_Challenges()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD_Challenges()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD_Challenges()
 		}
 
 
@@ -1730,18 +1740,28 @@ function void fn00db3c()
 			RenderHUD_Orig()
 		else if (time_attack != 1 && time_attack != 2)
 		{
-			DecrementTimerDisplay()
-			RenderHUD()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else
 		{
 			RenderHUD_RedRings()
-			DecrementTimerDisplay()
-			RenderHUD_Challenges()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD_Challenges()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD_Challenges()
 		}
 		Renderer.setLogicalSpriteSpace(Space.WORLD)
 	}
@@ -1753,18 +1773,28 @@ function void fn00db3c()
 		else if (time_attack != 1 && time_attack != 2)
 		{
 			RenderHUD_RedRings()
-			DecrementTimerDisplay()
-			RenderHUD()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
 		else
 		{
 			RenderHUD_RedRings()
-			DecrementTimerDisplay()
-			RenderHUD_Challenges()
-			IncrementTimerDisplay()
+			if (timer.alldata)
+			{
+				DecrementTimerDisplay()
+				RenderHUD_Challenges()
+				IncrementTimerDisplay()
+			}
+			else
+				RenderHUD_Challenges()
 		}
 	}
 #endif
