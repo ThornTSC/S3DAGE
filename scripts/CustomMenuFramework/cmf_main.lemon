@@ -1546,7 +1546,7 @@ function void DataSelect.drawCustomPlanes()
 
 function void DataSelect.drawRevisitedSprites()
 {
-	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffff80e0, 0x10000)		// tinted background 0xffff8080
+	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffb080ff, 0x10000)
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art
@@ -1657,7 +1657,7 @@ function void GameModeControlLoop()
 
 function void customMenu.mainLogicLoop.main()
 {
-	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xffff8080, 0x10000)					// background
+	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xffff80a0, 0x10000)					// background
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)
 
 	// Specific check for The ECSU Framework
@@ -1773,7 +1773,7 @@ function void customMenu.mainLogicLoop.main()
 		// Letters.Show("Play any act in the game`in either Revisited or`Classic Mode, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!`Be quick, precise, and`above all careful!", 1, getScreenExtend() - 40 + 212, 68)
 		Letters.Show("Play any act, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!``Submit your best runs to`www.speedrun.com/s3airdag`to compete with others!", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 4)
-		Letters.Show("Tackle the classic`Blue Sphere game with`a tricky twist.``Touch Green Spheres to`turn them into Blue`Spheres. Plan your moves`carefully to create rings`and avoid red spheres!", 1, getScreenExtend() - 40 + 212, 68)
+		Letters.Show("Tackle the classic`Blue Sphere game with`a tricky twist.``Touch green spheres to`turn them into blue`spheres. Plan your moves`carefully to create rings`and avoid red spheres!", 1, getScreenExtend() - 40 + 212, 68)
 	else if (selectedMenuOption.main == 5)
 		Letters.Show("Return to the A.I.R. menu`to change options or`exit the game.", 1, getScreenExtend() - 40 + 212, 68)
 
