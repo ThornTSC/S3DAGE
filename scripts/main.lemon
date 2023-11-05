@@ -17843,16 +17843,12 @@ function void DEZ1_CustomSprites()
 
 function void DEZ1_DrawBackground()
 {
-	if (getScreenWidth() == 320)
-		Renderer.drawCustomSprite("bg_dez1_classic", 0, 0, 0x00, 0, 0x1100)
-	else if (getScreenWidth() > 464)
+	if (getScreenWidth() > 464)
 		Renderer.drawCustomSprite("bg_dez1_496", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
 	else if (getScreenWidth() > 432)
 		Renderer.drawCustomSprite("bg_dez1_464", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
-	else if (getScreenWidth() > 400)
-		Renderer.drawCustomSprite("bg_dez1_432", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
 	else
-		Renderer.drawCustomSprite("bg_dez1", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
+		Renderer.drawCustomSprite("bg_dez1", getScreenWidth()/2, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
 	if (palette_set >= 2 && !original_mode)											// if new palettes,
 		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x1101, 0, 0x40)	// dim background
 }
@@ -17861,21 +17857,14 @@ function void DEZ2_DrawBackground()
 {
 	if (palette_set < 2 || original_mode)
 	{
-		if (getScreenWidth() == 320)
+		if (original_mode)
 			Renderer.drawCustomSprite("bg_dez2_classic", 0, 0, 0x00, 0, 0x1100)
-		else if (getScreenWidth() > 400)
-			Renderer.drawCustomSprite("bg_dez2_496", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
 		else
-			Renderer.drawCustomSprite("bg_dez2", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)		
+			Renderer.drawCustomSprite("bg_dez2", getScreenWidth()/2, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)		
 	}
 	else
 	{
-		if (getScreenWidth() == 320)
-			Renderer.drawCustomSprite("bg_dez2_new_320", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
-		else if (getScreenWidth() > 400)
-			Renderer.drawCustomSprite("bg_dez2_new_496", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
-		else
-			Renderer.drawCustomSprite("bg_dez2_new", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)		
+		Renderer.drawCustomSprite("bg_dez2_new", getScreenWidth()/2, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)		
 	}
 
 }
@@ -18375,7 +18364,10 @@ function void DEZBoss_CustomSprites()
 	// Draw our own widescreen version of the background
 	Renderer.enforceClearScreen(true)
 	Renderer.enableDefaultPlane(0, false)
-	DEZ2_DrawBackground()
+	if (!original_mode)
+		DEZ2_DrawBackground()
+	else
+		Renderer.drawCustomSprite("bg_dezboss_classic", 0, 0, 0x00, 0, 0x1100)	// In base S3&K, the final boss background is actually slightly different
 }
 
 

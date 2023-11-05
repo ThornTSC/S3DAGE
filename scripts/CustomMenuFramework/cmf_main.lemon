@@ -393,7 +393,7 @@ function void customMenu.mainLogicLoop()
 			else if (setting.levelselect.characters == 3 && sidekick && !setting.original_mode && !setting.time_attack)
 				setting.levelselect.characters = 4
 
-			original_mode = (setting.time_attack) ? 0 : setting.original_mode
+			original_mode = (setting.time_attack || unlock_act) ? 0 : setting.original_mode
 			if (original_mode)
 				Renderer.setScreenSize(320, 224)
 			else
@@ -1546,7 +1546,7 @@ function void DataSelect.drawCustomPlanes()
 
 function void DataSelect.drawRevisitedSprites()
 {
-	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffb080ff, 0x10000)
+	Renderer.drawCustomSprite("bg_dataselect", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffa080e0, 0x10000)
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art

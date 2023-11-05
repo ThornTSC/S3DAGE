@@ -1,16 +1,14 @@
 {
-	"bg_dez1_classic": { "File": "dez1_background_classic.bmp" },
-	"bg_dez1": { "File": "dez1_background_new.bmp" },	// The newness is a correction to the original's colormap. The change is only visible in new palettes.
-	"bg_dez1_432": { "File": "dez1_background_new_432.bmp", "Center": "216, 0" },
+	"bg_dez1": { "File": "dez1_background_new.bmp", "Center": "216, 0" },
 	"bg_dez1_464": { "File": "dez1_background_new_464.bmp", "Center": "232, 0" },
 	"bg_dez1_496": { "File": "dez1_background_new_496.bmp", "Center": "248, 0" },
 
 	"bg_dez2_classic": { "File": "dez2_background_classic.png" },
-	"bg_dez2_496": { "File": "dez2_background_496.png", "Center": "248, 0" },
+	"bg_dez2": { "File": "dez2_background.png", "Center": "248, 0" },
 
-	"bg_dez2_new": { "File": "dez2_background_new.png" },
-	"bg_dez2_new_320": { "File": "dez2_background_new_320.png", "Center": "160, 0" },
-	"bg_dez2_new_496": { "File": "dez2_background_new_496.png", "Center": "248, 0" },
+	"bg_dez2_new": { "File": "dez2_background_new.png", "Center": "248, 0" },
+
+	"bg_dezboss_classic": { "File": "dezboss_background_classic.bmp" },
 
 	"bg_dez_wall": { "File": "dez_backgroundwall.bmp" },
 	
