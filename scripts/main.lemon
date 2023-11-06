@@ -187,7 +187,7 @@ function void endOfFrame()
 		time_attack = 0
 		water.fullscreen = 0
 		marathon_timer = 0
-		draw_HUD = false					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
+		draw_HUD = false					// Do not draw HUD in menus. initializeMainGame() will activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
 		eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges

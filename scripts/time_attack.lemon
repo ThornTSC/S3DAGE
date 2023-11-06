@@ -107,7 +107,7 @@ function void initializeMainGame()
 		debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
 		marathon_timer = 0
 		time_attack = 0
-		draw_HUD = true					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
+		draw_HUD = true						// Activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
 		unlock_act = 0						// Remove unlockable act flag in main menu
