@@ -9764,17 +9764,86 @@ function void fn031502()
 
 
 
-// Function from November 2020 preview that prevents too many HCZ fan bubbles from stopping object spawning.
-// This is taken without alteration and is only here for legacy compatibility with the previous stable release.
+// Remove Tails assist glitch fix from HCZ fans in Original Mode.
+// Function taken from objects\02_hcz\hcz_fan.lemon
+//# address-hook(0x03077e) end(0x030832)
+function void fn03077e()
+{
+#if STANDALONE
+	if (debug_mode.state != 0 && !original_mode)
+		return
+#endif
+
+	if (u8[A1 + 0x05] >= 0x04)
+		return
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x18
+	if (D0.u16 < 0x30)
+	{
+		D1 = objA1.position.y.u16 + u16[A0 + 0x36] + u8[0xfffffe84] - objA0.position.y.u16
+		if (D1.s16 >= 0 && D1.u16 < u16[A0 + 0x38])
+		{
+			if (u8[A1 + 0x2e] == 0)
+			{
+				D1.u16 -= u16[A0 + 0x36]
+				if (D1.s16 >= 0)
+				{
+					D1.u16 ^= 0xffff
+					D1.u16 *= 2
+				}
+
+				D1.u16 += u16[A0 + 0x36]
+				D1.s16 = (-D1.s16) >> 6
+				objA1.position.y.u16 += D1.u16
+				objA1.velocity.y = 0
+				objA1.flags2a |= char.flag.IN_AIR
+				objA1.flags2a &= ~char.flag.CONTROL_LOCK
+				u8[A1 + 0x2f] = 0
+				u8[A1 + 0x40] = 0
+
+				if (objA0.subtype2c & 0x40)
+				{
+					// Underwater fan
+					objA1.state = char.state.LIFTED
+				}
+				else if (u8[A1 + 0x27] == 0)
+				{
+					objA1.state = char.state.RUNNING
+					u8[A1 + 0x27] = 1
+					u8[A1 + 0x30] = 0x7f
+					u8[A1 + 0x31] = 0x08
+				}
+
+			#if STANDALONE
+				// Fix for bug when Tails carries other player and gets caught by the fan
+				if (u8[A1 + 0x38] == CHARACTER_TAILS && tails.carrying && !original_mode)
+				{
+					u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+					u8[0xffffb000 + 0x2e] = 0
+				}
+			#endif
+			}
+
+			u16[A1 + 0x1c] = 1
+		}
+	}
+}
+
+
+
+
+// Use original fan bubble despawning behaviors in Original Mode.
+// Function taken from objects\02_hcz\hcz_fan.lemon
 //# address-hook(0x030834) end(0x03084a)
 function void fn030834()
 {
 	bool shouldDespawn = (objA0.position.y.u16 <= water.height.current)
-#if STANDALONE
-	// Also despawn above the screen
-	//  -> Without this, there's kind of a spam of bubbles in HCZ 1 (around X=0x1f40, Y=0x08c0) that can prevent regular object spawn
-	shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10)
-#endif
+	if (!original_mode)
+	{
+		// Also despawn above the screen
+		//  -> Without this, there's kind of a spam of bubbles in HCZ 1 (around X=0x1f40, Y=0x08c0) that can prevent regular object spawn
+		shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10)
+	}
 	if (shouldDespawn)
 	{
 		UnloadObject()
@@ -18080,6 +18149,69 @@ function void fn047892()
 	fn0478be()
 }
 
+
+
+
+// In Original Mode, remove fixes from the antigrav ball in DEZ.
+// Function taken from objects\13_dez\dez_hovermachine.lemon
+//# address-hook(0x04952a) end(0x0495d6)
+function void fn04952a()
+{
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x40
+	if (D0.u16 < 0x80)
+	{
+		LookupSinCos()
+		D0.s16 = (D0.s16 >> 2) + 0x20
+		D2.u16 = D0.u16 + 0x20
+		D1 = objA1.position.y.u16 - objA0.position.y.u16 + D0.u16
+
+		if (D1.u16 < D2.u16 && u8[A1 + 0x05] < 0x04 && u8[A1 + 0x2e] == 0)
+		{
+			D1.u16 -= D0.u16
+			if (D1.s16 >= 0)
+			{
+				D1.u16 = (D1.u16 ^ 0xffff) * 2
+			}
+			D1.u16 += D0.u16
+			D1.s16 = (-D1.s16) >> 4
+			objA1.position.y.u16 += D1.u16
+			objA1.velocity.y = 0
+			objA1.flags2a |= char.flag.IN_AIR
+			objA1.flags2a &= ~char.flag.CONTROL_LOCK
+			u8[A1 + 0x2f] = 0
+			u8[A1 + 0x40] = 0
+			u16[A1 + 0x1c] = 0x01
+
+			if (!original_mode)
+			{
+				// Remove spindash flag
+				u8[A1 + 0x3d] = 0
+			}
+
+			if ((level.framecounter.low & 0x0f) == 0)
+			{
+				playSound(0xd9)
+			}
+
+			if (u8[A1 + 0x27] == 0)
+			{
+				objA1.state = char.state.RUNNING
+				u8[A1 + 0x27] = 0x01
+				u8[A1 + 0x30] = 0x7f
+				u8[A1 + 0x31] = 0x08
+
+			#if STANDALONE
+				// Fix for bug when Tails carries other player and gets caught by the hover effect
+				if (u8[A1 + 0x38] == CHARACTER_TAILS && tails.carrying && !original_mode)
+				{
+					u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+					u8[0xffffb000 + 0x2e] = 0
+				}
+			#endif
+			}
+		}
+	}
+}
 
 
 
