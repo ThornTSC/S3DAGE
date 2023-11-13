@@ -1524,7 +1524,7 @@ function void DataSelect.drawCustomPlanes()
 		//  -> Maybe the plane W is used here?
 		if (original_mode || palette_set < 2)
 			Renderer.drawCustomSprite("bg_dataselect", getScreenExtend() - 40, 0, 0x00, 0, 0x2000)
-		else
+		else if (!original_mode)
 		{
 			DataSelect.drawRevisitedSprites()
 		}
@@ -1546,7 +1546,7 @@ function void DataSelect.drawCustomPlanes()
 
 function void DataSelect.drawRevisitedSprites()
 {
-	Renderer.drawCustomSprite("bg_dataselect", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffa080e0, 0x10000)
+	Renderer.drawCustomSprite("bg_cmfdataselect", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2001, 0, 0xffa080e0, 0x10000)
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art

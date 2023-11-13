@@ -1,6 +1,6 @@
 {
 	// Menu background from Custom Menu Framework, used for Revisited Mode Data Select
-	"bg_dataselect": { "File": "cmf_background.png" },
+	"bg_cmfdataselect": { "File": "cmf_background.png" },
 
 	// Data Select replacement text for new color scheme
 	"text_dataselect": { "File": "text_dataselect.png", "Rect": "0,0,168,16", "Center": "84,8" }

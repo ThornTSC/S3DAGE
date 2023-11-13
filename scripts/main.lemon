@@ -90,6 +90,7 @@ include time_attack
 include ring_object_managers
 include string_display
 include movement_changes
+include rom_manipulations
 include music
 include themes/?
 include RtWI/?
@@ -1398,38 +1399,6 @@ function void fn06185c()
 }
 
 
-
-
-
-
-// Force slot machine to use original probabilities in Original Mode.
-// Function taken from standalone\rom_manipulations.lemon
-function void ROMManipulation.BonusSM.Probabilities()
-{
-	if (original_mode)
-	{
-		A0 = 0x04c8b4
-		u8[A0]      = 4		// Chance of 3x Jackpot (enforced triple)	-- original value: 4
-		u8[A0 + 3]  = 9		// Chance of 3x Sonic (enforced triple)		-- original value: 9
-		u8[A0 + 6]  = 4		// Chance of 3x Knuckles (enforced triple)	-- original value: 4
-		u8[A0 + 9]  = 18	// Chance of 3x Robotnik (enforced triple)	-- original value: 18
-		u8[A0 + 12] = 9		// Chance of 3x Tails (enforced triple)		-- original value: 9
-		u8[A0 + 15] = 15	// Chance of 3x Ring (enforced triple)		-- original value: 15
-		u8[A0 + 18] = 15	// Chance of 3x Bar (enforced triple)		-- original value: 15
-	}
-	else
-	{
-		// Increased chance for Jackpot, reduced chance for Robotnik, and bringing Knuckles on the same level as Sonic & Tails
-		A0 = 0x04c8b4
-		u8[A0]      = 7		// Chance of 3x Jackpot (enforced triple)	-- original value: 4
-		u8[A0 + 3]  = 9		// Chance of 3x Sonic (enforced triple)		-- original value: 9
-		u8[A0 + 6]  = 9		// Chance of 3x Knuckles (enforced triple)	-- original value: 4
-		u8[A0 + 9]  = 15	// Chance of 3x Robotnik (enforced triple)	-- original value: 18
-		u8[A0 + 12] = 9		// Chance of 3x Tails (enforced triple)		-- original value: 9
-		u8[A0 + 15] = 15	// Chance of 3x Ring (enforced triple)		-- original value: 15
-		u8[A0 + 18] = 15	// Chance of 3x Bar (enforced triple)		-- original value: 15
-	}
-}
 
 
 
@@ -4044,6 +4013,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 {
 	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
 
+	if ((A0 == 0xffffb000 || A0 == 0xffffb04a || A0 == 0xffffcc0a) && original_mode)	// Player 1, sidekick Tails, Tails' tails
+		return false
+
 	// New custom code for title cards is inserted here.
 	// First, the colored bar.
 	if (objA0.update_address == 0x02d8e2)	// still title card bar but not with new title on
@@ -4605,6 +4577,25 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return true
 		}
 	}
+
+	#if GAMEAPP > 0x22091000
+	// CNZ Balloon
+	if (objA0.update_address == 0x031754 && objA0.subtype2c == 0x04 && !original_mode)
+	{
+		// This only works for the red balloon; its cord and other colors use a copy of the art that's Nemesis-compressed
+		Standalone.renderWithKosinskiCompression(px, py, 0x37060e, 0xff, renderQueue, 0xae80)		// Draw the balloon sprite
+
+		// Directly drawing the cord sprites
+		if (objA0.animation.sprite == 0x14)
+			Renderer.drawVdpSprite(px-4, py+16, 0x03, (sprite_attribute.PALETTE.LINE2 | 0x035c), renderQueue)
+		if (objA0.animation.sprite == 0x15)
+			Renderer.drawVdpSprite(px-4, py+16, 0x03, (sprite_attribute.PALETTE.LINE2 | 0x0360), renderQueue)
+		if (objA0.animation.sprite == 0x16)
+			Renderer.drawVdpSprite(px-4, py+16, 0x03, (sprite_attribute.FLIP_X | sprite_attribute.PALETTE.LINE2 | 0x035c), renderQueue)
+
+		return false			// Skip hardware drawing the original balloon
+	}
+	#endif
 
 	// FBZ 2 boss fight Egg Robo head
 	if (objA0.update_address == 0x067b96 && isMainCharacter(CHARACTER_KNUCKLES) && original_mode)
@@ -7544,9 +7535,22 @@ function void Standalone.onLevelFinished()
 // Functions taken from standalone\rom_manipulations.lemon
 function void ApplyROMManipulations()
 {
+	if (original_mode)
+	{
+		ApplyROMManipulations_Original()
+		return
+	}
+	
 	ROMManipulation.RepairSpriteMappings()
+	#if GAMEAPP <= 0x22091000
+	// Fix checkpoint stars loading incorrect tiles. Covered in ROMManipulation.RepairSpriteMappings() in later A.I.R. builds.
+	u16[0x187b8a] = 0xc0
+	u16[0x187bec] = 0xc0
+	u16[0x187c4e] = 0xc0
+	#endif
+
 	ROMManipulation.RepairAnimations()
-	//	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
+	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
 	ROMManipulation.AIZ1.KnucklesIntroCritters()
 	ROMManipulation.AIZ2.StartPosition()
 	ROMManipulation.AIZ2.BlimpSequenceBombs()
@@ -8922,7 +8926,7 @@ function void ROMManipulation.AIZ2.BlimpSequenceBombs()
 {
 	A0 = 0x23c0a6
 
-	if ((time_attack >= 3 || (Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE)) && !original_mode))
+	if (time_attack >= 3 || (Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE)))
 	{
 		// New sequence
 		ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x0c, 0x3f5c)

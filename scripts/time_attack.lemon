@@ -77,8 +77,7 @@ function void PrintVersionNumber()
 function void initializeMainGame()
 {
 	Letters.ClearAll()	// clear the text display queue to ensure previous text from menus does not show for one frame in a level
-	ROMManipulation.AIZ2.BlimpSequenceBombs()	// This is usually only called during the A.I.R. menu if a setting changes. Force it here.
-	ROMManipulation.BonusSM.Probabilities()		// Same here
+	ApplyROMManipulations()
 
 	// Specific check for The ECSU Framework
 	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))

@@ -1,0 +1,158 @@
+/*
+	This script file is part of the Sonic 3 A.I.R. script software distribution.
+	Copyright (C) 2017-2023 by Eukaryot
+
+	Published under the GNU GPLv3 open source software license, see license.txt
+	or https://www.gnu.org/licenses/gpl-3.0.en.html
+*/
+
+
+
+// Yes, we do ROM writes here indeed!
+
+function void ApplyROMManipulations_Original()
+{
+	ROMManipulation.RepairSpriteMappings_Original()
+	ROMManipulation.RepairAnimations_Original()
+	ROMManipulation.CutsceneKnucklesPalette_Original()
+	// ROMManipulation.AIZ1.KnucklesIntroCritters_Original()	// irrelevant in original ROM hack
+	// ROMManipulation.AIZ2.StartPosition_Original()	// handled elsewhere and not the same as base S3&K
+	ROMManipulation.AIZ2.BlimpSequenceBombs_Original()
+	ROMManipulation.HCZ.SetBottomHeight_Original()
+	// ROMManipulation.CNZ2.KnucklesPreBossCutscene_Original()	// irrelevant in original ROM hack
+	// ROMManipulation.HPZ.SecondMuralChunks_Original()	// handled elsewhere
+	ROMManipulation.BonusSM.Probabilities_Original()
+	// ROMManipulation.ALZ.MusicFix_Original()	// irrelevant in original ROM hack
+	// ROMManipulation.DPZ.LoopBugFix_Original()	// irrelevant in original ROM hack
+	// ROMManipulation.RollingDemoFix_Original()	// irrelevant in original ROM hack
+}
+
+
+function void ROMManipulation.RepairSpriteMappings_Original()
+{
+	// Fix for slight offset in Knuckles looking up sprites (0xd5 and 0xd5)
+	s16[0x14ba44] = -0x0c
+	s16[0x14ba4a] = -0x0c
+	s16[0x14ba52] = -0x0c
+	s16[0x14ba58] = -0x0c
+
+	// Fix for slight offset in Super Sonic balancing sprites (0xa1 and 0xa2)
+	s16[0x14805c] = -0x16	// Originally -0x16
+	s16[0x148076] = -0x16	// Originally -0x16
+
+	// Fix for slight offset in Super Sonic standing sprites (0xba to 0xc7)
+	s16[0x1480f4] = -0x18	// Originally -0x18
+	s16[0x1480fa] = -0x10	// Originally -0x10
+	s16[0x14810e] = -0x18	// Originally -0x18
+	s16[0x148114] = -0x10	// Originally -0x10
+	s16[0x148128] = -0x18	// Originally -0x18
+
+	// Fix for slight offset in Super Sonic transformation sprites (0xd5 and 0xd6)
+	s16[0x148160] = -0x01
+	s16[0x148174] = -0x01
+
+	// Fix for incorrect pattern pointers in Super Sonic's third standing sprite
+	u8[0x1484f1] = 0x02
+	u8[0x1484f7] = 0x0c
+	u8[0x1484fd] = 0x02
+	u8[0x148507] = 0x0c
+
+	// Fix for the HCZ blow fish ("Pointdexter")
+	s8[0x360e8e] = -0x0c
+	s8[0x360e9a] = -0x0c
+
+/*	// Not for Original Mode
+	#if GAMEAPP > 0x22091000
+	// Remove the cord mapping from the CNZ red balloons; it's directly drawn in standalone to work around unloaded tiles in CNZ1 intro
+	u16[0x22306f4] = 0x02
+	u16[0x2230708] = 0x02
+	u16[0x223071c] = 0x02
+	#endif
+*/
+	// Fix checkpoint stars loading incorrect tiles
+	u16[0x187b8a] = 0x0060
+	u16[0x187bec] = 0x0060
+	u16[0x187c4e] = 0x0060
+}
+
+
+function void ROMManipulation.RepairAnimations_Original()
+{
+	// Apply changes to Super Sonic's idle animation to use the third frame
+	u8[0x012c45] = 0x5e			// Shift the pointer back a bit to an otherwise empty area
+	u32[0x012c96] = 0xffff07ba	// Add additional frames
+
+	// Fix for Tails' rolling animation playing backwards
+	u32[0x015b18] = 0x01969798
+	u32[0x015b1d] = 0x00969798
+}
+
+
+function void ROMManipulation.CutsceneKnucklesPalette_Original()
+{
+	// Fixed Super Sonic underwater palette effect repeat frame
+	for (u8 k = 0; k < 6; k += 2)
+	{
+		u32[0x003a00] = 0x0cee0cec
+		u16[0x003a04] = 0x0aec
+		u32[0x003a3c] = 0x0cee0cec
+		u16[0x003a40] = 0x0aec
+	}
+
+	// Changing Cutscene Knuckles' colors a bit to better fit the playable Knuckles
+	//  -> Note that this is not used (any more) in S3AIR, as Cutscene Knuckles uses a special palette there
+	//  -> See renderhooks.lemon
+	u16[0x066912 + 0x04] = 0x084e
+	u16[0x066912 + 0x06] = 0x040c
+	u16[0x066912 + 0x08] = 0x0206
+}
+
+
+function void ROMManipulation.AIZ2.BlimpSequenceBombs_Original()
+{
+	A0 = 0x23c0a6
+
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3f5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3f2c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3f5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3f2c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3f5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x38, 0x3f2c)
+
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3edc)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3eac)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3edc)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3eac)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3edc)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x38, 0x3eac)
+
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3e5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3e2c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3e5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3e2c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x20, 0x3e5c)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x38, 0x3e2c)
+
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
+	ROMManipulation.AIZ2.BlimpSequenceBombs.addBlimpSequenceBomb(0x40, 0x3dec)
+}
+
+function void ROMManipulation.HCZ.SetBottomHeight_Original()
+{
+	u16[0x01bce4] = 0x1000
+}
+
+
+function void ROMManipulation.BonusSM.Probabilities_Original()
+{
+	A0 = 0x04c8b4
+	u8[A0]      = 4		// Chance of 3x Jackpot (enforced triple)	-- original value: 4
+	u8[A0 + 3]  = 9		// Chance of 3x Sonic (enforced triple)		-- original value: 9
+	u8[A0 + 6]  = 4		// Chance of 3x Knuckles (enforced triple)	-- original value: 4
+	u8[A0 + 9]  = 18	// Chance of 3x Robotnik (enforced triple)	-- original value: 18
+	u8[A0 + 12] = 9		// Chance of 3x Tails (enforced triple)		-- original value: 9
+	u8[A0 + 15] = 15	// Chance of 3x Ring (enforced triple)		-- original value: 15
+	u8[A0 + 18] = 15	// Chance of 3x Bar (enforced triple)		-- original value: 15
+}
+
