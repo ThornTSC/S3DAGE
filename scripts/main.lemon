@@ -16218,7 +16218,7 @@ function void LRZ2_CustomSprites()
 
 
 // Removes the solidity on the stationary platforms in the LRZ2 boss lava fall (we use invisible objects instead) in non-Original Mode.
-// Function taken from objects\10_lrz\lrz_lavafallplatform.lemon.
+// Function taken from objects\10_lrz\lrz_lavafallplatform.lemon
 //# address-hook(0x079d08) end(0x079d22)
 function void fn079d08()
 {
@@ -16238,6 +16238,39 @@ function void fn079d08()
 
 
 
+// Disable the granted extra lives flags fix in LRZ boss act for Original Mode
+// Function taken from level\10_lrz\level_lrz.lemon
+//# address-hook(0x059b1c) end(0x059b42)
+function void fn059b1c()
+{
+	// Reset ring counter and time to LRZ 2 values after entering LRZ boss act
+	D0.u16 = level.backup.rings
+	if (D0.u16 != 0)
+	{
+		level.backup.rings = 0
+		ring_counter = D0.u16
+		hud.dirty.rings = 0x01
+	}
+
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Update the bitmask for granted extra lives, in case the player had 100 or more rings already
+		extra_lives_granted = (ring_counter / 100) << 1
+	}
+#endif
+
+	D0 = level.backup.timer.alldata
+	if (D0 != 0)
+	{
+		level.backup.timer.alldata = 0
+		timer.alldata = D0
+		hud.dirty.timer = 0xff
+	}
+
+	u16[0xffffeec0] += 4
+	fn059b46()
+}
 
 
 
