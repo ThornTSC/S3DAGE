@@ -289,7 +289,7 @@ function void customMenu.mainLogicLoop()
 		//	bool menuReady = false
 			pause_menu_selection = 0
 
-			while (!setting.original_mode && !time_attack && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
+			while ((!setting.original_mode || setting.unlock_act) && !time_attack && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
 			{
 				global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 				waitForNextFrame()
@@ -390,7 +390,7 @@ function void customMenu.mainLogicLoop()
 
 			if (setting.levelselect.characters == 1 && sidekick && !setting.time_attack)
 				setting.levelselect.characters = 0
-			else if (setting.levelselect.characters == 3 && sidekick && !setting.original_mode && !setting.time_attack)
+			else if (setting.levelselect.characters == 3 && sidekick && (!setting.original_mode || setting.unlock_act) && !setting.time_attack)
 				setting.levelselect.characters = 4
 
 			original_mode = (setting.time_attack || unlock_act) ? 0 : setting.original_mode
@@ -869,7 +869,7 @@ function void customMenu.displayTimes()
 		u16 normalgame_change_X = 0
 		u16 normalgame_change_Y = 0
 		bool drawSidekick = sidekick
-		if ((setting.original_mode && i == 2))
+		if ((setting.original_mode && i == 2 && !setting.unlock_act))
 			drawSidekick = 0
 
 		if (!time_attack)
@@ -878,7 +878,7 @@ function void customMenu.displayTimes()
 			normalgame_change_Y = -2
 			if (drawSidekick && i != 1)
 				normalgame_change_X -= 8
-			if (setting.original_mode || debug_mode.enabled || (i != 1 && sidekick) || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			if ((setting.original_mode && !setting.unlock_act) || debug_mode.enabled || (i != 1 && sidekick) || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				normalgame_change_Y = 12
 		}
 		
@@ -943,7 +943,7 @@ function void customMenu.displayTimes()
 		u32 uncollected = 0x80c0c0c0
 		u32 uncollectedDim = 0x80909090
 		u64 ringKey
-		if (!setting.time_attack && !setting.original_mode && !debug_mode.enabled && (!sidekick || i == 1) && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		if (!setting.time_attack && (!setting.original_mode || setting.unlock_act) && !debug_mode.enabled && (!sidekick || i == 1) && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			if (u8[redstarring_address] & 0x01)
 			{
