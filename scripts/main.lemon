@@ -15125,7 +15125,6 @@ function void FBZ2_CustomSprites()
 
 
 // In Original Mode, undo changes to the FBZ2 laser miniboss.
-// Also address the new laser behavior loading twice for unknown reasons.
 // Functions taken from bosses\boss_fbz2_mid.lemon
 //# address-hook(0x06fd38) end(0x06fdba)
 function void fn06fd38()
