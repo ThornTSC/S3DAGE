@@ -57,6 +57,8 @@ function void fn00881a()
 function void fn04c97e()
 {
 	Renderer.setScreenSize(screen_width, 224)
+	original_mode = 0					// Remove original mode in Green Sphere menu
+	ApplyROMManipulations()
 
 	if (!menu_initialized)
 	{
@@ -64,7 +66,6 @@ function void fn04c97e()
 		marathon_timer = 0
 		draw_HUD = false					// Do not draw HUD in menus. initializeMainGame() will activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
-		original_mode = 0					// Remove original mode in main menu
 		eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
 		specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 		restartSpecialStage = 0

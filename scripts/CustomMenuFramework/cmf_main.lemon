@@ -398,6 +398,7 @@ function void customMenu.mainLogicLoop()
 				Renderer.setScreenSize(320, 224)
 			else
 				Renderer.setScreenSize(400, 224)
+			ApplyROMManipulations()
 			
 			if (!setting.time_attack)
 				challenges_normalmode = 1
@@ -1822,6 +1823,7 @@ function void customMenu.mainLogicLoop.main()
 				time_attack = 3
 			else if (selectedMenuOption.main == 2)	// selectedGameType == 1
 				time_attack = 4
+			ApplyROMManipulations()
 			return
 		}
 		else if (selectedMenuOption.main == 3)	// Challenges was selected

@@ -766,6 +766,7 @@ function void LevelSelect()
 		hud.layout = (theme.hud >> 6)
 		theme.hud &= 0x3f		// set HUD to matching theme constant
 	}
+	ApplyROMManipulations()
 
 #if !STANDALONE
 	set_status_register(0x2700)
