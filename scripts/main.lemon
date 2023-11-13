@@ -8357,6 +8357,11 @@ function void UpdateLevelTiles.AIZ1()
 
 function void AIZ1_CustomSprites()
 {
+	if (!original_mode && palette_set < 2)
+		Renderer.drawCustomSprite("knuckles_intro_rocks_orig", 0x04d0 - camera.foreground.x.u16, 0x01f8 - camera.foreground.y.u16, 0, 0, 0x9dff)
+	else if (!original_mode)
+		Renderer.drawCustomSprite("knuckles_intro_rocks", 0x04d0 - camera.foreground.x.u16, 0x01f8 - camera.foreground.y.u16, 0, 0, 0x9dff)
+
 	Renderer.drawCustomSprite("tree_base_cover", 0x30f0 - camera.foreground.x.u16, 0x0380 - camera.foreground.y.u16, 0, 0, 0x4001)
 }
 

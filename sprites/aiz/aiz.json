@@ -1,3 +1,5 @@
 {
+	"knuckles_intro_rocks":  { "File": "knuckles_intro_rocks.png", "Center": "23,23" },
+	"knuckles_intro_rocks_orig":  { "File": "knuckles_intro_rocks_orig.png", "Center": "23,23" },
 	"tree_base_cover":  { "File": "tree_base_cover.bmp"}
 }
