@@ -193,5 +193,7 @@
 	"sonic2_spheresicon": { "File": "Sonic2_spheresicon.png"},
 	"sonic2_timeframe": { "File": "Sonic2_timeframe.png", "Center": "26,14"},
 	"sonic2_getXXrings": { "File": "Sonic2_getXXrings.png", "Center": "47,7"},
-	"sonic2_getXXXrings": { "File": "Sonic2_getXXXrings.png", "Center": "51,7"}
+	"sonic2_getXXXrings": { "File": "Sonic2_getXXXrings.png", "Center": "51,7"},
+	"sonic2_ringtogo": { "File": "Sonic2_ringtogo.png", "Center": "44,-1"},
+	"sonic2_ringstogo": { "File": "Sonic2_ringstogo.png", "Center": "48,-1"}
 }

@@ -3077,6 +3077,33 @@ function void BlueSpheres.renderCustomSpheres()
 			if (value == 0)
 				break
 		}
+
+		// Draw "XX RINGS TO GO!" warning message
+		if (BS_remainingTime <= 300 && ringsToDisplay < ringTargetCurrent && (level.framecounter.low & 0x06))	// less than five seconds left, lacking rings (i.e., not finished the stage), and in the six of eight frames for display
+		{
+			u16 neededRings = ringTargetCurrent - ringsToDisplay
+			u16 px_warning = getScreenWidth()/2 - 47	// assuming a three-digit number of rings to go when centering the message
+			if (neededRings < 100)
+				px_warning -= 4
+			if (neededRings < 10)
+				px_warning -= 4
+			if (neededRings == 1)
+				px_warning += 4
+			u16 px_warningText = (neededRings == 1) ? px_warning + 60 : px_warning + 64
+
+			if (neededRings == 1)
+				Renderer.drawCustomSprite("sonic2_ringtogo", px_warningText, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			else
+				Renderer.drawCustomSprite("sonic2_ringstogo", px_warningText, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			for (u32 valueWarning = neededRings;;)
+			{
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", valueWarning % 10), px_warning, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				px_warning -= 8
+				valueWarning /= 10
+				if (valueWarning == 0)
+					break
+			}
+		}
 	}
 		
 
