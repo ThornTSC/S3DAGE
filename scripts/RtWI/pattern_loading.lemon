@@ -50,7 +50,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("s2_spikes_art_nem", s2_decompression_buffer_2)
 		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8680)
 
-		System.loadExternalRawData("s2_spring_mappings", s2_mappings_address + 0x0040)
+		System.loadExternalRawData("s2_spring_mappings", 0x221dea)		// formerly s2_mappings_address + 0x0040
 		System.loadExternalRawData("s2_diagonalspring_art_nem", s2_decompression_buffer_2)
 		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8780)
 

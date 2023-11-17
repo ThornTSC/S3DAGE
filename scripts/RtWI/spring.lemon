@@ -1,9 +1,14 @@
 // Use Sonic 2 spring VRAM location and mappings when needed.
 // Functions taken from objects\basics\spikes.lemon
-//# address-hook(0x022d06) end(0x022d46)
 function void SpringVertical.BaseUpdate()
 {
-	objA0.mapping_offset = (unlock_act) ? 0x880040 : 0x02375c
+	Spring.BaseUpdate()
+}
+
+//# address-hook(0x022d06) end(0x022d46)
+function void Spring.BaseUpdate()
+{
+	objA0.mapping_offset = (unlock_act) ? 0x221dea : 0x02375c	// formerly 0x880040
 	objA0.sprite_attributes = (unlock_act) ? 0x045c : 0x04a4
 	objA0.render_flags |= render_flag.WORLD
 	objA0.box_size.x = 0x10
@@ -87,7 +92,7 @@ function void Spring.SharedInit()
 		objA0.mapping_offset = (competition_mode.active) ? 0x023912 : 0x023772
 		if (unlock_act)
 		{
-			objA0.mapping_offset = 0x880040 + 0x16
+			objA0.mapping_offset = 0x221dea + 0x16	// formerly 0x880040 + 0x16
 			objA0.sprite_attributes += 0x2000	// next palette line
 		}
 
