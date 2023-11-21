@@ -12582,7 +12582,10 @@ function void fn071de2()
 function void fn025ffe()
 {
 	if (objA0.subtype2c >= 0x60 && objA0.subtype2c <= 0x6f && !original_mode)	// if this object was vertical and then fell to the right,
+	{
 		UnloadObject()															// remove it.
+		return
+	}
 	
 	// Targets:
 	//  - 0x026044	-> u16[A0 + 0x36] = 0x00
