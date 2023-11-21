@@ -31,6 +31,11 @@
 	"greenspheres_speedup": { "File": "GreenSpheres_speedup.ogg",  "LoopStart": 5451808, "Type": "Music"},
 	"greenspheres_speedup45": { "File": "GreenSpheres_speedup45.ogg",  "LoopStart": 8065347, "Type": "Music"},
 
+	// 1UP jingles with less FM channels, to use as SFX for extra lives in special stages
+	"sfx_s2life": { "File": "SFX_S2Life.ogg", "Type": "Sound"},
+	"sfx_s3life": { "File": "SFX_S3Life.ogg", "Type": "Sound"},
+	"sfx_sklife": { "File": "SFX_SKLife.ogg", "Type": "Sound"},
+
 	// Sonic 3D Blast main menu music
 	"mainmenu": { "File": "MainMenu.ogg",  "LoopStart": 17070, "Type": "Music"},
 	

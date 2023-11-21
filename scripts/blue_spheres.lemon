@@ -2135,7 +2135,23 @@ function void fn00972e()
 						else
 						{
 							lives_counter = min(lives_counter + 1, 99)
-							soundId = 0x2a
+
+							// Extra life jingle, with less channels to sound like a sound effect
+							u64 soundKey = "sfx_sklife"
+							if (unlock_act || challenge_greenspheres)
+							{
+								soundKey = "sfx_s2life"
+							}
+							else if (Game.getSetting(SETTING_AUDIO_EXTRALIFE_JINGLE) == 0 && !original_mode)
+							{
+								soundKey = "sfx_s3life"
+							}
+							else if (Game.getSetting(SETTING_AUDIO_EXTRALIFE_JINGLE) == 0x10 && !original_mode)
+							{
+								if (!isSonicAndKnucklesZone())
+									soundKey = "sfx_s3life"
+							}
+							Audio.playAudio(soundKey, AudioContext.CONTEXT_SOUND)
 						}
 					}
 					else
