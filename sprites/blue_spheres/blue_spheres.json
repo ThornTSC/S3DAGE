@@ -187,6 +187,19 @@
 	"sonic2_specialdigit_9_mini_yellow": { "File": "Sonic2_specialdigits_mini_yellow.png", "Rect":  "72,0,8,12" },
 	"sonic2_specialdigit_slash_mini_yellow": { "File": "Sonic2_specialdigits_mini_yellow.png", "Rect":  "80,0,6,16" },
 
+	"sonic2_specialdigit_period_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":   "0,0,2,8" },
+	"sonic2_specialdigit_plus_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":   "2,0,4,8" },
+	"sonic2_specialdigit_0_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":   "6,0,6,8" },
+	"sonic2_specialdigit_1_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "12,0,6,8" },
+	"sonic2_specialdigit_2_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "18,0,6,8" },
+	"sonic2_specialdigit_3_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "24,0,6,8" },
+	"sonic2_specialdigit_4_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "30,0,6,8" },
+	"sonic2_specialdigit_5_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "36,0,6,8" },
+	"sonic2_specialdigit_6_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "42,0,6,8" },
+	"sonic2_specialdigit_7_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "48,0,6,8" },
+	"sonic2_specialdigit_8_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "54,0,6,8" },
+	"sonic2_specialdigit_9_bonus": { "File": "Sonic2_specialdigits_bonus.png", "Rect":  "60,0,6,8" },
+
 	// Sonic 2 special stage HUD elements
 	"sonic2_rings": { "File": "Sonic2_rings.png"},
 	// "hud_ring_s2" is identical in special stages and in a Sonic 2 main act

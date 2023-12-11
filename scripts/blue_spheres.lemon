@@ -1,4 +1,5 @@
 global u16 BS_remainingTime
+global u16 timeBonusThisFrame
 global u16 bluespheres.blue_collected
 global u16 bluespheres.blue_total
 global u8 showTimeGain
@@ -937,7 +938,7 @@ function void SpecialStage()
 	for (u8 player = 0; player < getNumPlayers(); ++player)
 	{
 		u8 character = getPlayerCharacter(player)
-		u64 paletteKey = (character == CHARACTER_SONIC) ? "bluesphere_palette_sonic" : (character == CHARACTER_TAILS) ? "bluesphere_palette_tails" : "bluesphere_palette_knuckles"
+		string paletteKey = getCharacterBluespherePaletteKey(character)
 		u16 numColors = System.loadExternalPaletteData(paletteKey, 0, 0x800000, 0x20)
 		if (numColors > 0)
 		{
@@ -1024,7 +1025,7 @@ function void SpecialStage()
 	BS_displayedTime = 0	// new: resets the time display between stages
 
 	u32[0xffffb000] = 0x008faa	// initialize main character
-	BS_fadeFinished = 0			// new for DAGE: ensure byte 0x3e of the character RAM is clear to lock controls in Original Mode until after fade in completes
+	BS_fadeFinished = 0			// new for DAGE: tracking value to lock controls in Original Mode until after fade in completes
 	if (getNumPlayers() >= 2 && !bluespheres.minigame_mode)
 	{
 		u32[0xffffb04a] = 0x009212
@@ -1341,6 +1342,18 @@ function void fn00903e()
 	}
 
 	fn0091a2()
+
+	u32 backupA1 = A1
+	if (challenge_greenspheres && allocDynamicObjectStd() && timeBonusThisFrame)
+	{
+		objA1.update_address = 0x009040
+		objA1.position.x.u16 = getScreenWidth() / 2 + 28
+		objA1.position.y.u16 = getScreenHeight() - 27
+		objA1.animation.timer = 30
+		objA1.value3e = timeBonusThisFrame / 6	// will display as frames converted to seconds (dividing by 60), but assuming hundredths digit will always be zero
+	}
+	A1 = backupA1
+	timeBonusThisFrame = 0
 }
 
 
@@ -1469,6 +1482,7 @@ function void fn0085b0()
 	{
 		useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
 		BS_remainingTime = S2Special.BonusTime[challenge_greenspheres * 3 - 3] * 60
+		timeBonusThisFrame = 0
 		bluespheres.blue_collected = 0
 		showTimeGain = 0
 		showTimeGainTarget = 0
@@ -2074,7 +2088,8 @@ function void fn00972e()
 			if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 3])
 			{
 				bluespheres.current_gamespeed = 0x1000
-				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 2] * 60
+				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 1] * 60
+				timeBonusThisFrame += S2Special.BonusTime[challenge_greenspheres * 3 - 2] * 60
 				showTimeGainTarget = 180
 				playSound(0x63)
 			}
@@ -2082,6 +2097,7 @@ function void fn00972e()
 			{
 				bluespheres.current_gamespeed = 0x1000
 				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 1] * 60
+				timeBonusThisFrame += S2Special.BonusTime[challenge_greenspheres * 3 - 1] * 60
 				showTimeGainTarget = 180
 				playSound(0x63)
 			}
@@ -2191,10 +2207,38 @@ function void fn00972e()
 		}
 		playSound(0x65)	// blue sphere sound
 		BS_remainingTime += 30
+		timeBonusThisFrame += 30
 		showTimeGain = 30
 	}
 }
 
+//# address-hook(0x009040)
+function void S2Special.TimeBonus()
+{
+	if (!objA0.animation.timer)
+	{
+		UnloadObject()
+		return
+	}
+	u16 renderQueue_hud = 0xe800 + objA0.animation.timer	// ensure newer bonus appear above older bonuses
+	u32 alpha = (objA0.animation.timer > 22) ? 255 : u16(objA0.animation.timer) * 255 / 22	// gradually fade away after eight frames
+	u16 y_shift = (objA0.animation.timer > 22) ? (objA0.animation.timer - 22) : 0	// travel upward 1 pixel per frame for eight frames, after which fading away begins
+	// A bug in AIR v22.09.10.00 causes Renderer.drawText to interfere with non-opaque sprites. Even without that bug, we would want the 1 character to be spaced equally to all other characters.
+//	u64 timeBonusToDisplay = stringformat("+%02d.%d0", objA0.value3e / 10, objA0.value3e % 10)
+//	Renderer.drawText("oxyfont_small", objA0.position.x.u16, objA0.position.y.u16 + y_shift, timeBonusToDisplay, 0xffffff00 + alpha, 1, 0, renderQueue_hud, false)		// alpha format is 0xRRGGBBAA for fonts, not 0xAABBGGRR as with sprites
+	// To that end, we use sprite copies of the plus sign, decimal point, and digits from oxyfont_small instead of rendering as a font.
+	// We tweak the font to better match the S2 special stage digit sprites (including using 252 for max RGB instead of 255) and position the sprites to align decimal points without showing leading zeroes.
+	Renderer.drawCustomSprite("sonic2_specialdigit_plus_bonus", objA0.position.x.u16, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+	if (objA0.value3e / 100)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_bonus", objA0.value3e / 100), objA0.position.x.u16 + 6, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_bonus", (objA0.value3e % 100) / 10), objA0.position.x.u16 + 12, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+	Renderer.drawCustomSprite("sonic2_specialdigit_period_bonus", objA0.position.x.u16 + 18, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_bonus", objA0.value3e % 10), objA0.position.x.u16 + 20, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+	Renderer.drawCustomSprite("sonic2_specialdigit_0_bonus", objA0.position.x.u16 + 26, objA0.position.y.u16 + y_shift, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+
+	if (!global.game.paused)	// we allow this object to run during pausing to render sprites properly, but rendering is all that we want
+		objA0.animation.timer--
+}
 
 constant array<u16> S2Special.RingTargets =
 {
@@ -2360,18 +2404,20 @@ function void BlueSpheres.OnBlueSphereCollected()
 	--bluespheres.blue_remaining
 	bluespheres.blue_collected++
 	BS_remainingTime += 30
+	timeBonusThisFrame += 30
 	showTimeGain = 30
 
-	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
-	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need all spheres for a continue. (Commented version: we need at least half of the total spheres for a continue.)
+	u16 continueSpheres = bluespheres.blue_total	// (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
 	if (bluespheres.blue_collected >= continueSpheres && challenge_greenspheres && (bluespheres.rings_flags & 0x01) == 0)
 	{
 		bluespheres.rings_flags |= 0x01
 		++continues_counter
-		if (bluespheres.blue_remaining == 0)
-			Standalone.playAudio(0x68)	// Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
-		else
-			Standalone.playAudio(0xac)	// Same as above.
+		// Uncomment to reintroduce Perfect sound if conditions for continue and perfect are not the same
+//		if (bluespheres.blue_remaining == 0)
+//			Standalone.playAudio(0x68)	// Perfect sound // Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
+//		else
+			Standalone.playAudio(0xac)	// Continue sound // Same as above.
 
 	#if STANDALONE
 		if (continues_counter >= 5)
@@ -2391,10 +2437,6 @@ function void BlueSpheres.OnBlueSphereCollected()
 			bluespheres.movement_speed = (bluespheres.movement_speed >= 0) ? -bluespheres.current_gamespeed : bluespheres.current_gamespeed
 			return
 		}
-	}
-	else if (bluespheres.blue_remaining == 0)
-	{
-		Standalone.playAudio(0x68)	// Same as above.
 	}
 }
 
@@ -2976,16 +3018,16 @@ function void BlueSpheres.renderCustomSpheres()
 		// Normal digits
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 	
-		// Sphere time bonus digits
+		// Sphere time running out digits
 		if (BS_remainingTime <= 600 && (level.framecounter.low & 0x08) && !bluespheres.stage_exit_state)
 		{
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_red", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+			Renderer.drawCustomSprite("sonic2_specialdigit_period_red", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
 		}
@@ -2996,18 +3038,17 @@ function void BlueSpheres.renderCustomSpheres()
 		{
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_teal", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_teal", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_teal", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite("sonic2_specialdigit_period_teal", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_teal", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_teal", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 		}
-
 		// Ring target time bonus digits
 		if (showTimeGainTarget)
 		{
 			alpha = min(u16(showTimeGainTarget) * 17 / 6, 255)	// here, 17 / 6 = 255 / 90, where 90 is half the variable's max.
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_green", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_green", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_period_green", seconds % 10), px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
+			Renderer.drawCustomSprite("sonic2_specialdigit_period_green", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_green", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_green", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha)
 		}
@@ -3389,6 +3430,7 @@ function void S2Special.swapRingsAndSpheres()
 
 
 // In marathon mode, skip blue spheres results screen.
+// We also handle Sonic 2 special stage result values here.
 // Function taken from level\special\bs_results.lemon
 //# address-hook(0x02e3da) end(0x02e40e)
 function void fn02e3da()
@@ -3400,6 +3442,11 @@ function void fn02e3da()
 		if (challenge_greenspheres)
 			results.ring_bonus = u32(bluespheres.blue_collected) * 10	// rings and blue spheres were swapped for other results screen checks
 		results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
+		if (challenge_greenspheres)
+		{
+			u32 s2spheresBonus = u32(bluespheres.rings_collected) * 1000 / bluespheres.blue_total	// each sphere awards a fraction out of a maximum 10k points
+			results.time_bonus = u16(s2spheresBonus)
+		}
 		addScore(results.time_bonus + results.ring_bonus)
 		results.time_bonus = 0
 		results.ring_bonus = 0
@@ -3416,6 +3463,11 @@ function void fn02e3da()
 	if (challenge_greenspheres)
 		results.ring_bonus = u32(bluespheres.blue_collected) * 10	// rings and blue spheres were swapped for other results screen checks
 	results.time_bonus = (bluespheres.rings_remaining == 0) ? 5000 : 0
+	if (challenge_greenspheres)
+	{
+		u32 s2spheresBonus = u32(bluespheres.rings_collected) * 1000 / bluespheres.blue_total	// each sphere awards a fraction out of a maximum 10k points
+		results.time_bonus = u16(s2spheresBonus)
+	}
 
 	// Wait for six seconds
 	objA0.countdown_value = 360
@@ -3430,14 +3482,14 @@ function void fn02e3da()
 }
 
 
-// In Sonic 2 special stages, check for half of blue spheres collected to show CONTINUE and icon in results.
+// In Sonic 2 special stages, check blue spheres collected to show CONTINUE and icon in results.
 // Functions taken from level\special\bs_results.lemon
 //# address-hook(0x02e4d6) end(0x02e50e)
 function void fn02e4d6()
 {
-	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need all spheres for a continue. (Commented version: we need at least half of the total spheres for a continue.)
 	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
-	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	u16 continueSpheres = bluespheres.blue_total // (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
 	if ((!challenge_greenspheres && bluespheres.rings_collected >= 50) || (challenge_greenspheres && bluespheres.rings_collected >= continueSpheres))
 	{
 		if (objA0.countdown_value != 0)
@@ -3464,9 +3516,9 @@ function void fn02e4d6()
 //# address-hook(0x02e616) end(0x02e744)
 function void fn02e616()
 {
-	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need all spheres for a continue. (Commented version: we need at least half of the total spheres for a continue.)
 	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
-	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	u16 continueSpheres = bluespheres.blue_total // (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
 
 	if (objA0.countdown_value != 0)
 	{
@@ -3485,8 +3537,6 @@ function void fn02e616()
 		D0 = 4
 		if ((!challenge_greenspheres && bluespheres.rings_collected >= 50) || (challenge_greenspheres && bluespheres.rings_collected >= continueSpheres))
 		{
-			debugLog(stringformat("collected = %d, threshold = %d, total = %d", bluespheres.blue_collected, continueSpheres, bluespheres.blue_total))
-			debugLog("Passed!")
 			D1.u16 = u16[0xffffeee0]
 			if (D1.u16 != 0)
 			{
@@ -3574,9 +3624,9 @@ function void fn02e616()
 //# address-hook(0x02ea7c) end(0x02eaa4)
 function void fn02ea7c()	// CONTINUE text and associated character-colored icon. The character sprite for continues is in the previous functions.
 {
-	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need at least half of the total spheres for a continue.
+	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need all spheres for a continue. (Commented version: we need at least half of the total spheres for a continue.)
 	// We will still check bluespheres.rings_collected because of value swaps done on special stage exit.
-	u16 continueSpheres = (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
+	u16 continueSpheres = bluespheres.blue_total // (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
 	if ((!challenge_greenspheres && bluespheres.rings_collected < 50) || (challenge_greenspheres && bluespheres.rings_collected < continueSpheres))
 	{
 		UnloadObject()

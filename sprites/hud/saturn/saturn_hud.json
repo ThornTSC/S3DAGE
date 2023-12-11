@@ -23,11 +23,13 @@
 	"saturn_hud_text_bonus_chaosstage":	{ "File": "saturn_hud.png", "Rect": "44,32,39,16" },
 	"saturn_hud_text_perfect_chaosstage":	{ "File": "saturn_hud.png", "Rect": "44,48,55,16" },
 	"saturn_hud_text_continue_chaosstage":	{ "File": "saturn_hud.png", "Rect": "44,64,63,16" },
+	"saturn_hud_text_sphere_chaosstage":	{ "File": "saturn_hud.png", "Rect": "0,171,47,16" },
 	"saturn_hud_text_score_superstage":	{ "File": "saturn_hud.png", "Rect": "108,0,39,16" },
 	"saturn_hud_text_ring_superstage":		{ "File": "saturn_hud.png", "Rect": "108,16,31,16" },
 	"saturn_hud_text_bonus_superstage":	{ "File": "saturn_hud.png", "Rect": "108,32,39,16" },
 	"saturn_hud_text_perfect_superstage":	{ "File": "saturn_hud.png", "Rect": "108,48,55,16" },
 	"saturn_hud_text_continue_superstage":	{ "File": "saturn_hud.png", "Rect": "108,64,63,16" },
+	"saturn_hud_text_sphere_superstage":	{ "File": "saturn_hud.png", "Rect": "48,171,47,16" },
 
 	"saturn_hud_bonus_icon_blue":   { "File": "saturn_hud.png", "Rect": "133,152,12,19", "Center": "0,-2" },		// Empty in Flicky hud, S3&K icon in Saturn
 	"saturn_hud_bonus_icon_orange": { "File": "saturn_hud.png", "Rect": "146,152,12,19", "Center": "0,-2" },		// Empty in Flicky hud, S3&K icon in Saturn

@@ -181,7 +181,7 @@ function void UpdateGamePause()
 			}
 			
 			A0 = 0xffffb000
-			D7 = 0x05
+			D7 = 0x0f
 			updateGameObjectLoopRenderPaused()
 			RenderSprites()
             A0 = backupA0
@@ -998,6 +998,9 @@ function void updateGameObjectLoopRenderPaused()
 				DrawObject()
 			}
 		}
+
+		if (D0 == 0x009040)
+			S2Special.TimeBonus()
 
 		// Go on to next object
 		A0 += 0x4a

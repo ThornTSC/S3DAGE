@@ -380,7 +380,7 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
 				HUD.drawSprite("hud_bonus_icon_blue", px+77, py-5, renderQueue-1)
 			else
-				HUD.drawSprite(getCharacterBonusTextIcon(getMainCharacter()), px+77, py-5, renderQueue-1)
+				HUD.drawSprite(getCharacterBonusTextIcon(getMainCharacter()), px+76, py-5, renderQueue-1)
 			HUD.drawSprite(isSKStage ? "hud_text_ring_superstage" : "hud_text_ring_chaosstage", px, py, renderQueue)
 			HUD.drawSprite(isSKStage ? "hud_text_bonus_superstage" : "hud_text_bonus_chaosstage", px + 40, py, renderQueue)
 			HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", results.ring_bonus * 10, px + 184, py, renderQueue)
@@ -391,8 +391,14 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
 				HUD.drawSprite("hud_bonus_icon_blue", px+52, py-5, renderQueue-1)
 			else
-				HUD.drawSprite(getCharacterBonusTextIcon(getMainCharacter()), px+52, py-5, renderQueue-1)
-			HUD.drawSprite(isSKStage ? "hud_text_perfect_superstage" : "hud_text_perfect_chaosstage", px, py, renderQueue)
+				HUD.drawSprite(getCharacterBonusTextIcon(getMainCharacter()), (unlock_act) ? px + 92 : px+52, py-5, renderQueue-1)
+			if (!unlock_act)
+				HUD.drawSprite(isSKStage ? "hud_text_perfect_superstage" : "hud_text_perfect_chaosstage", px, py, renderQueue)
+			else
+			{
+				HUD.drawSprite(isSKStage ? "hud_text_sphere_superstage" : "hud_text_sphere_chaosstage", px, py, renderQueue)
+				HUD.drawSprite(isSKStage ? "hud_text_bonus_superstage" : "hud_text_bonus_chaosstage", px + 56, py, renderQueue)
+			}
 			HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", results.time_bonus * 10, px + 184, py, renderQueue)
 			return true
 		}
