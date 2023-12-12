@@ -48,8 +48,8 @@ function void ROMManipulation.RepairSpriteMappings_Original()
 	s16[0x148128] = -0x18	// Originally -0x18
 
 	// Fix for slight offset in Super Sonic transformation sprites (0xd5 and 0xd6)
-	s16[0x148160] = -0x01
-	s16[0x148174] = -0x01
+	s16[0x148160] = -0x10
+	s16[0x148174] = -0x10
 
 	// Fix for incorrect pattern pointers in Super Sonic's third standing sprite
 	u8[0x1484f1] = 0x02
