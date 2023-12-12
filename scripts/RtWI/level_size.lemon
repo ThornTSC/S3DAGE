@@ -8,8 +8,10 @@ function void UpdateCameraBoundsInLevel()
 		return
 	}
 
+	constant u16 signpost_loc = 0x6740
+
 	// Emerald Hill Zone camera settings
-	if (level.scrolling_routine != 4)
+	if (level.scrolling_routine < 4)
 	{
 		level.vertical_wrap = 0
 		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420	// first value is Sonic Act 1 path, second is former Act 2
@@ -20,18 +22,26 @@ function void UpdateCameraBoundsInLevel()
 
 		if (camera.position.x.u16 >= 0x6500)
 			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
-
-		u16 signpost_loc = 0x6740
 		move_area.left = 0
 		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
-		if (allocDynamicObjectStd() && u16[0xffffb010] >= 0x6740 && time_attack != 1 && time_attack != 2)
+		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
 		{
-			// Spawn signpost
-			objA1.update_address = 0x0837b2
-			objA1.position.x.u16 = signpost_loc
 			level.scrolling_routine = 4
-			move_area.left = signpost_loc - (getScreenWidth() / 2)
+			move_area.left = camera.position.x.u16	// Do not allow going backward. Later code will shift the camera into the correct position if it's off-center.
+			hud.dirty.timer = 0
+			if (allocDynamicObjectStd())
+			{
+				// Spawn signpost
+				objA1.update_address = 0x0837b2
+				objA1.position.x.u16 = signpost_loc
+				objA1.position.y.u16 = 0x0425
+			}
 		}
+	}
+	else if (move_area.left < signpost_loc - (getScreenWidth() / 2))
+	{
+		move_area.left &= 0xfffe	// set final bit of camera position to 0
+		move_area.left += 2			// move camera position to next even number
 	}
 
 	// Settings for all levels

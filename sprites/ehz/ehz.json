@@ -117,5 +117,9 @@
 	// Sonic 2 Flicky
 	"s2_flicky_00": { "File": "s2_flicky.bmp", "Rect":  "0,0,16,15", "Center": "8,7" },
 	"s2_flicky_01": { "File": "s2_flicky.bmp", "Rect":  "16,0,16,15", "Center": "8,8" },
-	"s2_flicky_02": { "File": "s2_flicky.bmp", "Rect":  "32,0,15,21", "Center": "8,5" }
+	"s2_flicky_02": { "File": "s2_flicky.bmp", "Rect":  "32,0,15,21", "Center": "8,5" },
+
+	// Signpost art
+	"signpost_eggman": { "File": "signpost_eggman.png", "Center": "24,16"},
+	"signpost_pole": { "File": "signpost_pole.png", "Center": "3,8"}
 }

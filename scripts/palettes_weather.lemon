@@ -1053,12 +1053,16 @@ function void LevelPaletteUpdate.HCZ1()
 }
 
 
-// Add a scrolling plane of rain in front of the MGZ1 background but behind the foreground
+// Manage MGZ1 and EHZ custom visuals.
 //# address-hook(0x051150) end(0x051154)
 function void UpdateLevelScrolling.MGZ1()
 {
 	if (unlock_act)
+	{
 		EHZ_CustomSprites()
+		fn051158()	// call the most basic MGZ1 scroll routine
+		return
+	}
 	else
 		MGZ1_CustomSprites()
 
