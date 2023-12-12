@@ -208,5 +208,9 @@
 	"sonic2_getXXrings": { "File": "Sonic2_getXXrings.png", "Center": "47,7"},
 	"sonic2_getXXXrings": { "File": "Sonic2_getXXXrings.png", "Center": "51,7"},
 	"sonic2_ringtogo": { "File": "Sonic2_ringtogo.png", "Center": "44,-1"},
-	"sonic2_ringstogo": { "File": "Sonic2_ringstogo.png", "Center": "48,-1"}
+	"sonic2_ringstogo": { "File": "Sonic2_ringstogo.png", "Center": "48,-1"},
+
+	// Angel theme SPHERE text for results screen
+	"hud_text_sphere_chaosstage":	{ "File": "text_sphere.png", "Rect": "0,0,48,12" },
+	"hud_text_sphere_superstage":	{ "File": "text_sphere.png", "Rect": "48,0,48,12" }
 }

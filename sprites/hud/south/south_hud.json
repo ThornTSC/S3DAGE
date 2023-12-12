@@ -19,11 +19,13 @@
 	"south_hud_text_bonus_chaosstage":	{ "File": "south_hud.png", "Rect": "44,24,41,12" },
 	"south_hud_text_perfect_chaosstage":	{ "File": "south_hud.png", "Rect": "44,36,57,12" },
 	"south_hud_text_continue_chaosstage":	{ "File": "south_hud.png", "Rect": "44,48,63,12" },
+	"south_hud_text_sphere_chaosstage":	{ "File": "south_hud.png", "Rect": "0,168,48,12" },
 	"south_hud_text_score_superstage":	{ "File": "south_hud.png", "Rect": "108,0,41,12" },
 	"south_hud_text_ring_superstage":		{ "File": "south_hud.png", "Rect": "108,12,33,12" },
 	"south_hud_text_bonus_superstage":	{ "File": "south_hud.png", "Rect": "108,24,41,12" },
 	"south_hud_text_perfect_superstage":	{ "File": "south_hud.png", "Rect": "108,36,57,12" },
 	"south_hud_text_continue_superstage":	{ "File": "south_hud.png", "Rect": "108,48,63,12" },
+	"south_hud_text_sphere_superstage":	{ "File": "south_hud.png", "Rect": "48,168,48,12" },
 
 	"south_hud_bonus_icon_blue":   { "File": "south_hud.png", "Rect": "0,64,16,16", "Center": "7,-4" },
 	"south_hud_bonus_icon_orange": { "File": "south_hud.png", "Rect": "16,64,16,16", "Center": "7,-4" },
