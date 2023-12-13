@@ -122,5 +122,10 @@
 	"angel_smalldigit_8": { "File": "angel_smallfont.png", "Rect": "308,0,8,8" },
 	"angel_smalldigit_9": { "File": "angel_smallfont.png", "Rect": "317,0,8,8" },
 	"angel_smallchar_minutes": { "File": "angel_smallfont.png", "Rect": "380,0,8,8" },
-	"angel_smallchar_seconds": { "File": "angel_smallfont.png", "Rect": "388,0,8,8" }
+	"angel_smallchar_seconds": { "File": "angel_smallfont.png", "Rect": "388,0,8,8" },
+
+
+	"angel_game":  { "File": "angel_gametimeover.png", "Rect": "0, 0,64,16", "Center": "0,0" },
+	"angel_time":  { "File": "angel_gametimeover.png", "Rect": "0,16,64,16", "Center": "0,0" },
+	"angel_over":  { "File": "angel_gametimeover.png", "Rect": "0,32,64,16", "Center": "0,0" }
 }

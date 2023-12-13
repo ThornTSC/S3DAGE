@@ -4218,7 +4218,24 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return South.GameTimeOver(px, py, renderQueue)
 		}
 
-		return false			// no renderhook in standard theme
+		// Standard theme requires renderhook due to unlockable act palettes
+		if (objA0.animation.sprite == 0)
+		{
+			Renderer.drawCustomSprite("angel_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return false
+		}
+		else if (objA0.animation.sprite == 1 || objA0.animation.sprite == 3)	// first goes with GAME, second with TIME
+		{
+			Renderer.drawCustomSprite("angel_over", (global.time_over) ? px + 12 : px + 8, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)	// first goes with TIME, second with GAME
+			return false
+		}
+		else if (objA0.animation.sprite == 2)
+		{
+			Renderer.drawCustomSprite("angel_time", px - 57, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return false
+		}
+		else
+			return false
 	}
 
 	// EggRobo
