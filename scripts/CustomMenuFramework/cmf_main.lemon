@@ -507,7 +507,7 @@ function void customMenu.mainLogicLoop()
 
 	// Chaos needs extra menu functionality in levels where the Chaos Path allows
 	// for either the Sonic or Knuckles start location.
-	if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
+	if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos" && !setting.unlock_act)	// Chaos the Imposter is active and not selecting an unlockable act
 	{
 		System.setGlobalVariableValueByName("Chaos.KnuxStage", 0)
 		System.setGlobalVariableValueByName("ChaosForm", 0)

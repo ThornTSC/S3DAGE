@@ -724,6 +724,26 @@ function void fn0076a6()
 }
 
 
+// Chaos the Impostor completely overwrites DAGE's start position checks with no easy way around it.
+// This function will get called before initializeMainGame() finishes, so we use it to make a last-minute correction for unlockable acts.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x01cacc) end(0x01cad6)
+function void fn01cacc()
+{
+	base.fn01cacc()
+
+	if (Mods.isModActive("Chaos The Impostor") && unlock_act)
+	{
+		D1 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2]
+		D0 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2 + 1]
+		u16[0xffffb010] = D1.u16
+		u16[0xffffb014] = D0.u16
+		u16[0xffffb01a] = 0
+		u8[0xffffb020] = char.state.STANDING
+		u8[0xffffb02a] = 0
+		level.start_location = 0
+	}
+}
 
 
 // Load tiles as rawdata into shared memory and then decompress instead of using a ROM injection.
