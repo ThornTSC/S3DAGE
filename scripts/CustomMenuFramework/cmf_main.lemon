@@ -1221,22 +1221,6 @@ function void customMenu.displayTimesModded()
 
 function void customMenu.countMedals()
 {
-	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
-	{
-		string character_name = System.getGlobalVariableValueByName("DAGE_characterName")
-		if (character_name == 0)	// using 3D2D Glitches or ESCU
-		{
-			if (u8[0xffffe654])
-				character_name = "Extra Slot Character"
-			else
-				character_name = "3D2D Glitches"
-		}
-		Game.setDiscordDetails("D.A. Garden Edition")
-		Game.setDiscordState(character_name)		
-		Game.setDiscordLargeImage("menus")
-		return
-	}
-
 	u16 x_offset = 0
 	u16 y_offset = 0
 	u16 renderQueue = 0xf003
@@ -1246,13 +1230,11 @@ function void customMenu.countMedals()
 		y_offset = 2
 		renderQueue = 0xfff1
 	}
-	u16 starCount = 0
-	u32 medalAddress = 0x840000
-	u32 medalArrayEnd = medalAddress + 0x240
-	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
-	{
-		starCount += u8[medalAddress]
-	}
+
+	// Set initial star count to medal count
+	u16 starCount = medalCount
+
+	// Count Red Star Rings
 	u32 rsrAddress = 0x840280
 	u32 rsrArrayEnd = rsrAddress + 72
 	for (rsrAddress; rsrAddress < rsrArrayEnd; rsrAddress++)
@@ -1272,6 +1254,23 @@ function void customMenu.countMedals()
 	starCount += cheatStars
 	// For now, cap stars at 999.
 	starCount = min(starCount, 999)
+	total_stars = starCount
+
+	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
+	{
+		string character_name = System.getGlobalVariableValueByName("DAGE_characterName")
+		if (character_name == 0)	// using 3D2D Glitches or ESCU
+		{
+			if (u8[0xffffe654])
+				character_name = "Extra Slot Character"
+			else
+				character_name = "3D2D Glitches"
+		}
+		Game.setDiscordDetails("D.A. Garden Edition")
+		Game.setDiscordState(character_name)		
+		Game.setDiscordLargeImage("menus")
+		return
+	}
 
 	u8 spriteFlags = (global.game.paused) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
@@ -1307,8 +1306,6 @@ function void customMenu.countMedals()
 		
 		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
 	}
-
-	total_stars = starCount
 }
 
 

@@ -3354,17 +3354,6 @@ function void Standalone.onRestartAtCheckpoint()
 
 function void loadBestActTimes()
 {
-	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
-	{
-		loadBestActTimes3D2DGlitches()
-		return
-	}
-	if (System.getGlobalVariableValueByName("DAGE_characterName"))
-	{
-		loadBestActTimesModded()
-		return
-	}
-
 	if (!System.loadPersistentData(0x840000, "DAGE_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x840000 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
@@ -3383,6 +3372,25 @@ function void loadBestActTimes()
 	if (!System.loadPersistentData(0x8401e0, "DAGE_KnuxTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x8401e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+
+	medalCount = 0
+	u32 medalAddress = 0x840000
+	u32 medalArrayEnd = medalAddress + 0x240
+	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
+	{
+		medalCount += u8[medalAddress]
+	}
+
+	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	{
+		loadBestActTimes3D2DGlitches()
+		return
+	}
+	if (System.getGlobalVariableValueByName("DAGE_characterName"))
+	{
+		loadBestActTimesModded()
+		return
+	}
 
 	// The following section addresses an old glitch in which a vanilla AIR bug could cause a death in the sections of AIZ1 and ICZ1 that are in Act 2 internally
 	// to load the player at the miniboss location, finishing the acts in one frame and saving it as an Act 2 record.

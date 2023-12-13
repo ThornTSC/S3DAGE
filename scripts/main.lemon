@@ -44,6 +44,7 @@ global u8 air_time_p2
 // global u16 last_ground_y_pos
 
 // Define variables for time attack modes
+global u16 medalCount
 global u8 time_attack	// Use 0 for a normal game. Use 1 for standard time attack and 2 for Time Stone Trial mode. Use 3 for Marathon and 4 for No Emeralds Marathon mode.
 define u8 time_attack_hud = u8[0x840270]	// Use 0 for left-aligned and 1 for center-aligned
 global u8 time_attack_end	// 1 when a time attack or Time Stone Trial has ended. Resets to 0 when a level loads in either of the two modes via Standalone.onLevelStart().
@@ -4020,13 +4021,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	// First, the colored bar.
 	if (objA0.update_address == 0x02d8e2)	// still title card bar but not with new title on
 	{
-		if (!original_mode && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		if (!original_mode)
 		{
-			if (theme.hud == theme.flicky)
+			if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				return Flicky.TitleCardBar(px, py, renderQueue)
-			else if (theme.hud == theme.saturn)
+			else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				return Saturn.TitleCardBar(px, py, renderQueue)
-			else if (theme.hud == theme.south)
+			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				return South.TitleCardBar(px, py, renderQueue)
 			else if (unlock_act)
 				Renderer.drawCustomSprite("titlecard_redbar_dage_rtwi", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
@@ -4040,17 +4041,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	// Next, code for zone and act names.
 	if (objA0.update_address == 0x02d95c && !original_mode)
 	{
-		if (!original_mode && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))	// redundant with above check for now
-		{
-			if (theme.hud == theme.flicky)
-				return Flicky.TitleCardText(px, py, renderQueue)
-			else if (theme.hud == theme.saturn)
-				return Saturn.TitleCardText(px, py, renderQueue)
-			else if (theme.hud == theme.south)
-				return South.TitleCardText(px, py, renderQueue)
-		}
-		else 
-			return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			return Flicky.TitleCardText(px, py, renderQueue)
+		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			return Saturn.TitleCardText(px, py, renderQueue)
+		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			return South.TitleCardText(px, py, renderQueue)
+
 /*
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
