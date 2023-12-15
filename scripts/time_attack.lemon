@@ -1810,11 +1810,15 @@ function void RenderHUD_RedRings()
 		return
 
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone.apparent) + global.act.apparent	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	if (unlock_act)
+		redstarring_address = unlock_act
 	if (global.zone_act.apparent == 0x1600)
 		redstarring_address = (0x02 * 0x09) + 1	// same calculation as before, but force LRZ2 boss act to use LRZ2 data
 	if (global.zone_act.apparent == 0x1700)
 		redstarring_address = (0x02 * 0x0b) + 1	// same calculation as before, but force DEZ2 boss act to use DEZ2 data
 	redstarring_address += 0x840280
+	if (unlock_act)
+		redstarring_address += 0x300
 	if (global.characters == 2)
 		redstarring_address += 24
 	else if (global.characters == 3 || global.characters == 4)
@@ -3239,6 +3243,8 @@ function void Standalone.onLevelStart()
 		// Find the best time to display
 		best_time_address = global.zone >= 0x0c ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 		best_time_address += 0x840000
+		if (unlock_act)
+			best_time_address = 0x840300 + (4 * (unlock_act - 1))
 		if (setting.levelselect.characters == 2 && !System.getGlobalVariableValueByName("DAGE_characterName"))
 			best_time_address += 0x60
 		if (setting.levelselect.characters >= 3 && !System.getGlobalVariableValueByName("DAGE_characterName"))
@@ -3354,6 +3360,8 @@ function void Standalone.onRestartAtCheckpoint()
 
 function void loadBestActTimes()
 {
+	medalCount = 0
+
 	if (!System.loadPersistentData(0x840000, "DAGE_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x840000 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
@@ -3373,9 +3381,34 @@ function void loadBestActTimes()
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x8401e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 
-	medalCount = 0
 	u32 medalAddress = 0x840000
 	u32 medalArrayEnd = medalAddress + 0x240
+	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
+	{
+		medalCount += u8[medalAddress]
+	}
+
+	if (!System.loadPersistentData(0x840300, "RtWI_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840300 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840360, "RtWI_TailsTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840360 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x8403c0, "RtWI_KnuxTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x8403c0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840420, "RtWI_SonicTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840420 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840480, "RtWI_TailsTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840480 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x8404e0, "RtWI_KnuxTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x8404e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+
+	medalAddress = 0x840300
+	medalArrayEnd = medalAddress + 0x240
 	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
 	{
 		medalCount += u8[medalAddress]
@@ -3427,6 +3460,25 @@ function void loadBestActTimes3D2DGlitches()
 	if (!System.loadPersistentData(0x8401e0, "DAGE_BluxTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x8401e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+
+	if (!System.loadPersistentData(0x840300, "RtWI_AshuraTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840300 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840360, "RtWI_WechniaTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840360 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x8403c0, "RtWI_BluxTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x8403c0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840420, "RtWI_AshuraTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840420 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840480, "RtWI_WechniaTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840480 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x8404e0, "RtWI_BluxTST", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x8404e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 }
 
 function void loadBestActTimesModded()
@@ -3441,10 +3493,25 @@ function void loadBestActTimesModded()
 	if (!System.loadPersistentData(0x840120, moddedCharacterTSTKey, 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x840120 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+
+	moddedCharacterTAKey = stringformat("RtWImod_%sTA",moddedCharacterBaseKey)
+	moddedCharacterTSTKey = stringformat("RtWImod_%sTST",moddedCharacterBaseKey)
+
+	if (!System.loadPersistentData(0x840300, moddedCharacterTAKey, 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840300 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	if (!System.loadPersistentData(0x840420, moddedCharacterTSTKey, 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u8 i = 0; i < 0x60; i += 4)
+			u32[0x840420 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 }
 
 function void loadMedalTimes()
 {
+	if (setting.unlock_act || unlock_act)
+	{
+		loadMedalTimes_RtWI()
+		return
+	}
 	// Load dev and medal times
 	u32 medalTimeOffset = (0x20 * global.zone) + (0x10 * global.act) + (0x0480 * (time_attack - 1))
 	if (global.zone_act == 0x1601)
@@ -3454,7 +3521,14 @@ function void loadMedalTimes()
 	System.loadExternalRawData("MedalTimes", 0x840260, medalTimeOffset + 0x0300, 0x10, 1, 1)	// load Knuckles times
 }
 
-
+function void loadMedalTimes_RtWI()
+{
+	// Load dev and medal times
+	u32 medalTimeOffset = ((0x10 * (setting.unlock_act - 1)) + (0x0480 * (time_attack - 1)))
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840240, medalTimeOffset, 0x10, 1, 1)			// load Sonic times
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840250, medalTimeOffset + 0x0180, 0x10, 1, 1)	// load Tails times
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840260, medalTimeOffset + 0x0300, 0x10, 1, 1)	// load Knuckles times
+}
 
 
 
@@ -7264,31 +7338,67 @@ function void saveBestActTime()
 	// Find the appropriate key where best times are permanently saved
 	if (time_attack == 1)
 	{
-		datakey = "DAGE_SonicTA"
-		if (setting.levelselect.characters == 0x02)
+		if (!unlock_act)
 		{
-			datakey = "DAGE_TailsTA"
-			save_data_address += 0x60
+			datakey = "DAGE_SonicTA"
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "DAGE_TailsTA"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "DAGE_KnuxTA"
+				save_data_address += 0xc0
+			}
 		}
-		else if (setting.levelselect.characters >= 0x03)
+		else
 		{
-			datakey = "DAGE_KnuxTA"
-			save_data_address += 0xc0
+			datakey = "RtWI_SonicTA"
+			save_data_address += 0x300
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "RtWI_TailsTA"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "RtWI_KnuxTA"
+				save_data_address += 0xc0
+			}
 		}
 	}
 	else
 	{
-		datakey = "DAGE_SonicTST"
-		save_data_address += 0x120
-		if (setting.levelselect.characters == 0x02)
+		if (!unlock_act)
 		{
-			datakey = "DAGE_TailsTST"
-			save_data_address += 0x60
+			datakey = "DAGE_SonicTST"
+			save_data_address += 0x120
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "DAGE_TailsTST"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "DAGE_KnuxTST"
+				save_data_address += 0xc0
+			}
 		}
-		else if (setting.levelselect.characters >= 0x03)
+		else
 		{
-			datakey = "DAGE_KnuxTST"
-			save_data_address += 0xc0
+			datakey = "RtWI_SonicTST"
+			save_data_address += 0x420
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "RtWI_TailsTST"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "RtWI_KnuxTST"
+				save_data_address += 0xc0
+			}
 		}
 	}
 
@@ -7308,31 +7418,67 @@ function void saveBestActTime3D2DGlitches()
 	// Find the appropriate key where best times are permanently saved
 	if (time_attack == 1)
 	{
-		datakey = "DAGE_AshuraTA"
-		if (setting.levelselect.characters == 0x02)
+		if (!unlock_act)
 		{
-			datakey = "DAGE_WechniaTA"
-			save_data_address += 0x60
+			datakey = "DAGE_AshuraTA"
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "DAGE_WechniaTA"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "DAGE_BluxTA"
+				save_data_address += 0xc0
+			}
 		}
-		else if (setting.levelselect.characters >= 0x03)
+		else
 		{
-			datakey = "DAGE_BluxTA"
-			save_data_address += 0xc0
+			datakey = "RtWI_AshuraTA"
+			save_data_address += 0x300
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "RtWI_WechniaTA"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "RtWI_BluxTA"
+				save_data_address += 0xc0
+			}
 		}
 	}
 	else
 	{
-		datakey = "DAGE_AshuraTST"
-		save_data_address += 0x120
-		if (setting.levelselect.characters == 0x02)
+		if (!unlock_act)
 		{
-			datakey = "DAGE_WechniaTST"
-			save_data_address += 0x60
+			datakey = "DAGE_AshuraTST"
+			save_data_address += 0x120
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "DAGE_WechniaTST"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "DAGE_BluxTST"
+				save_data_address += 0xc0
+			}
 		}
-		else if (setting.levelselect.characters >= 0x03)
+		else
 		{
-			datakey = "DAGE_BluxTST"
-			save_data_address += 0xc0
+			datakey = "RtWI_AshuraTST"
+			save_data_address += 0x420
+			if (setting.levelselect.characters == 0x02)
+			{
+				datakey = "RtWI_WechniaTST"
+				save_data_address += 0x60
+			}
+			else if (setting.levelselect.characters >= 0x03)
+			{
+				datakey = "RtWI_BluxTST"
+				save_data_address += 0xc0
+			}
 		}
 	}
 
@@ -7347,6 +7493,12 @@ function void saveBestActTimeModded()
 	u64 moddedCharacterTAKey = stringformat("DAGEmod_%sTA",moddedCharacterBaseKey)
 	u64 moddedCharacterTSTKey = stringformat("DAGEmod_%sTST",moddedCharacterBaseKey)
 	u32 save_data_address = (time_attack == 2) ? 0x840120 : 0x840000
+	if (unlock_act)
+	{
+		moddedCharacterTAKey = stringformat("RtWImod_%sTA",moddedCharacterBaseKey)
+		moddedCharacterTSTKey = stringformat("RtWImod_%sTST",moddedCharacterBaseKey)
+		save_data_address += 0x300
+	}
 
 	// Place the new best time into shared memory
 	u8[best_time_address + 1] = timer.minutes

@@ -131,7 +131,7 @@ constant u16 unlock.theme.south = 25
 constant u16 unlock.level.ehz   = 50
 
 // Memory address constants
-constant u32 KosinskiRawdataBuffer = 0x840300
+constant u32 KosinskiRawdataBuffer = 0x840600
 constant u32 s2_angles_address = 0x854000
 constant u32 s2_heightmaps_address = 0x854100	// s2_angles_address + 0x100
 constant u32 s2_heightmapsrotated_address = 0x855100	// s2_heightmaps_address + 0x1000
@@ -19876,9 +19876,10 @@ function void RedStarRing_Collect()
 		u8[redstarring_address] |= ringNum				// Mark the red star ring as collected
 		Audio.playAudio("redstarring", AudioContext.CONTEXT_SOUND)		// play Red Star Ring collection sound
 
-		u32 rsrAddress = 0x840280
+		u32 rsrAddress = (unlock_act) ? 0x840580 : 0x840280
+		u64 key = (unlock_act) ? "RtWI_RSR" : "DAGE_RSR"
 		u8 rsrArraySize = 72
-		System.savePersistentData(rsrAddress, "DAGE_RSR", rsrArraySize)
+		System.savePersistentData(rsrAddress, key, rsrArraySize)
 	}
 	else	// the subtype wasn't set in the level object data properly, so play a warning sound
 	{
@@ -19925,7 +19926,12 @@ function void loadRSR()
 {
 	u32 rsrAddress = 0x840280
 	u8 rsrArraySize = 72
-	if (!System.loadPersistentData(rsrAddress, "DAGE_RSR", rsrArraySize))	// load best times for this character and mode, with a 0 returned if they don't exist
+	if (!System.loadPersistentData(rsrAddress, "DAGE_RSR", rsrArraySize))	// load DAGE red star rings
+	{
+		zeroMemory(rsrAddress, rsrArraySize)		// should default to zero, but another mod may have tried to use this memory
+	}
+	rsrAddress += 0x300
+	if (!System.loadPersistentData(rsrAddress, "RtWI_RSR", rsrArraySize))	// load RtWI red star rings
 	{
 		zeroMemory(rsrAddress, rsrArraySize)		// should default to zero, but another mod may have tried to use this memory
 	}

@@ -69,5 +69,6 @@
   "GreenSphereTimeAttackStages": { "File": "GreenSphereTimeAttackStages.bin"},
 
   // Medal and Dev times
-  "MedalTimes":  { "File": "MedalTimes.bin" }
+  "MedalTimes":  { "File": "MedalTimes.bin" },
+  "MedalTimes_RtWI":  { "File": "MedalTimes_RtWI.bin" }
 }
