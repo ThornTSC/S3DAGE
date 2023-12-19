@@ -2,29 +2,11 @@
 // to lead to an address hook for Sonic 2 objects, essentially creating a third
 // object "table". For now, we edit individual objects.
 
-//# address-hook(0x01a51a) end(0x01a524)
-function void fn01a51a()
-{
-	if (unlock_act && objA0.subtype2c == 2)
-		fn02b928()	// bridge support post. This address is an unused ID that points to a debug mode ring. We point it to HCZ bridge support posts.
-	else
-		base.fn01a51a()
-}
-
-//# address-hook(0x01ed26) end(0x01edaa)
-function void fn01ed26()
-{
-	if (unlock_act)
-		Spikes.Init()	// spikes
-	else
-		base.fn01ed26()
-}
-
 //# address-hook(0x01f746) end(0x01f7b2)
 function void fn01f746()
 {
 	if (unlock_act)
-		PathSwapperInit()	// path swapper
+		PathSwapperInit()	// path swapper	// 0x03
 	else
 		base.fn01f746()
 }
@@ -33,7 +15,7 @@ function void fn01f746()
 function void AIZZipLine.Init()
 {
 	if (unlock_act)
-		fn0214c4()	// corkscrew bridge
+		fn0214c4()	// corkscrew bridge	// 0x06
 	else
 		base.AIZZipLine.Init()
 }
@@ -42,7 +24,7 @@ function void AIZZipLine.Init()
 function void fn024e3c()
 {
 	if (unlock_act)
-		fn038688()	// bridge. Repurposed from HCZ/ICZ/LRZ, not ported.
+		fn038688()	// bridge. Repurposed from HCZ/ICZ/LRZ, not ported.	// 0x11
 	else
 		base.fn024e3c()
 }
@@ -51,16 +33,67 @@ function void fn024e3c()
 function void CupElevator.Init()
 {
 	if (unlock_act)
-		MovingPlatform.Init()
+		MovingPlatform.Init()	// 0x18
 	else
 		base.CupElevator.Init()
+}
+
+//# address-hook(0x01a51a) end(0x01a524)
+function void fn01a51a()
+{
+	if (unlock_act && objA0.subtype2c == 2)
+		fn02b928()	// bridge support post. This address is an unused ID that points to a debug mode ring. We point it to HCZ bridge support posts.	//0x1c
+	else
+		base.fn01a51a()
+}
+
+//# address-hook(0x01ed26) end(0x01edaa)
+function void fn01ed26()
+{
+	if (unlock_act)
+		Spikes.Init()	// spikes	// 0x36
+	else
+		base.fn01ed26()
+}
+
+//# address-hook(0x030e24) end(0x030e86)
+function void fn030e24()
+{
+	if (unlock_act)
+		fn02131c()	// Breakable wall	// 0x3c
+	else
+		base.fn030e24()
+}
+
+// Alteration to breakable wall mappings in unlockable acts. Not fully implemented at this time.
+// Function taken from objects\level\wall.lemon
+//# address-hook(0x02131c) end(0x021560)
+function void fn02131c()
+{
+	base.fn02131c()
+
+	if (unlock_act)
+	{
+		objA0.mapping_offset = 0x021aba
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0052)
+		objA0.box_size.x = 0x10
+		objA0.box_size.y = 0x20
+		objA0.countdown_callback = 0x021a7a
+		u32[A0 + 0x38] = 0x021a9a
+
+		if (objA0.animation.sprite == 0x02)
+		{
+			objA0.update_address = 0x021818
+			return
+		}
+	}
 }
 
 //# address-hook(0x031704) end(0x03174e)
 function void fn031704()
 {
 	if (unlock_act)
-		SpringVertical.BaseUpdate()		// spring. Despite the function name, it handles other types of springs too.
+		SpringVertical.BaseUpdate()		// spring. Despite the function name, it handles other types of springs too.	// 0x41
 	else
 		base.fn031704()
 }
@@ -69,7 +102,7 @@ function void fn031704()
 function void fn0328c4()
 {
 	if (unlock_act)
-		EHZwaterfall.BaseUpdate()		// transparent waterfall sprite
+		EHZwaterfall.BaseUpdate()		// transparent waterfall sprite	// 0x49
 	else
 		base.fn0328c4()
 }
@@ -78,16 +111,98 @@ function void fn0328c4()
 function void fn032990()
 {
 	if (unlock_act)
-		Buzzer.BaseUpdate()	// Buzzer
+		Buzzer.BaseUpdate()	// Buzzer		// 0x4b
 	else
 		base.fn032990()
+}
+
+//# address-hook(0x0330c8) end(0x0330e8)
+function void fn0330c8()
+{
+	if (unlock_act)
+	{
+		objA0.update_address = 0x01a51c
+		MiniTimeStone()	// Mini Time Stone	// 0x4c
+	}
+	else
+		base.fn0330c8()
+}
+
+//# address-hook(0x033360) end(0x03338c)
+function void CNZBarberPole.Init()
+{
+	if (unlock_act)
+	{
+		objA0.update_address = 0x047776
+		RedStarRing()	// Red Star Ring	// 0x4d
+	}
+	else
+		base.CNZBarberPole.Init()
+}
+
+//# address-hook(0x033836) end(0x033858)
+function void fn033836()
+{
+	if (unlock_act)
+		fn024d68()	// jump ramp	// 0x4e
+	else
+		base.fn033836()
+}
+
+
+// Alteration to jump ramp angle in unlockable acts to match shape of EHZ curves
+// Function taken from objects\level\jumpramp.lemon
+//# address-hook(0x024d9a) end(0x024e32)
+function void fn024d9a()
+{
+	if (!unlock_act)
+	{
+		base.fn024d9a()
+		return
+	}
+
+	if (u8[A1 + 0x2a] & char.flag.IN_AIR)
+		return
+
+	s16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	s16 dy = objA1.position.y.u16 - objA0.position.y.u16
+	if (dx >= 0 && dx < 0x20 && dy >= -0x14 && dy <= 0x20)
+	{
+		if (u8[A1 + 0x2e] == 0)
+		{
+			if ((objA0.flags2a & 0x01) == 0)
+			{
+				if (objA1.velocity.x < 0x400)
+					return
+
+				objA1.velocity.x += 0x300		// 0x400 in normal acts
+			}
+			else
+			{
+				if (objA1.velocity.x > -0x400)
+					return
+
+				objA1.velocity.x -= 0x300	// 0x400 in normal acts
+			}
+
+			objA1.velocity.y = -0x780	// -0x700 in normal acts
+			u8[A1 + 0x2a] |= char.flag.IN_AIR
+			u8[A1 + 0x05] = 2
+			u16[A1 + 0x1c] = 1
+			u8[A1 + 0x27] = 1
+			u8[A1 + 0x20] = 0
+			u8[A1 + 0x30] = 0
+			u8[A1 + 0x31] = 4
+			u8[A1 + 0x2d] = 5
+		}
+	}
 }
 
 //# address-hook(0x03598e) end(0x0359ea)
 function void fn03598e()
 {
 	if (unlock_act)
-		Masher.BaseUpdate()	// Masher
+		Masher.BaseUpdate()	// Masher	// 0x5c
 	else
 		base.fn03598e()
 }
@@ -98,7 +213,7 @@ function void fn03b2f6()
 	if (unlock_act)
 	{
 		objA0.update_address = 0x01ec18
-		fn01ec18()	// Invisible solid object
+		fn01ec18()	// Invisible solid object	// 0x74
 	}
 	else
 		base.fn03b2f6()
@@ -110,7 +225,7 @@ function void fn03bab2()
 	if (unlock_act)
 	{
 		objA0.update_address = 0x02cfa8
-		Checkpoint.BaseUpdate()	// star post
+		Checkpoint.BaseUpdate()	// star post	// 0x79
 	}
 	else
 		base.fn03bab2()
@@ -121,7 +236,7 @@ function void fn03bab2()
 function void Mantis.Init()
 {
 	if (unlock_act)
-		Coconuts.BaseUpdate()	// Coconuts
+		Coconuts.BaseUpdate()	// Coconuts		// 0x9d
 	else
 		base.Mantis.Init()
 }

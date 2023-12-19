@@ -97,6 +97,19 @@
 	// EHZ waterfall (transparent)
 	"ehz_waterfall_transparent": { "File": "ehz_waterfall_transparent.bmp", "Center": "32,32" },
 
+	// EHZ cave ceiling shadow (digit is number of 16x16 blocks long the shadow is)
+	"ehz_cave_ceiling_shadow_1": { "File": "ehz_cave_ceiling_shadow.bmp", "Rect":  "0,0,16,8"},
+	"ehz_cave_ceiling_shadow_2": { "File": "ehz_cave_ceiling_shadow.bmp", "Rect":  "0,0,32,8"},
+	"ehz_cave_ceiling_shadow_3": { "File": "ehz_cave_ceiling_shadow.bmp", "Rect":  "0,0,48,8"},
+	"ehz_cave_ceiling_shadow_4": { "File": "ehz_cave_ceiling_shadow.bmp"},
+
+	// EHZ cave edge (digit is number of 16x16 blocks tall the edge is)
+	"ehz_cave_edge_1": { "File": "ehz_cave_edge.bmp", "Rect":  "0,0,8,16"},
+	"ehz_cave_edge_2": { "File": "ehz_cave_edge.bmp", "Rect":  "0,0,8,32"},
+	"ehz_cave_edge_3": { "File": "ehz_cave_edge.bmp", "Rect":  "0,0,8,48"},
+	"ehz_cave_edge_4": { "File": "ehz_cave_edge.bmp"},
+	"ehz_cave_edge_shadow": { "File": "ehz_cave_edge_shadow.bmp"},
+
 	// EHZ Platforms
 	"ehz_platform_00": { "File": "ehz_platforms.bmp", "Rect":   "8,8,64,64", "Center": "32,28" },
 	"ehz_platform_01": { "File": "ehz_platforms.bmp", "Rect":  "80,8,64,96", "Center": "32,47" },

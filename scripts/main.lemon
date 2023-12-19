@@ -261,7 +261,7 @@ function void discordRPC.dataSelect()	// A.I.R. sometimes forces its "In the Men
 
 function void discordRPC.challenges()
 {
-	Game.setDiscordState(stringformat("Challenges (%d/792 Stars)", total_stars))
+	Game.setDiscordState(stringformat("Challenges (%d/825 Stars)", total_stars))
 	if ((global.game_mode & 0x7f) != 0x54)
 	{
 		discordRPC.setCharacterImage()
@@ -4280,6 +4280,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		// Use smoother ring rotation based on standalone\rendering\renderhooks.lemon
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8	// divide by 2 instead of 4 to animate at double speed
 		u64 key = stringformat("minitimestone_0%d", animFrame)
+		if (unlock_act)
+			key = stringformat("minitimestone_0%d_s2", animFrame)
 		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401) ? 0xa000 : 0x02000
 		if (objA0.subtype2c == 0)
 			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, miniTimeStoneRenderQueue, 0, 255)
@@ -4290,33 +4292,34 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	if ((objA0.update_address == 0x01a51c) && objA0.base_state >= 0x06)	// sparkle while stone disappears, also mirrored compared to rings
 	{
 		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401) ? 0xa000 : 0x02000
+		u64 sparkleKey = (unlock_act) ? "minitimestone_sparkle_s2" : "minitimestone_sparkle"
 		if (objA0.animation.sprite == 4)
 		{
 			if (objA0.subtype2c == 0)
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, miniTimeStoneRenderQueue, 0, 255)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 2, miniTimeStoneRenderQueue, 0, 255)
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 2, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
 		}
 		else if (objA0.animation.sprite == 5)
 		{
 			if (objA0.subtype2c == 0)
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, miniTimeStoneRenderQueue, 0, 255)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 1, miniTimeStoneRenderQueue, 0, 255)
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 1, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
 		}
 		else if (objA0.animation.sprite == 6)
 		{
 			if (objA0.subtype2c == 0)
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, miniTimeStoneRenderQueue, 0, 255)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 3, miniTimeStoneRenderQueue, 0, 255)
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 3, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
 		}
 		else
 		{
 			if (objA0.subtype2c == 0)
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, miniTimeStoneRenderQueue, 0, 255)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 0, miniTimeStoneRenderQueue, 0, 255)
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
+				Renderer.drawCustomSprite(sparkleKey, px, py, 0x00, 0, miniTimeStoneRenderQueue, 0, 0xffffffff, 0x40000)
 		}
 		return true
 	}
@@ -4371,7 +4374,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 2, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				if (!unlock_act)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				else
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else if (objA0.animation.sprite == 5)
 		{
@@ -4381,7 +4387,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 1, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				if (!unlock_act)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				else
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else if (objA0.animation.sprite == 6)
 		{
@@ -4391,7 +4400,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 3, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				if (!unlock_act)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				else
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		else
 		{
@@ -4401,7 +4413,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				Renderer.drawCustomSprite("redstarring_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 0, 0xfff2)
 			}
 			else
-				Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				if (!unlock_act)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+				else
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
 		}
 		return true
 	}
@@ -8185,6 +8200,7 @@ function void fn01bc60()
 }
 
 //# address-hook(0x01bc60) end(0x01bcc2)
+//# alias(fn01bc60) deprecated
 function void Level.SetupLevelSize()
 {
 	u8[0xffffee30] = 0

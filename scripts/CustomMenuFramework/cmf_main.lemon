@@ -813,7 +813,7 @@ function void customMenu.displayTimes()
 	
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone) + global.act	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 	if (setting.unlock_act)
-		redstarring_address = unlock_act
+		redstarring_address = setting.unlock_act - 1
 	redstarring_address += 0x840280
 	if (setting.unlock_act)
 		redstarring_address += 0x300
@@ -1247,6 +1247,22 @@ function void customMenu.countMedals()
 	// Count Red Star Rings
 	u32 rsrAddress = 0x840280
 	u32 rsrArrayEnd = rsrAddress + 72
+	for (rsrAddress; rsrAddress < rsrArrayEnd; rsrAddress++)
+	{
+		if (u8[rsrAddress] & 0x01)
+			++starCount
+		if (u8[rsrAddress] & 0x02)
+			++starCount
+		if (u8[rsrAddress] & 0x04)
+			++starCount
+		if (u8[rsrAddress] & 0x08)
+			++starCount
+		if (u8[rsrAddress] & 0x10)
+			++starCount
+	}
+
+	rsrAddress = 0x840580
+	rsrArrayEnd = rsrAddress + 72
 	for (rsrAddress; rsrAddress < rsrArrayEnd; rsrAddress++)
 	{
 		if (u8[rsrAddress] & 0x01)

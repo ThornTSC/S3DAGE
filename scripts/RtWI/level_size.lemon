@@ -17,8 +17,8 @@ function void UpdateCameraBoundsInLevel()
 		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420	// first value is Sonic Act 1 path, second is former Act 2
 		if (u16[0xffffb010] < 0x0e80 && u16[0xffffb014] >= 0x0360)	// check that considers a raised opening in the Knux path
 			move_area.bottom.target = 0x04c0
-		else if (u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x0f00 && u16[0xffffb014] >= 0x03c0)	// checks the Knux path exit
-			move_area.bottom.target = 0x04c0
+		else if ((u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x1880 && u16[0xffffb014] >= 0x03c0) && !(u16[0xffffb010] >= 0x1280 && u16[0xffffb010] < 0x1380 && u16[0xffffb014] <= 0x0400))	// checks the Knux path exit
+			move_area.bottom.target = (u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x0f80) ? 0x0520 : 0x04c0
 
 		if (camera.position.x.u16 >= 0x6500)
 			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ

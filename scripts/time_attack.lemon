@@ -8,60 +8,94 @@ function void PrintVersionNumber()
 
 	u16 px = 16
 
-	// Many of these checks are older than mod.json allows, but in case somebody tries to mod around that, it's left for posterity.
-
-	#if GAMEAPP == 0x21092800	// v21.09.28.0 stable
-		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v21.09.28.0", 1, px, 193)
-		return
-	#endif
-	#if GAMEAPP == 0x22051500	// v22.05.15.0 preview
-		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.05.15.0", 1, px, 193)
-		return
-	#endif
-	#if GAMEAPP == 0x22070300	// use for old test version
-		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.07.03.0", 1, px, 193)
-		return
-	#endif
-	#if GAMEAPP == 0x22082700	// use for latest preview version
-		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.08.27.0", 1, px, 193)
-		return
-	#endif
 	#if GAMEAPP == 0x22091000	// use for latest stable version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v22.09.10.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v22.09.10.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x22121500	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v22.12.15.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23011500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v23.01.15.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.01.15.0", 1, px, 193)
 		return
 	#endif
-	#if GAMEAPP == 0x23032500	// use for latest test version
+	#if GAMEAPP == 0x23032500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. v23.03.25.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.03.25.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23032501	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.03.25.1", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23051400	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.05.14.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23051401	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.05.14.1", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23082700	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.08.27.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23100700	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.10.07.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23111000	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.11.10.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23111200	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.11.12.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23111201	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.11.12.1", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP == 0x23111800	// use for latest preview version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. v23.11.18.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP > 0x23011500	// use for versions that DAGE has not updated to learn yet
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. New Version", 1, px, 193)
+		Letters.Show("``DAGE v1.9.0.0`A.I.R. New Version", 1, px, 193)
 		return
 	#endif
 
 	if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.9.0.0 Beta`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
+	Letters.Show("``DAGE v1.9.0.0`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
 }
 
 
@@ -438,7 +472,7 @@ function void initializeMainGame()
 
 	Level.loadNonfadingPaletteData(0x03)
 
-	fn01bc60()
+	Level.SetupLevelSize()
 
 	UpdateCamera()
 	fn007812()
@@ -1811,7 +1845,7 @@ function void RenderHUD_RedRings()
 
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone.apparent) + global.act.apparent	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 	if (unlock_act)
-		redstarring_address = unlock_act
+		redstarring_address = unlock_act - 1
 	if (global.zone_act.apparent == 0x1600)
 		redstarring_address = (0x02 * 0x09) + 1	// same calculation as before, but force LRZ2 boss act to use LRZ2 data
 	if (global.zone_act.apparent == 0x1700)

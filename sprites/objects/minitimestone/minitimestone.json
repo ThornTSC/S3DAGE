@@ -9,7 +9,17 @@
 	"minitimestone_05": { "File": "minitimestones.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
 	"minitimestone_06": { "File": "minitimestones.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
 	"minitimestone_07": { "File": "minitimestones.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
-	"minitimestone_sparkle": { "File": "minitimestones_sparkle.bmp", "Rect": "0,0,0,0", "Center": "8,8" }
+	"minitimestone_sparkle": { "File": "minitimestones_sparkle.bmp", "Rect": "0,0,0,0", "Center": "8,8" },
+
+	"minitimestone_00_s2": { "File": "minitimestones_s2.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"minitimestone_01_s2": { "File": "minitimestones_s2.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"minitimestone_02_s2": { "File": "minitimestones_s2.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"minitimestone_03_s2": { "File": "minitimestones_s2.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"minitimestone_04_s2": { "File": "minitimestones_s2.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"minitimestone_05_s2": { "File": "minitimestones_s2.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"minitimestone_06_s2": { "File": "minitimestones_s2.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"minitimestone_07_s2": { "File": "minitimestones_s2.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"minitimestone_sparkle_s2": { "File": "minitimestones_sparkle_s2.bmp", "Rect": "0,0,0,0", "Center": "8,8" }
 
 	// Chaos Rings (used before Mini Time Stones were implemented)
 //	"chaosring_00": { "File": "chaosrings.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
