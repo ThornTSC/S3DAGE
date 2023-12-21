@@ -50,7 +50,7 @@ define u8 time_attack_hud = u8[0x840270]	// Use 0 for left-aligned and 1 for cen
 global u8 time_attack_end	// 1 when a time attack or Time Stone Trial has ended. Resets to 0 when a level loads in either of the two modes via Standalone.onLevelStart().
 global u8 restart_timer
 global u8 exit_timer
-define u8 restart_threshold = u8[0x840271]
+define u8 time_attack_hud.layout = u8[0x840271]
 define u8 exit_threshold = u8[0x840272]
 global u8 time_attack_instructions
 global u32 freeze_time
@@ -120,7 +120,7 @@ constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
 constant u8 theme.south  = 3
 
-// Flag for HUD layout
+// Value for HUD layout
 global u8 hud.layout
 
 // Flag for unlockable levels
@@ -538,19 +538,25 @@ function void TitleCard.Init()
 		specialstages_knuckles = 0
 	}
 
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+	{
+		theme.hud = theme.saturn								// else use the theme matching the menu
+		hud.layout = 1											// with Sonic CD-style ring counter
+	}
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
 	{
 		theme.hud = theme.s3k
 	}
-	else
+//	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
+//	{
+		hud.layout = (theme.hud >> 6)
+		theme.hud &= 0x3f		// set HUD to matching theme constant
+//	}
+	if (time_attack == 1 || time_attack == 2)
 	{
-		if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
-			theme.hud = theme.saturn								// else use the theme matching the menu
-		else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
-		{
-			hud.layout = (theme.hud >> 6)
-			theme.hud &= 0x3f		// set HUD to matching theme constant
-		}
+		if (time_attack_hud.layout > 2)		// leftover from when this was restart_threshold
+			time_attack_hud.layout = 1
+		hud.layout = time_attack_hud.layout
 	}
 
 	base.TitleCard.Init()

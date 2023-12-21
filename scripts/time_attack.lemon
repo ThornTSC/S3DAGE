@@ -794,12 +794,17 @@ function void LevelSelect()
 	loadBestActTimes()
 	loadRSR()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
-		theme.hud = theme.saturn								// else use the theme matching the menu
-	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
 	{
-		hud.layout = (theme.hud >> 6)
-		theme.hud &= 0x3f		// set HUD to matching theme constant
+		theme.hud = theme.saturn								// else use the theme matching the menu
+		hud.layout = (Game.getSetting(SETTING_EXTENDED_HUD)) ? 1 : 3
 	}
+//	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
+//	{
+		hud.layout = (theme.hud >> 6)
+		if (time_attack == 1 || time_attack == 2)
+			hud.layout = time_attack_hud.layout
+		theme.hud &= 0x3f		// set HUD to matching theme constant
+//	}
 	ApplyROMManipulations()
 
 #if !STANDALONE
@@ -1670,7 +1675,10 @@ function void RenderSprites()
 			if (timer.alldata)
 			{
 				DecrementTimerDisplay()
-				RenderHUD()
+				if (hud.layout != 3)
+					RenderHUD()
+				else
+					RenderHUD_Orig()
 				IncrementTimerDisplay()
 			}
 			else
@@ -1777,7 +1785,10 @@ function void fn00db3c()
 			if (timer.alldata)
 			{
 				DecrementTimerDisplay()
-				RenderHUD()
+				if (hud.layout != 3)
+					RenderHUD()
+				else
+					RenderHUD_Orig()
 				IncrementTimerDisplay()
 			}
 			else
@@ -1810,7 +1821,10 @@ function void fn00db3c()
 			if (timer.alldata)
 			{
 				DecrementTimerDisplay()
-				RenderHUD()
+				if (hud.layout != 3)
+					RenderHUD()
+				else
+					RenderHUD_Orig()
 				IncrementTimerDisplay()
 			}
 			else
@@ -2020,7 +2034,7 @@ function void RenderHUD_Challenges()
 				u16 centiseconds = (frames * 99 + 30) / 59
 
 				u16 px = (minutes >= 10) ? (baseX + 8) : baseX
-				if (Game.getSetting(SETTING_EXTENDED_HUD) || time_attack)
+				if (hud.layout != 3 || time_attack)
 				{
 					if (minutes >= 10)
 						HUD.drawDigit_Challenges(minutes / 10, px + 0x20, baseY + 0x10, renderQueue)
@@ -2265,8 +2279,7 @@ function void RenderHUD_Orig()
 
 	bool isBonusStage = (global.zone >= 0x13 && global.zone <= 0x15)
 #if STANDALONE
-/*
-	if (!debug_mode.state)
+	if (!debug_mode.state && !original_mode)
 	{
 		if (!isBonusStage)
 		{
@@ -2298,28 +2311,30 @@ function void RenderHUD_Orig()
 				u16 centiseconds = (frames * 99 + 30) / 59
 
 				u16 px = (minutes >= 10) ? (baseX + 8) : baseX
-//				if (Game.getSetting(SETTING_EXTENDED_HUD))
-//				{
-//					if (minutes >= 10)
-//						HUD.drawDigit(minutes / 10, px + 0x20, baseY + 0x10, renderQueue)
-//					HUD.drawDigit(minutes % 10, px + 0x28, baseY + 0x10, renderQueue)
-//					HUD.drawSprite("hud_char_minutes", px + 0x30, baseY + 0x10, renderQueue)
-//					HUD.drawDigit(seconds / 10, px + 0x38, baseY + 0x10, renderQueue)
-//					HUD.drawDigit(seconds % 10, px + 0x40, baseY + 0x10, renderQueue)
-//					HUD.drawSprite("hud_char_seconds", px + 0x48, baseY + 0x10, renderQueue)
-//					HUD.drawDigit(centiseconds / 10, px + 0x50, baseY + 0x10, renderQueue)
-//					if (minutes < 10)
-//						HUD.drawDigit(centiseconds % 10, px + 0x58, baseY + 0x10, renderQueue)
-//				}
-//				else
-//				{
+/*
+				if (hud.layout != 3)	// in theory this should never be true
+				{
+					if (minutes >= 10)
+						HUD.drawDigit(minutes / 10, px + 0x20, baseY + 0x10, renderQueue)
+					HUD.drawDigit(minutes % 10, px + 0x28, baseY + 0x10, renderQueue)
+					HUD.drawSprite("hud_char_minutes", px + 0x30, baseY + 0x10, renderQueue)
+					HUD.drawDigit(seconds / 10, px + 0x38, baseY + 0x10, renderQueue)
+					HUD.drawDigit(seconds % 10, px + 0x40, baseY + 0x10, renderQueue)
+					HUD.drawSprite("hud_char_seconds", px + 0x48, baseY + 0x10, renderQueue)
+					HUD.drawDigit(centiseconds / 10, px + 0x50, baseY + 0x10, renderQueue)
+					if (minutes < 10)
+						HUD.drawDigit(centiseconds % 10, px + 0x58, baseY + 0x10, renderQueue)
+				}
+				else
+*/
+				{
 					if (minutes >= 10)
 						HUD.drawDigit(minutes / 10, px + 0x20, baseY + 0x10, renderQueue)
 					HUD.drawDigit(minutes % 10, px + 0x28, baseY + 0x10, renderQueue)
 					HUD.drawSprite("hud_char_colon", px + 0x30, baseY + 0x10, renderQueue)
 					HUD.drawDigit(seconds / 10, px + 0x38, baseY + 0x10, renderQueue)
 					HUD.drawDigit(seconds % 10, px + 0x40, baseY + 0x10, renderQueue)
-//				}
+				}
 				++renderQueue
 			}
 		}
@@ -2331,8 +2346,7 @@ function void RenderHUD_Orig()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-//			u16 px = baseX + (!isBonusStage && Game.getSetting(SETTING_EXTENDED_HUD) ? 0x58 : 0x40)
-			u16 px = baseX + 0x40
+			u16 px = baseX + (!isBonusStage && hud.layout != 3 ? 0x58 : 0x40)	// in theory hud.layout should always be 3 here
 			for (u32 value = ring_counter;;)
 			{
 				HUD.drawDigit(value % 10, px, py, renderQueue)
@@ -2345,7 +2359,7 @@ function void RenderHUD_Orig()
 		}
 
 		// Lives (not visible in Time Attack or with infinite lives setting)
-		if (!Game.isTimeAttack() && (!Game.getSetting(SETTING_INFINITE_LIVES) || original_mode))
+		if (!Game.isTimeAttack() && !Game.getSetting(SETTING_INFINITE_LIVES))
 		{
 			bool useMobilePosition = HUD.useMobileLivesDisplay()
 			u16 px = useMobilePosition ? (getScreenWidth() - baseX - 0x30) : baseX
@@ -2360,7 +2374,6 @@ function void RenderHUD_Orig()
 		}
 	}
 	else
-*/
 #endif
 	{
 		D4 = (isBonusStage) ? 8 : 0
@@ -2601,10 +2614,10 @@ function void UpdateTimeAndHud()
 // Functions taken from maingame\hud\hud.lemon
 function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
-	if (hud.layout == 2 && Game.getSetting(SETTING_EXTENDED_HUD) && (key == "hud_text_score" || key == "hud_text_time" || key == "hud_text_time_red"))
+	if (hud.layout == 2 && (key == "hud_text_score" || key == "hud_text_time" || key == "hud_text_time_red"))
 		return
 
-	if (hud.layout == 2 && Game.getSetting(SETTING_EXTENDED_HUD) && (key == "hud_text_rings" || key == "hud_text_rings_red"))
+	if (hud.layout == 2 && (key == "hud_text_rings" || key == "hud_text_rings_red"))
 	{
 		u32 alpha = 0xffffffff
 		if (key == "hud_text_rings_red")
@@ -2648,7 +2661,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		}
 	}
 
-	if (hud.layout == 2 && Game.getSetting(SETTING_EXTENDED_HUD) && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
+	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
 		u32 alpha = 0xffffffff
@@ -6706,10 +6719,10 @@ function void Challenge.checkRestartShortcut()
 		restart_timer = 0
 	}
 
-	if (restart_threshold > 1)
+	if (exit_threshold > 1)
 		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, restart_timer * 8)
 
-	if (restart_timer == restart_threshold)
+	if (restart_timer == exit_threshold)
 	{
 		restart_timer = 0
 		checkpoint.number = 0

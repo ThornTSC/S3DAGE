@@ -204,8 +204,6 @@ function bool customMenu.scrollRight()
 
 function void customMenu.mainLogicLoop()
 {
-	exit_threshold = restart_threshold	// set outside of option 4 in case an old version of the game with separate options caused a desync
-	
 	if (global.game_mode == 0x58)
 	{
 		customMenu.mainLogicLoop.main()
@@ -230,8 +228,7 @@ function void customMenu.mainLogicLoop()
 		customMenu.selectGameType()
 	else if (selectedMenuOption == 4 && time_attack)
 	{
-		restart_threshold = customMenu.selectRetryAndExit(restart_threshold)
-		exit_threshold = restart_threshold
+		exit_threshold = customMenu.selectRetryAndExit(exit_threshold)
 	}
 	else if (selectedMenuOption == 4)	// not time attack
 		customMenu.selectSidekick()
@@ -1430,7 +1427,7 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
 			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
-			if (restart_threshold == 1)
+			if (exit_threshold == 1)
 				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
 				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text

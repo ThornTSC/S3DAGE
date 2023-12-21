@@ -131,7 +131,7 @@ function void UpdateGamePause()
 				{
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && global.zone_act != 0x1701)
+					if ((global.game_mode & 0x7f) == 0x0c && global.zone_act != 0x1701)
 					{
 						Renderer.drawCustomSprite("change_theme_full", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 						Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 71, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
@@ -245,7 +245,7 @@ function void UpdateGamePause()
 	//	}
 
 		PauseMenu_ChangeTheme()
-		if ((Game.getSetting(SETTING_EXTENDED_HUD) || time_attack == 1 || time_attack == 2) && (global.game_mode & 0x7f) == 0x0c && !original_mode && global.zone_act != 0x1701)
+		if ((global.game_mode & 0x7f) == 0x0c && !original_mode && global.zone_act != 0x1701)
 			PauseMenu_ChangeLayout()
 	}
 
@@ -304,29 +304,54 @@ function void PauseMenu_ChangeTheme()
 
 function void PauseMenu_ChangeLayout()
 {
+	u8 hud.layout.max = (time_attack == 1 || time_attack == 2) ? 2 : 3	// layout 3 is Classic, which we don't use in Challenges
 	if ((control.pad1.state & CONTROL_B) && customMenu.scrollUp())
 	{
-		if (hud.layout == 0) 
-			hud.layout = 2
+		if (hud.layout == 0)
+		{
+			hud.layout = hud.layout.max
+			if (time_attack == 1 || time_attack == 2)
+				time_attack_hud = !time_attack_hud
+		}
 		else
 			hud.layout -= 1
 
-		theme.hud += (hud.layout << 6)		// combine theme and layout values…
-		System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-		theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+		if (time_attack != 1 && time_attack != 2)
+		{
+			theme.hud += (hud.layout << 6)		// combine theme and layout values…
+			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+		}
+		else
+		{
+			time_attack_hud.layout = hud.layout
+			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
+		}
 
 		playSound(0x5b)
 	}
 	else if ((control.pad1.state & CONTROL_B) && customMenu.scrollDown())
 	{
-		if (hud.layout == 2) 
+		if (hud.layout == hud.layout.max)
+		{
 			hud.layout = 0
+			if (time_attack == 1 || time_attack == 2)
+				time_attack_hud = !time_attack_hud			
+		}
 		else
 			hud.layout += 1
 
-		theme.hud += (hud.layout << 6)		// combine theme and layout values…
-		System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-		theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+		if (time_attack != 1 && time_attack != 2)
+		{
+			theme.hud += (hud.layout << 6)		// combine theme and layout values…
+			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
+			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+		}
+		else
+		{
+			time_attack_hud.layout = hud.layout
+			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
+		}
 
 		playSound(0x5b)
 	}

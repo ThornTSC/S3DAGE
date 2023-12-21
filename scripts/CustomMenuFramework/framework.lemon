@@ -209,7 +209,7 @@ function void loadTASettings()
 	if !System.loadPersistentData(0x840270, "DAGE_TASettings", 0x03)	// load time attack mode settings, with a 0 returned if they don't exist
 	{
 		time_attack_hud = 1
-		restart_threshold = 30
+		time_attack_hud.layout = 1
 		exit_threshold = 30
 	}
 }

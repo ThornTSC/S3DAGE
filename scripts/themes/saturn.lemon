@@ -1,6 +1,6 @@
 function void Saturn.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
-	if (hud.layout == 2 && Game.getSetting(SETTING_EXTENDED_HUD) && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
+	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
 		u32 alpha = 0xffffffff
