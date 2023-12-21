@@ -61,8 +61,16 @@ function void MovingPlatform.Init()
 	}
 
 	objA0.subtype2c = (objA0.subtype2c & 0x0f) * 2
-	objA0.update_address = (objA0.subtype2c == 0x1a) ? 0x024ef2 : 0x0255f4		// falliing platforms reference LBZ's code for this
-	MovingPlatform.Update()
+	if (objA0.subtype2c == 0x1a)
+	{
+		objA0.update_address = 0x024ef2 // falliing platforms reference LBZ's code for this
+		fn024ef2()
+	}
+	else
+	{
+		objA0.update_address = 0x0255f4
+		MovingPlatform.Update()
+	}
 }
 
 
