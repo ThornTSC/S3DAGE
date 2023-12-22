@@ -2283,7 +2283,7 @@ function void fn00d42c_Orig()
 
 		if (result == 1)
 		{
-			if (control.pad1.pressed & DataSelect.CONTROLS_ACCEPT)
+			if (control.pad1.pressed & 0xe0)
 			{
 				levelselect.characters = u16[A0 + 0x34]
 
@@ -2553,12 +2553,14 @@ function void fn00d42c()
 //# address-hook(0x00d30c) end(0x00d39a)
 function void fn00d30c()
 {
+	u8 startGame = (original_mode) ? DataSelect.CONTROLS_ACCEPT | CONTROL_C : DataSelect.CONTROLS_ACCEPT
+
 	objA0.compound.sprite1.animation.sprite = 0x0f
 	objA0.animation.sprite = dataselect.nosave_characters + 4
 
 	if (dataselect.slot_selected == 0 && u16[0xffffb04a + 0x2e] == 0 && u16[0xffffeee4] == 0)
 	{
-		if (control.pad1.pressed & DataSelect.CONTROLS_ACCEPT)
+		if (control.pad1.pressed & startGame)
 		{
 			levelselect.characters = dataselect.nosave_characters
 
@@ -2666,4 +2668,297 @@ function void fn00d30c()
 
 	objA0.compound.count = 0
 	fn00d69e()
+}
+
+
+function bool fn00d458()
+{
+	u8 startGame = (original_mode) ? DataSelect.CONTROLS_ACCEPT | CONTROL_C : DataSelect.CONTROLS_ACCEPT
+
+	// Result values:
+	//  - 0 = Abort outer function
+	//  - 1 = Allow character selection (up/down)
+	//  - 2 = Continue normally outside
+
+	if (u8[A1] & 0x80)
+	{
+		// Empty save slot
+		objA0.compound.sprite1.animation.sprite = 0x0f
+		objA0.animation.frame = 0
+		if (u16[0xffffb04a + 0x2e] != 0 || u16[0xffffeee4] != 0)
+		{
+			return 2
+		}
+		else
+		{
+			return 1
+		}
+	}
+	else
+	{
+		// Used save slot
+		D1.u16 = u16[A0 + 0x36]
+		fn00d96a()
+
+		objA0.animation.frame = 0x17
+		D1.u16 = u16[A0 + 0x36]
+		if (D1.u8 == objA0.value3a && objA0.value3b != 0)
+		{
+			// This gets entered only for completed games
+			if (objA0.value3b == 1)
+			{
+				++objA0.animation.frame
+			}
+			else if (objA0.value3b == 2)
+			{
+				objA0.animation.frame += 2
+			}
+			else
+			{
+				objA0.animation.frame += 4
+			}
+
+			if (objA0.value3b == 1 || objA0.value3b == 2)
+			{
+				if (u16[A0 + 0x34] >= CHARS_TAILS_ALONE)	// It feels strange that this is the same for Tails and Knuckles
+				{
+					objA0.animation.frame = 0x23
+				}
+			}
+		}
+
+		if (u16[A0 + 0x38] == 0 && objA0.value3b == 0)
+		{
+			if (u16[0xffffb04a + 0x2e] != 0)
+			{
+				return 2
+			}
+
+			objA0.compound.sprite1.animation.sprite = 0
+		}
+		else
+		{
+			if (u16[A0 + 0x38] == 0)
+			{
+				objA0.flags38 = 0xff
+			}
+
+			if (u16[0xffffb04a + 0x2e] != 0)
+			{
+				return 2
+			}
+
+			if (u16[0xffffeee4] != 0)
+			{
+				objA0.compound.sprite1.animation.sprite = 0
+				objA0.compound.count = 2
+				return 2
+			}
+
+			if (u16[A0 + 0x34] >= CHARS_KNUCKLES_ALONE)		// Originally this is only an equality check
+			{
+				D6 = 0x0b
+			}
+			else if (u16[A0 + 0x34] == CHARS_TAILS_ALONE || objA0.value3b < 2)
+			{
+				D6 = 0x0c
+			}
+			else
+			{
+				D6 = 0x0d
+			}
+
+			D1.u16 = u16[A0 + 0x36]
+			if (control.pad1.pressed & CONTROL_DOWN)
+			{
+				playSound(SFX_CLICK)
+				--D1.u16
+				if (D1.s16 < 0)
+				{
+					D1.u16 = D6.u16
+				}
+			}
+			else if (control.pad1.pressed & CONTROL_UP)
+			{
+				playSound(SFX_CLICK)
+				++D1.u16
+				if (D1.u16 > D6.u16)
+				{
+					D1 = 0
+				}
+			}
+
+			u16[A0 + 0x36] = D1.u16
+			objA0.compound.sprite1.animation.sprite = (level.framecounter.low & 0x10) ? 0x1a : 0
+		}
+
+		objA0.compound.count = 2
+		if (u16[0xffffeee4] != 0)
+		{
+			return 2
+		}
+		if ((control.pad1.pressed & startGame) == 0)
+		{
+			return 2
+		}
+
+		level.giantrings_clear.u16 = u16[A1 + 0x04]
+		if (objA0.value3b == 0)
+		{
+			D0.u8 = u8[A1 + 0x03]
+		}
+		else
+		{
+			D0.u16 = u16[A0 + 0x36]
+			if (D0.u8 >= objA0.value3a)
+			{
+				return 2
+			}
+			level.giantrings_clear = 0
+		}
+		fn00da4e()
+
+		global.zone_act = D0.u16
+		global.zone_act.apparent = D0.u16
+		levelselect.characters  = (u8[A1 + 0x02] >> 4)
+		global.next_bluespheres = (u8[A1 + 0x02] & 0x0f)
+
+		D0 = u16[A1 + 0x06]
+		A2 = 0xffffffb2
+		fn00da1e()
+		global.chaos_emeralds = D1.u8
+		global.super_emeralds = D2.u8
+	#if STANDALONE
+		global.game_random_base = u8[A1 + 0x01]
+		if (global.game_random_base == 0)
+		{
+			// Intentionally not using the (more deterministic) "getRandomNumber" here
+			global.game_random_base = 1 + (System.rand() % 0xff)		// Avoid the 0 value
+		}
+	#endif
+
+		global.active_saveslot = A1
+		DataSelect.SharedGameSlotContinue()
+
+		D0.u8 = u8[A1 + 0x08]
+		if ((D0.u8 == 0) || (D0.u8 < 3 && u8[A1 + 0x09] == 0))
+		{
+			u8[A1 + 0x08] = 3
+			if (u8[A1 + 0x09] > 0)
+				--u8[A1 + 0x09]
+		}
+
+		lives_counter = u8[A1 + 0x08]
+		continues_counter = u8[A1 + 0x09]
+
+	#if STANDALONE
+		if (continues_counter >= 5)
+		{
+			Game.setAchievementComplete(ACHIEVEMENT_CONTINUES)
+		}
+
+		// Load additional data
+		u32 slotIndex = (A1 - 0xffffe6ac) / 0x0a
+		u32 address = 0x801100 + slotIndex * 0x20
+		if (u8[A1] == 0)
+		{
+			// Load score, but only for non-completed games
+			player.score = u32[address]
+			player.next_life_score = (player.score / 5000 + 1) * 5000
+		}
+	#endif
+
+		sram.block_interrupts.u8 = 0xff
+		SaveGameSlot()
+
+		global.game_mode = 0x0c
+		DrawObject()
+		return 0
+	}
+}
+
+
+
+// Disable pressing Y to enter Delete mode in Original Mode.
+// Functions taken from menus\dataselect.lemon
+//# address-hook(0x00d7c0) end(0x00d7e6)
+function void fn00d7c0()
+{
+	u8 startDelete = (original_mode) ? DataSelect.CONTROLS_ACCEPT | CONTROL_C : DataSelect.CONTROLS_ACCEPT
+
+	if (dataselect.slot_selected == 9)
+	{
+		if (control.pad1.pressed & startDelete)
+		{
+			playSound(0x63)
+			u8[0xffffeee4] = 0xff
+			objA0.base_state += 4
+		}
+	}
+
+#if STANDALONE
+	if (Input.buttonPressed(BUTTON_Y) && dataselect.slot_selected >= 1 && !original_mode)
+	{
+		playSound(0x63)
+		u8[0xffffeee4] = 0xff
+		objA0.base_state += 4
+	}
+#endif
+
+	fn00d69e()
+}
+
+//# address-hook(0x00d7ea) end(0x00d84e)
+function void fn00d7ea()
+{
+	u8 confirmDelete = (original_mode) ? DataSelect.CONTROLS_ACCEPT | CONTROL_C : DataSelect.CONTROLS_ACCEPT
+
+	fn00d912()
+	fn00d94a()
+
+	if (u16[0xffffb04a + 0x2e] == 0)
+	{
+		if (control.pad1.pressed & DataSelect.CONTROLS_CANCEL)
+		{
+			fn00d854()
+			return
+		}
+	#if STANDALONE
+		if (Input.buttonPressed(BUTTON_Y) && !original_mode)
+		{
+			fn00d854()
+			return
+		}
+	#endif
+
+		if (control.pad1.pressed & confirmDelete)
+		{
+			if (dataselect.slot_selected == 9)
+			{
+				fn00d854()
+				return
+			}
+
+			D0 = dataselect.slot_selected - 1
+			D0 = 0xffffe6ac + u32(D0.u16) * 10
+			u32[A0 + 0x2e] = D0
+			A1 = D0
+			if (u8[A1] & 0x80)
+			{
+				fn00d854()
+				return
+			}
+
+			playSound(0x63)
+			u8[0xffffeee2] = 0xff
+			objA0.base_state += 8
+		}
+	}
+
+	D0.u16 = u16[0xffffb04a + 0x10]
+	objA0.position.x.u16 = D0.u16
+	objA0.velocity.x = D0.u16
+	objA0.velocity.y = objA0.position.y.u16
+
+	DrawObject()
 }
