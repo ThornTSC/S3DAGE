@@ -10025,8 +10025,23 @@ function void UpdateWaterSurfaceLevel.HCZ2()
 }
 
 
+// Shift the background in HCZ2 to accomodate raising the level's upper boundary.
+// Function taken from level\02_hcz\level_hcz.lemon
+// //# address-hook(0x051070) end(0x0510d8)
+/*
+function void UpdateBackground.HCZ2()
+{
+	if (original_mode)
+	{
+		base.UpdateBackground.HCZ2()
+		return
+	}
 
-
+	camera.foreground.y.u16 += 0x80
+	base.UpdateBackground.HCZ2()
+	camera.foreground.y.u16 -= 0x80
+}
+*/
 
 
 
