@@ -222,8 +222,8 @@ function void customMenu.mainLogicLoop()
 		customMenu.selectAct()
 	else if (selectedMenuOption == 2)
 		customMenu.selectTAMode()
-	else if (selectedMenuOption == 3 && time_attack)
-		customMenu.selectHudPosition()
+//	else if (selectedMenuOption == 3 && time_attack)
+//		customMenu.selectHudPosition()
 	else if (selectedMenuOption == 3)	// not time attack
 		customMenu.selectGameType()
 	else if (selectedMenuOption == 4 && time_attack)
@@ -264,6 +264,7 @@ function void customMenu.mainLogicLoop()
 
 
 	// Dev cheat code for gaining or losing stars 10 at a time.
+/*
 	if (Input.buttonDown(BUTTON_Y))
 	{
 		if ((control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
@@ -277,8 +278,8 @@ function void customMenu.mainLogicLoop()
 			playSound(0x46)
 		}
 	}
-
-	else if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
+*/
+	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
 	{
 		if (selectedMenuOption == 6)
 		{
@@ -452,7 +453,7 @@ function void customMenu.mainLogicLoop()
 	else if (customMenu.scrollUp())
 	{
 		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
-		if (selectedMenuOption == 4 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots"))  && setting.time_attack == 0)
+		if (selectedMenuOption == 4 && !setting.unlock_act)
 		{
 			selectedMenuOption = 2
 			playSound(0x5b)
@@ -478,7 +479,7 @@ function void customMenu.mainLogicLoop()
 	else if (customMenu.scrollDown())
 	{
 		u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
-		if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2 && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && setting.time_attack == 0)
+		if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2  && !setting.unlock_act)
 		{
 			selectedMenuOption = 4
 			playSound(0x5b)
@@ -563,6 +564,7 @@ function void customMenu.selectZone()
 			{
 				setting.unlock_act = 1
 				selectedZoneAct = 0x0200	// Make selection become EHZ
+				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
 				selectedZoneAct -= 0x0b00	// Make selection become AIZ
@@ -599,6 +601,7 @@ function void customMenu.selectZone()
 			{
 				setting.unlock_act = 1
 				selectedZoneAct = 0x0200	// Make selection become EHZ
+				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
 				selectedZoneAct += 0x0b00	// Make selection become DEZ
@@ -636,6 +639,7 @@ function void customMenu.selectAct()
 			{
 				setting.unlock_act = 1
 				selectedZoneAct = 0x0200	// Make selection become EHZ
+				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
 				selectedZoneAct = 0x0000	// Make selection become AIZ1
@@ -662,6 +666,7 @@ function void customMenu.selectAct()
 			{
 				setting.unlock_act = 1
 				selectedZoneAct = 0x0200	// Make selection become EHZ
+				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
 				selectedZoneAct = 0x0b01	// Make selection become DEZ2
@@ -698,23 +703,40 @@ function void customMenu.selectTAMode()
 	if (customMenu.scrollLeft())
 	{
 		if (time_attack == 0)
-			time_attack = 2
-		else
+			if (setting.original_mode)	// was on Classic Mode
+				setting.original_mode = 0
+			else						// was on Revisited Mode
+				time_attack = 2
+		else							// was on Time Attack or Time Stone Trial
+		{
 			time_attack--
+			if (time_attack == 0 && !setting.unlock_act)		// was on Time Attack
+				setting.original_mode = 1
+		}
 		setting.time_attack = time_attack
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollRight())
 	{
-		if (time_attack == 2)
+		if (time_attack == 2)			// was on Time Stone Trial
 			time_attack = 0
 		else
-			time_attack++
+		{
+			if (!time_attack && !setting.original_mode && !setting.unlock_act)	// was on Revisited Mode
+				setting.original_mode = 1
+			else
+			{
+				time_attack++
+				if (time_attack)
+					setting.original_mode = 0
+			}
+		}
 		setting.time_attack = time_attack
 		playSound(0x5b)
 	}
 }
 
+/*
 function void customMenu.selectHudPosition()
 {
 	if (customMenu.scrollLeft() || customMenu.scrollRight())
@@ -726,11 +748,13 @@ function void customMenu.selectHudPosition()
 		playSound(0x5b)
 	}
 }
+*/
 
 function void customMenu.selectGameType()
 {
 	if (customMenu.scrollLeft() || customMenu.scrollRight())
 	{
+/*
 		if (!setting.unlock_act)
 		{
 			if (setting.original_mode == 0)
@@ -739,7 +763,9 @@ function void customMenu.selectGameType()
 				setting.original_mode = 0
 		}
 		else
+*/
 		{
+
 			if (setting.ehz_music == 0)
 				setting.ehz_music = 1
 			else
@@ -1399,7 +1425,10 @@ function void DataSelect.drawCustomPlanes()
 
 
 		if (time_attack == 0)
-			Renderer.drawCustomSprite("text_option_NG", getScreenExtend() - 40 + 78 + 43, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// NORMAL GAME text
+			if (!setting.original_mode)
+				Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + 70, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// NORMAL GAME text
+			else
+				Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + 76, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// NORMAL GAME text
 		if (time_attack == 1)
 			Renderer.drawCustomSprite("text_option_TA", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME ATTACK text
 		else if (time_attack == 2)
@@ -1412,70 +1441,62 @@ function void DataSelect.drawCustomPlanes()
 
 		if (time_attack)
 		{
-			Renderer.drawCustomSprite("text_hudposition", getScreenExtend() - 40 + 54 + 47, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// HUD POSITION text
-			if (time_attack_hud == 0)
-				Renderer.drawCustomSprite("text_option_left", getScreenExtend() - 40 + 170 + 15, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// LEFT text
-			else
-				Renderer.drawCustomSprite("text_option_center", getScreenExtend() - 40 + 162 + 23, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)	// CENTER text
+			if (setting.unlock_act)
+			{
+				Renderer.drawCustomSprite("text_musictype", getScreenExtend() - 40 + 43 + 39 + 16, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
+				if (setting.ehz_music == 0)
+					Renderer.drawCustomSprite("text_option_1player", getScreenExtend() - 40 + 134 + 32 + 16, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 1 PLAYER text
+				else
+					Renderer.drawCustomSprite("text_option_2player", getScreenExtend() - 40 + 134 + 32 + 16, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 2 PLAYER text
+			}
 			if (selectedMenuOption == 3)
 			{
-				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// HUD POSITION left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 180 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// HUD POSITION right arrow
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE right arrow
 			}
 
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
-			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
-			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105, 200, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			if (exit_threshold == 1)
-				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
-				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
 			if (selectedMenuOption == 4)
 			{
-				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 154 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 212 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
 			}
 		}
 		else
 		{
-			if (!System.getGlobalVariableValueByName("DAGE_characterID") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))
+			if (setting.unlock_act)
 			{
-				u64 typeKey = (setting.unlock_act) ? "text_musictype" : "text_gametype" 
-				Renderer.drawCustomSprite(typeKey, getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
-				if (!setting.unlock_act)
-				{
-					if (setting.original_mode == 0)
-						Renderer.drawCustomSprite("text_option_revisited", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// REVISITED text
-					else
-						Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + 140 + 25, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// CLASSIC text
-				}
+				Renderer.drawCustomSprite("text_musictype", getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
+				if (setting.ehz_music == 0)
+					Renderer.drawCustomSprite("text_option_1player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 1 PLAYER text
 				else
-				{
-					if (setting.ehz_music == 0)
-						Renderer.drawCustomSprite("text_option_1player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 1 PLAYER text
-					else
-						Renderer.drawCustomSprite("text_option_2player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 2 PLAYER text
-				}
-				if (selectedMenuOption == 3)
-				{
-					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE left arrow
-					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE right arrow
-				}
+					Renderer.drawCustomSprite("text_option_2player", getScreenExtend() - 40 + 134 + 32, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? modeSelectionTint : nonSelectionTint, 0x10000)		// 2 PLAYER text
+			}
+			if (selectedMenuOption == 3)
+			{
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE right arrow
 			}
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
 			if (System.getGlobalVariableValueByName("DAGE_characterID") != 2)
 			{
-				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, 209, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, (setting.unlock_act) ? 209 : 201 , 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 				if (sidekick == 1)
-					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
+					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
 				else
-					Renderer.drawCustomSprite("text_option_no", getScreenExtend() - 40 + 158 + 7, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)			// HOLD text
+					Renderer.drawCustomSprite("text_option_no", getScreenExtend() - 40 + 158 + 7, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)			// HOLD text
 				if (selectedMenuOption == 4)
 				{
-					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK left arrow
-					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, 196 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK right arrow
+					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK left arrow
+					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, (setting.unlock_act) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK right arrow
 				}
 			}
 		}
