@@ -237,6 +237,7 @@ function void customMenu.mainLogicLoop()
 	
 	customMenu.matchActToSelection()
 	customMenu.displayTimes()
+	countTotalStars()
 	customMenu.countMedals()
 
 //	else if (selectedMenuOption == 6)
@@ -302,6 +303,7 @@ function void customMenu.mainLogicLoop()
 				RenderSprites()
 				DataSelect.drawCustomPlanes()
 				customMenu.displayTimes()
+				countTotalStars()
 				customMenu.countMedals()
 				A0 = backupA0
 
@@ -1247,23 +1249,9 @@ function void customMenu.displayTimesModded()
 }
 
 
-
-
-
-
-
-function void customMenu.countMedals()
+// We separate this from customMenu.countMedals() to give ESCU a way to count stars.
+function void countTotalStars()
 {
-	u16 x_offset = 0
-	u16 y_offset = 0
-	u16 renderQueue = 0xf003
-	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34)
-	{
-		x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
-		y_offset = 2
-		renderQueue = 0xfff1
-	}
-
 	// Set initial star count to medal count
 	u16 starCount = medalCount
 
@@ -1304,6 +1292,22 @@ function void customMenu.countMedals()
 	// For now, cap stars at 999.
 	starCount = min(starCount, 999)
 	total_stars = starCount
+}
+
+
+// total_stars is set in the function before this
+function void customMenu.countMedals()
+{
+	u16 x_offset = 0
+	u16 y_offset = 0
+	u16 renderQueue = 0xf003
+
+	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34)
+	{
+		x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
+		y_offset = 2
+		renderQueue = 0xfff1
+	}
 
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
 	{
@@ -1324,36 +1328,36 @@ function void customMenu.countMedals()
 	u8 spriteFlags = (global.game.paused) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
-		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
+		Flicky.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)
-		South.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
+		South.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.s3k && renderQueue == 0xfff1)	// done here since Saturn is default for menus and Angel/S3K has no script yet
 	{
 		Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
-		if (starCount / 100 != 0)
+		if (total_stars / 100 != 0)
 		{
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// tens (even if 0)
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// tens (even if 0)
 		}
-		else if ((starCount / 10) % 10 != 0)
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue) // non-zero tens
+		else if ((total_stars / 10) % 10 != 0)
+			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue) // non-zero tens
 		
-		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// ones (even if 0)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// ones (even if 0)
 	}
 	else	// Saturn theme, also used in menus
 	{
 		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
 			x_offset -= 6
 		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
-		if (starCount / 100 != 0)
+		if (total_stars / 100 != 0)
 		{
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
 		}
-		else if ((starCount / 10) % 10 != 0)
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
+		else if ((total_stars / 10) % 10 != 0)
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
 		
-		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", total_stars % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
 	}
 }
 

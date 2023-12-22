@@ -8228,7 +8228,7 @@ function void Level.SetupLevelSize()
 	if (global.zone_act == 0x0000 && !unlock_act)	// AIZ 1
 	{
 		minX = 0x12e0
-		if (isMainCharacter(CHARACTER_KNUCKLES) && !original_mode) //  || (isMainCharacter(CHARACTER_TAILS) && u8[0xffffef7c] == 0xDA && (u16[0xffffef7c] != 0xDA00 || u16[0xffffef7c] != 0xDA02))
+		if (u16[0xffffb010] < 0x1000 && !original_mode) //  || (isMainCharacter(CHARACTER_TAILS) && u8[0xffffef7c] == 0xDA && (u16[0xffffef7c] != 0xDA00 || u16[0xffffef7c] != 0xDA02))
 		{
 			minX = 0x0200
 		}

@@ -148,6 +148,13 @@ function void UpdateGamePause()
 
 					customMenu.countMedals()
 				}
+				else if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
+				{
+					Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)					
+				}
 				if ((original_mode || global.pause_disabled || (global.zone >= 0x13 && global.zone <= 0x15) || global.zone_act == 0x1701) && PauseMenu_Basic())
 					break
                 else if (global.pause_disabled)
