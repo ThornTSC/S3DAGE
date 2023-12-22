@@ -1788,7 +1788,7 @@ function void customMenu.mainLogicLoop.main()
 	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
 	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
-	if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
+//	if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")))
 		Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 88, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
 	Renderer.drawCustomSprite("text_option_speedrunmode", getScreenExtend() - 40 + option_x, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
@@ -1939,8 +1939,8 @@ function void customMenu.mainLogicLoop.main()
 		if (selectedMenuOption.main > 0 && selectedMenuOption.main <= 5)
 		{
 			selectedMenuOption.main -= 1
-			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
-				selectedMenuOption.main -= 1
+//			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
+//				selectedMenuOption.main -= 1
 		}
 		else if (selectedMenuOption.main == 0)
 		{
@@ -1953,8 +1953,8 @@ function void customMenu.mainLogicLoop.main()
 		if (selectedMenuOption.main < 5)
 		{
 			selectedMenuOption.main += 1
-			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
-				selectedMenuOption.main += 1
+//			if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || Mods.isModActive("Extra Character Slots")) && selectedMenuOption.main == 1)
+//				selectedMenuOption.main += 1
 		}
 		else if (selectedMenuOption.main == 5)
 		{
@@ -2211,6 +2211,116 @@ function void fn00d1fa()
 	}
 }
 
+
+
+// Sidestep the call to fn00d42c() if in Original Mode so that Extra Slot Characters don't interfere with fn00d6d0().
+// Function taken from menus\dataselect.lemon
+//# address-hook(0x00d39e) end(0x00d426)
+function void fn00d39e()
+{
+	if (allocDynamicObjectAfterA0())
+	{
+		// Spawn Emeralds
+		objA1.update_address = 0x00d70c
+		u16[A1 + 0x48] = A0.u16
+	}
+
+	D0 = 0xffffe6ac + (u32(objA0.flags2e) * 10)
+	u32[A0 + 0x30] = D0
+	A1 = D0
+	u8[A0 + 0x35] = u8[A1 + 0x02] >> 4
+	u8[A0 + 0x37] = u8[A1 + 0x03]
+	objA0.value3a = u8[A1 + 0x03]
+	objA0.value3b = u8[A1] & 0x03
+
+	D0.u16 = u16[A1 + 0x06]
+	A2 = 0xffffffb2
+	fn00da1e()
+
+	u8[A0 + 0x3c] = D1.u8
+	u8[A0 + 0x3d] = D2.u8
+	if (u8[A1 + 0x09] == 0 && u8[A1 + 0x08] < 3)
+	{
+		u8[A1 + 0x08] = 3
+		u32 backupA1 = A1
+		sram.block_interrupts.u8 = 0xff
+		SaveGameSlot()
+		A1 = backupA1
+	}
+
+	u8[A0 + 0x3e] = u8[A1 + 0x08]
+	u8[A0 + 0x3f] = u8[A1 + 0x09]
+
+	if (original_mode)
+	{
+		objA0.update_address = 0x00d42e
+		fn00d42c_Orig()
+	}
+	else
+	{
+		objA0.update_address = 0x00d42c
+		fn00d42c()
+	}
+}
+
+//# address-hook(0x00d42e) end(0x00d69a)
+function void fn00d42c_Orig()
+{
+	objA0.compound.count = 0
+	A1 = u32[A0 + 0x30]
+
+	D0.u8 = dataselect.slot_selected - 1
+	if (D0.u8 != objA0.flags2e)
+	{
+		u8[A0 + 0x37] = u8[A1 + 0x03]
+		u16[A0 + 0x38] = 0
+	}
+	else
+	{
+		u8 result = fn00d458()
+		if (result == 0)
+			return
+
+		if (result == 1)
+		{
+			if (control.pad1.pressed & DataSelect.CONTROLS_ACCEPT)
+			{
+				levelselect.characters = u16[A0 + 0x34]
+
+				// Initialize the new save state
+				u32[A1] = 0
+				 u8[A1 + 0x02] = (levelselect.characters << 4)
+				u32[A1 + 0x04] = 0
+				u16[A1 + 0x08] = 0x0300
+
+				DataSelect.sharedNewGameStartup()
+				global.active_saveslot = A1
+				DataSelect.SharedGameSlotContinue()
+
+			#if STANDALONE
+				u8[A1 + 0x01] = global.game_random_base
+			#endif
+
+				sram.block_interrupts.u8 = 0xff
+				SaveGameSlot()
+
+				DrawObject()
+				return
+			}
+
+			D0.u16 = u16[A0 + 0x34]
+			fn00d6d0_Orig()
+			u16[A0 + 0x34] = D0.u16
+
+			objA0.compound.count = (level.framecounter.low & 0x10) ? 1 : 0
+		}
+	}
+
+	objA0.animation.sprite = u16[A0 + 0x34] + 4
+	fn00d69e()
+}
+
+
 //# address-hook(0x00d42c) end(0x00d69a)
 function void fn00d42c()
 {
@@ -2268,7 +2378,7 @@ function void fn00d42c()
 					else
 						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
-					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
+//					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
 					if (menuReady == true)
 					{
@@ -2356,7 +2466,7 @@ function void fn00d42c()
 					else
 						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
-					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
+//					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
 					if (menuReady == true)
 					{
@@ -2483,7 +2593,7 @@ function void fn00d30c()
 				else
 					Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
 
-				global.characters = levelselect.characters	// set so Discord RPC reads correct choice
+//				global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
 			//	if (menuReady == true)
 			//	{
@@ -2539,7 +2649,10 @@ function void fn00d30c()
 		}
 
 		D0.u16 = dataselect.nosave_characters
-		fn00d6d0()
+		if (original_mode)
+			fn00d6d0_Orig()
+		else
+			fn00d6d0()
 		dataselect.nosave_characters = D0.u16
 
 		objA0.animation.sprite = D0.u8 + 4

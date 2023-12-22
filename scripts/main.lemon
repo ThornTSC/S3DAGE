@@ -6245,20 +6245,13 @@ function void DataSelectScreen()
 // Disable Knuckles & Tails in the data select in Original Mode
 // Function taken from menus\dataselect.lemon
 //# address-hook(0x00d6d0) end(0x00d70a)
-function void fn00d6d0()
+function void fn00d6d0_Orig()
 {
 	// Character selection
 	u8 character = D0.u8
 	if (u16[0xffffb04a + 0x30] == 0)
 	{
 		u8 maxCharacterSelection = 3
-	#if STANDALONE
-		// Knuckles & Tails
-		if (Game.isSecretUnlocked(SECRET_KNUX_AND_TAILS) && !original_mode)
-		{
-			maxCharacterSelection = 4
-		}
-	#endif
 
 		if (control.pad1.pressed & CONTROL_UP)
 		{
