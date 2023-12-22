@@ -11817,6 +11817,7 @@ function void fn065d46()
 	{
 		u8[0xfffffaa2] = 0xff
 		water.height.target = 0x0c10	// 0x0a58	// normally 0x0958, but it's then set to 0x0a58 anyway when the lights are turned on in the original code
+		water.height.changerate = 2
 	}
 
 	UnloadObject()
