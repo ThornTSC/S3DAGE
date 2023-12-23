@@ -798,6 +798,7 @@ function void LevelSelect()
 		theme.hud = theme.saturn								// else use the theme matching the menu
 		hud.layout = (Game.getSetting(SETTING_EXTENDED_HUD)) ? 1 : 3
 	}
+	countTotalStars()
 //	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
 //	{
 		hud.layout = (theme.hud >> 6)
@@ -3250,6 +3251,7 @@ function void Standalone.onLevelStart()
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
 	loadBestActTimes()
 	loadRSR()
+	countTotalStars()
 
 	if (!time_attack)
 	{
