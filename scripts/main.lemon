@@ -197,6 +197,7 @@ function void endOfFrame()
 		restartSpecialStage = 0
 		fast_forward = false
 		unlock_act = 0
+		Audio.stopChannel(0)
 
 		menu_initialized = 0
 		Game.returnToMainMenu()
@@ -381,7 +382,6 @@ function void MainMenuBG.Run()
 	
 	global.game_mode = 0x0c
 	global.zone_act = 0x0d01
-	playMusic(0x2f)
 
 	// Load the required level patterns for the outro
 	//  -> This is essentially the same as "fn007812", but without the call to "waitForNextFrame", and hard-coded 0x1cfb44 to simplify things
