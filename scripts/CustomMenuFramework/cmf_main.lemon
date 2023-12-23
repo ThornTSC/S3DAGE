@@ -742,7 +742,7 @@ function void customMenu.selectTAMode()
 			time_attack = 0
 		else
 		{
-			if ((time_attack == 0 && !setting.unlock_act) && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+			if ((time_attack == 0 && !setting.unlock_act) && !setting.original_mode && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 				setting.original_mode = 1
 			else
 			{
