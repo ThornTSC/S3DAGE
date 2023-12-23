@@ -568,7 +568,7 @@
   },
 */
 
-  // Replaces HCZ Chunks, Act 1 Sonic/Tails start location, and Act 1 water currents
+  // Replaces HCZ Chunks, Act 1 Sonic/Tails start location, Act 1 water currents, and Act 2 twisting slide
 /*
   "ChunksHCZP": {
     "File": "HCZPChunks.bin",
@@ -594,6 +594,10 @@
   "HCZ1WaterCurrentRemover2": {
     "File": "HCZ1WaterCurrentRemover.bin",
     "RomInject": "0x2054c4"
+  },
+  "HCZ2TwistCoordinates": {
+    "File": "HCZ2TwistCoordinates.bin",
+    "RomInject": "0x03903c"
   },
 
   // Replaces MGZ Chunks and Act 1 start locations
