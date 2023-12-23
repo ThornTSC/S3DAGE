@@ -3757,7 +3757,8 @@ function void fn018466()
 
 
 
-// Do not show hints for hidden monitors in Original Mode.
+// Do not show hints for hidden monitors in Original Mode,
+// and show hints correctly in unlockable acts.
 // Function taken from objects\basics\signpost.lemon
 //# address-hook(0x083708) end(0x083798)
 function void fn083708()
@@ -3817,12 +3818,15 @@ function void fn083708()
 			{
 				bool unload = (objA1.flags38 & 0x01)
 			#if STANDALONE
-				// As a bug fix, also check "countdown_value" to make sure it's not the exact frame where the signpost hit the ground, but a later one
-				//  -> Otherwise hidden monitors can get locked too early
-				unload = unload && (s16[A1 + 0x2e] < 0x40)
+				if (!original_mode)
+				{
+					// As a bug fix, also check "countdown_value" to make sure it's not the exact frame where the signpost hit the ground, but a later one
+					//  -> Otherwise hidden monitors can get locked too early
+					unload = unload && (s16[A1 + 0x2e] < 0x40)
 
-				// Only needed for the hint
-				u8[A0 + 0x49] = (u8[A0 + 0x49] > 4) ? (u8[A0 + 0x49] - 4) : 0
+					// Only needed for the hint
+					u8[A0 + 0x49] = (u8[A0 + 0x49] > 4) ? (u8[A0 + 0x49] - 4) : 0
+				}
 			#endif
 
 				if (unload)
@@ -3830,6 +3834,8 @@ function void fn083708()
 					// Signpost touched ground without hitting a monitor
 					playSound(0x7e)
 					objA0.update_address = 0x01b588		// Address of "DrawOrUnloadObject"
+					if (unlock_act)
+						objA0.update_address = 0x08370a	// dummy address for renderhooking
 				}
 			}
 
@@ -3848,7 +3854,11 @@ function void fn083708()
 	CheckForUnloadObject()
 }
 
-
+//# address-hook(0x08370a)
+function void HiddenMonitor.RenderS2Hint()
+{
+	DrawOrUnloadObject()	// adding this to the drawn object queue allows the renderhook to draw over it
+}
 
 
 
@@ -4489,6 +4499,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				}
 			}
 		}
+		return true
+	}
+
+	// Dummy address given to hidden monitor hints in unlockable acts
+	if (objA0.update_address == 0x08370a)
+	{
+		Renderer.drawCustomSprite("s2_monitor_s2_intact", px, py, 0x00, 0, renderQueue)
 		return true
 	}
 
