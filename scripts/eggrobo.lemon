@@ -66,16 +66,15 @@ function void fn09159a()
 
 	A1 = 0xffffb000
 	CheckDistanceToObjectA1()
-	if (!u16[A0 + 0x46])		// new if statement: only tell the object to turn toward the player if this flag isn't set
+	if (!u16[A0 + 0x46] && !original_mode)		// new if statement: only tell the object to turn toward the player if this flag isn't set
 		fn084b5c()
 
-#if STANDALONE
 	bool playerNotBehindEggrobo = (((objA0.render_flags & render_flag.FLIP_X) && u16[0xffffb010] > objA0.position.x.u16) || (!(objA0.render_flags & render_flag.FLIP_X) && u16[0xffffb010] < objA0.position.x.u16))
-	// Limit range in x-direction as well, partly to accomodate for earlier spawn in widescreen
-	if (D2.u16 < 0xc0 && D3.u16 <= 0x08 && playerNotBehindEggrobo)	// usual check for D2.u16 is < 0x100. Final check is new and disallows shooting if player has passed.
-#else
-	if (D3.u16 <= 0x08)
-#endif
+	// Limit range in x-direction as well, partly to accommodate for earlier spawn in widescreen
+	bool firingCheck = (D2.u16 < 0xc0 && D3.u16 <= 0x08 && playerNotBehindEggrobo)	// usual check for D2.u16 is < 0x100. Final check is new and disallows shooting if player has passed.
+	if (original_mode)
+		firingCheck = (D3.u16 <= 0x08)
+	if (firingCheck)
 	{
 		// Shoot
 		objA0.update_address = 0x0915de

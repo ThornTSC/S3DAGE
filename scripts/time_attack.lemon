@@ -3220,7 +3220,7 @@ function void Standalone.onLevelStart()
 
 	if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2 || time_attack == 1 || time_attack == 2)
 	{
-		if (checkpoint.number == 0 && ((global.zone_act == 0x0001 && global.zone_act.apparent == 0x0000) || (global.zone_act == 0x0501 && global.zone_act.apparent == 0x0500)))
+		if (checkpoint.number == 0 && ((global.zone_act == 0x0001 && global.zone_act.apparent == 0x0000) || (global.zone_act == 0x0501 && global.zone_act.apparent == 0x0500)) && !original_mode)
 			global.zone_act = global.zone_act.apparent	// If in the parts of AIZ1 and ICZ1 that are internally Act 2 with no checkpoints, fully return to Act 1
 	}
 	if (global.zone_act == 0x0201 && checkpoint.number == 6)

@@ -2669,6 +2669,8 @@ function void fn079416()
 
 
 // Call the chosen palette if restarting from the star post in the LRZ2 boss.
+// Also disable palette cycle fix in Original Mode.
+// Function taken from level\10_lrz\level_lrz.lemon
 //# address-hook(0x059a7e) end(0x059afe)
 function void InitLevelTiles.LRZ_Boss()
 {
@@ -2704,6 +2706,12 @@ function void InitLevelTiles.LRZ_Boss()
 		u16[0xffffeed4] = 0x2d
 		u16[0xffffeec0] = 0x0c
 	}
+
+#if STANDALONE
+	// Begin glowing crystal palette cycle if starting from the checkpoint, #contributed by mrgrassman14
+	if (checkpoint.number != 0 && !original_mode)
+		u8[0xfffff650] = 1
+#endif
 
 	Level.GetCameraPosition()
 	Level.InitialTilesFill()

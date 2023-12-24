@@ -761,15 +761,15 @@ function void MonitorIntact.CheckBlocking()
 			canOpenMonitor = true
 		}
 	#if STANDALONE
-		else if (sonic_moves && u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.SONIC_DROPDASH)
+		else if (sonic_moves && u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state == char.state.SONIC_DROPDASH && !original_mode)
 		{
 			canOpenMonitor = true
 		}
-		else if (objA1.state == char.state.SPINDASH)
+		else if (objA1.state == char.state.SPINDASH&& !original_mode)
 		{
 			canOpenMonitor = true
 		}
-		else if (objA0.velocity.y != 0)
+		else if (objA0.velocity.y > 0 && !original_mode)
 		{
 			canOpenMonitor = true
 		}

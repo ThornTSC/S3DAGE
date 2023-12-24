@@ -29,7 +29,7 @@ function void fn0187f0()
 
 	objA0.update_address = 0x018868
 	u8[A0 + 0x34] = 4
-	fn018868()
+	fn018868()	// old alias. New function name is Invincibility.Update().
 }
 
 // Get uncompressed art for Sonic 2 elemental shields when relevant

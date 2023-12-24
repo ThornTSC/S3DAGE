@@ -477,39 +477,7 @@ function void MainMenuBG.Run()
 
 	while (true)
 	{
-		Renderer.resetSprites()
-	
-		// Ocean palette effect
-//		fn05928c()
-		VDP.copyToCRAMbyDMA(0xfffffc00, 0x0000, 0x80)
-
-		// Scrolling for water and clouds
-		{
-			camera.foreground.x.u16 = cameraForegroundX + MainMenuBG.scrollOffset
-			u16[0xffffee98] = cameraBackgroundX + MainMenuBG.scrollOffset
-
-			fn05b0a8()
-			u32[0xffffa800] -= 0x0200	// Partially undo the scrolling progress, to make it slightly slower
-
-			A4 = 0x05b15a
-			A5 = 0xffffa804
-			A1 = 0xffffe000		// Location of linewise scroll offsets
-			D0.u16 = 0x0300		// camera.background.y.u16 - 0x0500
-			D1.u16 = getScreenHeight() - 1
-			D3.u16 = camera.foreground.x.u16
-			fn04f0de()
-
-			// Manual correction for two lines with broken scrolling (also in outro)
-			u16[0xffffe0ee] = u16[0xffffe0f2]
-			u16[0xffffe16e] = u16[0xffffe172]
-			VDP.copyToVRAMbyDMA(0xffffe000, 0xf000, getScreenHeight() * 4)
-		}
-
-		Renderer.drawCustomSprite("sonic3air_logo", MainMenuBG.logoPosition, 11, 0, 0, 0xa000)
-		if (palette_set >= 2)
-			Renderer.drawCustomSprite("title_screen_air_new", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
-		else
-			Renderer.drawCustomSprite("title_screen_air", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
+		MainMenuBG.Update(cameraForegroundX, cameraBackgroundX)
 
 		PrintVersionNumber()
 
@@ -519,9 +487,42 @@ function void MainMenuBG.Run()
 }
 #endif
 
+function void MainMenuBG.Update(u16 cameraForegroundX, u16 cameraBackgroundX)
+{
+	Renderer.resetSprites()
 
+	// Ocean palette effect
+//		fn05928c()
+	VDP.copyToCRAMbyDMA(0xfffffc00, 0x0000, 0x80)
 
+	// Scrolling for water and clouds
+	{
+		camera.foreground.x.u16 = cameraForegroundX + MainMenuBG.scrollOffset
+		u16[0xffffee98] = cameraBackgroundX + MainMenuBG.scrollOffset
 
+		fn05b0a8()
+		u32[0xffffa800] -= 0x0200	// Partially undo the scrolling progress, to make it slightly slower
+
+		A4 = 0x05b15a
+		A5 = 0xffffa804
+		A1 = 0xffffe000		// Location of linewise scroll offsets
+		D0.u16 = 0x0300		// camera.background.y.u16 - 0x0500
+		D1.u16 = getScreenHeight() - 1
+		D3.u16 = camera.foreground.x.u16
+		fn04f0de()
+
+		// Manual correction for two lines with broken scrolling (also in outro)
+		u16[0xffffe0ee] = u16[0xffffe0f2]
+		u16[0xffffe16e] = u16[0xffffe172]
+		VDP.copyToVRAMbyDMA(0xffffe000, 0xf000, getScreenHeight() * 4)
+	}
+
+	Renderer.drawCustomSprite("sonic3air_logo", MainMenuBG.logoPosition, 11, 0, 0, 0xa000)
+	if (palette_set >= 2)
+		Renderer.drawCustomSprite("title_screen_air_new", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
+	else
+		Renderer.drawCustomSprite("title_screen_air", MainMenuBG.logoPosition, 11 + 20, 0, 0, 0xa000)
+}
 
 
 
@@ -715,18 +716,10 @@ function void fn0076a6()
 	}
 
 	u32[0xfffff7b4] = D0
-	if (D0 >= 0x260000)
-	{
-		D0 += 0x600
-		u32[0xfffff7b8] = D0
-		u32[0xfffff796] = u32[0xfffff7b4]
-	}
-	else
-	{
-		++D0
-		u32[0xfffff7b8] = D0
-		u32[0xfffff796] = u32[0xfffff7b4]
-	}
+
+	D0 += (D0 >= 0x260000) ? 0x600 : 1
+	u32[0xfffff7b8] = D0
+	u32[0xfffff796] = u32[0xfffff7b4]
 }
 
 
@@ -1378,6 +1371,130 @@ function void LevelRingsTableBuilder.buildRings()
 
 
 
+// In Original Mode, do not implement a collision fix for running on the ceiling and getting crushed by objects.
+// Function taken from objects\shared.lemon
+function void fn01e006()
+{
+	if (u8[A1 + 0x05] >= 0x06 || debug_mode.state != 0)
+	{
+		D4 = 0
+		return
+	}
+
+	// D0.u16 is the character's x-offset relative to the object's collision box (left border)
+	// D1.u16 is the object collision box half width
+	D5.u16 = D0.u16
+	if (D0.u16 > D1.u16)
+	{
+		D0.u16 -= D1.u16 * 2
+		D5.s16 = -D0.s16
+	}
+
+	// D3.u16 is the character's y-offset relative to the object's collision box (top border)
+	// D2.u16 is the object collision box half height, I guess... but it seems to change whether the character is rolled or not
+	D1.u16 = D3.u16
+	if (D3.u16 > D2.u16)
+	{
+		D3.u16 -= D4.u16 + 4
+		D1.s16 = -D3.s16
+	}
+
+	if (D1.u16 >= D5.u16 && D1.u16 > 4)
+	{
+		// Blocked by the object
+		fn01e042()
+	}
+	else if (D3.s16 >= 0)
+	{
+		if (D3.u16 < 0x10)
+		{
+		// 0x01e154:
+			D3.u16 -= 4
+			D2.u16 = objA0.box_size.x * 2
+			D1.s16 = objA1.position.x.u16 - objA0.position.x.u16 + objA0.box_size.x
+			if (D1.s16 >= 0 && D1.u16 < D2.u16)
+			{
+				if (global.inv_gravity)
+				{
+					D3.s16 = -D3.s16
+					++objA1.position.y.u16
+				}
+				else
+				{
+					--objA1.position.y.u16
+				}
+
+				objA1.position.y.u16 -= D3.u16
+				if (objA1.velocity.y >= 0)
+				{
+					LetSonicClimbOnObject()
+					D6 |= (u32(1) << (D6.u16 + 17))
+					D4 = 0xffffffff
+					return
+				}
+			}
+			D4 = 0
+		}
+		else
+		{
+			fn01e0a2()
+		}
+	}
+	else
+	{
+		if ((objA1.flags2a & char.flag.IN_AIR) == 0)
+		{
+			if (objA1.velocity.y == 0)
+			{
+				if (abs(D0.s16) < 0x10)
+				{
+					// Blocked by the object
+					fn01e042()
+				}
+				else
+				{
+				#if STANDALONE
+					// Fix ceiling run crush, e.g. occasional crush death by HCZ 2's first rotating pillar, fix #contributed by Elsie The Pict
+					if (objA1.value26 != 0x80 || original_mode)
+				#endif
+					{
+						// Getting crushed
+						u32 backupA0 = A0
+						A0 = A1
+						Character.Die()
+						A0 = backupA0
+
+						D6 |= (u32(1) << (D6.u16 + 15))
+						D4 = 0xfffffffe
+					}
+				}
+				return
+			}
+			else
+			{
+				if (objA1.velocity.y > 0 || D3.s16 >= 0)
+				{
+					fn01e10e()
+					return
+				}
+			}
+		}
+		else
+		{
+			u16[A1 + 0x1c] = 0
+		}
+
+		if (global.inv_gravity)
+			D3.s16 = -D3.s16
+
+		objA1.position.y.u16 -= D3.u16
+		objA1.velocity.y = 0
+
+		fn01e10e()
+	}
+}
+
+
 
 
 // Disable AIR's new giant ring behaviors in Original Mode
@@ -1972,6 +2089,494 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 
 	// Prevent emulator-like rendering
 	return true
+}
+
+
+
+// In Original Mode, remove AIR changes to avoid some animation quirks
+// Function taken from objects\shared.lemon
+//# address-hook(0x01e0a2)
+function void fn01e0a2()
+{
+	u8 bit = 1 << (D6.u16 + 2)
+	if (objA0.flags2a & bit)
+	{
+		if (u8[A1 + 0x20] != char.state.ROLLING && u8[A1 + 0x20] != char.state.SPINDASH)
+		{
+		#if STANDALONE
+			// Also add exceptions for...
+			//  -> The win pose: This prevents characters from showing their walking animation when standing next to an object like the capsule during the level results
+			//  -> Super/Hyper transformation: Without this, transforming next to a monitor switched to the run animation, and can even cause a softlock if immediately cancelling the transformation
+			if ((u8[A1 + 0x20] != char.state.WIN_POSE && u8[A1 + 0x20] != char.state.TRANSFORMING) || original_mode)
+		#endif
+			{
+				objA1.state = char.state.RUNNING
+				u8[A1 + 0x21] = char.state.RUNNING2
+			}
+		}
+
+		objA0.flags2a &= ~bit
+		objA1.flags2a &= ~char.flag.PUSHING
+	}
+	D4 = 0
+}
+
+
+
+
+
+
+// In Original Mode, remove improvements to behavior of Knuckles gliding above the screen.
+// Functions taken from maingame\character\character.lemon
+//# address-hook(0x016ff6) end(0x0170c0)
+function void UpdateKnucklesGlide()
+{
+	if (char.double_jump_state == 1)
+	{
+		// Glide direction:
+		//  - 0x00: Right
+		//  - 0x80: Left
+		//  - 0x01...0x7f: Turning right to left
+		//  - 0x81...0xff: Turning left to right
+		u8 glideDirection = knuckles.glide_direction
+
+		// Speed increases while gliding
+		D0.u16 = char.groundspeed
+		if (D0.u16 < 0x400)
+		{
+			D0.u16 += 8
+		}
+		else if (D0.u16 < 0x1800)
+		{
+			if ((glideDirection & 0x7f) == 0)
+			{
+				if (super.active)
+					D0.u16 += 12
+				else
+					D0.u16 += 4
+			}
+		}
+		char.groundspeed = D0.u16
+
+		// Gradually change gliding direction
+		if ((control.player1.state & CONTROL_LEFT) && glideDirection != 0x80)
+		{
+			// Change direction towards left
+			glideDirection = 2 + abs(glideDirection)
+		}
+		else if ((control.player1.state & CONTROL_RIGHT) && glideDirection != 0)
+		{
+			// Change direction towards right
+			glideDirection = 2 - abs(glideDirection)
+		}
+		else
+		{
+			// Gradually change direction until left/right is reached
+			if (glideDirection & 0x7f)
+			{
+				glideDirection += 2
+			}
+		}
+		knuckles.glide_direction = glideDirection
+
+		s32 dx = lookupCos(glideDirection)
+		char.velocity.x = (dx * char.groundspeed) >> 8
+		char.velocity.y += (char.velocity.y >= 0x80) ? -0x20 : 0x20
+		// Disable this behavior in S3AIR, as it feels like a bug in some places like the HCZ 1 boss fight
+		if (level.vertical_wrap != 0xff00 && original_mode)	// ...but only if vertical wrap is disabled
+		{
+			if (s16(char.position.y.u16) < level.vertical_wrap + 0x10)
+			{
+				char.velocity.x >>= 1
+				char.groundspeed >>= 1
+			}
+		}
+	}
+
+	centerCameraYOffset()
+}
+
+//# address-hook(0x016890) end(0x016c78)
+//# translated(0x016f6c) end(0x016fa6)
+function void UpdateKnucklesGlideCollision()
+{
+	if (char.double_jump_state == 0)
+		return
+
+	D0.u8 = char.double_jump_state
+	if (char.double_jump_state == 1 || char.double_jump_state > 5)	// Last check is probably not needed, just added for full compatibility
+	{
+		// Gliding state
+		fn01793e()
+		if (knuckles.glideclimbstate & 0x02)	// Gliding?
+		{
+			if (knuckles.glideclimbstate & 0x20)	// Climbing?
+			{
+				if ((knuckles.preventclimbing & 0x80) == 0)
+				{
+					bool hit_wall = true
+					D5.u8 = char.layer_flags2
+					D0.u8 = knuckles.glide_direction + 0x40
+					if (D0.s8 < 0)
+					{
+						char.flags |= char.flag.FACING_LEFT
+						CheckHitboxCollisionLeft()
+
+						D1.u16 |= D0.u16
+						if (D1.u16 != 0)
+						{
+							D3.u16 = char.position.x.u16 - s8(char.hitbox_extends.y) - 1
+
+							if (global.inv_gravity == 0)
+							{
+								D2.u16 = char.position.y.u16 - 11
+								Character.checkFloorEdgeCollisionFixedY()
+								if (D1.s16 < 0 || D1.u16 >= 12)
+								{
+									hit_wall = false
+								}
+								else
+								{
+									char.position.y.u16 += D1.u16
+								}
+							}
+							else
+							{
+								D2.u16 = (char.position.y.u16 + 11) ^ 0x0f
+								Character.checkCeilingEdgeCollisionFixedY()
+								if (D1.s16 < 0 || D1.u16 >= 12)
+								{
+									hit_wall = false
+								}
+								else
+								{
+									char.position.y.u16 -= D1.u16
+								}
+							}
+						}
+						else
+						{
+							++char.position.x.u16
+						}
+					}
+					else
+					{
+						char.flags &= ~char.flag.FACING_LEFT
+						CheckHitboxCollisionRight()
+
+						D1.u16 |= D0.u16
+						if (D1.u16 != 0)
+						{
+							D3.u16 = char.position.x.u16 + s8(char.hitbox_extends.y) + 1
+
+							if (global.inv_gravity == 0)
+							{
+								D2.u16 = char.position.y.u16 - 11
+								Character.checkFloorEdgeCollisionFixedY()
+								if (D1.s16 < 0 || D1.u16 >= 12)
+								{
+									hit_wall = false
+								}
+								else
+								{
+									char.position.y.u16 += D1.u16
+								}
+							}
+							else
+							{
+								D2.u16 = (char.position.y.u16 + 11) ^ 0x0f
+								Character.checkCeilingEdgeCollisionFixedY()
+								if (D1.s16 < 0 || D1.u16 >= 12)
+								{
+									hit_wall = false
+								}
+								else
+								{
+									char.position.y.u16 -= D1.u16
+								}
+							}
+						}
+					}
+
+					if (hit_wall)
+					{
+						// When Hyper Knuckles hits a wall fast enough, that kills all badniks on screen
+						if ((super.active & 0x80) && u16(char.groundspeed) >= 0x480)
+						{
+							camera.hyper_knux_shake = 0x14
+							Character.ClearEnemiesOnScreen()
+							playSound(0x49)
+						}
+						else
+						{
+							playSound(SFX_GRAB)
+						}
+
+						char.groundspeed = 0
+						char.velocity.x = 0
+						char.velocity.y = 0
+						char.double_jump_state = 4
+						char.animation.sprite = 0xb7
+						char.animation.timer = 0x7f
+						char.animation.frame = 0
+						knuckles.glide_direction = 3
+						char.position.x.frac = char.position.x.u16
+					#if STANDALONE
+						// Prevent Knuckles from climbing above the screen limits
+						//  -> This same check is down while climbing up/down, but we do it here to correct the position right away
+						//  -> This is added for S3AIR specifically because it's now much easier to get outside the screen after we removed the stopping effect when gliding the the top of screen (see "UpdateKnucklesGlide")
+						if (level.vertical_wrap != 0xff00 && !original_mode)
+						{
+							s16 minY = level.vertical_wrap + 0x10
+							if (s16(char.position.y.u16) < minY)
+							{
+								char.position.y.u16 = minY
+							}
+						}
+					#endif
+						return
+					}
+				}
+
+				char.double_jump_state = 2
+				char.state = char.state.KNUX_FALLING
+				char.hitbox_extends.x = char.hitbox.default.x
+				char.hitbox_extends.y = char.hitbox.default.y
+				knuckles.glideclimbstate |= 0x02
+				return
+			}
+
+			if (control.player1.state & CONTROL_ABC)
+			{
+				fn016fa8()
+			}
+			else
+			{
+				// Stop gliding
+				char.double_jump_state = 2
+				char.state = char.state.KNUX_FALLING
+				if (char.velocity.x < 0)
+					char.flags |= char.flag.FACING_LEFT
+				else
+					char.flags &= ~char.flag.FACING_LEFT
+
+				char.velocity.x >>= 2
+				char.hitbox_extends.x = char.hitbox.default.x
+				char.hitbox_extends.y = char.hitbox.default.y
+
+			#if STANDALONE
+				// Perform a ground collision check after updating the hitbox height
+				//  -> This prevents getting killed when Knuckles stops gliding just above the floor and there's a blocker object right underneath
+				if (!original_mode)
+				{
+					Character.CheckFloorCollision()
+					if (D1.s16 < 0)
+					{
+						char.position.y.u16 += global.inv_gravity ? -D1.s16 : D1.s16
+					}
+				}
+			#endif
+			}
+		}
+		else
+		{
+			if (char.velocity.x < 0)
+				char.flags |= char.flag.FACING_LEFT
+			else
+				char.flags &= ~char.flag.FACING_LEFT
+
+			D0.u8 = (char.rotation + 0x20) & 0xc0
+			if (D0.u8 != 0)
+			{
+				char.velocity.x = char.groundspeed
+				char.velocity.y = 0
+				Character.LandingOnGroundNoSpindash()
+			}
+			else
+			{
+				char.double_jump_state = 3
+				char.animation.sprite = 0xcc
+				char.animation.timer = 0x7f
+				char.animation.frame = 0
+				if (char.drown_countdown >= 12)
+				{
+					u8[A6 + 0x05] = 6
+					u8[A6 + 0x22] = 0x15
+				}
+			}
+		}
+	}
+	else if (char.double_jump_state == 2)
+	{
+		// Falling state
+		Character.UpdateControlInAir()
+
+		// Gravity
+		char.velocity.y += (char.flags & char.flag.UNDERWATER) ? 0x10 : 0x38
+
+		fn01793e()
+		if ((knuckles.glideclimbstate & 0x02) == 0)
+		{
+			char.groundspeed = 0
+			char.velocity.x = 0
+			char.velocity.y = 0
+			s16 dy = s8(char.hitbox_extends.y - char.hitbox.default.y)
+			char.position.y.u16 += global.inv_gravity ? -dy : dy
+			playSound(0x4c)
+
+			D0.u8 = (char.rotation + 0x20) & 0xc0
+			if (D0.u8 != 0)
+			{
+				Character.LandingOnGroundNoSpindash()
+			}
+			else
+			{
+				Character.LandingOnGroundNoSpindash()
+				char.hlock_countdown = 15
+				char.state = char.state.KNUX_STANDUP2
+			}
+		}
+	}
+	else if (char.double_jump_state == 3)
+	{
+		// Touched ground while gliding
+		bool goto016b64 = false
+		if (control.player1.state & CONTROL_ABC)
+		{
+			if (char.velocity.x < 0)
+			{
+				char.velocity.x += 0x20
+				goto016b64 = (char.velocity.x < 0)
+			}
+			else
+			{
+				char.velocity.x -= 0x20
+				goto016b64 = (char.velocity.x >= 0)
+			}
+		}
+
+		if (goto016b64)
+		{
+			fn01793e()
+			Character.CheckFloorCollision()
+			if (D1.s16 < 0x0e)
+			{
+				char.position.y.u16 += global.inv_gravity ? -D1.s16 : D1.s16
+				char.rotation = D3.u8
+				if ((level.framecounter.low & 0x07) == 0)
+				{
+					playSound(0x7e)
+				}
+			}
+			else
+			{
+				char.double_jump_state = 2
+				char.state = char.state.KNUX_FALLING
+				char.hitbox_extends.x = char.hitbox.default.x
+				char.hitbox_extends.y = char.hitbox.default.y
+				knuckles.glideclimbstate |= 0x02
+			}
+		}
+		else
+		{
+			char.groundspeed = 0
+			char.velocity.x = 0
+			char.velocity.y = 0
+			s16 dy = s8(char.hitbox_extends.y - char.hitbox.default.y)
+			char.position.y.u16 += global.inv_gravity ? -dy : dy
+			Character.LandingOnGroundNoSpindash()
+			char.hlock_countdown = 15
+			char.state = char.state.KNUX_STANDUP
+		}
+	}
+	else if (char.double_jump_state == 4)
+	{
+		// Climbing state
+		if (knuckles.preventclimbing & 0x80 || char.position.x.u16 != char.position.x.frac || (char.flags & char.flag.ON_OBJECT))
+		{
+			fn016ed2()
+			return
+		}
+
+		char.groundspeed = 0
+		char.velocity.x = 0
+		char.velocity.y = 0
+		u32[0xfffff796] = (char.layer_flags2 == 0x0d) ? u32[0xfffff7b4] : u32[0xfffff7b8]
+		D5.u8 = char.layer_flags2
+		D1 = 0
+
+		if ((control.player1.state & CONTROL_UP) == 0)
+		{
+			fn016d10()
+			return
+		}
+
+		if (global.inv_gravity)
+		{
+			fn016da8()
+			return
+		}
+
+		D2.u16 = char.position.y.u16 - 11
+		fn016f4e()
+		if (D1.s16 >= 4)
+		{
+			fn016eba()
+			return
+		}
+
+		if (D1.u16 != 0)
+		{
+			fn016e60()
+		}
+
+		D5.u8 = char.layer_flags2
+		D2.u16 = char.position.y.u16 - 8
+		D3.u16 = char.position.x.u16
+		fn00fbee()
+		if (D1.s16 < 0)
+		{
+			char.position.y.u16 -= D1.u16
+			D1 = 1
+		}
+		else
+		{
+			--char.position.y.u16
+			if (super.active)
+				--char.position.y.u16
+
+			D1 = 1
+			D0.u16 = level.vertical_wrap
+			if (D0.u16 != 0xff00)
+			{
+				D0.u16 += 0x10
+				if (D0.s16 > s16(objA0.position.y.u16))
+				{
+					char.position.y.u16 = D0.u16
+				}
+			}
+		}
+		fn016e10()
+	}
+	else if (char.double_jump_state == 5)
+	{
+		// Climbing up a ledge
+		if (char.animation.timer == 0)
+		{
+			fn016efe()
+			if (knuckles.glide_direction == 0x10)
+			{
+				char.groundspeed = 0
+				char.velocity.x = 0
+				char.velocity.y = 0
+				if (char.flags & char.flag.FACING_LEFT)
+					--char.position.x.u16
+
+				Character.LandingOnGroundNoSpindash()
+				char.state = char.state.STANDING
+			}
+		}
+	}
 }
 
 
@@ -3743,16 +4348,217 @@ function void Character.UpdateNormalState.Sonic()
 
 
 
-// Do not muffle audio underwater in Original Mode.
+// Do not muffle audio underwater or fix Knuckles's bubble location in Original Mode.
 // Function taken from maingame\character\underwater_update.lemon
 //# address-hook(0x018466) end(0x018680)
 function void fn018466()
 {
-	base.fn018466()
-	if (original_mode)
-		Game.setUnderwaterAudioEffect(0)
-}
+	A2 = u32[A0 + 0x40]
+	#if GAMEAPP
+		if (A2 == 0xffffb000 && u8[0xffffb000 + 0x05] <= 0x04)
+		{
+			if (Game.getSetting(SETTING_UNDERWATER_AUDIO) && !original_mode)
+			{
+				s16 diff = s16[0xffffb000 + 0x14] - s16(water.height.current)
+				Game.setUnderwaterAudioEffect(clamp(diff - 8, 0, 64) * 0xff / 64)
+			}
+			else
+			{
+				Game.setUnderwaterAudioEffect(0)
+			}
+		}
+	#endif
 
+	bool doChecks = true
+	if (u16[A0 + 0x30] == 0)
+	{
+		// Character died?
+		if (u8[A2 + 0x05] >= 0x06)
+			return
+
+		// Protected by bubble shield?
+		if (u8[A2 + 0x2b] & char.bonus.SHIELD_BUBBLE)
+			return
+
+	#if STANDALONE
+		// Hyper form active?
+		if (u8[A2 + 0x38] == CHARACTER_TAILS)
+		{
+			if (super.active.tails & 0x80)
+				return
+		}
+		else
+	#endif
+		{
+			if (super.active & 0x80)
+				return
+		}
+
+		// Left the water?
+		if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0)
+			return
+
+		// Decrease the drown countdown
+		--u16[A0 + 0x3c]
+		if (s16[A0 + 0x3c] < 0)
+		{
+			u16[A0 + 0x3c] = 0x3b
+			u16[A0 + 0x3a] = 0x01
+			objA0.flags38 = (getRandomNumber() & 0x01)
+
+			D0 = u8[A2 + 0x2c]
+			if (D0.u16 != 0x0f && D0.u16 != 0x14 && D0.u16 != 0x19)
+			{
+				if (D0.u16 <= 0x0c)
+				{
+					if (D0.u16 == 0x0c && u8[A0 + 0x43] == 0)
+					{
+						playMusic(MUSIC_DROWNING)
+					}
+
+					--u8[A0 + 0x36]
+					if (s8[A0 + 0x36] < 0)
+					{
+						u8[A0 + 0x36] = u8[A0 + 0x37]
+						objA0.value3a |= 0x80
+					}
+				}
+			}
+			else
+			{
+				if (u8[A0 + 0x43] == 0)
+				{
+					playSound(SFX_UNDERWATER_BELL)
+				}
+			}
+
+			--u8[A2 + 0x2c]
+			if (s8[A2 + 0x2c] < 0)
+			{
+				// Drowned
+				u8[A2 + 0x2e] = 0x81
+				playSound(SFX_DROWN)
+
+				objA0.flags38 = 0x0a
+				u16[A0 + 0x3a] = 0x01
+				u16[A0 + 0x30] = 0x78
+
+				A1 = A2
+				UpdateMusicOnWaterTransition()
+				u32 backupA0 = A0
+
+				A0 = A2
+				Character.LandingOnGroundNoSpindash()
+
+				objA0.state = char.state.DROWNED
+				objA0.flags2a |= 0x02
+				u8[A0 + 0x0a] |= 0x80
+				objA0.velocity.y = 0
+				objA0.velocity.x = 0
+				s16[A0 + 0x1c] = 0
+				objA0.base_state = 0x0c
+				A0 = backupA0
+				if (A2 == 0xffffb000)
+				{
+					u8[0xffffee30] = 1
+				}
+				return
+			}
+			else
+			{
+				doChecks = false
+			}
+		}
+	}
+	else
+	{
+		u8[A2 + 0x20] = char.state.DROWNED
+		--u16[A0 + 0x30]
+		if (u16[A0 + 0x30] == 0)
+		{
+			u8[A2 + 0x05] = 0x06
+			return
+		}
+	}
+
+	if (doChecks)
+	{
+		if (u16[A0 + 0x3a] == 0)
+			return
+
+		--objA0.value3e
+		if (s16[A0 + 0x3e] >= 0)
+			return
+	}
+
+	objA0.value3e = 8 + (getRandomNumber() & 0x0f)
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = objA0.update_address
+		objA1.position.x.u16 = u16[A2 + 0x10]
+		D0 = 6
+		if (u8[A2 + 0x2a] & char.flag.FACING_LEFT)
+		{
+			D0.s16 = -D0.s16
+			u8[A1 + 0x26] = 0x40
+		}
+		objA1.position.x.u16 += D0.u16
+		objA1.position.y.u16 = u16[A2 + 0x14]
+	#if STANDALONE
+		// Moves Knuckles' respiratory system back into his mouth, #contributed by iCloudius
+		if (u8[A2 + 0x38] == CHARACTER_KNUCKLES && !original_mode)
+			objA1.position.y.u16 -= 5
+	#endif
+		u32[A1 + 0x40] = u32[A0 + 0x40]
+		u8[A1 + 0x2c] = 6
+		if (u16[A0 + 0x30] != 0)
+		{
+			objA0.value3e &= 0x07
+			D0.u16 = u16[A2 + 0x14] - 12
+			objA1.position.y.u16 = D0.u16
+			u8[A1 + 0x26] = getRandomNumber()
+			D0.u16 = level.framecounter & 0x03
+			if (D0.u8 == 0)
+			{
+				u8[A1 + 0x2c] = 0x0e
+			}
+		}
+		else
+		{
+			if (objA0.value3a & 0x80)
+			{
+				D2 = u8[A2 + 0x2c]
+				if (D2.u8 < 0x0c)
+				{
+					D2.u16 >>= 1
+					D0.u16 = getRandomNumber() & 0x03
+					if (D0.u16 == 0)
+					{
+						if ((objA0.value3a & 0x40) == 0)
+						{
+							objA0.value3a |= 0x40
+							u8[A1 + 0x2c] = D2.u8
+							u16[A1 + 0x3c] = 28
+						}
+					}
+					if (objA0.flags38 == 0)
+					{
+						if ((objA0.value3a & 0x40) == 0)
+						{
+							objA0.value3a |= 0x40
+							u8[A1 + 0x2c] = D2.u8
+							u16[A1 + 0x3c] = 28
+						}
+					}
+				}
+			}
+		}
+
+		--objA0.flags38
+		if (s8[A0 + 0x38] < 0)
+			u16[A0 + 0x3a] = 0
+	}
+}
 
 
 
@@ -3876,7 +4682,12 @@ function void UpdateCameraPositionY()
 	}
 	if (char.flags & char.flag.ROLLING)
 	{
+	#if STANDALONE
+		// Accounting for Tails` smaller rolling box. see: https://s3unlocked.blogspot.com/2017/12/roll-height-bugs-part-1.html
+		D0.s16 -= (char.character == CHARACTER_TAILS && !original_mode) ? 1 : 5
+	#else
 		D0.s16 -= 5
+	#endif
 	}
 
 	#if STANDALONE
@@ -6052,7 +6863,7 @@ function void TitleScreen_SK()
 				fn005972()
 
 				u32[0xffffb04a] = 0x005802
-				u16[0xffffb078] = 0x0140
+				u16[0xffffb04a + 0x2e] = 0x0140 + getScreenExtend() // Fix for the Death Egg not in the right position when skipping intro, #contributed by TheMushrunt
 				u16[0xffffb07c] = 0x70
 				u16[0xffffeec0] = 0x03
 
@@ -6867,6 +7678,7 @@ function void Character.TailsAI.Init()
 		#if STANDALONE
 			if (isMainCharacter(CHARACTER_KNUCKLES) && global.zone_act == 0x0500)
 			{
+				// For Knuckles & Tails in ICZ 1, make Tails fly in after a short time
 				tails.respawn_counter = 0
 				tails.ai_routine = 0x02
 				char.control_flags = 0x81
@@ -8286,6 +9098,31 @@ constant array<u16> UnlockAct.LevelSizes =
 
 
 
+
+// Use original timing for AIZ1 Sonic intro in Original Mode.
+// Function taken from level\01_aiz\intro_sonic.lemon
+//# address-hook(0x061e24) end(0x061e62)
+function void fn061e24()
+{
+	Object.animationProgress(0x0666af)
+	UpdateMovementSimple()
+	if (D0.s32 >= 0)
+	{
+		CheckGroundCollision()
+		if (D1.s16 < 0)
+		{
+			objA0.base_state = 0x06
+			objA0.position.y.u16 += D1.u16
+			objA0.animation.sprite = 0x16
+			objA0.countdown_value = (original_mode) ? 127 : 63	// Don't wait that long, both Sonic and Knuckles just stands there doing nothing for quite some time...
+			objA0.countdown_callback = 0x061e6a
+		}
+	}
+}
+
+
+
+
 // Correct an issue with A.I.R.'s widescreen settings for the AIZ1 hollow tree in Classic Mode / low
 // screen widths in which going too fast would make the player crash into a wall and fall down.
 // Functions taken from objects\01_aiz\aiz_hollowtree.lemon
@@ -8394,7 +9231,10 @@ function void fn01f7ce()
 			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
 			{
 				D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x90
-				if (D0.s16 >= 0 && D0.u16 <= 0x130)
+				s16 minDiff = 0
+				if (original_mode)
+					minDiff = 12		// For a slightly faster exit at the top
+				if (D0.s16 >= minDiff && D0.u16 <= 0x130)
 				{
 					fn01f914()
 					return
@@ -8430,7 +9270,23 @@ function void fn01f7ce()
 	}
 }
 
-
+//# address-hook(0x01f8b4)
+function void fn01f8b4()
+{
+	u8 bit = (1 << D6.u8)
+	if (original_mode) // unlock horizontal speed in AIR / Revisited Mode, but not in Original Mode
+		objA1.velocity.x >>= 1
+	objA1.velocity.y >>= 1
+	u8[A1 + 0x1e] = 19
+	u8[A1 + 0x1f] = 9
+	u16[A1 + 0x20] = 1
+	objA1.flags2a |= char.flag.IN_AIR
+	objA1.flags2a &= ~(char.flag.ROLLING | char.flag.ON_OBJECT)
+	u8[A1 + 0x2e] &= ~0x42
+	u8[A1 + 0x30] = 0
+	u8[A1 + 0x31] = 4
+	objA0.flags2a &= ~bit
+}
 
 
 
@@ -9270,7 +10126,7 @@ function void fn069588()
 //# address-hook(0x065c56) end(0x065c6c)
 function void fn065c56()
 {
-	if (original_mode)
+	if (!Game.getSetting(SETTING_FIX_GLITCHES) || original_mode)
 	{
 		// In standalone, this is done in "fn02b452", so player can't jump and avoid falling down
 		player1.control_override = 0
@@ -9496,6 +10352,118 @@ function void fn030cf8()
 
 
 
+// Allow the original S3&K's one-pixel character shift on rotating pillars in Original Mode.
+// Function taken from objects\02_hcz\hcz_rotatingpillar.lemon
+//# address-hook(0x032784) end(0x0328c2)
+function void fn032784()
+{
+#if STANDALONE
+	if (debug_mode.state)
+		return
+#endif
+
+	u8 bit = (1 << D6.u8)
+	D0.u8 = u8[A2]
+	if (D0.u8 == 0)
+	{
+		if (objA0.flags2a & bit)
+		{
+			u8[A2 + 0x01] = 0
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+			if (D0.s16 < 0)
+			{
+				D0.s16 = -D0.s16
+				u8[A2 + 0x01] = 0x80
+			}
+			u8[A2 + 0x02] = D0.u8
+
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			u16[A1 + 0x1c] = 0
+			u8[A1 + 0x1e] = u8[A1 + 0x44]
+			u8[A1 + 0x1f] = u8[A1 + 0x45]
+			u8[A1 + 0x20] = 0
+			objA1.flags2a &= ~(char.flag.IN_AIR | char.flag.ROLLING | char.flag.CONTROL_LOCK | char.flag.PUSHING)
+			u8[A1 + 0x2e] = 0x03
+			u8[A1 + 0x40] = 0
+
+			u8[A2] = 1
+			fn03260a()
+		}
+		return
+	}
+
+	if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < 0x04)
+	{
+		if ((objA0.flags2a & bit) == 0)
+		{
+			u8[A2] = 0
+			return
+		}
+
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+		}
+
+		D0 = u8[A2 + 0x01]
+		LookupSinCos()
+		D0.u16 = (D0.s16 + 0x0100) >> 2
+		u8[A2 + 0x03] = D0.u8
+
+		D2 = u16[A2 + 0x02]
+		D1.s32 = s32(D1.s16) * D2.s16
+		if (!original_mode)
+		{
+			bool negative = D1.s32 < 0 				// Prevents the game from shifting the characters over a pixel
+			D1.s32 = (negative) ? -D1.s32 : D1.s32	// everytime the game mirrors the rotation animation; #contributed by iCloudius
+			D1 >>= 16
+			D1.u16 = (negative) ? -D1.u16 : D1.u16
+		}
+		else
+		{
+			D1 = (D1 << 16) + (D1 >> 16)
+		}
+		D1.u16 += objA0.position.x.u16
+		objA1.position.x.u16 = D1.u16
+		u8[A2 + 0x01] += 2
+		u16[A1 + 0x1c] = 0
+		D0.u16 = objA0.velocity.y
+		if (D0.s16 < 0)
+			D0.s16 = -D0.s16
+
+		if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+			if (D0.u16 >= 0x0480)
+			{
+				u16[A1 + 0x1c] = 0x0800
+			}
+		}
+
+		// Check if jump button pressed
+		D5.u8 &= CONTROL_ABC
+		if (D5.u8 == 0)
+		{
+			fn03260a()
+			return
+		}
+
+		u8[A1 + 0x40] = 0x01
+		u8[A1 + 0x1e] = 0x0e
+		u8[A1 + 0x1f] = 0x07
+		u8[A1 + 0x20] = char.state.ROLLING
+		u8[A1 + 0x2a] |= char.flag.ROLLING
+		objA1.velocity.y = objA0.velocity.y - 0x680
+		objA1.velocity.x = 0
+		u16[A1 + 0x1c] = 0
+	}
+
+	u8[A1 + 0x2a] |= char.flag.IN_AIR
+	objA1.sprite_priority = 0x0100
+	u8[A1 + 0x2e] = 0
+	u8[A2] = 0
+}
+
 
 
 
@@ -9657,7 +10625,7 @@ function void fn050c4c()
 
 	#if STANDALONE
 		// Move the waves effect as well, to avoid a one-frame glitch here
-		if (u32[0xffffcf82] == 0x01f244)
+		if (u32[0xffffcf82] == 0x01f244 && !original_mode)
 		{
 			u16[0xffffcf82 + 0x10] -= D0.u16	// offsetX replaces the D0.u16 variables in this function in future AIR
 		}
@@ -10309,7 +11277,7 @@ function void fn025d9c()
 			A1 = 0xffffb000
 		#if STANDALONE
 			// Also allow for drop-dashing on the spin wheel, #contributed by iCloudius
-			if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
+			if (objA1.state == char.state.SPINDASH || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state.former == char.state.SONIC_DROPDASH))
 		#else
 			if (objA1.state == char.state.SPINDASH)
 		#endif
@@ -10321,6 +11289,8 @@ function void fn025d9c()
 				{
 					u8[A0 + 0x32] = 0xff
 				}
+				if (!original_mode && objA1.state.former == char.state.SONIC_DROPDASH)
+					objA1.state = char.state.SONIC_DROPDASH
 			}
 		}
 
@@ -10328,7 +11298,11 @@ function void fn025d9c()
 		if (D6.u8 != 0)
 		{
 			A1 = 0xffffb04a
+		#if STANDALONE
+			if (objA1.state == char.state.SPINDASH || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state.former == char.state.SONIC_DROPDASH))
+		#else
 			if (objA1.state == char.state.SPINDASH)
+		#endif
 			{
 				u16[A0 + 0x30] = 0x3c
 				u8[A0 + 0x32] = 1
@@ -10337,6 +11311,8 @@ function void fn025d9c()
 				{
 					u8[A0 + 0x32] = 0xff
 				}
+				if (!original_mode && objA1.state.former == char.state.SONIC_DROPDASH)
+					objA1.state = char.state.SONIC_DROPDASH
 			}
 		}
 	}
@@ -10401,8 +11377,6 @@ function void fn025ea6()
 #if STANDALONE
 	if (objA1.state == char.state.SONIC_DROPDASH)
 	{
-		u8[A1 + 0x40] = 1 // re-enable double jump state
-        u8[A1 + 0x2f] = 1 // re-enable jump flag
 		u8[A1 + 0x40] = 1	// Re-enable double jump state
 		u8[A1 + 0x2f] = 1	// Re-enable jump flag
 	}
@@ -11581,6 +12555,44 @@ function void fn0890d8()
 
 
 
+// Do not enable a Batbot priority fix in Original Mode
+// Functions taken from enemies\cnz_batbot.lemon
+//# address-hook(0x08937c) end(0x08938a)
+function void fn08937c()
+{
+#if STANDALONE
+	// Put Batbot in front of the stage, #contributed by TheMushrunt
+	if (!original_mode)
+		objA0.sprite_priority = 0x200
+#endif
+	// Targets:
+	//  - 0x089394	-> objA0.base_state = 0x00
+	//  - 0x0893a4	-> objA0.base_state = 0x02
+	//  - 0x0893cc	-> objA0.base_state = 0x04
+	call tableLookupAddress(0x08938e, objA0.base_state)
+
+	Enemy.DrawOrUnload()
+}
+
+//# address-hook(0x08942e) end(0x089440)
+function void fn08942e()
+{
+#if STANDALONE
+	// Putting Batbot's body in front of the stage required the eyes to be brought up in priority
+	if (!original_mode)
+		objA0.sprite_priority = 0x180
+#endif
+	MoveWithParent()
+
+	// Targets:
+	//  - 0x08944a	-> objA0.base_state = 0x00
+	//  - 0x08940c	-> objA0.base_state = 0x02
+	//  - 0x089452	-> objA0.base_state = 0x04
+	call tableLookupAddress(0x089444, objA0.base_state)
+
+	fn084920()
+}
+
 
 // In Original Mode, hurt players should fall through CNZ antigrav fans
 // Function taken from objects\04_cnz\cnz_fan.lemon
@@ -11664,6 +12676,62 @@ function void UpdateLevelScrolling.CNZ2()
 		move_area.bottom.target = 0x0b70	// going more than a few pixels lower than this reveals the background's lower edge
 	base.UpdateLevelScrolling.CNZ2()
 }
+
+
+
+// Do not enable a CNZ1 boss palette fix in Original Mode
+// Function taken from objects\shared.lemon
+//# address-hook(0x08598a) end(0x0859cc)
+function void fn08598a()
+{
+#if STANDALONE
+	// Fix for CNZ1 miniboss altering Ring palette, #contributed by TheMushrunt
+	if ((objA0.update_address == 0x06da24 && objA0.base_state < 0x06) && global.zone_act == 0x0300 && !original_mode)
+		return
+#endif
+	if (u8[0xfffffabf] != 0)
+		return
+
+	A1 = 0xfffffade
+	while (u16[A1] != 0)
+	{
+		--u8[A1 + 2]
+		if (s8[A1 + 2] < 0)
+		{
+			A2 = u32[A1 + 4]
+			A3 = 0xffff0000 + u16[A2]
+			A4 = A2 + u16[A1]
+			D1.u16 = u16[A4]
+			if (D1.s16 < 0)
+			{
+				if (fn0859ce())
+				{
+					A1 += 8
+					continue
+				}
+			}
+
+			D2 = u8[A2 + 2]
+			while (D2.s16 >= 0)
+			{
+				u16[A3] = u16[A4]
+				A3 += 2
+				A4 += 2
+				--D2.s16
+			}
+
+			u8[A1 + 2] = u16[A4]
+			A4 += 2
+			D0 = A4 - A2
+			u16[A1] = D0.u16
+		}
+		A1 += 8
+	}
+}
+
+
+
+
 
 
 // In Original Mode, do not use AIR's camera adjustment after the CNZ1 boss
@@ -12998,7 +14066,44 @@ function void fn05410c()
 
 
 
+// Do not let use new Egg Mobile behaviors during LBZ1 pre-boss in Original Mode
+// Functions taken from level\06_lbz\lbz1_pre_boss_cutscene.lemon
+//# address-hook(0x08cd4c) end(0x08cd58)
+function void fn08cd4c()
+{
+	UpdateMovementStraightSimple()
+	fn08d1fc()
+	fn085160()
 
+	// Added to make Egg Mobile bob up and down instead of moving in a straight line after deploying Twin Hammer's box, #contributed by mrgrassman14
+	if (!original_mode)
+		fn0847e6()
+}
+
+//# address-hook(0x08d1fc) end(0x08d22e)
+function void fn08d1fc()
+{
+	if (u8[A0 + 0x28] == 0)
+	{
+		if (objA0.state == 0)
+		{
+			objA0.state = 0x20
+			playSound(0x6e)
+			objA0.flags2a |= 0x40
+		}
+
+		// Make Egg Mobile flash when hitting it, #contributed by mrgrassman14
+		if (!original_mode)
+			Boss.updateHitFlashing(3, 0x07a622, 0x07a628, 0x07a62e)
+
+		--objA0.state
+		if (objA0.state == 0)
+		{
+			objA0.flags2a &= ~0x40
+			u8[A0 + 0x28] = u8[A0 + 0x25]
+		}
+	}
+}
 
 
 
@@ -13733,7 +14838,7 @@ function void fn08d53e()
 
 // Remove the Big Arms fight from Original Mode.
 // Function taken from bosses\boss_lbz2_2.lemon
-//# address-hook(0x0734fa) end(0x073602)
+//# address-hook(0x0734fa) end(0x07360c)
 function void fn0734fa()
 {
 	if (u8[A0 + 0x28] != 0)
@@ -13832,8 +14937,8 @@ function void fn0734fa()
 
 
 
-// AIR fix in version after v22.09.10.00: remove visually broken object from Big Arms on defeat.
-// We leave the object in Original Mode.
+// AIR fixes in version after v22.09.10.00: remove visually broken object from Big Arms on defeat and do not reset character state upon final hit.
+// We leave the object and character state reset in Original Mode.
 // Function taken from bosses\boss_lbz2_3.lemon
 //# address-hook(0x074fd2) end(0x07508c)
 function void fn074fd2()
@@ -13854,7 +14959,8 @@ function void fn074fd2()
 		{
 			u8[A1 + 0x2c] = 0x04
 		}
-		if (u8[A0 + 0x30] == 0)
+		// This resets the character state, but is unnecessary, #contributed by TheMushrunt
+		if (u8[A0 + 0x30] == 0 && original_mode)
 		{
 			stopCharacterWinPose(0xffffb000)
 		}
@@ -15162,6 +16268,23 @@ function void fn06ef14()
 
 
 
+// Undo FBZ1 eye fix in Original Mode
+// Function taken from scripts\bosses\boss_fbz1.lemon
+//# address-hook(0x06f7a6) end(0x06f7be)
+function void fn06f7a6()
+{
+	objA0.countdown_value = u16[0x06f7c0 + objA0.subtype2c]
+	A1 = 0x06f7c6 + objA0.subtype2c * 2
+	D1.u16 = u16[(A1+=2)-2]
+	u16[A0 + D1.s16] = u16[(A1+=2)-2]
+#if STANDALONE
+	if (!original_mode)
+		u16[A0 + D1.s16] += 2 	// Add 2 to make Gapsule's eye windows symmetrically aligned, #contributed by mrgrassman14
+#endif
+}
+
+
+
 // Draw signpost in front of FBZ1 boss only in Revisited Mode.
 // Also set signpost to launch upward when first touched in a Sonic 2 act.
 // Function taken from objects\basics\signpost.lemon
@@ -15366,6 +16489,59 @@ function void fn0701b4()
 		}
 	}
 	Enemy.DrawDynamicObject()
+}
+
+
+
+// Do not enable rumbling when restarting at last FBZ2 star post in Original Mode
+// Function taken from level\08_fbz\level_fbz.lemon
+//# address-hook(0x052fa8) end(0x053018)
+function void InitLevelScrolling.FBZ2()
+{
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x052d10
+	}
+
+	if (camera.position.x.u16 >= 0x2c40)
+	{
+	#if STANDALONE
+		// This begins the rumbling sound at the end of Act 2 when starting from the final checkpoint, #contributed by mrgrassman14
+		if (!original_mode)
+			objA1.update_address = 0x08642e
+	#endif
+		level.scrolling_routine = 0x10
+		D0.u16 = u16[A3]
+		u16[A3 + 0x70] = D0.u16
+		u16[A3 + 0x74] = D0.u16
+		u16[A3 + 0x78] = D0.u16
+		u16[A3 + 0x7c] = D0.u16
+
+		camera.screenshake.state.hi = 0xff
+		D7.u16 = 0xc000
+		fn05318c()
+
+		fn04f2f6()
+		Level.InitialTilesFill()
+		WriteScrollOffsetsFlipped()
+		fn04f386()
+
+		scrolloffset.y.planeA = camera.background.y.u16
+		scrolloffset.y.planeB = camera.foreground.y.u16
+
+		signalMultiReturn()
+		return
+	}
+
+	fn052a2a()
+	fn04f2f6()
+
+	D1 = 0
+	Level.InitialTilesFill()
+
+	A4 = 0x052d28
+	A5 = 0xffffa800
+	fn04f0ce()
 }
 
 
@@ -16077,6 +17253,51 @@ function void fn08f0ca()
 
 
 
+// Do not enable fix to SOZ2 boss damage palette flash in Original Mode
+// Function taken from bosses\boss_soz2.lemon
+//# address-hook(0x0781e4) end(0x078266)
+function void fn0781e4()
+{
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	if (boss.remaining_hits == 0)
+	{
+		objA0.update_address = 0x085668
+		objA0.countdown_callback = 0x07780a
+		u16[0xffffeec6] = 0x55
+
+		// "spawnSimpleChildObjects(0x083fee)" replaced by:
+		spawnSimpleChildObjects(0x083d84, 1)
+
+		D0.u16 = camera.position.x.u16
+		move_area.left = D0.u16
+		AddScoreForBossEnemy()
+		return
+	}
+
+	if (objA0.state == 0)
+	{
+		objA0.flags2a |= 0x40
+		objA0.state = 0x20
+		playSound(0x6e)
+	}
+
+	// Fix for boss palette damage flash, #contributed by mrgrassman14
+	if (!original_mode)
+		Boss.updateHitFlashing(5, 0x07826c, 0x078276, 0x078280)
+	else
+		Boss.updateHitFlashing(3, 0x07826c, 0x078276, 0x078284)
+
+	--objA0.state
+	if (objA0.state == 0)
+	{
+		objA0.flags2a &= ~0x40
+		u8[A0 + 0x28] = u8[A0 + 0x25]
+	}
+}
+
+
 
 
 // In Original Mode, restore one of the Death Egg appearances in the LRZ1 background for Knuckles.
@@ -16151,6 +17372,13 @@ function void fn0881fe()
 	// Invulnerability frames should shake off the piranha / toxomister cloud, as should being dead
 	if ((u8[A1 + 0x34] > 0 || objA1.base_state >= 0x06) && !original_mode)	// base state check: objA1.base_state is base_state.DIED, base_state.INACTIVE, or base_state.DROWNED
 	{
+		D0 = 1
+	}
+	else if (objA1.base_state >= 0x06 && !original_mode)
+	{
+		// Same if the character just died (e.g. drowned)
+		//  -> This prevents an original game issue in case the character drowns and gets killed by a piranha at almost the same time,
+		//     which would remove two lives, and in worst case could lead to the live counter falling below 0 (resulting in 255 lives)
 		D0 = 1
 	}
 	else
@@ -16676,7 +17904,6 @@ function void fn063c66()
 // Enforce 8 hits on LRZ2 boss in Original Mode
 // Function taken from bosses\boss_lrz2.lemon
 //# address-hook(0x07981e) end(0x079852)
-//# address-hook(0x07981e) end(0x079852)
 function void fn07981e()
 {
 	setupObjectAttributesFull(0x07a140)
@@ -16702,6 +17929,42 @@ function void fn07981e()
 }
 
 
+// Do not use unused boss defeat sprite for LRZ2 boss in Original Mode
+// Function taken from bosses\boss_lrz2.lemon
+//# address-hook(0x079c1c) end(0x079c4c)
+function void fn079c1c()
+{
+	MoveAndFlipWithParent()
+
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	objA0.animation.sprite = 0x0f	// Normal face
+
+	if (!original_mode)
+	{
+		// Swapped if statements to make the otherwise unused defeat face appear when defeated, #contributed by mrgrassman14
+		if (u8[A1 + 0x2a] & 0x80)
+		{
+			objA0.animation.sprite = 0x11	// Defeat face
+		}
+		else if (u8[A1 + 0x2a] & 0x40)
+		{
+			objA0.animation.sprite = 0x10	// Damage face
+		}
+	}
+	else
+	{
+		if (u8[A1 + 0x2a] & 0x40)
+		{
+			objA0.animation.sprite = 0x10	// Damage face
+		}
+		else if (u8[A1 + 0x2a] & 0x80)
+		{
+			objA0.animation.sprite = 0x11	// Defeat face
+		}
+	}
+
+	fn08498c()
+}
 
 
 
@@ -16982,26 +18245,29 @@ function void fn06615a()
 {
 	if (objA0.velocity.x != 0)
 	{
-		u16 borderDistance = getScreenExtend()
-		if (original_mode)
-			borderDistance = 0x10	// the screen extension is 0 in Original Mode, which centers Knuckles on the screen's edge (half of him off screen)
-
 		if (objA0.velocity.x > 0)
 		{
-			D0.u16 = camera.position.x.u16 + getScreenWidth() - borderDistance
-			if (D0.u16 <= objA0.position.x.u16)
+			// Right movement boundary for Knuckles
+			u16 rightBoundary = move_area.right + 320 - 0x18
+			if (original_mode)
+				rightBoundary = camera.position.x.u16 + getScreenWidth() - 0x10
+			if (objA0.position.x.u16 >= rightBoundary)
 			{
 				objA0.velocity.x = 0
 			}
 		}
 		else
 		{
-			D0.u16 = camera.position.x.u16 + borderDistance
-			if (D0.u16 >= objA0.position.x.u16)
+			// Left movement boundary for Knuckles
+			u16 leftBoundary = camera.position.x.u16 + 0x18	// Just for the sake of symmetry
+			if (original_mode)
+				leftBoundary = camera.position.x.u16 + 0x10
+			if (objA0.position.x.u16 <= leftBoundary)
 			{
 				objA0.velocity.x = 0
 			}
 		}
+
 	}
 }
 
@@ -17070,6 +18336,71 @@ function void HPZ.hub_CustomSprites()
 			HUD.drawDigit(7, 0x1730 - camera.position.x.u16 - 3 + theme.x, 0x0390 - camera.position.y.u16 - camera.screenshake.offset + 0x20 + theme.y, 0x4000)
 	}
 }
+
+
+// Undo AIR fixes to the HPZ cutscene in Original Mode.
+// Functions taken from level\11_hpz\hpz_cutscene.lemon
+//# address-hook(0x06471a) end(0x064752)
+function void fn06471a()
+{
+	u8[A1 + 0x2a] |= 0x40
+	objA0.base_state = 0x34
+	u16[A0 + 0x44] = 0
+	objA0.mapping_offset = 0x14a8d6
+	objA0.animation.sprite = 0x9a
+	objA0.velocity.x = -0x200
+	objA0.velocity.y = -0x200
+	if (original_mode)		// Removed playSound(SFX_JUMP) as it is not appropriate here, #contributed by mrgrassman14
+		playSound(SFX_JUMP)
+
+	A1 = 0x0667c1
+	fn084580()
+}
+
+//# address-hook(0x06478e) end(0x0647c0)
+function void fn06478e()
+{
+	if (!original_mode)
+		objA0.position.y.u16 = 0x03ac	// Change from 0x03ab so Knuckles doesn't float 1 pixel above the ground, #contributed by mrgrassman14
+	else
+		objA0.position.y.u16 = 0x03ab
+	objA0.base_state = 0x36
+	u8[A0 + 0x0a] &= ~0x80
+	u16[A0 + 0x44] = 0
+	objA0.mapping_offset = 0x14a8d6
+	objA0.animation.sprite = 0x07
+	objA0.velocity.x = 0
+	objA0.velocity.y = 0
+
+	A1 = 0x06682f
+	fn084580()
+}
+
+//# address-hook(0x066348) end(0x066370)
+function void fn066348()
+{
+	if (objA0.flags2a & 0x40)
+	{
+		if (objA0.state == 0)
+		{
+			objA0.state = 0x30
+			playSound(0x6e)
+		}
+
+ 	// Fix for Egg Mobile palette damage flash, #contributed by mrgrassman14
+	if (!original_mode)
+		Boss.updateHitFlashing(3, 0x07a622, 0x07a628, 0x07a62e)
+	else
+		Boss.updateHitFlashing(3, 0x07a622, 0x07a628, 0x07a62c)
+
+		--objA0.state
+		if (objA0.state == 0)
+		{
+			objA0.flags2a &= ~0x40
+		}
+	}
+}
+
 
 
 
@@ -17180,6 +18511,35 @@ function void SSZ_CustomSprites()
 	//	Renderer.addSpriteMaskWorld(0x1180, 0xb80, 0x0080, 0x0080, 0xcf00, 7)
 	}
 }
+
+
+
+
+
+// Remove rendering fix for Knuckles on SSZ button in Original Mode
+// Functions taken from level\12_ssz\ssz_start.lemon
+//# address-hook(0x065af6) end(0x065b08)
+function void fn065af6()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+	{
+		fn08459c()
+		return
+	}
+	else
+	{
+	#if STANDALONE
+		// Signal to the sprite masking object that it's not needed any more
+		if (!original_mode)
+			u8[0xfffffab8] |= 0x04
+	#endif
+		fn0851e4()
+		Object.TriggerUnloading()
+	}
+}
+
+
 
 
 
@@ -17354,6 +18714,77 @@ function void fn045170()
 
 
 
+// Do not enable SSZ boss damage palette flash fix in Original Mode
+// Functions taken from boss\boss_ssz_mecha.lemon, boss_ssz_mid1.lemon, and boss_ssz_mid2.lemon.
+//# address-hook(0x07d312) end(0x07d358)
+//# translated(0x07d3be) end(0x07d3c6)
+function void fn07d312()
+{
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	D0.u8 = boss.remaining_hits
+	if (D0.u8 == 0)
+	{
+		// Targets:
+		//  - 0x07d35a
+		//  - 0x07d39e
+		call A4
+		return
+	}
+
+	if (objA0.state == 0)
+	{
+		objA0.state = 0x20
+		playSound(0x6e)
+		objA0.flags2a |= 0x40
+	}
+
+	// Fix for boss palette damage flash, #contributed by mrgrassman14
+	if (!original_mode)
+		Boss.updateHitFlashing(5, 0x07d3cc, 0x07d3d6, 0x07d3e0)
+	else
+		Boss.updateHitFlashing(5, 0x07d3cc, 0x07d3d6, 0x07d3de)
+
+	--objA0.state
+	if (objA0.state == 0)
+	{
+		objA0.flags2a &= ~0x40
+	}
+}
+
+
+
+
+// In Original Mode, allow original game glitch in which midbosses would disappear for one frame as they started flaying away upon defeat.
+// Functions taken from boss\boss_ssz_mid1.lemon and boss_ssz_mid2.lemon.
+//# address-hook(0x07a3ce) end(0x07a3e4)
+function void fn07a3ce()
+{
+	objA0.update_address = 0x07a3e6
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.velocity.x = 0x0400
+	objA0.velocity.y = 0
+#if STANDALONE
+	// Draw Egg Mobile so it doesn't disappear for 1 frame, #contributed by mrgrassman14
+	if (!original_mode)
+		DrawObject()
+#endif
+}
+
+//# address-hook(0x07ac7a) end(0x07ac90)
+function void fn07ac7a()
+{
+	objA0.update_address = 0x07ac92
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.velocity.x = 0x400
+	objA0.velocity.y = 0
+#if STANDALONE
+	// Draw Egg Mobile so it doesn't disappear for 1 frame, #contributed by mrgrassman14
+	if (!original_mode)
+		DrawObject()
+#endif
+}
 
 
 
@@ -17705,6 +19136,10 @@ function void fn0459b4()
 // Improve the "imprecise" x velocity calculations for large screen widths in some of Mecha Sonic's attacks.
 // These are still very imprecise. The method of base + extend * coefficient is likely not practical.
 // Functions taken from bosses\boss_ssz_mecha.lemon
+
+// There is a new version of this in the 18 Nov 2023 preview.
+// If a 2024 version of AIR becomes the earliest supported stable version, the new version should be modified for Original Mode and used to replace this.
+
 //# address-hook(0x07b544) end(0x07b574)
 function void fn07b544()
 {
@@ -18112,6 +19547,32 @@ function void DEZ.drawBackgroundWall(u16 px, u16 py, u16 width)
 
 
 
+// Disable a camera fix between DEZ1 and DEZ2 in Original Mode
+// Function taken from scripts\bosses\boss_dez1.lemon
+//# address-hook(0x07e420) end(0x07e446)
+function void fn07e420()
+{
+	fn07eeee()
+	if (objA0.velocity.y >= 0)
+	{
+		objA0.update_address = 0x07e44c
+		fn05fd88()
+
+		A1 = 0xffffb000
+	#if STANDALONE
+		if (!original_mode)
+			objA1.flags2e = 0 // Fixes the camera at the start of act 2; #contributed by iCloudius
+	#endif
+		objA1.render_flags &= ~render_flag.FLIP_X
+		objA1.state = char.state.STANDING
+		objA1.state.former = char.state.RUNNING
+		objA1.flags2a &= ~char.flag.FACING_LEFT
+	}
+	fn07e44c()
+}
+
+
+
 // Add background changes to DEZ2 to return indoors in some areas
 //# address-hook(0x05951e) end(0x059522)
 // Function taken from level\13_dez\level_dez.lemon
@@ -18375,40 +19836,44 @@ function void fn04952a()
 
 
 
-// Create a function for DEZ staircase subtype 0x02 functionality that Euka did not port to lemonscript, as it was unused in the vanilla game.
+// Import Legobouwer's version of the collapsing DEZ staircase for consistency with AIR, overwriting the hand-ported version from previous versions of DAGE.
 // This staircase subtype vibrates for one second (60 frames) when hit from underneath, then becomes subtype 0x03 (which calls the same function as subtype 0x01)
 // The original ROM hack uses these for a staircase that can get hit from below to drop it, so Original Mode needs them too.
 // Other staircase functions are in objects\13_dez\dez_staircase.lemon
 //# address-hook(0x047774) end(0x0477c0)
 function void fn047774()
 {
-	if (u16[A0 + 0x30])
-	{								// Start loc_4778C here
-		if (u16[A0 + 0x30] -= 1)
-		{							// loc_4779E here. Make the staircase vibrate during the 60-second timer, with the if statement above decrementing the timer.
-			A1 = A0 + 0x34
-			D0.u16 = u16[A0 + 0x30]
-			D0.u8 = (D0.u8 >>= 2) & 0x01
-			u16[(A1+=2)-2] = D0.u16
-			D0.u8 ^= 1
-			u16[(A1+=2)-2] = D0.u16
-			D0.u8 ^= 1
-			u16[(A1+=2)-2] = D0.u16
-			D0.u8 ^= 1
-			u16[(A1+=2)-2] = D0.u16
+	if (u16[A0 + 0x30] == 0)
+	{
+		D0.u8 = u8[A0 + 0x32] & 0x0c
+		if (D0.u8 != 0)
+		{
+			u16[A0 + 0x30] = 0x3c
 		}
-		else
-		{							// Remainder of loc_4778C here. Make the staircase descend by setting its subtype to 0x03, for the same descent function call as 0x01.
-			++objA0.subtype2c
-			playSound(0xc0)
-		}
+		return
 	}
 	else
-	{								// Remainder of loc_47774 here. The staircase is staying still.
-		D0.u8 = u8[A0 + 0x32]
-		if (D0.u8 &= 0x0c)
-			u16[A0 + 0x30] = 60		// number of frames to vibrate before falling
+	{
+		--u16[A0 + 0x30]
+		if (u16[A0 + 0x30] == 0)
+		{
+			++objA0.subtype2c
+			playSound(0xc0)
+			return
+		}
 	}
+
+	A1 = A0 + 0x34
+	D0.u16 = u16[A0 + 0x30]
+	D0.u8 >>= 2
+	D0.u8 &= 0x01
+	u16[(A1+=2)-2] = D0.u16
+	D0.u8 ^= 0x01
+	u16[(A1+=2)-2] = D0.u16
+	D0.u8 ^= 0x01
+	u16[(A1+=2)-2] = D0.u16
+	D0.u8 ^= 0x01
+	u16[(A1+=2)-2] = D0.u16
 }
 
 
@@ -18755,17 +20220,79 @@ function void fn05a7ec()
 
 
 
+// Do not apply DEZ final boss finger position fix to Original Mode
+// Functions taken from bosses\boss_dez_final1.lemon
+//# address-hook(0x080b66) end(0x080b8a)
+function void fn080b66()
+{
+	objA0.base_state = 0x02
+	objA0.value39 = 0x03
+
+	// "spawnChildObjects(0x081316)" replaced by:
+	spawnChildObject(0x080ce2, 0x00, 0, -16)
+	spawnChildObject(0x080ce2, 0x02, -32, -16)
+	spawnChildObject(0x080ce2, 0x04, 32, -16)
+
+	objA0.value42 = (objA0.subtype2c == 0) ? -0x80 : 0x80
+	objA0.position.y.u16 = (original_mode) ? 0xe3 : 0xe4
+	fn080b90()
+}
+
+//# address-hook(0x080cca) end(0x080ce0)
+function void fn080cca()
+{
+	objA0.base_state = 0x02
+	objA0.position.y.u16 = (original_mode) ? 0xe3 : 0xe4
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	u8[A1 + 0x38] &= ~0x02
+}
+
 
 
 
 // In Original Mode, revert DEZ final boss behaviors to base S3&K behaviors
 // and allow players to rebound into a pit after the final blow
 // Functions taken from bosses\boss_dez_final3.lemon
+//# address-hook(0x0802b2) end(0x0802be)
+function void fn0802b2()
+{
+	objA0.update_address = 0x0802c0
+#if STANDALONE
+	// Reset speed to the default one, to handle the case that the boss got defeated right while leaping forward
+	if (!original_mode)
+		objA0.velocity.x = 0x278
+
+	if (!DEZFinalBoss3.shouldEscapeWithMasterEmerald())
+#endif
+	{
+		u8[0xfffffab8] |= 0x10
+	}
+}
+
 function bool DEZFinalBoss3.shouldEscapeWithMasterEmerald()
 {
 	if (original_mode)
 		return false
 	return DEZFinalBoss3.canPlayerEnterDoomsday()
+}
+
+//# address-hook(0x0804d2) end(0x0804ee)
+function void fn0804d2()
+{
+	if ((u8[0xfffffab8] & 0x08) == 0)
+	{
+		MoveAndFlipWithParent()
+	#if STANDALONE
+		// This makes the claw in the third phase of the final boss use the proper grabbing frame instead of the opened one, #contributed by mrgrassman14
+		if (!original_mode)
+			objA0.animation.sprite = 2
+	#endif
+	}
+	else
+	{
+		objA0.update_address = 0x08565e
+		objA0.countdown_callback = 0x0852a0	// Address of "Object.TriggerUnloading()"
+	}
 }
 
 //# address-hook(0x0801d8) end(0x080202)
@@ -18870,7 +20397,11 @@ function void fn080e2c()
 		}
 	}
 
-	Boss.updateHitFlashing(3, 0x080ee2, 0x080ee8, 0x080eec)
+	// Fix for boss palette damage flash, #contributed by mrgrassman14
+	if (!original_mode)
+		Boss.updateHitFlashing(3, 0x080ee2, 0x080ee8, 0x080eee)
+	else
+		Boss.updateHitFlashing(3, 0x080ee2, 0x080ee8, 0x080eec)
 
 	--objA0.state
 	if (objA0.state == 0)
@@ -19186,10 +20717,118 @@ function void fn05adc0()
 
 
 
+// Undo Outro fixes in Original Mode
+// Functions taken from maingame\outro\outro_sonic_tails.lemon
+//# address-hook(0x05ded4) end(0x05dfea)
+function void fn05ded4()
+{
+	if ((u8[0xfffffab8] & 0x01) == 0)
+		return
+
+	objA0.base_state = 0x04
+
+	// Adjusted velocity to help Master Emerald fall properly into place, #contributed by mrgrassman14
+	if (!original_mode)
+	{
+		objA0.velocity.x = -0x1fb
+		objA0.velocity.y = 0x120 - min(getScreenExtend(), 40) / 2
+	}
+	else
+	{
+		objA0.velocity.x = -0x200
+		objA0.velocity.y = 0x100
+	}
+
+	fn05def0()
+}
+
+//# address-hook(0x05def0) end(0x05df0c)
+function void fn05def0()
+{
+	if (u16[0xfffffaa4] == 0)
+	{
+		UpdateMovementStraightSimple()
+		return
+	}
+
+	objA0.base_state = 0x06
+	u16[A0 + 0x46] = u16[0xfffffaa4]
+
+	// Adjust final position of Master Emerald so it appears properly attached, #contributed by mrgrassman14
+	if (!original_mode)
+	{
+		u8[A0 + 0x42] = 0xdf
+		u8[A0 + 0x43] = 0x09
+	}
+	else
+	{
+		u8[A0 + 0x42] = 0xe0
+		u8[A0 + 0x43] = 0x01
+	}
+
+	fn05df12()
+}
+
+//# address-hook(0x05dfee) end(0x05e084)
+function void fn05dfee()
+{
+	objA0.update_address = 0x05e08a
+	objA0.mapping_offset = 0x060486
+	objA0.sprite_attributes = 0x026e
+	objA0.sprite_priority = 0x0380
+	objA0.animation.sprite = 0x01
+	objA0.box_size.x = 0x20
+	objA0.box_size.y = 0x14
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.position.x.u16 = 0x0220 + getScreenExtend()
+	objA0.position.y.u16 = 0xb0
+	objA0.velocity.x = -0x100 - (getScreenExtend() * 0x40 / 40)		// Faster plane needed
+
+	fn06001e()
+
+	playMusic(MUSIC_CREDITSMEDLEY)
+
+#if STANDALONE
+	// Reset frame counter so we can use it to get the current credits music playback position
+	level.framecounter = 0
+
+	// Start skippable cutscene again, to reset the timer
+	Game.startSkippableCutscene()
+#endif
+
+	// "spawnSimpleChildObjects(0x0601ca)" replaced by:
+	spawnSimpleChildObjects(0x05ecb4, 2)
+
+	// "spawnChildObjects(0x0601d0)" replaced by:
+	spawnChildObject(0x05ebf0, 0x00, 28, 0)
+
+	u8[0xfffffab8] &= ~0x01
+
+	// Spawn the Master Emerald
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x05de60
+		u16[A1 + 0x46] = A0.u16
+		objA1.position.x.u16 = 0x0190 + getScreenExtend()
+		objA1.position.y.u16 = 0xdc
+		u8[A1 + 0x2c] = 0xff
+	}
+
+	Kosinski.addToDMAQueue(0x162914, 0x4dc0)
+
+#if STANDALONE
+	// Add missing Tornado flame, #contributed by mrgrassman14
+	if (!original_mode)
+		spawnChildObject(0x05ec3c, 0x00, -10, 12)
+#endif
+}
+
+
+
 
 
 // Move Hyper Sonic end game cutscene, force original AIZ1 palette, and load external chunk data
-// Functions taken from scripts\level\outro\level_outro.lemon
+// Functions taken from level\outro\level_outro.lemon
 //# address-hook(0x05abc0) end(0x05ac6c)
 function void fn05abc0()
 {
