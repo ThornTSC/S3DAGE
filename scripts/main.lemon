@@ -6545,7 +6545,34 @@ function void fn0048dc()
 	if (palette_set < 2 || original_mode)
 		Renderer.drawCustomSprite("bg_title_screen", getScreenExtend() - 40, 0, 0x00, 0, 0x1100)
 	else
+	{
 		Renderer.drawCustomSprite("bg_title_screen_new", getScreenExtend() - 40, 0, 0x00, 0, 0x1100)
+		s64 rippleShiftIndex = (global.demo_countdown / 12) % 66
+		Renderer.drawCustomSprite("bg_title_screen_new_line200", SwScrl_RippleData[(rippleShiftIndex + 23) % 66] / 3, 200, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line201", SwScrl_RippleData[(rippleShiftIndex + 22) % 66] / 3, 201, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line202", SwScrl_RippleData[(rippleShiftIndex + 21) % 66] / 3, 202, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line203", SwScrl_RippleData[(rippleShiftIndex + 20) % 66] / 3, 203, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line204", SwScrl_RippleData[(rippleShiftIndex + 19) % 66] / 3, 204, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line205", SwScrl_RippleData[(rippleShiftIndex + 18) % 66] / 3, 205, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line206", SwScrl_RippleData[(rippleShiftIndex + 17) % 66] / 3, 206, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line207", SwScrl_RippleData[(rippleShiftIndex + 16) % 66] / 3, 207, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line208", SwScrl_RippleData[(rippleShiftIndex + 15) % 66] / 3, 208, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line209", SwScrl_RippleData[(rippleShiftIndex + 14) % 66] / 3, 209, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line210", SwScrl_RippleData[(rippleShiftIndex + 13) % 66] / 3, 210, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line211", SwScrl_RippleData[(rippleShiftIndex + 12) % 66] / 3, 211, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line212", SwScrl_RippleData[(rippleShiftIndex + 11) % 66] / 3, 212, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line213", SwScrl_RippleData[(rippleShiftIndex + 10) % 66] / 3, 213, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line214", SwScrl_RippleData[(rippleShiftIndex +  9) % 66] / 3, 214, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line215", SwScrl_RippleData[(rippleShiftIndex +  8) % 66] / 3, 215, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line216", SwScrl_RippleData[(rippleShiftIndex +  7) % 66] / 3, 216, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line217", SwScrl_RippleData[(rippleShiftIndex +  6) % 66] / 3, 217, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line218", SwScrl_RippleData[(rippleShiftIndex +  5) % 66] / 3, 218, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line219", SwScrl_RippleData[(rippleShiftIndex +  4) % 66] / 3, 219, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line220", SwScrl_RippleData[(rippleShiftIndex +  3) % 66] / 3, 220, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line221", SwScrl_RippleData[(rippleShiftIndex +  2) % 66] / 3, 221, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line222", SwScrl_RippleData[(rippleShiftIndex +  1) % 66] / 3, 222, 0, 0, 0x1101)
+		Renderer.drawCustomSprite("bg_title_screen_new_line223", SwScrl_RippleData[(rippleShiftIndex +  0) % 66] / 3, 223, 0, 0, 0x1101)
+	}
 
 	// Also draw the "Angel Island Revisited" text and others
 	++airHighlightAnimationTimer
