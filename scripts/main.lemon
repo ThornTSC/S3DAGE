@@ -539,10 +539,12 @@ function void TitleCard.Init()
 		specialstages_knuckles = 0
 	}
 
+	bool hudLoaded = true
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
 		hud.layout = 1											// with Sonic CD-style ring counter
+		hudLoaded = false
 	}
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
 	{
@@ -550,7 +552,8 @@ function void TitleCard.Init()
 	}
 //	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
 //	{
-		hud.layout = (theme.hud >> 6)
+		if (hudLoaded)
+			hud.layout = (theme.hud >> 6)
 		theme.hud &= 0x3f		// set HUD to matching theme constant
 //	}
 	if (time_attack == 1 || time_attack == 2)
