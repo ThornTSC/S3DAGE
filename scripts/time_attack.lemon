@@ -1085,11 +1085,12 @@ function bool LevelSelect.innerUpdate()
 		}
 
 		global.characters = levelselect.characters
-	#if STANDALONE
-		// Handle Knuckles & Tails
-		useKnucklesAndTails = (global.characters == 4)
-		global.characters = min(global.characters, 3)
-	#endif
+		if (!original_mode)
+		{
+			// Handle Knuckles & Tails
+			useKnucklesAndTails = (global.characters == 4)
+			global.characters = min(global.characters, 3)
+		}
 
 		D0.u16 = u16[0x007d22 + levelselect.selection * 2]
 		if (D0.u16 & 0x8000)
@@ -1103,10 +1104,11 @@ function bool LevelSelect.innerUpdate()
 			// Start game
 			lives_counter = 3
 			global.sk_bluespheres = 0
-		#if STANDALONE
-			player.next_life_score = 5000
-			u32[0xffffffc4] = 5000
-		#endif
+			if (!original_mode)
+			{
+				player.next_life_score = 5000
+				u32[0xffffffc4] = 5000
+			}
 
 			if (D0.u16 == 0x4000 || D0.u16 == 0x4001)
 			{
@@ -1134,7 +1136,7 @@ function bool LevelSelect.innerUpdate()
 		//		else
 		//		{
 
-					if (levelselect.soundtest >= 0x20 && levelselect.soundtest <= 0x3f)		// test values for forcing green sphere mode layouts
+					if (levelselect.soundtest >= 0x20 && levelselect.soundtest <= 0x3f && total_stars >= unlock.level.ehz)		// test values for forcing green sphere mode layouts
 						challenge_greenspheres = levelselect.soundtest - 0x1f		// not subtracting 0x20 because it needs to be nonzero to load a layout
 
 					global.game_mode = 0x34
