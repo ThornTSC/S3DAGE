@@ -10923,9 +10923,62 @@ function void fn030834()
 
 
 
+// If below the square HCZ blocks that hold fans after coming up from underneath them, don't make the blocks solid.
+// This helps with floor collision oddities and with ensuring Knuckles can climb the walls they touch.
+// Function taken from objects\02_hcz\hcz_fan.lemon
+//# address-hook(0x030850) end(0x0308f4)
+function void fn030850()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x3c]
+	D0.u16 = u16[0xffffb000 + 0x14] - objA0.position.y.u16
 
+	if (D0.s16 >= 0x20)
+	{
+		if (u8[A1 + 0x42] == 0)
+		{
+			u8[A1 + 0x42] = 0x01
+			u16[A1 + 0x34] = 0
+			playSound(0x58)
+		}
 
+		D1.u16 = u16[A0 + 0x3a]
+		if (D1.u16 != u16[A0 + 0x30])
+		{
+			u16[A0 + 0x30] += 8
+		}
+	}
+	else if (D0.s16 < -0x30)
+	{
+		if (u8[A1 + 0x42] != 0)
+		{
+			u8[A1 + 0x42] = 0
+			u8[A1 + 0x24] = 0
+			playSound(0x58)
+		}
 
+		if (u16[A0 + 0x30] != 0)
+		{
+			u16[A0 + 0x30] -= 8
+		}
+	}
+
+	D0.u16 = u16[A0 + 0x30]
+	if (objA0.flags2a & 0x01)
+		D0.s16 = -D0.s16
+	D0.u16 += u16[A0 + 0x40]
+	objA0.position.x.u16 = D0.u16
+	objA1.position.x.u16 = D0.u16
+
+	D1 = objA0.box_size.x + 11
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	if (!(objA0.subtype2c == 0xa4 && u16[A0 + 0x30] == 0x40))	// subtype of sealing bridge floor, and offset 30 is the distance away from extended position (retracted is usually 0x40)
+		fn01dc56()	// SolidObjectFull routine, which is always called in the original object code
+
+	D0.u16 = u16[A0 + 0x40]
+	DrawOrUnloadObjectByD0()
+}
 
 
 
