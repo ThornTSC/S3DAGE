@@ -1,9 +1,4 @@
 {
-	// Menu background rectangle
-	"2_option_dim":  { "File": "2_option_dim.png", "Center": "45,19" },
-	"3_option_dim":  { "File": "3_option_dim.png", "Center": "45,27" },
-	"4_option_dim":  { "File": "4_option_dim.png", "Center": "45,35" },
-
 	// PAUSED text
 	"paused":  { "File": "smallmenu.png", "Rect": "0, 120, 90,16", "Center": "45,8" },
 	"select_difficulty":  { "File": "difficulty_menu.png", "Rect": "0, 0, 272,16", "Center": "137,8" },

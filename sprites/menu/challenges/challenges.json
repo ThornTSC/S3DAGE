@@ -1,8 +1,6 @@
 {
 	// Menu border rectangles
-	"blackscreen_optionsdim":  { "File": "blackscreen_optionsdim.png", "Center": "114,30" },
-	"blackscreen_besttimesdim":  { "File": "blackscreen_besttimesdim.png", "Center": "76,32" },
-	"blackscreen_besttimesdim_rect":  { "File": "blackscreen_besttimesdim_rect.png", "Center": "74,30" },
+	"blackscreen_besttimesdim":  { "File": "blackscreen_besttimesdim.png", "Center": "76,32" },		// currently unused in favor of rectangular variant
 
 	// Challenge menu options, arrows, and base text
 	"leftarrow_large":  { "File": "leftarrow_large.png", "Center": "7,14" },
@@ -22,7 +20,7 @@
 	"text_option_press":  { "File": "text_option_press.png", "Center": "19,4" },
 	"text_option_hold":  { "File": "text_option_hold.png", "Center": "16,4" },
 	// "text_backbuttonexit":  { "File": "text_backbuttonexit.png", "Center": "64,4" },	// no longer in use
-	"text_gametype":  { "File": "text_gametype.png", "Center": "39,4" },
+	// "text_gametype":  { "File": "text_gametype.png", "Center": "39,4" },
 	"text_musictype":  { "File": "text_musictype.png", "Center": "43,4" },		// off center to align with text_gametype
 	"text_option_revisited":  { "File": "text_option_revisited.png", "Center": "32,4" },	
 	"text_option_classic":  { "File": "text_option_classic.png", "Center": "25,4" },
@@ -41,7 +39,7 @@
 	"star_gold":  { "File": "star_gold.png"},
 	"star_silver":  { "File": "star_silver.png"},
 	"star_bronze":  { "File": "star_bronze.png"},
-	"star_red":  { "File": "star_red.png"},
+	// "star_red":  { "File": "star_red.png"},
 
 	// Digits, dash, and minutes/seconds symbols (Sonic 3D tall)
 	"S3D_digit_0": { "File": "Sonic3D_digits_tall.png", "Rect":  "0,0,8,16" },
