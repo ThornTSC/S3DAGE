@@ -57,7 +57,11 @@
   "PaletteDEZ2Boss":  { "File": "palettes/PaletteDEZ2Boss.bin" },
   "PaletteFinalBoss":  { "File": "palettes/PaletteFinalBoss.bin" },
 
+  // Hard Mode Super Emerald special stage layouts
+  "HardSuperEmeralds":  { "File": "SKSS1K.bin" },
+
   // Original special stage layouts
+  "S3SS6_Orig":  { "File": "S3SS6_Orig.bin" },
   "S3SS8_Orig":  { "File": "S3SS8_Orig.bin" },
   "SKSS5_Orig":  { "File": "SKSS5_Orig.bin" },
   "SKSS7_Orig":  { "File": "SKSS7_Orig.bin" },

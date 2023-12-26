@@ -992,10 +992,10 @@
     "File": "SKSS1.bin",
     "RomInject": "0x1fcf2a"
   },
-  "SKStageSet1K": {
-    "File": "SKSS1K.bin",
-    "RomInject": "0x2d3ad0"
-  },
+//  "SKStageSet1K": {
+//    "File": "SKSS1K.bin",
+//    "RomInject": "0x2d3ad0"
+//  },
 //  "SKStageSet2": {  // commented out; this file actually affects blue sphere game data and thus randomly generated stages
 //    "File": "SKSS2.bin",
 //    "RomInject": "0x1fd5ca"

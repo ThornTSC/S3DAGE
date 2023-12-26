@@ -1501,7 +1501,8 @@ function void fn0085b0()
 		// Main game stages
 		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)	// new check for Knuckles
 		{
-			Kosinski.decompress(0x2d3ad0, 0xffff0000)	// shift to ROM location of Knuckles' super emerald layouts
+			System.loadExternalRawData("HardSuperEmeralds", KosinskiRawdataBuffer)	// copy Hard Super Emerald special stage layouts to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
 			u8[0xffffef7c] |= 0x01	// set a green sphere flag for mods in the least significant bit of otherwise unused RAM byte 0xffffef7c
 		}
 		else
@@ -1532,6 +1533,14 @@ function void fn0085b0()
 		bluespheres.position.y = u16[A2+4]
 		bluespheres.rings_remaining = u16[A2+6]
 
+		// Special check for Original Mode Sonic 3 Special Stage 6
+		if (original_mode && !useSKLayouts && global.next_bluespheres == 5)
+		{
+			System.loadExternalRawData("S3SS6_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S3SS6_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S3SS6_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S3SS6_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
 		// Special check for Original Mode Sonic 3 Secret Special Stage
 		if (original_mode && !useSKLayouts && global.next_bluespheres == 7)
 		{
@@ -1548,6 +1557,7 @@ function void fn0085b0()
 			System.loadExternalRawData("SKSS5_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
 			System.loadExternalRawData("SKSS5_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
+
 		// Special check for Original Mode Sonic & Knuckles Special Stage 7
 		else if (original_mode && useSKLayouts && global.next_bluespheres == 6)
 		{
