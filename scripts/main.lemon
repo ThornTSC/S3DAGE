@@ -21493,13 +21493,13 @@ function void RedStarRing()
 	if (global.characters == 1 && objA0.subtype2c > 0x30)							// max subtype for Sonic's red star rings
 	{
 		s8[A0 + 0x26] = 24	// assume a Tails red star ring, 24 bytes ahead
-		if (objA0.subtype2c <= 0x50 && (u8[redstarring_address + 24] & ringNum))	// a Tails red star ring
+		if (objA0.subtype2c > 0x40 && objA0.subtype2c <= 0x50 && (u8[redstarring_address + 24] & ringNum))	// a Tails red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
 		}
 		s8[A0 + 0x26] = 48	// set as a Knuckles red star ring, 48 bytes ahead
-		if (objA0.subtype2c <= 0x90 && (u8[redstarring_address + 48] & ringNum))	// a Knuckles red star ring
+		if (objA0.subtype2c > 0x80 && objA0.subtype2c <= 0x90 && (u8[redstarring_address + 48] & ringNum))	// a Knuckles red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
@@ -21508,13 +21508,13 @@ function void RedStarRing()
 	else if (global.characters == 2 && (objA0.subtype2c <= 0x40 || objA0.subtype2c > 0x50))	// range of Tails's red star rings
 	{
 		s8[A0 + 0x26] = -24	// assume a Sonic red star ring, 24 bytes prior
-		if (objA0.subtype2c <= 0x40 && (u8[redstarring_address - 24] & ringNum))	// a Sonic red star ring
+		if (objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address - 24] & ringNum))	// a Sonic red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
 		}
 		s8[A0 + 0x26] = 24	// set as a Knuckles red star ring, 24 bytes ahead
-		if (objA0.subtype2c > 0x50 && (u8[redstarring_address + 24] & ringNum))		// a Knuckles red star ring
+		if (objA0.subtype2c > 0x80 && objA0.subtype2c <= 0x90 && (u8[redstarring_address + 24] & ringNum))	// a Knuckles red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
@@ -21523,13 +21523,13 @@ function void RedStarRing()
 	else if (global.characters == 3 && objA0.subtype2c < 0x80)						// min subtype for Knux's red star rings
 	{
 		s8[A0 + 0x26] = -48	// assume a Sonic red star ring, 48 bytes prior
-		if (objA0.subtype2c <= 0x30 && (u8[redstarring_address - 48] & ringNum))	// a Sonic red star ring
+		if (objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address - 48] & ringNum))	// a Sonic red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
 		}
-		s8[A0 + 0x26] = -24	// set as a Knuckles red star ring
-		if (objA0.subtype2c <= 0x50 && (u8[redstarring_address - 24] & ringNum))	// a Tails red star ring
+		s8[A0 + 0x26] = -24	// set as a Tails red star ring, 24 bytes prior
+		if (objA0.subtype2c > 0x40 && objA0.subtype2c <= 0x50 && (u8[redstarring_address - 24] & ringNum))	// a Tails red star ring
 		{
 			UnloadObject()		// only display other character's red star rings if we haven't picked them up yet
 			return
