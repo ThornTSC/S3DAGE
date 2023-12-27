@@ -146,6 +146,7 @@ function void UpdateGamePause()
 					if (total_stars < unlock.theme.south)
 						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
+					countTotalStars()
 					customMenu.countMedals()
 				}
 				else if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
@@ -205,6 +206,7 @@ function void UpdateGamePause()
 					if (total_stars < unlock.theme.south)
 						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 
+					countTotalStars()
 					customMenu.countMedals()
 				}
 
