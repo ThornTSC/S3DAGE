@@ -3272,6 +3272,7 @@ function void Standalone.onLevelStart()
 		player.score = 0
 		TA_menu_selection = 0
 		time_attack_end = 0
+		checkpoint.time = 0
 
 		loadMedalTimes()
 
