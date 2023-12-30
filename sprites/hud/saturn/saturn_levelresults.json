@@ -12,6 +12,7 @@
 
 	"saturn_got_text":  { "File": "saturn_levelresults.png", "Rect": "0,0,48,16", "Center": "-9,0" },
 	"saturn_through_text":  { "File": "saturn_levelresults.png", "Rect": "64,0,112,16", "Center": "0,0" },	// if using usual S3&K alignment, leave Center at 0,0
+	"saturn_act_text":  { "File": "saturn_levelresults.png", "Rect": "176,64,48,16", "Center": "0,0" },
 
 	"saturn_specialstage_text":  { "File": "saturn_levelresults.png", "Rect": "0,16,208,16", "Center": "104,0" },
 	"saturn_chaosemerald_text":  { "File": "saturn_levelresults.png", "Rect": "0,32,208,16", "Center": "104,0" },

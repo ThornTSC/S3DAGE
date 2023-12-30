@@ -1,4 +1,6 @@
 {
 	"saturn_titlecard_act1":  { "File": "saturn_actnumbers.png", "Rect": "0,0,48,32", "Center": "0,0" },
-	"saturn_titlecard_act2":  { "File": "saturn_actnumbers.png", "Rect": "0,32,48,32", "Center": "0,0" }
+	"saturn_titlecard_act2":  { "File": "saturn_actnumbers.png", "Rect": "0,32,48,32", "Center": "0,0" },
+	"saturn_titlecard_1":  { "File": "saturn_actnumbers.png", "Rect": "28,0,20,32", "Center": "0,0" },
+	"saturn_titlecard_2":  { "File": "saturn_actnumbers.png", "Rect": "28,32,20,32", "Center": "0,0" }
 }

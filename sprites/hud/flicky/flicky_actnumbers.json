@@ -1,4 +1,6 @@
 {
 	"flicky_titlecard_act1":  { "File": "flicky_actnumbers.png", "Rect": "0,0,46,32", "Center": "0,0" },
-	"flicky_titlecard_act2":  { "File": "flicky_actnumbers.png", "Rect": "0,32,46,32", "Center": "0,0" }
+	"flicky_titlecard_act2":  { "File": "flicky_actnumbers.png", "Rect": "0,32,46,32", "Center": "0,0" },
+	"flicky_titlecard_1":  { "File": "flicky_actnumbers.png", "Rect": "29,0,17,32", "Center": "0,0" },
+	"flicky_titlecard_2":  { "File": "flicky_actnumbers.png", "Rect": "29,32,17,32", "Center": "0,0" }
 }

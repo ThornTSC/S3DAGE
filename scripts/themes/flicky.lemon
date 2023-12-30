@@ -299,7 +299,7 @@ function bool Flicky.LevelResults(s16 px, s16 py, s16 renderQueue)
     {
         Renderer.drawCustomSprite(Flicky.getCharacterBonusTextIcon(getMainCharacter()), px+37, py-5, 0, SPRITE_FLAG_PRIO, 0xe000)  // these icons are blank in this theme
 
-        Renderer.drawCustomSprite("flicky_hud_text_total", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        Renderer.drawCustomSprite("flicky_hud_text_total", px - 20, py, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
     else if (objA0.animation.sprite == 0x0c)
@@ -349,8 +349,10 @@ function bool Flicky.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x10)
     {
-        s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? -40 : 0		// show "Zone" in SSZ, thus shift "Through" left.
+        s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? -40 : -32		// show "Zone" in SSZ, thus shift "Through" left.
         Renderer.drawCustomSprite("flicky_through_text", px + through_x_offset, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+		if (through_x_offset == -32)	// only when ACT should be shown; zone is handled in the next condition
+        	Renderer.drawCustomSprite("flicky_act_text", px + through_x_offset + 128, py, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
     else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ.
@@ -360,7 +362,7 @@ function bool Flicky.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x0f)
     {
-        Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        Renderer.drawCustomSprite(stringformat("flicky_titlecard_%d", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px + 28, py + 2, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
 }
