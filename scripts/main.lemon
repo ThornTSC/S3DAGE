@@ -9261,9 +9261,9 @@ function void fn01f7ce()
 			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
 			{
 				D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x90
-				s16 minDiff = 0
+				s16 minDiff = 12
 				if (original_mode)
-					minDiff = 12		// For a slightly faster exit at the top
+					minDiff = 0		// For a slightly faster exit at the top
 				if (D0.s16 >= minDiff && D0.u16 <= 0x130)
 				{
 					fn01f914()
@@ -10731,9 +10731,9 @@ function void HCZ1_CustomSprites()
 {
 	if (time_attack == 1 || time_attack == 2)
 		Renderer.drawCustomSprite("hcz1_turbine", 0x370c - camera.foreground.x.u16, 0x06a0 - camera.foreground.y.u16, 0, 0x00, 0x9800)
-	Renderer.drawCustomSprite("hcz_ceilingshadow", 0x3720 - camera.foreground.x.u16, 0x0500 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2100)
 	if (!original_mode)
 	{
+		Renderer.drawCustomSprite("hcz_ceilingshadow", 0x3720 - camera.foreground.x.u16, 0x0500 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2100)
 		Renderer.drawCustomSprite("hcz_brick", 0x3620 - camera.foreground.x.u16, 0x0670 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x4001)
 		Renderer.drawCustomSprite("hcz_brick", 0x3620 - camera.foreground.x.u16, 0x06f0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x4001)
 		Renderer.drawCustomSprite("hcz_brick", 0x3630 - camera.foreground.x.u16, 0x0700 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x4001)
@@ -18326,6 +18326,12 @@ function void fn0660e2()
 //# address-hook(0x06615a) end(0x066188)
 function void fn06615a()
 {
+//	if (original_mode)
+//	{
+//		fn06615a_Orig()		// Kept for posterity in case there are issues with new A.I.R. preview movement boundary calculations
+//		return
+//	}
+
 	if (objA0.velocity.x != 0)
 	{
 		if (objA0.velocity.x > 0)
@@ -18354,8 +18360,32 @@ function void fn06615a()
 	}
 }
 
+/*
+function void fn06615a_Orig()
+{
+	if (objA0.velocity.x != 0)
+	{
+		u16 borderDistance = 0x10	// the screen extension is 0 in Original Mode, which centers Knuckles on the screen's edge (half of him off screen)
 
-
+		if (objA0.velocity.x > 0)
+		{
+			D0.u16 = camera.position.x.u16 + getScreenWidth() - borderDistance
+			if (D0.u16 <= objA0.position.x.u16)
+			{
+				objA0.velocity.x = 0
+			}
+		}
+		else
+		{
+			D0.u16 = camera.position.x.u16 + borderDistance
+			if (D0.u16 >= objA0.position.x.u16)
+			{
+				objA0.velocity.x = 0
+			}
+		}
+	}
+}
+*/
 
 
 
