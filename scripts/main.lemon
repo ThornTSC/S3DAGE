@@ -8444,6 +8444,7 @@ function void Standalone.onLevelFinished()
 	restart_timer = 0
 	exit_timer = 0
 	checkpoint.number = 0
+	checkpoint.time = 0
 	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 	global.stage_type = 0
 	global.in_extra_stage = 0
