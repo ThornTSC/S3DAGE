@@ -8956,6 +8956,8 @@ function void fn01c46e()
 	{
 		u8[0xfffff72e] = 0
 		move_area.left = camera.position.x.u16
+		if (u16[0xffffb010] == 0x13a0)	// AIZ1 start position for Sonic and Tails
+			move_area.left = max(camera.position.x.u16, 0x12e0)		// max function and set value added to prevent ultrawide resolutions from showing garbage graphics to left.
 		if (camera.position.x.u16 >= 0x1308 - getScreenExtend())	// Not exact, but works for 416px
 		{
 			if (checkpoint.number == 0 && isMainCharacter(CHARACTER_SONIC))
@@ -9757,8 +9759,6 @@ function void GenericObject.Update()
 	Object.animationUpdate(0x02bf9c)
 	DrawOrUnloadObject()
 }
-
-
 
 
 
@@ -12111,6 +12111,12 @@ function void fn06c698()
 
 	level.bossarea.left -= getScreenExtend()
 	level.bossarea.right += getScreenExtend()
+
+	// Alter some chunks to the right of the level's edge (i.e., the left edge due to wrapping)
+	// to allow the correct zone transition in ultrawide resolutions.
+	u8[0xffff8108] = 0x50
+	u8[0xffff8188] = 0x4f
+	u8[0xffff8208] = 0xbc
 }
 
 //# address-hook(0x06d45e) end(0x06d4aa)
@@ -12335,7 +12341,7 @@ function void fn06c8f4()
 #if STANDALONE
 	// Replace a chunk so Knuckles won't run into a wall (just outside the right screen border)
 	// Note that this chunk is actually on the left of the level, as we're on the rightmost edge of the level, and the chunks wrap here
-	u8[0xffff8188] = 0x4f	// 0x4a in AIR
+//	u8[0xffff8188] = 0x4f	// 0x4a in AIR. We handle this on boss load (function void fn06c698()) instead of after the level's end so the fix is always visible in ultrawide resolutions.
 #endif
 }
 
