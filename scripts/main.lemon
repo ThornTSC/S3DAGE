@@ -9763,6 +9763,36 @@ function void GenericObject.Update()
 
 
 
+// When the AIZ waterfall log spawner first loads, create more logs underneath as if the logs had always been falling.
+// This makes climbing the logs from below more useful and apparent, as there is no waiting for the spawner to drop the logs.
+// This must be coupled with loading the spawner at all y positions in Object Pos data.
+// Function taken from objects\01_aiz\aiz_waterfallwood.lemon
+//# address-hook(0x02b586) end(0x02b5ce)
+function void AIZWaterfall.Init()
+{
+	if (objA0.position.x.u16 == 0x1c40 && u16[0xffffb014] > 0x0610)		// on Knux AIZ2 path heading under falling logs on S/T path
+	{
+	//	UnloadObject()													// Now that we load falling logs at all y positions, we need this safety check. Commented out full unload so if we debug move to S/T path, it functions.
+		return															// The falling logs above the AIZ1 Sonic intro don't fall into the intro area quickly enough to cause an issue.
+	}
+
+	base.AIZWaterfall.Init()
+	if (original_mode)
+		return
+
+	// Spawn more platforms underneath to make the waterfall climb accessible right away from below
+	u16 backupYpos = objA0.position.y.u16
+	objA0.position.y.u16 -= 0x80 - (level.framecounter.low & 0x7f)		// the spawner in DAGE levels spawns a log every 0x80 frames per the level framecounter, with each log moving downward at 1 pixel per second.
+	u8 waterfallHeight = (objA0.position.x.u16 == 0x1c40) ? 2 : 3		// number of logs that fit between the source and the water. Only 2 for the S/T route waterfall in Act 2.
+	for (u8 i = 0; i <= waterfallHeight; ++i)
+	{
+		objA0.position.y.u16 += 0x80
+		AIZWaterfall.spawnPlatform()
+	}
+	objA0.position.y.u16 = backupYpos
+}
+
+
 
 
 // Adjust where the camera vertically locks for the blimp sequence based on screen resolution.
