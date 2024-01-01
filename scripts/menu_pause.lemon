@@ -942,7 +942,12 @@ function void fn02ddc6()
 			// Render the score digits directly right here
 			if (renderQueue != 0 && D0.u16 > 0)
 			{
-				HUD.drawDigit(D0.u16 - 1, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
+				if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				{
+					HUD.drawSprite(stringformat("hud_digit_%d_results", D0.u16 - 1), D2.u16 - 0x80 - 28, D3.u16 - 0x80, renderQueue)
+				}
+				else
+					HUD.drawDigit(D0.u16 - 1, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
 			}
 		}
 
@@ -955,7 +960,12 @@ function void fn02ddc6()
 		// Render the additional 0 at the end
 		if (renderQueue != 0)
 		{
-			HUD.drawDigit(0, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
+			if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			{
+				HUD.drawSprite("hud_digit_0_results", D2.u16 - 0x80 - 28, D3.u16 - 0x80, renderQueue)
+			}
+			else
+				HUD.drawDigit(0, D2.u16 - 0x80, D3.u16 - 0x80, renderQueue)
 		}
 	}
 }
