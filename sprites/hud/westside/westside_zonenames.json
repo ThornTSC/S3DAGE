@@ -1,0 +1,51 @@
+{
+    "westside_titleblue":  { "File": "westside_titleblue.png"},
+    "westside_titleorange":  { "File": "westside_titleorange.png"},
+    "westside_titlegreen":  { "File": "westside_titlegreen.png"},
+    "westside_titleyellow":  { "File": "westside_titleyellow.png"},
+    "westside_titleredside":  { "File": "westside_titleredside.png"},
+    "westside_titleblueside":  { "File": "westside_titleblueside.png"},
+    "westside_titleorangeside":  { "File": "westside_titleorangeside.png"},
+    "westside_titlegreenside":  { "File": "westside_titlegreenside.png"},
+    "westside_dage":  { "File": "westside_dage.png", "Center": "65,0"},
+    "westside_rtwi":  { "File": "westside_rtwi.png", "Center": "93,0"},
+
+    "westside_titlecard_zone_text":  { "File": "westside_zonenames.png", "Rect": "0,240,63,16", "Center": "4,0" },
+  
+    "westside_titlecard_zone0":   { "File": "westside_zonenames.png", "Rect": " 0,  0,182,16", "Center": "13,-8" }, // Rect3 - Center1 = 169 for all entries
+    "westside_titlecard_zone1":   { "File": "westside_zonenames.png", "Rect": " 0, 16,136,16", "Center": "-33,-8" }, // in order to right-align them all.
+    "westside_titlecard_zone2":   { "File": "westside_zonenames.png", "Rect": " 0, 32,210,16", "Center": "41,-8" },
+    "westside_titlecard_zone3":   { "File": "westside_zonenames.png", "Rect": " 0, 48,200,16", "Center": "31,-8" },
+    "westside_titlecard_zone4":   { "File": "westside_zonenames.png", "Rect": " 0, 64,210,16", "Center": "41,-8" },
+    "westside_titlecard_zone5":   { "File": "westside_zonenames.png", "Rect": " 0, 80, 87,16", "Center": "-82,-8" },
+    "westside_titlecard_zone6":   { "File": "westside_zonenames.png", "Rect": " 0, 96,173,16", "Center": "4,-8" },
+    "westside_titlecard_zone7":   { "File": "westside_zonenames.png", "Rect": " 0,112,210,16", "Center": "41,-8" },
+    "westside_titlecard_zone8":   { "File": "westside_zonenames.png", "Rect": " 0,128,151,16", "Center": "-18,-8" },
+    "westside_titlecard_zone9":   { "File": "westside_zonenames.png", "Rect": " 0,144,135,16", "Center": "-34,-8" },
+    "westside_titlecard_zone10":  { "File": "westside_zonenames.png", "Rect": " 0,160,205,16", "Center": "36,-8" },
+    "westside_titlecard_zone11":  { "File": "westside_zonenames.png", "Rect": " 0,176,142,16", "Center": "-26,-8" },    // Exception made here to use same alignment for DEATH EGG as in Sonic 2
+    "westside_titlecard_zone12":  { "File": "westside_zonenames.png", "Rect": " 0,192,195,16", "Center": "26,-8" },
+    "westside_titlecard_zone13":  { "File": "westside_zonenames.png", "Rect": " 0,208,197,16", "Center": "28,-8" },
+
+    "westside_titlecard_bonus":   { "File": "westside_zonenames.png", "Rect": " 0,224, 80,16", "Center": "-2,0" },
+    "westside_titlecard_stage":   { "File": "westside_zonenames.png", "Rect": "96,224, 76,16", "Center": "-2,0" },
+
+    "westside_titlecard_unlock0001":     { "File": "westside_zonenames.png", "Rect": " 0,256,190,16", "Center": "21,-8" }
+
+    // Same as above, but with proper centers rather than centers meant for title card alignment.
+    // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.
+    // "titlecard_zone00_menu":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "86,33" },
+    // "titlecard_zone01_menu":  { "File": "Title_HCZ.png", "Rect": "0,0,139,66", "Center": "70,33" },
+    // "titlecard_zone02_menu":  { "File": "Title_MGZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
+    // "titlecard_zone03_menu":  { "File": "Title_CNZ.png", "Rect": "0,0,194,66", "Center": "97,33" },
+    // "titlecard_zone04_menu":  { "File": "Title_ICZ.png", "Rect": "0,0,100,66", "Center": "50,33" },
+    // "titlecard_zone05_menu":  { "File": "Title_LBZ.png", "Rect": "0,0,167,66", "Center": "84,33" },
+    // "titlecard_zone06_menu":  { "File": "Title_MHZ.png", "Rect": "0,0,201,66", "Center": "101,33" },
+    // "titlecard_zone07_menu":  { "File": "Title_FBZ.png", "Rect": "0,0,192,66", "Center": "96,33" },
+    // "titlecard_zone08_menu":  { "File": "Title_SOZ.png", "Rect": "0,0,150,66", "Center": "75,33" },
+    // "titlecard_zone09_menu":  { "File": "Title_LRZ.png", "Rect": "0,0,138,66", "Center": "69,33" },
+    // "titlecard_zone0a_menu":  { "File": "Title_SSZ.png", "Rect": "0,0,194,66", "Center": "97,33" },
+    // "titlecard_zone0b_menu":  { "File": "Title_DEZ.png", "Rect": "0,0,141,66", "Center": "71,33" },
+    // "titlecard_zone0c_menu":  { "File": "Title_DDZ.png", "Rect": "0,0,180,66", "Center": "90,33" },
+    // "titlecard_zoneHPZ_menu":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "93,33" }
+}

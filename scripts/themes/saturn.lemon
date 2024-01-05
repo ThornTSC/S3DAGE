@@ -455,7 +455,7 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 				x_offset = 17
 			else if (px == 0x0060)	// MILES in MILES CAN GO TO
 				x_offset = -7
-			else if (px == 0x00a8)	// MILES in MILES TAILS CAN
+			else if (px == 0x00a8)	// MILES in NOW MILES CAN
 				x_offset = 1
 			
 			Renderer.drawCustomSprite("saturn_miles_text", px + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)

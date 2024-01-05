@@ -1888,6 +1888,8 @@ function void RenderHUD_RedRings()
 	u16 py = getScreenHeight() - 16
 	if (time_attack_end && time_attack_hud == 0)
 		py -= 6
+	u8 flags = (theme.westside && S2TitleCard.loaded) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
+	u16 renderQueue = (global.game.paused) ? 0xfff1 : 0xe008
 	// u8 ringNum = objA0.subtype2c & 0x1f
 	if (draw_HUD && !original_mode && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00 && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails))
 	{
@@ -1901,7 +1903,7 @@ function void RenderHUD_RedRings()
 			alpha = 0x80c0c0c0
 			ringKey = "medal_02_00"
 		}
-		Renderer.drawCustomSprite(ringKey, px, py, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
 
 		if (u8[redstarring_address] & 0xe2)
 		{
@@ -1913,7 +1915,7 @@ function void RenderHUD_RedRings()
 			alpha = 0x80c0c0c0
 			ringKey = "medal_02_00"
 		}
-		Renderer.drawCustomSprite(ringKey, px + 12, py, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 12, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
 
 		if (u8[redstarring_address] & 0x04)
 		{
@@ -1925,7 +1927,7 @@ function void RenderHUD_RedRings()
 			alpha = 0x80c0c0c0
 			ringKey = "medal_02_00"
 		}
-		Renderer.drawCustomSprite(ringKey, px + 24, py, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 24, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
 
 		if (u8[redstarring_address] & 0x08)
 		{
@@ -1937,7 +1939,7 @@ function void RenderHUD_RedRings()
 			alpha = 0x80c0c0c0
 			ringKey = "medal_02_00"
 		}
-		Renderer.drawCustomSprite(ringKey, px + 36, py, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 36, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
 
 		if (u8[redstarring_address] & 0x10)
 		{
@@ -1949,7 +1951,7 @@ function void RenderHUD_RedRings()
 			alpha = 0x80c0c0c0
 			ringKey = "medal_02_00"
 		}
-		Renderer.drawCustomSprite(ringKey, px + 48, py, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 48, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
 	}
 }
 
@@ -2131,6 +2133,10 @@ function void RenderHUD_Challenges()
 			{
 				South.BestText(px, py, renderQueue)
 			}
+			else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			{
+				Westside.BestText(px, py, renderQueue)
+			}
 			else
 				Renderer.drawCustomSprite("hud_text_best", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
 
@@ -2204,6 +2210,8 @@ function void RenderHUD_MedalTimes()
 				Saturn.DevText(medal_py)
 			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				South.DevText(medal_py)
+			else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				Westside.DevText(medal_py)
 			else
 				Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
 
@@ -2235,6 +2243,8 @@ function void RenderHUD_MedalTimes()
 				Saturn.TargetTime(medal_px, medal_py, medalOffset)
 			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				South.TargetTime(medal_px, medal_py, medalOffset)
+			else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				Westside.TargetTime(medal_px, medal_py, medalOffset)
 			else
 			{
 				u32 medal_time_address = 0x840240 + (0x10 * (setting.levelselect.characters - 1)) + medalOffset
@@ -2668,6 +2678,12 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 			South.HUD.drawSprite(theme_key, px, py, renderQueue)
 			return
 		}
+		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			theme_key = stringformat("%s%s", "westside_", key)
+			Westside.HUD.drawSprite(theme_key, px, py, renderQueue)
+			return
+		}
 	}
 
 	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
@@ -2756,6 +2772,11 @@ function void HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue
 	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 	{
 		South.HUD.drawDigit_Challenges(digit, px, py, renderQueue)
+		return
+	}
+	else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	{
+		Westside.HUD.drawDigit_Challenges(digit, px, py, renderQueue)
 		return
 	}
 
@@ -3195,15 +3216,13 @@ function void GiantRing.Init()
 
 
 
-
-
-
-
 // Set giant rings to appear or not appear appropriately for time attack modes
 // and set MHZ2 to use a post-cutscene start for Sonic and Tails
 // Functions taken from standalone\gamecallbacks.lemon
 function void Standalone.onLevelStart()
 {
+	S2TitleCard.disappear = false
+	S2TitleCard.loaded = false
 	draw_HUD = true
 	System.setGlobalVariableValueByName("ChaosPath", 0)	// At the moment there are some incompatibilities with Chaos starting from the AIZ1 Knuckles start.
 														// If these are resolved, ChaosPath must be considered as 0 for Challenges and Marathon modes.
@@ -3384,6 +3403,8 @@ function void restartAtCheckpoint()
 
 function void Standalone.onRestartAtCheckpoint()
 {
+	S2TitleCard.disappear = false
+	S2TitleCard.loaded = false
 	draw_HUD = true
 	freeze_time = 0
 
@@ -5929,11 +5950,13 @@ function void StartCharacterWinPose()
 
 
 // Have level results add up instantly and not make any point-adding noises in marathon modes.
-// This function also maintains shields on certain transitions between Acts 1 and 2.
+// This function also maintains shields on certain transitions between Acts 1 and 2 and prevents the full Sonic 2 title card from showing between acts.
 // Function taken from maingame\hud\levelresults.lemon
 //# address-hook(0x02dc36) end(0x02dd38)
 function void LevelResults.UpdateBonusCounting()
 {
+	titlecard.full = false
+
 	if (time_attack <= 2)
 	{
 		if (objA0.countdown_value != 0)
@@ -7221,6 +7244,8 @@ function void Challenge.showEndInterface()
 			Saturn.NewRecordText()
 		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			South.NewRecordText()
+		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			Westside.NewRecordText()
 		else
 			Renderer.drawCustomSprite("new_record", getScreenWidth() / 2, 0x2e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
@@ -7234,6 +7259,8 @@ function void Challenge.showEndInterface()
 			Saturn.TimeStopBonusText()
 		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			South.TimeStopBonusText()
+		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			Westside.TimeStopBonusText()
 		else
 			Renderer.drawCustomSprite("time_stop_bonus", getScreenWidth() - 62 - 16, 0x0e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
 	}
@@ -7273,6 +7300,8 @@ function void Challenge.manageEndMenu()
 		Saturn.TAEndMenu()
 	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		South.TAEndMenu()
+	else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		Westside.TAEndMenu()
 	else if (TA_menu_selection < 3)
 	{
 		Renderer.drawCustomSprite(stringformat("ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)

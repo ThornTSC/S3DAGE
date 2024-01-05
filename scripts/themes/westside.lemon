@@ -1,0 +1,772 @@
+global bool titlecard.full	// true when the colored shapes should be behind the zone name, else false
+global bool S2TitleCard.disappear
+global bool S2TitleCard.loaded
+
+function void Westside.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
+{
+	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
+	{
+		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
+		u32 alpha = 0xffffffff
+		if (!showRingHUD)
+			alpha = 0xff0000ff
+		if (py == 0x28)
+		{
+			px -= 64
+			py -= 24
+		}
+		else
+		{
+			px -= 40
+			py += 8
+		}
+		Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, alpha)	// -74, -30 centers display atop the ring
+		return
+	}
+
+    u16 inputY = py
+  	if ((time_attack == 1 || time_attack == 2) && py != 0x48 && !HUD.isShadowTarget(key))	// 0x48 is the height of Shadow's boost bar
+	{
+        py -= 0x10
+		if (time_attack_hud)	// center HUD?
+		{
+			//px += 136			// move time and rings to the right, half a pixel left of center
+			px += getScreenWidth() / 2 - 64
+			if (inputY == 0x28 && hud.layout == 1)	// rings?
+				px += 13		// move even more to the right. Note that this is 1px more than it should be for aesthetics, lining up TIME's M with RINGS' R.
+		}
+	}
+	if (px >= 0x58 && px <= 0x68 && py == 0x28 && hud.layout == 1)	// Rings in Mania HUD position
+		px -= 0x18								// move to classic position
+
+	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
+		Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_NO_GLOBAL_TINT | SPRITE_FLAG_PRIO, renderQueue)	// do not tint the lives HUD while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	else
+		Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+	if (inputY == 0x18 && freeze_time)	// HUD graphics have a base py of 0x08, and the TIME row is 0x10 beyond that
+    {
+		if (freeze_time >= 64)
+		{
+			if (key == "westside_hud_char_minutes")
+				Renderer.drawCustomSprite("westside_hud_char_minutes_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			else if (key == "westside_hud_char_seconds")
+				Renderer.drawCustomSprite("westside_hud_char_seconds_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			else if (key == "westside_hud_char_colon")
+				Renderer.drawCustomSprite("westside_hud_char_colon_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			else if (key == "westside_hud_text_time")
+				Renderer.drawCustomSprite("westside_hud_text_time_chaosstage", px - 1, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+		}
+		else
+		{
+			if (key == "westside_hud_char_minutes")
+				Renderer.drawCustomSprite("westside_hud_char_minutes_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			else if (key == "westside_hud_char_seconds")
+				Renderer.drawCustomSprite("westside_hud_char_seconds_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			else if (key == "westside_hud_char_colon")
+				Renderer.drawCustomSprite("westside_hud_char_colon_tst", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			else if (key == "westside_hud_text_time")
+				Renderer.drawCustomSprite("westside_hud_text_time_chaosstage", px - 1, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+		}
+    }
+}
+
+function void Westside.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue)
+{
+    u16 inputY = py
+    if (time_attack == 1 || time_attack == 2)
+	{
+        py -= 0x10
+		if (time_attack_hud)	// center HUD?
+		{
+			// px += 136			// move time and rings to the right, half a pixel left of center
+			px += getScreenWidth() / 2 - 64
+			if (inputY == 0x28 && hud.layout == 1)	// rings?
+				px -= 12		// move to the left
+		}
+	}
+	Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+	if (inputY == 0x18 && freeze_time)	// HUD graphics have a base py of 0x08, and the TIME row is 0x10 beyond that
+		if (freeze_time >= 64)
+			Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d_tst", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+		else
+			Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d_tst", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+}
+
+function void Westside.BestText(u16 px, u16 py, u16 renderQueue)
+{
+    Renderer.drawCustomSprite("westside_hud_text_best", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+}
+
+function void Westside.NewRecordText()
+{
+	Renderer.drawCustomSprite("westside_new_record", getScreenWidth() / 2, 0x30, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+}
+
+function void Westside.TimeStopBonusText()
+{
+	Renderer.drawCustomSprite("westside_time_stop_bonus", getScreenWidth() - 62 - 16, 0x10, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
+}
+
+function void Westside.DevText(u16 medal_py)
+{
+    Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)   // same font as Angel theme
+}
+
+function void Westside.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)   // same font as Angel theme
+{
+    u32 medal_time_address = 0x840240 + (0x10 * (setting.levelselect.characters - 1)) + medalOffset
+    u16 medal_time_minutes = u8[medal_time_address + 1]
+    u16 medal_time_seconds = u8[medal_time_address + 2]
+    u16 medal_time_frames = u8[medal_time_address + 3]
+    u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
+
+    Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite("angel_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite("angel_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+}
+
+function void Westside.TAEndMenu()
+{
+	if (TA_menu_selection < 3)
+	{
+		Renderer.drawCustomSprite(stringformat("westside_ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_ta_select_act_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("westside_ta_exit_game_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+	}
+	else
+	{
+		Renderer.drawCustomSprite(stringformat("westside_cancel_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_main_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("westside_air_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+	}
+}
+
+function void Westside.PauseMenu_Normal()
+{
+    Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+    Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_restart_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.PauseMenu_Restart()
+{
+    Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+    Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_normal_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_star_post_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_normal_act_start_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.PauseMenu_ExitGame()
+{
+    Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+    Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_main_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_air_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.PauseMenu_Basic()
+{
+    Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+    Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+    Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.PauseMenu_BlueSphere()
+{
+    Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+    Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_ss_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_ss_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_ss_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.PauseMenu_Challenges()
+{
+	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
+	Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 6
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_select_act_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 6
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+}
+
+function void Westside.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 spriteFlags, u16 renderQueue)	// same font as Angel theme
+{
+	Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 126 + 79 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+	if (starCount / 100 != 0)
+	{
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
+	}
+	else if ((starCount / 10) % 10 != 0)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
+	
+	Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+}
+
+function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
+{
+	if (objA0.update_address == 0x02d8e2)
+	{
+//		if (!level.framecounter)	// Level framecounter hasn't moved? Unless we hit the single frame of rollover after 18 minutes of sitting in a level, we are loading a zone fresh.
+//			titlecard.full = true
+
+		u64 backdropKey = "westside_titleblue"
+		if (global.characters == 2)
+			backdropKey = "westside_titleorange"
+		else if (global.characters >= 3)
+			backdropKey = "westside_titlegreen"
+		u64 sideKey = "westside_titleredside"
+	
+		s16 backdropHeight = (objA0.value32 < 14) ? objA0.value32 * getScreenHeight()/14 - getScreenHeight() : 0
+		s16 yellowPosition = (objA0.value32 < 26) ? getScreenWidth() - (getScreenWidth()/20 * (objA0.value32 - 6)) : 0
+		s16 redPosition = (objA0.value32 < 26) ? 120/7 * (objA0.value32 - 19) - 120 : 0
+		u16 alpha = 255
+
+//		if (timer.alldata == 0x0114)	// 0'01"32 on the HUD timer. We assume it is not possible to enter a special stage or touch a star post in this short window of time.
+//			S2TitleCard.disappear = true	// If the title card is up with this timer displayed, we are about to end the between-act title card.
+
+		if (!S2TitleCard.disappear)		// We assume that the timer will be at more than 0'02"00 when finishing a level or entering a special/bonus stage
+		{
+//			if (!global.game.paused)
+//				objA0.value32++		// run a timer
+			if (titlecard.full)
+			{
+				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe008)
+				if (objA0.value32 >= 7)		// yellow rectangle moves for 20 frames before locking in place
+				{
+					Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
+					Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
+				}
+			}
+			else
+			{
+				alpha = 192
+				sideKey = isMainCharacter(CHARACTER_SONIC) ? "westside_titleblueside" : isMainCharacter(CHARACTER_TAILS) ? "westside_titleorangeside" : "westside_titlegreenside"
+			}
+			if (objA0.value32 >= 20)	// red pattern comes in on 14th frame of yellow rectangle's slide and moves for seven frames
+				Renderer.drawCustomSprite(sideKey, redPosition, 0, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a, 0, alpha)
+		}
+		else
+		{
+//			if (!global.game.paused)
+//				objA0.value3e++		// run a timer
+			s16 animationTimer = objA0.value3e // (titlecard.full) ? objA0.value3e : max(s16[objA0.value3e] - 0x0114,0)	// u16[0xfffffe24] is timer minutes and frames
+			backdropHeight = (animationTimer > 8) ? -((animationTimer - 8) * getScreenHeight()/14) : 0
+			yellowPosition = (animationTimer > 4) ? getScreenWidth()/20 * (animationTimer - 4) : 0
+			redPosition = -(120/7 * (animationTimer))
+			if (titlecard.full)
+			{
+				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe008)
+				Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
+				Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
+			}
+			else
+			{
+				alpha = 192
+				sideKey = isMainCharacter(CHARACTER_SONIC) ? "westside_titleblueside" : isMainCharacter(CHARACTER_TAILS) ? "westside_titleorangeside" : "westside_titlegreenside"
+			}
+			Renderer.drawCustomSprite(sideKey, redPosition, 0, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a, 0, alpha)
+
+			// Remove fade-in for Sonic 2 theme, where we want to reveal the level in full color behind the title card
+			if (level.framecounter == 1 && titlecard.full)	// the frame before the framecounter advances, SetPaletteFadedOut() and SetPaletteToBlack() have run
+			{
+				copyMemory(0xfffffc00, 0xfffffc80, 0x80)	// above water palette
+				copyMemory(0xfffff080, 0xfffff000, 0x80)	// underwater palette (note: fade target and displayed palettes are in the opposite order as they are above water)
+				palette_fade.count = 0						// tell the fading functions to fade one entry (this byte is number of colors minus 1), which is always black anyway
+			}
+		}
+		return true
+	}
+}
+
+// Run timers for Sonic 2 title cards outside of their rendering code so they still operate normally during a theme switch mid-title card.
+// Function taken from maingame\hud\titlecard.lemon
+//# address-hook(0x02d8e2) end(0x02d926)
+function void TitleCard.RedBarElement.Update()
+{
+	S2TitleCard.loaded = true
+	if (!level.framecounter)	// Level framecounter hasn't moved? Unless we hit the single frame of rollover after 18 minutes of sitting in a level, we are loading a zone fresh.
+		titlecard.full = true
+	if (timer.alldata == 0x011c)		// 0'01"52 on the HUD timer. We assume it is not possible to enter a special stage or touch a star post in this short window of time.
+		S2TitleCard.disappear = true	// If the title card is up with this timer displayed, we are about to end the between-act title card.
+	if (!global.game.paused)
+	{
+		if (!S2TitleCard.disappear)
+			objA0.value32++		// run a timer for the Sonic 2 title card entering the screen
+		else
+			objA0.value3e++		// run a timer for the Sonic 2 title card leaving the screen
+	}
+
+	A1 = 0xffff0000 + u16[A0 + 0x48]
+	D0.u16 = u16[A1 + 0x32]
+	if (D0.u16 != 0)
+	{
+		// Disappearing
+		if (!(objA0.render_flags & render_flag.VISIBLE))
+		{
+			--u16[A1 + 0x30]
+			UnloadObject()
+			S2TitleCard.disappear = false
+			S2TitleCard.loaded = false
+			return
+		}
+
+		if (D0.u8 >= u8[A0 + 0x28])
+		{
+			objA0.position.y.u16 -= 0x20
+
+		}
+	}
+	else
+	{
+		// Appearing or showing
+		if (objA0.position.y.u16 != u16[A0 + 0x46])
+		{
+			objA0.position.y.u16 += 0x10
+			u8[A1 + 0x34] = 0xff
+		}
+	}
+
+	objA0.box_size.y = 0x70
+	DrawObject()
+}
+
+function bool Westside.TitleCardText(s16 px, s16 py, s16 renderQueue)
+{
+	// Next, code for zone and act names.
+	if (objA0.update_address == 0x02d95c && !original_mode)
+	{
+		// Act number or ZONE text, which all moves in time with the zone name text in the Westside theme
+		if (objA0.animation.sprite == 0x02 || objA0.animation.sprite == 0x03)
+			return true	// don't draw anything but prevent the original graphic from showing
+
+		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
+		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
+		{
+			if (unlock_act)
+				Renderer.drawCustomSprite(stringformat("westside_titlecard_unlock%04d", unlock_act), px + getScreenExtend() - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+			else
+				Renderer.drawCustomSprite(stringformat("westside_titlecard_zone%d", objA0.animation.sprite - 4), px + getScreenExtend() - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+
+			// Sonic 2 title cards lock the act name, word ZONE, and act number in place simultaneously
+			u16 px_zone = (getScreenWidth() - px) + (getScreenExtend() - 40) + 84 - ((px - getScreenWidth()/2)/2)		// (reverse movement) + (accommodate for screen resolutions) - (extra movement to ensure act number starts off-screen)
+			Renderer.drawCustomSprite("westside_titlecard_zone_text", px_zone, py - 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+
+			if (unlock_act || global.zone_act == 0x1601 || global.zone == 0x0a || global.zone == 0x0c)	// unlockable levels, HPZ, SSZ, or DDZ
+				return true	// no act number
+			u64 actNumberKey = stringformat("westside_titlecard_act%d", global.act.apparent + 1)
+			if (global.zone_act == 0x1600 || global.zone_act == 0x1700)
+				actNumberKey = "westside_titlecard_act2"
+			Renderer.drawCustomSprite(actNumberKey, px_zone + 60, py - 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+			return true
+		}
+		// "Bonus"
+		else if (objA0.animation.sprite == 0x12 || objA0.animation.sprite == 0x13)
+		{
+			Renderer.drawCustomSprite("westside_titlecard_bonus", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+			return true
+		}
+		// "Stage"
+		else if (objA0.animation.sprite == 0x14)
+		{
+			Renderer.drawCustomSprite("westside_titlecard_stage", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+			return true
+		}
+	}
+}
+
+
+function string Westside.getCharacterBonusTextIcon(u8 character)
+{
+	return (character == CHARACTER_SONIC) ? "westside_hud_bonus_icon_blue" : (character == CHARACTER_TAILS) ? "westside_hud_bonus_icon_orange" : "westside_hud_bonus_icon_red"
+}
+
+function string Westside.getCharacterBonusTextIconSpecial(u8 character)
+{
+	return (character == CHARACTER_SONIC) ? "hud_bonus_icon_blue_special" : (character == CHARACTER_TAILS) ? "hud_bonus_icon_orange_special" : "hud_bonus_icon_red_special"
+}
+
+function bool Westside.LevelResults(s16 px, s16 py, s16 renderQueue)
+{
+    if (objA0.animation.sprite == 0x0b)
+    {
+        Renderer.drawCustomSprite(Westside.getCharacterBonusTextIcon(getMainCharacter()), px+37, py-5, 0, SPRITE_FLAG_PRIO, 0xe000)  // these icons are blank in this theme
+
+        Renderer.drawCustomSprite("westside_hud_text_total", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x0c)
+    {
+        Renderer.drawCustomSprite(Westside.getCharacterBonusTextIcon(getMainCharacter()), px+37, py-5, 0, SPRITE_FLAG_PRIO, 0xe000)  // these icons are blank in this theme
+
+        Renderer.drawCustomSprite("westside_hud_text_bonus", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x0d)
+    {
+        Renderer.drawCustomSprite("westside_hud_text_ring", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x0e)
+    {
+        Renderer.drawCustomSprite("westside_hud_text_time", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x13)
+    {
+        Renderer.drawCustomSprite("westside_sonic_text", px + 9, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x15)
+    {
+        Renderer.drawCustomSprite("westside_tails_text", px + 2, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x14)
+    {
+        Renderer.drawCustomSprite("westside_miles_text", px + 4, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    if (objA0.animation.sprite == 0x16)
+    {
+        Renderer.drawCustomSprite("westside_knuckles_text", px + 23, py, 0, SPRITE_FLAG_PRIO, 0xe008) // large horizontal shift for Knuckles to center KNUCKLES GOT
+        return true
+    }
+    else if (objA0.animation.sprite == 0x11)
+    {
+        if (isMainCharacter(CHARACTER_KNUCKLES))
+            px += 17
+		else if (isMainCharacter(CHARACTER_SONIC))
+			px -= 9
+		else if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+			px -= 7
+		else
+			px -= 3
+
+        Renderer.drawCustomSprite("westside_got_text", px, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x10)
+    {
+        s16 through_x_offset = (global.zone_act == 0x0a00 || unlock_act) ? 2 : 0		// show "Zone" in SSZ and unlockable acts, thus shift "Through" left.
+        Renderer.drawCustomSprite("westside_through_text", px - 34 + through_x_offset, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+		if (through_x_offset == 0)	// only when ACT should be shown; zone is handled in the next condition
+			Renderer.drawCustomSprite("westside_act_text", px + 91 + through_x_offset, py, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ and unlockable acts.
+    {
+        Renderer.drawCustomSprite("westside_titlecard_zone_text", px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+    else if (objA0.animation.sprite == 0x0f)
+    {
+        Renderer.drawCustomSprite(stringformat("westside_titlecard_act%d", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px+26, py+4, 0, SPRITE_FLAG_PRIO, 0xe008)
+        return true
+    }
+}
+
+function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
+{
+	global.region_code & 0x80
+	u8 gameMode = global.game_mode & 0x7f
+	if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02eac8 || objA0.update_address == 0x02ebcc || objA0.update_address == 0x02ec1e && (gameMode == 0x48 || gameMode == 0x0c))
+	{
+		s16 x_offset = 0
+		s16 y_offset = 0
+
+		bool isSKStage = (global.lock_on_state == 0 && global.sk_bluespheres)
+
+        // HUD.drawNumber() and HUD.drawSprite() calls get funneled through a function that appends the theme prefix. Do NOT add it manually!
+        // This also means using the standard getCharacterBonusTextIcon() function instead of the theme-specific one.
+		if (objA0.animation.sprite == 0x17 || objA0.animation.sprite == 0x31 || objA0.animation.sprite == 0x36)
+		{
+			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
+				HUD.drawSprite("hud_bonus_icon_blue", px-60, py-5, renderQueue-1)
+			else
+				HUD.drawSprite(Westside.getCharacterBonusTextIconSpecial(getMainCharacter()), px-60 + 1, py-5, renderQueue-1)
+				
+			HUD.drawSprite(isSKStage ? "hud_text_score_superstage" : "hud_text_score_chaosstage", px - 96, py, renderQueue)
+			HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", player.score * 10, px + 88, py, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x18 || objA0.animation.sprite == 0x32 || objA0.animation.sprite == 0x37)
+		{
+			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
+				HUD.drawSprite("hud_bonus_icon_blue", px-60, py-5, renderQueue-1)
+			else
+				HUD.drawSprite(Westside.getCharacterBonusTextIconSpecial(getMainCharacter()), px+77, py-5, renderQueue-1)
+
+			HUD.drawSprite(isSKStage ? "hud_text_ring_superstage" : "hud_text_ring_chaosstage", px, py, renderQueue)
+			HUD.drawSprite(isSKStage ? "hud_text_bonus_superstage" : "hud_text_bonus_chaosstage", px + 40, py, renderQueue)
+			HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", results.ring_bonus * 10, px + 184, py, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x19 || objA0.animation.sprite == 0x33 || objA0.animation.sprite == 0x38)
+		{
+			u16 spherePerfectOffset = (unlock_act) ? 93 : 53
+			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
+				HUD.drawSprite("hud_bonus_icon_blue", px-60, py-5, renderQueue-1)
+			else
+				HUD.drawSprite(Westside.getCharacterBonusTextIconSpecial(getMainCharacter()), px + spherePerfectOffset, py-5, renderQueue-1)
+			
+			if (!unlock_act)
+				HUD.drawSprite(isSKStage ? "hud_text_perfect_superstage" : "hud_text_perfect_chaosstage", px, py, renderQueue)
+			else
+			{
+				HUD.drawSprite(isSKStage ? "hud_text_sphere_superstage" : "hud_text_sphere_chaosstage", px, py, renderQueue)
+				HUD.drawSprite(isSKStage ? "hud_text_bonus_superstage" : "hud_text_bonus_chaosstage", px + 56, py, renderQueue)
+			}
+			HUD.drawNumber(isSKStage ? "hud_digit_%d" : "hud_digit_%d_chaosstage", results.time_bonus * 10, px + 184, py, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x1a || objA0.animation.sprite == 0x34 || objA0.animation.sprite == 0x39)
+		{
+			if (getMainCharacter() == CHARACTER_TAILS && original_mode)
+				HUD.drawSprite("hud_bonus_icon_blue", px-60, py-5, renderQueue-1)
+			else
+				HUD.drawSprite(Westside.getCharacterBonusTextIconSpecial(getMainCharacter()), px+60, py-5, renderQueue-1)
+			
+			HUD.drawSprite(isSKStage ? "hud_text_continue_superstage" : "hud_text_continue_chaosstage", px, py, renderQueue)
+			return true
+		}
+
+		else if (objA0.animation.sprite == 0x12)
+		{
+			x_offset = 0
+			if (getMainCharacter() == CHARACTER_TAILS)
+				x_offset = (global.region_code & 0x80) ? -1 : 3
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)
+				x_offset = 3
+
+			u64 getSuperOrHyper = (isSKStage) ? "hyper" : "super"
+			if (getMainCharacter() == CHARACTER_TAILS && !Game.getSetting(SETTING_HYPER_TAILS))
+				getSuperOrHyper = "super_nohyper"
+			
+			u64 getCharacter = "sonic"
+			if (getMainCharacter() == CHARACTER_TAILS)
+				getCharacter = "tails"
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)
+				getCharacter = "knuckles"
+
+			Renderer.drawCustomSprite(stringformat("westside_%s_text_%s", getSuperOrHyper, getCharacter), px + 2 + x_offset, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x13)
+		{
+			x_offset = 1
+			y_offset = 0
+			if (py == 0x0030 || py == 0x00bc)	// SONIC in BE SUPER/HYPER SONIC
+			{
+				y_offset = -6
+			}
+			else if (px == 0x0060)	// SONIC in SONIC CAN GO TO
+				x_offset = -3
+			else if (px == 0x00a8)	// SONIC in NOW SONIC CAN
+				x_offset = -3
+			
+			Renderer.drawCustomSprite(isSKStage ? "westside_sonic_text" : "westside_sonic_text_special", px + 12 + x_offset, py + y_offset, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x14)
+		{
+			x_offset = 1
+			if (py == 0x0030 || py == 0x00bc)	// MILES in BE SUPER/HYPER MILES
+			{
+				y_offset = -6
+			}
+			else if (px == 0x0060)	// MILES in MILES CAN GO TO
+				x_offset = -5
+			else if (px == 0x00a8)	// MILES in NOW MILES CAN
+				x_offset = -5
+			
+			Renderer.drawCustomSprite(isSKStage ? "westside_miles_text" : "westside_miles_text_special", px + 9 + x_offset, py + y_offset, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x15)
+		{
+			x_offset = -3
+			if (py == 0x0030 || py == 0x00bc)	// TAILS in BE SUPER/HYPER TAILS
+			{
+				y_offset = -6
+			}
+			else if (px == 0x0064)	// TAILS in TAILS CAN GO TO
+				x_offset = -7
+			else if (px == 0x00ac)	// TAILS in NOW TAILS CAN
+				x_offset = -9
+			
+			Renderer.drawCustomSprite(isSKStage ? "westside_tails_text" : "westside_tails_text_special", px + 15 + x_offset, py + y_offset, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x16)
+		{
+			x_offset = -4
+			if (py == 0x0030 || py == 0x00bc)	// KNUCKLES in BE SUPER/HYPER KNUCKLES
+			{
+				x_offset = 4
+				y_offset = -6
+			}
+			else if (px == 0x0048)	// KNUCKLES in KNUCKLES CAN GO TO	// likely needs a new value!
+				x_offset = -8
+			else if (px == 0x0090)	// KNUCKLES in NOW KNUCKLES CAN		// likely needs a new value!
+				x_offset = 0
+			
+			Renderer.drawCustomSprite(isSKStage ? "westside_knuckles_text" : "westside_knuckles_text_special", px + 9 + x_offset, py + y_offset, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+
+		else if (objA0.animation.sprite == 0x22)
+		{
+			Renderer.drawCustomSprite(isSKStage ? "westside_specialstage_text_super" : "westside_specialstage_text", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x23)
+		{
+			x_offset = 0
+			if (getMainCharacter() == CHARACTER_TAILS)	// both MILES and TAILS
+				x_offset = 3
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)	// offset less for GOT ALL
+				x_offset = (px == 0x00d4) ? 3 : 0
+			Renderer.drawCustomSprite(isSKStage ? "westside_gota_text_super" : "westside_gota_text", px + 5 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x24)
+		{
+			Renderer.drawCustomSprite("westside_chaosemerald_text", px, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x25)
+		{
+			x_offset = 0
+			if (getMainCharacter() == CHARACTER_TAILS)	// both MILES and TAILS
+				x_offset = 3
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)
+				x_offset = 3
+			Renderer.drawCustomSprite(isSKStage ? "westside_gotall_text_super" : "westside_gotall_text", px + 5 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x26)
+		{
+			Renderer.drawCustomSprite(isSKStage ? "westside_superemeralds_text_super" : "westside_chaosemeralds_text", px, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x27)
+		{
+			x_offset = -8
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = -12
+			Renderer.drawCustomSprite("westside_now_text", px + 8 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x28)
+		{
+			x_offset = -16
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = -20
+			Renderer.drawCustomSprite("westside_be_text", px + 12 + x_offset, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x2c)
+		{
+			x_offset = -8
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = -12
+			Renderer.drawCustomSprite("westside_now_text_super", px + 8 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x2d)
+		{
+			x_offset = 32
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = 36
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)	// KNUCKLES
+				x_offset = 40
+			Renderer.drawCustomSprite("westside_can_text_super", px - 8 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x2e)
+		{
+			// No x_offset for Sonic
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = 4
+			Renderer.drawCustomSprite("westside_cangoto_text", px + 2 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x2f)
+		{
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = 4
+			Renderer.drawCustomSprite("westside_hiddenpalace_text", px + x_offset, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x30)
+		{
+			Renderer.drawCustomSprite("westside_superemerald_text_super", px, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x35)
+		{
+			x_offset = -16
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = -20
+			Renderer.drawCustomSprite("westside_be_text_super", px + 12 + x_offset, py - 6, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x3a)
+		{
+			x_offset = 32
+			if (getMainCharacter() == CHARACTER_TAILS && (global.region_code & 0x80))	// if region code check is true, using TAILS instead of MILES
+				x_offset = 36
+			else if (getMainCharacter() == CHARACTER_KNUCKLES)	// KNUCKLES
+				x_offset = 40
+			Renderer.drawCustomSprite("westside_can_text", px - 8 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			return true
+		}
+    return false    // update address 0x02ec1e, animation sprite 1 is Super Emerald activation and is not renderhooked
+	}
+}
+
+function bool Westside.SpecialStageResultsContinue(s16 px, s16 py, s16 renderQueue)
+{
+	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+	string key = getCharacterContinueIcon(getMainCharacter())
+	Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+	return true
+}
+
+function bool Westside.GameTimeOver(s16 px, s16 py, s16 renderQueue)	// same font as South theme
+{
+	if (objA0.animation.sprite == 0)
+	{
+		Renderer.drawCustomSprite("westside_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		return true
+	}
+	else if (objA0.animation.sprite == 1 || objA0.animation.sprite == 3)	// first goes with GAME, second with TIME
+	{
+		Renderer.drawCustomSprite("westside_over", px + 8, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		return true
+	}
+	else if (objA0.animation.sprite == 2)
+	{
+		Renderer.drawCustomSprite("westside_time", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		return true
+	}
+	else
+		return false
+}

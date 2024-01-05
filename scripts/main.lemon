@@ -119,6 +119,7 @@ constant u8 theme.s3k    = 0
 constant u8 theme.flicky = 1
 constant u8 theme.saturn = 2
 constant u8 theme.south  = 3
+constant u8 theme.westside  = 4
 
 // Value for HUD layout
 global u8 hud.layout
@@ -128,6 +129,7 @@ global u16 unlock_act
 
 // Number of stars for unlocks constants
 constant u16 unlock.theme.south = 25
+constant u16 unlock.theme.westside = 50
 constant u16 unlock.level.ehz   = 50
 
 // Memory address constants
@@ -800,6 +802,8 @@ function void fn007812()
 //# address-hook(0x01c2b0) end(0x01c360)
 function void fn01c2b0()
 {
+	S2TitleCard.disappear = true	// once the chunks are loaded, the level is about to start
+
 	// This is not the only location that level data gets loaded!
 	// Act 2 chunks, blocks, and tiles are loaded in act transition functions.
 	// function void fn04fc46(): main.lemon, AIZ1 to AIZ2 transition behind fire wall
@@ -4879,6 +4883,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Saturn.TitleCardBar(px, py, renderQueue)
 			else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				return South.TitleCardBar(px, py, renderQueue)
+			else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				return Westside.TitleCardBar(px, py, renderQueue)
 			else if (unlock_act)
 				Renderer.drawCustomSprite("titlecard_redbar_dage_rtwi", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
 			else
@@ -4897,6 +4903,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return Saturn.TitleCardText(px, py, renderQueue)
 		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			return South.TitleCardText(px, py, renderQueue)
+		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			return Westside.TitleCardText(px, py, renderQueue)
 
 /*
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
@@ -4977,6 +4985,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Saturn.LevelResults(px, py, renderQueue)
 			else if (theme.hud == theme.south)
 				return South.LevelResults(px, py, renderQueue)
+			else if (theme.hud == theme.westside)
+				return Westside.LevelResults(px, py, renderQueue)
 		}
 		
 		if (objA0.animation.sprite == 0x0b)
@@ -5066,6 +5076,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Saturn.GameTimeOver(px, py, renderQueue)
 			else if (theme.hud == theme.south)
 				return South.GameTimeOver(px, py, renderQueue)
+			else if (theme.hud == theme.westside)
+				return Westside.GameTimeOver(px, py, renderQueue)
 		}
 
 		// Standard theme requires renderhook due to unlockable act palettes
@@ -5338,6 +5350,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Saturn.SpecialStageResults(px, py, renderQueue)
 			else if (theme.hud == theme.south)
 				return South.SpecialStageResults(px, py, renderQueue)
+			else if (theme.hud == theme.westside)
+				return Westside.SpecialStageResults(px, py, renderQueue)
 		}
 
 		bool isSKStage = (global.lock_on_state == 0 && global.sk_bluespheres)
@@ -18467,7 +18481,7 @@ function void HPZ.hub_CustomSprites()
 {
 	constant u8 superemerald.inactive = 2
 	s8 theme.x = (theme.hud == theme.south) ? -1 : 0
-	s8 theme.y = (theme.hud == theme.s3k || theme.hud == theme.south) ? 2 : 0
+	s8 theme.y = (theme.hud == theme.s3k || theme.hud == theme.south || theme.hud == theme.westside) ? 2 : 0
 	if (!original_mode && global.stage_type == 2 && global.game_mode == 0x0c)
 	{
 		if (u8[0xffffffb2] == superemerald.inactive)

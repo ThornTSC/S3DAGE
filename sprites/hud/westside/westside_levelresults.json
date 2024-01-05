@@ -1,0 +1,47 @@
+{
+	"westside_sonic_text":  { "File": "westside_levelresultsname.png", "Rect": "0,0,72,16", "Center": "9,0" },
+	"westside_tails_text":  { "File": "westside_levelresultsname.png", "Rect": "0,16,69,16", "Center": "9,0" },
+	"westside_miles_text":  { "File": "westside_levelresultsname.png", "Rect": "0,32,79,16", "Center": "9,0" },
+	"westside_knuckles_text":  { "File": "westside_levelresultsname.png", "Rect": "0,48,128,16", "Center": "9,0" },
+	"westside_super_text_sonic":  { "File": "westside_levelresultsname.png", "Rect": "0,64,80,16", "Center": "6,0" },
+	"westside_super_text_tails":  { "File": "westside_levelresultsname.png", "Rect": "0,80,80,16", "Center": "9,0" },
+	"westside_super_text_knuckles":  { "File": "westside_levelresultsname.png", "Rect": "0,96,80,16", "Center": "9,0" },
+	"westside_hyper_text_sonic":  { "File": "westside_levelresultsname.png", "Rect": "0,112,80,16", "Center": "6,0" },
+	"westside_hyper_text_tails":  { "File": "westside_levelresultsname.png", "Rect": "0,128,80,16", "Center": "9,0" },
+	"westside_hyper_text_knuckles":  { "File": "westside_levelresultsname.png", "Rect": "0,144,80,16", "Center": "9,0" },
+	"westside_sonic_text_special":  { "File": "westside_levelresultsname.png", "Rect": "0,160,72,16", "Center": "9,0" },
+	"westside_tails_text_special":  { "File": "westside_levelresultsname.png", "Rect": "0,176,69,16", "Center": "9,0" },
+	"westside_miles_text_special":  { "File": "westside_levelresultsname.png", "Rect": "0,192,79,16", "Center": "9,0" },
+	"westside_knuckles_text_special":  { "File": "westside_levelresultsname.png", "Rect": "0,208,128,16", "Center": "9,0" },
+	"westside_super_nohyper_text_tails":  { "File": "westside_levelresultsname.png", "Rect": "0,224,80,16", "Center": "9,0" },
+
+	"westside_got_text":  { "File": "westside_levelresults.png", "Rect": "0,0,47,16", "Center": "-9,0" },
+	"westside_through_text":  { "File": "westside_levelresults.png", "Rect": "64,0,112,16", "Center": "0,0" },	// if using usual S3&K alignment, leave Center at 0,0
+	"westside_act_text":  { "File": "westside_levelresults.png", "Rect": "178,0,46,16", "Center": "0,0" },
+
+	"westside_specialstage_text":  { "File": "westside_levelresults.png", "Rect": "0,16,187,16", "Center": "94,0" },
+	"westside_chaosemerald_text":  { "File": "westside_levelresults.png", "Rect": "0,32,208,16", "Center": "104,0" },
+	"westside_chaosemeralds_text":  { "File": "westside_levelresults.png", "Rect": "208,32,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"westside_superemerald_text":  { "File": "westside_levelresults.png", "Rect": "0,48,208,16", "Center": "104,0" },
+	"westside_superemeralds_text":  { "File": "westside_levelresults.png", "Rect": "208,48,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"westside_can_text":  { "File": "westside_levelresults.png", "Rect": "0,64,48,16", "Center": "24,0" },
+	"westside_cangoto_text":  { "File": "westside_levelresults.png", "Rect": "0,64,127,16", "Center": "64,0" },
+	"westside_hiddenpalace_text":  { "File": "westside_levelresults.png", "Rect": "0,80,197,16", "Center": "99,0" },
+	"westside_gota_text":  { "File": "westside_levelresults.png", "Rect": "0,96,71,16", "Center": "0,0" },
+	"westside_gotall_text":  { "File": "westside_levelresults.png", "Rect": "0,96,103,16", "Center": "0,0" },
+	"westside_now_text":  { "File": "westside_levelresults.png", "Rect": "128,96,55,16", "Center": "0,0" },
+	"westside_be_text":  { "File": "westside_levelresults.png", "Rect": "192,96,32,16", "Center": "0,0" },
+
+	"westside_specialstage_text_super":  { "File": "westside_levelresults.png", "Rect": "0,112,187,16", "Center": "94,0" },
+	"westside_chaosemerald_text_super":  { "File": "westside_levelresults.png", "Rect": "0,128,208,16", "Center": "104,0" },
+	"westside_chaosemeralds_text_super":  { "File": "westside_levelresults.png", "Rect": "208,128,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"westside_superemerald_text_super":  { "File": "westside_levelresults.png", "Rect": "0,144,208,16", "Center": "104,0" },
+	"westside_superemeralds_text_super":  { "File": "westside_levelresults.png", "Rect": "208,144,16,16", "Center": "-104,0" },	// Misnomer! This is just the extra S!
+	"westside_can_text_super":  { "File": "westside_levelresults.png", "Rect": "0,160,48,16", "Center": "24,0" },
+	"westside_cangoto_text_super":  { "File": "westside_levelresults.png", "Rect": "0,160,127,16", "Center": "64,0" },
+	"westside_hiddenpalace_text_super":  { "File": "westside_levelresults.png", "Rect": "0,176,197,16", "Center": "99,0" },
+	"westside_gota_text_super":  { "File": "westside_levelresults.png", "Rect": "0,192,71,16", "Center": "0,0" },
+	"westside_gotall_text_super":  { "File": "westside_levelresults.png", "Rect": "0,192,103,16", "Center": "0,0" },
+	"westside_now_text_super":  { "File": "westside_levelresults.png", "Rect": "128,192,55,16", "Center": "0,0" },
+	"westside_be_text_super":  { "File": "westside_levelresults.png", "Rect": "192,192,32,16", "Center": "0,0" }
+}

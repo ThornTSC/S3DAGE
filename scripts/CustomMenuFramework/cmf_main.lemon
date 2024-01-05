@@ -1349,6 +1349,8 @@ function void customMenu.countMedals()
 		Flicky.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)
 		South.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
+	else if (theme.hud == theme.westside && renderQueue == 0xfff1)
+		Westside.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.s3k && renderQueue == 0xfff1)	// done here since Saturn is default for menus and Angel/S3K has no script yet
 	{
 		Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)

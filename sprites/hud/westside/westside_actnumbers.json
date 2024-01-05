@@ -1,0 +1,4 @@
+{
+	"westside_titlecard_act1":  { "File": "westside_actnumbers.png", "Rect": "0,0,23,29", "Center": "0,0" },
+	"westside_titlecard_act2":  { "File": "westside_actnumbers.png", "Rect": "0,29,23,29", "Center": "0,0" }
+}
