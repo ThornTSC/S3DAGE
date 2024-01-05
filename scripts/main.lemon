@@ -11093,7 +11093,7 @@ function void fn030850()
 //# address-hook(0x006e9c) end(0x006eb8)
 function void UpdateWaterSurfaceLevel.HCZ2()
 {
-// These lines create a natural camera scroll to reveal the paths at the character path spliit
+// These lines create a natural camera scroll to reveal the paths at the character path split
 // and removes the new camera position when outside of the relevant area.
 // The effect is fully functional, but I'm not keen on the look; it feels unnatural to run so low on the screen
 // without being at the level's bottom or approaching a boss/cutscene.
