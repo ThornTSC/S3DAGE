@@ -802,7 +802,8 @@ function void fn007812()
 //# address-hook(0x01c2b0) end(0x01c360)
 function void fn01c2b0()
 {
-	S2TitleCard.disappear = true	// once the chunks are loaded, the level is about to start
+	if (!global.stage_type)
+		S2TitleCard.disappear = true	// once the chunks are loaded, the level is about to start
 
 	// This is not the only location that level data gets loaded!
 	// Act 2 chunks, blocks, and tiles are loaded in act transition functions.
