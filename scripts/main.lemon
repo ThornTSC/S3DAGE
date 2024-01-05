@@ -9803,7 +9803,8 @@ function void AIZWaterfall.Init()
 	for (u8 i = 0; i <= waterfallHeight; ++i)
 	{
 		objA0.position.y.u16 += 0x80
-		AIZWaterfall.spawnPlatform()
+		if (objA0.position.y.u16 < (water.height.current - 1))	// use -1 because the object moves down one pixel *before* checking for deletion
+			AIZWaterfall.spawnPlatform()
 	}
 	objA0.position.y.u16 = backupYpos
 }
