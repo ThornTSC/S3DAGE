@@ -1,5 +1,6 @@
-global u16 rings.state_table_size = 512	// I seem to recall the first or last word of the table being specially marked, so the actual number of rings may be one lower.
-										// The default value is 512 (0x200).
+global u16 rings.state_table_size = 1024	// The first word of ring data is always 00 00, so this is one more than the number of rings.
+											// The default value is 512 (0x200).
+global u16 bonus.rings.state_table_size = 512
 
 // Move the ring state table from 0xffffe700 to shared memory address 0x820000, freeing the space for the object respawn table.
 // Adjust all pointers that used 0xffff0000 as a base.
@@ -16,7 +17,7 @@ function void fn00eb1a()
 
 	if (global.zone == 0x14)
 	{
-		zeroMemory(0xffff8600, 2 * rings.state_table_size)
+		zeroMemory(0xffff8600,  2 * bonus.rings.state_table_size)	// usually 0x400
 	}
 
 	u16 offset = global.zone * 8 + global.act * 4
