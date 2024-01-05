@@ -5955,7 +5955,7 @@ function void StartCharacterWinPose()
 //# address-hook(0x02dc36) end(0x02dd38)
 function void LevelResults.UpdateBonusCounting()
 {
-	titlecard.full = false
+	S2TitleCard.full = false
 
 	if (time_attack <= 2)
 	{

@@ -72,7 +72,7 @@ function void fn02d47e()
 		{
 			S2TitleCard.disappear = false
 			S2TitleCard.loaded = false
-			titlecard.full = true
+			S2TitleCard.full = true
 		}
 
 		return
@@ -133,10 +133,10 @@ function void fn02d47e()
 				u16[0xfffffe50] = 0		// ring_counter backup
 				u8[0xfffffe61] = 0	// tracks lives given by 100 rings
 			}
-			
+
 			S2TitleCard.disappear = false
 			S2TitleCard.loaded = false
-			titlecard.full = true
+			S2TitleCard.full = true
 			global.in_extra_stage = 1
 			fn01bb7e()
 		}

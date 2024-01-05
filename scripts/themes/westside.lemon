@@ -1,4 +1,4 @@
-global bool titlecard.full	// true when the colored shapes should be behind the zone name, else false
+global bool S2TitleCard.full	// true when the colored shapes should be behind the zone name, else false
 global bool S2TitleCard.disappear
 global bool S2TitleCard.loaded
 
@@ -242,7 +242,7 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 	if (objA0.update_address == 0x02d8e2)
 	{
 //		if (!level.framecounter)	// Level framecounter hasn't moved? Unless we hit the single frame of rollover after 18 minutes of sitting in a level, we are loading a zone fresh.
-//			titlecard.full = true
+//			S2TitleCard.full = true
 
 		u64 backdropKey = "westside_titleblue"
 		if (global.characters == 2)
@@ -263,7 +263,7 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 		{
 //			if (!global.game.paused)
 //				objA0.value32++		// run a timer
-			if (titlecard.full)
+			if (S2TitleCard.full)
 			{
 				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
 				if (objA0.value32 >= 7)		// yellow rectangle moves for 20 frames before locking in place
@@ -284,11 +284,11 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 		{
 //			if (!global.game.paused)
 //				objA0.value3e++		// run a timer
-			s16 animationTimer = objA0.value3e // (titlecard.full) ? objA0.value3e : max(s16[objA0.value3e] - 0x0114,0)	// u16[0xfffffe24] is timer minutes and frames
+			s16 animationTimer = objA0.value3e // (S2TitleCard.full) ? objA0.value3e : max(s16[objA0.value3e] - 0x0114,0)	// u16[0xfffffe24] is timer minutes and frames
 			backdropHeight = (animationTimer > 8) ? -((animationTimer - 8) * getScreenHeight()/14) : 0
 			yellowPosition = (animationTimer > 4) ? getScreenWidth()/20 * (animationTimer - 4) : 0
 			redPosition = -(120/7 * (animationTimer))
-			if (titlecard.full)
+			if (S2TitleCard.full)
 			{
 				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
 				Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
@@ -302,7 +302,7 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 			Renderer.drawCustomSprite(sideKey, redPosition, 0, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b, 0, alpha)
 
 			// Remove fade-in for Sonic 2 theme, where we want to reveal the level in full color behind the title card
-			if (level.framecounter == 1 && titlecard.full)	// the frame before the framecounter advances, SetPaletteFadedOut() and SetPaletteToBlack() have run
+			if (level.framecounter == 1 && S2TitleCard.full)	// the frame before the framecounter advances, SetPaletteFadedOut() and SetPaletteToBlack() have run
 			{
 				copyMemory(0xfffffc00, 0xfffffc80, 0x80)	// above water palette
 				copyMemory(0xfffff080, 0xfffff000, 0x80)	// underwater palette (note: fade target and displayed palettes are in the opposite order as they are above water)
@@ -320,7 +320,7 @@ function void TitleCard.RedBarElement.Update()
 {
 	S2TitleCard.loaded = true
 	if (!level.framecounter)	// Level framecounter hasn't moved? Unless we hit the single frame of rollover after 18 minutes of sitting in a level, we are loading a zone fresh.
-		titlecard.full = true
+		S2TitleCard.full = true
 	if (timer.alldata == 0x011c)		// 0'01"52 on the HUD timer. We assume it is not possible to enter a special stage or touch a star post in this short window of time.
 		S2TitleCard.disappear = true	// If the title card is up with this timer displayed, we are about to end the between-act title card.
 	if (!global.game.paused)
