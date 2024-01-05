@@ -10028,6 +10028,30 @@ function void fn0504dc()
 
 
 
+
+// When Eggman flies behind the trees at the end of AIZ2, adjust some chunks at the horizontal loop point
+// to prevent a rendering issue with the loop.
+// Function taken from level\01_aiz\level_aiz.lemon
+//# address-hook(0x0500e6) end(0x0500e6)
+function void fn0500e6()
+{
+	if (camera.position.x.u16 >= 0x4600)
+	{
+		u8[0xffff8243] = 0xea
+		u8[0xffff82db] = 0xe9
+		u8[0xffff8373] = 0xe8
+	}
+
+	base.fn0500e6()
+}
+
+
+
+
+
+
+
+
 // Undo AIR's adjustments for the camera position in the AIZ2 boss in Original Mode,
 // as they prevent the right-side pit from being on screen.
 //# address-hook(0x069456) end(0x069466)
