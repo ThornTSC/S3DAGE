@@ -11088,11 +11088,14 @@ function void fn030850()
 
 
 // Changes the water level and upper screen boundary in HCZ2 if Knuckles approaches Sonic's boss or in time attack modes
-// Also adds water tint. A commented-out function scrolls the camera to reveal the character path split.
+// Also adds water tint and fixes a potential camera issue. A commented-out function scrolls the camera to reveal the character path split.
 // Function taken from level\level_water.lemon
 //# address-hook(0x006e9c) end(0x006eb8)
 function void UpdateWaterSurfaceLevel.HCZ2()
 {
+	if (timer.alldata == 0x00000418 && move_area.right == 0x00a8)	// at end of whirlpool level transition and right camera boundary screenmover failed to load (should be 0x00a9 now as move starts)
+		move_area.right = 0x6000									// force the target camera boundary
+
 // These lines create a natural camera scroll to reveal the paths at the character path split
 // and removes the new camera position when outside of the relevant area.
 // The effect is fully functional, but I'm not keen on the look; it feels unnatural to run so low on the screen
