@@ -100,6 +100,9 @@ function void UpdateGamePause()
 				Checkpoint.SaveCurrentState()
 				checkpoint.camera.x = 0x1308
 				checkpoint.camera.y = 0x0390
+				S2TitleCard.disappear = false
+				S2TitleCard.loaded = false
+				S2TitleCard.full = true
 				level.restart = 1
 				break
 			}

@@ -8565,8 +8565,8 @@ function void ROMManipulation.AIZ1.KnucklesIntroCritters()
 
 
 
-// Move Knuckles' intro
-// Function comes from level\07_mhz\intro_knuckles.lemon
+// Move Knuckles' intro and set Sonic 2 title card variables
+// Functions come from level\07_mhz\intro_knuckles.lemon
 //# address-hook(0x0634ca) end(0x063524)
 function void fn0634ca()
 {
@@ -8703,6 +8703,9 @@ function void fn06364e()
 		if (allocDynamicObjectStd())
 		{
 			// Show title card
+			S2TitleCard.disappear = false
+			S2TitleCard.loaded = false
+			S2TitleCard.full = false
 			objA1.update_address = 0x02d690
 		}
 
@@ -8723,6 +8726,9 @@ function void fn06364e()
 	else
 #endif
 	{
+		S2TitleCard.disappear = false
+		S2TitleCard.loaded = false
+		S2TitleCard.full = true
 		level.restart = 1
 		Object.TriggerUnloading()
 	}
@@ -8730,9 +8736,42 @@ function void fn06364e()
 
 
 
+// Adjust Sonic 2 title card variables in the AIZ intros
+// Function taken from level\01_aiz\intro_sonic.lemon
+//# address-hook(0x061f10) end(0x061f5a)
+function void fn061f10()
+{
+	if (objA0.render_flags & render_flag.VISIBLE)
+	{
+		Object.AnimationProgressByLocalA1()
+		UpdateMovementStraightSimple()
+		return
+	}
 
+	u8[0xfffff650] = 0
+	player1.control_override = 0
+	fn083c06()
+	fn0851e4()
 
+	if (allocDynamicObjectStd())
+	{
+		// Show title card
+		S2TitleCard.disappear = false
+		S2TitleCard.loaded = false
+		S2TitleCard.full = false
+		objA1.update_address = 0x02d690
+	}
 
+	global.level_started = -0x6f	// Let HUD fly in
+	hud.dirty.timer = 0x80
+	timer.alldata = 0
+	hud.dirty.lives = 0x01
+	Object.TriggerUnloading()
+
+#if STANDALONE
+	Game.endSkippableCutscene()
+#endif
+}
 
 
 
