@@ -6539,6 +6539,8 @@ function void TitleScreen()
 	u32[0xffffffc4] = 5000
 }
 
+// Move title screen Sonic and the ring upward from his A.I.R. position.
+// Function taken from menus\titlescreen.lemon
 //# address-hook(0x00486c) end(0x0048d8)
 function void fn00486c()
 {
@@ -6571,17 +6573,17 @@ function void fn00486c()
 
 	D0.s16 = 0xd4 - s16[A0 + 0x30]
 	objA0.position.y.u16 = D0.u16
-#if STANDALONE
+// #if STANDALONE
 	// Move it down
-	objA0.position.y.u16 += 0x0e	// 0x1c
-#else
+	objA0.position.y.u16 += 0x10
+// #else
 
 	// Movement of Sonic and the ring around him
-	if (scrolloffset.y.planeA != 0x10)
+	if (scrolloffset.y.planeA != 0x08)
 	{
 		++scrolloffset.y.planeA
 	}
-#endif
+// #endif
 
 	fn0048dc()
 }
