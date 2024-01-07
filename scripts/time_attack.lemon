@@ -86,6 +86,12 @@ function void PrintVersionNumber()
 		Letters.Show("``DAGE v1.9.1.0`A.I.R. v23.11.18.0", 1, px, 193)
 		return
 	#endif
+	#if GAMEAPP == 0x24010700	// use for test version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.1.0`A.I.R. v24.01.07.0", 1, px, 193)
+		return
+	#endif
 	#if GAMEAPP > 0x23011500	// use for versions that DAGE has not updated to learn yet
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long

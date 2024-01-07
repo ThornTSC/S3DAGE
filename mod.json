@@ -6,7 +6,7 @@
 		"Author": "D.A. Garden (game), Thorn (port + features)",
 		"Description": "A port of Sonic 3: D.A. Garden Edition v1.02 to Sonic 3 A.I.R. with new features and widescreen adaptations.",
 		"URL": "https://github.com/ThornTSC/S3DAGE/releases",
-		"ModVersion": "1.9.1.0",
+		"ModVersion": "1.9.1.1",
 		"GameVersion": "22.09.10.0"
 	},
 	"Settings":
