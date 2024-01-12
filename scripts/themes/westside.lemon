@@ -87,8 +87,8 @@ function void Westside.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 re
 	}
 
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
-		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the lives HUD while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
 
 	Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", digit), px, py, 0, flags, renderQueue)
 	if (inputY == 0x18 && freeze_time)	// HUD graphics have a base py of 0x08, and the TIME row is 0x10 beyond that
@@ -101,8 +101,8 @@ function void Westside.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 re
 function void Westside.BestText(u16 px, u16 py, u16 renderQueue)
 {
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
-		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the lives HUD while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	if (u32[0xffffb250] == 0x2d690)	// title card is activ
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tintwhile the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
 
     Renderer.drawCustomSprite("westside_hud_text_best", px, py, 0, flags, renderQueue)
 }
@@ -120,8 +120,8 @@ function void Westside.TimeStopBonusText()
 function void Westside.DevText(u16 medal_py)
 {
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
-		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the lives HUD while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
 
     Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, flags, 0xe008)   // same font as Angel theme, but designed around Sonic 2 title cards
 }
@@ -135,8 +135,8 @@ function void Westside.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)   
     u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
 
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
-		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the lives HUD while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
 
     Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py + 1, 0, flags, 0xe008)
     Renderer.drawCustomSprite("angel_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py + 1, 0, flags, 0xe008)

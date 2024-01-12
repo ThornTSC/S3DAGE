@@ -2200,6 +2200,10 @@ function void RenderHUD_Challenges()
 
 function void RenderHUD_MedalTimes()
 {
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690 && theme.hud == theme.westside)	// title card is active in Westside theme
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the medal icons while that title card is up
+
 	if ((time_attack == 1 || time_attack == 2) && !time_attack_end && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !u8[0xffffe654])
 	{
 		u16 medal_px = getScreenExtend() - 40 + 400 - 0x35 - 0x10	// 0x35 to make sure it doesn't run off the right edge, and then 0x10 to space it away from the edge
@@ -2219,24 +2223,24 @@ function void RenderHUD_MedalTimes()
 			else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 				Westside.DevText(medal_py)
 			else
-				Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, SPRITE_FLAG_PRIO, 0xf003)
+				Renderer.drawCustomSprite("angel_text_dev", getScreenWidth() - 97, medal_py + 1, 0, flags, 0xf003)
 
 		//	Renderer.drawText("sonic3_fontB", getScreenExtend() - 40 + 303, medal_py + 8, "DEV", 0xffffffff, 1, 0, 0xffff, 0)	// one to the left of S3D small text
 		}
 		else if (timer.alldata < u32[0x840240 + (0x10 * (setting.levelselect.characters - 1)) + 0x04])	// gold medal?
 		{
 			medalOffset = 0x04
-			Renderer.drawCustomSprite("star_gold", getScreenWidth() - 81, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("star_gold", getScreenWidth() - 81, medal_py, 0, flags, 0xe008)
 		}
 		else if (timer.alldata < u32[0x840240 + (0x10 * (setting.levelselect.characters - 1)) + 0x08])	// silver medal?
 		{
 			medalOffset = 0x08
-			Renderer.drawCustomSprite("star_silver", getScreenWidth() - 81, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("star_silver", getScreenWidth() - 81, medal_py, 0, flags, 0xe008)
 		}
 		else if (timer.alldata < u32[0x840240 + (0x10 * (setting.levelselect.characters - 1)) + 0x0c])	// bronze medal?
 		{
 			medalOffset = 0x0c
-			Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 81, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+			Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 81, medal_py, 0, flags, 0xe008)
 		}
 		else
 			medalOffset = 0xff	// null value that avoids drawing any target times

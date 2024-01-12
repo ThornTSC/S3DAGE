@@ -46,9 +46,9 @@
 	"westside_ss_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	"westside_ss_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	
-	"westside_ss_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
-	"westside_ss_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 39,12", "Center": "20,6" },	// selected
-	"westside_ss_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
+	"westside_ss_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+	"westside_ss_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
+	"westside_ss_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	
 	"westside_ss_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
 	"westside_ss_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
@@ -60,10 +60,10 @@
 	"westside_challenge_pause_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	"westside_challenge_pause_continue_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 
-	"westside_challenge_pause_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
-	"westside_challenge_pause_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 39,12", "Center": "20,6" },	// selected
-	"westside_challenge_pause_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
-	"westside_challenge_pause_retry_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
+	"westside_challenge_pause_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+	"westside_challenge_pause_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
+	"westside_challenge_pause_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+	"westside_challenge_pause_retry_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	
 	"westside_challenge_pause_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
 	"westside_challenge_pause_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
@@ -76,9 +76,9 @@
 	"westside_challenge_pause_exit_game_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
 
 	// End of Time Attack / Time Stone Trial menu
-	"westside_ta_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 39,12", "Center": "20,6" },	// selected
-	"westside_ta_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
-	"westside_ta_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
+	"westside_ta_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
+	"westside_ta_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+	"westside_ta_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	
 	"westside_ta_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
 	"westside_ta_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 12, 78,12", "Center": "39,6" },	// selected
