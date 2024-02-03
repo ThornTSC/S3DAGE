@@ -1,0 +1,95 @@
+{
+	// ----- HUD ----- //
+
+	// HUD texts
+	"hud_text_score":	  { "File": "advance_hud.png", "Rect": "0,0,40,13" },
+	"hud_text_time":	  { "File": "advance_hud.png", "Rect": "0,13,40,13" },
+	"hud_text_time_red":  { "File": "advance_hud.png", "Rect": "40,12,1,1" },		// Empty pixel
+	"hud_text_rings":	  { "File": "advance_hud.png", "Rect": "0,26,40,13" },
+	"hud_text_rings_red": { "File": "advance_hud.png", "Rect": "40,24,1,1" },		// Empty pixel
+
+	// Additional texts for level results
+	"hud_text_ring":  { "File": "advance_hud.png", "Rect": "0,26,32,13" },
+	"hud_text_bonus": { "File": "advance_hud.png", "Rect": "0,39,40,13" },
+	"hud_text_total": { "File": "advance_hud.png", "Rect": "0,52,40,13" },
+
+	// Special stage results
+	"hud_text_score_chaosstage":	{ "File": "advance_hud.png", "Rect": "44,0,40,13" },
+	"hud_text_ring_chaosstage":		{ "File": "advance_hud.png", "Rect": "44,13,32,13" },
+	"hud_text_bonus_chaosstage":	{ "File": "advance_hud.png", "Rect": "44,26,40,13" },
+	"hud_text_perfect_chaosstage":	{ "File": "advance_hud.png", "Rect": "44,39,56,13" },
+	"hud_text_continue_chaosstage":	{ "File": "advance_hud.png", "Rect": "44,52,64,13" },
+	"hud_text_score_superstage":	{ "File": "advance_hud.png", "Rect": "108,0,40,13" },
+	"hud_text_ring_superstage":		{ "File": "advance_hud.png", "Rect": "108,13,32,13" },
+	"hud_text_bonus_superstage":	{ "File": "advance_hud.png", "Rect": "108,26,40,13" },
+	"hud_text_perfect_superstage":	{ "File": "advance_hud.png", "Rect": "108,39,56,13" },
+	"hud_text_continue_superstage":	{ "File": "advance_hud.png", "Rect": "108,52,64,13" },
+
+	"hud_bonus_icon_blue":   { "File": "advance_hud.png", "Rect":  "0,128,12,19" },
+	"hud_bonus_icon_orange": { "File": "advance_hud.png", "Rect": "13,128,12,19" },
+	"hud_bonus_icon_red":    { "File": "advance_hud.png", "Rect": "26,128,12,19" },
+
+	// Digits (for score, time, rings)
+	"hud_digit_0": { "File": "advance_hud.png", "Rect":  "0,65,8,13" },
+	"hud_digit_1": { "File": "advance_hud.png", "Rect":  "8,65,8,13" },
+	"hud_digit_2": { "File": "advance_hud.png", "Rect": "16,65,8,13" },
+	"hud_digit_3": { "File": "advance_hud.png", "Rect": "24,65,8,13" },
+	"hud_digit_4": { "File": "advance_hud.png", "Rect": "32,65,8,13" },
+	"hud_digit_5": { "File": "advance_hud.png", "Rect": "40,65,8,13" },
+	"hud_digit_6": { "File": "advance_hud.png", "Rect": "48,65,8,13" },
+	"hud_digit_7": { "File": "advance_hud.png", "Rect": "56,65,8,13" },
+	"hud_digit_8": { "File": "advance_hud.png", "Rect": "64,65,8,13" },
+	"hud_digit_9": { "File": "advance_hud.png", "Rect": "72,65,8,13" },
+
+	// Digits (for running out of time or zero rings, unique to Sonic Advance HUD)
+	"hud_digit_0_red": { "File": "advance_hud.png", "Rect":  "0,78,8,13" },
+	"hud_digit_1_red": { "File": "advance_hud.png", "Rect":  "8,78,8,13" },
+	"hud_digit_2_red": { "File": "advance_hud.png", "Rect": "16,78,8,13" },
+	"hud_digit_3_red": { "File": "advance_hud.png", "Rect": "24,78,8,13" },
+	"hud_digit_4_red": { "File": "advance_hud.png", "Rect": "32,78,8,13" },
+	"hud_digit_5_red": { "File": "advance_hud.png", "Rect": "40,78,8,13" },
+	"hud_digit_6_red": { "File": "advance_hud.png", "Rect": "48,78,8,13" },
+	"hud_digit_7_red": { "File": "advance_hud.png", "Rect": "56,78,8,13" },
+	"hud_digit_8_red": { "File": "advance_hud.png", "Rect": "64,78,8,13" },
+	"hud_digit_9_red": { "File": "advance_hud.png", "Rect": "72,78,8,13" },
+
+	// Digits (Chaos Emerald stage results)
+	"hud_digit_0_chaosstage": { "File": "advance_hud.png", "Rect":  "0,91,8,13" },
+	"hud_digit_1_chaosstage": { "File": "advance_hud.png", "Rect":  "8,91,8,13" },
+	"hud_digit_2_chaosstage": { "File": "advance_hud.png", "Rect": "16,91,8,13" },
+	"hud_digit_3_chaosstage": { "File": "advance_hud.png", "Rect": "24,91,8,13" },
+	"hud_digit_4_chaosstage": { "File": "advance_hud.png", "Rect": "32,91,8,13" },
+	"hud_digit_5_chaosstage": { "File": "advance_hud.png", "Rect": "40,91,8,13" },
+	"hud_digit_6_chaosstage": { "File": "advance_hud.png", "Rect": "48,91,8,13" },
+	"hud_digit_7_chaosstage": { "File": "advance_hud.png", "Rect": "56,91,8,13" },
+	"hud_digit_8_chaosstage": { "File": "advance_hud.png", "Rect": "64,91,8,13" },
+	"hud_digit_9_chaosstage": { "File": "advance_hud.png", "Rect": "72,91,8,13" },
+
+	// Other characters for time
+	"hud_char_colon":   { "File": "advance_hud.png", "Rect": "80,65,8,13" },
+	"hud_char_minutes": { "File": "advance_hud.png", "Rect": "80,65,8,13" },
+	"hud_char_seconds": { "File": "advance_hud.png", "Rect": "80,65,8,13" },
+/*
+	// Continue icons
+	"continue_icon_sonic":    { "File": "advance_hud.png", "Rect": "0,82,20,24",  "Center": "12,24" },
+	"continue_icon_tails":    { "File": "advance_hud.png", "Rect": "20,82,20,24", "Center": "10,24" },
+	"continue_icon_knuckles": { "File": "advance_hud.png", "Rect": "40,82,20,24", "Center": "9,24" },
+*/
+	// Character icon for lives
+	"hud_lives_icon_sonic":    { "File": "advance_hud.png", "Rect":  "0,112,16,16" },
+	"hud_lives_icon_tails":    { "File": "advance_hud.png", "Rect": "16,112,16,16" },
+	"hud_lives_icon_knuckles": { "File": "advance_hud.png", "Rect": "32,112,16,16" },
+	"hud_lives_icon_miles":    { "File": "advance_hud.png", "Rect": "16,112,16,16" },
+
+	// Small digits for lives (not actually small digits in Advance HUD; repositioned normal digits)
+	"hud_smalldigit_0": { "File": "advance_hud.png", "Rect":  "0,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_1": { "File": "advance_hud.png", "Rect":  "8,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_2": { "File": "advance_hud.png", "Rect": "16,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_3": { "File": "advance_hud.png", "Rect": "24,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_4": { "File": "advance_hud.png", "Rect": "32,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_5": { "File": "advance_hud.png", "Rect": "40,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_6": { "File": "advance_hud.png", "Rect": "48,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_7": { "File": "advance_hud.png", "Rect": "56,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_8": { "File": "advance_hud.png", "Rect": "64,65,8,13", "Center": "12,6" },
+	"hud_smalldigit_9": { "File": "advance_hud.png", "Rect": "72,65,8,13", "Center": "12,6" }
+}
