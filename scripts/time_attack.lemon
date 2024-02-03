@@ -8,100 +8,106 @@ function void PrintVersionNumber()
 
 	u16 px = 16
 
-	#if GAMEAPP == 0x22091000	// use for latest stable version
+	#if GAMEAPP == 0x22091000	// use for previous stable version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v22.09.10.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v22.09.10.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x22121500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v22.12.15.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v22.12.15.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23011500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.01.15.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.01.15.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23032500	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.03.25.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.03.25.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23032501	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.03.25.1", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.03.25.1", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23051400	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.05.14.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.05.14.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23051401	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.05.14.1", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.05.14.1", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23082700	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.08.27.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.08.27.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23100700	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.10.07.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.10.07.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23111000	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.11.10.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.11.10.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23111200	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.11.12.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.11.12.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23111201	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.11.12.1", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.11.12.1", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x23111800	// use for latest preview version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v23.11.18.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v23.11.18.0", 1, px, 193)
 		return
 	#endif
 	#if GAMEAPP == 0x24010700	// use for test version
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. v24.01.07.0", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v24.01.07.0", 1, px, 193)
 		return
 	#endif
-	#if GAMEAPP > 0x23011500	// use for versions that DAGE has not updated to learn yet
+	#if GAMEAPP == 0x24020200	// use for latest stable version
+		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
+			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. v24.02.02.0", 1, px, 193)
+		return
+	#endif
+	#if GAMEAPP > 0x24020200	// use for versions that DAGE has not updated to learn yet
 		if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.9.1.1`A.I.R. New Version", 1, px, 193)
+		Letters.Show("``DAGE v1.9.1.2`A.I.R. New Version", 1, px, 193)
 		return
 	#endif
 
 	if (time_attack_end && !time_attack_hud)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.9.1.1`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
+	Letters.Show("``DAGE v1.9.1.2`A.I.R. Unknown Version", 1, px, 193)	// use for old preview/test versions or stable versions before v21.09.28.0 (via modified mod.json)
 }
 
 
@@ -457,13 +463,15 @@ function void initializeMainGame()
 
 		level.skip_titlecard = false
 
-		// Artifical delay in Original Mode
+		// Artifical delay in Original Mode (to better match ROM hack) and unlockable acts (because they load so fast the title card is barely legible)
 		u8 delay = 58	// measured from entering AIZ2 from Level Select
 		if (global.zone >= 0x13 && global.zone <= 0x15)
 			delay = 38	// Bonus stages have a smaller delay. This is estimated, mot measured.
 		if (global.zone == 0x0c || global.zone_act == 0x1700 || global.zone_act == 0x0a01)	// Final boss stages load few plane graphics and thus load fast. Estimated delay.
 			delay = 18
-		if (original_mode)	// Original Mode, not Doomsday, not DEZ2 final boss
+		if (unlock_act)	// unlockable stages load so quickly that it's hard to read the title cards without a slight delay
+			delay = 10
+		if (original_mode || unlock_act)	// Original Mode, not Doomsday, not DEZ2 final boss
 			for (u8 i = 0; i < delay; i++)	
 				waitForNextFrame()
 
