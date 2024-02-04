@@ -1700,8 +1700,10 @@ function void RenderSprites()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else
+			else if (hud.layout != 3)
 				RenderHUD()
+			else
+				RenderHUD_Orig()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
@@ -1812,8 +1814,10 @@ function void fn00db3c()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else
+			else if (hud.layout != 3)
 				RenderHUD()
+			else
+				RenderHUD_Orig()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
@@ -1850,8 +1854,10 @@ function void fn00db3c()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else
+			else if (hud.layout != 3)
 				RenderHUD()
+			else
+				RenderHUD_Orig()
 			if (time_attack >= 3)
 				RenderHUD_Marathon()
 		}
