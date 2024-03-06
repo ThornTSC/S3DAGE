@@ -34,7 +34,7 @@ function void Buzzer.Projectile()
 function void Buzzer.Flame()
 {
 	A1 = buzzer.parent
-	if (objA1.update_address != 0x032990)	// this should be the update address of the main Buzzer object
+	if (objA1.update_address != 0x02d068)	// this should be the update address of the main Buzzer object
 	{
 		UnloadObject()
 		return
@@ -73,7 +73,7 @@ function void Buzzer.Init()
 	objA0.base_state += 0x02
 	if (allocDynamicObjectAfterA0())
 	{
-		objA1.update_address = 0x032990		// this should be the update address of the main Buzzer object
+		objA1.update_address = 0x02d068		// this should be the update address of the main Buzzer object
 		objA1.base_state = 0x04
 		objA1.mapping_offset = 0x880336		// get the mappings offset!
 		objA1.sprite_attributes = 0x03d2
@@ -146,7 +146,7 @@ function void Buzzer.CheckPlayers()
 	{
 		D0.u16 = objA0.position.x.u16
 		A1 = 0xffffb000
-		if (u8[0xfffffe0f] & 0x01)	// u8[0xfffffe0f] is V_int_run_count+3. Same in S2 and S3.
+		if (level.framecounter.low & 0x01)	// global.framecounter.low in Sonic 2, but we remove some randomness.
 		{
 			A1 = 0xffffb04a
 		}
@@ -210,7 +210,7 @@ function void Buzzer.ShootProjectile()
 {
 	if (allocDynamicObjectAfterA0())
 	{
-		objA1.update_address = 0x032990	// this should be the update address of the main Buzzer object
+		objA1.update_address = 0x02d068	// this should be the update address of the main Buzzer object
 		objA1.base_state = 0x06
 		objA1.mapping_offset = 0x880336		// get the mappings offset!
 		objA1.sprite_attributes = 0x03d2
