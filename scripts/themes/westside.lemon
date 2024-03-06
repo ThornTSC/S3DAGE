@@ -101,8 +101,8 @@ function void Westside.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 re
 function void Westside.BestText(u16 px, u16 py, u16 renderQueue)
 {
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690)	// title card is activ
-		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tintwhile the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
 
     Renderer.drawCustomSprite("westside_hud_text_best", px, py, 0, flags, renderQueue)
 }
