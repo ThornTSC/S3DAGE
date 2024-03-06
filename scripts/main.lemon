@@ -6141,6 +6141,7 @@ function void TitleScreen()
 	*/
 
 	original_mode = 0
+	time_attack = 0
 	Renderer.setScreenSize(400, 224)
 
 	playMusic(MUSIC_CTRL_FADEOUT)
