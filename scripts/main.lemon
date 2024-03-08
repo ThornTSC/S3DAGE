@@ -30,6 +30,12 @@ global bool original_mode
 global bool menu_initialized
 global bool fast_forward
 
+// Define variables and number of frames per rev for L button spindash charge
+global u8 L_TailsAssist	// settings variable. 0 = Up+A only, 1 = L only, 2 = both
+global u8 L_Spindash	// settings variable. 0 = off, 1 = on
+global u8 L_Spindash_Charge
+constant u8 L_Spindash_ChargeInterval = 8
+
 // Define special stage variables
 // global u8 yellow_spheres	// if 0, use green spheres instead
 define u8 green_spheres.active	= u8[0x8e1218]			// Set to 0x01 when the Green Spheres mode is active
@@ -3648,65 +3654,72 @@ function void Tails.UpdateCarrySonic()
 function bool onCharacterPressedJumpInMidAir(u8 input_state, u8 input_pressed)
 {
 	// The following is only relevant for first player if having Tails as second character
-	if (A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS))
+	if (A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS) && L_TailsAssist != 1)	// a value of 1 represents only the L button may trigger Tails Assist
+		return checkStartTailsAssist(input_state)
+
+	// Use normal jump button reaction
+	return true
+}
+
+// We make this its own function so we can also access it with the L button
+function bool checkStartTailsAssist(u8 input_state)
+{
+	// Start Tails Assist flight?
+	if (Game.getSetting(SETTING_TAILS_ASSIST_MODE) != 0 && ((input_state & CONTROL_UP) || Input.buttonPressed(BUTTON_L)) && !original_mode)
 	{
-		// Start Tails Assist flight?
-		if (Game.getSetting(SETTING_TAILS_ASSIST_MODE) != 0 && (input_state & CONTROL_UP) && !original_mode)
+		// Tails must be AI controlled and not too far away
+		s16 dx = s16[0xffffb04a + 0x10] - s16[0xffffb000 + 0x10]
+		s16 dy = s16[0xffffb04a + 0x14] - s16[0xffffb000 + 0x14]
+		if (tails.control_counter == 0 && tails.ai_routine == 0x06 && abs(dx) < 0xc0 && abs(dy) < 0x80)
 		{
-			// Tails must be AI controlled and not too far away
-			s16 dx = s16[0xffffb04a + 0x10] - s16[0xffffb000 + 0x10]
-			s16 dy = s16[0xffffb04a + 0x14] - s16[0xffffb000 + 0x14]
-			if (tails.control_counter == 0 && tails.ai_routine == 0x06 && abs(dx) < 0xc0 && abs(dy) < 0x80)
+			// Tails must not already be flying already, and ready for flying
+			bool startFlight = false
+			if (u8[0xffffb04a + 0x20] == char.state.ROLLING && u8[0xffffb04a + 0x40] == 1)	// char.jumping must be set
 			{
-				// Tails must not already be flying already, and ready for flying
-				bool startFlight = false
-				if (u8[0xffffb04a + 0x20] == char.state.ROLLING && u8[0xffffb04a + 0x40] == 1)	// char.jumping must be set
-				{
-					startFlight = true
-				}
+				startFlight = true
+			}
 
-				// Alternatively, Tails can be standing or running and ready to jump
-				else if ((u8[0xffffb04a + 0x2a] & char.flag.IN_AIR) == 0)
+			// Alternatively, Tails can be standing or running and ready to jump
+			else if ((u8[0xffffb04a + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+				A0 = 0xffffb04a
+				control.tails.pressed |= CONTROL_ABC
+				if (Character.CheckStartJump())
 				{
-					A0 = 0xffffb04a
-					control.tails.pressed |= CONTROL_ABC
-					if (Character.CheckStartJump())
-					{
-						tails.ai_routine = 0x30		// No valid value in vanilla, but we're using it for the Tails Assist flight routine
-						tails_assist.trigger_countdown = 8	// Hold jump button for 8 frames before triggering flight
-					}
-					A0 = 0xffffb000
-				}
-
-				if (startFlight)
-				{
-					A0 = 0xffffb04a
-					TailsStartFlight()
-					char.velocity.y = max(char.velocity.y, -0x200)	// Limit Tails' velocity
 					tails.ai_routine = 0x30		// No valid value in vanilla, but we're using it for the Tails Assist flight routine
-					tails_assist.trigger_countdown = 0
-					tails.catch_timeout = 0
-					A0 = 0xffffb000
-
-					// No further reaction to jump button if:
-					//  - it would activate the fire or bubble shield
-					//  - Knuckles would start gliding
-					bool preventAction = false
-					if (isMainCharacter(CHARACTER_SONIC))
-					{
-						preventAction = (char.bonus_effect & (char.bonus.SHIELD_FIRE | char.bonus.SHIELD_BUBBLE)) != 0 && (char.bonus_effect & char.bonus.INVINCIBLE) == 0 && !super.active
-					}
-					else if (isMainCharacter(CHARACTER_KNUCKLES))
-					{
-						preventAction = (abs(char.velocity.x) < 0x100)
-					}
-					return !preventAction
+					tails_assist.trigger_countdown = 8	// Hold jump button for 8 frames before triggering flight
 				}
+				A0 = 0xffffb000
+			}
+
+			if (startFlight)
+			{
+				A0 = 0xffffb04a
+				TailsStartFlight()
+				char.velocity.y = max(char.velocity.y, -0x200)	// Limit Tails' velocity
+				tails.ai_routine = 0x30		// No valid value in vanilla, but we're using it for the Tails Assist flight routine
+				tails_assist.trigger_countdown = 0
+				tails.catch_timeout = 0
+				A0 = 0xffffb000
+
+				if (Input.buttonPressed(BUTTON_L))
+					return false	// no need to prevent jump button action if L was used
+				// No further reaction to jump button if:
+				//  - it would activate the fire or bubble shield
+				//  - Knuckles would start gliding
+				bool preventAction = false
+				if (isMainCharacter(CHARACTER_SONIC))
+				{
+					preventAction = (char.bonus_effect & (char.bonus.SHIELD_FIRE | char.bonus.SHIELD_BUBBLE)) != 0 && (char.bonus_effect & char.bonus.INVINCIBLE) == 0 && !super.active
+				}
+				else if (isMainCharacter(CHARACTER_KNUCKLES))
+				{
+					preventAction = (abs(char.velocity.x) < 0x100)
+				}
+				return !preventAction
 			}
 		}
 	}
-
-	// Use normal jump button reaction
 	return true
 }
 

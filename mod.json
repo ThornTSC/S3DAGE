@@ -9,6 +9,10 @@
 		"ModVersion": "1.9.1.2",
 		"GameVersion": "22.09.10.0"
 	},
+	"UsesFeatures":
+	{
+		"Controls_LR": true
+	},
 	"Settings":
 	{
 		"List":
@@ -104,6 +108,31 @@
 				"InternalName": "SonicMoves",
 				"DisplayName": "Sonic Peelout & Drop Dash",
 				"Variable": "sonic_moves",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
+				"InternalName": "TailsAssist",
+				"DisplayName": "Tails Assist Input",
+				"Variable": "L_TailsAssist",
+				"DefaultValue": "2",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Up+Jump",
+					"1": "L Button",
+					"2": "Up+Jump or L (default)"
+				}
+			},
+			{
+				"InternalName": "EasySpindash",
+				"DisplayName": "L Button Spindash Charge",
+				"Variable": "L_Spindash",
 				"DefaultValue": "1",
 			  	"Category": "Control Settings",
 				"Options":

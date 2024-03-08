@@ -221,7 +221,9 @@ function void customMenu.mainLogicLoop()
 		selectedZoneAct = 0x0000		// Make selection become AIZ1
 	}
 
-	if (selectedMenuOption == 0)
+	if (Input.buttonPressed(BUTTON_L) || Input.buttonPressed(BUTTON_R))
+		customMenu.selectAct()
+	else if (selectedMenuOption == 0)
 		customMenu.selectZone()
 	else if (selectedMenuOption == 1 || selectedMenuOption == 6)
 		customMenu.selectAct()
@@ -646,7 +648,7 @@ function void customMenu.selectZone()
 function void customMenu.selectAct()
 {
 	// Select an act.
-	if (customMenu.scrollRight())
+	if (customMenu.scrollRight() || Input.buttonPressed(BUTTON_R))
 	{
 		if (setting.unlock_act)				// Pressed right on EHZ?
 		{
@@ -673,7 +675,7 @@ function void customMenu.selectAct()
 		playSound(0x5b)
 		customMenu.matchActToSelection()
 	}
-	else if (customMenu.scrollLeft())
+	else if (customMenu.scrollLeft() || Input.buttonPressed(BUTTON_L))
 	{
 		if (setting.unlock_act)				// Pressed left on EHZ?
 		{

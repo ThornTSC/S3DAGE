@@ -100,6 +100,92 @@ function void Character.LandingOnGroundStandUp()
 
 
 
+// Allow holding the L button to charge the spin dash.
+// Function taken from maingame\character\character.lemon
+//# translated(0x011bde) end(0x011cf0)
+//# translated(0x011d16) end(0x011da4)
+//# translated(0x0151fc) end(0x01530c)
+//# translated(0x015332) end(0x0153c0)
+function bool Character.UpdateSpindash()
+{
+#if STANDALONE
+	// Ignore this while charging the Super Peel-Out
+	if (char.spindash == 0x80)
+		return false
+#endif
+
+	u8 input_state   = (char.character == CHARACTER_TAILS) ? control.tails.state   : control.player1.state
+	u8 input_pressed = (char.character == CHARACTER_TAILS) ? control.tails.pressed : control.player1.pressed
+
+	if (char.spindash == 0)
+	{
+		bool canStartSpindash = (char.state == char.state.COWERING) && ((input_pressed & CONTROL_ABC) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode))
+		if (!canStartSpindash)
+		{
+			// Nothing to see here
+			return false
+		}
+
+		// Start spindash
+		char.state = char.state.SPINDASH
+		playSound(SFX_SPINDASH_CHARGE)
+		L_Spindash_Charge = 0
+
+		char.spindash = 1
+		char.spindash_charge = 0
+		if (char.drown_countdown >= 12)
+		{
+			// Set state of dust cloud object to 0x02
+			u8[A6 + 0x20] = 0x02
+		}
+	}
+	else
+	{
+		if (input_state & CONTROL_DOWN)
+		{
+			// Update spindash
+			if (char.spindash_charge > 0)
+			{
+				char.spindash_charge -= char.spindash_charge >> 5
+				if (s16(char.spindash_charge) < 0)
+					char.spindash_charge = 0
+			}
+
+			if (Input.buttonDown(BUTTON_L) && A0 == 0xffffb000 && !original_mode)
+			{
+				++L_Spindash_Charge	// this increments based on player 1, but the charge timer is shared with sidekick Tails as well
+			}
+
+			if ((input_pressed & CONTROL_ABC) || L_Spindash_Charge == L_Spindash_ChargeInterval)
+			{
+				// Charge up
+				u16 maxDash = 0x800		// (Input.buttonDown(BUTTON_L) && !original_mode) ? 0x700 : 0x800	// can optionally lower maximum speed when using L; revving should be more effective
+				char.state.both = 0x0900		// char.state.SPINDASH, char.state.RUNNING
+				char.spindash_charge = min(char.spindash_charge + 0x200, maxDash)
+				playSound(SFX_SPINDASH_CHARGE)
+				L_Spindash_Charge = 0
+			}
+		#if STANDALONE
+			Input.setControllerRumbleByAddress(A0, 0.0f, 0.2f, 100)
+		#endif
+		}
+		else
+		{
+			releaseSpindash()
+		}
+
+		// Center camera y-offset again
+		centerCameraYOffset()
+	}
+
+	Character.CheckAgainstMoveBorders()
+	Character.UpdateRotationOnGround()
+	partialUpdateCharacterOnGround()
+
+	return true
+}
+
+
 
 // Allow drop dash and peelout via an option separate from AIR's settings.
 // Functions taken from maingame\character\character.lemon
@@ -211,6 +297,7 @@ function void Character.UpdateNormalState.Sonic()
 	}
 }
 
+// This function also allows the L button to trigger Tails Assist.
 function void Character.updateJumpMoves()
 {
 	u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state   : control.player1.state
@@ -244,6 +331,10 @@ function void Character.updateJumpMoves()
 						}
 					}
 				#endif
+
+				// Check if triggered Tails Assist via L button
+				if (Input.buttonPressed(BUTTON_L) && A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS) && L_TailsAssist && !original_mode)
+					checkStartTailsAssist(input_state)
 
 				// Check if pressed jump again in mid-air
 				if (input_pressed & CONTROL_ABC)
