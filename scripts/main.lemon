@@ -10930,7 +10930,7 @@ function void HCZ2_CustomSprites()
 		Renderer.drawCustomSprite("hcz_backgroundballpillarsection", 0x478c - camera.foreground.x.u16, 0x0340 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 		if (palette_set >= 2)
 		{
-			u16 renderQueue = 0xdfe1
+			u16 renderQueue = 0xdfe0
 			for (u8 i = 0; i <= 0x6d; i++)
 			{
 				if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
