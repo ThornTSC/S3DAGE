@@ -11100,6 +11100,7 @@ function void fn03077e()
 
 
 // Use original fan bubble despawning behaviors in Original Mode.
+// Also implement bubbles disappearing when off screen on the sides as well, not just above the screen.
 // Function taken from objects\02_hcz\hcz_fan.lemon
 //# address-hook(0x030834) end(0x03084a)
 function void fn030834()
@@ -11107,9 +11108,9 @@ function void fn030834()
 	bool shouldDespawn = (objA0.position.y.u16 <= water.height.current)
 	if (!original_mode)
 	{
-		// Also despawn above the screen
+		// Also despawn when far enough off screen in any direction except below the screen
 		//  -> Without this, there's kind of a spam of bubbles in HCZ 1 (around X=0x1f40, Y=0x08c0) that can prevent regular object spawn
-		shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10)
+		shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10) || (objA0.position.x.u16 < camera.position.x.u16 - 0x10) || (objA0.position.x.u16 > camera.position.x.u16 + getScreenWidth() + 0x10)
 	}
 	if (shouldDespawn)
 	{
