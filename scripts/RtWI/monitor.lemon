@@ -42,7 +42,7 @@ function void ItemEffect.ApplySuperTransformation()
 		// Tails
 		super.active = 0
 	#if STANDALONE
-		super.active = (unlock_act) ? 1 : 0xff
+		super.active.tails = (unlock_act) ? 1 : 0xff
 	#else
 		super.active.tails = 1
 	#endif
