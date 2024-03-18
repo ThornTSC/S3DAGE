@@ -554,16 +554,18 @@ function void TitleCard.Init()
 		hud.layout = 1											// with Sonic CD-style ring counter
 		hudLoaded = false
 	}
-	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
-	{
-		theme.hud = theme.s3k
-	}
 //	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
 //	{
 		if (hudLoaded)
 			hud.layout = (theme.hud >> 6)
 		theme.hud &= 0x3f		// set HUD to matching theme constant
 //	}
+
+	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
+	{
+		theme.hud &= 0xc0	// keep HUD layout but zero out HUD theme (theme.s3k = 0)
+	}
+
 	if (time_attack == 1 || time_attack == 2)
 	{
 		if (time_attack_hud.layout > 2)		// leftover from when this was restart_threshold
