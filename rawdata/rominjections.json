@@ -784,7 +784,7 @@
     "RomInject": "0x1ad68e"
   },
 
-  // Replaces LRZ Chunks, Blocks, and collision
+  // Replaces LRZ Chunks, Blocks, and collision and Knux Act 2 boss start location
 /*
   "ChunksLRZP": {
     "File": "LRZPChunks.bin",
@@ -836,6 +836,10 @@
   "CollisionLRZ2": {
     "File": "LRZ2Collision.bin",
     "RomInject": "0x099fc0"
+  },
+  "LRZBKnucklesStart": {
+    "File": "LRZBKnucklesStart.bin",
+    "RomInject": "0x1e3d88"
   },
 
   // Replaces HPZ Chunks
