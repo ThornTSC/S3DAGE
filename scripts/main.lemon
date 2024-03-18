@@ -18436,7 +18436,7 @@ function void fn079988()
 //# address-hook(0x05a12e) end(0x05a152)
 function void InitLevelTiles.HPZ()
 {
-	if (isMainCharacter(CHARACTER_KNUCKLES) && (level.start_location >= 2 || original_mode))
+	if (isMainCharacter(CHARACTER_KNUCKLES) && (level.start_location != 1 || original_mode))
 	{
 		move_area.right = 0x0aa0 + getScreenExtend()
 
@@ -18469,7 +18469,8 @@ function void fn0456f4()
 	fn045856()
 
 	A1 = 0xffffb000
-	#if STANDALONE
+	if (!original_mode)
+	{
 		// Check if character got hurt right while entering the beam
 		if (u8[A1 + 0x05] == 0x04)
 		{
@@ -18478,7 +18479,7 @@ function void fn0456f4()
 			objA1.velocity.y = 0
 			objA1.groundspeed = 0
 		}
-	#endif
+	}
 
 	A2 = 0xffff0000 + u16[A0 + 0x3c]
 	if (s8[A2 + 0x46] >= 0x08)
@@ -18547,6 +18548,49 @@ function void fn0456f4()
 
 	DrawObject()
 }
+
+
+
+
+// Do not move Knuckles from HPZ to SSZ if he is not being held by the teleporter beam.
+// Function taken from objects\level\teleporter.lemon
+//# address-hook(0x045b94) end(0x045bf2)
+function void fn045b94()
+{
+	if (isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		// Knuckles' HPZ teleporter
+		if (camera.position.y.u16 >= 0x0240 || u16[0xffffb000 + 0x10] < 0x0b00)
+			return
+
+		// New check to ensure the teleporter beam is holding the character
+		if (u8[0xffffeed6] != 0xff && !original_mode)
+			return
+
+		playMusic(MUSIC_CTRL_FADEOUT)
+
+		sram.block_interrupts.u8 = 0xff
+		SaveGameOnLevelFinished()
+
+		TriggerNextZone(0x0a01)		// Knuckles' Sky Sanctuary act
+	}
+	else
+	{
+		// Sonic's / Tails' HPZ teleporter (part of the HPZ cutscene)
+		A1 = 0xffff0000 + u16[A0 + 0x2e]
+		if (objA1.position.x.u16 < 0x1000)
+		{
+			UnloadObject()
+			return
+		}
+
+		u32[0xfffffc62] = 0x040c0408
+		level.palettefx.state = 0xff
+		objA1.update_address = 0x045ad6
+		objA0.update_address = 0x045bf4
+	}
+}
+
 
 
 
