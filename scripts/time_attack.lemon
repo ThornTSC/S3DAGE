@@ -467,7 +467,7 @@ function void initializeMainGame()
 		u8 delay = 58	// measured from entering AIZ2 from Level Select
 		if (global.zone >= 0x13 && global.zone <= 0x15)
 			delay = 38	// Bonus stages have a smaller delay. This is estimated, mot measured.
-		if (global.zone == 0x0c || global.zone_act == 0x1700 || global.zone_act == 0x0a01)	// Final boss stages load few plane graphics and thus load fast. Estimated delay.
+		if (global.zone == 0x0c || global.zone == 0x17 || global.zone_act == 0x0a01)	// Final boss stages load few plane graphics and thus load fast. HPZ emerald altar also loads fast. Estimated delay.
 			delay = 18
 		if (unlock_act)	// unlockable stages load so quickly that it's hard to read the title cards without a slight delay
 			delay = 10
