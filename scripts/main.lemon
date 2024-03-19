@@ -961,6 +961,7 @@ function void fn01c2b0()
 
 
 // Disable A.I.R.'s custom widescreen fix for the gumball machine, as it doesn't cover ultrawide
+// NOTE: AIR is implementing its own ultrawide fix in the version after v24.02.02.00 via https://github.com/Eukaryot/sonic3air/commit/69e80315752b3ad24fe8b9824a7d16aed448f460 , so check it again at that time!
 // Function taken from level\bonus_gm\level_gumballmachine.lemon
 //# address-hook(0x23efa2) end(0x23efb2)
 function void UpdateLevelTiles.BonusGM()
@@ -3834,6 +3835,77 @@ function void KnucklesPressedJumpInMidAir()
 	base.KnucklesPressedJumpInMidAir()
 }
 
+//# address-hook(0x0148ac)
+function void UpdateTailsFlight_innerB()
+{
+	if (char.flags & char.flag.UNDERWATER)
+	{
+		// Swimming
+		if (tails.flight_countdown == 0)
+		{
+			// Tired
+		#if STANDALONE
+			// Use proper animation when both exhausted and carrying Sonic at the same time underwater, #contributed by mrgrassman14
+			if (tails.carrying && !original_mode)
+			{
+				char.state = char.state.TAILS_SWIMCARRY
+			}
+			else
+		#endif
+			{
+				char.state = char.state.TAILS_SWIMTIRED
+			}
+		}
+		else
+		{
+			// Not tired
+			if (tails.carrying)
+			{
+				char.state = char.state.TAILS_SWIMCARRY
+			}
+			else
+			{
+				char.state = (char.velocity.y < 0) ? char.state.TAILS_SWIMUP : char.state.TAILS_SWIMDOWN
+			}
+		}
+	}
+	else
+	{
+		// Flying
+		if (competition_mode.active)
+		{
+			// Not really clear why this is here, competition mode Tails doesn't seem to even use this function
+			char.state = char.state.TAILS_FLYDOWN
+		}
+		else
+		{
+			if (tails.flight_countdown == 0)
+			{
+				char.state = char.state.TAILS_FLYTIRED
+			}
+			else if (tails.carrying)
+			{
+				char.state = (char.velocity.y < 0) ? char.state.TAILS_CARRYUP : char.state.TAILS_CARRYDOWN
+			}
+			else
+			{
+				char.state = (char.velocity.y < 0) ? char.state.TAILS_FLYUP : char.state.TAILS_FLYDOWN
+			}
+		}
+
+		if (char.render_flags & render_flag.VISIBLE)
+		{
+			if (((level.framecounter.low + 8) & 0x0f) == 0)
+			{
+				playSound((char.state == char.state.TAILS_FLYTIRED) ? 0xbb : 0xba)
+			#if STANDALONE
+				Input.setControllerRumbleByAddress(A0, 0.0f, 0.1f, 150)
+			#endif
+			}
+		}
+	}
+}
+
 
 
 // Do not allow canceling Super/Hyper transformations in Original Mode.
@@ -5811,9 +5883,26 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 	}
 
 	// SSZ clouds effect
-	if (objA0.update_address == 0x057bf6 && original_mode)
+	if (objA0.update_address == 0x057bf6)
 	{
-		return false
+		if (original_mode)
+			return false
+		
+		// SSZ clouds effect
+		if (objA0.update_address == 0x057bf6)
+		{
+			Renderer.drawVdpSpriteWithAlpha(px,   py, size, index, 0xd000, 140)
+			Renderer.drawVdpSpriteWithAlpha(px+1, py, size, index, 0xd000, 144)
+
+			if (getScreenWidth() > 400)
+			{
+				// Draw an additional copy of the cloud one loop further to the right
+				Renderer.drawVdpSpriteWithAlpha(px+512, py, size, index, 0xd000, 140)
+				Renderer.drawVdpSpriteWithAlpha(px+513, py, size, index, 0xd000, 144)
+			}
+
+		return true
+		}
 	}
 
 	return base.Standalone.onDrawVdpSpriteCompound(px, py, size, index, renderQueue, spriteCounter)
@@ -8594,6 +8683,30 @@ function void ApplyROMManipulations()
 	u16[0x187c4e] = 0xc0
 	#endif
 
+	#if GAMEAPP <= 0x24020200
+	// Fix for offset in Sonic's first ending pose sprite (after credits roll), #contributed by mrgrassman14. Covered in ROMManipulation.RepairSpriteMappings() in later A.I.R. builds.
+	u16[0x0607f2] = 0xdc0f
+	u16[0x0607f6] = 0xfff0
+	u16[0x0607f8] = 0xe401
+	u16[0x0607fc] = 0x0010
+	u16[0x0607fe] = 0xe402
+	u16[0x060802] = 0xffe8
+	u16[0x060804] = 0xfc0e
+	u16[0x060808] = 0xffe8
+	u16[0x06080a] = 0xfc01
+	u16[0x06080e] = 0x0008
+	u16[0x060810] = 0x1405
+	u16[0x060814] = 0xfff0
+
+	// Apply changes to Super Sonic's idle and balancing animations to make the hair flow as it did in Sonic 2, #contributed by Veenee (idle animation) and mrgrassman14 (balancing animation).
+	// Covered in ROMManipulation.RepairAnimations() in later A.I.R. builds.
+	u8[0x012c45] = 0x5a			// Shift the idle animation pointer back a bit to an otherwise empty area
+	u8[0x012c47] = 0x60			// Shift the balance animation pointer back to our newly created space
+	u32[0x012c94] = 0x07babbbc	// Add additional frames (idle speed + first three idle frames)
+	u32[0x012c98] = 0xbbff07a1  // Add additional frames (4th idle frame + balance speed + first balance frame)
+	u32[0x012c9c] = 0xa2a3a2ff  // Add additional frames (last 3 balance frames)
+	#endif
+
 	ROMManipulation.RepairAnimations()
 	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
 	ROMManipulation.AIZ1.KnucklesIntroCritters()
@@ -9286,7 +9399,7 @@ constant array<u16> UnlockAct.LevelSizes =
 
 
 // Use original timing for AIZ1 Sonic intro in Original Mode.
-// Function taken from level\01_aiz\intro_sonic.lemon
+// Functions taken from level\01_aiz\intro_sonic.lemon
 //# address-hook(0x061e24) end(0x061e62)
 function void fn061e24()
 {
@@ -9303,6 +9416,51 @@ function void fn061e24()
 			objA0.countdown_value = (original_mode) ? 127 : 63	// Don't wait that long, both Sonic and Knuckles just stands there doing nothing for quite some time...
 			objA0.countdown_callback = 0x061e6a
 		}
+	}
+}
+
+
+
+
+
+// Do not apply an AIR palette fix to Monkey Dude's coconuts in Original Mode.
+// Function taken from enemies\aiz_monkeydude.lemon
+//# address-hook(0x08744c) end(0x08745e)
+function void fn08744c()
+{
+	fn087518()
+
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Fix for the coconut palette before it's thrown, #contributed by Legobouwer
+		objA0.sprite_attributes = 0x0548
+		if (objA0.animation.sprite != 6)
+			objA0.sprite_attributes |= sprite_attribute.PALETTE.LINE1
+	}
+#endif
+
+	// Targets:
+	//  - 0x087468	-> objA0.base_state = 0x00
+	//  - 0x087472	-> objA0.base_state = 0x02
+	call tableLookupAddress(0x087462, objA0.base_state)
+
+	fn084920()
+}
+
+//# address-hook(0x08756a) end(0x087590)
+function void fn08756a()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	if (u8[A1 + 0x38] & 0x02)
+	{
+		objA0.base_state = D1.u8
+		objA0.flags38 |= 0x02
+		if (!original_mode)
+			objA0.value3a = objA0.value3a >> 1
+		D0.u8 = objA0.value3a >> 1
+		objA0.value3a = D0.u8
+		objA0.value3b = 1
 	}
 }
 
@@ -13259,7 +13417,7 @@ function void fn05227c()
 	// Limit movement to where the boss area ends, to prevent Knuckles from gliding over the boss
 	if (global.zone_act == 0x0301 && move_area.right == 0x6000 && camera.position.x.u16 >= 0x4500 && camera.position.y.u16 < 0x320 && !original_mode)
 	{
-		move_area.right = 0x47e0
+		move_area.right = max(0x4620 + getScreenWidth(), 0x47e0)
 		level.vertical_wrap = 0x0200
 	}
 #endif
@@ -13345,12 +13503,40 @@ function void fn06e724()
 		u8[0xffff84af] = u8[0xffff84ae]
 	}
 }
+//# address-hook(0x06e7e4) end(0x06e80a)
+function void fn06e7e4()
+{
+	// Fire the cannon when it's ready
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	A1 = 0xffff0000 + u16[A0 + 0x44]
+	if (u8[A1 + 0x26] != 0x12)
+		return
+
+	objA0.update_address = 0x06e80c
+
+	control.player1 = 0x7070		// CONTROL_ABC, CONTROL_ABC
+
+	player1.control_override = 0xff
+
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Prevent that character gets stopped by right screen border after getting shot out of the cannon
+		player1.camera_lock = 1
+		move_area.right += 0x100
+	}
+#endif
+}
+
 
 //# address-hook(0x06e80c) end(0x06e826)
 function void fn06e80c()
 {
 	// Minor tweak: Fade out a little later
-	if (u16[0xffffb000 + 0x14] > camera.position.y.u16 && !original_mode)
+	if ((u16[0xffffb000 + 0x14] > camera.position.y.u16 - 0x20) && !original_mode)
 		return
 	else if (u16[0xffffb000 + 0x14] > camera.position.y.u16 + 0x20)
 		return
@@ -14018,6 +14204,7 @@ function void ICZSnow.Init2()
 
 
 // Adjust end-of-zone transition in ICZ to match the original game by removing an AIR correction
+// Function taken from bosses\boss_icz2.lemon
 //# address-hook(0x071de2) end(0x071e22)
 function void fn071de2()
 {
@@ -14031,18 +14218,41 @@ function void fn071de2()
 
 	PlayMusicAfterLevelResults()
 	move_area.bottom.target = screenmover_target.bottom
-	screenmover_target.right = 0x47c0
 
-//#if STANDALONE
-//	// Make nobody ever sees the blank space where there is no snow
-//	screenmover_target.right = 0x4764 - (getScreenWidth() - 320)
-//#endif
+//	if (!original_mode)
+//		screenmover_target.right = 0x4720
+//	else
+		screenmover_target.right = 0x47c0
 
 	spawnSimpleChildObjects(0x084b00)
 	fn0852ae()
 }
 
 
+
+// Correct a missing bit of snow in the exit to ICZ2 with a future AIR version correction (post-v24.02.02.0)
+// Function taken from enemies\shared.lemon
+//# address-hook(0x085ad2) end(0x085b06)
+function void fn085ad2()
+{
+	if ((objA0.render_flags & render_flag.VISIBLE) == 0)
+	{
+		DrawOrUnloadObject()
+	}
+	else
+	{
+		objA0.update_address = objA0.countdown_callback
+	}
+
+	#if STANDALONE
+	// Special handling for the snow tunnel after ICZ 2 boss, to prevent a frame where the object is not drawn
+	if (objA0.update_address == 0x08b554 && !original_mode) // addressof(ICZSnow.Init2)
+	{
+		ICZSnow.Init2()
+		DrawObject()
+	}
+	#endif
+}
 
 
 
@@ -15768,6 +15978,25 @@ function void InitLevelTiles.MHZ1()
 
 
 
+// Allow Knuckles' palette to load for the red switch at the start of MHZ2
+// Function taken from maingame\cutscene_knuckles.lemon
+function void CutsceneKnuckles.loadPalette()
+{
+#if STANDALONE
+	// Do not load Knuckles' cutscene palette if using EXTENDED_CHARACTER_PALETTES, fix #contributed by TheMushrunt
+	if (!EXTENDED_CHARACTER_PALETTES || original_mode)
+#endif
+	{
+		loadPaletteLine1(0x066912)
+	}
+
+	// When using EXTENDED_CHARACTER_PALETTES:
+	//  - the (potentially modded) Knuckles palette gets used instead
+	//  - it is already loaded at this point
+}
+
+
+
 function void MHZ2_CustomSprites()
 {
 	if (rain_intensity && palette_set >= 2)	// is weather enabled? All these checks do not need the palette_set variable checked, as original palette users are already sent to the base function
@@ -16454,7 +16683,25 @@ function void fn052ca2()
 	}
 }
 
+//# address-hook(0x052c2e) end(0x052c3c)
+function void fn052c2e()
+{
+	#if STANDALONE
+	if (!original_mode)
+	{
+		// Immediately refresh the background with a blue sky, to avoid visual glitch in widescreen
+		//  -> TODO: Rather load the actual background content here
+		for (u16 address = 0xe000; address <= 0xf000; address += 2)
+			setVRAM(address, 0x6092)
+	}
+	#endif
 
+	u8[0xffffeed6] = 0xff
+	D0 = 0x10
+	D6.u16 = 0x03f0
+	A1 = 0x052dd0
+	fn052c42()
+}
 
 
 
@@ -16736,6 +16983,45 @@ function void fn0837d8()
 }
 
 
+
+
+// Import a graphics fix from post-v24.02.02.0 AIR.
+// Once a version after this one becomes the minimum requirement, this code can be removed.
+// Function taken from objects\o8_fbz\fbz_capsule.lemon
+//# address-hook(0x089dee) end(0x089e6a)
+function void fn089dee()
+{
+	D1.u16 = objA0.subtype2c
+	D0 = objA0.subtype2c & 0x06
+	D2.u16 = u16[0x089e6c + D0.u16]
+	objA0.velocity.y = D2.u16
+	objA0.value3e = D2.u16
+	// objA0.sprite_attributes = u16[0x089e74 + (D0.u16 & 0x02)]
+	D0.u16 &= 0x02
+	objA0.sprite_attributes = u16[0x089e74 + D0.u16]
+
+	D2 = global.zone * 2
+	A1 = 0x02c7ba + D2.u16
+	D0.u16 >>= 1
+	D0.u16 = u8[A1 + D0.u16] * 8
+
+	A2 = 0x02c7ea
+	objA0.mapping_offset = u32[A2 + D0.u16 + 4]
+	D1.u16 <<= 2
+	objA0.countdown_value = D1.u16
+
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	objA0.velocity.x = (objA0.position.x.u16 < objA1.position.x.u16) ? -0x200 : 0x200
+	objA0.render_flags &= ~render_flag.FLIP_X
+	if (objA0.velocity.x < 0)
+	{
+		objA0.render_flags |= render_flag.FLIP_X
+	}
+}
+
+
+
+
 // Adjust camera on the outdoor section on the lowest route of FBZ2
 // to prevent sight of interior tiles, and display hanging inputs
 //# address-hook(0x052e34) end(0x052e40)
@@ -16743,11 +17029,14 @@ function void UpdateLevelTiles.FBZ2()
 {
 	FBZ2_CustomSprites()
 
-	// This if and else if are new for the outdoor section
-	if (camera.position.x.u16 >= 0x0d00 && camera.position.x.u16 <= 0x1180 && camera.position.y.u16 >= 0x0a00)	// If outdoors and not leaving,
-		move_area.left = 0x0d00																					// prevent seeing within left wall,
-	else if (camera.position.x.u16 <= 0x1500)																	// else if still early in the level,
-		move_area.left = 0x0000																					// allow returning to the start.
+	// New for the outdoor section
+	if (!original_mode)
+	{
+		if (camera.position.x.u16 >= 0x0d00 && camera.position.x.u16 <= 0x1180 && camera.position.y.u16 >= 0x0a00)	// If outdoors and not leaving,
+			move_area.left = 0x0d00																					// prevent seeing within left wall,
+		else if (camera.position.x.u16 <= 0x1500)																	// else if still early in the level,
+			move_area.left = 0x0000																					// allow returning to the start.
+	}
 
 	camera.foreground.y.u16 += camera.screenshake.offset
 	call 0x052e44 + s16[0xffffeec0]
@@ -17664,6 +17953,32 @@ function void fn08f0ca()
 		u8[0xfffffaad] = 0
 	}
 }
+
+
+
+// Do not enable fix to SOZ2 boss Egg Mobile priority in Original Mode
+// Function taken from bosses\boss_soz2.lemon
+//# address-hook(0x077822) end(0x077842)
+function void fn077822()
+{
+	MoveWithGravity20()
+	if (objA0.velocity.y >= 0x0200)
+	{
+		objA0.update_address = 0x077848
+		objA0.flags2a &= ~0x80
+		objA0.render_flags |= render_flag.FLIP_X
+
+	#if STANDALONE
+		// Change priority of Egg Mobile so it isn't underneath its own exhaust flame, #contributed by mrgrassman14
+		if (!original_mode)
+			objA0.sprite_priority = 0x100
+	#endif
+	}
+	DrawObject()
+}
+
+
+
 
 
 
@@ -21420,6 +21735,63 @@ function void fn05dfee()
 #endif
 }
 
+//# address-hook(0x05e3c0) end(0x05e3e8)
+function void fn05e3c0()
+{
+	// Medium end pose sprite
+
+#if STANDALONE
+	u32 targetAddress = 0x802000 + getMainCharacter() * 0x40
+	loadCharacterEndPosePalette(getMainCharacter(), targetAddress, 0)
+	targetAddress += 0x180
+	loadCharacterEndPosePalette(getMainCharacter(), targetAddress, 0)
+#endif
+
+	objA0.base_state = 0x08
+	objA0.countdown_value = 0x05
+	if (isMainCharacter(CHARACTER_TAILS))
+	{
+		objA0.render_flags |= render_flag.FLIP_X
+	}
+
+#if STANDALONE
+	// Flip sprite horizontally to reflect larger sprite's hand/foot position, #contributed by mrgrassman14
+	if (isMainCharacter(CHARACTER_SONIC) && objA0.animation.sprite == 0 && !original_mode)
+		objA0.render_flags &= ~render_flag.FLIP_X
+#endif
+
+	A1 = 0xffffb000
+	u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+	objA1.animation.sprite = 0
+	DrawObject()
+}
+
+//# address-hook(0x05e3ee) end(0x05e40c)
+function void fn05e3ee()
+{
+	// Big end pose sprite
+
+	--objA0.countdown_value
+	if (objA0.countdown_value < 0)
+	{
+		objA0.base_state = 0x12
+		++objA0.animation.sprite
+
+	#if STANDALONE
+		// Flip sprite horizontally to original position as it was affected by the change in fn05e3c0()
+		if (isMainCharacter(CHARACTER_SONIC) && !original_mode)
+			objA0.render_flags |= render_flag.FLIP_X
+	#endif
+
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = 0x05ef68
+		}
+	}
+	DrawObject()
+}
+
+
 
 
 
@@ -21885,7 +22257,6 @@ function bool Standalone.useMultiSampleCollision()
 		else if (global.zone_act == 0x0101)
 		{
 			// HCZ 2
-			Standalone.MultiSampleCollision.addRect(0x08C0, 0x0420, 0x0960, 0x04B0)
 			Standalone.MultiSampleCollision.addRect(0x12C0, 0x0920, 0x1360, 0x09B0)
 			Standalone.MultiSampleCollision.addRect(0x2040, 0x01A0, 0x20E0, 0x0230)
 			Standalone.MultiSampleCollision.addRect(0x38C0, 0x01A0, 0x3960, 0x0230)
@@ -21901,14 +22272,13 @@ function bool Standalone.useMultiSampleCollision()
 		{
 			// CNZ 1
 			Standalone.MultiSampleCollision.addRect(0x0300, 0x0B50, 0x03E0, 0x0BF0)
-			Standalone.MultiSampleCollision.addRect(0x09C0, 0x0650, 0x0A80, 0x0700)	// Still getting subpixel stopped here...
-		//	Standalone.MultiSampleCollision.addRect(0x2800, 0x0300, 0x2A00, 0x0400)	// this is an inverted ceiling curve sequence. Multi-sample doesn't seem to help its reliability. :(
+			Standalone.MultiSampleCollision.addRect(0x09C0, 0x0650, 0x0A80, 0x0700)
 		}
 		else if (global.zone_act == 0x0301)
 		{
 			// CNZ 2
 			Standalone.MultiSampleCollision.addRect(0x0500, 0x09E0, 0x05B0, 0x0A60)
-			Standalone.MultiSampleCollision.addRect(0x0A50, 0x07D0, 0x0B00, 0x0880) // Still getting subpixel stopped here...
+			Standalone.MultiSampleCollision.addRect(0x0A50, 0x07D0, 0x0B00, 0x0880)
 			Standalone.MultiSampleCollision.addRect(0x18A0, 0x03E0, 0x1920, 0x0460)
 			Standalone.MultiSampleCollision.addRect(0x2b50, 0x0750, 0x2c00, 0x0800)
 		}

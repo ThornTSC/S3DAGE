@@ -73,14 +73,31 @@ function void ROMManipulation.RepairSpriteMappings_Original()
 	u16[0x187b8a] = 0x0060
 	u16[0x187bec] = 0x0060
 	u16[0x187c4e] = 0x0060
+
+	// Fix for offset in Sonic's first ending pose sprite (after credits roll), #contributed by mrgrassman14
+	u16[0x0607f2] = 0x000f
+	u16[0x0607f6] = 0x0008
+	u16[0x0607f8] = 0x0801
+	u16[0x0607fc] = 0x0028
+	u16[0x0607fe] = 0x0802
+	u16[0x060802] = 0x0000
+	u16[0x060804] = 0x200e
+	u16[0x060808] = 0x0000
+	u16[0x06080a] = 0x2001
+	u16[0x06080e] = 0x0020
+	u16[0x060810] = 0x3805
+	u16[0x060814] = 0x0008
 }
 
 
 function void ROMManipulation.RepairAnimations_Original()
 {
-	// Apply changes to Super Sonic's idle animation to use the third frame
+	// Apply changes to Super Sonic's idle and balancing animations to make the hair flow as it did in Sonic 2, #contributed by Veenee (idle animation) and mrgrassman14 (balancing animation)
 	u8[0x012c45] = 0x5e			// Shift the pointer back a bit to an otherwise empty area
-	u32[0x012c96] = 0xffff07ba	// Add additional frames
+	u8[0x012c47] = 0x62			// Shift the balance animation pointer back to our newly created space
+	u32[0x012c94] = 0xffffffff	// Add additional frames (idle speed + first three idle frames)
+	u32[0x012c98] = 0x07babbff  // Add additional frames (4th idle frame + balance speed + first balance frame)
+	u32[0x012c9c] = 0x09a1a2a3  // Add additional frames (last 3 balance frames)
 
 	// Fix for Tails' rolling animation playing backwards
 	u32[0x015b18] = 0x01969798
