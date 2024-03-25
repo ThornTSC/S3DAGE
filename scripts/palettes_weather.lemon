@@ -1267,7 +1267,7 @@ function void InitLevelTiles.CNZ2()
 
 
 
-// Adjust the light switch to load the correct palette in CNZ 1.
+// Adjust the light switch to load the correct palette in CNZ1.
 // From cnz2_knuckles_lights_out.lemon
 //# address-hook(0x062480) end(0x0624ca)
 function void fn062480()
@@ -1378,7 +1378,44 @@ function void LevelPaletteUpdate.CNZ()
 }
 
 
+// Do not reset palette cycles when switching from CNZ1 to CNZ2.
+// Function taken from level\04_cnz\level_cnz.lemon
+//# address-hook(0x051e60) end(0x051f30)
+function void fn051e60()
+{
+	u16 foregroundLightPaletteBackupA = u16[0xfffffc4e]
+	u64 foregroundLightPaletteBackupB = u64[0xfffffc50]
+	u64 backgroundLightPaletteBackup = u64[0xfffffc72]	// last two bytes aren't needed, but this allows just one variable
+	base.fn051e60()
+	if (global.zone_act == 0x0301 && palette_set >= 2 && !original_mode)
+	{
+		u16[0xfffffc4e] = foregroundLightPaletteBackupA
+		u64[0xfffffc50] = foregroundLightPaletteBackupB
+		u64[0xfffffc72] = backgroundLightPaletteBackup
+	}
+}
 
+
+
+
+
+
+// Do not reset palette cycles when switching from ICZ1 to ICZ2.
+// Function taken from level\05_icz\level_icz.lemon
+//# address-hook(0x053740) end(0x053740)
+//# address-hook(0x053886) end(0x05393c)
+function void ICZ1.TransitionToOutdoorArea()
+{
+	u64 glowingPaletteBackupA = u64[0xfffffc58]
+//	u64 glowingPaletteBackupB = u64[0xfffffc78]		// "indoor" rotating palette. Hidden by tunnel background, so not actually necessary.
+	base.ICZ1.TransitionToOutdoorArea()
+	if (palette_set >= 2 && !original_mode)
+	{
+		u64[0xfffffc58] = glowingPaletteBackupA
+//		if (camera.position.y.u16 >= 0x0700)
+//			u64[0xfffffc78] = glowingPaletteBackupB
+	}
+}
 
 
 // Modify the ICZ1 palette cycles for redesigned palettes.
