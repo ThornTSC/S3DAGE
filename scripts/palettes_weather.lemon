@@ -602,6 +602,11 @@ function void LevelPaletteUpdate.AIZ1()
 			u32[0xfffffc7a] = u32[0x002b96 + D0.s16]
 			u16[0xfffffc7e] = u16[0x002b96 + D0.s16 + 4]
 		}
+		// In new palettes, we want to alter the most saturated blue.
+		if (u16[0xfffffc66] == 0x0e40)
+			u16[0xfffffc66] = 0x0e84
+		if (u16[0xfffffc6a] == 0x0e40)
+			u16[0xfffffc6a] = 0x0e84
 	}
 }
 
@@ -643,9 +648,14 @@ function void LevelPaletteUpdate.EHZ()
 function void fn083c7c()
 {
 	// Loads palette colors 0x10 .. 0x3f
-	copyMemory(0xfffffc20, 0x0a8b7c, 0x60)
 	if (palette_set >= 2 && !original_mode)
+	{
+		u64 waterfallPaletteBackup = u64[0xfffffc56]
 		System.loadExternalRawData("Palette0000", 0xfffffc20)
+		u64[0xfffffc56] = waterfallPaletteBackup
+	}
+	else
+		copyMemory(0xfffffc20, 0x0a8b7c, 0x60)
 }
 
 
