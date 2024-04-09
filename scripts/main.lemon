@@ -184,7 +184,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffb02f, 1)
+	debugWatch(0xffffb05a, 2)
 }
 
 // This function is the final one of any frame.
@@ -7947,7 +7947,7 @@ function void SetupCharacterAtStartPosition()
 //	#endif
 		else if (global.zone_act == 0x0700)
 		{
-			if ((level.start_location == 1 || (!isMainCharacter(CHARACTER_KNUCKLES) && original_mode)) && global.lock_on_state == 0)	// !isMainCharacter(CHARACTER_KNUCKLES) instead of level.start_location in base game
+			if ((level.start_location == 1 || (!isMainCharacter(CHARACTER_KNUCKLES) && original_mode)) && global.lock_on_state == 0 || (level.start_location == 0 && !isMainCharacter(CHARACTER_KNUCKLES)))	// !isMainCharacter(CHARACTER_KNUCKLES) instead of level.start_location in base game
 			{
 				move_area.left  = 0x00c0
 				u16[0xffffee0c] = 0x00c0
@@ -8128,7 +8128,7 @@ function void Character.TailsAI.Init()
 			tails.ai_routine = 0x0c
 
 		#if STANDALONE
-			if (level.start_location == 2 || (isMainCharacter(CHARACTER_KNUCKLES) && original_mode))	// isMainCharacter(CHARACTER_KNUCKLES) instead of level.start_location in base game
+			if (level.start_location == 2 || (isMainCharacter(CHARACTER_KNUCKLES) && (original_mode || level.start_location == 0)))	// isMainCharacter(CHARACTER_KNUCKLES) instead of level.start_location in base game
 			{
 				char.position.x.u16 += 0x10
 				char.position.y.u16 -= 0x10
@@ -8307,7 +8307,7 @@ function void fn0067ee()
 	else if (global.zone_act == 0x0700)
 	{
 		// Mushroom Hill Zone
-		if (level.start_location == 2 || (isMainCharacter(CHARACTER_KNUCKLES) && original_mode))
+		if (level.start_location == 2 || (isMainCharacter(CHARACTER_KNUCKLES) && (original_mode || level.start_location == 0)))
 		{
 			objA1.state = char.state.FALLING_PANIC
 			objA1.flags2a |= char.flag.IN_AIR
@@ -8315,7 +8315,7 @@ function void fn0067ee()
 		else if (global.lock_on_state == 0)
 		{
 			// Add Tails
-			if ((level.start_location == 1 && !isMainCharacter(CHARACTER_TAILS)) || (global.characters == CHARS_SONIC_ALONE && original_mode))
+			if ((level.start_location == 1 && !isMainCharacter(CHARACTER_TAILS)) || (global.characters == CHARS_SONIC_ALONE && original_mode) || (level.start_location == 0 && isMainCharacter(CHARACTER_SONIC)))
 			{
 				u32[0xffffb04a] = 0x01365c
 				u16[0xffffb05a] = u16[0xffffb010]
