@@ -107,9 +107,9 @@ function void UpdateListOfRingsAround_Default()
 	s16 borderRight = 8
 #if STANDALONE
 	// We can extend that borders a little further, to avoid rings not getting collected when the player outruns the camera
-	if (u16[0xffffb010] < camera.position.x.u16 + 0x20)
+	if (u16[0xffffb010] < camera.position.x.u16 + 0x20 && !original_mode)
 		borderLeft += 0x20
-	if (u16[0xffffb010] >= camera.position.x.u16 + getScreenWidth() - 0x20)
+	if (u16[0xffffb010] >= camera.position.x.u16 + getScreenWidth() - 0x20 && !original_mode)
 		borderRight += 0x20
 #endif
 
@@ -351,7 +351,7 @@ function void SonicUpdateRingCollection()
 
 		#if STANDALONE
 			// Consider vertical level wrap
-			if (level.vertical_wrap == 0xff00)
+			if (level.vertical_wrap == 0xff00 && !original_mode)
 			{
 				s16 dy = py - box.pos.y
 				if (dy < -s16(level.height.bitmask)/2)

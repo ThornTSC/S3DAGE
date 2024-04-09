@@ -580,6 +580,196 @@ function void TitleCard.Init()
 
 
 
+// In Original Mode, do not implement some AIR fixes for attracted rings.
+// Functions taken from objects\basics\ring.lemon
+//# address-hook(0x01a938) end(0x01a98c)
+function void DynamicRing.UpdateAttraction()
+{
+	s16 dx = u16[0xffffb000 + 0x10] - objA0.position.x.u16
+	if (dx < 0)
+	{
+		D1.s16 = -0x30
+		if (objA0.velocity.x >= 0)
+		{
+			D1.u16 *= 4
+		}
+	}
+	else
+	{
+		D1.s16 = 0x30
+		if (objA0.velocity.x < 0)
+		{
+			D1.u16 *= 4
+		}
+	}
+	objA0.velocity.x += D1.s16
+
+	s16 dy = u16[0xffffb000 + 0x14] - objA0.position.y.u16
+	#if STANDALONE
+		// Consider level wrap for ring collection
+		if (level.vertical_wrap == 0xff00 && !original_mode)
+		{
+			if (dy > s16(level.height.bitmask) / 2)
+			{
+				objA0.position.y.u16 += level.height.bitmask
+			}
+			else if (dy < -s16(level.height.bitmask) / 2)
+			{
+				objA0.position.y.u16 -= level.height.bitmask
+			}
+			dy = u16[0xffffb000 + 0x14] - objA0.position.y.u16
+		}
+	#endif
+	if (dy < 0)
+	{
+		D1.s16 = -0x30
+		if (objA0.velocity.y >= 0)
+		{
+			D1.s16 *= 4
+		}
+	}
+	else
+	{
+		D1.s16 = 0x30
+		if (objA0.velocity.y < 0)
+		{
+			D1.s16 *= 4
+		}
+	}
+	objA0.velocity.y += D1.s16
+
+	UpdateMovementStraightSimple()
+}
+
+//# address-hook(0x01a67a) end(0x01a6ac)
+function void fn01a67a()
+{
+	D6 = global.inv_gravity ? 0x01a662 : 0x01a64a
+	// Standalone uses a higher limit for number of spilled rings on screen at once
+	u16 maxRings = (original_mode) ? 32 : 48
+
+	A1 = A0
+	D5 = (u8[A0 + 0x3f] == 0) ? ring_counter : ring_counter.player2
+	D5.u16 = min(D5.u16, maxRings) - 1
+	D4.u16 = 0x288
+	SpillRings()
+}
+
+
+// Have rings check for collision against all manner of terrain every frame
+// instead of only against floors every eighth frame.
+// Function taken from objects\basics\ring.lemon
+// //# address-hook(0x01a75c) end(0x01a7be)
+/*
+function void fn01a75c()
+{
+	objA0.animation.sprite = spilled_rings.animframe
+	UpdateMovementStraightSimple()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y >= 0)
+	{
+		D0.u8 = (global.framecounter + D7.u8) & 0x07	// in original mode, only 1/8th of spilled rings check for floor collision each frame
+		if (D0.u8 == 0 || !original_mode)
+		{
+			if (objA0.render_flags & render_flag.VISIBLE)
+			{
+				if (original_mode || objA0.velocity.y > 0)
+				{
+					fn00f994()
+					if (D1.s16 < 0)
+					{
+						objA0.position.y.u16 += D1.u16
+						objA0.velocity.y = (objA0.velocity.y >> 2) - objA0.velocity.y
+					}
+				}
+			}
+
+			if (original_mode && ((spilled_rings.speed == 0) || (objA0.position.y.u16 > move_area.bottom.current + getScreenHeight())))
+			{
+				// Time over for this ring, or it fell out of the lower level bounds
+				UnloadObject()
+				return
+			}
+		}
+	}
+	if (!original_mode)
+	{
+		if (objA0.velocity.y < 0)
+		{
+			fn00fca0()
+			if (D1.s16 < 0)
+			{
+				objA0.position.y.u16 -= D1.s16
+				objA0.velocity.y = -objA0.velocity.y
+			}
+		}
+		if (objA0.velocity.x < 0)
+		{
+			CheckHitboxCollisionLeft()
+			if (D1.s16 < 0)
+			{
+				objA0.position.x.u16 += D1.u16
+				objA0.velocity.x = -objA0.velocity.x
+			}
+		}
+		else if (objA0.velocity.x > 0)
+		{
+			CheckHitboxCollisionRight()
+			if (D1.s16 < 0)
+			{
+				objA0.position.x.u16 -= D1.u16
+				objA0.velocity.x = -objA0.velocity.x
+			}
+		}
+		if ((spilled_rings.speed == 0) || objA0.position.y.u16 > move_area.bottom.current + getScreenHeight())
+		{
+			UnloadObject()
+			return
+		}
+	}
+
+	AddAsDynamicObject()
+	objA0.position.x.u16 -= u16[0xffffeebc]
+	DrawObject()
+}
+*/
+
+//# address-hook(0x01a75c) end(0x01a7be)
+function void fn01a75c()
+{
+	objA0.animation.sprite = spilled_rings.animframe
+	UpdateMovementStraightSimple()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y >= 0)
+	{
+		D0.u8 = (global.framecounter + D7.u8) & 0x07
+		if (D0.u8 == 0 || !original_mode)	// in original mode, only 1/8th of spilled rings check for floor collision each frame
+		{
+			if (objA0.render_flags & render_flag.VISIBLE)
+			{
+				fn00f994()
+				if (D1.s16 < 0)
+				{
+					objA0.position.y.u16 += D1.u16
+					objA0.velocity.y = (objA0.velocity.y >> 2) - objA0.velocity.y
+				}
+			}
+
+			if ((spilled_rings.speed == 0) || (objA0.position.y.u16 > move_area.bottom.current + getScreenHeight()))
+			{
+				// Time over for this ring, or it fell out of the lower level bounds
+				UnloadObject()
+				return
+			}
+		}
+	}
+
+	AddAsDynamicObject()
+	objA0.position.x.u16 -= u16[0xffffeebc]
+	DrawObject()
+}
+
+
 
 
 
@@ -12143,9 +12333,22 @@ function void fn021818()
 
 
 
-// Alter a function regarding MGZ top collision to make sure an old AIR-specific glitch is not possible in Original Mode.
-// Function taken from maingame\collision.lemon
-// This function does not have an address hook.
+// Alter functions regarding MGZ top collision to make sure an old AIR-specific glitch is not possible in Original Mode.
+// Functions taken from maingame\collision.lemon
+// These functions do not have address hooks.
+//# alias(fn00fd9a_shared) deprecated
+function void Character.CheckLeftWallCollision.shared()
+{
+	D3.u16 ^= 0x0f
+	checkStaticCollisionHorizontal(D3.u16, D2.u16, 0xfffff768, -0x10, 0x400)
+
+	D2.u8 = 0x40
+	if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2 && !original_mode)
+		D3.u8 = u8[0xfffff768]		// Due to a mistake in code porting, this line was missing for quite a long time in S3AIR, causing a glitch that is now actively used in speedrunning
+	if (D3 & 0x01)
+		D3.u8 = 0x40
+}
+
 function void Character.CheckRightWallCollision.shared()
 {
 	checkStaticCollisionHorizontal(D3.u16, D2.u16, 0xfffff768, 0x10, 0)
