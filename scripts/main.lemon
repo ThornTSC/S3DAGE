@@ -184,7 +184,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-	debugWatch(0xffffb05a, 2)
+//	debugWatch(0xffffb05a, 2)
 }
 
 // This function is the final one of any frame.
@@ -8890,11 +8890,11 @@ function void ApplyROMManipulations()
 
 	// Apply changes to Super Sonic's idle and balancing animations to make the hair flow as it did in Sonic 2, #contributed by Veenee (idle animation) and mrgrassman14 (balancing animation).
 	// Covered in ROMManipulation.RepairAnimations() in later A.I.R. builds.
-	u8[0x012c45] = 0x5a			// Shift the idle animation pointer back a bit to an otherwise empty area
-	u8[0x012c47] = 0x60			// Shift the balance animation pointer back to our newly created space
-	u32[0x012c94] = 0x07babbbc	// Add additional frames (idle speed + first three idle frames)
-	u32[0x012c98] = 0xbbff07a1  // Add additional frames (4th idle frame + balance speed + first balance frame)
-	u32[0x012c9c] = 0xa2a3a2ff  // Add additional frames (last 3 balance frames)
+//	u8[0x012c45] = 0x5a			// Shift the idle animation pointer back a bit to an otherwise empty area
+//	u8[0x012c47] = 0x60			// Shift the balance animation pointer back to our newly created space
+//	u32[0x012c94] = 0x07babbbc	// Add additional frames (idle speed + first three idle frames)
+//	u32[0x012c98] = 0xbbff07a1  // Add additional frames (4th idle frame + balance speed + first balance frame)
+//	u32[0x012c9c] = 0xa2a3a2ff  // Add additional frames (last 3 balance frames)
 	#endif
 
 	ROMManipulation.RepairAnimations()
