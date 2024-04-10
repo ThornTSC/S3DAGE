@@ -20774,6 +20774,8 @@ function u32 scaleOnScreenWidth()
 function void DEZ1_CustomSprites()
 {
 	DEZ1_DrawBackground()
+	// Sprite mask introduced to hide the laser for the Act 1 boss must work during pause and must be made longer for ultrawide
+	Renderer.addSpriteMaskWorld(0x3640, 0x340, 0x0200, 0x30, 0x9f80, 1)
 }
 
 
