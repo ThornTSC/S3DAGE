@@ -1946,7 +1946,10 @@ function void releaseSpindash()
 
 
 
-
+function u32 UpdatePaletteEffects.SuperForm.getSuperSonicUnderwaterPalette()
+{
+	return ((original_mode && (global.zone == 0 || global.zone == 5)) || (!original_mode && (global.zone == 0 || global.zone == 1)))  ? 0x0039ca : 0x003a06
+}
 
 
 function void UpdatePaletteEffects.SuperForm.applyGeneral(u8 characterVersion, u32 source)
@@ -1987,6 +1990,169 @@ function void UpdatePaletteEffects.SuperForm.smoothedVersion(u8 characterVersion
 	else
 		base.UpdatePaletteEffects.SuperForm.smoothedVersion(characterVersion)
 }
+
+function void UpdatePaletteEffects.SuperForm.originalVersion(u8 characterVersion)
+{
+	if (!original_mode)
+	{
+		base.UpdatePaletteEffects.SuperForm.originalVersion(characterVersion)
+		return
+	}
+
+	if (super.palettefx.state & 0x80)
+	{
+		// Update ongoing palette effect
+		if (characterVersion == 0)
+		{
+			// Hyper Sonic
+			--super.palettefx.timer
+			if (super.palettefx.timer >= 0)
+				return
+
+			UpdatePaletteEffects.SuperForm.applyGeneral(characterVersion, 0x003a42)
+
+			super.palettefx.timer = 4
+			super.palettefx.frame += 6
+			if (super.palettefx.frame >= 72)
+				super.palettefx.frame = 0
+		}
+		else if (characterVersion == 1)
+		{
+			// Super Sonic
+			UpdatePaletteEffects.UpdateSuperSonic.Original(characterVersion)
+		}
+		else if (characterVersion == 2)
+		{
+			// Super/Hyper Tails
+			--super.palettefx.timer.tails
+			if (super.palettefx.timer.tails < 0)
+			{
+				UpdatePaletteEffects.SuperForm.applyGeneral(characterVersion, 0x003a8a)
+
+				super.palettefx.timer.tails = 0x0b
+				super.palettefx.frame.tails = (super.palettefx.frame.tails + 6) % 36
+			}
+
+			// Also update Sonic's colors, for the flickies
+//		#if STANDALONE
+//			if (super.active.tails == 0xff)
+//		#endif
+				UpdatePaletteEffects.UpdateSuperSonic.Original(0xff)
+		}
+		else
+		{
+			// Super/Hyper Knuckles
+			--super.palettefx.timer
+			if (super.palettefx.timer >= 0)
+				return
+
+			UpdatePaletteEffects.SuperForm.applyGeneral(characterVersion, 0x003aae)
+
+			super.palettefx.timer = 2
+			super.palettefx.frame += 6
+			if (super.palettefx.frame >= 60)
+			{
+				super.palettefx.frame = 0
+				super.palettefx.timer = 0x0e
+			}
+		}
+	}
+	else if (super.palettefx.state == 1)
+	{
+		// Fade in effect
+		--super.palettefx.timer
+		if (super.palettefx.timer >= 0)
+			return
+
+		super.palettefx.timer = 1
+		if (characterVersion <= 1)
+		{
+			// Sonic
+			UpdatePaletteEffects.SuperForm.applyGeneral(1, 0x00398e)
+
+			super.palettefx.frame += 6
+			if (super.palettefx.frame < 36)
+				return
+		}
+		else
+		{
+			// Tails / Knuckles
+			//  -> They don't need an additional fade-in, as their palette animation is constantly fading in and out anyway
+			super.palettefx.frame = 0
+			super.palettefx.frame.tails = 0
+		}
+
+		super.palettefx.state = 0xff
+		u8[0xffffb000 + 0x2e] = 0		// Reset "char.control_flags"
+	}
+	else  // (super.palettefx.state == 2)
+	{
+		// Fade out effect
+		if (characterVersion <= 1)
+		{
+			// Sonic
+			--super.palettefx.timer
+			if (super.palettefx.timer >= 0)
+				return
+
+			UpdatePaletteEffects.SuperForm.applyGeneral(1, 0x00398e)
+
+			super.palettefx.timer = 3
+			super.palettefx.frame -= 6
+			if (s16(super.palettefx.frame) < 0)
+			{
+//			#if STANDALONE
+//				super.palettefx.frame = 0
+//			#else
+				u8[0xfffff65c] = 0		// Clear only upper byte of super.palettefx.frame (but why?)
+//			#endif
+				super.palettefx.state = 0
+			}
+		}
+		else
+		{
+			// Tails / Knuckles: There is no fade-out, their colors instantly convert back to normal
+			super.palettefx.frame = 0
+			super.palettefx.state = 0
+			super.palettefx.frame.tails = 0
+			if (characterVersion == 2)
+			{
+				// Tails
+//			#if STANDALONE
+//				u32 offset = getMainCharacter() * 0x40
+//				u16[0x802010 + offset] = u16[0x8021d0]
+//				u16[0x802012 + offset] = u16[0x8021d2]
+//				u16[0x802016 + offset] = u16[0x8021d6]
+//				if (level.water_present)
+//				{
+//					u16[0x802310 + offset] = u16[0x8024d0]
+//					u16[0x802312 + offset] = u16[0x8024d2]
+//					u16[0x802316 + offset] = u16[0x8024d6]
+//				}
+//			#else
+				UpdatePaletteEffects.SuperForm.applyGeneral(characterVersion, 0x003a8a)
+//			#endif
+
+				// Revert flickies colors
+				UpdatePaletteEffects.SuperForm.applyGeneral(0xff, 0x00398e)
+			}
+			else
+			{
+				// Knuckles
+//			#if STANDALONE
+//				u32 offset = getMainCharacter() * 0x40
+//				copyMemory(0x802004 + offset, 0x802204, 6)
+//				if (level.water_present)
+//					copyMemory(0x802304 + offset, 0x802504, 6)
+//			#else
+				UpdatePaletteEffects.SuperForm.applyGeneral(characterVersion, 0x003aea)
+//			#endif
+			}
+		}
+	}
+}
+
+
 
 // Do not allow smooth rotation and speedup after images in Original Mode.
 // Function taken from standalone\rendering\render_character.lemon and updated to match AIR commit b29d9f1
@@ -4115,7 +4281,7 @@ function void Character.updateBonusEffects()
 			// Not in Doomsday and not in Sonic's AIZ intro
 			if (global.zone_act != 0x0c00 && (char.control_flags & 0x40) == 0)
 			{
-				Character.cancelSuperTransformation()
+				Character.cancelSuperTransformation()	// there is actually some code that should be modified here for Original Mode to reintroduce a soft lock and award another frame of invincibility, but AIR needs that frame gone to set music properly
 				// If lightning shield is active in a Sonic 2 act, reload sprite patterns for the sparks. The above function handles this for S3&K acts.
 				if (u32[0xffffcce8] == 0x019732 && unlock_act)
 				{
