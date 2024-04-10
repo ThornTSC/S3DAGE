@@ -13974,8 +13974,20 @@ function void ICZ1_CustomSprites()
 
 
 
-
-
+// When entering the ICZ1 snowboarding section, if a shield was carried from CNZ2, do not draw it until the character is on screen.
+// Because of the timing of shield pattern updates, this causes the lightning shield to pop in two frames too late, but this is much less noticeable than a floating empty shield.
+// This also occurs in all run-in levels but is most noticeable in ICZ1 for Sonic.
+// Function taken from objects\basics\shields.lemon
+//# address-hook(0x01999a) end(0x0199e8)
+function void Shield.SharedSpriteUpdate()
+{
+	base.Shield.SharedSpriteUpdate()
+	if (global.zone_act == 0x0500 && u16[0xffffb010] == 0x0010 && !original_mode)
+	{
+		VDP.setupVRAMWrite(objA0.shield.targetInVRAM)
+		VDP.zeroVRAM(0x340)
+	}
+}
 
 
 // Overwrites function disallowing leftward pushing of ICZ sliding platforms in Act 1
