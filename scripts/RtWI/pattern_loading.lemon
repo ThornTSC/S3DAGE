@@ -6,7 +6,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		base.RequestLoadingPatterns()
 		return
 	}
-	if (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07)	// PLC_01 (Sonic), 05 (Knuckles), or 07 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	if (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52)	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
 	{
 		// Life icon art needed. Goes to 0xfa80.
 
