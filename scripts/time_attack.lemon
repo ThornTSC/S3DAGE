@@ -2859,7 +2859,11 @@ function void Character.OnThreatCollisionInner()
 	{
 		A2 = A1
 		if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+		{
+			if (freeze_time && ring_counter)
+				Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 			freeze_time = 0
+		}
 		Character.GettingHurt()
 	}
 }
@@ -2899,7 +2903,11 @@ function void fn074640()
 		A2 = A0
 		A0 = 0xffffb000
 		if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+		{
+			if (freeze_time && ring_counter)
+				Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 			freeze_time = 0
+		}
 		Character.GettingHurt()
 		A0 = A2
 	}
@@ -2937,7 +2945,11 @@ function void fn08a84c()
 		A2 = A0
 		A0 = A1
 		if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+		{
+			if (freeze_time && ring_counter)
+				Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 			freeze_time = 0
+		}
 		Character.GettingHurt()
 		if (objA0.state != 0x18)
 		{
@@ -2979,7 +2991,11 @@ function void fn08b4ec()
 		A2 = A0
 		A0 = A1
 		if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+		{
+			if (freeze_time && ring_counter)
+				Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 			freeze_time = 0
+		}
 		Character.GettingHurt()
 		A0 = A2
 	}
@@ -2997,7 +3013,11 @@ function void Enemy.DamageCharacter()
 	A2 = A0
 	A0 = A1
 	if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+	{
+		if (freeze_time && ring_counter)
+			Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 		freeze_time = 0
+	}
 	Character.GettingHurt()
 	A0 = A2
 }
@@ -3019,7 +3039,11 @@ function void DamageCharacter()
 
 			// Hurt character
 			if (((char.bonus_effect & char.bonus.ANY_SHIELD) == 0) && (u8[0xffffb037] & 0x80) == 0)	// if the character is not protected by a shield or object (e.g. MGZ top)
+			{
+				if (freeze_time && ring_counter)
+					Audio.playAudio("losetimefreeze", AudioContext.CONTEXT_SOUND)		// play sound for losing time freeze from damage
 				freeze_time = 0
+			}
 			Character.GettingHurt()
 			A0 = A2
 		}
