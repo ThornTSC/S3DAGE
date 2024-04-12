@@ -10896,6 +10896,81 @@ function void fn065c56()
 
 
 
+// If sidekick Tails touches a bubble, do not let him pop it.
+// Function taken from objects\level\airbubbles.lemon
+//# address-hook(0x02fbb2)
+function void fn02fbb2()
+{
+	// New: decrement sidekick Tails interaction blocking timer if set.
+	if (u8[A0 + 0x42] && A1 == 0xffffb04a)
+	{
+		--u8[A0 + 0x42]
+		return
+	}
+
+	if (u8[A1 + 0x2e] & control_flag.DISABLE_INTERACTION)
+		return
+
+	D0.u16 = objA1.position.x.u16
+	D1.u16 = objA0.position.x.u16
+	if (D0.u16 <= D1.u16 - 0x10 || D0.u16 > D1.u16 + 0x10)
+		return
+
+	D0.u16 = objA1.position.y.u16
+	D1.u16 = objA0.position.y.u16
+	if (D0.u16 <= D1.u16 || D0.u16 > D1.u16 + 0x10)
+		return
+
+	if (u8[A1 + 0x2b] & char.bonus.SHIELD_BUBBLE)
+		return	// Ignore if player has a bubble shield
+
+	// Collect bubble
+	UpdateMusicOnWaterTransition()
+
+	playSound(0x38)
+
+	objA1.velocity.x = 0
+	objA1.velocity.y = 0
+	objA1.groundspeed = 0
+	objA1.state = char.state.BREATHE
+	u16[A1 + 0x32] = 0x23
+	u8[A1 + 0x40] = 0
+	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.PUSHING)
+
+	if (u8[A1 + 0x2a] & char.flag.ROLLING)
+	{
+		if (objA1.update_address == addressof(Character.BaseUpdate.Sonic))		// Checking for Sonic, might be clearer to check `u8[A1 + 0x38] == CHARACTER_SONIC` instead
+		{
+			u8[A1 + 0x2a] &= ~char.flag.ROLLING
+			objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+			objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+			objA1.position.y.u16 -= 0x05
+		}
+		else
+		{
+			objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT_TAILS
+			objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+			--objA1.position.y.u16
+		}
+	}
+	if (objA0.base_state != 0x06)
+	{
+		if (!original_mode && A1 == 0xffffb04a && objA1.state == char.state.BREATHE && !u8[A0 + 0x42])	// do not pop the bubble if sidekick Tails touches it outside of Original Mode
+		{
+			u8[A0 + 0x42] = 60	// instead, set a timer that says Tails cannot interact with this bubble for one second
+			return
+		}
+
+		objA0.base_state = 0x06
+		objA0.state += 0x04
+	}
+}
+
+
+
+
+
+
 
 
 
