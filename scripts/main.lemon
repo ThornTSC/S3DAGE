@@ -34,6 +34,7 @@ global bool fast_forward
 global u8 L_TailsAssist	// settings variable. 0 = Up+A only, 1 = L only, 2 = both
 global u8 L_Spindash	// settings variable. 0 = off, 1 = on
 global u8 L_Spindash_Charge
+global u8 L_Spindash_Charge_P2
 constant u8 L_Spindash_ChargeInterval = 5
 
 // Define special stage variables

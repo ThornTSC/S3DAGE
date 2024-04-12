@@ -119,7 +119,7 @@ function bool Character.UpdateSpindash()
 
 	if (char.spindash == 0)
 	{
-		bool canStartSpindash = (char.state == char.state.COWERING) && ((input_pressed & CONTROL_ABC) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode))
+		bool canStartSpindash = (char.state == char.state.COWERING) && ((input_pressed & CONTROL_ABC) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a))
 		if (!canStartSpindash)
 		{
 			// Nothing to see here
@@ -129,7 +129,12 @@ function bool Character.UpdateSpindash()
 		// Start spindash
 		char.state = char.state.SPINDASH
 		playSound(SFX_SPINDASH_CHARGE)
-		L_Spindash_Charge = 0
+		if (A0 == 0xffffb000)
+			L_Spindash_Charge = 0
+		if (A0 == 0xffffb04a)
+			L_Spindash_Charge_P2 = 0
+		if (!original_mode)
+			char.velocity.x = 0	// velocity can actually still be set, which interfere's with Euka's code to have sidekick Tails mimic a player spindash
 
 		char.spindash = 1
 		char.spindash_charge = 0
@@ -154,16 +159,42 @@ function bool Character.UpdateSpindash()
 			if (Input.buttonDown(BUTTON_L) && A0 == 0xffffb000 && !original_mode)
 			{
 				++L_Spindash_Charge	// this increments based on player 1, but the charge timer is shared with sidekick Tails as well
+				if (char.spindash_charge == 0 && L_Spindash_Charge == 1)
+					++L_Spindash_Charge		// this extra charge for one frame makes the max spindash and peelout charge both occur at the same time
+				if (u32[0xffffb04a] && u8[0xffffb04a + 0x3d] == 1 && !tails.control_counter)	// sidekick Tails exists, is charging a spindash, and is AI controlled
+				{
+					u16[0xfffb04a + 0x18] = 0	// zero out sidekick Tails's velocity so he does not slide toward the player in a spindash state
+					u16[0xfffb04a + 0x1c] = 0	// same for ground speed value
+					if (u8[0xffffb000 + 0x2a] & char.flag.FACING_LEFT)
+						u8[0xffffb04a + 0x2a] |= char.flag.FACING_LEFT		// set left-facing flag to match player character
+					else
+						u8[0xffffb04a + 0x2a] &= 0xfe						// unset left-facing flag to match player character
+				}
 			}
 
-			if ((input_pressed & CONTROL_ABC) || L_Spindash_Charge == L_Spindash_ChargeInterval)
+			if (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && A0 == 0xffffb04a && !original_mode)
+			{
+				++L_Spindash_Charge_P2	// this increments based on player 1, but the charge timer is shared with sidekick Tails as well
+				if (char.spindash_charge == 0 && L_Spindash_Charge_P2 == 1)
+					++L_Spindash_Charge_P2		// this extra charge for one frame makes the max spindash and peelout charge both occur at the same time
+			}
+
+			if (!Input.buttonDown(BUTTON_L))
+				L_Spindash_Charge = 0
+			if (!Input.buttonDown(BUTTON_L + BUTTON_PAD2))
+				L_Spindash_Charge_P2 = 0
+
+			if ((input_pressed & CONTROL_ABC) || (L_Spindash_Charge == L_Spindash_ChargeInterval && A0 == 0xffffb000) || (L_Spindash_Charge_P2 == L_Spindash_ChargeInterval && A0 == 0xffffb04a))
 			{
 				// Charge up
 				u16 maxDash = 0x800		// (Input.buttonDown(BUTTON_L) && !original_mode) ? 0x700 : 0x800	// can optionally lower maximum speed when using L; revving should be more effective
 				char.state.both = 0x0900		// char.state.SPINDASH, char.state.RUNNING
 				char.spindash_charge = min(char.spindash_charge + 0x200, maxDash)
 				playSound(SFX_SPINDASH_CHARGE)
-				L_Spindash_Charge = 0
+				if (L_Spindash_Charge == L_Spindash_ChargeInterval && A0 == 0xffffb000)
+					L_Spindash_Charge = 0
+				if (L_Spindash_Charge_P2 == L_Spindash_ChargeInterval && A0 == 0xffffb04a)
+					L_Spindash_Charge_P2 = 0
 			}
 		#if STANDALONE
 			Input.setControllerRumbleByAddress(A0, 0.0f, 0.2f, 100)
