@@ -133,11 +133,13 @@ global u8 hud.layout
 
 // Flag for unlockable levels
 global u16 unlock_act
+global u8 layout.part
 
 // Number of stars for unlocks constants
 constant u16 unlock.theme.south = 25
 constant u16 unlock.theme.westside = 50
 constant u16 unlock.level.ehz   = 50
+constant u16 unlock.level.cpz   = 100
 
 // Memory address constants
 constant u32 KosinskiRawdataBuffer = 0x840600
@@ -293,8 +295,10 @@ function void discordRPC.mainGame()
 	else if (time_attack == 3)
 		gameType = "100% Speedrun"
 
-	if (unlock_act)
+	if (unlock_act == 1)
 		gameType = "Emerald Hill Zone"
+	else if (unlock_act == 2)
+		gameType = "Chemical Plant Zone"
 	// else if (time_attack == 4)	// unused, as it's a special case that won't state emerald count
 	//	gameType = "Any% Speedrun"
 
@@ -573,6 +577,9 @@ function void TitleCard.Init()
 			time_attack_hud.layout = 1
 		hud.layout = time_attack_hud.layout
 	}
+
+	if (unlock_act == 2)
+		u32[0xffffb40c] = 0x020fd2	// create CPZ background pillar in a specific object slot	// created alongside water surface in Sonic 2
 
 	base.TitleCard.Init()
 }
@@ -911,7 +918,10 @@ function void fn0076a6()
 	if (unlock_act)
 	{
 		D0 = 0x0df370	// location of S2&K object position pointers and data
-		System.loadExternalRawData("ehz_collision", D0)
+		if (unlock_act == 1)
+			System.loadExternalRawData("ehz_collision", D0)
+		else if (unlock_act == 2)
+			System.loadExternalRawData("cpz_collision", D0)
 	}
 	else
 	{
@@ -960,13 +970,16 @@ function void fn007812()
 //	u32 backupA1 = A1
 	if (unlock_act)
 	{
-		System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary blocks to shared memory
+		if (unlock_act == 1)
+			System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
+		else if (unlock_act == 2)
+			System.loadExternalRawData("cpz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
 		A1 = s2_decompression_buffer
 	}
 	else if (global.zone == 0x04)
 	{
 		u64 key  = (original_mode) ? "fbz_tiles_p_orig" : "fbz_tiles_p"
-		System.loadExternalRawData(key, s2_decompression_buffer)		// copy Primary blocks to shared memory
+		System.loadExternalRawData(key, s2_decompression_buffer)		// copy Primary tiles to shared memory
 		A1 = s2_decompression_buffer
 	}
 //	A1 = backupA1
@@ -1042,7 +1055,10 @@ function void fn01c2b0()
 	D7 = D0
 	if (unlock_act)
 	{
-		System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		if (unlock_act == 1)
+			System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		else if (unlock_act == 2)
+			System.loadExternalRawData("cpz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)				// decompress them to their proper RAM
 	}
 	else
@@ -1067,7 +1083,10 @@ function void fn01c2b0()
 	key = stringformat("%s_chunks_p", getZoneInitials(global.zone))
 	if (unlock_act)
 	{
-		System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		if (unlock_act == 1)
+			System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		else if (unlock_act == 2)
+			System.loadExternalRawData("cpz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
 	}
 	else if (global.zone_act == 0x0a00 && System.hasExternalRawData("ssz1_chunks_p"))					// SSZ uses Primary and Secondary in Act 1 and unique Primary only in Act 2
@@ -1273,7 +1292,17 @@ function void fn01c362()
 	copyMemory(0xffff8000, A0, 0x1000)
 
 	if (unlock_act)
-		Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
+	{
+		if (unlock_act == 1)
+			Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
+		else if (unlock_act == 2)
+		{
+			if (layout.part == 0)
+				Standalone.loadRawLevelData("cpz_layout_1", global.zone_act, 0xffff8000)
+			else
+				Standalone.loadRawLevelData("cpz_layout_2", global.zone_act, 0xffff8000)
+		}
+	}
 	else if (!original_mode)
 		Standalone.loadRawLevelData("%s_layout", global.zone_act, 0xffff8000)
 	else
@@ -1298,7 +1327,17 @@ function void LevelObjectTableBuilder.buildObjects()
 	// Load objects from a custom binary file
 	u32 bytes
 	if (unlock_act)
-		bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
+	{
+		if (unlock_act == 1)
+			bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
+		else if (unlock_act == 2)
+		{
+			if (layout.part == 0)
+				bytes = Standalone.loadRawLevelData("cpz_objects_1", global.zone_act, A0)
+			else
+				bytes = Standalone.loadRawLevelData("cpz_objects_2", global.zone_act, A0)
+		}
+	}
 	else if (!original_mode)
 		bytes = Standalone.loadRawLevelData("%s_objects", global.zone_act, A0)
 	else
@@ -1450,7 +1489,17 @@ function void LevelRingsTableBuilder.buildRings()
 	// Load rings from a custom binary file
 	u32 bytes
 	if (unlock_act)
-		bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
+	{
+		if (unlock_act == 1)
+			bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
+		else if (unlock_act == 2)
+		{
+			if (layout.part == 0)
+				bytes = Standalone.loadRawLevelData("cpz_rings_1", global.zone_act, A1)
+			else
+				bytes = Standalone.loadRawLevelData("cpz_rings_2", global.zone_act, A1)
+		}
+	}
 	else if (!original_mode)
 		bytes = Standalone.loadRawLevelData("%s_rings", global.zone_act, A1)
 	else
@@ -6239,6 +6288,49 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 		return true
 	}
 
+	// CPZ water waves effect
+	if (objA0.update_address == 0x0208dc)
+	{
+		s16 x_shift = (level.framecounter.low & 0x10) ? -0x10 : 0x10
+		if (A0 == 0xffffcf82 && D4.u16 == 0)		// Only for one sprite of the main object
+		{
+			Renderer.clearSpriteTag()
+			px = (camera.position.x.u16 & 0xffc0) - camera.position.x.u16 + x_shift	// Extend a bit more to the left just for sprite interpolation
+			for (; px < s16(getScreenWidth()); px += 0x40)
+			{
+				renderQueue = 0xdfe1
+				for (u8 i = 0; i <= 0x6d; i++)
+				{
+					if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
+					{
+						renderQueue = 0x9fe1	// when in act transition area, do not cover Angel theme zone name, act number, or red bar
+						break
+					}
+				}
+				Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, 208)
+			}
+		}
+		else if (A0 == 0xffffcf82 && D4.u16 == 1)		// Only for one sprite of the main object
+		{
+			Renderer.clearSpriteTag()
+			px = (camera.position.x.u16 & 0xffc0) - camera.position.x.u16 - x_shift	// Extend a bit more to the left just for sprite interpolation
+			for (; px < s16(getScreenWidth()); px += 0x40)
+			{
+				renderQueue = 0xdfe1
+				for (u8 i = 0; i <= 0x6d; i++)
+				{
+					if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
+					{
+						renderQueue = 0x9fe1	// when in act transition area, do not cover Angel theme zone name, act number, or red bar
+						break
+					}
+				}
+				Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, 208)
+			}
+		}
+		return true		
+	}
+
 	// SSZ clouds effect
 	if (objA0.update_address == 0x057bf6)
 	{
@@ -7766,7 +7858,7 @@ function void TriggerNextZone()
 {
 #if STANDALONE
 	Standalone.onLevelFinished()
-	D0.u16 = Game.onTriggerNextZone(D0.u16)
+	D0.u16 = (unlock_act) ? 0x0200 : Game.onTriggerNextZone(D0.u16)	// stay with MGZ zone/act ID when moving between unlockable acts
 
 	// Decide on the next zone's start location -- either the default or an alternative one
 	//  - 0 is the default
@@ -7836,11 +7928,13 @@ function void TriggerNextZone()
 
 constant array<u16> UnlockAct_StartPositionsSonicTails =
 {
-	0x0060, 0x0294		// EHZ
+	0x0060, 0x0294,		// EHZ
+	0x0060, 0x01ec		// CPZ
 }
 constant array<u16> UnlockAct_StartPositionsKnuckles =
 {
-	0x0060, 0x0534		// EHZ
+	0x0060, 0x0534,		// EHZ
+	0x0060, 0x01ec		// CPZ
 }
 
 
@@ -9000,6 +9094,22 @@ function void Standalone.onLevelFinished()
 		return
 	}
 
+	if (unlock_act == 1 && total_stars >= unlock.level.cpz)		// in EHZ with enough stars to play CPZ
+	{
+		++unlock_act
+		// Trigger the fade out and loading of next zone
+		global.zone_act = 0x0200			// Don't change from the MGZ IDs. Actually set it, as other functions may try to change it.
+		global.zone_act.apparent = 0x0200	// Don't change from the MGZ IDs. Actually set it, as other functions may try to change it.
+		if (Game.getSetting(SETTING_MAINTAIN_SHIELDS) && !original_mode)
+		{
+			global.shields_backup_1 = u8[0xffffb02b] & 0x71
+		}
+		level.restart = 1
+		checkpoint.number = 0
+		global.stage_type = 0
+		return
+	}
+
 	// Truncated copy of code used for moving from DAGE pause menu to DAGE main menu
 	restart_timer = 0
 	exit_timer = 0
@@ -9013,12 +9123,91 @@ function void Standalone.onLevelFinished()
 	camera.background.y = 0		// fix for the AIZ1 background issue.
 	u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
 	zeroMemory(0xfffff100, 0x500)	// Clear out data used when loading level patterns, else the main game may try to access special stage data or vice versa.
-
 	global.game_mode = 0x54
 }
 
+// Function taken from maingame\hud\levelresults.lemon
+//# address-hook(0x02dcca)
+function void LevelResults.AdvanceToNextAct()
+{
+	if (!unlock_act)
+	{
+		base.LevelResults.AdvanceToNextAct()
+		return
+	}
 
+#if STANDALONE
+	if (level.restart)
+	{
+		// Fix "frame-perfect reset" bug, but only for highest level of glitch fix setting
+		if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2)
+		{
+			UnloadObject()
+			return
+		}
+	}
+#endif
 
+	if (objA0.countdown_value != 0)
+	{
+		--objA0.countdown_value
+		return
+	}
+
+	if (u16[A0 + 0x30] != 0)
+	{
+		++objA0.value32
+		return
+	}
+
+	level.wait_for_results = 0
+
+#if STANDALONE
+	Standalone.onLevelFinished()
+#endif
+/*
+	// Sky Sanctuary, Lava Reef Boss, Hidden Palace, or any Act 2?
+	if (global.zone == 0x0a || global.zone == 0x16 || global.act.apparent != 0)
+	{
+		level.results_done = 0xff
+		UnloadObject()
+		return
+	}
+
+	global.act.apparent = 1
+*/
+	checkpoint.number = 0
+	global.stage_type = 0
+
+/*
+	// Sandopolis, Death Egg use a small cutscene before showing the title card
+	if (global.zone == 0x08 || global.zone == 0x0b)
+	{
+		UnloadObject()
+		return
+	}
+	// Show title card for Act 2
+	objA0.update_address = addressof(TitleCard.Update)
+	objA0.base_state = 0
+	u8[A0 + 0x3e] = 0xff
+*/
+
+#if STANDALONE
+	Standalone.onLevelStart()
+
+/*
+	// Special handling for AIZ, when Knuckles uses Sonic's path
+	if (global.zone == 0x00 && isMainCharacter(CHARACTER_KNUCKLES) && camera.position.y.u16 < 0x400)
+	{
+		checkpoint.number = 4		// That number seems to be unused otherwise in whole AIZ
+		checkpoint.x = 0x1240
+		checkpoint.y = 0x0358
+		Checkpoint.SaveCurrentState()
+		checkpoint.move_area.bottom = 0x0590	// Overwrite move_area.bottom.* backup accordingly
+	}
+*/
+#endif
+}
 
 
 // Add ROM manipulations to support correct AIZ1 Knuckles intro animals
@@ -9749,7 +9938,8 @@ function void Level.SetupLevelSize()
 
 constant array<u16> UnlockAct.LevelSizes =
 {
-	0x0000, 0x7fff, 0x0000, 0x04c0
+	0x0000, 0x7fff, 0x0000, 0x04c0,		// EHZ
+	0x0000, 0x7fff, 0x0000, 0x0720		// CPZ
 }
 
 
@@ -10977,9 +11167,6 @@ function void fn02fbb2()
 
 
 
-
-
-
 // Removes special check for HCZ1's first water pool.
 //# address-hook(0x006c34) end(0x006ca0)
 function void UpdateWater()
@@ -11180,7 +11367,40 @@ function void fn030cf8()
 	}
 }
 
+// Function taken from level\level_water.lemon
+//# address-hook(0x006d6c) end(0x006d9a)
+function void UpdateWaterSurfaceLevel()
+{
+	if (unlock_act == 2 && layout.part == 1)
+		UpdateWaterSurfaceLevel.CPZ()
+	else
+		base.UpdateWaterSurfaceLevel()
+}
 
+function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
+{
+	if (layout.part == 1  && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend() && water.height.current > 0x0600)	// added 0x0700 in x before original Act 2
+	{
+		water.height.target = 0x0510
+		if (u16[0xffffb014] < 0x0380)		// if the player character is well above the water,
+		{
+			water.height.current = 0x0510	// move it instantly
+			water.height.next = 0x0510
+		}
+	}
+
+	u16 baseWaterHeight = (water.height.target < 0x0600) ? 0x0510 : 0x0710
+	water.height.target = baseWaterHeight + (u8[0xfffffe70] >> 1)
+
+	// Update changing water surface height
+	if (water.height.next != water.height.target)
+	{
+		if (water.height.next < water.height.target)
+			water.height.next += water.height.changerate
+		else
+			water.height.next -= water.height.changerate
+	}
+}
 
 
 
@@ -12412,6 +12632,12 @@ function void SetupCharacterAtLastCheckpoint()
 	base.SetupCharacterAtLastCheckpoint()
 	if (global.zone_act == 0x0201 && checkpoint.number == 6 && level.trigger08 != 1 && !original_mode)
 		level.trigger08 = 1		// if we are restarting from the loop's star post after that return, automatically throw the trigger
+	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00)
+	{
+		water.height.current = 0x0510
+		water.height.next = 0x0510
+		water.height.target = 0x0510
+	}
 }
 
 
@@ -13699,12 +13925,14 @@ function void fn051d82()
 
 
 
-// For Original Mode, ignore the water height set in StartingWaterHeights.bin
+// For Original Mode, ignore the water height set in StartingWaterHeights.bin.
+// Also set water for the proper unlockable acts.
+// Functions taken from maingame\maingame.lemon
 //# address-hook(0x007892) end(0x007a48)
 function void Level.InitializeWater()
 {
 	bool levelHasWater = false
-	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601)
+	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601 || unlock_act == 2)
 	{
 		levelHasWater = true
 	}
@@ -13766,6 +13994,13 @@ function void Level.InitializeWater()
 		u16 waterHeight = u16[0x006d2c + offset]
 		if (original_mode && global.zone_act == 0x0301)		// Original Mode CNZ2 lines up with base S3&K
 			waterHeight = 0x0a90
+		if (unlock_act == 2)	// Chemical Plant Zone
+		{
+			waterHeight = (layout.part) ? 0x0710 : 0x0c00
+			if (layout.part == 1  && camera.position.x.u16 >= 0x1d00)
+				waterHeight = 0x0510
+		}
+		water.height.target = 0x0510
 		water.height.current = waterHeight
 		water.height.next = waterHeight
 		water.height.target = waterHeight
@@ -13778,7 +14013,78 @@ function void Level.InitializeWater()
 	}
 }
 
+//# address-hook(0x00796c)
+function void Level.InitializeWater.Part2()
+{
+	if (level.water_present)
+	{
+		if (global.zone_act == 0x0000)			// AIZ 1
+		{
+			D0 = 0x2b
+		}
+		else if (global.zone_act == 0x0001)		// AIZ 2
+		{
+			D0 = 0x2c
+			water.palette.source = 0x007502
+		}
+		else if (global.zone_act == 0x0100)		// HCZ 1
+		{
+			D0 = 0x31
+			water.palette.source = 0x007554
+		}
+		else if (global.zone_act == 0x0101)		// HCZ 2
+		{
+			D0 = 0x32
+			water.palette.source = 0x007554
+		}
+		else if (global.zone_act == 0x0301)		// CNZ 2
+		{
+			D0 = 0x3a
+			water.palette.source = 0x00752a
+		}
+		else if (global.zone_act == 0x0501)		// ICZ 2
+		{
+			D0 = 0x39
+			water.palette.source = 0x00752a
+		}
+		else if (global.zone_act == 0x0600)		// LBZ 1
+		{
+			D0 = 0x2d
+			water.palette.source = 0x007554
+		}
+		else									// LBZ 2	// CPZ is using this while testing
+		{
+			D0 = 0x2e
+			water.palette.source = 0x00757e
+		}
 
+		D1.u16 = D0.u16
+		fn003df2()
+
+		D0.u16 = D1.u16
+		fn003e0e()
+
+		if (checkpoint.number != 0)
+		{
+			water.fullscreen = checkpoint.water.fullscreen
+		}
+
+	#if STANDALONE
+		if (!EXTENDED_CHARACTER_PALETTES)
+	#endif
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				// Copying in Knuckles' colors into underwater palette
+				A1 = 0x007a4a + global.zone * 6
+				if (unlock_act)
+					A1 = 0x007a4a + 0x03 * 6	// use CNZ water palette for now
+				copyMemory(0xfffff004, A1, 6)
+				copyMemory(0xfffff084, A1, 6)
+			}
+		}
+	}
+}
 
 
 
