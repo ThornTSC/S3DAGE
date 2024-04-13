@@ -626,3 +626,337 @@ function void DynamicObjectsLoading.Init()
 		}
 	}
 }
+
+// Use the Sonic 2 object table when needed.
+// Functions taken from general\objectspawning.lemon
+//# address-hook(0x01ba0c) end(0x01ba3c)
+function void ObjectSpawning.SpawnFixedObject()
+{
+	u16 px			 = u16[A0]
+	u16 py			 = u16[A0+2] & 0x0fff
+	u8 flipFlags	 = (u16[A0+2] >> 13) & (render_flag.FLIP_X | render_flag.FLIP_Y)
+	u8 objectType	 = u8[A0+4]
+	u8 objectSubtype = u8[A0+5]
+
+	if (!unlock_act)
+		objA1.update_address = u32[A4 + u16(objectType) * 4]
+	else
+		objA1.update_address = S2.ObjectTable[objectType]
+	
+	objA1.position.x.u16 = px
+	objA1.position.y.u16 = py
+	objA1.render_flags = flipFlags
+	u8[A1 + 0x2a] = flipFlags
+	u8[A1 + 0x2c] = objectSubtype
+	objA1.respawn_entry = A3.u16
+	A0 += 6
+
+	AllocDynamicObjectAfterA1()
+}
+
+function bool conditionalSpawnDynamicObject(bool considerLevelWrap, bool forceYPositionCheck)
+{
+	// Check for flag in respawn table entry
+	if (u8[A3] & 0x80)
+		return true
+
+	u16 px			 = u16[A0]
+	u16 py			 = u16[A0+2] & D5.u16		// D5.u16 is usually 0x0fff here
+	u8 flipFlags	 = (u16[A0+2] >> 13) & (render_flag.FLIP_X | render_flag.FLIP_Y)
+	bool checkYPos	 = (u16[A0+2] & 0x8000) == 0
+	u8 objectType	 = u8[A0+4]
+	u8 objectSubtype = u8[A0+5]
+
+	if (checkYPos || forceYPositionCheck)
+	{
+		if (considerLevelWrap)
+		{
+			if (py < D3.u16 && py > D4.u16)
+			{
+				return true
+			}
+		}
+		else
+		{
+			if (py < D3.u16 || py > D4.u16)
+			{
+				return true
+			}
+		}
+	}
+
+	u32 updateAddress = (unlock_act) ? S2.ObjectTable[objectType] : u32[A4 + u16(objectType) * 4]
+
+	// Set flag in respawn table entry
+	u8[A3] |= 0x80
+
+	objA1.update_address = updateAddress
+	objA1.position.x.u16 = px
+	objA1.position.y.u16 = py
+	objA1.render_flags = flipFlags
+	u8[A1 + 0x2a] = flipFlags
+	u8[A1 + 0x2c] = objectSubtype
+	objA1.respawn_entry = A3.u16
+
+	return allocDynamicObjectAfterA1()
+}
+
+constant array<u32> S2.ObjectTable =
+{
+	0x01a51a,	// 0x00		// Ring
+	0x01d566,	// 0x01		// Monitor (normally Sonic in S2; should be using ID 26 instead)
+	0x01a51a,	// 0x02		// Ring (normally Tails in S2)
+	0x01ccae,	// 0x03		// Path Swapper
+	0x01a51a,	// 0x04		// Ring
+	0x01a51a,	// 0x05		// Ring
+	0x0214c4,	// 0x06		// Corkscrew bridge (EHZ), must be pointed at FBZ rotating cylinder when in MTZ
+	0x01a51a,	// 0x07		// Ring
+	0x01a51a,	// 0x08		// Ring
+	0x01a51a,	// 0x09		// Ring
+	0x01a51a,	// 0x0a		// Ring
+	0x02536c,	// 0x0b		// CPZ pipe top flipping platform
+	0x01a51a,	// 0x0c		// Ring
+	0x0836e0,	// 0x0d		// Hidden monitor (normally signpost in S2)
+	0x01a51a,	// 0x0e		// Ring
+	0x01a51a,	// 0x0f		// Ring
+	0x01a51a,	// 0x10		// Ring
+	0x038688,	// 0x11		// EHZ Bridge (using code for HCZ/ICZ/LRZ, not S2 code)
+	0x01a51a,	// 0x12		// Ring
+	0x01a51a,	// 0x13		// Ring
+	0x01a51a,	// 0x14		// Ring
+	0x01a51a,	// 0x15		// Ring
+	0x01a51a,	// 0x16		// Ring
+	0x01a51a,	// 0x17		// Ring
+	0x025506,	// 0x18		// EHZ/ARZ/HTZ moving platforms (referencing code for AIZ and LBZ platforms, not S2 code)
+	0x022018,	// 0x19		// CPZ moving platforms
+	0x01a51a,	// 0x1a		// Ring
+	0x0222ac,	// 0x1b		// CPZ speed booster
+	0x02b928,	// 0x1c		// EHZ bridge support (using code for decorative sprite objects from S3&K, not S2 code)
+	0x02536a,	// 0x1d		// CPZ chemical orbs
+	0x02259c,	// 0x1e		// CPZ spin tube
+	0x01a51a,	// 0x1f		// Ring
+	0x01a51a,	// 0x20		// Ring
+	0x01a51a,	// 0x21		// Ring
+	0x01a51a,	// 0x22		// Ring
+	0x01a51a,	// 0x23		// Ring
+	0x01a51a,	// 0x24		// Ring
+	0x01a51a,	// 0x25		// Ring
+	0x01d566,	// 0x26		// Monitor (using S3&K code, not S2 code)
+	0x01a51a,	// 0x27		// Ring
+	0x01a51a,	// 0x28		// Ring
+	0x01a51a,	// 0x29		// Ring
+	0x01a51a,	// 0x2a		// Ring
+	0x01a51a,	// 0x2b		// Ring
+	0x01a51a,	// 0x2c		// Ring
+	0x030e24,	// 0x2d		// CPZ/MTZ/DEZ door (using S3&K code, not S2 code)
+	0x01a51a,	// 0x2e		// Ring
+	0x01a51a,	// 0x2f		// Ring
+	0x01a51a,	// 0x30		// Ring
+	0x01a51a,	// 0x31		// Ring
+	0x02a3d0,	// 0x32		// CPZ tube block (using FBZ cork block code, not S2 code)
+	0x01a51a,	// 0x33		// Ring
+	0x01a51a,	// 0x34		// Ring
+	0x01a51a,	// 0x35		// Ring
+	0x023f84, 	// 0x36		// Spikes (using S3&K code, not S2 code)
+	0x01a51a,	// 0x37		// Ring
+	0x01a51a,	// 0x38		// Ring
+	0x01a51a,	// 0x39		// Ring
+	0x01a51a,	// 0x3a		// Ring
+	0x01a51a,	// 0x3b		// Ring
+	0x02131c,	// 0x3c		// Breakable wall (using S3&K code, not S2 code)
+	0x01a51a,	// 0x3d		// Ring
+	0x031164,	// 0x3e		// Ring (Normally Egg Prison in S2, but currently pointing to the S3 object with same ID: the HCZ conveyor belt)
+	0x01a51a,	// 0x3f		// Ring
+	0x026370,	// 0x40		// CPZ/ARZ/MCZ springboard
+	0x022d06,	// 0x41		// Spring (using S3&K code, not S2 code)
+	0x01a51a,	// 0x42		// Ring
+	0x01a51a,	// 0x43		// Ring
+	0x01a51a,	// 0x44		// Ring
+	0x01a51a,	// 0x45		// Ring
+	0x01a51a,	// 0x46		// Ring
+	0x01a51a,	// 0x47		// Ring
+	0x01a51a,	// 0x48		// Ring
+	0x020b9e,	// 0x49		// EHZ waterfall
+	0x01a51a,	// 0x4a		// Ring
+	0x02d068,	// 0x4b		// EHZ Buzzer
+	0x01a51c,	// 0x4c		// Mini Time Stone
+	0x047776,	// 0x4d		// Red Star Ring
+	0x024d68,	// 0x4e		// Jump ramp from AIZ, SOZ, LRZ
+	0x01a51a,	// 0x4f		// Ring
+	0x01a51a,	// 0x50		// Ring
+	0x01a51a,	// 0x51		// Ring
+	0x01a51a,	// 0x52		// Ring
+	0x01a51a,	// 0x53		// Ring
+	0x01a51a,	// 0x54		// Ring
+	0x01a51a,	// 0x55		// Ring
+	0x01a51a,	// 0x56		// Ring
+	0x01a51a,	// 0x57		// Ring
+	0x01a51a,	// 0x58		// Ring
+	0x01a51a,	// 0x59		// Ring
+	0x01a51a,	// 0x5a		// Ring
+	0x01a51a,	// 0x5b		// Ring
+	0x047782,	// 0x5c		// EHZ Masher
+	0x01a51a,	// 0x5d		// Ring
+	0x01a51a,	// 0x5e		// Ring
+	0x01a51a,	// 0x5f		// Ring
+	0x01a51a,	// 0x60		// Ring
+	0x01a51a,	// 0x61		// Ring
+	0x01a51a,	// 0x62		// Ring
+	0x01a51a,	// 0x63		// Ring
+	0x01a51a,	// 0x64		// Ring
+	0x01a51a,	// 0x65		// Ring
+	0x01a51a,	// 0x66		// Ring
+	0x01a51a,	// 0x67		// Ring
+	0x01a51a,	// 0x68		// Ring
+	0x01a51a,	// 0x69		// Ring
+	0x01a51a,	// 0x6a		// Ring
+	0x027d6c,	// 0x6b		// CPZ moving blocks
+	0x01a51a,	// 0x6c		// Ring
+	0x01a51a,	// 0x6d		// Ring
+	0x01a51a,	// 0x6e		// Ring
+	0x01a51a,	// 0x6f		// Ring
+	0x01a51a,	// 0x70		// Ring
+	0x01a51a,	// 0x71		// Ring
+	0x01a51a,	// 0x72		// Ring
+	0x01a51a,	// 0x73		// Ring
+	0x01ec18,	// 0x74		// Invisible object (using S3&K code, not S2 code)
+	0x01a51a,	// 0x75		// Ring
+	0x01a51a,	// 0x76		// Ring
+	0x01a51a,	// 0x77		// Ring
+	0x04763e,	// 0x78		// CPZ blocks that form stairs (using code for S&K DEZ stairs, not S2 code)
+	0x02cfa8,	// 0x79		// Star post (using S3&K code, not S2 code)
+	0x0293a0,	// 0x7a		// CPZ pipe top moving platform
+	0x029590,	// 0x7b		// CPZ tube spring
+	0x01a51a,	// 0x7c		// Ring (normally CPZ background pylon/pillar in S2)
+	0x01a51a,	// 0x7d		// Ring
+	0x01a51a,	// 0x7e		// Ring
+	0x01a51a,	// 0x7f		// Ring
+	0x01a51a,	// 0x80		// Ring
+	0x01a51a,	// 0x81		// Ring
+	0x01a51a,	// 0x82		// Ring
+	0x01a51a,	// 0x83		// Ring
+	0x01a51a,	// 0x84		// Ring
+	0x01a51a,	// 0x85		// Ring
+	0x01a51a,	// 0x86		// Ring
+	0x01a51a,	// 0x87		// Ring
+	0x01a51a,	// 0x88		// Ring
+	0x01a51a,	// 0x89		// Ring
+	0x01a51a,	// 0x8a		// Ring
+	0x01a51a,	// 0x8b		// Ring
+	0x01a51a,	// 0x8c		// Ring
+	0x01a51a,	// 0x8d		// Ring
+	0x01a51a,	// 0x8e		// Ring
+	0x01a51a,	// 0x8f		// Ring
+	0x01a51a,	// 0x90		// Ring
+	0x01a51a,	// 0x91		// Ring
+	0x01a51a,	// 0x92		// Ring
+	0x01a51a,	// 0x93		// Ring
+	0x01a51a,	// 0x94		// Ring
+	0x01a51a,	// 0x95		// Ring
+	0x01a51a,	// 0x96		// Ring
+	0x01a51a,	// 0x97		// Ring
+	0x01a51a,	// 0x98		// Ring
+	0x01a51a,	// 0x99		// Ring
+	0x01a51a,	// 0x9a		// Ring
+	0x01a51a,	// 0x9b		// Ring
+	0x01a51a,	// 0x9c		// Ring
+	0x037bfa,	// 0x9d		// EHZ Coconuts
+	0x01a51a,	// 0x9e		// Ring
+	0x01a51a,	// 0x9f		// Ring
+	0x01a51a,	// 0xa0		// Ring
+	0x01a51a,	// 0xa1		// Ring
+	0x01a51a,	// 0xa2		// Ring
+	0x01a51a,	// 0xa3		// Ring
+	0x01a51a,	// 0xa4		// Ring
+	0x038aea,	// 0xa5		// CPZ Spiny (horizontal)
+	0x038b86,	// 0xa6		// CPZ Spiny (vertical)
+	0x038dba,	// 0xa7		// CPZ Grabber
+	0x01a51a,	// 0xa8		// Ring (sub-object for Grabber in S2)
+	0x01a51a,	// 0xa9		// Ring (sub-object for Grabber in S2)
+	0x01a51a,	// 0xaa		// Ring (sub-object for Grabber in S2)
+	0x01a51a,	// 0xab		// Ring
+	0x01a51a,	// 0xac		// Ring
+	0x01a51a,	// 0xad		// Ring
+	0x01a51a,	// 0xae		// Ring
+	0x01a51a,	// 0xaf		// Ring
+	0x01a51a,	// 0xb0		// Ring
+	0x01a51a,	// 0xb1		// Ring
+	0x01a51a,	// 0xb2		// Ring
+	0x01a51a,	// 0xb3		// Ring
+	0x01a51a,	// 0xb4		// Ring
+	0x01a51a,	// 0xb5		// Ring
+	0x01a51a,	// 0xb6		// Ring
+	0x01a51a,	// 0xb7		// Ring
+	0x01a51a,	// 0xb8		// Ring
+	0x01a51a,	// 0xb9		// Ring
+	0x01a51a,	// 0xba		// Ring
+	0x01a51a,	// 0xbb		// Ring
+	0x01a51a,	// 0xbc		// Ring
+	0x01a51a,	// 0xbd		// Ring
+	0x01a51a,	// 0xbe		// Ring
+	0x01a51a,	// 0xbf		// Ring
+	0x01a51a,	// 0xc0		// Ring
+	0x01a51a,	// 0xc1		// Ring
+	0x01a51a,	// 0xc2		// Ring
+	0x01a51a,	// 0xc3		// Ring
+	0x01a51a,	// 0xc4		// Ring
+	0x01a51a,	// 0xc5		// Ring
+	0x01a51a,	// 0xc6		// Ring
+	0x01a51a,	// 0xc7		// Ring
+	0x01a51a,	// 0xc8		// Ring
+	0x01a51a,	// 0xc9		// Ring
+	0x01a51a,	// 0xca		// Ring
+	0x01a51a,	// 0xcb		// Ring
+	0x01a51a,	// 0xcc		// Ring
+	0x01a51a,	// 0xcd		// Ring
+	0x01a51a,	// 0xce		// Ring
+	0x01a51a,	// 0xcf		// Ring
+	0x01a51a,	// 0xd0		// Ring
+	0x01a51a,	// 0xd1		// Ring
+	0x01a51a,	// 0xd2		// Ring
+	0x01a51a,	// 0xd3		// Ring
+	0x01a51a,	// 0xd4		// Ring
+	0x01a51a,	// 0xd5		// Ring
+	0x01a51a,	// 0xd6		// Ring
+	0x01a51a,	// 0xd7		// Ring
+	0x01a51a,	// 0xd8		// Ring
+	0x01a51a,	// 0xd9		// Ring
+	0x01a51a,	// 0xda		// Ring
+	0x01a51a,	// 0xdb		// Ring
+	0x01a51a,	// 0xdc		// Ring
+	0x01a51a,	// 0xdd		// Ring
+	0x01a51a,	// 0xde		// Ring
+	0x01a51a,	// 0xdf		// Ring
+	0x01a51a,	// 0xe0		// Ring
+	0x01a51a,	// 0xe1		// Ring
+	0x01a51a,	// 0xe2		// Ring
+	0x01a51a,	// 0xe3		// Ring
+	0x01a51a,	// 0xe4		// Ring
+	0x01a51a,	// 0xe5		// Ring
+	0x01a51a,	// 0xe6		// Ring
+	0x01a51a,	// 0xe7		// Ring
+	0x01a51a,	// 0xe8		// Ring
+	0x01a51a,	// 0xe9		// Ring
+	0x01a51a,	// 0xea		// Ring
+	0x01a51a,	// 0xeb		// Ring
+	0x01a51a,	// 0xec		// Ring
+	0x01a51a,	// 0xed		// Ring
+	0x01a51a,	// 0xee		// Ring
+	0x01a51a,	// 0xef		// Ring
+	0x01a51a,	// 0xf0		// Ring
+	0x01a51a,	// 0xf1		// Ring
+	0x01a51a,	// 0xf2		// Ring
+	0x01a51a,	// 0xf3		// Ring
+	0x01a51a,	// 0xf4		// Ring
+	0x01a51a,	// 0xf5		// Ring
+	0x01a51a,	// 0xf6		// Ring
+	0x01a51a,	// 0xf7		// Ring
+	0x01a51a,	// 0xf8		// Ring
+	0x01a51a,	// 0xf9		// Ring
+	0x01a51a,	// 0xfa		// Ring
+	0x01a51a,	// 0xfb		// Ring
+	0x01a51a,	// 0xfc		// Ring
+	0x01a51a,	// 0xfd		// Ring
+	0x01a51a,	// 0xfe		// Ring
+	0x01a51a,	// 0xff		// Ring
+}

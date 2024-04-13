@@ -1,4 +1,4 @@
-// //# address-hook(0x020b9e) end(0x020ba8)
+//# address-hook(0x020b9e) end(0x020ba8)
 function void EHZwaterfall.BaseUpdate()
 {
 	if (!objA0.base_state)
