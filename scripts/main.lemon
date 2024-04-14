@@ -2953,6 +2953,72 @@ function void UpdateKnucklesGlideCollision()
 	}
 }
 
+//# address-hook(0x01174a) end(0x0117d8)
+//# address-hook(0x014f74) end(0x015000)
+function void Character.CheckForStartRolling()
+{
+	u8 input_state = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
+
+	if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
+	{
+		if ((input_state & (CONTROL_LEFT | CONTROL_RIGHT)) == 0)	// No left or right pressed
+		{
+			if (input_state & CONTROL_DOWN)
+			{
+				if (abs(char.groundspeed) >= 0x100)
+				{
+					// Start rolling
+					u32 onObjectAddress = 0xffff0000 + char.object_standing_on
+					bool allowRolling = (original_mode || !((char.flags & char.flag.ON_OBJECT) && (u32[onObjectAddress] == 0x01f752 || u32[onObjectAddress] == 0x03a252)))
+					if ((char.flags & char.flag.ROLLING) == 0 && allowRolling)
+					{
+						char.flags |= char.flag.ROLLING
+						char.hitbox_extends.x = char.hitbox.x.ROLLING
+						char.hitbox_extends.y = char.hitbox.y.ROLLING
+						char.state = char.state.ROLLING
+
+						s8 dy = (char.character == CHARACTER_TAILS) ? 1 : 5
+						char.position.y.u16 += (global.inv_gravity) ? -dy : dy
+
+						playSound(SFX_ROLL)
+						if (char.groundspeed == 0)
+							char.groundspeed = 0x200
+					}
+				}
+				else if ((char.flags & char.flag.ON_OBJECT) == 0)
+				{
+					char.state = char.state.COWERING
+				#if STANDALONE
+					// Also slow down a little
+					if (char.groundspeed <= -4 && !original_mode)
+						char.groundspeed += 4
+					else if (char.groundspeed >= 4 && !original_mode)
+						char.groundspeed -= 4
+				#endif
+				}
+			}
+			else
+			{
+				// Stop crouching
+				if (char.state == char.state.COWERING)
+					char.state = char.state.RUNNING
+
+			#if STANDALONE
+				// Allow for starting the Super Peel-Out even if still moving slowly, just like handling for the spindash
+				//  (this logic here is active even if the Peel-Out is not enabled)
+				if ((input_state & CONTROL_UP) && abs(char.groundspeed) < 0x100 && (char.flags & char.flag.ON_OBJECT) == 0 && !original_mode)
+				{
+					char.state = char.state.LOOKING_UP
+					if (char.groundspeed <= -4)
+						char.groundspeed += 4
+					else if (char.groundspeed >= 4)
+						char.groundspeed -= 4
+				}
+			#endif
+			}
+		}
+	}
+}
 
 
 
