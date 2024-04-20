@@ -52,7 +52,7 @@
   "PaletteFBZIndoor":  { "File": "palettes/PaletteFBZIndoor.bin" },
 
   "PaletteLRZ2Boss":  { "File": "palettes/PaletteLRZ2Boss.bin" },
-  "PaletteLRZ2BossFire":  { "File": "palettes/PaletteLRZ2Fire.bin" },
+  "PaletteLRZ2BossFire":  { "File": "palettes/PaletteLRZ2BossFire.bin" },
   
   "PaletteDEZ2Boss":  { "File": "palettes/PaletteDEZ2Boss.bin" },
   "PaletteFinalBoss":  { "File": "palettes/PaletteFinalBoss.bin" },
