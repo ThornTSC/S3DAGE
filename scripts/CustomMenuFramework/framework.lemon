@@ -24,6 +24,12 @@ function void EntryFunctions.dataSelect()
 	System.setupCallFrame("loadupCustomMenu")
 }
 
+// Redirect A.I.R.'s new scripted act select to the DAGE act select
+function void EntryFunctions.actSelectMenu()
+{
+	global.game_mode = 0x54
+	EntryFunctions.dataSelect()
+}
 
 // Setup custom menu.
 function void loadupCustomMenu()
