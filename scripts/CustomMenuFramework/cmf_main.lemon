@@ -204,11 +204,15 @@ function bool customMenu.scrollRight()
 
 function void customMenu.mainLogicLoop()
 {
+	time_attack_end = 0
 	if (global.game_mode == 0x58)
 	{
 		customMenu.mainLogicLoop.main()
 		return
 	}
+
+//	PrintVersionNumber()
+//	PrintVersionNumber()	// for some reason, the entirety of PrintVersionNumber() needs to be called twice to display in the Challenges menu
 
 	// Keep track of how many options should be available on the left half of the Act Select / Challenges menu.
 	u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
@@ -1409,8 +1413,8 @@ function void DataSelect.drawCustomPlanes()
 		if (setting.unlock_act)
 			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
 		else
-			Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
-		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xf001, 0, 95)							// background dimming (37.5% opacity)
+			Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
+		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xe001, 0, 95)							// background dimming (37.5% opacity)
 
 		// Render the border rectangles around the options and best times
 		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
@@ -1813,6 +1817,8 @@ function void customMenu.mainLogicLoop.main()
 	Renderer.drawCustomSprite(stringformat("text_option_airmenu_%d", selectedMenuOption.main), getScreenExtend() - 40 + 25, 180, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 */	
 	u16 option_x = 12
+
+	PrintVersionNumber()
 
 	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 

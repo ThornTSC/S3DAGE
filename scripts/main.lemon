@@ -387,6 +387,7 @@ function void MainMenuBG.Run()
 {
 	AIR_menu_run = 1
 	unlock_act = 0
+	time_attack_end = 0
 
 	held_time.up = 0
 	held_time.down = 0
@@ -5865,7 +5866,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		u16 px_hud = getScreenWidth() - 70
 		u16 py_hud = getScreenHeight() - 16
 		if (time_attack_end && time_attack_hud == 0)
-			py_hud -= 6
+			py_hud -= 9	// 6 if version number is against bottom of screen as in older versions
 		u8 sparkleNum = objA0.subtype2c & 0x1f
 		if (sparkleNum == 0x02)
 			px_hud += 12
@@ -7324,6 +7325,8 @@ function void fn00486c()
 //# address-hook(0x0048dc) end(0x0048fe)
 function void fn0048dc()
 {
+	PrintVersionNumber()
+
 	--objA0.animation.timer
 	if (s8(objA0.animation.timer) < 0)
 	{
@@ -7477,6 +7480,8 @@ function void fn005b42()
 	VDP.zeroVRAM(0x0a80)
 
 	base.fn005b42()
+
+	PrintVersionNumber()
 
 	Renderer.drawCustomSprite(stringformat("sktitle_start_game_%d", titlescreen.selection), getScreenWidth()/2, getScreenHeight() - 24, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	Renderer.drawCustomSprite(stringformat("sktitle_air_menu_%d", titlescreen.selection), getScreenWidth()/2, getScreenHeight() - 12, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
