@@ -261,6 +261,7 @@
   // Sonic 2 general object art, mappings, and animation
   "s2_badnikpoints_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Badnik Points Nemesis Art.bin" },
   "s2_badnikpoints_mappings":  { "File": "../level/EHZ/Object Art/Sonic 2 Badnik Points Mappings.bin" },
+  "s2_bubbles_art_nem":  { "File": "../level/CPZ/Object Art/Bubbles Nemesis Art.bin" },
   "s2_explosion_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Explosion Nemesis Art.bin" },
   "s2_flicky_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 Flicky Nemesis Art.bin" },
   "s2_hud_art_nem":  { "File": "../level/EHZ/Object Art/Sonic 2 HUD Nemesis Art.bin" },
@@ -319,5 +320,71 @@
     "coconuts_animation":  { "File": "../level/EHZ/Object Art/Coconuts Animation.bin" },
     "masher_art_nem":  { "File": "../level/EHZ/Object Art/Masher Nemesis Art.bin" },
     "masher_mappings":  { "File": "../level/EHZ/Object Art/Masher Mappings.bin" },
-    "masher_animation":  { "File": "../level/EHZ/Object Art/Masher Animation.bin" }
+    "masher_animation":  { "File": "../level/EHZ/Object Art/Masher Animation.bin" },
+
+  // CPZ
+    // Layout
+    "cpz_layout_1": { "File": "../level/CPZ/Layout/Part 1.bin" },
+    "cpz_objects_1": { "File": "../level/CPZ/Object Pos/Part 1.bin" },
+    "cpz_rings_1": { "File": "../level/CPZ/Ring Pos/Part 1.bin" },
+    "cpz_layout_2": { "File": "../level/CPZ/Layout/Part 2 Hard.bin" },
+    "cpz_objects_2": { "File": "../level/CPZ/Object Pos/Part 2 Hard.bin" },
+    "cpz_rings_2": { "File": "../level/CPZ/Ring Pos/Part 2 Hard.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "cpz_tiles":  { "File": "../level/CPZ/Tiles/Tiles.bin" },
+//    "cpz_animscripts":  { "File": "../level/CPZ/Tiles/Animation Scripts.bin" },
+//    "cpz_animtiles":  { "File": "../level/CPZ/Tiles/Animated Tiles.bin" },
+    "cpz_blocks":  { "File": "../level/CPZ/Blocks/Blocks.bin" },
+    "cpz_chunks_p":  { "File": "../level/CPZ/Chunks/Primary.bin" },
+
+    // Collision
+    "cpz_collision":  { "File": "../level/CPZ/Collision/IndexesSK.bin" },
+
+    // Palette
+    "cpz_palette_rtwi":  { "File": "../level/CPZ/Palette/Palette RtWI.bin" },
+    "cpz_palette":  { "File": "../level/CPZ/Palette/Palette.bin" },
+    "cpz_palette_s2":  { "File": "../level/CPZ/Palette/S2 Palette.bin" },
+    "cpz_palette_underwater":  { "File": "../level/CPZ/Palette/Palette Underwater.bin" },
+    "cpz_palettecycles":  { "File": "../level/CPZ/Palette/Palette Cycles.bin" },
+
+    // Object art, mappings, and animation
+    "cpz_booster_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Booster Nemesis Art.bin" },
+    "cpz_booster_mappings":  { "File": "../level/CPZ/Object Art/CPZ Booster Mappings.bin" },
+    "cpz_pillar_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Pillar Nemesis Art.bin" },
+    "cpz_pillar_mappings":  { "File": "../level/CPZ/Object Art/CPZ Pillar Mappings.bin" },
+    "cpz_door_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Door Nemesis Art.bin" },
+    "cpz_door_mappings":  { "File": "../level/CPZ/Object Art/CPZ Door Mappings.bin" },
+    "cpz_movingblock_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Nemesis Art.bin" },
+    "cpz_movingblock_mappings":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Mappings.bin" },
+    "cpz_movingblock_subdata":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Subdata.bin" },
+    "cpz_orb_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Orb Nemesis Art.bin" },
+    "cpz_orb_mappings":  { "File": "../level/CPZ/Object Art/CPZ Orb Mappings.bin" },
+    "cpz_platform_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Platform Nemesis Art.bin" },
+    "cpz_platform_mappings":  { "File": "../level/CPZ/Object Art/CPZ Platform Mappings.bin" },
+    "cpz_rotatingblock_mappings":  { "File": "../level/CPZ/Object Art/CPZ Rotating Block Mappings.bin" },
+    "cpz_tubeblock_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Tube Block Nemesis Art.bin" },
+    "cpz_tubeblock_mappings":  { "File": "../level/CPZ/Object Art/CPZ Tube Block Mappings FBZ Block.bin" },
+    "cpz_tubespring_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Tube Spring Nemesis Art.bin" },
+    "cpz_tubespring_mappings":  { "File": "../level/CPZ/Object Art/CPZ Tube Spring Mappings.bin" },
+    "cpz_tubespring_animation":  { "File": "../level/CPZ/Object Art/CPZ Tube Spring Animation.bin" },
+    "cpz_watersurface_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Water Surface Nemesis Art.bin" },
+    "cpz_watersurface_mappings":  { "File": "../level/CPZ/Object Art/CPZ Water Surface Mappings.bin" },
+    "cpz_yellowplat_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Yellow Platforms Nemesis Art.bin" },
+    "cpz_yellowplat_mappings":  { "File": "../level/CPZ/Object Art/CPZ Yellow Platforms Mappings.bin" },
+    "cpz_yellowplat_animation":  { "File": "../level/CPZ/Object Art/CPZ Yellow Platforms Animation.bin" },
+    "grabber_art_nem":  { "File": "../level/CPZ/Object Art/Grabber Nemesis Art.bin" },
+    "grabber_mappings":  { "File": "../level/CPZ/Object Art/Grabber Mappings.bin" },
+    "grabber_animation":  { "File": "../level/CPZ/Object Art/Grabber Animation.bin" },
+    "spiny_art_nem":  { "File": "../level/CPZ/Object Art/Spiny Nemesis Art.bin" },
+    "spiny_mappings":  { "File": "../level/CPZ/Object Art/Spiny Mappings.bin" },
+    "spiny_animation":  { "File": "../level/CPZ/Object Art/Spiny Animation.bin" },
+    "springboard_art_nem":  { "File": "../level/CPZ/Object Art/Springboard Nemesis Art.bin" },
+    "springboard_mappings":  { "File": "../level/CPZ/Object Art/Springboard Mappings.bin" },
+    "springboard_animation":  { "File": "../level/CPZ/Object Art/Springboard Animation.bin" },
+    "springboard_slopedata":  { "File": "../level/CPZ/Object Art/Springboard Slope Data.bin" },
+
+    // Spin tube data
+    "obj1E_a":  { "File": "../level/CPZ/Spin Tube Data/obj1E_a.bin" },
+    "obj1E_b":  { "File": "../level/CPZ/Spin Tube Data/obj1E_b.bin" }
 }

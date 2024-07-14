@@ -1,0 +1,449 @@
+define charA1.control_flags = u8[A1 + 0x2e]
+define charA1.jumping = u8[A1 + 0x40]
+
+define objA0.s2tube_objoff2a.u16 = u16[A0 + 0x3e]
+define objA0.s2tube_objoff2c.u16 = u16[A0 + 0x40]	// Up to 6 can be added to this offset for u16 addressing, so we cannot set this higher than 0x42 without overwriting the next object
+define objA0.s2tube_objoff2c.u8  =  u8[A0 + 0x40]	// must match above offset
+// We have moved A0 + 0x36 to A0 + 0x30.
+
+//# address-hook(0x02259c) end(0x0225b6)
+function void SpinTube.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		SpinTube.Init()
+	else // if (objA0.base_state == 2)
+		SpinTube.Main()
+	
+	D0.u8 = objA0.s2tube_objoff2c.u8 + u8[A0 + 0x30]
+	if (D0.u8 == 0)
+	{
+		DrawOrUnloadObject()
+	}
+}
+
+
+//# address-hook(0x0225c2) end(0x0225f0)
+function void SpinTube.Init()
+{
+	objA0.base_state += 0x02
+	D0.u8 = objA0.subtype2c
+	D0.u16 *= 2
+	D0.u16 &= 0x06
+	objA0.s2tube_objoff2a.u16 = (D0.u16 == 0) ? 0x00a0 : (D0.u16 == 2) ? 0x0100 : 0x0120
+	SpinTube.Main()
+}
+
+function void SpinTube.Main()
+{
+	A1 = 0xffffb000		// Player character
+	A4 = A0 + 0x40										// Originally A0 + 0x2c, but changed to line up with defines in comments at top of file.
+	SpinTube.Main_JumpTable()
+	A1 = 0xffffb04a		// Sidekick
+	A4 = A0 + 0x30										// Another chosen offset, but one that can be maintained at its original location.
+	SpinTube.Main_JumpTable()
+}
+
+function void SpinTube.Main_JumpTable()
+{
+	D0 = u8[A4]
+	if (D0.u16 == 0)
+		fn0225fc()
+	else if (D0.u16 == 2)
+		fn02271a()
+	else if (D0.u16 == 4)
+		fn0227fe()
+	else // if (D0.u16 == 6)
+		fn02286a()
+}
+
+
+//# address-hook(0x0225fc) end(0x02266c)
+function void fn0225fc()
+{
+	constant array<u8> byte_2266e = 
+	{
+		2,
+		2,	// 1
+		2,	// 2
+		2,	// 3
+		2,	// 4
+		2,	// 5
+		2,	// 6
+		2,	// 7
+		2,	// 8
+		2,	// 9
+		0,	// 0x0a
+		2,	// 0x0b
+		0,	// 0x0c
+		1,	// 0x0d
+		2,	// 0x0e
+		1	// 0x0f
+	}
+
+	if (debug_mode.state != 0)
+	{
+		return
+	}
+	D2.u16 = objA0.s2tube_objoff2a.u16
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+	if (D0.u16 >= D2.u16)
+	{
+		return
+	}
+	D1.u16 = objA1.position.y.u16 - objA0.position.y.u16
+	if (D1.u16 >= 0x80)
+	{
+		return
+	}
+	if (objA1.state == 0x20)
+	{
+		return
+	}
+	D3 = 0
+	if (D2.u16 != 0xa0)
+	{
+		D3 = 0x08
+		if (D2.u16 != 0x0120)
+		{
+			D3 = 0x04
+			D0.s16 = -D0.s16
+			D0.u16 += 0x0100
+		}
+	}
+	if (D0.u16 < 0x80)
+	{
+		fn02267f()
+		return
+	}
+	D2 = 0
+	D0.u8 = objA0.subtype2c
+	D0.u16 >>= 2
+	D0.u16 &= 0x0f
+	D2.u8 = byte_2266e[D0.u16]
+	if (D2.u8 != 0x02)
+	{
+		fn022688()
+		return
+	}
+	D2.u8 = timer.seconds & 0x01
+	fn022688()
+}
+
+
+function void fn02267f()	// Actually should be fn02267e(), but MHZ swings use the exact same address
+{
+	D2 = 0x02
+	if (D1.u16 < 0x40)
+	{
+		D2 = 0x03
+	}
+	fn022688()
+}
+
+function void fn022688()
+{
+	u8[A4 + 0x01] = D2.u8
+	D2.u16 += D3.u16
+	D2.u16 *= 2
+	D2.u16 &= 0x1e
+	// We'll place spin tube data to shared memory for now.
+	// The amount of address register references to it would require a very careful rework
+	// if the data were converted to constants.
+	A2 = 0x880980
+	A2 += u16[A2 + D2.s16]
+	u16[A4 + 0x04] = u16[(A2+=2)-2]
+	u16[A4 + 0x04] -= 0x04
+	D4.u16 = u16[(A2+=2)-2]
+	D4.u16 += objA0.position.x.u16
+	objA1.position.x.u16 = D4.u16
+	D5.u16 = u16[(A2+=2)-2]
+	D5.u16 += objA0.position.y.u16
+	objA1.position.y.u16 = D5.u16
+	u32[A4 + 0x06] = A2
+	D4.u16 = u16[(A2+=2)-2]
+	D4.u16 += objA0.position.x.u16
+	D5.u16 = u16[(A2+=2)-2]
+	D5.u16 += objA0.position.y.u16
+	u8[A4] += 0x02
+	charA1.control_flags = 0x81
+	objA1.state = 0x02
+	objA1.groundspeed = 0x0800
+	objA1.velocity.x = 0
+	objA1.velocity.y = 0
+	objA0.flags2a &= ~0x20
+	objA1.flags2a &= ~0x20
+	objA1.flags2a |= 0x02
+	charA1.jumping = 0
+	objA1.sprite_attributes &= ~0x80
+	D2.u16 = 0x0800
+	fn022902()
+	playSound(SFX_ROLL)
+}
+
+
+//# address-hook(0x02271a) end(0x0227b8)
+function void fn02271a()
+{
+	--u8[A4 + 0x02]
+	if (s8[A4 + 0x02] < 0)
+	{
+		A2 = u32[A4 + 0x06]
+		D4.u16 = u16[(A2+=2)-2]
+		D4.u16 += objA0.position.x.u16
+		objA1.position.x.u16 = D4.u16
+		D5.u16 = u16[(A2+=2)-2]
+		D5.u16 += objA0.position.y.u16
+		objA1.position.y.u16 = D5.u16
+		if (s8[A4 + 0x01] < 0)
+		{
+			A2 -= 0x08
+		}
+		u32[A4 + 0x06] = A2
+		u16[A4 + 0x04] -= 0x04
+		if (u16[A4 + 0x04] == 0)
+		{
+			fn022784()
+			return
+		}
+		D4.u16 = u16[(A2+=2)-2]
+		D4.u16 += objA0.position.x.u16
+		D5.u16 = u16[(A2+=2)-2]
+		D5.u16 += objA0.position.y.u16
+		D2.u16 = 0x0800
+		fn022902()
+		return
+	}
+	// Obj1E_MoveCharacter, loc_2275E
+	D2 = objA1.position.x
+	D3 = objA1.position.y
+	D0.u16 = objA1.velocity.x
+	D0.s32 = D0.s16
+	D0.s32 <<= 8
+	D2 += D0
+	D0.u16 = objA1.velocity.y
+	D0.s32 = D0.s16
+	D0.s32 <<= 8
+	D3 += D0
+	objA1.position.x = D2
+	objA1.position.y = D3
+}
+
+function void fn022784()
+{
+	constant array<u8> byte_227be = 
+	{
+		  2,   1,  0,  0,
+		255,   3,  0,  0,
+		  4, 254,  0,  0,
+		253, 252,  0,  0,
+		251, 251,  0,  0,
+		  7,   6,  0,  0,
+		249, 250,  0,  0,
+		  8,   9,  0,  0,
+		248, 247,  0,  0,
+		 11,  10,  0,  0,
+		 12,   0,  0,  0,
+		 11, 246,  0,  0,
+		 12,   0,  0,  0,
+		  0,  13,  0,  0,
+		 13,  14,  0,  0,
+		  0, 242,  0,  0
+	}
+
+	if (u8[A4 + 0x01] < 0x04)
+	{
+		D0.u8 = objA0.subtype2c
+		D0.u16 &= 0xfc
+		D0.u8 += u8[A4 + 1]
+		u8[A4 + 0x01] = 0x04
+		D0.u8 = byte_227be[D0.u16]
+		if (D0.u8 != 0)
+		{
+			fn022892()
+			return
+		}
+	}
+	objA1.position.y.u16 &= 0x07ff
+	u8[A4] = 0x06
+	charA1.control_flags = 0
+	playSound(SFX_SPINDASH_RELEASE)
+}
+
+
+//# address-hook(0x0227fe) end(0x022864)
+function void fn0227fe()
+{
+	--u8[A4 + 0x02]
+	if (s8[A4 + 0x02] < 0)
+	{
+		A2 = u32[A4 + 0x06]
+		D4.u16 = u16[(A2+=2)-2]
+		objA1.position.x.u16 = D4.u16
+		D5.u16 = u16[(A2+=2)-2]
+		objA1.position.y.u16 = D5.u16
+		if (s8[A4 + 0x01] < 0)
+		{
+			A2 -= 0x08
+		}
+		u32[A4 + 0x06] = A2
+		u16[A4 + 0x04] -= 0x04
+		if (u16[A4 + 0x04] == 0)
+		{
+			fn022858()
+			return
+		}
+		D4.u16 = u16[(A2+=2)-2]
+		D5.u16 = u16[(A2+=2)-2]
+		D2.u16 = 0x0800
+		fn022902()
+		return
+	}
+	// Obj1E_MoveCharacter_2, loc_22832
+	D2 = objA1.position.x
+	D3 = objA1.position.y
+	D0.u16 = objA1.velocity.x
+	D0.s32 = D0.s16
+	D0.s32 <<= 8
+	D2 += D0
+	D0.u16 = objA1.velocity.y
+	D0.s32 = D0.s16
+	D0.s32 <<= 8
+	D3 += D0
+	objA1.position.x = D2
+	objA1.position.y = D3
+}
+
+function void fn022858()
+{
+	objA1.position.y.u16 &= 0x07ff
+	u8[A4] = 0
+	playSound(SFX_SPINDASH_RELEASE)
+}
+
+
+//# address-hook(0x02286a) end(0x022890)
+function void fn02286a()
+{
+	D2.u16 = objA0.s2tube_objoff2a.u16
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+	if (D0.u16 < D2.u16)
+	{
+		D1.u16 = objA1.position.y.u16 - objA0.position.y.u16
+		if (D1.u16 < 0x80)
+		{
+			return
+		}
+	}
+	u8[A4] = 0
+}
+
+
+//# address-hook(0x022892) end(0x022900)
+function void fn022892()
+{
+	// One potential tube path to take
+	if (D0.s8 < 0)	// if( _negative())
+	{
+		D0.s8 = -D0.s8
+		u8[A4 + 0x01] = 0xfc
+		D0.u16 *= 2
+		// We'll place spin tube data to shared memory for now.
+		// The amount of address register references to it would require a very careful rework
+		// if the data were converted to constants.
+		A2 = 0x880e88
+		A2 += u16[A2 + D0.s16]
+		D0.u16 = u16[(A2+=2)-2]
+		D0.u16 -= 0x04
+		u16[A4 + 0x04] = D0.u16
+		A2 = A2 + D0.s16
+		D4.u16 = u16[(A2+=2)-2]
+		objA1.position.x.u16 = D4.u16
+		D5.u16 = u16[(A2+=2)-2]
+		objA1.position.y.u16 = D5.u16
+		A2 -= 0x08
+	}
+	// The other potential tube path to take
+	else
+	{
+		D0.u16 *= 2
+		// We'll place spin tube data to shared memory for now.
+		// The amount of address register references to it would require a very careful rework
+		// if the data were converted to constants.
+		A2 = 0x880e88
+		A2 += u16[A2 + D0.s16]
+		u16[A4 + 0x04] = u16[(A2+=2)-2]
+		u16[A4 + 0x04] -= 0x04
+		D4.u16 = u16[(A2+=2)-2]
+		objA1.position.x.u16 = D4.u16
+		D5.u16 = u16[(A2+=2)-2]
+		objA1.position.y.u16 = D5.u16
+	}
+	u32[A4 + 0x06] = A2
+	D4.u16 = u16[(A2+=2)-2]
+	D5.u16 = u16[(A2+=2)-2]
+	D2.u16 = 0x0800
+	fn022902()
+	playSound(SFX_ROLL)
+	u8[A4] += 0x02
+}
+
+
+//# address-hook(0x022902) end(0x02297e)
+function void fn022902()
+{
+	D0 = 0
+	D3.u16 = D2.u16
+	D0.u16 = D4.u16 - objA1.position.x.u16
+	if (D0.s16 < 0)
+	{
+		D0.s16 = -D0.s16
+		D2.s16 = -D2.s16
+	}
+	D1 = D5.u16
+	D1.u16 -= objA1.position.y.u16
+	if (D1.s16 < 0)
+	{
+		D1.s16 = -D1.s16
+		D3.s16 = -D3.s16
+	}
+	if (D1.u16 >= D0.u16)
+	{
+		D1 = D5.u16
+		D1.u16 -= objA1.position.y.u16
+		D1 = (D1 << 16) + (D1 >> 16)
+		D1.s16 = D1.s32 / D3.s16   // Result should also contain modulo in upper byte/word
+		D0 = D4.u16
+		D0.u16 -= objA1.position.x.u16
+		if (D0.u16 != 0)
+		{
+			D0 = (D0 << 16) + (D0 >> 16)
+			D0.s16 = D0.s32 / D1.s16   // Result should also contain modulo in upper byte/word
+		}
+		objA1.velocity.x = D0.u16
+		objA1.velocity.y = D3.u16
+		if (D1.s16 < 0)
+		{
+			D1.s16 = -D1.s16
+		}
+		u16[A4 + 0x02] = D1.u16
+		return
+	}
+	D0 = D4.u16
+	D0.u16 -= objA1.position.x.u16
+	D0 = (D0 << 16) + (D0 >> 16)
+	D0.s16 = D0.s32 / D2.s16   // Result should also contain modulo in upper byte/word
+	D1 = D5.u16
+	D1.u16 -= objA1.position.y.u16
+	if (D1.u16 != 0)
+	{
+		D1 = (D1 << 16) + (D1 >> 16)
+		D1.s16 = D1.s32 / D0.s16   // Result should also contain modulo in upper byte/word
+	}
+	objA1.velocity.y = D1.u16
+	objA1.velocity.x = D2.u16
+	if (D0.s16 < 0)
+	{
+		D0.s16 = -D0.s16
+	}
+	u16[A4 + 0x02] = D0.u16
+}

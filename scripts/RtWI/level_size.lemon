@@ -8,41 +8,10 @@ function void UpdateCameraBoundsInLevel()
 		return
 	}
 
-	constant u16 signpost_loc = 0x6740
-
-	// Emerald Hill Zone camera settings
-	if (level.scrolling_routine < 4)
-	{
-		level.vertical_wrap = 0
-		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420	// first value is Sonic Act 1 path, second is former Act 2
-		if (u16[0xffffb010] < 0x0e80 && u16[0xffffb014] >= 0x0360)	// check that considers a raised opening in the Knux path
-			move_area.bottom.target = 0x04c0
-		else if ((u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x1880 && u16[0xffffb014] >= 0x03c0) && !(u16[0xffffb010] >= 0x1280 && u16[0xffffb010] < 0x1380 && u16[0xffffb014] <= 0x0400))	// checks the Knux path exit
-			move_area.bottom.target = (u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x0f80) ? 0x0520 : 0x04c0
-
-		if (camera.position.x.u16 >= 0x6500)
-			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
-		move_area.left = 0
-		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
-		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
-		{
-			level.scrolling_routine = 4
-			move_area.left = camera.position.x.u16	// Do not allow going backward. Later code will shift the camera into the correct position if it's off-center.
-			hud.dirty.timer = 0
-			if (allocDynamicObjectStd())
-			{
-				// Spawn signpost
-				objA1.update_address = 0x0837b2
-				objA1.position.x.u16 = signpost_loc
-				objA1.position.y.u16 = 0x0425
-			}
-		}
-	}
-	else if (move_area.left < signpost_loc - (getScreenWidth() / 2))
-	{
-		move_area.left &= 0xfffe	// set final bit of camera position to 0
-		move_area.left += 2			// move camera position to next even number
-	}
+	if (unlock_act == 1)
+		EHZ.cameraBounds()
+	else
+		CPZ.cameraBounds()
 
 	// Settings for all levels
 	D1 = 2
@@ -81,4 +50,106 @@ function void fn0511c8()
 		return
 	
 	base.fn0511c8()
+}
+
+function void EHZ.cameraBounds()
+{
+	u16 signpost_loc = 0x6740
+
+	// Emerald Hill Zone camera settings
+	if (level.scrolling_routine < 4)
+	{
+		level.vertical_wrap = 0
+		move_area.bottom.target = (camera.position.x.u16 < 0x3d80) ? 0x0320 : 0x0420	// first value is Sonic Act 1 path, second is former Act 2
+		if (u16[0xffffb010] < 0x0e80 && u16[0xffffb014] >= 0x0360)	// check that considers a raised opening in the Knux path
+			move_area.bottom.target = 0x04c0
+		else if ((u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x1880 && u16[0xffffb014] >= 0x03c0) && !(u16[0xffffb010] >= 0x1280 && u16[0xffffb010] < 0x1380 && u16[0xffffb014] <= 0x0400))	// checks the Knux path exit
+			move_area.bottom.target = (u16[0xffffb010] >= 0x0e80 && u16[0xffffb010] < 0x0f80) ? 0x0520 : 0x04c0
+
+		if (camera.position.x.u16 >= 0x6500)
+			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
+		move_area.left = 0
+		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
+		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
+		{
+			level.scrolling_routine = 4
+			move_area.left = camera.position.x.u16	// Do not allow going backward. Later code will shift the camera into the correct position if it's off-center.
+			hud.dirty.timer = 0
+			if (allocDynamicObjectStd())
+			{
+				// Spawn signpost
+				objA1.update_address = 0x0837b2
+				objA1.position.x.u16 = signpost_loc
+				objA1.position.y.u16 = 0x0425
+			}
+		}
+	}
+	else if (move_area.left < signpost_loc - (getScreenWidth() / 2))
+	{
+		move_area.left &= 0xfffe	// set final bit of camera position to 0
+		move_area.left += 2			// move camera position to next even number
+	}
+}
+
+function void CPZ.cameraBounds()
+{
+	u16 signpost_loc = (layout.part == 1) ? 0x3840 : 0x7f00 // 0x3440 : 0x7f00 in Normal layout // 0x3f00 for Act 1 alone
+
+	if (level.scrolling_routine < 4)
+	{
+		level.vertical_wrap = 0
+	//	move_area.bottom.current = 0x0800 - getScreenHeight()
+//		move_area.bottom.target = (layout.part == 1 && camera.position.x.u16 >= 0x2800 + 0x0600) ? 0x0450 : (0x0800 - getScreenHeight())	// needed for Normal layout
+		move_area.left = 0
+		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
+
+		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
+		{
+			level.scrolling_routine = 4
+			move_area.left = camera.position.x.u16	// Do not allow going backward. Later code will shift the camera into the correct position if it's off-center.
+			hud.dirty.timer = 0
+			if (allocDynamicObjectStd())
+			{
+				move_area.bottom.target = 0x0450
+				// Spawn signpost
+				objA1.update_address = 0x0837b2
+				objA1.position.x.u16 = signpost_loc
+				objA1.position.y.u16 = 0x03e0	// 0x04e0
+			}
+		}
+	}
+
+	if (camera.position.x.u16 >= 0x4990 && layout.part == 0)
+	{
+		// Move camera and character
+		camera.position.x.u16 -= 0x4800
+		camera.foreground.x.u16 -= 0x4800
+		u16[0xffffb010] -= 0x4800
+		u16[0xffffb05a] -= 0x4800
+
+		// Change spin tube coordinates. Only the upper tube is changed at this time.
+		u16[0x880e88 + 0x3e] -= 0x4800
+		u16[0x880e88 + 0x42] -= 0x4800
+	//	u16[0x880e88 + 0x46] -= 0x4800
+	//	u16[0x880e88 + 0x4a] -= 0x4800
+	//	u16[0x880e88 + 0x4e] -= 0x4800
+	//	u16[0x880e88 + 0x52] -= 0x4800
+	//	u16[0x880e88 + 0x56] -= 0x4800
+	//	u16[0x880e88 + 0x5a] -= 0x4800
+
+		layout.part = 1
+		fn01c362()								// load Part 2 layout
+		dynobjects.routine = 0
+		DynamicObjectsLoading()					// load Part 2 objects
+		rings.update_routine = 0
+		UpdateListOfRingsAround()				// load Part 2 rings
+		Level.InitializeWater()					// set water height
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+	}
+	else if (u16[0xffffb010] < 0x300 && u16 [0xffffb014] == 0x04b0 && layout.part == 1)		// player character is in the act transition tube and just switched acts
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+
+	// Hard layout layering fix
+	if (layout.part == 1 && u16[0xffffb010] > 0x2f75 && u16[0xffffb010] <= 0x2f85 && u16[0xffffb014] == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
+		u16[A0 + 0x46] = 0x0e0f	// set into Path 1 (2) High
 }

@@ -1,0 +1,325 @@
+define blockplatform.position.center.y = u16[A0 + 0x30]
+define blockplatform.position.center.x = u16[A0 + 0x34]
+define blockplatform.direction = u8[A0 + 0x2e]
+
+//# address-hook(0x027d6c)
+function void BlockPlatform.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		BlockPlatform.Init()
+	else // if (objA0.base_state == 2)
+		BlockPlatform.Main()
+}
+
+
+function void BlockPlatform.Init()
+{
+	objA0.base_state += 0x02
+	// objA0.mapping_offset = 0x026ec8	// for Metropolis Zone mappings offset
+	objA0.sprite_attributes = 0x6000
+	if (unlock_act == 2)	// Chemical Plant Zone
+	{
+		objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18
+		objA0.sprite_attributes = 0x6418
+	}
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0180
+
+	constant array<u8> obj6B.InitData = 
+	{
+		0x20, 0x0c, 1, 0,
+		0x10, 0x10, 0, 0
+	}
+	D0 = objA0.subtype2c
+	D0.u16 >>= 2
+	D0.u16 &= 0x1c
+	objA0.box_size.x = obj6B.InitData[D0.u16]
+	objA0.box_size.y = obj6B.InitData[D0.u16 + 1]
+	objA0.animation.sprite = obj6B.InitData[D0.u16 + 2]
+	blockplatform.position.center.x = objA0.position.x.u16
+	blockplatform.position.center.y = objA0.position.y.u16
+	blockplatform.direction = objA0.flags2a
+	D0 = objA0.subtype2c
+	D0.u16 &= 0x0f
+//	bool carry = (s32(D0.u16) - 0x08) < 0	// new for checking carryFlag
+	D0.u16 -= 0x08
+	if (D0.s16 >= 0)	// (!carry)	// !carryFlag()
+	{
+		D0.u16 <<= 2
+		A2 = 0xfffffe8e	// 0xfffffe8a in Sonic 2
+	//	A2 = A2 + D0.s16
+		if (s16[A2] < 0)
+		{
+			blockplatform.direction ^= 0x01
+		}
+	}
+}
+
+
+function void BlockPlatform.Main()
+{
+	u16 objA0.position.x.beforeMove = objA0.position.x.u16
+	D0 = objA0.subtype2c
+	D0.u16 &= 0x0f
+	// D0.u16 *= 2
+	// D1.u16 = u16[0x027e4e + D0.s16]
+	//call 0x027e4e + D1.s16	// jsr, so we do complete the rest of BlockPlatform.Main()
+
+//	if (D0.u16 == 0)
+//		// jump to fn027e66(), which is just an rts that continues from here
+	if (D0.u16 == 1)
+		fn027e68()
+	else if (D0.u16 == 2)
+		fn027e74()
+	else if (D0.u16 == 3)
+		fn027e96()
+	else if (D0.u16 == 4)
+		fn027ea2()
+	else if (D0.u16 == 5)
+		fn027ec4()
+	else if (D0.u16 == 6)
+		fn027ee2()
+	else if (D0.u16 == 7)
+		fn027f10()
+	else if (D0.u16 == 8)
+		fn027f4e()
+	else if (D0.u16 == 9)
+		fn027f60()
+	else if (D0.u16 == 0x0a)
+		fn027f70()
+	else if (D0.u16 == 0x0b)
+		fn027f80()
+
+	D4.u16 = objA0.position.x.beforeMove
+	if (objA0.render_flags & 0x80)	// s8[A0 + 0x01] < 0, which we convert to an unsigned check by testing the sign bit
+	{
+		D1 = objA0.box_size.x
+		D1.u16 += 0x0b
+		D2 = objA0.box_size.y
+		D3.u16 = D2.u16
+		++D3.u16
+		fn01dc56()	// this is SolidObject in the Sonic 2 disassembly and SolidObjectFull in the S3&K disassembly
+	}
+	D0.u16 = blockplatform.position.center.x
+	DrawOrUnloadObjectByD0()
+}
+
+/*
+function void fn027e66()
+{
+	return
+}
+*/
+
+function void fn027e68()
+{
+	D1.u16 = 0x40
+	D0 = u8[0xfffffe68]
+	fn027e7e()
+}
+
+
+function void fn027e74()
+{
+	D1.u16 = 0x80
+	D0 = u8[0xfffffe7c]
+	fn027e7e()
+}
+
+
+function void fn027e7e()
+{
+	if (objA0.flags2a & 0x01)
+	{
+		D0.s16 = -D0.s16
+		D0.u16 += D1.u16
+	}
+	D1.u16 = blockplatform.position.center.x - D0.u16
+	objA0.position.x.u16 = D1.u16
+}
+
+
+function void fn027e96()
+{
+	D1.u16 = 0x40
+	D0 = u8[0xfffffe68]
+	fn027eac()
+}
+
+
+function void fn027ea2()
+{
+	D1.u16 = 0x80
+	D0 = u8[0xfffffe7c]
+	fn027eac()
+}
+
+
+function void fn027eac()
+{
+	if (objA0.flags2a & 0x01)
+	{
+		D0.s16 = -D0.s16
+		D0.u16 += D1.u16
+	}
+	D1.u16 = blockplatform.position.center.y - D0.u16
+	objA0.position.y.u16 = D1.u16
+	return
+}
+
+
+function void fn027ec4()
+{
+	D0.u8 = u8[0xfffffe60]
+	D0.u16 >>= 1
+	D0.u16 += blockplatform.position.center.y
+	objA0.position.y.u16 = D0.u16
+	D1.u8 = objA0.flags2a & 0x18
+	if (D1.u8 != 0)
+	{
+		++objA0.subtype2c
+	}
+}
+
+
+function void fn027ee2()
+{
+	D3 = u32[A0 + 0x0c]
+	D0.u16 = objA0.velocity.y
+	D0.s32 = D0.s16
+	D0.s32 <<= 8
+	D3 += D0
+	u32[A0 + 0x0c] = D3
+	objA0.velocity.y += 0x08
+	D0.u16 = move_area.bottom.current + 0xe0
+	if (D0.u16 < objA0.position.y.u16)
+	{
+		objA0.subtype2c = 0
+	}
+}
+
+
+function void fn027f10()
+{
+	if (u8[A0 + 0x38] == 0)
+	{
+		D0.u8 = objA0.flags2a & 0x18
+		if (D0.u8 == 0)
+		{
+			return
+		}
+		u8[A0 + 0x38] = 0x08
+	}
+	UpdateMovementStraightSimple()	// ObjectMove
+	objA0.position.y.u16 &= 0x07ff
+	if (objA0.velocity.y == 0x02a8)
+	{
+		s8[A0 + 0x38] = -s8[A0 + 0x38]
+	}
+	D1.u8 = u8[A0 + 0x38]
+	D1.s16 = D1.s8
+	objA0.velocity.y += D1.u16
+	if (objA0.velocity.y == 0)
+	{
+		objA0.subtype2c = 0
+	}
+}
+
+
+function void fn027f4e()
+{
+	// Oscillating values seem slightly different between S2 and S3&K. Confirm? Loop times:
+	// 0xfffffe8c and e: 3s 17f
+	// + 28: 4s 35f
+	// + 32: 3s 49f
+	// Current setup does seem to take exactly 3 seconds as in the original ROM hack.
+	D1.u16 = 0x10
+	D0 = u8[0xfffffe8c]	// 0xfffffe8c ?
+	D0.u16 >>= 2	// 1
+	D3.u16 = u16[0xfffffe8e] // 0xfffffe8e ?
+	fn027f8e()
+}
+
+
+function void fn027f60()
+{
+	// Oscillating values seem slightly different between S2 and S3&K. Confirm?
+	D1.u16 = 0x30
+	D0 = u8[0xfffffe8c] * 3 / 4
+	D3.u16 = u16[0xfffffe8e]
+	fn027f8e()
+}
+
+
+function void fn027f70()
+{
+	D1.u16 = 0x50
+	D0 = u8[0xfffffe90]
+	D3.u16 = u16[0xfffffe92]
+	fn027f8e()
+}
+
+
+function void fn027f80()
+{
+	D1.u16 = 0x70
+	D0 = u8[0xfffffe94]
+	D3.u16 = u16[0xfffffe96]
+	fn027f8e()
+}
+
+function void fn027f8e()
+{
+	// D0 = oscillating data from 0x00 to a maximum value (byte)
+	// D1.u16 = maximum x/y offset from center position
+	// D3.u16 = oscillating data for movement speed (word)
+	if (D3.u16 == 0)
+	{
+		++blockplatform.direction
+		blockplatform.direction &= 0x03
+	}
+	D2.u8 = blockplatform.direction & 0x03
+	if (D2.u8 == 0)		// blockplatform.direction = 0
+	{
+		D0.u16 -= D1.u16
+		D0.u16 += blockplatform.position.center.x
+		objA0.position.x.u16 = D0.u16
+		D1.s16 = -D1.s16
+		D1.u16 += blockplatform.position.center.y
+		objA0.position.y.u16 = D1.u16
+		return
+	}
+	--D2.u8
+	if (D2.u8 == 0)		// blockplatform.direction = 1
+	{
+		--D1.u16
+		D0.u16 -= D1.u16
+		D0.s16 = -D0.s16
+		D0.u16 += blockplatform.position.center.y
+		objA0.position.y.u16 = D0.u16
+		++D1.u16
+		D1.u16 += blockplatform.position.center.x
+		objA0.position.x.u16 = D1.u16
+		return
+	}
+	--D2.u8
+	if (D2.u8 == 0)		// blockplatform.direction = 2
+	{
+		--D1.u16
+		D0.u16 -= D1.u16
+		D0.s16 = -D0.s16
+		D0.u16 += blockplatform.position.center.x
+		objA0.position.x.u16 = D0.u16
+		++D1.u16
+		D1.u16 += blockplatform.position.center.y
+		objA0.position.y.u16 = D1.u16
+		return
+	}
+	// blockplatform.direction = 3
+	D0.u16 -= D1.u16
+	D0.u16 += blockplatform.position.center.y
+	objA0.position.y.u16 = D0.u16
+	D1.s16 = -D1.s16
+	D1.u16 += blockplatform.position.center.x
+	objA0.position.x.u16 = D1.u16
+}

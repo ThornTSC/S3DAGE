@@ -420,7 +420,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 #endif
 
 	// New code for loading palettes from rawdata
-	if (unlock_act && index == 0x0e)	// && index == 0x2a)
+	if (unlock_act == 1 && index == 0x0e)
 	{
 		if (palette_set >= 2)
 			System.loadExternalRawData("ehz_palette", destRaw)
@@ -429,12 +429,25 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		else
 			System.loadExternalRawData("ehz_palette_s2", destRaw)
 	}
+	else if (unlock_act == 2 && index == 0x0e)
+	{
+		if (palette_set >= 2)
+			System.loadExternalRawData("cpz_palette", destRaw)
+		else if (palette_set == 1)
+			System.loadExternalRawData("cpz_palette_rtwi", destRaw)
+		else
+			System.loadExternalRawData("cpz_palette_s2", destRaw)
+	}
 
 	else if ((original_mode || palette_set == 1) && index == 0x1a)	// Original ROM Hack has ICZ2 and SOZ1 as exceptions to S3&K palettes (former actually partially hardcoded later, so only SOZ1 here)
 		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
 	
 	else if (palette_set < 2 || original_mode)	// load from ROM normally if S3&K palettes or Original ROM Hack palettes other than the two above
+	{
+		if (index == 0x2e && unlock_act) // LBZ2 water or unlockable act water
+			System.loadExternalRawData("cpz_palette_underwater", destRaw)
 		return
+	}
 
 	else if (index == 0x2a || (index >= 0x0b && index <= 0x22)) // AIZ1 is 0x2a, and most main acts fall in sequence from 0x0b to 0x22
 		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
@@ -450,8 +463,13 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		System.loadExternalRawData("PaletteCNZ2Water", destRaw)
 	else if (index == 0x39) // ICZ2 water
 		System.loadExternalRawData("PaletteICZ2Water", destRaw)
-	else if (index == 0x2e) // LBZ2 water
-		System.loadExternalRawData("PaletteLBZ2Water", destRaw)
+	else if (index == 0x2e) // LBZ2 water or unlockable act water
+	{
+		if (!unlock_act)
+			System.loadExternalRawData("PaletteLBZ2Water", destRaw)
+		else
+			System.loadExternalRawData("cpz_palette_underwater", destRaw)
+	}
 	else if (index == 0x0a)	// AIZ1 Sonic intro
 		System.loadExternalRawData("PaletteAIZIntro", destRaw)
 	else if (index == 0x30) // AIZ2 boss approach
@@ -539,7 +557,10 @@ function void UpdatePaletteEffects.Default()
 	{
 		UpdatePaletteEffects.SuperForm()	// this must always be called to allow super transformations; a control lock is handled inside
 
-		LevelPaletteUpdate.EHZ()
+		if (unlock_act == 1)
+			LevelPaletteUpdate.EHZ()
+		else if (unlock_act == 2)
+			LevelPaletteUpdate.CPZ()
 		return
 	}
 
@@ -613,12 +634,12 @@ function void LevelPaletteUpdate.AIZ1()
 function void LevelPaletteUpdate.EHZ()
 {
 	A0 = 0x870000
-	--u16[0xfffff634]
+	--u16[0xfffff634]	// PalCycle_Timer in PalCycle_EHZ: in disassembly
 	if (s16[0xfffff634] < 0)
 	{
 		System.loadExternalRawData("ehz_palettecycle", 0x870000)
 		u16[0xfffff634] = 0x07
-		D0.u16 = u16[0xfffff632]
+		D0.u16 = u16[0xfffff632]	// PalCycle_Frame in PalCycle_EHZ: in disassembly
 		++u16[0xfffff632]
 		D0.u16 &= 0x03
 		D0.u16 <<= 3
@@ -631,6 +652,89 @@ function void LevelPaletteUpdate.EHZ()
 	}
 }
 
+function void LevelPaletteUpdate.CPZ()
+{
+	A0 = 0x870000
+	--u16[0xfffff634]
+	if (s16[0xfffff634] < 0)
+	{
+		// Chemicals in terrain
+		u16[0xfffff634] = 0x07
+		System.loadExternalRawData("cpz_palettecycles", 0x870000)	// contains three palette cycles
+		D0.u16 = u16[0xfffff632]
+		u16[0xfffff632] += 6
+		if (u16[0xfffff632] >= 0x36)
+			u16[0xfffff632] = 0
+		u32[0xfffffc78] = u32[A0 + D0.s16]
+		u16[0xfffffc7c] = u16[A0 + D0.s16]
+		// Add underwater palette cycling
+		if (palette_set >= 2)
+		{
+			u32[0xfffff0f8] = u32[A0 + D0.s16]
+			u8[0xfffff0f8] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (u8[0xfffff0f9] == 0x00)
+				u8[0xfffff0f9] = 0x0c	// use less green and more red for brightest color
+			else if (u8[0xfffff0f9] == 0x20)
+				u8[0xfffff0f9] = 0x2c	// use less green and more red for brightest color
+			else if (u8[0xfffff0f9] == 0x40)
+				u8[0xfffff0f9] = 0x4c	// use less green and more red for brightest color
+			else
+				u8[0xfffff0f9] = 0x4e	// use less green and more red for brightest color
+			u8[0xfffff0fa] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (u8[0xfffff0fb] == 0x00)
+				u8[0xfffff0fb] = 0x0c	// use less green and more red for brightest color
+			else if (u8[0xfffff0fb] == 0x20)
+				u8[0xfffff0fb] = 0x2c	// use less green and more red for brightest color
+			else if (u8[0xfffff0fb] == 0x40)
+				u8[0xfffff0fb] = 0x4c	// use less green and more red for brightest color
+			else
+				u8[0xfffff0fb] = 0x4e	// use less green and more red for brightest color
+			u16[0xfffff0fc] = u16[A0 + D0.s16]
+			u8[0xfffff0fc] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (u8[0xfffff0fd] == 0x00)
+				u8[0xfffff0fd] = 0x0c	// use less green and more red for brightest color
+			else if (u8[0xfffff0fd] == 0x20)
+				u8[0xfffff0fd] = 0x2c	// use less green and more red for brightest color
+			else if (u8[0xfffff0fd] == 0x40)
+				u8[0xfffff0fd] = 0x4c	// use less green and more red for brightest color
+			else
+				u8[0xfffff0fd] = 0x4e	// use less green and more red for brightest color
+		}
+
+		// Lights on underside of chemical tube terrain
+		A0 = 0x870000 + 0x36		// move past cycle 1 to cycle 2
+		D0.u16 = u16[0xfffff652]	// PalCycle_Frame2
+		u16[0xfffff652] += 2
+		if (u16[0xfffff652] >= 0x2a)
+			u16[0xfffff652] = 0
+		u16[0xfffffc7e] = u16[A0 + D0.s16]	// Normal_palette_line4+$1E
+		// Add underwater palette cycling
+		if (palette_set >= 2)
+		{
+			u16[0xfffff0fe] = u16[A0 + D0.s16]	// Normal_palette_line4+$1E
+			if (u8[0xfffff0fe] > 0x02)	// if sufficient blue,
+				u8[0xfffff0fe] -= 0x02	// dim it
+			u8[0xfffff0ff] = (((u8[0xfffff0ff] & 0xf0)/2) & 0xe0) + (u8[0xfffff0ff] & 0x0f)	// take green color, halve it, remove odd values, and re-add red color
+			if ((u8[0xfffff0ff] & 0x0f) > 0x02)	// if sufficient red,
+				u8[0xfffff0ff] -= 0x02			// dim it
+		}
+
+		// Background red lights
+		A0 = 0x870000 + 0x36 + 0x2a	// move past cycles 1 and 2 to cycle 3
+		D0.u16 = u16[0xfffff654]	// PalCycle_Frame3
+		u16[0xfffff654] += 2
+		u16[0xfffff654] &= 0x1e
+		u16[0xfffffc5e] = u16[A0 + D0.s16]	// Normal_palette_line3+$1E
+		// Add underwater palette cycling
+		if (palette_set >= 2)
+		{
+			u16[0xfffff0de] = u16[A0 + D0.s16]	// Underwater_palette_line3+$1E
+			u8[0xfffff0de] += 0x08		// add blue to the red flash to make purple
+			if ((u8[0xfffff0df] & 0x0f) > 0x04)	// if there is sufficient red in the current flash color,
+				u8[0xfffff0df] -= 0x02	// remove a bit of it to dim the color underwater
+		}
+	}
+}
 
 
 
@@ -1069,7 +1173,10 @@ function void UpdateLevelScrolling.MGZ1()
 {
 	if (unlock_act)
 	{
-		EHZ_CustomSprites()
+		if (unlock_act == 1)
+			EHZ_CustomSprites()
+		else if (unlock_act == 2)
+			CPZ_CustomSprites()
 		fn051158()	// call the most basic MGZ1 scroll routine
 		return
 	}

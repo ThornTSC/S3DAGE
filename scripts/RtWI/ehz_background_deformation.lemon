@@ -149,7 +149,7 @@ function void UpdateBackgroundScrolling.EHZ()
 	// Ocean
 	// Renderer.drawCustomSprite("ehz_background_ocean_reflection", parallaxShift, 80 - yShift, 0, 0, 0x1100)	// replace later with correct reflection shifts
 
-	s64 rippleShiftIndex = (level.framecounter / 8) % 66	// Sonic 2 uses u8[0xfffffe0f], a.k.a. V_int_run_count+3. Same address in S2 and S3. We use level.framecounter since that pauses with DAGE pausing.
+	s64 rippleShiftIndex = (level.framecounter / 8) % 66	// Sonic 2 uses u8[0xfffffe0f], a.k.a. global.framecounter.low. Same address in S2 and S3. We use level.framecounter since that pauses with DAGE pausing.
 	Renderer.drawCustomSprite("ehz_background_ocean_line80", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 21) % 66], 80 - yShift, 0, 0, 0x1100)
 	Renderer.drawCustomSprite("ehz_background_ocean_line81", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 20) % 66], 81 - yShift, 0, 0, 0x1100)
 	Renderer.drawCustomSprite("ehz_background_ocean_line82", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 19) % 66], 82 - yShift, 0, 0, 0x1100)

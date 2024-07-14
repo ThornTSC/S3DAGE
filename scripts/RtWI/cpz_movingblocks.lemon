@@ -1,0 +1,77 @@
+// For the staircase variant of the blocks, use code from the DEZ staircases.
+// Functions taken from objects\13_dez\dez_staircase.lemon
+//# address-hook(0x04763e) end(0x0476e4)
+function void fn04763e()
+{
+	objA0.render_flags |= render_flag.WORLD
+	D0.u16 = objA0.subtype2c & 0x07
+	if ((D0.u16 >= 4) == !(objA0.render_flags & render_flag.FLIP_Y))
+	{
+		objA0.render_flags ^= render_flag.FLIP_X
+	}
+
+	D3 = 0x34
+	D4 = 2
+	if (objA0.flags2a & 0x01)
+	{
+		D3 = 0x3a
+		D4 = -2
+	}
+
+	D2.u16 = objA0.position.x.u16
+	A1 = A0
+	D1 = 3
+	while (true)
+	{
+		// Spawn staircase segments
+		objA1.mapping_offset = 0x046f7a
+		objA1.sprite_attributes = (unlock_act) ? (sprite_attribute.PALETTE.LINE3 | 0x0418) : (sprite_attribute.PALETTE.LINE1 | 0x0480)
+		objA1.render_flags = objA0.render_flags
+		objA1.sprite_priority = 0x0180
+		objA1.box_size.x = 0x10
+		objA1.box_size.y = 0x10
+		u8[A1 + 0x2c] = objA0.subtype2c
+		objA1.position.x.u16 = D2.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		u16[A1 + 0x44] = objA0.position.x.u16
+		u16[A1 + 0x46] = objA1.position.y.u16
+		D2.u16 += 0x20
+		u8[A1 + 0x33] = D3.u8
+		u16[A1 + 0x3e] = A0.u16
+		D3.u8 += D4.u8
+
+		--D1.s16
+		if (D1.s16 < 0)
+			break
+
+		if (!allocDynamicObjectAfterA0())
+			break
+
+		objA1.update_address = 0x0476fe
+	}
+
+	objA0.update_address = 0x0476ea
+	fn0476ea()
+}
+
+//# address-hook(0x04774a) end(0x04776e)
+function void fn04774a()
+{
+	if (u16[A0 + 0x30] == 0)
+	{
+		if (u8[A0 + 0x32] & 0x30)
+		{
+			u16[A0 + 0x30] = 0x1e
+		}
+	}
+	else
+	{
+		--u16[A0 + 0x30]
+		if (u16[A0 + 0x30] == 0)
+		{
+			++objA0.subtype2c
+			if (!unlock_act)		// make no sound in CPZ
+				playSound(0xc0)
+		}
+	}
+}

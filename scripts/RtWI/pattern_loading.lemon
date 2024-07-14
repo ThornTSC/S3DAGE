@@ -1,6 +1,22 @@
+// Do not load post-title card patterns in unlockable acts;
+// we take advantage of the image title cards to overwrite them during the title card itself.
+// Function taken from maingame\hud\titlecard.lemon
+//# address-hook(0x02f77c) end(0x02f7bc)
+function void fn02f77c()
+{
+	if (!unlock_act)
+		base.fn02f77c()
+	else
+	{
+		u32 backupA0 = A0
+		D0.u16 = 0x12
+		RequestLoadingPatterns()
+		A0 = backupA0
+	}
+}
+
 function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers in sonic3k.asm from the GitHub disassembly
 {
-	// debugLog(stringformat("D0 = %x", D0))
 	if (!unlock_act) // && !(D0.u16 == 0x01 || D0.u16 == 0x02 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x12))
 	{
 		base.RequestLoadingPatterns()
@@ -19,8 +35,11 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("s2_hud_art_nem", s2_decompression_buffer_2)
 		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xd940)
 	}
-	// Be aware PLC_01 (Sonic), 05 (Knuckles), or 07 (Tails) will be called after this!
-	if (D0.u16 == 0x12) // 0x0b)	// MGZ1 Primary, now EHZ. 0x0b was used when the AIZ1 level slot was tested.
+
+	if (D0.u16 != 0x12)		// MGZ1 Primary, now unlockable acts
+		return
+
+	if (unlock_act == 1)	// EHZ
 	{
 		// Primary
 		System.loadExternalRawData("ehz_waterfall_mappings", s2_mappings_address + 0x0186)
@@ -62,7 +81,6 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 
 		// Other
 		System.loadExternalRawData("s2_invin_stars_mappings", s2_mappings_address + 0x041a)
-	//	System.loadExternalRawData("s2_invin_stars_art_unc", 0x898000)
 
 		System.loadExternalRawData("s2_starpost_mappings", s2_mappings_address + 0x04c6)	// we'll use the Sonic 3 dust recolored for now, as the characters are from Sonic 3
 		System.loadExternalRawData("s2_starpost_art_nem", s2_decompression_buffer_2)
@@ -74,5 +92,102 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 
 		// Animation scripts for objects. These must be handled after all other art if we intend to use the same address as above.
 		System.loadExternalRawData("masher_animation", s2_decompression_buffer_2)
+	}
+
+	else if (unlock_act == 2)	// CPZ
+	{
+		// Primary
+		System.loadExternalRawData("cpz_pillar_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c)	// 0x64 bytes
+		System.loadExternalRawData("cpz_pillar_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x6e60)
+		
+		System.loadExternalRawData("cpz_door_mappings", s2_mappings_address + 0x24 + 0x0a)	// 0x4c bytes
+		System.loadExternalRawData("cpz_door_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7280)
+
+		System.loadExternalRawData("cpz_booster_mappings", s2_mappings_address)	// 0x24 bytes
+		System.loadExternalRawData("cpz_booster_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7380)
+
+		System.loadExternalRawData("cpz_platform_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a)	// 0x4c bytes
+		System.loadExternalRawData("cpz_platform_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7400)
+
+		System.loadExternalRawData("cpz_yellowplat_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64)	// 0x50 bytes
+		System.loadExternalRawData("cpz_yellowplat_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7600)
+
+		System.loadExternalRawData("cpz_tubespring_mappings", s2_mappings_address + 0x0800)	// 0x44 bytes
+		System.loadExternalRawData("cpz_tubespring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x7c00)
+
+		System.loadExternalRawData("cpz_watersurface_mappings", s2_mappings_address + 0x1000)	// 0xba bytes
+		System.loadExternalRawData("cpz_watersurface_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8000)
+
+		System.loadExternalRawData("s2_bubbles_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa9a0)	// not the original art or location from Sonic 2! Using S3&K additional bubbles with Sonic 2 colors.
+
+		System.loadExternalRawData("cpz_movingblock_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50)	// 0x10 bytes
+		System.loadExternalRawData("cpz_movingblock_subdata", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10)	// 0x18 bytes for subdata
+		System.loadExternalRawData("cpz_rotatingblock_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18)	// 0x0a bytes
+		System.loadExternalRawData("cpz_movingblock_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8300)
+
+		System.loadExternalRawData("cpz_tubeblock_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc + 0xf6)	// 0x1c bytes
+		System.loadExternalRawData("cpz_tubeblock_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8600)
+
+		// Secondary
+		System.loadExternalRawData("s2_spikes_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8680)
+
+		System.loadExternalRawData("cpz_orb_mappings", s2_mappings_address + 0x24)	// 0x09 bytes, rounded up to 0x0a for even value
+		System.loadExternalRawData("cpz_orb_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8780)
+
+		System.loadExternalRawData("springboard_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c)	// 0x20 bytes
+		System.loadExternalRawData("springboard_slopedata", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20)	// 0x50 bytes
+		System.loadExternalRawData("springboard_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8800)
+
+		System.loadExternalRawData("s2_spring_mappings", 0x221dea)		// formerly s2_mappings_address + 0x0040
+	//	System.loadExternalRawData("s2_diagonalspring_art_nem", s2_decompression_buffer_2)	// not used in CPZ
+	//	Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8780)							// not used in CPZ
+
+		System.loadExternalRawData("s2_upwardspring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8b80)
+
+		System.loadExternalRawData("s2_sidespring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8e00)
+
+		System.loadExternalRawData("grabber_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc) // 0xf6 bytes
+		System.loadExternalRawData("grabber_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa000)
+
+		System.loadExternalRawData("spiny_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50)	// 0xbc bytes
+		System.loadExternalRawData("spiny_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa5a0)
+
+		// Other
+		System.loadExternalRawData("s2_invin_stars_mappings", s2_mappings_address + 0x041a)
+
+		System.loadExternalRawData("s2_starpost_mappings", s2_mappings_address + 0x04c6)	// we'll use the Sonic 3 dust recolored for now, as the characters are from Sonic 3
+		System.loadExternalRawData("s2_starpost_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8f80)
+
+		System.loadExternalRawData("s2_badnikpoints_mappings", s2_mappings_address + 0x046e)
+		System.loadExternalRawData("s2_badnikpoints_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xbc80)
+
+		System.loadExternalRawData("obj1E_a", 0x880980)
+		System.loadExternalRawData("obj1E_b", 0x880e88)
+
+		// Animation scripts for objects. These must be handled after all other art if we intend to use the same address as above.
+		System.loadExternalRawData("cpz_yellowplat_animation", s2_decompression_buffer_2)	// 0x14 bytes
+		System.loadExternalRawData("springboard_animation", s2_decompression_buffer_2 + 0x14)	// 0x0c bytes
+		System.loadExternalRawData("spiny_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)	// 0x12 bytes containing three scripts: horizontal Spiny, vertical Spiny, projectile
+		System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
+		System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// 0x18 bytes
 	}
 }

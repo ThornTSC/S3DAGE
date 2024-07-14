@@ -1,0 +1,173 @@
+//# address-hook(0x0293a0)
+function void YellowPlatform.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		YellowPlatform.Init()
+	else if (objA0.base_state == 2)
+		YellowPlatform.Main()
+	else // if (objA0.base_state == 4)
+		YellowPlatform.SubObject()
+}
+
+function void YellowPlatform.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50
+	objA0.sprite_attributes = 0xe418
+//	if (unlock_act == 0x06)		// Mystic Cave Zone
+//	{
+//		objA0.mapping_offset = 0x010256
+//		objA0.sprite_attributes = 0
+//	}
+	D1 = objA0.subtype2c
+	A2 = (s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10) + D1.s16
+	D1.u8 = u8[(A2+=1)-1]
+	A1 = A0
+//	call 0x029426
+	// The call enters a loop midway. We take from the entry point to the end and make a new function.
+	YellowPlatform.SetSharedProperties()
+	--D1.s16
+	if (D1.s16 >= 0)
+		YellowPlatform.SubObjectLoop()
+	else
+		YellowPlatform.PostSubObjectLoop()
+}
+
+// Obj7A_LoadSubObject or loc_29426, out of order with YellowPlatform.SubObjectLoop() because of a mid-loop jump in ASM
+function void YellowPlatform.SetSharedProperties()
+{
+	objA1.mapping_offset = objA0.mapping_offset
+	objA1.sprite_attributes = objA0.sprite_attributes
+	objA1.render_flags = 0x04
+	objA1.sprite_priority = 0x0200
+	objA1.box_size.x = 0x18
+	objA1.box_size.y = 0x08
+	u16[A1 + 0x30] = objA1.position.x.u16
+}
+
+function void YellowPlatform.SubObjectLoop()
+{
+	while (true)
+	{
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = objA0.update_address
+			objA1.base_state = 0x04
+			objA1.position.x.u16 = objA0.position.x.u16
+			objA1.position.y.u16 = objA0.position.y.u16
+			// Obj7A_LoadSubObject or loc_29426, converted into a function
+			YellowPlatform.SetSharedProperties()
+		}
+		--D1.s16
+		if (D1.s16 < 0)
+			break
+	}
+	YellowPlatform.PostSubObjectLoop()
+}
+
+function void YellowPlatform.PostSubObjectLoop()
+{
+	u32[A1 + 0x3c] = A0
+	u32[A0 + 0x3c] = A1
+	if (objA0.subtype2c == 0x0c)
+	{
+		u8[A0 + 0x36] = 0x01
+	}
+	D1 = 0
+	D1.u8 = u8[(A2+=1)-1]
+	D0.u16 = u16[A0 + 0x30] - D1.u16
+	u16[A0 + 0x32] = D0.u16
+	u16[A1 + 0x32] = D0.u16
+	D0.u16 += D1.u16
+	D0.u16 += D1.u16
+	u16[A0 + 0x34] = D0.u16
+	u16[A1 + 0x34] = D0.u16
+	D0.u16 = u16[(A2+=2)-2]
+	objA0.position.x.u16 += D0.u16
+	D0.u16 = u16[(A2+=2)-2]
+	objA1.position.x.u16 += D0.u16
+	YellowPlatform.Main()
+}
+
+// loc_2948E
+function void YellowPlatform.Main()
+{
+	fn0294f4()
+	D0.u16 = (u16[A0 + 0x32] & 0xff80) - level.despawn_position.x	// camera_x_pos_coarse in disassemblies
+	if (D0.u16 > 0x0280)
+	{
+		D0.u16 = (u16[A0 + 0x34] & 0xff80) - level.despawn_position.x
+		if (D0.u16 > 0x0280)
+		{
+			YellowPlatform.CheckUnload()
+			return
+		}
+	}
+	DrawObject()
+}
+
+// loc_294C4
+function void YellowPlatform.CheckUnload()
+{
+	A1 = u32[A0 + 0x3c]
+	if (A1 != A0)
+	{
+		UnloadObjectA1()	// no return after this	(jsr) // this function is DeleteObject2 in the Sonic 2 disassembly
+	}
+//	A2 = 0xffffe700		// start of object respawn table. Normally 0xffffeb00 in base S3&K. Not needed here because of how objA0.respawn_entry saves addresses in S3&K.
+	D0.u16 = objA0.respawn_entry
+	if (D0.u16 != 0)
+	{
+		u8[0xffff0000 + D0.u16] &= ~0x80
+	}
+	UnloadObject()
+}
+
+function void YellowPlatform.SubObject()
+{
+	fn0294f4()
+	fn02953e()
+	DrawObject()
+}
+
+function void fn0294f4()
+{
+	u16[A7-=2] = objA0.position.x.u16
+	if (u8[A0 + 0x36] != 0)
+	{
+		D0.u16 = objA0.position.x.u16
+		--D0.u16
+		if (D0.u16 == u16[A0 + 0x32])
+		{
+			u8[A0 + 0x36] = 0
+		}
+		objA0.position.x.u16 = D0.u16
+	}
+	else
+	{
+		D0.u16 = objA0.position.x.u16
+		++D0.u16
+		if (D0.u16 == u16[A0 + 0x34])
+		{
+			u8[A0 + 0x36] = 0x01
+		}
+		objA0.position.x.u16 = D0.u16
+	}
+	D1 = objA0.box_size.x
+	D3.u16 = 0x08
+	D4.u16 = u16[(A7+=2)-2]
+	PlatformCheckClimbOn()
+}
+
+function void fn02953e()
+{
+	A1 = u32[A0 + 0x3c]
+	D0.u16 = objA0.position.x.u16 - 0x18
+	D2.u16 = objA1.position.x.u16 + 0x18
+	if (D2.u16 == D0.u16)
+	{
+		u8[A0 + 0x36] ^= 0x01
+		u8[A1 + 0x36] ^= 0x01
+	}
+	return
+}

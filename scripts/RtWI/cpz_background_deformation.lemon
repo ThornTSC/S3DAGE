@@ -1,0 +1,138 @@
+function void CPZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.CPZ()
+
+	if (level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
+	{
+		Renderer.drawCustomSprite("signpost_eggman", 0x6740, 0x0425, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		Renderer.drawCustomSprite("signpost_pole", 0x6740, 0x043d, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+	}
+	// Doing this and setting the above to check for 6 avoids one frame of an invisible signpost (level end reached, true signpost not yet drawn after loading)
+	if (level.scrolling_routine == 4)
+	{
+		level.scrolling_routine += 2
+	}
+}
+
+/*
+function void EHZ.drawTransparentWaterfall(s16 px, s16 py, s16 width, s16 height, u16 renderQueue)
+{
+	if ((camera.position.x.u16 >= (px + width - 32)) || (camera.position.y.u16 >= (py + height - 32)))
+		return
+	if (((camera.position.x.u16 + getScreenWidth() + 32) < px) || ((camera.position.y.u16 + getScreenHeight() + 32) < py))
+		return
+
+	for (u16 count.x = width; count.x > 0; count.x -= 0x40)
+	{
+		for (u16 count.y = height; count.y > 0; count.y -= 0x40)
+		{
+			Renderer.drawCustomSprite("ehz_waterfall_transparent", px + count.x - 0x40, py + count.y - 0x40, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, renderQueue)
+		}
+	}
+}
+*/
+
+function void UpdateBackgroundScrolling.CPZ()
+{
+	s16 yShift = camera.position.y.u16 / 4
+
+	// Buildings
+	s64 parallaxShift = -(camera.position.x.u16 / 6) % 768
+	Renderer.drawCustomSprite("cpz_background_high", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+
+	// Water (scroll offset is based on buildings before ripple is applied)
+	s64 rippleShiftIndex = (level.framecounter / 8) % 66	// Sonic 2 uses u8[0xfffffe0f], a.k.a. global.framecounter.low. Same address in S2 and S3. We use level.framecounter since that pauses with DAGE pausing.
+	Renderer.drawCustomSprite("cpz_background_water_line288", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 21) % 66], 288 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line289", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 20) % 66], 289 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line290", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 19) % 66], 290 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line291", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 18) % 66], 291 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line292", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 17) % 66], 292 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line293", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 16) % 66], 293 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line294", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 15) % 66], 294 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line295", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 14) % 66], 295 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line296", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 13) % 66], 296 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line297", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 12) % 66], 297 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line298", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 11) % 66], 298 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line299", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 10) % 66], 299 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("cpz_background_water_line300", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  9) % 66], 300 - yShift, 0, 0, 0x1100)
+	// Sonic 2 actually ripples the next three lines of pure white water as well, but this has no visible effect except extending the error visible on the far left of the background.
+
+	// Catwalks and background wall
+	parallaxShift = -(camera.position.x.u16 / 2) % 768
+	Renderer.drawCustomSprite("cpz_background_low", parallaxShift, 301 - yShift, 0, 0, 0x1100)	// low background actually starts at line 304, but we include the non-rippling water here.
+
+	// Animated background wall tiles, sorted by x position. The background goes lower than this, but the original level does not make it visible.
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 576 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 576 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 640 - yShift, 0, 0, 0x1101)
+
+	// Animated background wall tiles again, but repeating the ones that must be shown past the loop point before the modulus assists.
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+
+	// Transparency fix image. Transparent colors do not load properly while both above-water and below-water palettes are on screen.
+	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, water.height.current, 0, SPRITE_FLAG_WORLDSPACE, 0x10ff)
+
+	// Chemical water cloudiness
+	Renderer.drawCustomSprite("whitescreen", 0, max(camera.foreground.y.u16, water.height.current + 2) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xdfe0, 0, 0x40800080, 0x10000)
+
+	if (layout.part == 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
+	{
+		Renderer.drawCustomSprite("signpost_eggman", 0x3840, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)			// 0x3440, 0x04e0 in Normal layout
+		Renderer.drawCustomSprite("signpost_pole", 0x3840, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)	// 0x3440, 0x04e0 in Normal layout
+	}
+	// Doing this and setting the above to check for 6 avoids one frame of an invisible signpost (level end reached, true signpost not yet drawn after loading)
+	if (level.scrolling_routine == 4)
+	{
+		level.scrolling_routine += 2
+	}
+}

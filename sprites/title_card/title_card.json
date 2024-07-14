@@ -51,5 +51,6 @@
     "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" },
 
     "angel_titlecard_zone":  { "File": "angel_zonenames.png", "Rect": "0,0,72,24", "Center": "36,12" },
-    "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,24,160,24", "Center": "32,12" }
+    "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,24,160,24", "Center": "32,12" },
+    "angel_titlecard_unlock0002":  { "File": "angel_zonenames.png", "Rect": "0,48,198,24", "Center": "70,12" }
 }

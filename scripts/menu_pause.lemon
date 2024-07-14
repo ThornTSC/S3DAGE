@@ -1013,8 +1013,10 @@ function void fn02ddc6()
 
 function void PauseMenu_DrawCustomSprites()
 {
-	if (unlock_act)
+	if (unlock_act == 1)
 		EHZ_CustomSprites()
+	else if (unlock_act == 2)
+		CPZ_CustomSprites()
 	else if (global.zone_act == 0x0000)
 		AIZ1_CustomSprites()
 	else if (global.zone_act == 0x0100)

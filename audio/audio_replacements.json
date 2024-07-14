@@ -9,11 +9,18 @@
 	"ehz2": { "File": "EmeraldHill2.ogg",  "LoopStart": 99572, "Type": "Music"},
 	"ehz2_fast": { "File": "EmeraldHill2_F.ogg",  "LoopStart": 79604, "Type": "Music"},
 
+	"cpz": { "File": "ChemicalPlant.ogg",  "LoopStart": 684580, "Type": "Music"},
+	"cpz_fast": { "File": "ChemicalPlant_F.ogg",  "LoopStart": 547578, "Type": "Music"},
+
 	"s2_boss": { "File": "S2_Boss.ogg", "Type": "Music"},	// no loop point needed
+
+	"s2_chemjump": { "File": "S2_ChemJump.ogg", "Type": "Sound"},
 
 	"s2_gameover": { "File": "S2_GameOver.ogg", "Type": "Jingle", "ClearMusic": "1" },
 	"s2_continue": { "File": "S2_Continue.ogg", "Type": "Jingle", "ClearMusic": "1" },
 	"s2_actcomplete": { "File": "S2_ActComplete.ogg", "Type": "Jingle", "ClearMusic": "1" },
+
+	"s2_emerald": { "File": "S2_Emerald.ogg", "Type": "Jingle" },
 
 	"s2_1up": { "File": "S2_1Up.ogg", "Type": "Jingle" },
 
@@ -21,6 +28,8 @@
 	"s2_invin_fast": { "File": "S2_Invincibility_F.ogg",  "LoopStart": 30897, "Type": "Music"},
 
 	"s2_specialstage": { "File": "S2_SpecialStage.ogg",  "LoopStart": 496644, "Type": "Music"},
+
+	"s2_spring": { "File": "S2_Spring.ogg", "Type": "Sound"},
 
 	"s2_super": { "File": "S2_Super.ogg", "Type": "Music"},	// no loop point needed
 

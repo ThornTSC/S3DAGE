@@ -1,0 +1,102 @@
+define booster.boost_speed = u16[A0 + 0x3e]	// objoff_30 in Sonic 2
+
+//# address-hook(0x0222ac)
+function void Booster.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Booster.Init()
+	else // if (objA0.base_state == 2)
+		Booster.Main()
+}
+
+function void Booster.Init()
+{
+	objA0.base_state += 2
+	objA0.mapping_offset = s2_mappings_address
+	objA0.sprite_attributes = 0xe39c
+	objA0.render_flags |= 0x04
+	objA0.box_size.x = 0x20
+	objA0.box_size.y = 0x20		// added to help with pop in/out issues
+	objA0.sprite_priority = 0x0080
+	booster.boost_speed = (objA0.subtype2c & 0x02) ? 0x0a00 : 0x1000
+	Booster.Main()
+}
+
+function void Booster.Main()
+{
+	if (u16[A0 + 0x30])		// check the "don't repeat the booster sound" timer
+		--u16[A0 + 0x30]	// if it's active, decrement it
+	
+	objA0.animation.sprite = (level.framecounter.low & 0x02)
+//	D0.u16 = objA0.position.x.u16 - 0x10
+//	D1.u16 = D0.u16 += 2*0x10
+//	D2.u16 = objA0.position.y.u16 - 0x10
+//	D3.u16 = D2.u16 += 2*0x10
+	Booster.CheckGiveBoost(0xffffb000)
+	if (u32[0xffffb04a] != 0)	// sidekick Tails active
+		Booster.CheckGiveBoost(0xffffb04a)
+	DrawOrUnloadObject()
+}
+
+function void Booster.CheckGiveBoost(u32 characterAddress)
+{
+	A1 = characterAddress
+	if ((objA1.flags2a & char.flag.IN_AIR) && !(isMainCharacter(CHARACTER_KNUCKLES) && objA1.animation.sprite == 0xcc))
+		return
+
+	if (abs(objA1.position.x.u16 - objA0.position.x.u16) > 0x10)
+		return
+	if (abs(objA1.position.y.u16 - objA0.position.y.u16) > 0x10)
+		return
+//	if (D0.u16 < objA1.position.x.u16)
+//		return
+//	if (D1.u16 > objA1.position.x.u16)
+//		return
+//	if (D2.u16 < objA1.position.y.u16)
+//		return
+//	if (D3.u16 > objA1.position.y.u16)
+//		return
+
+//	u16 backupD0 = D0.u16
+	Booster.GiveBoost()
+//	D0.u16 = backupD0
+}
+
+function void Booster.GiveBoost()
+{
+	// Boosts the character in A1.
+	// We make a change from Sonic 2: give a boost if slower than the booster speed, not if slower than 0x1000.
+	// (Boost given if going opposite direction of booster, of course.)
+
+	// Use a countdown to track if the sound of the booster can play again
+	if (!u16[A0 + 0x30])
+	{
+		playSound(SFX_SPRING)
+		u16[A0 + 0x30] = 15		// set a timer to 15 frames to avoid playing the booster sound every frame
+	}
+
+	// Make corrections for Knuckles glide-sliding into a booster
+	if ((isMainCharacter(CHARACTER_KNUCKLES) && objA1.animation.sprite == 0xcc)) 	// exclude the Knuckles gliding skid from counting as "in air"
+	{
+		u32 backupA0 = A0
+		A0 = A1
+		s16 dy = s8(char.hitbox_extends.y - char.hitbox.default.y)
+		char.position.y.u16 += global.inv_gravity ? -dy : dy
+		Character.LandingOnGroundNoSpindash()
+		char.hlock_countdown = 15
+		char.state = char.state.RUNNING
+		char.animation.sprite = 0x24
+		A0 = backupA0
+	}
+
+	D0.u16 = abs(objA1.velocity.x)	// (objA0.flags2a & 0x01) ? objA1.velocity.x : -objA1.velocity.x	// check boost direction to determine how to check character speed
+	bool boosterAimsLeft = (objA0.flags2a & 0x01) ? true : false
+	if (booster.boost_speed > D0.u16 || (boosterAimsLeft && objA1.velocity.x > 0) || (!boosterAimsLeft && objA1.velocity.x < 0))	// no need to check for 0, as the speed case covers it
+	{
+		objA1.velocity.x = (objA0.flags2a & 0x01) ? -booster.boost_speed : booster.boost_speed		// set speed as left or right
+		objA1.flags2a = (objA0.flags2a & 0x01) ? (objA1.flags2a | 0x01) : (objA1.flags2a & 0xfe)	// set or remove character facing left flag if needed
+		objA1.groundspeed = objA1.velocity.x	// called inertia in disassemblies
+		objA0.flags2a &= 0x9f	// clear bits 5 and 6 for the booster (set if an object has a player character or sidekick Tails pushing against it)
+		objA1.flags2a &= 0xdf	// clear bit 5 for the boosted character (set if the character is pushing an object)
+	}
+}

@@ -1,0 +1,44 @@
+{
+//	"cpz_background":  { "File": "cpz_background.bmp"},
+
+	"cpz_background_high":  { "File": "cpz_background.bmp", "Rect": "0,0,1536,288"},		// lines 0 through 287
+
+	"cpz_background_water_line288":  { "File": "cpz_background.bmp", "Rect": "0,288,1536,1"},		// line 288
+	"cpz_background_water_line289":  { "File": "cpz_background.bmp", "Rect": "0,289,1536,1"},		// line 289
+	"cpz_background_water_line290":  { "File": "cpz_background.bmp", "Rect": "0,290,1536,1"},		// line 290
+	"cpz_background_water_line291":  { "File": "cpz_background.bmp", "Rect": "0,291,1536,1"},		// line 291
+	"cpz_background_water_line292":  { "File": "cpz_background.bmp", "Rect": "0,292,1536,1"},		// line 292
+	"cpz_background_water_line293":  { "File": "cpz_background.bmp", "Rect": "0,293,1536,1"},		// line 293
+	"cpz_background_water_line294":  { "File": "cpz_background.bmp", "Rect": "0,294,1536,1"},		// line 294
+	"cpz_background_water_line295":  { "File": "cpz_background.bmp", "Rect": "0,295,1536,1"},		// line 295
+	"cpz_background_water_line296":  { "File": "cpz_background.bmp", "Rect": "0,296,1536,1"},		// line 296
+	"cpz_background_water_line297":  { "File": "cpz_background.bmp", "Rect": "0,297,1536,1"},		// line 297
+	"cpz_background_water_line298":  { "File": "cpz_background.bmp", "Rect": "0,298,1536,1"},		// line 298
+	"cpz_background_water_line299":  { "File": "cpz_background.bmp", "Rect": "0,299,1536,1"},		// line 299
+	"cpz_background_water_line300":  { "File": "cpz_background.bmp", "Rect": "0,300,1536,1"},		// line 300
+
+	"cpz_background_low":  { "File": "cpz_background.bmp", "Rect": "0,301,1536,595"},		// lines 301 through 895. 301 through 303 are non-rippling water.
+
+	"cpz_background_transparencyfix":  { "File": "cpz_background_transparencyfix.bmp"},		// Transparent colors are not showing properly underwater when water only partially fills the screen.
+																							// To circumvent this bug, we use the same color in a different palette entry behind the background.
+
+	"cpz_background_anim_0":  { "File": "cpz_background_anim.bmp", "Rect": "0,8,32,48"},
+	"cpz_background_anim_1":  { "File": "cpz_background_anim.bmp", "Rect": "0,7,32,48"},
+	"cpz_background_anim_2":  { "File": "cpz_background_anim.bmp", "Rect": "0,6,32,48"},
+	"cpz_background_anim_3":  { "File": "cpz_background_anim.bmp", "Rect": "0,5,32,48"},
+	"cpz_background_anim_4":  { "File": "cpz_background_anim.bmp", "Rect": "0,4,32,48"},
+	"cpz_background_anim_5":  { "File": "cpz_background_anim.bmp", "Rect": "0,3,32,48"},
+	"cpz_background_anim_6":  { "File": "cpz_background_anim.bmp", "Rect": "0,2,32,48"},
+	"cpz_background_anim_7":  { "File": "cpz_background_anim.bmp", "Rect": "0,1,32,48"}
+/*
+	// Sonic 2 Ricky
+	"s2_ricky_00": { "File": "s2_ricky.bmp", "Rect":  "0,0,22,15", "Center": "10,7" },
+	"s2_ricky_01": { "File": "s2_ricky.bmp", "Rect":  "22,0,24,16", "Center": "12,8" },
+	"s2_ricky_02": { "File": "s2_ricky.bmp", "Rect":  "46,0,15,24", "Center": "7,8" },
+
+	// Sonic 2 Flicky
+	"s2_flicky_00": { "File": "s2_flicky.bmp", "Rect":  "0,0,16,15", "Center": "8,7" },
+	"s2_flicky_01": { "File": "s2_flicky.bmp", "Rect":  "16,0,16,15", "Center": "8,8" },
+	"s2_flicky_02": { "File": "s2_flicky.bmp", "Rect":  "32,0,15,21", "Center": "8,5" },
+*/
+}

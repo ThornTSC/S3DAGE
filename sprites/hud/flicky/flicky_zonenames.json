@@ -22,7 +22,8 @@
     "flicky_titlecard_zone13":  { "File": "flicky_zonenames.png", "Rect": " 0,208,208,16", "Center": "56,-8" },
     "flicky_titlecard_bonus":   { "File": "flicky_zonenames.png", "Rect": " 0,224, 80,16", "Center": "0,0" },
     "flicky_titlecard_stage":   { "File": "flicky_zonenames.png", "Rect": "96,224, 80,16", "Center": "0,0" },
-    "flicky_titlecard_unlock0001":     { "File": "flicky_zonenames.png", "Rect": " 0,256,192,16", "Center": "40,-8" }
+    "flicky_titlecard_unlock0001":     { "File": "flicky_zonenames.png", "Rect": " 0,256,192,16", "Center": "40,-8" },
+    "flicky_titlecard_unlock0002":     { "File": "flicky_zonenames.png", "Rect": " 0,272,224,16", "Center": "72,-8" }
 
     // Same as above, but with proper centers rather than centers meant for title card alignment.
     // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.

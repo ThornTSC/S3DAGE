@@ -199,8 +199,8 @@ function void Coconuts.CreateCoconut()
 
 		playSound(SFX_BOMBFALL)
 
-//		A2 = 0x037d2a		// routine used to move coconut projectile. Used in Sonic2.Projectile.Main()
-//		u32[A1 + 0x2a] = A2
+//		A2 = 0x037d2a			// This line and the next can be used to set the movement routine a projectile uses.
+		u32[A1 + 0x30] = 0x9d	// It's usually at objoff_2A in Sonic 2.
 	}
 }
 
@@ -216,6 +216,14 @@ function void Sonic2.Projectile()	// called LoadSubObject in S2 disassembly
 //# address-hook(0x037d26)
 function void Sonic2.Projectile.Init()	// usually in LoadSubObject
 {
+	if (u32[A0 + 0x30] == 0x9d)	// Emerald Hill Zone
+		Coconuts.Projectile.Init()			// other projectiles need other function calls
+	else if (u32[A0 + 0x30] == 0xa5)
+		Spiny.Projectile.Init()
+}
+
+function void Coconuts.Projectile.Init()
+{
 	objA0.mapping_offset = 0x8802d2
 	objA0.sprite_attributes = 0x03ee
 	objA0.render_flags = 0x84
@@ -223,6 +231,19 @@ function void Sonic2.Projectile.Init()	// usually in LoadSubObject
 	objA0.box_size.x = 0x08
 	objA0.box_size.y = 0x08
 	objA0.collision_attributes = 0x8b
+	objA0.flags2b |= char.bonus.DEFLECTABLE	// allow projectile to be deflected by insta shield
+	objA0.base_state += 2
+}
+
+function void Spiny.Projectile.Init()
+{
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50
+	objA0.sprite_attributes = 0x252d
+	objA0.render_flags = 0x84
+	objA0.sprite_priority = 0x0280
+	objA0.box_size.x = 0x04
+	objA0.box_size.y = 0x04
+	objA0.collision_attributes = 0x98
 	objA0.flags2b |= char.bonus.DEFLECTABLE	// allow projectile to be deflected by insta shield
 	objA0.base_state += 2
 }
@@ -236,7 +257,11 @@ function void Sonic2.Projectile.Main()	// usually in LoadSubObject
 		UnloadObject()
 		return
 	}
-	Coconuts.Projectile.Move()			// other projectiles need other function calls
+	if (u32[A0 + 0x30] == 0x9d)	// Emerald Hill Zone
+		Coconuts.Projectile.Move()			// other projectiles need other function calls
+	else if (u32[A0 + 0x30] == 0xa5)
+		Spiny.Projectile.Move()
+
 	Enemy.DrawOrUnload()
 }
 
@@ -245,4 +270,15 @@ function void Coconuts.Projectile.Move()	// usually in LoadSubObject
 {
 	objA0.velocity.y += 0x20
 	UpdateMovementStraightSimple()
+}
+
+
+function void Spiny.Projectile.Move()	// usually in LoadSubObject
+{
+	objA0.velocity.y += 0x20
+	UpdateMovementStraightSimple()
+
+	System.loadExternalRawData("spiny_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)	// 0x12 bytes containing three scripts: horizontal Spiny, vertical Spiny, projectile
+	A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x0c		// third of three Spiny animation scripts, each 0x06 long
+	Object.AnimationUpdate()
 }

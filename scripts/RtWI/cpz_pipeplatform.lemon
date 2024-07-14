@@ -1,0 +1,92 @@
+define pipeplatform.duration_current = u16[A0 + 0x30]
+define pipeplatform.duration_initial = u16[A0 + 0x32]
+define pipeplatform.delay = u8[A0 + 0x36]
+
+//# address-hook(0x02536c)
+function void PipePlatform.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		PipePlatform.Init()
+	else // if (objA0.base_state == 2 || objA0.base_state == 4)	// not how this works in Sonic 2 but we're working within Lemonizer limitations
+		PipePlatform.Main()
+}
+
+// loc_200B0
+function void PipePlatform.Init()
+{
+	objA0.base_state = 0x02		// uses addition in Sonic 2, but states move in a predictable fashion and this is needed for jumps
+	objA0.mapping_offset =	s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64
+	objA0.sprite_attributes = 0xe3b0
+	objA0.render_flags |= 0x04
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10		// added to help with pop in/out issues
+	objA0.sprite_priority = 0x0200
+	D0 = objA0.subtype2c
+	D0.u16 &= 0xf0
+	D0.u16 += 0x10
+	D1.u16 = D0.u16
+	--D0.u16
+	pipeplatform.duration_current = D0.u16
+	pipeplatform.duration_initial = D0.u16
+	D0 = objA0.subtype2c
+	D0.u16 &= 0x0f
+	++D0.u16
+	D0.u16 <<= 4
+	pipeplatform.delay = D0.u8
+	PipePlatform.Main()
+}
+
+// loc_20104
+function void PipePlatform.Main()
+{
+	if (objA0.base_state != 0x04)
+		D0.u8 = level.framecounter.low + pipeplatform.delay		// this is usually global.framecounter.low, but we use level.framecounter.low to remove randomness
+	if (D0.u8 == 0 || objA0.base_state == 0x04)
+	{
+		objA0.base_state = 0x04
+		// loc_20112
+		--pipeplatform.duration_current
+		if (s16[A0 + 0x30] < 0)	// pipeplatform.duration_current, usually addressed unsigned, has become negative if signed
+		{
+			pipeplatform.duration_current = 0x7f
+			if (objA0.state != 0)
+			{
+				pipeplatform.duration_current = pipeplatform.duration_initial
+			}
+			objA0.state ^= 0x01
+		}
+		// loc_20130
+		A1 = 0x890000
+		System.loadExternalRawData("cpz_yellowplat_animation", A1)
+		Object.AnimationUpdate()	// in objects\shared.lemon, address hook 0x01abe8. Can also give an address as an input to have it placed in A1 automatically.
+	}
+	// loc_2013C
+	if (objA0.animation.sprite == 0)
+	{
+		D1 = objA0.box_size.x
+		D3 = 0x11
+		D4.u16 = objA0.position.x.u16
+		PlatformCheckClimbOn()
+		DrawOrUnloadObject()
+		return
+	}
+	D0.u8 = objA0.flags2a & 0x18
+	if (D0.u8 != 0)
+	{
+		if (objA0.flags2a & 0x08)
+		{
+			objA0.flags2a &= ~0x08
+			// set status/flags2a for player character
+			u8[0xffffb000 + 0x2a] &= ~0x08
+			u8[0xffffb000 + 0x2a] |= 0x02
+		}
+		if (objA0.flags2a & 0x10)
+		{
+			objA0.flags2a &= ~0x10
+			// set status/flags2a for sidekick character
+			u8[0xffffb04a + 0x2a] &= ~0x08
+			u8[0xffffb04a + 0x2a] |= 0x02
+		}
+	}
+	DrawOrUnloadObject()
+}

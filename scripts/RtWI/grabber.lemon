@@ -1,0 +1,561 @@
+define objA0.collision_property	=  u8[A0 + 0x29]
+define objA0.s2objoff2a.u16 = u16[A0 + 0x42]
+define objA0.s2objoff2a.u8  =  u8[A0 + 0x42]
+define objA0.s2objoff2a.s16 = s16[A0 + 0x42]
+define objA0.s2objoff2b.u8  =  u8[A0 + 0x43]
+define objA0.s2objoff2c.u16 = u16[A0 + 0x44]
+define objA1.s2objoff2c.u16 = u16[A1 + 0x44]
+define objA0.s2objoff2c.s8  =  s8[A0 + 0x44]
+define objA0.s2objoff2d.u8  =  u8[A0 + 0x45]
+define objA0.s2objoff2e.u16 = u16[A0 + 0x2e]
+define objA0.s2objoff30.u8  =  u8[A0 + 0x30]
+define objA1.s2objoff30.u8  =  u8[A1 + 0x30]
+define objA0.s2objoff32.u16 = u16[A0 + 0x32]
+define objA1.s2objoff32.u16 = u16[A1 + 0x32]
+define objA0.s2objoff34.u16 = u16[A0 + 0x34]
+define objA1.s2objoff34.u16 = u16[A1 + 0x34]
+define objA0.s2routine_secondary = u8[A0 + 0x46]
+define objA1.s2routine_secondary = u8[A1 + 0x46]
+
+define charA1.spindash = u8[A1 + 0x3d]
+
+
+//# address-hook(0x038dba) end(0x038dc4)
+function void Grabber.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Grabber.Init()
+	else // if (objA0.base_state == 2)
+		Grabber.Main()
+
+	if (u8[0xffffb020] == 0x0e) // if character is using animation from being grabbed
+	{
+		if (level.framecounter.low & 0x08)	// display alternating left and right inputs
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		else
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+	}
+}
+
+
+function void Grabber.Init()
+{
+	// call 0x0365f4	// LoadSubObject. We should set these values directly.
+	// This function does not actually flow into the Main function, and the base state for that is set in LoadSubObject.
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc
+	objA0.sprite_attributes = 0xa500
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = 0x20	// upped from 0x10
+	objA0.box_size.y = 0x18
+	objA0.collision_attributes = 0x0b
+	objA0.base_state += 2
+
+	D0.s16 = -0x0040
+	if (objA0.render_flags & 0x01)
+	{
+		D0.s16 = -D0.s16
+	}
+	objA0.velocity.x = D0.s16
+	objA0.s2objoff2a.u16 = 0xff
+	objA0.s2objoff2d.u8 = 0x02
+	S2.LoadChildObject(0x003e, 0x039032, 0x3a)	// objA9, GrabberStringBox
+	S2.LoadChildObject(0x003c, 0x038f66, 0x38)	// objA8, GrabberLegs
+	S2.LoadChildObject(0x003a, 0x039066, 0x3c)	// objAA, GrabberString
+}
+
+
+function void Grabber.Main()
+{
+	if (objA0.s2routine_secondary == 0)
+		fn038e52()
+	else if (objA0.s2routine_secondary == 2)
+		fn038e9a()
+	else if (objA0.s2routine_secondary == 4)
+		fn038eb4()
+	else if (objA0.s2routine_secondary == 6)
+		fn038f3e()
+	else if (objA0.s2routine_secondary == 8)
+		fn038f58()
+	else // if (objA0.s2routine_secondary == 0x0a)
+		Grabber.CheckExplode()
+
+	UpdateMovementStraightSimple()	// ObjectMove
+	D0 = 0
+	D1 = 0x10
+	A1 = 0xffff0000 + u16[A0 + 0x3c]
+	S2.AlignChildXY()
+	A1 = 0xffff0000 + u16[A0 + 0x3e]
+	objA1.position.x.u16 = objA0.position.x.u16
+	A1 = 0xffff0000 + u16[A0 + 0x3a]
+	objA1.position.x.u16 = objA0.position.x.u16
+	A2 = A0 + 0x3a
+	fn039182()
+}
+
+
+function void fn038e52()
+{
+	CheckDistanceToPlayers()		// Obj_GetOrientationToPlayer
+	D2.u16 += 0x40
+	if (D2.u16 < 0x80)
+	{
+		if (D3.s16 > -0x0080)
+		{
+			fn038e84()
+			return
+		}
+	}
+	--objA0.s2objoff2a.u16
+	if (objA0.s2objoff2a.s16 < 0)
+	{
+		objA0.s2objoff2a.u16 = 0xff
+		objA0.velocity.x = -objA0.velocity.x
+		objA0.render_flags ^= 0x01
+		objA0.flags2a ^= 0x01
+	}
+}
+
+function void fn038e84()
+{
+	objA0.s2routine_secondary += 0x02
+	objA0.s2objoff2e.u16 = objA0.velocity.x
+	objA0.velocity.x = 0
+	objA0.s2objoff2c.s8 = 0x10
+}
+
+
+function void fn038e9a()
+{
+	--objA0.s2objoff2c.s8
+	if (objA0.s2objoff2c.s8 >= 0)
+	{
+		return
+	}
+	objA0.s2routine_secondary += 0x02
+	objA0.velocity.y = 0x0200
+	objA0.s2objoff2c.s8 = 0x40
+}
+
+
+function void fn038eb4()
+{
+	if (objA0.s2objoff30.u8 == 0)
+	{
+		--objA0.s2objoff2c.s8
+		if (objA0.s2objoff2c.s8 != 0)
+		{
+			if (objA0.s2objoff2c.s8 == 0x20)
+			{
+				objA0.velocity.y = -objA0.velocity.y
+			}
+			System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
+			A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12
+			Object.AnimationUpdate()
+			return
+		}
+		objA0.s2routine_secondary = 0
+		objA0.velocity.y = 0
+		objA0.velocity.x = objA0.s2objoff2e.u16
+		objA0.animation.sprite = 0
+		return
+	}
+	// ObjA7_GrabCharacter, loc_38EEE
+	objA0.s2routine_secondary += 0x02
+	A1 = 0xffff0000 + objA0.s2objoff32.u16
+	objA1.flags2e = 0x81
+	objA1.velocity.x = 0
+	objA1.velocity.y = 0
+	objA1.state = 0x0e
+	charA1.spindash = 0	// line added to fix being stuck in spin dash when grabbed in base Sonic 2
+	objA0.animation.sprite = 0x01
+	if (objA0.velocity.y >= 0)
+	{
+		objA0.velocity.y = -objA0.velocity.y
+		D0.u8 = objA0.s2objoff2c.s8 - 0x40
+		D0.s16 = -D0.s16
+		++D0.u8
+		objA0.s2objoff2c.s8 = D0.u8
+	}
+	objA0.s2objoff2a.u8 = 0x01
+	objA0.s2objoff2b.u8 = 0x10
+	u8[A0 + 0x37] = 0x20
+}
+
+
+function void fn038f3e()
+{
+	Grabber.CheckExplode()
+	fn0390bc()
+	--objA0.s2objoff2c.s8
+	if (objA0.s2objoff2c.s8 != 0)
+	{
+		return
+	}
+	objA0.s2routine_secondary += 0x02
+	objA0.velocity.y = 0
+}
+
+
+function void fn038f58()
+{
+	Grabber.CheckExplode()
+	fn0390bc()
+}
+
+
+//# address-hook(0x038f66) end(0x038f70)
+function void GrabberLegs.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		GrabberLegs.Init()
+	else if (objA0.base_state == 2)
+		fn038f88()
+	else if (objA0.base_state == 4)
+		fn038fe8()
+	else // if (objA0.base_state == 6)
+		fn039022()
+}
+
+
+function void GrabberLegs.Init()
+{
+	// call 0x0365f4	// LoadSubObject. We should set these values directly.
+	// This function does not actually flow into the Main function, and the base state for that is set in LoadSubObject.
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc
+	objA0.sprite_attributes = 0xa500
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0080
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x18
+	objA0.collision_attributes = 0xd7
+	objA0.base_state += 2
+
+	objA0.animation.sprite = 0x03
+}
+
+
+function void fn038f88()
+{
+	constant array<u16> word_38fdc = 
+	{
+		0xb000,	// player character
+		0xb04a,	// sidekick character
+		0xb000,	// player character
+		0xf604,	// first controller held buttons
+		0xf606,	// second controller held buttons
+		0xf604	// first controller held buttons
+	}
+
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	if (objA1.update_address != 0x038dba)	// if this object isn't the core Grabber object
+	{
+		UnloadObject()
+		return
+	}
+	S2.InheritParentXYFlip()
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	D0.u8 = objA1.animation.sprite + 0x03
+	objA0.animation.sprite = D0.u8
+	D0.u8 = objA0.collision_property
+	if (D0.u8 != 0)
+	{
+		objA0.collision_property = 0
+		if (objA1.s2routine_secondary == 0x04)
+		{
+			D0.u8 &= 0x03
+			if (D0.u8 != 0)
+			{
+				objA0.collision_attributes = 0
+				objA0.base_state += 0x02
+			//	D0.u16 *= 2
+				objA1.s2objoff30.u8 = 0xff
+				objA1.s2objoff32.u16 = word_38fdc[D0.u8 - 1]	// D0.u8 cannot be 0 here, so this will not underflow
+				objA1.s2objoff34.u16 = word_38fdc[D0.u8 + 2]
+			}
+		}
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+function void fn038fe8()
+{
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	D0.u16 = objA1.s2objoff32.u16
+	if (D0.u16 != 0)
+	{
+		A2 = 0xffff0000 + D0.u16
+		if (objA1.update_address == 0x038dba)	// if this object is the core Grabber object
+		{
+			u16[A2 + 0x10] = objA0.position.x.u16		// correctly set to S3&K OST locations;
+			u16[A2 + 0x14] = objA0.position.y.u16		// defines for objects in A2 do not exist
+			Enemy.DrawOrUnload()
+			return
+		}
+		u8[A2 + 0x2e] = 0				// correctly set to S3&K OST locations;
+		u8[A2 + 0x2a] |= 0x02			// defines for objects in A2 do not exist
+		UnloadObject()
+		return
+	}
+	objA0.base_state += 0x02
+	Enemy.DrawOrUnload()
+}
+
+
+function void fn039022()
+{
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	if (objA1.update_address != 0x038dba)	// if this object isn't the core Grabber object
+	{
+		UnloadObject()
+		return
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x039032) end(0x03903c)
+function void GrabberStringBox.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		GrabberStringBox.Init()
+	else	// if (objA0.base_state == 2)
+		GrabberStringBox.Main()
+}
+
+
+function void GrabberStringBox.Init()
+{
+	// call 0x0365f4	// LoadSubObject. We should set these values directly.
+	// This function does not actually flow into the Main function, and the base state for that is set in LoadSubObject.
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc
+	objA0.sprite_attributes = 0xa500
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = 0x04
+	objA0.box_size.y = 0x18
+	objA0.collision_attributes = 0x00
+	objA0.base_state += 2
+
+	objA0.animation.sprite = 0x02
+	objA0.position.y.u16 -= 0x0c
+}
+
+
+function void GrabberStringBox.Main()
+{
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	if (objA1.update_address != 0x038dba)	// if this object isn't the core Grabber object
+	{
+		UnloadObject()
+		return
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x039066) end(0x039070)
+function void GrabberString.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		GrabberString.Init()
+	else	// if (objA0.base_state == 2)
+		GrabberString.Main()
+}
+
+
+function void GrabberString.Init()
+{
+	// call 0x0365f4	// LoadSubObject. We should set these values directly.
+	// This function does not actually flow into the Main function, and the base state for that is set in LoadSubObject.
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20 + 0x50 + 0xbc
+	objA0.sprite_attributes = 0xa500
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0280
+	objA0.box_size.x = 0x04
+	objA0.box_size.y = 0x30
+	objA0.collision_attributes = 0x00
+	objA0.base_state += 2
+
+	objA0.position.y.u16 -= 0x08
+}
+
+
+function void GrabberString.Main()
+{
+	A1 = 0xffff0000 + objA0.s2objoff2c.u16
+	if (objA1.update_address != 0x038dba)	// if this object isn't the core Grabber object
+	{
+		UnloadObject()
+		return
+	}
+	D0.u16 = objA1.position.y.u16 - objA0.position.y.u16
+	if (D0.s16 >= 0)
+	{
+		D0.u16 >>= 4
+		objA0.animation.sprite = D0.u8 + 7		// + 7 added to avoid "split" mappings in base Sonic 2
+	}
+	Enemy.DrawOrUnload()
+}
+
+
+function void fn0390bc()
+{
+	A1 = 0xffff0000 + objA0.s2objoff34.u16
+	D0.u16 = u16[A1]
+	if (u8[A0 + 0x31] != 0)
+	{
+		--u8[A0 + 0x37]
+		if (u8[A0 + 0x37] == 0)
+		{
+			fn0390fa()
+			return
+		}
+		D1.u8 = u8[A0 + 0x36]
+		D0.u8 &= 0x0c
+		if (D0.u8 != 0)
+		{
+			if (D0.u8 != D1.u8)
+			{
+				u8[A0 + 0x36] = D0.u8
+				++u8[A0 + 0x38]
+			}
+		}
+		return
+	}
+	D0.u8 &= 0x0c
+	if (D0.u8 == 0)
+	{
+		return
+	}
+	u8[A0 + 0x31] = 0xff
+	u8[A0 + 0x36] = D0.u8
+	return
+}
+
+function void fn0390fa()
+{
+	if (u8[A0 + 0x38] >= 0x04)
+	{
+		objA0.s2routine_secondary = 0x0a
+		objA0.velocity.y = 0
+		objA0.collision_attributes = 0
+		A2 = 0xffff0000 + objA0.s2objoff32.u16
+		u8[A2 + 0x2e] = 0				// correctly set
+		u8[A2 + 0x2a] |= 0x02			// correctly set
+		u8[A2 + 0x20] = 0				// correctly set
+		objA0.s2objoff32.u16 = 0
+	}
+	u8[A0 + 0x37] = 0x20
+	u8[A0 + 0x31] = 0
+	u8[A0 + 0x38] = 0
+}
+
+
+function void Grabber.CheckExplode()
+{
+	--objA0.s2objoff2a.u8
+	if (objA0.s2objoff2a.u8 == 0)
+	{
+		objA0.s2objoff2a.u8 = objA0.s2objoff2b.u8
+		--objA0.s2objoff2b.u8
+		if (objA0.s2objoff2b.u8 == 0)
+		{
+			Grabber.Explode()
+			return
+		}
+		u8[A0 + 0x0a] ^= 0x20		// correctly set as the upper byte of objA0.sprite_attributes
+	}
+}
+
+function void Grabber.Explode()	// ObjA7_Poof
+{
+	objA0.update_address = 0x01e5e0					// load explosion
+	objA0.base_state = 0x02
+	u8[A0 + 0x0a] |= 0x20			// correctly set (upper byte of objA0.sprite_attributes)
+	D0.u16 = objA0.s2objoff32.u16
+	if (D0.u16 != 0)
+	{
+		A2 = 0xffff0000 + D0.u16
+		u8[A2 + 0x2e] = 0				// correctly set
+		u8[A2 + 0x2a] |= 0x02			// correctly set
+		objA0.collision_attributes = 0x0b
+	}
+}
+
+
+function void fn039182()
+{
+//	if (u16[0xffffffd8] != 0)	// test two-player mode
+//	{
+		Enemy.DrawOrUnload()
+		return
+//	}
+/*
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= 0x0280)
+	{
+		DrawObject() // Enemy.DrawOrUnload()
+		return
+	}
+//	A3 = 0xfffffc00
+	D0.u16 = objA0.respawn_entry
+	if (D0.u16 != 0)
+	{
+		u8[0xffff0000 + D0.u16] &= ~0x80
+	}
+	if (objA0.s2objoff30.u8 != 0)
+	{
+		A3 = 0xffff0000 + objA0.s2objoff32.u16
+		u8[A3 + 0x2e] = 0				// correctly set
+		u8[A3 + 0x2a] |= 0x02			// correctly set
+	}
+	D6 = objA0.s2objoff2d.u8
+	while (true)
+	{
+		A1 = 0xffff0000 + u16[(A2+=2)-2]
+		UnloadObject()
+		--D6.s16
+		if (D6.s16 < 0)
+			break
+	}
+	UnloadObject()
+*/
+}
+
+//# address-hook(0x036760) end(0x036774)
+function void S2.AlignChildXY()
+{
+	D2.u16 = objA0.position.x.u16 + D0.u16
+	objA1.position.x.u16 = D2.u16
+	D3.u16 = objA0.position.y.u16 + D1.u16
+	objA1.position.y.u16 = D3.u16
+}
+
+//# address-hook(0x0367aa) end(0x0367ce)
+function void S2.InheritParentXYFlip()
+{
+	D0.u8 = objA0.render_flags & 0xfc
+	D2.u8 = objA0.flags2a & 0xfc
+	D1.u8 = objA1.render_flags & 0x03
+	D0.u8 |= D1.u8
+	D2.u8 |= D1.u8
+	objA0.render_flags = D0.u8
+	objA0.flags2a = D2.u8
+}
+
+//# address-hook(0x0367d0) end(0x0367f6)
+function void S2.LoadChildObject(u16 parentToChildOffset, u32 childObjectAddress, u8 childSubtype)
+{
+	if (allocDynamicObjectStd())
+	{
+		D0.u16 = parentToChildOffset
+		u16[A0 + D0.s16] = A1.u16
+		objA1.update_address = childObjectAddress
+		objA1.subtype2c = childSubtype
+		objA1.s2objoff2c.u16 = A0.u16	// for the Grabber, we stored the childToParentOffset in offset 0x44
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+	}
+}

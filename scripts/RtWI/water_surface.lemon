@@ -1,0 +1,123 @@
+//# address-hook(0x0208dc) end(0x0208e6)
+function void WaterSurface.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		WaterSurface.Init()
+	else if (objA0.base_state == 2)
+		WaterSurface.Action()
+	else // if (objA0.base_state == 4)
+		WaterSurface.Action2()
+}
+
+
+//# address-hook(0x0208f0) end(0x02097e)
+function void WaterSurface.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x1000		// mappings offset for Chemical Plant Zone / Hidden Palace Zone
+	objA0.sprite_attributes = 0x8400
+	objA0.render_flags = 0x04 + render_flag.COMPOUND
+	objA0.box_size.x = 0x80
+	objA0.box_size.y = 0x20
+	u16[A0 + 0x30] = objA0.position.x.u16
+	if (unlock_act == 3)		// Aquatic Ruin Zone
+	{
+		objA0.base_state += 0x02
+		objA0.mapping_offset = s2_mappings_address + 0x1000	// ARZ mappings offset
+		WaterSurface.Action2()
+		return
+	}
+	WaterSurface.Action()
+}
+
+function void WaterSurface.Action()
+{
+	objA0.position.x.u16 = (camera.position.x.u16 & 0xffe0) + 0x60
+	D1.u16 = water.height.current
+	objA0.position.y.u16 = D1.u16
+	if (u8[A0 + 0x32] == 0)
+	{
+		if ((control.pad1.pressed & 0x80) == 0)
+		{
+			fn020962()
+			return
+		}
+		if (objA0.animation.sprite < 3 && palette_set < 2)
+			objA0.animation.sprite += 0x03	// non-Revisited visuals only show the full sprite on pause
+		u8[A0 + 0x32] = 0x01
+	}
+	else
+	{
+		if (global.game.paused == 0)
+		{
+			u8[A0 + 0x32] = 0
+			if (objA0.animation.sprite < 3 && palette_set < 2)
+				objA0.animation.sprite -= 0x03	// non-Revisited visuals revert to half sprites upon unpausing
+		}
+	}
+	DrawObject()
+}
+
+function void fn020962()
+{
+	constant array<u8> Anim_obj04 = 
+	{
+		0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
+		1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,
+		2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,
+		1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
+	}
+	D1 = objA0.animation.frame
+	objA0.animation.sprite = Anim_obj04[D1.s16]
+	if (palette_set >= 2)
+		objA0.animation.sprite += 3		// we can draw the full surface in A.I.R.
+	++objA0.animation.frame
+	objA0.animation.frame &= 0x3f
+	DrawObject()
+}
+
+
+//# address-hook(0x0209c2) end(0x020a0a)
+function void WaterSurface.Action2()
+{
+	objA0.position.x.u16 = (camera.position.x.u16 & 0xffe0) + 0x60
+	D1.u16 = water.height.current
+	objA0.position.y.u16 = D1.u16
+	if (u8[A0 + 0x32] == 0)
+	{
+		if ((control.pad1.pressed & 0x80) == 0)
+		{
+			fn0209f4()
+			return
+		}
+		objA0.animation.sprite += 0x02
+		u8[A0 + 0x32] = 0x01
+		DrawObject()
+	}
+	else
+	{
+		if (global.game.paused == 0)
+		{
+			u8[A0 + 0x32] = 0
+			objA0.animation.sprite -= 0x02
+			--objA0.animation.timer
+			fn0209f4()
+		}
+		else
+		{
+			DrawObject()
+		}
+	}
+}
+
+function void fn0209f4()
+{
+	--objA0.animation.timer
+	if (objA0.animation.timer > 0x7f)	// underflowed timer (define for it is unsigned)
+	{
+		objA0.animation.timer = 0x05
+		++objA0.animation.sprite
+		objA0.animation.sprite &= 0x01
+	}
+	DrawObject()
+}

@@ -1,0 +1,277 @@
+define cpzplatform.position.center.x = u16[A0 + 0x30]
+define cpzplatform.position.center.y = u16[A0 + 0x34]	// 0x32 in Sonic 2. Changed to S3&K convention.
+
+//# address-hook(0x022018)
+function void CPZPlatform.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		CPZPlatform.Init()
+	else // if (objA0.base_state == 2)
+		CPZPlatform.Main()
+}
+
+
+function void CPZPlatform.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a
+	objA0.sprite_attributes = 0x63a0 
+	if (unlock_act == 7)	// Oil Ocean Zone
+	{
+		objA0.sprite_attributes = 0x62f4
+	}
+	else if (unlock_act == 10)	// Wing Fortress Zone
+	{
+		objA0.sprite_attributes = 0xa46d
+	}
+	objA0.render_flags = 0x04
+
+	constant array<u8> obj19.InitData = 
+	{
+		0x20, 0,	// objA0.box_size.x, objA0.animation.sprite
+		0x18, 1,
+		0x40, 2,
+		0x20, 3
+	}
+
+	D0 = objA0.subtype2c
+	D0.u16 >>= 3
+	D0.u16 &= 0x1e
+	objA0.box_size.x = obj19.InitData[D0.u16]
+	objA0.animation.sprite = obj19.InitData[D0.u16 + 1]
+	objA0.box_size.y = 0x10
+	objA0.sprite_priority = 0x0200
+	cpzplatform.position.center.x = objA0.position.x.u16
+	cpzplatform.position.center.y = objA0.position.y.u16
+	objA0.subtype2c &= 0x0f
+	if (objA0.subtype2c == 0x03)
+	{
+		if (objA0.flags2a & 0x01)
+		{
+			// Copy of loc_220B2 from below, done to aid code flow
+			objA0.position.y.u16 -= 0xc0
+			CPZPlatform.Main()
+		}
+	}
+	fn0220aa()
+}
+
+// loc_220AA
+function void fn0220aa()
+{
+	if (objA0.subtype2c == 0x07)
+	{
+		// loc_220B2
+		objA0.position.y.u16 -= 0xc0
+	}
+	CPZPlatform.Main()
+}
+
+function void CPZPlatform.Main()
+{
+	// Obj19_Main, loc_220B8
+	u16 objA0.position.x.beforeMove = objA0.position.x.u16
+	CPZPlatform.Move()
+	D1 = objA0.box_size.x
+	D3.u16 = 0x11
+	D4.u16 = objA0.position.x.beforeMove
+	PlatformCheckClimbOn()
+	D0.u16 = (cpzplatform.position.center.x & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= 0x0280)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+
+function void CPZPlatform.Move()
+{
+	D0 = objA0.subtype2c
+	D0.u16 &= 0x0f
+//	D0.u16 *= 2
+//	D1.u16 = u16[0x0220fc + D0.s16]
+//	call 0x0220fc + D1.s16
+	if (D0.u16 == 0)
+		fn02211c()
+	else if (D0.u16 == 1)
+		fn022126()
+	else if (D0.u16 == 2)
+		fn022146()
+	else if (D0.u16 == 3)
+		fn022166()
+	else if (D0.u16 == 4)
+		fn022176()
+	else if (D0.u16 == 6 || D0.u16 == 7)		// D0.u16 == 5 leads to an rts only
+		fn022198()
+	else if (D0.u16 >= 8 && D0.u16 <= 0x0b)
+		fn0221b4()
+	else if (D0.u16 != 5)	// D0.u16 >= 0x0c; cannot exceed 0x0f due to AND before jump
+		fn0221ee()
+}
+
+
+function void fn02211c()
+{
+	D0.u8 = u8[0xfffffe78]
+	D1.u16 = 0x40
+	fn02212e()
+}
+
+
+function void fn022126()
+{
+	D0.u8 = u8[0xfffffe7c]
+	D1.u16 = 0x60
+	fn02212e()
+}
+
+function void fn02212e()
+{
+	if (objA0.flags2a & 0x01)
+	{
+		D0.s16 = -D0.s16
+		D0.u16 += D1.u16
+	}
+	D1.u16 = cpzplatform.position.center.x - D0.u16
+	objA0.position.x.u16 = D1.u16
+}
+
+
+function void fn022146()
+{
+	MovingPlatform.Vertical02.Update()
+	return
+/*
+	D0.u8 = u8[0xfffffe7c]
+	D1.u16 = 0x80
+	if (objA0.flags2a & 0x01)
+	{
+		D0.s16 = -D0.s16
+		D0.u16 += D1.u16
+	}
+	D1.u16 = cpzplatform.position.center.y - D0.u16
+	objA0.position.y.u16 = D1.u16
+*/
+}
+
+
+function void fn022166()
+{
+	D0.u8 = objA0.flags2a & 0x18
+	if (D0.u8 != 0)
+	{
+		++objA0.subtype2c
+	}
+}
+
+
+function void fn022176()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	D1 = 0x08
+	D0.u16 = cpzplatform.position.center.y - 0x60
+	if (D0.u16 < objA0.position.y.u16)
+	{
+		D1.s16 = -D1.s16
+	}
+	objA0.velocity.y += D1.u16
+	if (objA0.velocity.y == 0)
+	{
+		++objA0.subtype2c
+	}
+}
+
+
+function void fn022198()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	D1 = 0x08
+	D0.u16 = cpzplatform.position.center.y - 0x60
+	if (D0.u16 < objA0.position.y.u16)
+	{
+		D1.s16 = -D1.s16
+	}
+	objA0.velocity.y += D1.u16
+}
+
+/*
+function void fn0221b4()	// counterclockwise rotation
+{
+	D1.u8 = u8[0xfffffe98 - 0x08] - 0x40
+	D1.s16 = D1.s8
+	D2.u8 = u8[0xfffffe9c - 0x08] - 0x40
+	D2.s16 = D2.s8
+	if (D0 & 0x00000004)
+	{
+		D1.s16 = -D1.s16
+		D2.s16 = -D2.s16
+	}
+	if (D0 & 0x00000002)
+	{
+		D1.s16 = -D1.s16
+		// exg.32    D2, D1
+		u32 origD1 = D1
+		D1 = D2
+		D2 = origD1
+	}
+	D1.u16 += cpzplatform.position.center.x
+	objA0.position.x.u16 = D1.u16
+	D2.u16 += cpzplatform.position.center.y
+	objA0.position.y.u16 = D2.u16
+}
+*/
+
+function void fn0221b4()	// counterclockwise rotation
+{
+	u32 position = ((level.framecounter + (128 * (objA0.subtype2c - 0x08))) % 512) * 314 / 100		// position in the circle (offset by 128 frames -- a quarter turn -- per subtype increment) ranging from 0 to 511, times pi
+	s32 x_offset = cos_s16(u16(position)) * 31 / 128		// Fraction to find proper scaling is sin or cos output * diameter / 512.
+	s32 y_offset = -sin_s16(u16(position)) * 31 / 128
+	objA0.position.x.u16 = cpzplatform.position.center.x + x_offset
+	objA0.position.y.u16 = cpzplatform.position.center.y + y_offset
+}
+
+function void fn0221ee()	// clockwise rotation
+{
+	u32 position = ((level.framecounter + (128 * (objA0.subtype2c - 0x0c))) % 512) * 314 / 100		// position in the circle (offset by 128 frames -- a quarter turn -- per subtype increment) ranging from 0 to 511, times pi
+	s32 x_offset = cos_s16(u16(position)) * 31 / 128		// Fraction to find proper scaling is sin or cos output * diameter / 512. Chemical Plant uses a diameter of 124 pixels. 124/512 = 31/128.
+	s32 y_offset = sin_s16(u16(position)) * 31 / 128
+	objA0.position.x.u16 = cpzplatform.position.center.x + x_offset
+	objA0.position.y.u16 = cpzplatform.position.center.y + y_offset
+/*
+	D1.u8 = u8[0xfffffe98 - 0x08] - 0x40
+	D1.s16 = D1.s8
+	D2.u8 = u8[0xfffffe9c - 0x08] - 0x40
+	D2.s16 = D2.s8
+	if (D0 & 0x00000004)
+	{
+		D1.s16 = -D1.s16
+		D2.s16 = -D2.s16
+	}
+	if (D0 & 0x00000002 && D0 != 0x0f)	// check for subtype 0x0f not in normal code
+	{
+		D1.s16 = -D1.s16
+		// exg.32    D2, D1
+		u32 origD1 = D1
+		D1 = D2
+		D2 = origD1
+	}
+	if (D0 != 0x0f)
+		D1.s16 = -D1.s16	// normal code
+	else
+		D2.s16 = -D2.s16	// special case added for subtype 0x0f
+	
+	D1.u16 += cpzplatform.position.center.x
+	objA0.position.x.u16 = D1.u16
+	D2.u16 += cpzplatform.position.center.y
+	objA0.position.y.u16 = D2.u16
+*/
+}

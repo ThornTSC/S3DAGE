@@ -36,29 +36,38 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 function u64 Standalone.getModdedSoundKey.unlockAct(u64 soundKey, u8 sfxId, u8 soundRegType)
 {
     // Fast music tracks do not need to be called separately
-    if (sfxId == 0x05)
-        soundKey = (setting.ehz_music) ? "ehz2" : "ehz1"
-    else if (sfxId == 0x19)
+    if (sfxId == MUSIC_MGZ1)						// 0x05
+	{
+		if (unlock_act == 1)
+        	soundKey = (setting.ehz_music) ? "ehz2" : "ehz1"
+		else if (unlock_act == 2)
+			soundKey = "cpz"
+	}
+    else if (sfxId == MUSIC_MAINBOSS)				// 0x19
         soundKey = "s2_boss"
-	else if (sfxId == 0x1c && greenspheres_music && !original_mode)
+	else if (sfxId == MUSIC_SPECIALSTAGE && greenspheres_music && !original_mode)	// 0x1c
 	{
 		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 
 		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
 			soundKey = "s2_specialstage"	// _speedup
 	}
-    else if (sfxId == 0x27)
+    else if (sfxId == MUSIC_GAMEOVER)				// 0x27
         soundKey = "s2_gameover"
-    else if (sfxId == 0x28)
+    else if (sfxId == MUSIC_CONTINUE)				// 0x28
         soundKey = "s2_continue"
-    else if (sfxId == 0x29)
+    else if (sfxId == MUSIC_LEVELCLEAR)				// 0x29
         soundKey = "s2_actcomplete"
-//    else if (sfxId == 0x2a)           // 1UPs are handled in the next function
+//    else if (sfxId == MUSIC_EXTRALIFE)			// 0x2a	// 1UPs are handled in the next function
 //        soundKey = "s2_1up"
-    else if (sfxId == 0x2c)
+	else if (sfxId == MUSIC_CHAOSEMERALD)			// 0x2b
+		soundKey = "s2_emerald"
+    else if (sfxId == MUSIC_INVINCIBLE)				// 0x2c
         soundKey = "s2_invin"
-    else if (sfxId == 0x9f)
+    else if (sfxId == SFX_SUPERTRANSFORM)			// 0x9f
         soundKey = "s2_transform"
+    else if (sfxId == SFX_SPRING && global.game_mode != 0x34)					// 0xb1	// do not let yellow spheres use the Sonic 2 sound
+        soundKey = "s2_spring"
     else if (sfxId == 0xf0)
         soundKey = "s2_super"
 	else if (sfxId == 0xf8 && greenspheres_music)

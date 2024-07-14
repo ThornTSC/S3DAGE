@@ -1,0 +1,45 @@
+// Adjust VRAM location for underwater bubbles art and countdown art in unlockable acts.
+// Functions taken from maingame\character\underwater_update.lemon
+//# address-hook(0x018184) end(0x0181d6)
+function void fn018184()
+{
+	objA0.base_state += 2
+	objA0.mapping_offset = (u8[A0 + 0x43] == 0) ? 0x02fcb2 : 0x02fce0
+	objA0.sprite_attributes = 0x045c
+	objA0.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
+	objA0.box_size.x = 0x10
+	objA0.sprite_priority = 0x80
+
+	if (objA0.subtype2c & 0x80)
+	{
+		// Underwater handler
+		objA0.base_state += 8
+		u8[A0 + 0x37] = objA0.subtype2c & 0x7f
+		fn018466()
+	}
+	else
+	{
+		// Bubble
+		// Subtypes 1-5 become the associated countdown numbers.
+		// Subtype 6 remains a bubble.
+		if (unlock_act)
+			objA0.sprite_attributes = 0x054d
+		objA0.state = objA0.subtype2c
+		u16[A0 + 0x34] = objA0.position.x.u16
+		objA0.velocity.y = -0x100
+		fn0181dc()
+	}
+}
+
+//# address-hook(0x01841e) end(0x018464)
+function void fn01841e()
+{
+	if (objA0.animation.sprite >= 9 && objA0.animation.sprite <= 0x12 && objA0.animation.sprite != u8[A0 + 0x32])
+	{
+		objA0.sprite_attributes = 0x045c	// when a bubble changes to a digit, restore the original art offset
+		u8[A0 + 0x32] = objA0.animation.sprite
+		u32 sourceBase = 0x0a9dfc + (objA0.animation.sprite - 9) * 0xc0
+		u16 targetInVRAM = (u8[A0 + 0x43] == 0) ? DustCloud.targetInVRAM : DustCloud.Tails.targetInVRAM
+		updateSpritePattern(sourceBase, targetInVRAM, 0x60)
+	}
+}

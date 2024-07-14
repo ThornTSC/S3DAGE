@@ -1,0 +1,53 @@
+//# address-hook(0x020fd2)
+function void CPZPillar.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		CPZPillar.Init()
+	else // (if objA0.base_state == 2)
+		CPZPillar.Main()
+}
+
+function void CPZPillar.Init()
+{
+	objA0.base_state += 2
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c
+	objA0.sprite_attributes = 0xc373
+	objA0.box_size.x = 0x10
+	objA0.sprite_priority = 0x0380
+	CPZPillar.Main()
+}
+
+function void CPZPillar.Main()
+{
+	D1 = (camera.position.x.u16 + 0x00ac) & 0x03ff		// 0xac added to line pillars up very close to where they are in the original 320x224 ROM hack
+	if (D1 < 0x02e0)	// originally 0x02e0
+	{
+		D0 = -(D1 * 3/4)
+		objA0.position.x.u16 = D0 + 0x280	// 0x0280 is new for this port
+		D1 = -((camera.position.y.u16 / 2) & 0x3F) + 0x0100
+		objA0.position.y.u16 = D1
+		DrawObject()
+	}
+}
+
+/*
+function void CPZPillar.Main()
+{
+	D1.u16 = camera.position.x.u16 & 0x03ff
+	if (D1.u16 < 0x02e0)
+	{
+		D1.s16 >>= 1
+		D0.u16 = D1.u16
+		D1.s16 >>= 1
+		D0.u16 += D1.u16
+		D0.s16 = -D0.s16
+		objA0.position.x.u16 = D0.u16
+		D1.s16 >>= 1
+		D1.u16 &= 0x3f
+		D1.s16 = -D1.s16
+		D1.u16 += 0x0100
+		objA0.position.y.u16 = D1.u16
+		DrawObject()
+	}
+}
+*/

@@ -1,0 +1,120 @@
+// For CPZ doors, use code from Carnival Night doors.
+// Functions taken from objects\04_cnz\cnz_trapdoor.lemon
+//# address-hook(0x030e24) end(0x030e86)
+function void fn030e24()
+{
+	if (objA0.subtype2c & 0x80)
+	{
+		D0 = objA0.subtype2c
+		fn030fd2()
+		return
+	}
+
+	objA0.animation.sprite = objA0.subtype2c
+	A1 = 0x030e18 + objA0.subtype2c * 4
+	objA0.box_size.x = u8[(A1+=1)-1]
+	objA0.box_size.y = u8[(A1+=1)-1]
+	objA0.sprite_attributes = u16[(A1+=2)-2]
+	objA0.mapping_offset = 0x030f86
+	if (unlock_act)
+	{
+		objA0.sprite_attributes = 0x2394
+		objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a
+		objA0.animation.sprite = (palette_set >= 2) ? 0x02 : 0x00	// use RSDK or original appearance based on visual setting
+	}
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0300
+	objA0.value32 = objA0.position.y.u16
+
+	u16[A0 + 0x34] = objA0.position.x.u16 - 0x200
+	u16[A0 + 0x36] = objA0.position.x.u16 + 0x18
+	if (objA0.flags2a & 0x01)
+	{
+		u16[A0 + 0x34] += 0x1e8
+		u16[A0 + 0x36] += 0x1e8
+	}
+
+	objA0.update_address = 0x030e8c
+	fn030e8c()
+}
+
+//# address-hook(0x030e8c) end(0x030f52)
+function void fn030e8c()
+{
+	if ((objA0.flags2a & 0x01) == 0)
+	{
+		D2.u16 = u16[A0 + 0x34]
+		D3.u16 = (objA0.flags38 == 0) ? objA0.position.x.u16 : u16[A0 + 0x36]
+	}
+	else
+	{
+		D2.u16 = (objA0.flags38 == 0) ? objA0.position.x.u16 : u16[A0 + 0x34]
+		D3.u16 = u16[A0 + 0x36]
+	}
+
+	D4.u16 = objA0.value32 - 0x20
+	D5.u16 = objA0.value32 + 0x20
+#if STANDALONE
+	// Special handling for this certain door in DEZ 1 (end of the turbine room)
+	if (global.zone_act == 0x0b00 && objA0.position.x.u16 == 0x2990 && objA0.value32 == 0x0840)
+	{
+		D4.u16 -= 0x20
+		D5.u16 += 0x20
+	}
+#endif
+
+#if STANDALONE
+	//debugDrawRect(D2.u16, D4.u16, D3.u16 - D2.u16, D5.u16 - D4.u16, 0x80ff0000)
+#endif
+
+	// This tells us after the following checks if any character is inside to test rectangle
+	objA0.flags38 = 0
+
+	A1 = 0xffffb000
+	fn030f58()
+
+	A1 = 0xffffb04a
+	fn030f58()
+
+	if (objA0.flags38 != 0)
+	{
+		u16 maxOffset = 0x40
+	#if STANDALONE
+		// Special handling for another certain door in DEZ 1
+		if (global.zone_act == 0x0b00 && objA0.position.x.u16 == 0x2e30 && objA0.value32 == 0x06a0)
+			maxOffset = 0x48
+	#endif
+
+		// Inside
+		if (u16[A0 + 0x30] != maxOffset)
+		{
+			u16[A0 + 0x30] += 8
+			if (u16[A0 + 0x30] == maxOffset && !unlock_act)		// make no sound in CPZ
+			{
+				playSound(0x58)
+			}
+			objA0.position.y.u16 = objA0.value32 - u16[A0 + 0x30]
+		}
+	}
+	else
+	{
+		// Outside
+		if (u16[A0 + 0x30] != 0)
+		{
+			u16[A0 + 0x30] -= 8
+			if (u16[A0 + 0x30] == 0 && !unlock_act)		// make no sound in CPZ
+			{
+				playSound(0x58)
+			}
+			objA0.position.y.u16 = objA0.value32 - u16[A0 + 0x30]
+		}
+	}
+
+	D1 = objA0.box_size.x + 11
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	DrawOrUnloadObject()
+}

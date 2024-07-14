@@ -1,0 +1,141 @@
+define u8 chemicalorb.make_sound   = u8[A0 + 0x42]
+define u8 chemicalorbA1.make_sound = u8[A1 + 0x42]
+
+//# address-hook(0x02536a)
+function void ChemicalOrbs.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ChemicalOrbs.Init()
+	else if (objA0.base_state == 2 || objA0.base_state == 6)
+		ChemicalOrbs.Wait()
+	else if (objA0.base_state == 4)
+		ChemicalOrbs.MoveArc()
+	else // (if objA0.base_state == 8)
+		ChemicalOrbs.MoveStraight()
+}
+
+function void ChemicalOrbs.Init()
+{
+	objA0.base_state += 2
+	objA0.velocity.y = -0x0480
+	D1 = objA0.subtype2c
+	D0.u8 = D1.u8
+	D1.u8 &= 0x0f	// number of orbs
+	D0.u8 &= 0xf0	// check upper nybble to see if these orbs arc or move vertically
+	D5.u8 = (D0.u8) ? 6 : 2
+	D4.u8 = objA0.flags2a
+	D2 = 0
+	A1 = A0
+	ChemicalOrbs.InitOrb()
+}
+
+
+function void ChemicalOrbs.InitOrb()
+{
+	objA1.update_address = objA0.update_address
+	objA1.base_state = D5.u8
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+	objA1.mapping_offset = 0x880000 + 0x24
+	objA1.sprite_attributes = 0x643c
+	objA1.render_flags = 0x04
+	objA1.sprite_priority = 0x0180
+	objA1.collision_attributes = 0x8b
+	u16[A1 + 0x38] = objA1.position.x.u16
+	u16[A1 + 0x30] = objA1.position.y.u16
+	objA1.velocity.y = objA0.velocity.y
+	s16[A1 + 0x34] = objA1.velocity.y
+	objA1.box_size.x = 0x08
+	objA1.box_size.y = 0x08
+	D4.u8 &= 0x01
+	s16[A1 + 0x3a] = (D4.u8) ? -0x60 : 0x60
+	s16[A1 + 0x36] = (D4.u8) ? -0x0b : 0x0b
+	u16[A1 + 0x32] = D2.u16
+	chemicalorbA1.make_sound = !(D1.s8 & 0x01)	// alternating orbs make noise
+	D2.u16 += 3
+	if (D1.s8 > 0)
+	{
+		--D1.s16
+		if (allocDynamicObjectStd())	// Obj1D_LoadBall simply checks if a new orb can be loaded
+			ChemicalOrbs.InitOrb()		// recursive call to keep making orbs until D1.s8 runs out
+	}
+}
+
+function void ChemicalOrbs.Wait()
+{
+	--s16[A0 + 0x32]
+	if (s16[A0 + 0x32] < 0)
+	{
+		objA0.base_state += 2
+		u16[A0 + 0x32] = 0x3b
+		if (objA0.position.y.u16 > (camera.position.y.u16 - 0x80) && objA0.position.y.u16 <= (camera.position.y.u16 + getScreenHeight() + 0x80) && chemicalorb.make_sound)	// new check to only play sound for visible or close orbs, cutting down on noise
+			Audio.playAudio("s2_chemjump", AudioContext.CONTEXT_SOUND)
+	}
+	Enemy.DrawOrUnload()
+}
+
+function void ChemicalOrbs.MoveArc()
+{
+	UpdateMovementStraightSimple()
+	D0.s16 = s16[A0 + 0x36]
+	objA0.velocity.x += D0.s16
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y == 0)
+		s16[A0 + 0x36] = -s16[A0 + 0x36]
+	D0.u16 = u16[A0 + 0x30]
+	if (D0.u16 <= objA0.position.y.u16)
+	{
+		objA0.velocity.y = s16[A0 + 0x34]
+		objA0.velocity.x = 0
+		objA0.base_state -= 2
+	}
+	Enemy.DrawOrUnload()
+}
+
+function void ChemicalOrbs.MoveStraight()
+{
+	UpdateMovementStraightSimple()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y == 0)
+	{
+		D0.u16 = u16[A0 + 0x3a] + u16[A0 + 0x38]
+		objA0.position.x.u16 = D0.u16
+	}
+	if (objA0.velocity.y == 0x0180)
+	{
+		if (objA0.position.y.u16 > (camera.position.y.u16 - 0x50) && objA0.position.y.u16 <= (camera.position.y.u16 + getScreenHeight() + 0x20) && chemicalorb.make_sound)	// new check to only play sound for visible or close orbs, cutting down on noise
+			Audio.playAudio("s2_chemjump", AudioContext.CONTEXT_SOUND)
+	}
+	D0.u16 = u16[A0 + 0x30]
+	if (D0.u16 <= objA0.position.y.u16)
+	{
+		objA0.velocity.y = u16[A0 + 0x34]
+		objA0.position.x.u16 = u16[A0 + 0x38]
+		if (objA0.position.y.u16 > (camera.position.y.u16 - 0x50) && objA0.position.y.u16 <= (camera.position.y.u16 + getScreenHeight() + 0x20) && chemicalorb.make_sound)	// new check to only play sound for visible or close orbs, cutting down on noise
+			Audio.playAudio("s2_chemjump", AudioContext.CONTEXT_SOUND)
+	}
+	Enemy.DrawOrUnload()
+}
+
+/*
+function void ChemicalOrbs.MoveStraight()
+{
+	UpdateMovementStraightSimple()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y == 0)
+	{
+		D0.s16 = s16[A0 + 0x3a] + u16[A0 + 0x38]	// check if these s16s should be u16s
+		objA0.position.x.u16 = D0.u16
+	}
+	if (objA0.velocity.y == 0x0180)
+		Audio.playAudio("s2_chemjump", AudioContext.CONTEXT_SOUND)
+	D0.u16 = u16[A0 = 0x30]
+	if (D0.u16 <= objA0.position.y.u16)
+	{
+		objA0.velocity.y = s16[A0 + 0x34]
+		objA0.position.x.u16 = u16[A0 + 0x38]
+		Audio.playAudio("s2_chemjump", AudioContext.CONTEXT_SOUND)
+	}
+	Enemy.DrawOrUnload()
+}
+*/

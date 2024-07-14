@@ -9,6 +9,9 @@ function void LevelTilesAnimation()
 
 function void S2.LevelTilesAnimation()
 {
+	if (unlock_act != 1)	// only EHZ uses this so far
+		return
+
 	A2 = s2_levelanimation_address	// should A2 contain the address of the animation scripts for a level?
 	System.loadExternalRawData("ehz_animscripts", A2)
 	System.loadExternalRawData("ehz_animtiles", A2 + 0x64)	// 0x64 is the length of the animation script file

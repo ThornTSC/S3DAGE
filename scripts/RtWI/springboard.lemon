@@ -1,0 +1,172 @@
+//# address-hook(0x026370) end(0x02637e)
+function void Springboard.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Springboard.Init()
+	else // if (objA0.base_state == 2)
+		Springboard.Main()
+
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x02638c) end(0x02641c)
+function void Springboard.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c
+	objA0.sprite_attributes = 0x0440
+	objA0.render_flags |= 0x04
+	objA0.box_size.x = 0x1c
+	objA0.box_size.y = 0x20
+	objA0.sprite_priority = 0x0200
+	objA0.flags2a |= 0x80
+	D0.u8 = objA0.subtype2c
+	D0.u16 &= 0x02
+	u16[A0 + 0x30] = u16[0x026386 + D0.s16]
+	Springboard.Main()
+}
+
+function void Springboard.Main()
+{
+	System.loadExternalRawData("springboard_animation", s2_decompression_buffer_2 + 0x14)	// 0x0c bytes
+	A1 = s2_decompression_buffer_2 + 0x14
+	Object.AnimationUpdate()
+	D1.u16 = 0x27
+	D2.u16 = 0x08
+	D4.u16 = objA0.position.x.u16
+	A2 = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20		// springboard is sloped
+	if (objA0.animation.sprite != 0)
+	{
+		A2 += 0x28		// springboard is pressed down and flat (halfway through 0x50 bytes of data from A2)
+	}
+	A1 = 0xffffb000
+	D6 = 0x03
+	push(D4)
+	push(D3)
+	push(D2)
+	push(D1)
+	fn01dd24()		// SlopedSolid_SingleCharacter in Sonic 2 disassembly
+	if (objA0.flags2a & 0x08)
+	{
+		fn02641e()
+	}
+	D1 = pop()
+	D2 = pop()
+	D3 = pop()
+	D4 = pop()
+	A1 = 0xffffb04a
+	D6 = 0x04
+	fn01dd24()		// SlopedSolid_SingleCharacter in Sonic 2 disassembly
+	if (objA0.flags2a & 0x10)
+	{
+		fn02641e()
+	}
+}
+
+
+//# address-hook(0x02641e) end(0x02654a)
+function void fn02641e()
+{
+	if ((objA0.flags2a & 0x01) == 0)
+	{
+		D0.u16 = objA0.position.x.u16 - 0x10
+		if (D0.u16 < objA1.position.x.u16)
+		{
+			fn026446()
+		}
+		return
+	}
+	D0.u16 = objA0.position.x.u16 + 0x10
+	if (D0.u16 < objA1.position.x.u16)
+	{
+		return
+	}
+	fn026446()
+}
+
+function void fn026446()
+{
+	constant array<u8> byte_26550 = 
+	{
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+		0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  1,  1,  1,	// 16
+		1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,  2,	// 32
+		3,  3,  3,  3,  3,  3,  4,  4,  0,  0,  0,  0,  0,  0,  0,  0,	// 48
+		0,  0,  0,  0,  0,  0,  0,  0									// 64
+	}
+
+	if (objA0.state != 0x01)
+	{
+		objA0.state.both = 0x0100
+		return
+	}
+	if (objA0.animation.sprite != 0)
+	{
+		return
+	}
+	D0.u16 = objA0.position.x.u16 - 0x1c - objA1.position.x.u16
+	D0.s16 = -D0.s16
+	if (objA0.flags2a & 0x01)
+	{
+		D0.u16 ^= 0xffff
+		D0.u16 += 2 * 0x1c	// 0x27 in original game, which bugged x-flipped springboards as weaker than normal ones
+	}
+	if (D0.s16 < 0)
+	{
+		D0 = 0
+	}
+	// A3 = 0x026550
+	D0.u8 = byte_26550[D0.s16]	// u8[A3 + D0.s16]
+	objA1.velocity.y = 0xfc00
+	u8[A1 + 0x1a] -= D0.u8			// access the upper byte of player's y velocity
+	objA1.flags2a |= 0x01
+	if ((objA0.flags2a & 0x01) == 0)
+	{
+		objA1.flags2a &= ~0x01
+		D0.s8 = -D0.s8
+	}
+	D1.u16 = objA1.velocity.x
+	if (D1.s16 < 0)
+	{
+		D1.s16 = -D1.s16
+	}
+	if (D1.u16 >= 0x0400)
+	{
+		u8[A1 + 0x18] -= D0.u8		// access the upper byte of player's x velocity
+	}
+	objA1.flags2a |= 0x02
+	objA1.flags2a &= ~0x08
+	objA1.state = 0x10
+	objA1.base_state = 0x02
+	u8[A1 + 0x3d] = 0				// spindash flag
+	D0.u8 = objA0.subtype2c
+	if (D0 & 0x00000001)
+	{
+		objA1.groundspeed = 0x01
+		u8[A1 + 0x27] = 0x01		// flip_angle, which is at offset 0x27 in Sonic 2 and in Sonic 3 & Knuckles
+		objA1.state = 0
+		u8[A1 + 0x30] = 0x01		// flips_remaining
+		u8[A1 + 0x31] = 0x08		// flip_speed
+		if ((D0 & 0x00000002) == 0)
+		{
+			u8[A1 + 0x30] = 0x03	// flips_remaining
+		}
+		if (objA1.flags2a & 0x01)
+		{
+			s8[A1 + 0x27] = -s8[A1 + 0x27]		// flip_angle, which is at offset 0x27 in Sonic 2 and in Sonic 3 & Knuckles
+			objA1.groundspeed = -objA1.groundspeed
+		}
+	}
+	D0.u8 &= 0x0c
+	if (D0.u8 == 0x04)
+	{
+		u8[A1 + 0x46] = 0x0c		// top_solid_bit
+		u8[A1 + 0x47] = 0x0d		// lrb_solid_bit
+	}
+	if (D0.u8 == 0x08)
+	{
+		u8[A1 + 0x46] = 0x0e		// top_solid_bit
+		u8[A1 + 0x47] = 0x0f		// lrb_solid_bit
+	}
+	playSound(SFX_SPRING)
+}

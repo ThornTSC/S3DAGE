@@ -30,7 +30,8 @@
     "westside_titlecard_bonus":   { "File": "westside_zonenames.png", "Rect": " 0,224, 80,16", "Center": "-2,0" },
     "westside_titlecard_stage":   { "File": "westside_zonenames.png", "Rect": "96,224, 76,16", "Center": "-2,0" },
 
-    "westside_titlecard_unlock0001":     { "File": "westside_zonenames.png", "Rect": " 0,256,190,16", "Center": "21,-8" }
+    "westside_titlecard_unlock0001":     { "File": "westside_zonenames.png", "Rect": " 0,256,190,16", "Center": "21,-8" },
+    "westside_titlecard_unlock0002":     { "File": "westside_zonenames.png", "Rect": " 0,272,224,16", "Center": "56,-8" }    // Exception made here to use same alignment for CHEMICAL PLANT as in Sonic 2
 
     // Same as above, but with proper centers rather than centers meant for title card alignment.
     // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.
