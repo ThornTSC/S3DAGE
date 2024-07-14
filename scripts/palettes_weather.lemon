@@ -450,7 +450,16 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	}
 
 	else if (index == 0x2a || (index >= 0x0b && index <= 0x22)) // AIZ1 is 0x2a, and most main acts fall in sequence from 0x0b to 0x22
+	{
 		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
+//		if (index == 0x2a && (isMainCharacter(CHARACTER_KNUCKLES) || global.zone_act == 0x0d01))		// Knux in AIZ or outro AIZ
+//		{
+//			u8[destRaw + 0x50] += 2		// alter cloud color
+//			u8[destRaw + 0x51] -= 2
+//			u8[destRaw + 0x56] += 2		// brighten the blue of the sky slightly
+//			u8[destRaw + 0x57] -= 0x02
+//		}
+	}
 	else if (index == 0x2b) // AIZ1 water
 		System.loadExternalRawData("PaletteAIZ1Water", destRaw)
 	else if (index == 0x2c) // AIZ2 water
@@ -3421,10 +3430,7 @@ function void LevelPaletteUpdate.DEZ2()
 			u16[0xfffff652] = 0
 
 		A0 = 0x003474 + D0.s16
-		A1 = 0xfffffc50
-		u32[(A1+=4)-4] = u32[(A0+=4)-4]
-		u32[(A1+=4)-4] = u32[(A0+=4)-4]
-		u16[(A1+=2)-2] = u16[(A0+=2)-2]
+		copyMemory(0xfffffc50, A0, 10)
 	}
 }
 

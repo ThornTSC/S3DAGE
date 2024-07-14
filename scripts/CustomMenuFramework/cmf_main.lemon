@@ -2130,6 +2130,7 @@ function void fn00d1fa()
 
 	#if STANDALONE
 		playSound(0xad)
+		DataSelect.drawCustomPlanes()
 
 		u32 backupA0 = A0
 		FadeOutScreenBlocking()
