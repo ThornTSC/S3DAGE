@@ -770,7 +770,40 @@ function void fn01a75c()
 	DrawObject()
 }
 
+//# address-hook(0x01a7e8) end(0x01a84a)
+function void fn01a7e8()
+{
+	objA0.animation.sprite = spilled_rings.animframe
+	UpdateMovementStraight()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y >= 0)
+	{
+		D0.u8 = (global.framecounter + D7.u8) & 0x07
+		if (D0.u8 == 0 || !original_mode)	// in original mode, only 1/8th of spilled rings check for floor collision each frame
+		{
+			if (objA0.render_flags & render_flag.VISIBLE)
+			{
+				fn00fca0()
+				if (D1.s16 < 0)
+				{
+					objA0.position.y.u16 -= D1.u16
+					objA0.velocity.y = (objA0.velocity.y >> 2) - objA0.velocity.y
+				}
+			}
 
+			if ((spilled_rings.speed == 0) || (objA0.position.y.u16 > move_area.bottom.current + getScreenHeight()))
+			{
+				// Time over for this ring, or it fell out of the lower level bounds
+				UnloadObject()
+				return
+			}
+		}
+	}
+
+	AddAsDynamicObject()
+	objA0.position.x.u16 -= u16[0xffffeebc]
+	DrawObject()
+}
 
 
 
