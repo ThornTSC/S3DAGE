@@ -32,8 +32,10 @@ function void fn02c8b8()
 		D0.u16 = getRandomNumber() & 0x01
 		objA0.sprite_attributes = (D0.u16 == 0) ? 0x0580 : 0x0592
 
-		u16 zoneID = (unlock_act) ? 0x06 : global.zone	// EHZ uses the same animals as LBZ
+		u16 zoneID = (unlock_act) ? 0x04 : global.zone	// EHZ uses the same animals as FBZ
 		D1 = global.zone * 2 + D0.u16
+		if (unlock_act)
+			D1 = 0x04 * 2 + D0.u16	// EHZ uses the same animals as FBZ
 		D0.u8 = u8[0x02c7ba + D1.s16]
 		u8[A0 + 0x30] = D0.u8
 		D0.u16 <<= 3

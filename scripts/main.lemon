@@ -6371,7 +6371,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	}
 
 	// Sonic 2 Ricky
-	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 1)
+	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 6)
 	{
 		Renderer.drawCustomSprite(stringformat("s2_ricky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 		return true

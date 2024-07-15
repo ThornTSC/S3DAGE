@@ -97,6 +97,10 @@
 	// EHZ waterfall (transparent)
 	"ehz_waterfall_transparent": { "File": "ehz_waterfall_transparent.bmp", "Center": "32,32" },
 
+	// EHZ grass tips under waterfalls
+	"ehz_waterfall_grass_1": { "File": "ehz_waterfall_grass_1.bmp"},
+	"ehz_waterfall_grass_2": { "File": "ehz_waterfall_grass_2.bmp"},
+
 	// EHZ cave ceiling shadow (digit is number of 16x16 blocks long the shadow is)
 	"ehz_cave_ceiling_shadow_1": { "File": "ehz_cave_ceiling_shadow.bmp", "Rect":  "0,0,16,8"},
 	"ehz_cave_ceiling_shadow_2": { "File": "ehz_cave_ceiling_shadow.bmp", "Rect":  "0,0,32,8"},
