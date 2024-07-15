@@ -1411,7 +1411,7 @@ function void DataSelect.drawCustomPlanes()
 		
 		// Render the background and dim it
 		if (setting.unlock_act)
-			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xf000)		// level background
+			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
 		else
 			Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
 		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xe001, 0, 95)							// background dimming (37.5% opacity)
