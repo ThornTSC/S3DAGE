@@ -125,7 +125,8 @@ function void fn0225fc()
 		fn022688()
 		return
 	}
-	D2.u8 = timer.seconds & 0x01
+	// D2.u8 = timer.seconds & 0x01		// original Sonic 2 method of determining direction
+	D2.u8 = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles) ? 1 : 0	// for RtWI, Knuckles Hard mode goes one way, else go the other
 	fn022688()
 }
 
