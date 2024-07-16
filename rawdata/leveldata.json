@@ -327,9 +327,12 @@
     "cpz_layout_1": { "File": "../level/CPZ/Layout/Part 1.bin" },
     "cpz_objects_1": { "File": "../level/CPZ/Object Pos/Part 1.bin" },
     "cpz_rings_1": { "File": "../level/CPZ/Ring Pos/Part 1.bin" },
-    "cpz_layout_2": { "File": "../level/CPZ/Layout/Part 2 Hard.bin" },
-    "cpz_objects_2": { "File": "../level/CPZ/Object Pos/Part 2 Hard.bin" },
-    "cpz_rings_2": { "File": "../level/CPZ/Ring Pos/Part 2 Hard.bin" },
+    "cpz_layout_2": { "File": "../level/CPZ/Layout/Part 2.bin" },
+    "cpz_objects_2": { "File": "../level/CPZ/Object Pos/Part 2.bin" },
+    "cpz_rings_2": { "File": "../level/CPZ/Ring Pos/Part 2.bin" },
+    "cpz_layout_2_knux": { "File": "../level/CPZ/Layout/Part 2 Hard.bin" },
+    "cpz_objects_2_knux": { "File": "../level/CPZ/Object Pos/Part 2 Hard.bin" },
+    "cpz_rings_2_knux": { "File": "../level/CPZ/Ring Pos/Part 2 Hard.bin" },
 
     // Tiles + animation, blocks, chunks
     "cpz_tiles":  { "File": "../level/CPZ/Tiles/Tiles.bin" },

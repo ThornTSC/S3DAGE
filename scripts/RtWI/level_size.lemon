@@ -93,13 +93,16 @@ function void EHZ.cameraBounds()
 
 function void CPZ.cameraBounds()
 {
-	u16 signpost_loc = (layout.part == 1) ? 0x3840 : 0x7f00 // 0x3440 : 0x7f00 in Normal layout // 0x3f00 for Act 1 alone
+	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+
+	u16 signpost_loc = (KnuxHard)? 0x3840 : (layout.part == 1) ? 0x3440 : 0x7f00 // 0x3f00 for Act 1 alone
 
 	if (level.scrolling_routine < 4)
 	{
 		level.vertical_wrap = 0
 	//	move_area.bottom.current = 0x0800 - getScreenHeight()
-//		move_area.bottom.target = (layout.part == 1 && camera.position.x.u16 >= 0x2800 + 0x0600) ? 0x0450 : (0x0800 - getScreenHeight())	// needed for Normal layout
+		if (!KnuxHard)
+			move_area.bottom.target = (layout.part == 1 && camera.position.x.u16 >= 0x2800 + 0x0600) ? 0x0450 : (0x0800 - getScreenHeight())	// needed for Normal layout
 		move_area.left = 0
 		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 
@@ -114,7 +117,7 @@ function void CPZ.cameraBounds()
 				// Spawn signpost
 				objA1.update_address = 0x0837b2
 				objA1.position.x.u16 = signpost_loc
-				objA1.position.y.u16 = 0x03e0	// 0x04e0
+				objA1.position.y.u16 = (KnuxHard) ? 0x03e0 : 0x04e0
 			}
 		}
 	}
@@ -150,6 +153,6 @@ function void CPZ.cameraBounds()
 		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 
 	// Hard layout layering fix
-	if (layout.part == 1 && u16[0xffffb010] > 0x2f75 && u16[0xffffb010] <= 0x2f85 && u16[0xffffb014] == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
+	if (KnuxHard && u16[0xffffb010] > 0x2f75 && u16[0xffffb010] <= 0x2f85 && u16[0xffffb014] == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
 		u16[A0 + 0x46] = 0x0e0f	// set into Path 1 (2) High
 }

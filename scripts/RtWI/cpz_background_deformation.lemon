@@ -127,8 +127,17 @@ function void UpdateBackgroundScrolling.CPZ()
 
 	if (layout.part == 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
 	{
-		Renderer.drawCustomSprite("signpost_eggman", 0x3840, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)			// 0x3440, 0x04e0 in Normal layout
-		Renderer.drawCustomSprite("signpost_pole", 0x3840, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)	// 0x3440, 0x04e0 in Normal layout
+		bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+		if (KnuxHard)
+		{
+			Renderer.drawCustomSprite("signpost_eggman", 0x3840, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+			Renderer.drawCustomSprite("signpost_pole", 0x3840, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		}
+		else
+		{
+			Renderer.drawCustomSprite("signpost_eggman", 0x3440, 0x04e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+			Renderer.drawCustomSprite("signpost_pole", 0x3440, 0x04e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		}
 	}
 	// Doing this and setting the above to check for 6 avoids one frame of an invisible signpost (level end reached, true signpost not yet drawn after loading)
 	if (level.scrolling_routine == 4)

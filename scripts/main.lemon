@@ -1331,9 +1331,12 @@ function void fn01c362()
 			Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
 		else if (unlock_act == 2)
 		{
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 			if (layout.part == 0)
 				Standalone.loadRawLevelData("cpz_layout_1", global.zone_act, 0xffff8000)
-			else
+			else if (KnuxHard)
+				Standalone.loadRawLevelData("cpz_layout_2_knux", global.zone_act, 0xffff8000)				
+			else 
 				Standalone.loadRawLevelData("cpz_layout_2", global.zone_act, 0xffff8000)
 		}
 	}
@@ -1366,8 +1369,11 @@ function void LevelObjectTableBuilder.buildObjects()
 			bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
 		else if (unlock_act == 2)
 		{
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 			if (layout.part == 0)
 				bytes = Standalone.loadRawLevelData("cpz_objects_1", global.zone_act, A0)
+			else if (KnuxHard)
+				bytes = Standalone.loadRawLevelData("cpz_objects_2_knux", global.zone_act, A0)
 			else
 				bytes = Standalone.loadRawLevelData("cpz_objects_2", global.zone_act, A0)
 		}
@@ -1528,8 +1534,11 @@ function void LevelRingsTableBuilder.buildRings()
 			bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
 		else if (unlock_act == 2)
 		{
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 			if (layout.part == 0)
 				bytes = Standalone.loadRawLevelData("cpz_rings_1", global.zone_act, A1)
+			else if (KnuxHard)
+				bytes = Standalone.loadRawLevelData("cpz_rings_2_knux", global.zone_act, A1)
 			else
 				bytes = Standalone.loadRawLevelData("cpz_rings_2", global.zone_act, A1)
 		}
@@ -11559,24 +11568,28 @@ function void UpdateWaterSurfaceLevel()
 
 function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
 {
-	if (layout.part == 1  && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend() && water.height.current > 0x0600)	// added 0x0700 in x before original Act 2
+	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+	u16 baseWaterHeight = (water.height.target < 0x0580) ? 0x0510 : 0x0710
+	if (KnuxHard)
 	{
-		water.height.target = 0x0510
+		// Hard layout
+		baseWaterHeight = 0x0590
+		water.height.current = 0x0590
+		water.height.next = 0x0590
+		water.height.target = 0x0590
+	}
+	else if (layout.part == 1  && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend() && water.height.current > 0x0600)	// added 0x0700 in x before original Act 2
+	{
+		// Normal layout
+		baseWaterHeight = 0x0510
 		if (u16[0xffffb014] < 0x0380)		// if the player character is well above the water,
 		{
-			water.height.current = 0x0510	// move it instantly
-			water.height.next = 0x0510
+			water.height.current = baseWaterHeight	// move it instantly
+			water.height.next = baseWaterHeight
 		}
 	}
-	// Normal
-//	u16 baseWaterHeight = (water.height.target < 0x0600) ? 0x0510 : 0x0710
-//	water.height.target = baseWaterHeight + (u8[0xfffffe70] >> 1)
-	// Hard
-	water.height.current = 0x0590
-	water.height.next = 0x0590
-	water.height.target = 0x0590
-
 	// Update changing water surface height
+	water.height.target = baseWaterHeight + (u8[0xfffffe70] >> 1)
 	if (water.height.next != water.height.target)
 	{
 		if (water.height.next < water.height.target)
@@ -14180,11 +14193,10 @@ function void Level.InitializeWater()
 			waterHeight = 0x0a90
 		if (unlock_act == 2)	// Chemical Plant Zone
 		{
-			waterHeight = (layout.part) ? 0x0710 : 0x0c00
-			if (layout.part == 1  && camera.position.x.u16 >= 0x1d00)
-				waterHeight = 0x0510
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+			waterHeight = (KnuxHard) ? 0x0590 : (layout.part == 1 && camera.position.x.u16 < 0x1d00) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
 		}
-		water.height.target = 0x0510
+		water.height.target = waterHeight
 		water.height.current = waterHeight
 		water.height.next = waterHeight
 		water.height.target = waterHeight
