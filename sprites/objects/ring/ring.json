@@ -1,0 +1,12 @@
+{
+	// Sonic Origins Rings
+	"ring_00": { "File": "rings.bmp", "Rect":  "0,0,16,16", "Center": "8,8" },
+	"ring_01": { "File": "rings.bmp", "Rect": "16,0,16,16", "Center": "8,8" },
+	"ring_02": { "File": "rings.bmp", "Rect": "32,0,16,16", "Center": "8,8" },
+	"ring_03": { "File": "rings.bmp", "Rect": "48,0,16,16", "Center": "8,8" },
+	"ring_04": { "File": "rings.bmp", "Rect": "64,0,16,16", "Center": "8,8" },
+	"ring_05": { "File": "rings.bmp", "Rect": "80,0,16,16", "Center": "8,8" },
+	"ring_06": { "File": "rings.bmp", "Rect": "96,0,16,16", "Center": "8,8" },
+	"ring_07": { "File": "rings.bmp", "Rect":"112,0,16,16", "Center": "8,8" }
+
+}
