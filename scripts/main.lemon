@@ -557,7 +557,7 @@ function void TitleCard.Init()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
-		hud.layout = 1											// with Sonic CD-style ring counter
+		hud.layout = 3											// with the classic layout
 		hudLoaded = false
 	}
 //	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
