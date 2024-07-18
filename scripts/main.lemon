@@ -19304,6 +19304,31 @@ function void fn0881fe()
 
 
 
+// Restore Iwamodoki point display and award points outside of Original Mode
+// Function taken from enemies\lrz_iwamodoki.lemon
+//# address-hook(0x08fb76) end(0x08fb8a)
+function void fn08fb76()
+{
+	objA0.update_address = addressof(SmallExplosion.BaseUpdate)
+	objA0.flags2a |= 0x80
+// #if STANDALONE
+	// Do not spawn an animal & floating points, as you won't get points...
+//	objA0.base_state = 0x02
+// #else
+//	objA0.base_state = 0
+// #endif
+
+	objA0.base_state = 0
+	if (!original_mode)
+		addScore(10)
+
+	// Spawn flying explosion debris
+	// "spawnProjectileChildObjects(0x08fbd6)" replaced by:
+	spawnProjectileChildObject(0x08fb90, 0x00, -4, 4, -1024, -512, 0x08fbd0, 0x08fc8b, 0x08fbb8)
+	spawnProjectileChildObject(0x08fb90, 0x02, 4, 4, 1024, -512, 0x08fbd0, 0x08fc8b, 0x08fbb8)
+	spawnProjectileChildObject(0x08fb90, 0x04, -8, -8, -512, -1024, 0x08fbd0, 0x08fc87, 0x08fbb8)
+	spawnProjectileChildObject(0x08fb90, 0x06, 8, -8, 512, -1024, 0x08fbd0, 0x08fc87, 0x08fbb8)
+}
 
 
 
