@@ -12563,7 +12563,8 @@ function void fn034574()
 
 
 
-// Implement future A.I.R. feature by iCloudius to allow drop dash to trigger MGZ spin wheels (matching Origins)
+// Implement future A.I.R. feature by iCloudius to allow drop dash to trigger MGZ spin wheels (matching Origins).
+// Also add Origins activation sound effect 0x5a.
 // Functions taken from objects\03_mgz\mgz_spinwheeltrigger.lemon
 //# address-hook(0x025d9c) end(0x025ea0)
 function void fn025d9c()
@@ -12589,6 +12590,8 @@ function void fn025d9c()
 			if (objA1.state == char.state.SPINDASH)
 		#endif
 			{
+				if (!u16[A0 + 0x30] && !original_mode)
+					playSound(0x5a)		// add Origins whirring sound if the wheel is not already spinning
 				u16[A0 + 0x30] = 0x3c
 				u8[A0 + 0x32] = 1
 				D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
@@ -12611,6 +12614,8 @@ function void fn025d9c()
 			if (objA1.state == char.state.SPINDASH)
 		#endif
 			{
+				if (!u16[A0 + 0x30] && !original_mode)
+					playSound(0x5a)		// add Origins whirring sound if the wheel is not already spinning
 				u16[A0 + 0x30] = 0x3c
 				u8[A0 + 0x32] = 1
 				D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
