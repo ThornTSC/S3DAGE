@@ -1013,6 +1013,13 @@ function void fn02ddc6()
 
 function void PauseMenu_DrawCustomSprites()
 {
+	// Show drop dash dust
+	u32 backupA0 = A0
+	A0 = 0xffffcc54		// dust cloud object address
+	if (u8[A0 + 0x30])
+		Dust.animateDropDash()
+	A0 = backupA0
+
 	if (unlock_act == 1)
 		EHZ_CustomSprites()
 	else if (unlock_act == 2)

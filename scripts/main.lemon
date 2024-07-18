@@ -2248,6 +2248,7 @@ function void UpdatePaletteEffects.SuperForm.originalVersion(u8 characterVersion
 
 
 // Do not allow smooth rotation and speedup after images in Original Mode.
+// Also use Sonic Origins' drop dash animation.
 // Function taken from standalone\rendering\render_character.lemon and updated to match AIR commit b29d9f1
 function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
 {
@@ -2304,7 +2305,7 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 			// Special handling for Drop Dash & Super Peel-Out
 			if (char.state == char.state.SONIC_DROPDASH)
 			{
-				animationSpriteEx = CHAR_ANIMSPRITE_SONIC_DROPDASH + ((level.framecounter >> 1) & 0x01)
+				animationSpriteEx = CHAR_ANIMSPRITE_SONIC_DROPDASH + ((level.framecounter) & 0x0f)
 			}
 			else if (!super.active && animationSprite >= 0x21 && animationSprite <= 0x30)
 			{
@@ -2428,13 +2429,13 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 		if (key == 0 && animationSpriteEx >= 0x100)
 		{
 			// Special handling for Drop Dash & Super Peel-Out
-			if (animationSpriteEx >= CHAR_ANIMSPRITE_SONIC_PEELOUT)
+			if (animationSpriteEx >= CHAR_ANIMSPRITE_SONIC_PEELOUT && char.state != char.state.SONIC_DROPDASH)
 			{
 				key = stringformat("sonic_peelout_%d", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_PEELOUT)
 			}
 			else
 			{
-				key = stringformat("sonic_dropdash_%d", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_DROPDASH)
+				key = stringformat("sonic_dropdash_%x", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_DROPDASH)
 			}
 		}
 		if (isPlayer1)

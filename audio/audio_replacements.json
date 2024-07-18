@@ -58,6 +58,9 @@
 	// Sonic CD Time Stone collection
 	"E0": { "File": "TimeStoneGet.ogg", "Type": "Sound"},
 
+	// Sonic Origins Drop Dash charge
+	"dropdash_charge": { "File": "DropDash_Charge.ogg", "Type": "Sound"},
+
 	// Sonic Colors Red Star Ring collection
 	"redstarring": { "File": "RedStarRing.ogg", "Type": "Sound"},
 

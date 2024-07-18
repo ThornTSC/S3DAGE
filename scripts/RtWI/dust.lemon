@@ -6,3 +6,44 @@ function void fn018d6a()
 	D6 = (unlock_act) ? 0x349122 : 0x18a604		// Dust art in the Sonic 2 palette is injected at the Sonic 3 alone dust location
 	fn018d70()
 }
+
+
+
+// Give the drop dash a unique dust cloud
+// Function taken from objects\effects\dustcloud.lemon
+//# address-hook(0x018c94) end(0x018ca4)
+function void fn018c94()
+{
+	if (objA0.state != 2)	// Not a spin dash dust object
+	{
+		u8[A0 + 0x30] = 0	// As long as drop dash dust is the same object as other dust and water splashes, we can't render it at the same time as those other objects
+	}
+	if (u8[A0 + 0x30])
+	{
+		Dust.animateDropDash()
+		return
+	}
+	// Just update the animation and render
+	Object.animationUpdate(0x018dc0)
+	fn018d6a()
+	DrawObject()
+}
+
+function void Dust.animateDropDash()
+{
+	if (u8[A0 + 0x30] == 0x28 + 1)	// animation is 40 frames long
+	{
+		objA0.state = 0		// reset dust object to doing/showing nothing
+		u8[A0 + 0x30] = 0
+		return
+	}
+
+	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+	if (unlock_act)
+		Renderer.drawCustomSprite(stringformat("dropdash_dust_s2_%02x", u8[A0 + 0x30]), objA0.position.x.u16, objA0.position.y.u16, 0, (objA0.render_flags & 0x01) | SPRITE_FLAG_WORLDSPACE | (prioFlag ? SPRITE_FLAG_PRIO : 0), 0x9f7e)	// draw object at same renderQueue priority as spin dash dust
+	else
+		Renderer.drawCustomSprite(stringformat("dropdash_dust_%02x", u8[A0 + 0x30]), objA0.position.x.u16, objA0.position.y.u16, 0, (objA0.render_flags & 0x01) | SPRITE_FLAG_WORLDSPACE| (prioFlag ? SPRITE_FLAG_PRIO : 0), 0x9f7e)		// draw object at same renderQueue priority as spin dash dust
+	if (!global.game.paused)
+		++u8[A0 + 0x30]		// prepare next frame of animation for next gameplay frame
+}
+

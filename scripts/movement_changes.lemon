@@ -328,6 +328,108 @@ function void Character.UpdateNormalState.Sonic()
 	}
 }
 
+
+function void releaseDropDash()
+{
+	// Release drop dash!
+
+	// Show dust cloud
+	if (char.drown_countdown >= 12 && abs(s8(char.rotation)) < 0x1c)
+	{
+		u8[A6 + 0x20] = 0x02
+		u16[A6 + 0x10] = char.position.x.u16
+		u16[A6 + 0x14] = char.position.y.u16
+		u8[A6 + 0x23] = 0x01
+		u8[A6 + 0x2a] = char.flags & char.flag.FACING_LEFT
+
+		// New flag to use drop dash dust animation
+		u8[A6 + 0x30] = 1
+	}
+
+	s16 dy = s8(14 - char.hitbox_extends.y)
+	char.hitbox_extends.x = char.hitbox.x.ROLLING
+	char.hitbox_extends.y = char.hitbox.y.ROLLING
+	char.position.y.u16 += global.inv_gravity ? dy : -dy
+
+	char.state = char.state.ROLLING
+	char.flags |= char.flag.ROLLING
+	char.spindash = 0
+
+	sonic.dropdash_counter = 0
+	if (control.player1.state & CONTROL_LEFT)
+	{
+		char.flags |= char.flag.FACING_LEFT
+	}
+	else if (control.player1.state & CONTROL_RIGHT)
+	{
+		char.flags &= ~char.flag.FACING_LEFT
+	}
+
+	// Camera delay
+	if (A0 == 0xffffb000)
+	{
+		ClearPositionBackup()
+		camera.locktime.player1 = 0x0c00
+	}
+	else
+	{
+		camera.locktime.player2 = 0x0c00
+	}
+
+	s16 baseSpeed = super.active ? 0x0c00 : 0x0800
+	s16 maxSpeed  = super.active ? 0x0d00 : 0x0c00
+	if ((char.flags & char.flag.FACING_LEFT) == 0)
+	{
+		if (char.velocity.x > 0)
+		{
+			char.groundspeed = min(baseSpeed + (char.groundspeed >> 2), maxSpeed)
+		}
+		else if (char.rotation != 0)
+		{
+			char.groundspeed = baseSpeed + (char.groundspeed >> 1)
+		}
+		else
+		{
+			char.groundspeed = baseSpeed
+		}
+	}
+	else
+	{
+		baseSpeed = -baseSpeed
+		if (char.velocity.x < 0)
+		{
+			char.groundspeed = max(baseSpeed + (char.groundspeed >> 2), -maxSpeed)
+		}
+		else if (char.rotation != 0)
+		{
+			char.groundspeed = baseSpeed + (char.groundspeed >> 1)
+		}
+		else
+		{
+			char.groundspeed = baseSpeed
+		}
+	}
+
+	if (super.active)
+	{
+		// Using upper byte to signal the difference between Hyper Knuckles hitting the wall and Super/Hyper Sonic's drop dash
+		camera.hyper_knux_shake = 0x0114
+
+		Character.ClearEnemiesOnScreen()
+		playSound(0x49)
+	}
+
+	Audio.playAudio("dropdash_release", AudioContext.CONTEXT_SOUND)
+#if STANDALONE
+	if (super.active)
+		Input.setControllerRumbleByAddress(A0, 0.5f, 1.0f, 200)
+	else
+		Input.setControllerRumbleByAddress(A0, 0.0f, 1.0f, 150)
+#endif
+}
+
+
+
 // This function also allows the L button to trigger Tails Assist.
 function void Character.updateJumpMoves()
 {
