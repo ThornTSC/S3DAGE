@@ -782,7 +782,7 @@ constant array<u32> S2.ObjectTable =
 	0x01a51c,	// 0x4c		// Mini Time Stone
 	0x047776,	// 0x4d		// Red Star Ring
 	0x024d68,	// 0x4e		// Jump ramp from AIZ, SOZ, LRZ
-	0x01a51a,	// 0x4f		// Ring
+	0x01f5a0,	// 0x4f		// Killing Blocker Element
 	0x01a51a,	// 0x50		// Ring
 	0x01a51a,	// 0x51		// Ring
 	0x01a51a,	// 0x52		// Ring

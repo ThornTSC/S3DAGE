@@ -18,6 +18,7 @@
 	"cpz_background_water_line300":  { "File": "cpz_background.bmp", "Rect": "0,300,1536,1"},		// line 300
 
 	"cpz_background_low":  { "File": "cpz_background.bmp", "Rect": "0,301,1536,595"},		// lines 301 through 895. 301 through 303 are non-rippling water.
+	"cpz_background_extra":  { "File": "cpz_background.bmp", "Rect": "0,640,1536,356"},		// lines 640 through 895, used to extend Knux's background
 
 	"cpz_background_transparencyfix":  { "File": "cpz_background_transparencyfix.bmp"},		// Transparent colors are not showing properly underwater when water only partially fills the screen.
 																							// To circumvent this bug, we use the same color in a different palette entry behind the background.
@@ -29,7 +30,9 @@
 	"cpz_background_anim_4":  { "File": "cpz_background_anim.bmp", "Rect": "0,4,32,48"},
 	"cpz_background_anim_5":  { "File": "cpz_background_anim.bmp", "Rect": "0,3,32,48"},
 	"cpz_background_anim_6":  { "File": "cpz_background_anim.bmp", "Rect": "0,2,32,48"},
-	"cpz_background_anim_7":  { "File": "cpz_background_anim.bmp", "Rect": "0,1,32,48"}
+	"cpz_background_anim_7":  { "File": "cpz_background_anim.bmp", "Rect": "0,1,32,48"},
+
+	"cpz_layouttransition":  { "File": "cpz_layouttransition.bmp"}							// this helps to disguise the layout transition between Part 1 and Part 2 Hard
 /*
 	// Sonic 2 Ricky
 	"s2_ricky_00": { "File": "s2_ricky.bmp", "Rect":  "0,0,22,15", "Center": "10,7" },

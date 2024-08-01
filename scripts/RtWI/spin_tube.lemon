@@ -127,6 +127,8 @@ function void fn0225fc()
 	}
 	// D2.u8 = timer.seconds & 0x01		// original Sonic 2 method of determining direction
 	D2.u8 = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles) ? 1 : 0	// for RtWI, Knuckles Hard mode goes one way, else go the other
+	if (objA1.position.y.u16 > 0x0500)
+		D2.u8 = !D2.u8		// the lower tube and higher tube use opposite data sets
 	fn022688()
 }
 
@@ -264,7 +266,7 @@ function void fn022784()
 			return
 		}
 	}
-	objA1.position.y.u16 &= 0x07ff
+//	objA1.position.y.u16 &= 0x07ff		// our level goes below 0x0800
 	u8[A4] = 0x06
 	charA1.control_flags = 0
 	playSound(SFX_SPINDASH_RELEASE)
@@ -316,7 +318,7 @@ function void fn0227fe()
 
 function void fn022858()
 {
-	objA1.position.y.u16 &= 0x07ff
+//	objA1.position.y.u16 &= 0x07ff		// our level goes below 0x0800
 	u8[A4] = 0
 	playSound(SFX_SPINDASH_RELEASE)
 }

@@ -2045,14 +2045,18 @@ function void RenderHUD_Challenges()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
+			bool inPainWater = (isMainCharacter(CHARACTER_KNUCKLES) && unlock_act == 2 && layout.part == 1 && specialstages_knuckles && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE))
 			u16 px = baseX + ((!time_attack_hud && hud.layout) ? 0x40 : 0x58)
-			for (u32 value = ring_counter;;)
+			if (!inPainWater || (level.framecounter & 0x08))
 			{
-				HUD.drawDigit_Challenges(value % 10, px, py, renderQueue)
-				px -= 8
-				value /= 10
-				if (value == 0)
-					break
+				for (u32 value = ring_counter;;)
+				{
+					HUD.drawDigit_Challenges(value % 10, px, py, renderQueue)
+					px -= 8
+					value /= 10
+					if (value == 0)
+						break
+				}
 			}
 			++renderQueue
 		}
@@ -2334,14 +2338,18 @@ function void RenderHUD_Orig()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
+			bool inPainWater = (isMainCharacter(CHARACTER_KNUCKLES) && unlock_act == 2 && layout.part == 1 && specialstages_knuckles && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE))
 			u16 px = baseX + (!isBonusStage && hud.layout != 3 ? 0x58 : 0x40)	// in theory hud.layout should always be 3 here
-			for (u32 value = ring_counter;;)
+			if (!inPainWater || (level.framecounter & 0x08))
 			{
-				HUD.drawDigit(value % 10, px, py, renderQueue)
-				px -= 8
-				value /= 10
-				if (value == 0)
-					break
+				for (u32 value = ring_counter;;)
+				{
+					HUD.drawDigit(value % 10, px, py, renderQueue)
+					px -= 8
+					value /= 10
+					if (value == 0)
+						break
+				}
 			}
 			++renderQueue
 		}
@@ -3412,6 +3420,9 @@ function void Standalone.onRestartAtCheckpoint()
 	{
 		if (global.zone_act == 0x0201 && checkpoint.number == 6)
 			level.trigger08 = 1	// If we went through the "loop" of MGZ2 and returned to the star post, set the loop's trigger ID
+
+		if (unlock_act == 2 && checkpoint.number <= 7)
+			layout.part = 0		// Make sure we restart in the correct part of CPZ
 
 		// Handle achievements
 		Game.setAchievementValue(ACHIEVEMENT_MGZ_GIANTRINGS, 0)

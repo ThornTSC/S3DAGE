@@ -445,7 +445,11 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	else if (palette_set < 2 || original_mode)	// load from ROM normally if S3&K palettes or Original ROM Hack palettes other than the two above
 	{
 		if (index == 0x2e && unlock_act) // LBZ2 water or unlockable act water
-			System.loadExternalRawData("cpz_palette_underwater", destRaw)
+		{
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			u64 cpz_underwater_palette = (KnuxHard) ? "cpz_palette_underwater_hard" : "cpz_palette_underwater"
+			System.loadExternalRawData(cpz_underwater_palette, destRaw)
+		}
 		return
 	}
 
@@ -477,7 +481,11 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		if (!unlock_act)
 			System.loadExternalRawData("PaletteLBZ2Water", destRaw)
 		else
-			System.loadExternalRawData("cpz_palette_underwater", destRaw)
+		{
+			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			u64 cpz_underwater_palette = (KnuxHard) ? "cpz_palette_underwater_hard" : "cpz_palette_underwater"
+			System.loadExternalRawData(cpz_underwater_palette, destRaw)
+		}
 	}
 	else if (index == 0x0a)	// AIZ1 Sonic intro
 		System.loadExternalRawData("PaletteAIZIntro", destRaw)
@@ -663,6 +671,8 @@ function void LevelPaletteUpdate.EHZ()
 
 function void LevelPaletteUpdate.CPZ()
 {
+	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+
 	A0 = 0x870000
 	--u16[0xfffff634]
 	if (s16[0xfffff634] < 0)
@@ -680,7 +690,8 @@ function void LevelPaletteUpdate.CPZ()
 		if (palette_set >= 2)
 		{
 			u32[0xfffff0f8] = u32[A0 + D0.s16]
-			u8[0xfffff0f8] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (!KnuxHardLayout)
+				u8[0xfffff0f8] = 0x0e		// create same amount of blue as in purple terrain base color
 			if (u8[0xfffff0f9] == 0x00)
 				u8[0xfffff0f9] = 0x0c	// use less green and more red for brightest color
 			else if (u8[0xfffff0f9] == 0x20)
@@ -689,7 +700,8 @@ function void LevelPaletteUpdate.CPZ()
 				u8[0xfffff0f9] = 0x4c	// use less green and more red for brightest color
 			else
 				u8[0xfffff0f9] = 0x4e	// use less green and more red for brightest color
-			u8[0xfffff0fa] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (!KnuxHardLayout)
+				u8[0xfffff0fa] = 0x0e		// create same amount of blue as in purple terrain base color
 			if (u8[0xfffff0fb] == 0x00)
 				u8[0xfffff0fb] = 0x0c	// use less green and more red for brightest color
 			else if (u8[0xfffff0fb] == 0x20)
@@ -699,7 +711,8 @@ function void LevelPaletteUpdate.CPZ()
 			else
 				u8[0xfffff0fb] = 0x4e	// use less green and more red for brightest color
 			u16[0xfffff0fc] = u16[A0 + D0.s16]
-			u8[0xfffff0fc] = 0x0e		// create same amount of blue as in purple terrain base color
+			if (!KnuxHardLayout)
+				u8[0xfffff0fc] = 0x0e		// create same amount of blue as in purple terrain base color
 			if (u8[0xfffff0fd] == 0x00)
 				u8[0xfffff0fd] = 0x0c	// use less green and more red for brightest color
 			else if (u8[0xfffff0fd] == 0x20)
@@ -724,8 +737,8 @@ function void LevelPaletteUpdate.CPZ()
 			if (u8[0xfffff0fe] > 0x02)	// if sufficient blue,
 				u8[0xfffff0fe] -= 0x02	// dim it
 			u8[0xfffff0ff] = (((u8[0xfffff0ff] & 0xf0)/2) & 0xe0) + (u8[0xfffff0ff] & 0x0f)	// take green color, halve it, remove odd values, and re-add red color
-			if ((u8[0xfffff0ff] & 0x0f) > 0x02)	// if sufficient red,
-				u8[0xfffff0ff] -= 0x02			// dim it
+			if ((u8[0xfffff0ff] & 0x0f) > 0x02 && !KnuxHardLayout)	// if sufficient red,
+				u8[0xfffff0ff] -= 0x02								// dim it
 		}
 
 		// Background red lights
@@ -738,9 +751,13 @@ function void LevelPaletteUpdate.CPZ()
 		if (palette_set >= 2)
 		{
 			u16[0xfffff0de] = u16[A0 + D0.s16]	// Underwater_palette_line3+$1E
-			u8[0xfffff0de] += 0x08		// add blue to the red flash to make purple
-			if ((u8[0xfffff0df] & 0x0f) > 0x04)	// if there is sufficient red in the current flash color,
-				u8[0xfffff0df] -= 0x02	// remove a bit of it to dim the color underwater
+			if (!KnuxHardLayout)
+			{
+				u8[0xfffff0de] += 0x08		// add blue to the red flash to make purple
+				if ((u8[0xfffff0df] & 0x0f) > 0x04)	// if there is sufficient red in the current flash color,
+					u8[0xfffff0df] -= 0x02	// remove a bit of it to dim the color underwater
+				
+			}
 		}
 	}
 }

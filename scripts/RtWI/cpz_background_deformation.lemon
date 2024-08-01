@@ -2,6 +2,12 @@ function void CPZ_CustomSprites()
 {
 	UpdateBackgroundScrolling.CPZ()
 
+	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+	if (layout.part == 0 && camera.position.y.u16 > (0x0980 - getScreenHeight()))
+		Renderer.drawCustomSprite("cpz_layouttransition", 0x4900, 0x0980, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+	else if (KnuxHardLayout)
+		Renderer.drawCustomSprite("cpz_layouttransition", 0x0100, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+
 	if (level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
 	{
 		Renderer.drawCustomSprite("signpost_eggman", 0x6740, 0x0425, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
@@ -34,7 +40,9 @@ function void EHZ.drawTransparentWaterfall(s16 px, s16 py, s16 width, s16 height
 
 function void UpdateBackgroundScrolling.CPZ()
 {
-	s16 yShift = camera.position.y.u16 / 4
+	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+	u16 cameraYOffset = KnuxHardLayout ? 0x0800 : 0
+	s16 yShift = (camera.position.y.u16 + cameraYOffset) / 4
 
 	// Buildings
 	s64 parallaxShift = -(camera.position.x.u16 / 6) % 768
@@ -62,76 +70,181 @@ function void UpdateBackgroundScrolling.CPZ()
 	Renderer.drawCustomSprite("cpz_background_low", parallaxShift, 301 - yShift, 0, 0, 0x1100)	// low background actually starts at line 304, but we include the non-rippling water here.
 
 	// Animated background wall tiles, sorted by x position. The background goes lower than this, but the original level does not make it visible.
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 448 - yShift, 0, 0, 0x1101)
+	// The Knux hard layout can only see these as high as 512, so any positioned higher than that are skipped in that layout.
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 + 128 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 + 128 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 + 128 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 512 - yShift, 0, 0, 0x1101)	// left of two columns
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 576 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 704 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 768 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 832 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 512 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 512 - yShift, 0, 0, 0x1101)	// right of two columns
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 576 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 704 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 768 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 832 - yShift, 0, 0, 0x1101)
 
-	// Animated background wall tiles again, but repeating the ones that must be shown past the loop point before the modulus assists.
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768, 768 - yShift, 0, 0, 0x1101)	// the extra two-column sections at the bottom of the background - left
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768, 768 - yShift, 0, 0, 0x1101)	// the extra two-column sections at the bottom of the background - right
+
+	// Animated background wall tiles again, but repeating the ones that must be shown past the loop point before the modulus assists (up to +480 in x).
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768 + 768, 640 + 128 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768 + 768, 640 + 128 - yShift, 0, 0, 0x1101)
 
-	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
+	if (!KnuxHardLayout)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 448 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 512 - yShift, 0, 0, 0x1101)
 	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 640 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768 + 768, 640 + 128 - yShift, 0, 0, 0x1101)
+
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768 + 768, 768 - yShift, 0, 0, 0x1101)
+	Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768 + 768, 768 - yShift, 0, 0, 0x1101)
+
+	// Extra background for Knux Hard layout
+	if (KnuxHardLayout)
+	{
+		Renderer.drawCustomSprite("cpz_background_extra", parallaxShift, 896 - yShift, 0, 0, 0x1100)
+		Renderer.drawCustomSprite("cpz_background_extra", parallaxShift, 896 + 256 - yShift, 0, 0, 0x1100)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 640 + 256 - yShift, 0, 0, 0x1101)	// the sets of three between the extra two-column sections
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 + 256 - yShift, 0, 0, 0x1101)	// sets of three in full columns
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768, 768 - yShift, 0, 0, 0x1101)		// the extra two-column sections at the bottom of the background - left
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768, 832 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768, 768 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144) % 768, 832 + 256 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768, 768 - yShift, 0, 0, 0x1101)		// the extra two-column sections at the bottom of the background - right
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768, 832 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768, 768 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208) % 768, 832 + 256 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 896 - yShift, 0, 0, 0x1101)		// left of two columns
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 960 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 1024 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 1088 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 528) % 768, 1152 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 896 - yShift, 0, 0, 0x1101)		// right of two columns
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 960 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1088 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1088 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1152 - yShift, 0, 0, 0x1101)
+
+		// And now again repeating the ones that must be shown past the loop point before the modulus assists (up to +480 in x).
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)	// the sets of three between the extra two-column sections
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 128 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 176 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 224 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)	// sets of three in full columns
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480 + 768) % 768, 640 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384 + 768) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432 + 768) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480 + 768) % 768, 640 + 384 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 384 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 432 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 480 + 768) % 768, 640 + 512 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144 + 768) % 768, 768 - yShift, 0, 0, 0x1101)		// the extra two-column sections at the bottom of the background - left
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144 + 768) % 768, 832 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144 + 768) % 768, 768 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 144 + 768) % 768, 832 + 256 - yShift, 0, 0, 0x1101)
+
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208 + 768) % 768, 768 - yShift, 0, 0, 0x1101)		// the extra two-column sections at the bottom of the background - right
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208 + 768) % 768, 832 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208 + 768) % 768, 768 + 256 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 208 + 768) % 768, 832 + 256 - yShift, 0, 0, 0x1101)
+	}
 
 	// Transparency fix image. Transparent colors do not load properly while both above-water and below-water palettes are on screen.
-	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, water.height.current, 0, SPRITE_FLAG_WORLDSPACE, 0x10ff)
+	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, max(camera.foreground.y.u16, water.height.current), 0, SPRITE_FLAG_WORLDSPACE, 0x10ff)
 
 	// Chemical water cloudiness
-	Renderer.drawCustomSprite("whitescreen", 0, max(camera.foreground.y.u16, water.height.current + 2) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xdfe0, 0, 0x40800080, 0x10000)
+	u32 waterTint = (KnuxHardLayout) ? 0x400000ff : 0x40800080
+	Renderer.drawCustomSprite("whitescreen", 0, max(camera.foreground.y.u16, water.height.current + 2) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xdfe0, 0, waterTint, 0x10000)
 
 	if (layout.part == 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
 	{
-		bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
-		if (KnuxHard)
+		if (KnuxHardLayout)
 		{
-			Renderer.drawCustomSprite("signpost_eggman", 0x3840, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-			Renderer.drawCustomSprite("signpost_pole", 0x3840, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+			Renderer.drawCustomSprite("signpost_eggman", 0x3f40, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+			Renderer.drawCustomSprite("signpost_pole", 0x3f40, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
 		}
 		else
 		{

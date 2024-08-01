@@ -187,7 +187,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffb05a, 2)
+	debugWatch(0xffffb02c, 2)
 }
 
 // This function is the final one of any frame.
@@ -5036,6 +5036,8 @@ function void Character.UpdateNormalState.Sonic()
 
 
 // Do not muffle audio underwater or fix Knuckles's bubble location in Original Mode.
+// Also fix a quirk with resetting the drowning countdown outside of Original Mode
+// and implement CPZ damaging water.
 // Function taken from maingame\character\underwater_update.lemon
 //# address-hook(0x018466) end(0x018680)
 function void fn018466()
@@ -5057,6 +5059,13 @@ function void fn018466()
 	#endif
 
 	bool doChecks = true
+
+	// Outside of Original Mode, reset the frames counter for the drowning countdown too, not just the seconds counter.
+	// Without this reset, the player can get up to 30 seconds and 59 frames of time underwater.
+	u16 drowningFrames = u16[A0 + 0x3c]		// store the frames counter
+	if (!original_mode)
+		u16[A0 + 0x3c] = 0					// set it to zero so early exits to this function don't maintain the value
+
 	if (u16[A0 + 0x30] == 0)
 	{
 		// Character died?
@@ -5069,7 +5078,7 @@ function void fn018466()
 
 	#if STANDALONE
 		// Hyper form active?
-		if (u8[A2 + 0x38] == CHARACTER_TAILS)
+		if (u8[A2 + 0x38] == CHARACTER_TAILS && !original_mode)
 		{
 			if (super.active.tails & 0x80)
 				return
@@ -5085,8 +5094,34 @@ function void fn018466()
 		if ((u8[A2 + 0x2a] & char.flag.UNDERWATER) == 0)
 			return
 
+		u16[A0 + 0x3c] = drowningFrames
+
 		// Decrease the drown countdown
 		--u16[A0 + 0x3c]
+		// Knux CPZ water and time to lose a ring (every half-second), but not invulnerable/invincible/super
+		if (s16[A0 + 0x3c] % 30 == 0 && A2 == 0xffffb000 && isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1 && !u8[A2 + 0x34] && !(u8[A2 + 0x2b] & char.bonus.INVINCIBLE) && !super.active)
+		{
+			if (ring_counter == 0)
+			{
+				u32 backupA0 = A0
+				A0 = A2
+				Character.Die()
+				A0 = backupA0
+			}
+			else
+			{
+				D0.u16 = ring_counter - 1
+				if (D0.u16 == 0 || ring_counter == 10 || ring_counter == 100)
+				{
+					hud.dirty.rings |= 0x80
+				}
+				ring_counter = D0.u16
+				hud.dirty.rings |= 0x01
+				playSound(0x64)	// SFX_HITSPIKES instead?
+			}
+		}
+
+
 		if (s16[A0 + 0x3c] < 0)
 		{
 			u16[A0 + 0x3c] = 0x3b
@@ -11576,8 +11611,8 @@ function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
 		// Hard layout
 		baseWaterHeight = 0x0590
 		water.height.current = 0x0590
-		water.height.next = 0x0590
-		water.height.target = 0x0590
+//		water.height.next = 0x0590
+//		water.height.target = 0x0590
 	}
 	else if (layout.part == 1  && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend() && water.height.current > 0x0600)	// added 0x0700 in x before original Act 2
 	{
@@ -12833,9 +12868,11 @@ function void Checkpoint.BaseUpdate()
 function void SetupCharacterAtLastCheckpoint()
 {
 	base.SetupCharacterAtLastCheckpoint()
+
+	bool KnuxHard= (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 	if (global.zone_act == 0x0201 && checkpoint.number == 6 && level.trigger08 != 1 && !original_mode)
 		level.trigger08 = 1		// if we are restarting from the loop's star post after that return, automatically throw the trigger
-	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00)
+	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00 && !KnuxHard)
 	{
 		water.height.current = 0x0510
 		water.height.next = 0x0510
@@ -14200,7 +14237,7 @@ function void Level.InitializeWater()
 		if (unlock_act == 2)	// Chemical Plant Zone
 		{
 			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
-			waterHeight = (KnuxHard) ? 0x0590 : (layout.part == 1 && camera.position.x.u16 < 0x1d00) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
+			waterHeight = (KnuxHard) ? 0x0590 : (layout.part == 1 && checkpoint.number <= 0x10) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
 		}
 		water.height.target = waterHeight
 		water.height.current = waterHeight

@@ -93,16 +93,20 @@ function void EHZ.cameraBounds()
 
 function void CPZ.cameraBounds()
 {
-	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+	debugWatch(0xffffb014, 2)
+	A0 = 0xffffb000
+	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)	// && layout.part == 1
 
-	u16 signpost_loc = (KnuxHard)? 0x3840 : (layout.part == 1) ? 0x3440 : 0x7f00 // 0x3f00 for Act 1 alone
+	u16 signpost_loc = (KnuxHard && layout.part == 1) ? 0x3f40 : (layout.part == 1) ? 0x3440 : 0x7f00 // 0x3f00 for Act 1 alone
 
 	if (level.scrolling_routine < 4)
 	{
 		level.vertical_wrap = 0
-	//	move_area.bottom.current = 0x0800 - getScreenHeight()
 		if (!KnuxHard)
 			move_area.bottom.target = (layout.part == 1 && camera.position.x.u16 >= 0x2800 + 0x0600) ? 0x0450 : (0x0800 - getScreenHeight())	// needed for Normal layout
+		else
+			move_area.bottom.target = (layout.part == 0 && char.position.x.u16 >= 0x4800) ? (0x0f00 - getScreenHeight()) : (camera.position.x.u16 < 0x0480) ? (0x0f00 - getScreenHeight()) : (0x0800 - getScreenHeight())
+
 		move_area.left = 0
 		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 
@@ -122,13 +126,14 @@ function void CPZ.cameraBounds()
 		}
 	}
 
-	if (camera.position.x.u16 >= 0x4990 && layout.part == 0)
+	if (char.position.x.u16 > 0x4a00 && char.position.y.u16 < 0x0580 && layout.part == 0)	// in the joining tube between Part 1 and Part 2 (normal)
 	{
 		// Move camera and character
 		camera.position.x.u16 -= 0x4800
 		camera.foreground.x.u16 -= 0x4800
 		u16[0xffffb010] -= 0x4800
-		u16[0xffffb05a] -= 0x4800
+		if (u32[0xffffb04a])
+			u16[0xffffb05a] -= 0x4800
 
 		// Change spin tube coordinates. Only the upper tube is changed at this time.
 		u16[0x880e88 + 0x3e] -= 0x4800
@@ -139,6 +144,7 @@ function void CPZ.cameraBounds()
 	//	u16[0x880e88 + 0x52] -= 0x4800
 	//	u16[0x880e88 + 0x56] -= 0x4800
 	//	u16[0x880e88 + 0x5a] -= 0x4800
+		u16[0x880e88 + 0x76] -= 0x4800
 
 		layout.part = 1
 		fn01c362()								// load Part 2 layout
@@ -149,10 +155,60 @@ function void CPZ.cameraBounds()
 		Level.InitializeWater()					// set water height
 		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 	}
-	else if (u16[0xffffb010] < 0x300 && u16 [0xffffb014] == 0x04b0 && layout.part == 1)		// player character is in the act transition tube and just switched acts
+	else if (char.position.x.u16 > 0x4b00 && char.position.y.u16 > 0x0940 && layout.part == 0)	// in the transition area between Part 1 and Part 2 (hard)
+	{
+		// Move camera and character
+		camera.position.x.u16 -= 0x4800
+		camera.foreground.x.u16 -= 0x4800
+		camera.position.y.u16 -= 0x0800
+		camera.foreground.y.u16 -= 0x0800
+		u16[0xffffb010] -= 0x4800
+		u16[0xffffb014] -= 0x0800
+		if (u32[0xffffb04a])
+		{
+			u16[0xffffb05a] -= 0x4800
+			u16[0xffffb05e] -= 0x0800
+		}
+		layout.part = 1
+		fn01c362()								// load Part 2 layout
+		dynobjects.routine = 0
+		DynamicObjectsLoading()					// load Part 2 objects
+		rings.update_routine = 0
+		UpdateListOfRingsAround()				// load Part 2 rings
+		Level.InitializeWater()					// set water height
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+	}
+	else if (char.position.x.u16 < 0x0380 && char.position.y.u16 < 0x0100 && layout.part == 1)	// in the transition area between Part 2 and Part 1 (hard)
+	{
+		// Move camera and character
+		camera.position.x.u16 += 0x4800
+		camera.foreground.x.u16 += 0x4800
+		camera.position.y.u16 += 0x0800
+		camera.foreground.y.u16 += 0x0800
+		u16[0xffffb010] += 0x4800
+		u16[0xffffb014] += 0x0800
+		if (u32[0xffffb04a])
+		{
+			u16[0xffffb05a] += 0x4800
+			u16[0xffffb05e] += 0x0800
+		}
+		layout.part = 0
+		move_area.right = 0x7f00
+		fn01c362()								// load Part 1 layout
+		dynobjects.routine = 0
+		DynamicObjectsLoading()					// load Part 1 objects
+		rings.update_routine = 0
+		UpdateListOfRingsAround()				// load Part 1 rings
+		Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+	}
+
+	else if (char.position.x.u16 < 0x300 && char.position.y.u16 == 0x04b0 && layout.part == 1)		// player character is in the upper transition tube and just switched acts
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+	else if (char.position.x.u16 == 0x490 && char.position.y.u16 > 0x0500 && char.position.y.u16 < 0x0570 && layout.part == 1)		// player character is in the lower act transition tube and just switched acts
 		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 
 	// Hard layout layering fix
-	if (KnuxHard && u16[0xffffb010] > 0x2f75 && u16[0xffffb010] <= 0x2f85 && u16[0xffffb014] == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
-		u16[A0 + 0x46] = 0x0e0f	// set into Path 1 (2) High
+	if (KnuxHard && char.position.x.u16 > 0x2f75 && char.position.x.u16 <= 0x2f85 && char.position.y.u16 == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
+		char.layer_flags = 0x0e0f	// set into Path 1 (2) High
 }

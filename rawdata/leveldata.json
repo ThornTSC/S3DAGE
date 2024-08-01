@@ -349,6 +349,7 @@
     "cpz_palette":  { "File": "../level/CPZ/Palette/Palette.bin" },
     "cpz_palette_s2":  { "File": "../level/CPZ/Palette/S2 Palette.bin" },
     "cpz_palette_underwater":  { "File": "../level/CPZ/Palette/Palette Underwater.bin" },
+    "cpz_palette_underwater_hard":  { "File": "../level/CPZ/Palette/Palette Underwater Hard.bin" },
     "cpz_palettecycles":  { "File": "../level/CPZ/Palette/Palette Cycles.bin" },
 
     // Object art, mappings, and animation
