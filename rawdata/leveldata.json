@@ -359,6 +359,8 @@
     "cpz_pillar_mappings":  { "File": "../level/CPZ/Object Art/CPZ Pillar Mappings.bin" },
     "cpz_door_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Door Nemesis Art.bin" },
     "cpz_door_mappings":  { "File": "../level/CPZ/Object Art/CPZ Door Mappings.bin" },
+    "cpz_floatingblock_mappings":  { "File": "../level/CPZ/Object Art/CPZ Floating Block Mappings.bin" },
+    "cpz_floatingblocksmall_mappings":  { "File": "../level/CPZ/Object Art/CPZ Floating Block Small Mappings.bin" },
     "cpz_movingblock_art_nem":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Nemesis Art.bin" },
     "cpz_movingblock_mappings":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Mappings.bin" },
     "cpz_movingblock_subdata":  { "File": "../level/CPZ/Object Art/CPZ Moving Block Subdata.bin" },

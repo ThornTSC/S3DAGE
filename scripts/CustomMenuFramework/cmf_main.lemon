@@ -376,6 +376,11 @@ function void customMenu.mainLogicLoop()
 
 			// Start level.
 			global.game_mode = 0x8c
+			if (Input.buttonDown(BUTTON_Y) && !time_attack)
+			{
+				global.zone_act = 0x0200
+				setting.unlock_act = 2
+			}
 			unlock_act = setting.unlock_act
 
 			playSound(0xaf)

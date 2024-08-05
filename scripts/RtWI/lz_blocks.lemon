@@ -1,0 +1,90 @@
+// These two functions from objects\02_hcz\hcz_blocks.lemon are for stationary HCZ blocks.
+// We modify them to account for CPZ's Labyrinth Zone floating blocks.
+// No other platforms from Labyrinth Zone have been ported.
+//# address-hook(0x01f392) end(0x01f3c4)
+function void fn01f392()
+{
+	objA0.animation.sprite = objA0.subtype2c
+	A1 = 0x01f38a + objA0.subtype2c * 2
+	objA0.box_size.x = u8[(A1+=1)-1]
+	objA0.box_size.y = u8[(A1+=1)-1]
+	objA0.mapping_offset = 0x21d04a
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x03d4)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0280
+
+	if (unlock_act == 2)
+	{
+		objA0.box_size.x = 0x10
+		objA0.box_size.y = 0x10
+		if (objA0.subtype2c == 0)	// Chemical Plant Zone
+		{
+			objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18
+			objA0.sprite_attributes = 0x6418
+		}
+		else
+		{
+			objA0.mapping_offset = s2_mappings_address + 0x2000
+			objA0.sprite_attributes = sprite_attribute.PALETTE.LINE1
+			objA0.sprite_priority = 0x0300
+			if (objA0.subtype2c == 2)
+			{
+				objA0.box_size.x = 0x20			// platform is twice as wide
+				objA0.mapping_offset += 0x40	// 0x40 = size of small platform mappings
+			}
+			objA0.animation.sprite = 0
+		}
+	}
+
+	objA0.update_address = 0x01f3ca
+	fn01f3ca()
+}
+
+
+//# address-hook(0x01f3ca) end(0x01f3e6)
+function void fn01f3ca()
+{
+	D1 = objA0.box_size.x + 11
+	D2 = objA0.box_size.y
+	D3.u16 = objA0.box_size.y + 1
+	D4.u16 = objA0.position.x.u16
+	CheckCharacterOnClimbableObject()
+	if (unlock_act == 2 && objA0.subtype2c > 0)
+		FloatingBlock.CompareToWaterHeight()
+	DrawOrUnloadObject()
+}
+
+
+// Functions to move the block with the water height, capping falling/rising speed
+// to Sonic 1 behavior and stopping blocks at the floor or ceiling.
+
+function void FloatingBlock.CompareToWaterHeight()
+{
+	s16 diff = water.height.current - objA0.position.y.u16
+	if (abs(diff) > 0x10 && objA0.position.x.u16 > 0x4380 && objA0.position.x.u16 < 0x4600)		// if far away from water surface in the tutorial area,
+		objA0.position.y.u16 = water.height.current												// instantly snap to it (likely just loaded in)
+	else if (diff > 0)
+		FloatingBlock.Fall(diff)
+	else if (diff < 0)
+		FloatingBlock.Rise(diff)
+}
+
+function void FloatingBlock.Fall(s16 diff)
+{
+	diff = min(2, diff)				// limit falling speed
+	objA0.position.y.u16 += diff	// this is positive, so the block will fall
+	CheckGroundCollision()			// D1 is distance from floor. Positive values are above the floor.
+	if (D1.s16 >= 0x0f)
+		return
+	objA0.position.y.u16 += D1.u16 -= 0x0f	// stop the block at the floor
+}
+
+function void FloatingBlock.Rise(s16 diff)
+{
+	diff = max(-2, diff)			// limit rising speed
+	objA0.position.y.u16 += diff	// this is negative, so the block will rise
+	CheckCeilingCollision()			// D1 is distance from ceiling. Positive values are below the ceiling.
+	if (D1.s16 >= 0x10)
+		return
+	objA0.position.y.u16 -= D1.u16 - 0x10	// stop the block at the ceiling
+}

@@ -187,7 +187,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-	debugWatch(0xffffb02c, 2)
+//	debugWatch(0xffffb020, 2)
 }
 
 // This function is the final one of any frame.
@@ -1331,7 +1331,7 @@ function void fn01c362()
 			Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
 		else if (unlock_act == 2)
 		{
-			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
 				Standalone.loadRawLevelData("cpz_layout_1", global.zone_act, 0xffff8000)
 			else if (KnuxHard)
@@ -1369,7 +1369,7 @@ function void LevelObjectTableBuilder.buildObjects()
 			bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
 		else if (unlock_act == 2)
 		{
-			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
 				bytes = Standalone.loadRawLevelData("cpz_objects_1", global.zone_act, A0)
 			else if (KnuxHard)
@@ -1534,7 +1534,7 @@ function void LevelRingsTableBuilder.buildRings()
 			bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
 		else if (unlock_act == 2)
 		{
-			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
 				bytes = Standalone.loadRawLevelData("cpz_rings_1", global.zone_act, A1)
 			else if (KnuxHard)
@@ -5146,7 +5146,7 @@ function void fn018466()
 		// Decrease the drown countdown
 		--u16[A0 + 0x3c]
 		// Knux CPZ water and time to lose a ring (every half-second), but not invulnerable/invincible/super
-		if (s16[A0 + 0x3c] % 30 == 0 && A2 == 0xffffb000 && isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1 && !u8[A2 + 0x34] && !(u8[A2 + 0x2b] & char.bonus.INVINCIBLE) && !super.active)
+		if (s16[A0 + 0x3c] % 30 == 0 && A2 == 0xffffb000 && layout.part == 2 && !u8[A2 + 0x34] && !(u8[A2 + 0x2b] & char.bonus.INVINCIBLE) && !super.active)
 		{
 			if (ring_counter == 0)
 			{
@@ -11643,7 +11643,7 @@ function void fn030cf8()
 //# address-hook(0x006d6c) end(0x006d9a)
 function void UpdateWaterSurfaceLevel()
 {
-	if (unlock_act == 2 && layout.part == 1)
+	if (unlock_act == 2 && layout.part >= 1)
 		UpdateWaterSurfaceLevel.CPZ()
 	else
 		base.UpdateWaterSurfaceLevel()
@@ -11651,7 +11651,7 @@ function void UpdateWaterSurfaceLevel()
 
 function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
 {
-	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+	bool KnuxHard = (layout.part == 2)
 	u16 baseWaterHeight = (water.height.target < 0x0580) ? 0x0510 : 0x0710
 	if (KnuxHard)
 	{
@@ -11660,6 +11660,14 @@ function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
 		water.height.current = 0x0590
 //		water.height.next = 0x0590
 //		water.height.target = 0x0590
+
+		if (u16[0xffffb010] > 0x4380 && u16[0xffffb014] > 0x0500)
+			baseWaterHeight = 0x0720
+
+		if (u16[0xffffb010] >= 0x470a)
+		{
+			baseWaterHeight = 0x0290
+		}
 	}
 	else if (layout.part == 1  && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend() && water.height.current > 0x0600)	// added 0x0700 in x before original Act 2
 	{
@@ -12916,10 +12924,9 @@ function void SetupCharacterAtLastCheckpoint()
 {
 	base.SetupCharacterAtLastCheckpoint()
 
-	bool KnuxHard= (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 	if (global.zone_act == 0x0201 && checkpoint.number == 6 && level.trigger08 != 1 && !original_mode)
 		level.trigger08 = 1		// if we are restarting from the loop's star post after that return, automatically throw the trigger
-	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00 && !KnuxHard)
+	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00)
 	{
 		water.height.current = 0x0510
 		water.height.next = 0x0510
@@ -14283,8 +14290,8 @@ function void Level.InitializeWater()
 			waterHeight = 0x0a90
 		if (unlock_act == 2)	// Chemical Plant Zone
 		{
-			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
-			waterHeight = (KnuxHard) ? 0x0590 : (layout.part == 1 && checkpoint.number <= 0x10) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
+			bool KnuxHardLayout = (layout.part == 2)
+			waterHeight = (KnuxHardLayout) ? 0x0590 : (layout.part == 1 && (checkpoint.number & 0x7f) <= 10) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
 		}
 		water.height.target = waterHeight
 		water.height.current = waterHeight
@@ -23348,12 +23355,15 @@ function bool Standalone.useMultiSampleCollision()
 			Standalone.MultiSampleCollision.addRect(0x38C0, 0x01A0, 0x3960, 0x0230)
 			Standalone.MultiSampleCollision.addRect(0x38C0, 0x04A0, 0x3960, 0x0530)
 		}
-//		else if (global.zone_act == 0x0200)
-//		{
-//			// MGZ 1
+		else if (global.zone_act == 0x0200)
+		{
+			if (unlock_act == 2)
+				CPZ.MultiSampleCollision()
+			
+			// MGZ 1
 //			Standalone.MultiSampleCollision.addRect(0x0880, 0x04c0, 0x0960, 0x0540)
 //			Standalone.MultiSampleCollision.addRect(0x11c0, 0x01c0, 0x1240, 0x0240)
-//		}
+		}
 		else if (global.zone_act == 0x0300)
 		{
 			// CNZ 1
@@ -23373,7 +23383,7 @@ function bool Standalone.useMultiSampleCollision()
 			// ICZ 2
 
 			// Do not use this for the quarter-pipes (note: there are few more than those out-commented below),
-			// it leads to some unwanted bahavior:
+			// it leads to some unwanted behavior:
 			//  - The character is is most cases launched up into the air in a 90� angle instead of something like 85�
 			//  - When coming from right quickly (e.g. when spindashing), the character often directly follows the terrain instead of going over the 90� edge
 
@@ -23453,7 +23463,61 @@ function bool Standalone.useMultiSampleCollision()
 	//}
 }
 
-
+function void CPZ.MultiSampleCollision()
+{
+	if (layout.part == 0)
+	{
+		Standalone.MultiSampleCollision.addRect(0x0780, 0x04c0, 0x0780 + 0x0080, 0x04c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x09c0, 0x05a0, 0x09c0 + 0x0100, 0x05a0 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x0d80, 0x0440, 0x0d80 + 0x0080, 0x0440 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x0f20, 0x0220, 0x0f20 + 0x0100, 0x0220 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x0f20, 0x06a0, 0x0f20 + 0x0100, 0x06a0 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x1500, 0x0640, 0x1500 + 0x0080, 0x0640 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1900, 0x0140, 0x1900 + 0x0080, 0x0120 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1c00, 0x0140, 0x1c00 + 0x0080, 0x0140 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x2920, 0x0320, 0x2920 + 0x0100, 0x0320 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x2c20, 0x0620, 0x2c20 + 0x0100, 0x0620 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x2d80, 0x0240, 0x2d80 + 0x0080, 0x0240 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x2ea0, 0x02a0, 0x2ea0 + 0x0100, 0x02a0 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3000, 0x0420, 0x3000 + 0x0100, 0x0420 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x30a0, 0x02a0, 0x30a0 + 0x0100, 0x02a0 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3780, 0x05c0, 0x3780 + 0x0080, 0x05c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x3980, 0x05c0, 0x3920 + 0x0080, 0x05c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x3e00, 0x0280, 0x3e00 + 0x0100, 0x0280 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x4100, 0x0500, 0x4100 + 0x0080, 0x0500 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x43c0, 0x0680, 0x43c0 + 0x0080, 0x0680 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x45c0, 0x0680, 0x45c0 + 0x0080, 0x0680 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x4940, 0x07a0, 0x4940 + 0x0280, 0x07a0 + 0x0080)
+	}
+	else if (layout.part == 1)
+	{
+		Standalone.MultiSampleCollision.addRect(0x0380, 0x02c0, 0x0380 + 0x0080, 0x02c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x03e0, 0x0220, 0x03e0 + 0x0060, 0x0220 + 0x0060)
+		Standalone.MultiSampleCollision.addRect(0x0bc0, 0x0190, 0x0bc0 + 0x00a0, 0x0190 + 0x0100)
+		Standalone.MultiSampleCollision.addRect(0x1200, 0x0540, 0x1200 + 0x0080, 0x0540 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1380, 0x0380, 0x1380 + 0x0080, 0x0380 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1680, 0x0180, 0x1680 + 0x0080, 0x0180 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x1a80, 0x0180, 0x1a80 + 0x01a0, 0x0180 + 0x0220)
+		Standalone.MultiSampleCollision.addRect(0x1c00, 0x0500, 0x1c00 + 0x0080, 0x0500 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x1d00, 0x04c0, 0x1d00 + 0x0080, 0x04c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1e80, 0x0480, 0x1e80 + 0x0080, 0x0480 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x2000, 0x0100, 0x2000 + 0x0100, 0x0100 + 0x0100)
+		Standalone.MultiSampleCollision.addRect(0x2600, 0x0200, 0x2600 + 0x0080, 0x0200 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x2600, 0x0510, 0x2600 + 0x0100, 0x0510 + 0x0100)
+	}
+	else
+	{
+		Standalone.MultiSampleCollision.addRect(0x02c0, 0x01c0, 0x02c0 + 0x0080, 0x01c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x0f00, 0x02c0, 0x0f00 + 0x0080, 0x02c0 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x1680, 0x0180, 0x1680 + 0x0080, 0x0180 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x2780, 0x0500, 0x2780 + 0x0080, 0x0500 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x2800, 0x0400, 0x2800 + 0x0080, 0x0400 + 0x0040)
+		Standalone.MultiSampleCollision.addRect(0x2900, 0x0200, 0x2900 + 0x0080, 0x0200 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3170, 0x0330, 0x3170 + 0x0080, 0x0330 + 0x0120)
+		Standalone.MultiSampleCollision.addRect(0x3a00, 0x0280, 0x3a00 + 0x0080, 0x0280 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3a80, 0x0400, 0x3a80 + 0x0080, 0x0400 + 0x0040)
+	}
+}
 
 
 

@@ -32,7 +32,10 @@
 	"cpz_background_anim_6":  { "File": "cpz_background_anim.bmp", "Rect": "0,2,32,48"},
 	"cpz_background_anim_7":  { "File": "cpz_background_anim.bmp", "Rect": "0,1,32,48"},
 
-	"cpz_layouttransition":  { "File": "cpz_layouttransition.bmp"}							// this helps to disguise the layout transition between Part 1 and Part 2 Hard
+	"cpz_layouttransition":  { "File": "cpz_layouttransition.bmp"},									// this helps to disguise the layout transition between Part 1 and Part 2 Hard
+	"cpz_layouttransition_obj":  { "File": "cpz_layouttransition_obj.bmp"},
+
+	"cpz_background_interior":  { "File": "cpz_background_interior.bmp"}
 /*
 	// Sonic 2 Ricky
 	"s2_ricky_00": { "File": "s2_ricky.bmp", "Rect":  "0,0,22,15", "Center": "10,7" },

@@ -34,6 +34,14 @@ function void EntryFunctions.actSelectMenu()
 // Setup custom menu.
 function void loadupCustomMenu()
 {
+
+	// Temporary code to prevent the non-existent CPZ option from causing problems
+	if (unlock_act == 2)
+	{
+		unlock_act = 0
+		setting.unlock_act = 0
+	}
+	
 	// Go to our custom menu.
 	customMenu.setup()
 //	Menu.FadeInAfterInit()

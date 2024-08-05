@@ -2045,7 +2045,7 @@ function void RenderHUD_Challenges()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-			bool inPainWater = (isMainCharacter(CHARACTER_KNUCKLES) && unlock_act == 2 && layout.part == 1 && specialstages_knuckles && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE))
+			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
 			u16 px = baseX + ((!time_attack_hud && hud.layout) ? 0x40 : 0x58)
 			if (!inPainWater || (level.framecounter & 0x08))
 			{
@@ -2338,10 +2338,11 @@ function void RenderHUD_Orig()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-			bool inPainWater = (isMainCharacter(CHARACTER_KNUCKLES) && unlock_act == 2 && layout.part == 1 && specialstages_knuckles && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE))
+
 			u16 px = baseX + (!isBonusStage && hud.layout != 3 ? 0x58 : 0x40)	// in theory hud.layout should always be 3 here
-			if (!inPainWater || (level.framecounter & 0x08))
-			{
+//			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
+//			if (!inPainWater || (level.framecounter & 0x08))
+//			{
 				for (u32 value = ring_counter;;)
 				{
 					HUD.drawDigit(value % 10, px, py, renderQueue)
@@ -2350,7 +2351,7 @@ function void RenderHUD_Orig()
 					if (value == 0)
 						break
 				}
-			}
+//			}
 			++renderQueue
 		}
 
@@ -2633,6 +2634,9 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	if (hud.layout == 2 && (time_attack == 1 || time_attack == 2) && (key == "hud_char_minutes" || key == "hud_char_seconds") && py == 0x18)
 		px += (time_attack_hud) ? -20 : 8
 
+	bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
+	if ((inPainWater && !(level.framecounter & 0x08)) && (py == 0x10 || py == 0x28) && !(key == "hud_text_rings" || key == "hud_text_rings_red"))	// In pain water when ring count should flash, and element to draw is a digit at height of rings digits?
+		return																																		// Do not draw it. (Our custom functions for the Challenges HUD handles it for challenges.)
 
 	u64 theme_key
 	if (!original_mode)
@@ -4127,6 +4131,15 @@ function void fn088568()
 
 // MGZ2: unload Eggman cutscenes in time attack modes
 // Functions taken from level\03_mgz\mgz_robotnikencounters.lemon
+//# address-hook(0x051504) end(0x05155e)
+function void fn051504()
+{
+	if (!original_mode && u16[0xffffb010] < 0x1000)	// do not try to set the camera locks for the unused encounter
+		return
+	
+	base.fn051504()
+}
+
 // fn051560() normally loads the first encounter that is unused in DAGE.
 //# address-hook(0x051560) end(0x0515a2)
 function void fn051560()
@@ -4157,7 +4170,6 @@ function void fn051560()
 	}
 */
 }
-
 
 //# address-hook(0x0515a4) end(0x05160c)
 function void fn0515a4()	// Eggman encounter leading to upper boss
@@ -6730,7 +6742,7 @@ function void Standalone.checkTimeAttackFinish()
 			return										// Only run the rest of this function if the player has actually finished		
 	}
 	else if (!Challenge.checkAndRenderFinish())
-		return										// Only run the rest of this function if the player has actually finished
+		return											// Only run the rest of this function if the player has actually finished
 
 	if (hud.dirty.timer)
 	{
@@ -7074,6 +7086,13 @@ function u16 Challenge.checkAndRenderFinish_unlockAct()
 	{
 		pole.x = 0x6740
 		pole.y = 0x0444
+	}
+	
+	// CPZ
+	if (unlock_act == 2)
+	{
+		pole.x = (layout.part == 2) ? 0x4a00 : (layout.part == 1) ? 0x3440 : -1
+		pole.y = (layout.part == 2) ? 0x0280 : (layout.part == 1) ? 0x0500 : -1
 	}
 
 	if (pole.x != -1 && pole.y != -1)

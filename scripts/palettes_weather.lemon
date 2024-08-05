@@ -482,7 +482,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 			System.loadExternalRawData("PaletteLBZ2Water", destRaw)
 		else
 		{
-			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			bool KnuxHard = (layout.part == 2)
 			u64 cpz_underwater_palette = (KnuxHard) ? "cpz_palette_underwater_hard" : "cpz_palette_underwater"
 			System.loadExternalRawData(cpz_underwater_palette, destRaw)
 		}
@@ -671,7 +671,7 @@ function void LevelPaletteUpdate.EHZ()
 
 function void LevelPaletteUpdate.CPZ()
 {
-	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+	bool KnuxHardLayout = (layout.part == 2)
 
 	A0 = 0x870000
 	--u16[0xfffff634]

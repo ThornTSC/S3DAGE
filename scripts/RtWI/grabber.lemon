@@ -48,7 +48,7 @@ function void Grabber.Init()
 	objA0.sprite_priority = 0x0200
 	objA0.box_size.x = 0x20	// upped from 0x10
 	objA0.box_size.y = 0x18
-	objA0.collision_attributes = 0x0b
+	objA0.collision_attributes = 0x0a		// 16x8 collision. 8x8 collision as in Sonic 2 is 0x0b.
 	objA0.base_state += 2
 
 	D0.s16 = -0x0040
@@ -160,6 +160,10 @@ function void fn038eb4()
 		objA0.animation.sprite = 0
 		return
 	}
+
+	if (Grabber.checkGrabbingInstaShield(u32(0xffff0000 + objA0.s2objoff32.u16)))	// new to make sure an insta-shield isn't pulling the player right into the Grabber's arms
+		return
+
 	// ObjA7_GrabCharacter, loc_38EEE
 	objA0.s2routine_secondary += 0x02
 	A1 = 0xffff0000 + objA0.s2objoff32.u16
@@ -182,6 +186,22 @@ function void fn038eb4()
 	u8[A0 + 0x37] = 0x20
 }
 
+function bool Grabber.checkGrabbingInstaShield(u32 charAddress)
+{
+	// New: check if the player character is using the Insta-Shield. If so, do not grab the player character.
+	u32 backupA0 = A0
+	A0 = charAddress	// place character object address in A0 to facilitate char.xxx definitions
+	bool hasInstaShield = false
+	if (Game.getSetting(SETTING_INSTA_SHIELD) || original_mode || time_attack)
+	{
+		if (char.character == CHARACTER_SONIC && (char.bonus_effect & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)) == 0)
+		{
+			hasInstaShield = (char.double_jump_state == 1)
+		}
+	}
+	A0 = backupA0	// restore current object to A0
+	return hasInstaShield
+}
 
 function void fn038f3e()
 {
@@ -283,7 +303,7 @@ function void fn038fe8()
 {
 	A1 = 0xffff0000 + objA0.s2objoff2c.u16
 	D0.u16 = objA1.s2objoff32.u16
-	if (D0.u16 != 0)
+	if (D0.u16 != 0 && !Grabber.checkGrabbingInstaShield(u32(0xffff0000 + D0.u16)))
 	{
 		A2 = 0xffff0000 + D0.u16
 		if (objA1.update_address == 0x038dba)	// if this object is the core Grabber object

@@ -293,7 +293,7 @@ function string Flicky.getCharacterBonusTextIcon(u8 character)
 	return (character == CHARACTER_SONIC) ? "flicky_hud_bonus_icon_blue" : (character == CHARACTER_TAILS) ? "flicky_hud_bonus_icon_orange" : "flicky_hud_bonus_icon_red"
 }
 
-function void Flicky.HUD.drawDigit(u8 digit, u16 px, u16 py, u16 renderQueue)
+function void Flicky.HUD.drawDigit(u8 digit, u16 px, u16 py, u16 renderQueue)		// is this function necessary? Not in other themes and no apparent calls made to it.
 {
 	HUD.drawSprite(stringformat("hud_digit_%d", digit), px, py, renderQueue)
 }

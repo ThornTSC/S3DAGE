@@ -827,7 +827,7 @@ constant array<u32> S2.ObjectTable =
 	0x02cfa8,	// 0x79		// Star post (using S3&K code, not S2 code)
 	0x0293a0,	// 0x7a		// CPZ pipe top moving platform
 	0x029590,	// 0x7b		// CPZ tube spring
-	0x01a51a,	// 0x7c		// Ring (normally CPZ background pylon/pillar in S2)
+	0x01f392,	// 0x7c		// Labyrinth Zone floating block (normally CPZ background pylon/pillar in S2)
 	0x01a51a,	// 0x7d		// Ring
 	0x01a51a,	// 0x7e		// Ring
 	0x01a51a,	// 0x7f		// Ring

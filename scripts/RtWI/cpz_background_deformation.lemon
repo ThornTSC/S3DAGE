@@ -2,16 +2,65 @@ function void CPZ_CustomSprites()
 {
 	UpdateBackgroundScrolling.CPZ()
 
-	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
+	bool KnuxHardLayout = (layout.part == 2)
 	if (layout.part == 0 && camera.position.y.u16 > (0x0980 - getScreenHeight()))
-		Renderer.drawCustomSprite("cpz_layouttransition", 0x4900, 0x0980, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
-	else if (KnuxHardLayout)
-		Renderer.drawCustomSprite("cpz_layouttransition", 0x0100, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
-
-	if (level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
 	{
-		Renderer.drawCustomSprite("signpost_eggman", 0x6740, 0x0425, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-		Renderer.drawCustomSprite("signpost_pole", 0x6740, 0x043d, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		Renderer.drawCustomSprite("cpz_layouttransition", 0x4900, 0x0980, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x4b00, 0x08f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x4b60, 0x08f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+	}
+	else if (KnuxHardLayout)
+	{
+		Renderer.drawCustomSprite("cpz_layouttransition", 0x0100, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x0300, 0x00f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x0360, 0x00f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0200, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0300, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0380, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0400, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0480, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0500, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0580, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0650, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4700, 0x0400, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4700, 0x0480, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4700, 0x0700, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4780, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4780, 0x0300, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4780, 0x0580, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4780, 0x0600, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4780, 0x0700, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4800, 0x0400, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4800, 0x0480, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4800, 0x0700, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0250, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0300, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0380, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0400, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0480, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0500, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0580, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0600, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0680, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+	}
+
+	if (layout.part >= 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
+	{
+		if (KnuxHardLayout)
+		{
+			Renderer.drawCustomSprite("signpost_eggman", 0x4a00, 0x0260, 0, SPRITE_FLAG_WORLDSPACE, 0x2100) // originally 0x3f40, 03e0 in KnuxHardLayout
+			Renderer.drawCustomSprite("signpost_pole", 0x4a00, 0x0260 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		}
+		else
+		{
+			Renderer.drawCustomSprite("signpost_eggman", 0x3440, 0x04e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+			Renderer.drawCustomSprite("signpost_pole", 0x3440, 0x04e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
+		}
 	}
 	// Doing this and setting the above to check for 6 avoids one frame of an invisible signpost (level end reached, true signpost not yet drawn after loading)
 	if (level.scrolling_routine == 4)
@@ -40,8 +89,8 @@ function void EHZ.drawTransparentWaterfall(s16 px, s16 py, s16 width, s16 height
 
 function void UpdateBackgroundScrolling.CPZ()
 {
-	bool KnuxHardLayout = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && layout.part == 1)
-	u16 cameraYOffset = KnuxHardLayout ? 0x0800 : 0
+	bool KnuxHardLayout = (layout.part == 2)
+	u16 cameraYOffset = (KnuxHardLayout && (u16[0xffffb010] < 0x4700 || camera.position.y.u16 > 0x0400)) ? 0x0800 : 0
 	s16 yShift = (camera.position.y.u16 + cameraYOffset) / 4
 
 	// Buildings
@@ -199,7 +248,7 @@ function void UpdateBackgroundScrolling.CPZ()
 
 		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 896 - yShift, 0, 0, 0x1101)		// right of two columns
 		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 960 - yShift, 0, 0, 0x1101)
-		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1088 - yShift, 0, 0, 0x1101)
+		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1024 - yShift, 0, 0, 0x1101)
 		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1088 - yShift, 0, 0, 0x1101)
 		Renderer.drawCustomSprite(stringformat("cpz_background_anim_%d", (level.framecounter.low / 4) % 8), (parallaxShift + 592) % 768, 1152 - yShift, 0, 0, 0x1101)
 
@@ -238,23 +287,4 @@ function void UpdateBackgroundScrolling.CPZ()
 	// Chemical water cloudiness
 	u32 waterTint = (KnuxHardLayout) ? 0x400000ff : 0x40800080
 	Renderer.drawCustomSprite("whitescreen", 0, max(camera.foreground.y.u16, water.height.current + 2) - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xdfe0, 0, waterTint, 0x10000)
-
-	if (layout.part == 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
-	{
-		if (KnuxHardLayout)
-		{
-			Renderer.drawCustomSprite("signpost_eggman", 0x3f40, 0x03e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-			Renderer.drawCustomSprite("signpost_pole", 0x3f40, 0x03e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-		}
-		else
-		{
-			Renderer.drawCustomSprite("signpost_eggman", 0x3440, 0x04e0, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-			Renderer.drawCustomSprite("signpost_pole", 0x3440, 0x04e0 + 0x0018, 0, SPRITE_FLAG_WORLDSPACE, 0x2100)
-		}
-	}
-	// Doing this and setting the above to check for 6 avoids one frame of an invisible signpost (level end reached, true signpost not yet drawn after loading)
-	if (level.scrolling_routine == 4)
-	{
-		level.scrolling_routine += 2
-	}
 }

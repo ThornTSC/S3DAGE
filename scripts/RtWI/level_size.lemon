@@ -93,22 +93,61 @@ function void EHZ.cameraBounds()
 
 function void CPZ.cameraBounds()
 {
-	debugWatch(0xffffb014, 2)
 	A0 = 0xffffb000
-	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)	// && layout.part == 1
+	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+	bool KnuxHardLayout = (layout.part == 2)
 
-	u16 signpost_loc = (KnuxHard && layout.part == 1) ? 0x3f40 : (layout.part == 1) ? 0x3440 : 0x7f00 // 0x3f00 for Act 1 alone
+	u16 signpost_loc = (KnuxHardLayout) ? 0x4a00 : (layout.part == 1) ? 0x3440 : 0x7f00 // originally 0x3f40 in KnuxHardLayout
+
+//	move_area.left = 0
+	if (!KnuxHardLayout)
+		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 
 	if (level.scrolling_routine < 4)
 	{
 		level.vertical_wrap = 0
-		if (!KnuxHard)
+		if (!KnuxHard || layout.part == 1)
 			move_area.bottom.target = (layout.part == 1 && camera.position.x.u16 >= 0x2800 + 0x0600) ? 0x0450 : (0x0800 - getScreenHeight())	// needed for Normal layout
 		else
-			move_area.bottom.target = (layout.part == 0 && char.position.x.u16 >= 0x4800) ? (0x0f00 - getScreenHeight()) : (camera.position.x.u16 < 0x0480) ? (0x0f00 - getScreenHeight()) : (0x0800 - getScreenHeight())
+		{
+			if (layout.part != 1)	// didn't break into the normal Part 2 layout via a glitch
+				move_area.bottom.target = (layout.part == 0 && char.position.x.u16 >= 0x4800) ? (0x0f00 - getScreenHeight()) : (layout.part == 2 && camera.position.x.u16 < 0x0480) ? (0x0f00 - getScreenHeight()) : (layout.part == 2 && u16[0xffffb010] >= 0x470a) ? (move_area.bottom.target) : (0x0800 - getScreenHeight())
 
-		move_area.left = 0
-		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
+			if (KnuxHardLayout)
+			{
+				if (u16[0xffffb010] >= 0x4600)
+				{
+					move_area.bottom.target = 0x064c
+				}
+				if (u16[0xffffb010] >= 0x470a)
+				{
+	//				if (u16[0xffffb014] < water.height.current)		// old, from when it was okay to fall into the water
+					{
+						if (water.height.current == water.height.target)
+							move_area.bottom.target = (water.height.current < 0x0300) ? 0x01d0 : 0x064c
+						else
+							move_area.bottom.target = min(water.height.current - 0xc0, 0x064c)
+						level.vertical_wrap = move_area.bottom.target
+						if (water.height.current != water.height.target)
+							camera.position.y.u16 = move_area.bottom.target
+					}
+					move_area.left.target = min(0x46f0, 0x47c0 - (getScreenWidth()/2) - 0x20)
+					if (camera.position.x.u16 < move_area.left.target)
+						camera.position.x.u16 = (camera.position.x.u16 & 0xfffe) + 2
+					move_area.left = min(move_area.left.target, camera.position.x.u16)
+					if (u16[0xffffb014] > 0x0280 && !(move_area.right > (move_area.left + (2 * getScreenExtend()) + 0x40) && move_area.right < 0x5000))
+						move_area.right = move_area.left + (2 * getScreenExtend()) + 0x40
+					else
+					{
+						move_area.left = camera.position.x.u16
+						move_area.right += 4
+						if (u16[0xffffb010] > camera.position.x.u16 + (getScreenWidth()/2) && u16[0xffffb010] > 0x4880)		// if we're outpacing the camera,
+							move_area.right += 4																			// scroll faster
+						move_area.right = min(signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend()), move_area.right)
+					}
+				}
+			}
+		}
 
 		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
 		{
@@ -117,98 +156,115 @@ function void CPZ.cameraBounds()
 			hud.dirty.timer = 0
 			if (allocDynamicObjectStd())
 			{
-				move_area.bottom.target = 0x0450
+				move_area.bottom.target = (KnuxHardLayout) ? 0x01d0 : 0x0450
 				// Spawn signpost
 				objA1.update_address = 0x0837b2
 				objA1.position.x.u16 = signpost_loc
-				objA1.position.y.u16 = (KnuxHard) ? 0x03e0 : 0x04e0
+				objA1.position.y.u16 = (KnuxHardLayout) ? 0x0260 : 0x04e0	// originally 0x03e0 for KnuxHard
 			}
 		}
-	}
-
-	if (char.position.x.u16 > 0x4a00 && char.position.y.u16 < 0x0580 && layout.part == 0)	// in the joining tube between Part 1 and Part 2 (normal)
-	{
-		// Move camera and character
-		camera.position.x.u16 -= 0x4800
-		camera.foreground.x.u16 -= 0x4800
-		u16[0xffffb010] -= 0x4800
-		if (u32[0xffffb04a])
-			u16[0xffffb05a] -= 0x4800
-
-		// Change spin tube coordinates. Only the upper tube is changed at this time.
-		u16[0x880e88 + 0x3e] -= 0x4800
-		u16[0x880e88 + 0x42] -= 0x4800
-	//	u16[0x880e88 + 0x46] -= 0x4800
-	//	u16[0x880e88 + 0x4a] -= 0x4800
-	//	u16[0x880e88 + 0x4e] -= 0x4800
-	//	u16[0x880e88 + 0x52] -= 0x4800
-	//	u16[0x880e88 + 0x56] -= 0x4800
-	//	u16[0x880e88 + 0x5a] -= 0x4800
-		u16[0x880e88 + 0x76] -= 0x4800
-
-		layout.part = 1
-		fn01c362()								// load Part 2 layout
-		dynobjects.routine = 0
-		DynamicObjectsLoading()					// load Part 2 objects
-		rings.update_routine = 0
-		UpdateListOfRingsAround()				// load Part 2 rings
-		Level.InitializeWater()					// set water height
-		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
-	}
-	else if (char.position.x.u16 > 0x4b00 && char.position.y.u16 > 0x0940 && layout.part == 0)	// in the transition area between Part 1 and Part 2 (hard)
-	{
-		// Move camera and character
-		camera.position.x.u16 -= 0x4800
-		camera.foreground.x.u16 -= 0x4800
-		camera.position.y.u16 -= 0x0800
-		camera.foreground.y.u16 -= 0x0800
-		u16[0xffffb010] -= 0x4800
-		u16[0xffffb014] -= 0x0800
-		if (u32[0xffffb04a])
+		if (char.position.x.u16 > 0x4a00 && char.position.y.u16 < 0x0580 && layout.part == 0)	// in the joining tube between Part 1 and Part 2 (normal)
 		{
-			u16[0xffffb05a] -= 0x4800
-			u16[0xffffb05e] -= 0x0800
+			// Move camera and character
+			camera.position.x.u16 -= 0x4800
+			camera.foreground.x.u16 -= 0x4800
+			u16[0xffffb010] -= 0x4800
+			if (u32[0xffffb04a])
+				u16[0xffffb05a] -= 0x4800
+
+			// Change spin tube coordinates. Only the upper tube is changed at this time.
+			u16[0x880e88 + 0x3e] -= 0x4800
+			u16[0x880e88 + 0x42] -= 0x4800
+		//	u16[0x880e88 + 0x46] -= 0x4800
+		//	u16[0x880e88 + 0x4a] -= 0x4800
+		//	u16[0x880e88 + 0x4e] -= 0x4800
+		//	u16[0x880e88 + 0x52] -= 0x4800
+		//	u16[0x880e88 + 0x56] -= 0x4800
+		//	u16[0x880e88 + 0x5a] -= 0x4800
+			u16[0x880e88 + 0x76] -= 0x4800
+
+			layout.part = 1
+			fn01c362()								// load Part 2 layout
+			dynobjects.routine = 0
+			DynamicObjectsLoading()					// load Part 2 objects
+			rings.update_routine = 0
+			UpdateListOfRingsAround()				// load Part 2 rings
+			Level.InitializeWater()					// set water height
+			CPZ.setMultiSampleCollision()
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 		}
-		layout.part = 1
-		fn01c362()								// load Part 2 layout
-		dynobjects.routine = 0
-		DynamicObjectsLoading()					// load Part 2 objects
-		rings.update_routine = 0
-		UpdateListOfRingsAround()				// load Part 2 rings
-		Level.InitializeWater()					// set water height
-		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
-	}
-	else if (char.position.x.u16 < 0x0380 && char.position.y.u16 < 0x0100 && layout.part == 1)	// in the transition area between Part 2 and Part 1 (hard)
-	{
-		// Move camera and character
-		camera.position.x.u16 += 0x4800
-		camera.foreground.x.u16 += 0x4800
-		camera.position.y.u16 += 0x0800
-		camera.foreground.y.u16 += 0x0800
-		u16[0xffffb010] += 0x4800
-		u16[0xffffb014] += 0x0800
-		if (u32[0xffffb04a])
+		else if (char.position.x.u16 > 0x4b00 && char.position.y.u16 > 0x0940 && layout.part == 0)	// in the transition area between Part 1 and Part 2 (hard)
 		{
-			u16[0xffffb05a] += 0x4800
-			u16[0xffffb05e] += 0x0800
+			// Move camera and character
+			camera.position.x.u16 -= 0x4800
+			camera.foreground.x.u16 -= 0x4800
+			camera.position.y.u16 -= 0x0800
+			camera.foreground.y.u16 -= 0x0800
+			u16[0xffffb010] -= 0x4800
+			u16[0xffffb014] -= 0x0800
+			if (u32[0xffffb04a])
+			{
+				u16[0xffffb05a] -= 0x4800
+				u16[0xffffb05e] -= 0x0800
+			}
+			layout.part = 2
+			fn01c362()								// load Part 2 layout
+			dynobjects.routine = 0
+			DynamicObjectsLoading()					// load Part 2 objects
+			rings.update_routine = 0
+			UpdateListOfRingsAround()				// load Part 2 rings
+			Level.InitializeWater()					// set water height
+			CPZ.setMultiSampleCollision()
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 		}
-		layout.part = 0
-		move_area.right = 0x7f00
-		fn01c362()								// load Part 1 layout
-		dynobjects.routine = 0
-		DynamicObjectsLoading()					// load Part 1 objects
-		rings.update_routine = 0
-		UpdateListOfRingsAround()				// load Part 1 rings
-		Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
-		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+		else if (char.position.x.u16 < 0x0380 && char.position.y.u16 < 0x0100 && layout.part == 2)	// in the transition area between Part 2 and Part 1 (hard)
+		{
+			// Move camera and character
+			camera.position.x.u16 += 0x4800
+			camera.foreground.x.u16 += 0x4800
+			camera.position.y.u16 += 0x0800
+			camera.foreground.y.u16 += 0x0800
+			u16[0xffffb010] += 0x4800
+			u16[0xffffb014] += 0x0800
+			if (u32[0xffffb04a])
+			{
+				u16[0xffffb05a] += 0x4800
+				u16[0xffffb05e] += 0x0800
+			}
+			layout.part = 0
+			move_area.right = 0x7f00
+			fn01c362()								// load Part 1 layout
+			dynobjects.routine = 0
+			DynamicObjectsLoading()					// load Part 1 objects
+			rings.update_routine = 0
+			UpdateListOfRingsAround()				// load Part 1 rings
+			Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
+			CPZ.setMultiSampleCollision()
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+		}
+
+		else if (char.position.x.u16 < 0x300 && char.position.y.u16 == 0x04b0 && layout.part == 1)		// player character is in the upper transition tube and just switched acts
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+		else if (char.position.x.u16 == 0x490 && char.position.y.u16 > 0x0500 && char.position.y.u16 < 0x0570 && layout.part == 1)		// player character is in the lower act transition tube and just switched acts
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+
+		// Hard layout layering fix
+		if (KnuxHardLayout && char.position.x.u16 > 0x2f75 && char.position.x.u16 <= 0x2f85 && char.position.y.u16 == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
+			char.layer_flags = 0x0e0f	// set into Path 1 (2) High
 	}
 
-	else if (char.position.x.u16 < 0x300 && char.position.y.u16 == 0x04b0 && layout.part == 1)		// player character is in the upper transition tube and just switched acts
-		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
-	else if (char.position.x.u16 == 0x490 && char.position.y.u16 > 0x0500 && char.position.y.u16 < 0x0570 && layout.part == 1)		// player character is in the lower act transition tube and just switched acts
-		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+	else if (move_area.left < signpost_loc - (getScreenWidth() / 2))
+	{
+		move_area.left &= 0xfffe	// set final bit of camera position to 0
+		move_area.left += 2			// move camera position to next even number
+	}
+}
 
-	// Hard layout layering fix
-	if (KnuxHard && char.position.x.u16 > 0x2f75 && char.position.x.u16 <= 0x2f85 && char.position.y.u16 == 0x04ec)	// in a small area that looks like a path swap should work, but a swapper doesn't make sense
-		char.layer_flags = 0x0e0f	// set into Path 1 (2) High
+function void CPZ.setMultiSampleCollision()
+{
+	u32 tablePointer = 0x817000
+	u32 backupA1 = A1
+	u16[tablePointer] = (global.zone_act | 0x8080)
+	A1 = tablePointer + 4
+	CPZ.MultiSampleCollision()
 }
