@@ -11,7 +11,7 @@ function void fn02d3c8()
 	}
 
 	// Unlockable act star posts only
-	if (ring_counter < 50 || global.chaos_emeralds >= 7)
+	if (ring_counter < 50 || global.chaos_emeralds >= 7 || Mods.isModActive("Chaos The Impostor"))	// cuurently Sota's special stage random layout code causes an endless loop, hardlocking the game
 		return
 	
 	// Select bonus stage

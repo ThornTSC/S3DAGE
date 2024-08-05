@@ -194,7 +194,7 @@ function bool Grabber.checkGrabbingInstaShield(u32 charAddress)
 	bool hasInstaShield = false
 	if (Game.getSetting(SETTING_INSTA_SHIELD) || original_mode || time_attack)
 	{
-		if (char.character == CHARACTER_SONIC && (char.bonus_effect & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)) == 0)
+		if (((char.character == CHARACTER_SONIC) || (Mods.isModActive("Chaos The Impostor") && char.character == CHARACTER_TAILS)) && (char.bonus_effect & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)) == 0)
 		{
 			hasInstaShield = (char.double_jump_state == 1)
 		}
