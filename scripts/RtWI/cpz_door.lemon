@@ -114,7 +114,8 @@ function void fn030e8c()
 	D2 = objA0.box_size.y
 	D3.u16 = D2.u16 + 1
 	D4.u16 = objA0.position.x.u16
-	fn01dc56()
+	if (u16[A0 + 0x30] != 0x40 || original_mode)	// subtype of sealing bridge floor, and offset 30 is the distance away from extended position (retracted is usually 0x40)
+		fn01dc56()							// SolidObjectFull routine, which is always called in the original object code
 
 	DrawOrUnloadObject()
 }

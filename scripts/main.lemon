@@ -187,7 +187,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffb020, 2)
+	debugWatch(0xffffb014, 2)
 }
 
 // This function is the final one of any frame.
@@ -11664,7 +11664,7 @@ function void UpdateWaterSurfaceLevel.CPZ()	// make the water level oscillate
 		if (u16[0xffffb010] > 0x4380 && u16[0xffffb014] > 0x0500)
 			baseWaterHeight = 0x0720
 
-		if (u16[0xffffb010] >= 0x470a)
+		if (u16[0xffffb010] >= 0x470a || (u16[0xffffb010] >= 0x46e0 && u16[0xffffb014] <= 0x0680))
 		{
 			baseWaterHeight = 0x0290
 		}
@@ -12314,8 +12314,8 @@ function void fn030850()
 	D2 = objA0.box_size.y
 	D3.u16 = D2.u16 + 1
 	D4.u16 = objA0.position.x.u16
-	if (!(objA0.subtype2c == 0xa4 && u16[A0 + 0x30] == 0x40))	// subtype of sealing bridge floor, and offset 30 is the distance away from extended position (retracted is usually 0x40)
-		fn01dc56()	// SolidObjectFull routine, which is always called in the original object code
+	if (!(objA0.subtype2c == 0xa4 && u16[A0 + 0x30] == 0x40) || original_mode)	// subtype of sealing bridge floor, and offset 30 is the distance away from extended position (retracted is usually 0x40)
+		fn01dc56()							// SolidObjectFull routine, which is always called in the original object code
 
 	D0.u16 = u16[A0 + 0x40]
 	DrawOrUnloadObjectByD0()
@@ -23480,6 +23480,8 @@ function void CPZ.MultiSampleCollision()
 		Standalone.MultiSampleCollision.addRect(0x2d80, 0x0240, 0x2d80 + 0x0080, 0x0240 + 0x0040)
 		Standalone.MultiSampleCollision.addRect(0x2ea0, 0x02a0, 0x2ea0 + 0x0100, 0x02a0 + 0x0080)
 		Standalone.MultiSampleCollision.addRect(0x3000, 0x0420, 0x3000 + 0x0100, 0x0420 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3300, 0x0680, 0x3300 + 0x0080, 0x0680 + 0x0080)
+		Standalone.MultiSampleCollision.addRect(0x3340, 0x0590, 0x3340 + 0x0080, 0x0590 + 0x0080)
 		Standalone.MultiSampleCollision.addRect(0x30a0, 0x02a0, 0x30a0 + 0x0100, 0x02a0 + 0x0080)
 		Standalone.MultiSampleCollision.addRect(0x3780, 0x05c0, 0x3780 + 0x0080, 0x05c0 + 0x0040)
 		Standalone.MultiSampleCollision.addRect(0x3980, 0x05c0, 0x3920 + 0x0080, 0x05c0 + 0x0040)
