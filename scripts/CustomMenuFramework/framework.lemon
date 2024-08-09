@@ -27,21 +27,17 @@ function void EntryFunctions.dataSelect()
 // Redirect A.I.R.'s new scripted act select to the DAGE act select
 function void EntryFunctions.actSelectMenu()
 {
-	global.game_mode = 0x54
+	u64 characterModName = System.getGlobalVariableValueByName("DAGE_characterModName")
+	if ((Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition")) || (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && Mods.getModPriority("3D2D Glitches: Sonic 3 With Bluckles") < Mods.getModPriority("Sonic 3: D.A. Garden Edition")) || (Mods.isModActive(characterModName) && Mods.getModPriority(characterModName) < Mods.getModPriority("Sonic 3: D.A. Garden Edition")))
+		global.game_mode = 0x58		// if a character mod is active and at the wrong priority, redirect to the main menu where code will display an error message
+	else
+		global.game_mode = 0x54
 	EntryFunctions.dataSelect()
 }
 
 // Setup custom menu.
 function void loadupCustomMenu()
 {
-
-	// Temporary code to prevent the non-existent CPZ option from causing problems
-	if (unlock_act == 2)
-	{
-		unlock_act = 0
-		setting.unlock_act = 0
-	}
-	
 	// Go to our custom menu.
 	customMenu.setup()
 //	Menu.FadeInAfterInit()
