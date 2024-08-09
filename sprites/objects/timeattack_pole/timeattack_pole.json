@@ -1,0 +1,7 @@
+{
+	// Time Attack Pole
+	"timeattack_pole_01": { "File": "timeattack_pole.png", "Rect":  "0,0,12,60", "Center": "6,30" },
+	"timeattack_pole_02": { "File": "timeattack_pole.png", "Rect": "13,0,12,60", "Center": "6,30" },
+	"timeattack_pole_03": { "File": "timeattack_pole.png", "Rect": "26,0,12,60", "Center": "6,30" },
+	"timeattack_pole_04": { "File": "timeattack_pole.png", "Rect": "39,0,12,60", "Center": "6,30" }
+}
