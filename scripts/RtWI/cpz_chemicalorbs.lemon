@@ -39,7 +39,7 @@ function void ChemicalOrbs.InitOrb()
 	objA1.mapping_offset = 0x880000 + 0x24
 	objA1.sprite_attributes = 0x643c
 	objA1.render_flags = 0x04
-	objA1.sprite_priority = min(0x0180 + (0x80 * (5 - D1.s16)), 0x380)		// new to sort orb drawing order. Usually just 0x0180.
+	objA1.sprite_priority = min(0x0180 + (0x80 * (5 - D1.s16)), 0x300)		// new to sort orb drawing order. Usually just 0x0180. Cannot use the full 0x380 because background pillars share that value.
 	objA1.collision_attributes = 0x8b
 	u16[A1 + 0x38] = objA1.position.x.u16
 	u16[A1 + 0x30] = objA1.position.y.u16
