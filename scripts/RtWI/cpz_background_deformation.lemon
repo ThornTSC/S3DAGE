@@ -47,6 +47,10 @@ function void CPZ_CustomSprites()
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0580, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0600, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4880, 0x0680, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4900, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0xa000)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4980, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0xa000)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4a00, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0xa000)
+		Renderer.drawCustomSprite("cpz_background_interior", 0x4a80, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0xa000)
 	}
 
 	if (layout.part >= 1 && level.scrolling_routine < 6 && time_attack != 1 && time_attack != 2)
@@ -92,6 +96,11 @@ function void UpdateBackgroundScrolling.CPZ()
 	bool KnuxHardLayout = (layout.part == 2)
 	u16 cameraYOffset = (KnuxHardLayout && (u16[0xffffb010] < 0x4700 || camera.position.y.u16 > 0x0400)) ? 0x0800 : 0
 	s16 yShift = (camera.position.y.u16 + cameraYOffset) / 4
+
+	// Fog and background transparency
+	if (palette_set >= 2)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xdf00, 0, 0x188000ff, 0x10000)
+	Renderer.drawCustomSprite("cpz_background_transparencyfix", 0, 0, 0, 0, 0x10ff)
 
 	// Buildings
 	s64 parallaxShift = -(camera.position.x.u16 / 6) % 768
@@ -282,7 +291,7 @@ function void UpdateBackgroundScrolling.CPZ()
 	}
 
 	// Transparency fix image. Transparent colors do not load properly while both above-water and below-water palettes are on screen.
-	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, max(camera.foreground.y.u16, water.height.current), 0, SPRITE_FLAG_WORLDSPACE, 0x10ff)
+//	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, max(camera.foreground.y.u16, water.height.current), 0, SPRITE_FLAG_WORLDSPACE, 0x10ff)	// this now runs at all times anyway
 
 	// Chemical water cloudiness
 	u32 waterTint = (KnuxHardLayout) ? 0x400000ff : 0x40800080
