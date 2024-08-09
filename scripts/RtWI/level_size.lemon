@@ -95,6 +95,8 @@ function void CPZ.cameraBounds()
 {
 	A0 = 0xffffb000
 	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+	if (Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS))
+		KnuxHard = true
 	bool KnuxHardLayout = (layout.part == 2)
 
 	u16 signpost_loc = (KnuxHardLayout) ? 0x4a00 : (layout.part == 1) ? 0x3440 : 0x7f00 // originally 0x3f40 in KnuxHardLayout
@@ -131,12 +133,15 @@ function void CPZ.cameraBounds()
 						if (water.height.current != water.height.target)
 							camera.position.y.u16 = move_area.bottom.target
 					}
-					move_area.left.target = min(0x46f0, 0x47c0 - (getScreenWidth()/2) - 0x20)
+					move_area.left.target = 0x47c0 - 0x00e0		// center of arena minus distance to left screen boundary
+					if (getScreenWidth() > 448)
+						move_area.left.target -= (getScreenWidth() - 448)/2
 					if (camera.position.x.u16 < move_area.left.target)
 						camera.position.x.u16 = (camera.position.x.u16 & 0xfffe) + 2
 					move_area.left = min(move_area.left.target, camera.position.x.u16)
-					if (u16[0xffffb014] > 0x0280 && !(move_area.right > (move_area.left + (2 * getScreenExtend()) + 0x40) && move_area.right < 0x5000))
-						move_area.right = move_area.left + (2 * getScreenExtend()) + 0x40
+					u16 rightBoundary = 0x47c0 - getScreenWidth() + 0x00e0 + (2*getScreenExtend())	// center of arena minus screen width plus distance to left screen boundary plus extra width
+					if (u16[0xffffb014] > 0x0280 && !(move_area.right > rightBoundary && move_area.right < 0x5000))
+						move_area.right = rightBoundary
 					else
 					{
 						move_area.left = camera.position.x.u16
@@ -183,6 +188,7 @@ function void CPZ.cameraBounds()
 		//	u16[0x880e88 + 0x5a] -= 0x4800
 			u16[0x880e88 + 0x76] -= 0x4800
 
+			clearRespawnTable = true
 			layout.part = 1
 			fn01c362()								// load Part 2 layout
 			dynobjects.routine = 0
@@ -190,8 +196,8 @@ function void CPZ.cameraBounds()
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 2 rings
 			Level.InitializeWater()					// set water height
-			CPZ.setMultiSampleCollision()
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+			clearRespawnTable = false
 		}
 		else if (char.position.x.u16 > 0x4b00 && char.position.y.u16 > 0x0940 && layout.part == 0)	// in the transition area between Part 1 and Part 2 (hard)
 		{
@@ -207,6 +213,7 @@ function void CPZ.cameraBounds()
 				u16[0xffffb05a] -= 0x4800
 				u16[0xffffb05e] -= 0x0800
 			}
+			clearRespawnTable = true
 			layout.part = 2
 			fn01c362()								// load Part 2 layout
 			dynobjects.routine = 0
@@ -214,8 +221,8 @@ function void CPZ.cameraBounds()
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 2 rings
 			Level.InitializeWater()					// set water height
-			CPZ.setMultiSampleCollision()
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+			clearRespawnTable = false
 		}
 		else if (char.position.x.u16 < 0x0380 && char.position.y.u16 < 0x0100 && layout.part == 2)	// in the transition area between Part 2 and Part 1 (hard)
 		{
@@ -232,6 +239,7 @@ function void CPZ.cameraBounds()
 				u16[0xffffb05e] += 0x0800
 			}
 			layout.part = 0
+			clearRespawnTable = true
 			move_area.right = 0x7f00
 			fn01c362()								// load Part 1 layout
 			dynobjects.routine = 0
@@ -239,8 +247,8 @@ function void CPZ.cameraBounds()
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 1 rings
 			Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
-			CPZ.setMultiSampleCollision()
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+			clearRespawnTable = false
 		}
 
 		else if (char.position.x.u16 < 0x300 && char.position.y.u16 == 0x04b0 && layout.part == 1)		// player character is in the upper transition tube and just switched acts
@@ -258,13 +266,4 @@ function void CPZ.cameraBounds()
 		move_area.left &= 0xfffe	// set final bit of camera position to 0
 		move_area.left += 2			// move camera position to next even number
 	}
-}
-
-function void CPZ.setMultiSampleCollision()
-{
-	u32 tablePointer = 0x817000
-	u32 backupA1 = A1
-	u16[tablePointer] = (global.zone_act | 0x8080)
-	A1 = tablePointer + 4
-	CPZ.MultiSampleCollision()
 }

@@ -1,3 +1,5 @@
+global bool clearRespawnTable
+
 global u16 rings.state_table_size = 1024	// The first word of ring data is always 00 00, so this is one more than the number of rings.
 											// The default value is 512 (0x200).
 global u16 bonus.rings.state_table_size = 512
@@ -8,7 +10,7 @@ global u16 bonus.rings.state_table_size = 512
 //# address-hook(0x00eb1a) end(0x00eb84)
 function void fn00eb1a()
 {
-	if (!global.in_extra_stage || (specialstages_knuckles && unlock_act && isMainCharacter(CHARACTER_KNUCKLES)))	// Don't clear when returning from special/bonus stage unless we're in Knux Sonic 2 hard mode
+	if (!global.in_extra_stage || (specialstages_knuckles && unlock_act && isMainCharacter(CHARACTER_KNUCKLES)) || clearRespawnTable)	// Don't clear when returning from special/bonus stage unless we're in Knux Sonic 2 hard mode
 	{
 		zeroMemory(0x820000, 2 * rings.state_table_size)	// usually 0x400
 	}
@@ -507,7 +509,7 @@ function void DynamicObjectsLoading.Init()
 	level.object_type_table = useFirstObjectTypeTable ? 0x094ea2 : 0x0952a2
 
 	dynobjects.routine += 4			// Use "DynamicObjectsLoading.UpdateDefault()"
-	if (global.in_extra_stage == 0 || (specialstages_knuckles && unlock_act && isMainCharacter(CHARACTER_KNUCKLES)))
+	if (global.in_extra_stage == 0 || (specialstages_knuckles && unlock_act && isMainCharacter(CHARACTER_KNUCKLES)) || clearRespawnTable)
 	{
 	//	zeroMemory(0xffffeb00, 0x300)								// standard object respawn table
 		zeroMemory(object_respawn_table, object_respawn_table_size)	// new object respawn table location and size
