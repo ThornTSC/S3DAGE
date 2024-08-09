@@ -6472,10 +6472,20 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
-	// Sonic 2 Flicky
+	// Sonic 2 Flicky and Locky
 	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 5)
 	{
-		Renderer.drawCustomSprite(stringformat("s2_flicky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		if (unlock_act == 2)
+			Renderer.drawCustomSprite(stringformat("s2_locky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		else
+			Renderer.drawCustomSprite(stringformat("s2_flicky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		return true
+	}
+
+	// Sonic 2 Pocky
+	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 0)
+	{
+		Renderer.drawCustomSprite(stringformat("s2_pocky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 		return true
 	}
 

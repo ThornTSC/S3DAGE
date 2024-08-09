@@ -35,16 +35,15 @@
 	"cpz_layouttransition":  { "File": "cpz_layouttransition.bmp"},									// this helps to disguise the layout transition between Part 1 and Part 2 Hard
 	"cpz_layouttransition_obj":  { "File": "cpz_layouttransition_obj.bmp"},
 
-	"cpz_background_interior":  { "File": "cpz_background_interior.bmp"}
-/*
-	// Sonic 2 Ricky
-	"s2_ricky_00": { "File": "s2_ricky.bmp", "Rect":  "0,0,22,15", "Center": "10,7" },
-	"s2_ricky_01": { "File": "s2_ricky.bmp", "Rect":  "22,0,24,16", "Center": "12,8" },
-	"s2_ricky_02": { "File": "s2_ricky.bmp", "Rect":  "46,0,15,24", "Center": "7,8" },
+	"cpz_background_interior":  { "File": "cpz_background_interior.bmp"},
 
-	// Sonic 2 Flicky
-	"s2_flicky_00": { "File": "s2_flicky.bmp", "Rect":  "0,0,16,15", "Center": "8,7" },
-	"s2_flicky_01": { "File": "s2_flicky.bmp", "Rect":  "16,0,16,15", "Center": "8,8" },
-	"s2_flicky_02": { "File": "s2_flicky.bmp", "Rect":  "32,0,15,21", "Center": "8,5" },
-*/
+	// Sonic 2 Pocky
+	"s2_pocky_00": { "File": "s2_pocky.bmp", "Rect":  "0,0,16,24", "Center": "8,12" },
+	"s2_pocky_01": { "File": "s2_pocky.bmp", "Rect":  "16,0,16,24", "Center": "8,12" },
+	"s2_pocky_02": { "File": "s2_pocky.bmp", "Rect":  "32,0,16,24", "Center": "8,12" },
+
+	// Sonic 2 Locky
+	"s2_locky_00": { "File": "s2_locky.bmp", "Rect":  "0,0,16,15", "Center": "8,7" },
+	"s2_locky_01": { "File": "s2_locky.bmp", "Rect":  "16,0,16,15", "Center": "8,8" },
+	"s2_locky_02": { "File": "s2_locky.bmp", "Rect":  "32,0,15,24", "Center": "8,5" }
 }

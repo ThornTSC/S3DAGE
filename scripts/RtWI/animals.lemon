@@ -9,17 +9,34 @@ function void fn02c8b8()
 
 	if (objA0.subtype2c != 0)
 	{
+		// Decide which critter to spawn based on subtype, seems like a leftover all the way from Sonic 1's ending
+		// Targets:
+		// Flicky		-> objA0.subtype2c = 0x0f
+		// Flicky		-> objA0.subtype2c = 0x10
+		// Flicky		-> objA0.subtype2c = 0x11
+		// Rabbit		-> objA0.subtype2c = 0x12
+		// Rabbit		-> objA0.subtype2c = 0x13
+		// Penguin		-> objA0.subtype2c = 0x14
+		// Penguin		-> objA0.subtype2c = 0x15
+		// Seal			-> objA0.subtype2c = 0x16
+		// Pig			-> objA0.subtype2c = 0x17
+		// Chicken		-> objA0.subtype2c = 0x18
+		// Squirrel		-> objA0.subtype2c = 0x19
 		D0 = objA0.subtype2c * 2
+
+		// These two lines are not adjusted to account for the extra critter entries from Sonic 2, which leads to broken behavior
 		objA0.base_state = D0.u8
 		D0.u16 -= 0x14
+
 		objA0.sprite_attributes = u16[0x02c8a2 + D0.s16]
 		objA0.mapping_offset = u32[0x02c876 + D0.s16 * 2]
 
 		A1 = 0x02c84a
-		objA0.value32 = u16[A1 + D0.s16]
+		u16[A0 + 0x32] = u16[A1 + D0.s16]			// Used in calculating horizontal velocity
 		objA0.velocity.x = u16[A1 + D0.s16]
-		u16[A0 + 0x34] = u16[A1 + D0.s16 + 2]
+		u16[A0 + 0x34] = u16[A1 + D0.s16 + 2]		// Used in calculating vertical velocity
 		objA0.velocity.y = u16[A1 + D0.s16 + 2]
+
 		objA0.hitbox_extends.y = 12
 		objA0.render_flags = (render_flag.WORLD | render_flag.FLIP_X)
 		objA0.sprite_priority = 0x300
@@ -29,21 +46,46 @@ function void fn02c8b8()
 	else
 	{
 		objA0.base_state += 2
+
+		// Randomly decide which critter to spawn
 		D0.u16 = getRandomNumber() & 0x01
+		bool isEagle = (unlock_act == 2 && D0.u16 == 1)
 		objA0.sprite_attributes = (D0.u16 == 0) ? 0x0580 : 0x0592
 
-		u16 zoneID = (unlock_act) ? 0x04 : global.zone	// EHZ uses the same animals as FBZ
+		// Decides the two critter's movement pattern for each zone
+		// Targets:
+		// Flicky, chicken		-> global.zone = 0x00	-> AIZ
+		// Rabbit, seal			-> global.zone = 0x01	-> HCZ
+		// Flicky, chicken		-> global.zone = 0x02	-> MGZ
+		// Rabbit, flicky		-> global.zone = 0x03	-> CNZ
+		// Squirrel, flicky		-> global.zone = 0x04	-> FBZ
+		// Penguin, seal		-> global.zone = 0x05	-> ICZ
+		// Flicky, chicken		-> global.zone = 0x06	-> LBZ
+		// Squirrel, chicken	-> global.zone = 0x07	-> MHZ
+		// Rabbit, chicken		-> global.zone = 0x08	-> SOZ
+		// Flicky, chicken		-> global.zone = 0x09	-> LRZ
+		// Rabbit, chicken		-> global.zone = 0x0a	-> SSZ
+		// Squirrel, chicken	-> global.zone = 0x0b	-> DEZ
+		// Squirrel, chicken	-> global.zone = 0x0c	-> DDZ
+		// Flicky, chicken		-> global.zone = 0x0d	-> Outro S/T
+
+		u16 zoneID = (unlock_act == 1) ? 0x04 : (unlock_act == 2) ? 0x03 : global.zone	// EHZ uses the same animals as Flying Battery, and CPZ as Carnival Night (with eagle instead of Flicky)
 		D1 = global.zone * 2 + D0.u16
-		if (unlock_act)
-			D1 = 0x04 * 2 + D0.u16	// EHZ uses the same animals as FBZ
+		if (unlock_act == 1)
+			D1 = 0x04 * 2 + D0.u16	// EHZ uses the same animals as Flying Battery
+		else if (unlock_act == 2)
+			D1 = 0x03 * 2 + D0.u16	// and CPZ as Carnival Night (with eagle instead of Flicky)
 		D0.u8 = u8[0x02c7ba + D1.s16]
 		u8[A0 + 0x30] = D0.u8
 		D0.u16 <<= 3
 
 		A1 = 0x02c7ea + D0.u16
-		objA0.value32 = u16[(A1+=2)-2]
-		u16[A0 + 0x34] = u16[(A1+=2)-2]
+		objA0.value32 = u16[(A1+=2)-2]		// Used in calculating horizontal velocity
+		u16[A0 + 0x34] = u16[(A1+=2)-2]		// Used in calculating vertical velocity
+		if (isEagle)							// CPZ and an eagle has spawned
+			s16[A0 + 0x34] = -0x300				// lower jump height compared to Flicky (which is -0x400)
 		objA0.mapping_offset = u32[(A1+=4)-4]
+
 		objA0.hitbox_extends.y = 0x0c
 		objA0.render_flags = (render_flag.WORLD | render_flag.FLIP_X)
 		objA0.sprite_priority = 0x300
@@ -53,6 +95,7 @@ function void fn02c8b8()
 		objA0.velocity.y = -0x400
 		if (objA0.flags38 == 0)
 		{
+			// Broken free from a badnik
 			if (allocDynamicObjectStd())
 			{
 				// Spawn floating points display
@@ -65,6 +108,7 @@ function void fn02c8b8()
 		}
 		else
 		{
+			// Escaping from a capsule, another Sonic 1 leftover?
 			objA0.base_state = 0x1c
 			objA0.velocity.x = 0
 		}
