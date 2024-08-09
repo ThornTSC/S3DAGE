@@ -14,8 +14,11 @@ define objA0.s2objoff32.u16 = u16[A0 + 0x32]
 define objA1.s2objoff32.u16 = u16[A1 + 0x32]
 define objA0.s2objoff34.u16 = u16[A0 + 0x34]
 define objA1.s2objoff34.u16 = u16[A1 + 0x34]
+define objA0.baseY = u16[A0 + 0x36]
 define objA0.s2routine_secondary = u8[A0 + 0x46]
 define objA1.s2routine_secondary = u8[A1 + 0x46]
+define objA0.instaShieldMiss = u8[A0 + 0x47]
+define objA1.instaShieldMiss = u8[A1 + 0x47]
 
 define charA1.spindash = u8[A1 + 0x3d]
 
@@ -48,8 +51,11 @@ function void Grabber.Init()
 	objA0.sprite_priority = 0x0200
 	objA0.box_size.x = 0x20	// upped from 0x10
 	objA0.box_size.y = 0x18
-	objA0.collision_attributes = 0x0a		// 16x8 collision. 8x8 collision as in Sonic 2 is 0x0b.
+	objA0.collision_attributes = 0x0b		// 0x0a is 16x8 collision. 8x8 collision as in Sonic 2 is 0x0b.
 	objA0.base_state += 2
+
+	// Add a line that saves the Grabber's base y position. Each time it returns to this position, it can try to grab Sonic again after insta-shield forced a miss.
+	objA0.baseY = objA0.position.y.u16
 
 	D0.s16 = -0x0040
 	if (objA0.render_flags & 0x01)
@@ -67,6 +73,21 @@ function void Grabber.Init()
 
 function void Grabber.Main()
 {
+	// When the Grabber fully retracts, it can try to grab Sonic again after insta-shield forced a miss.
+	if (objA0.position.y.u16 == objA0.baseY)
+	{
+		if (objA0.instaShieldMiss)
+		{
+			objA0.s2routine_secondary = 0
+			objA0.velocity.y = 0
+		}
+		objA0.instaShieldMiss = 0
+	}
+	// We can also try again if Sonic's no longer insta-shielding.
+	if (!Grabber.checkGrabbingInstaShield(0xffffb000))
+		objA0.instaShieldMiss = 0 
+
+	objA0.instaShieldMiss = 0	// test line
 	if (objA0.s2routine_secondary == 0)
 		fn038e52()
 	else if (objA0.s2routine_secondary == 2)
@@ -118,10 +139,15 @@ function void fn038e52()
 
 function void fn038e84()
 {
-	objA0.s2routine_secondary += 0x02
-	objA0.s2objoff2e.u16 = objA0.velocity.x
-	objA0.velocity.x = 0
-	objA0.s2objoff2c.s8 = 0x10
+	if (!Grabber.checkGrabbingInstaShield(0xffffb010))
+	{
+		objA0.s2routine_secondary += 0x02
+		objA0.s2objoff2e.u16 = objA0.velocity.x
+		objA0.velocity.x = 0
+		objA0.s2objoff2c.s8 = 0x10
+	}
+	else
+		objA0.s2routine_secondary = 0
 }
 
 
@@ -132,22 +158,31 @@ function void fn038e9a()
 	{
 		return
 	}
-	objA0.s2routine_secondary += 0x02
-	objA0.velocity.y = 0x0200
-	objA0.s2objoff2c.s8 = 0x40
+	if (!Grabber.checkGrabbingInstaShield(0xffffb010))
+	{
+		objA0.s2routine_secondary += 0x02
+		objA0.velocity.y = 0x0200
+		objA0.s2objoff2c.s8 = 0x40
+	}
+	else
+		objA0.s2routine_secondary = 0
 }
 
 
 function void fn038eb4()
 {
-	if (objA0.s2objoff30.u8 == 0)
+	bool instaShieldUsed = (Grabber.checkGrabbingInstaShield(u32(0xffff0000 + objA0.s2objoff32.u16)) || objA0.instaShieldMiss)	// new to make sure an insta-shield isn't pulling the player right into the Grabber's arms
+
+	if (objA0.s2objoff30.u8 == 0 || objA0.position.y.u16 >= objA0.baseY + 0x5c)		// Last check is new. 0x5c goes from a ceiling to a floor with a gap of one chunk in between.
 	{
 		--objA0.s2objoff2c.s8
 		if (objA0.s2objoff2c.s8 != 0)
 		{
-			if (objA0.s2objoff2c.s8 == 0x20)
+			if (objA0.s2objoff2c.s8 == 0x20 || instaShieldUsed || objA0.position.y.u16 >= objA0.baseY + 0x5c)		// Last check is new. 0x5c goes from a ceiling to a floor with a gap of one chunk in between.
 			{
 				objA0.velocity.y = -objA0.velocity.y
+				if (objA0.position.y.u16 >= objA0.baseY + 0x5c)
+					objA0.instaShieldMiss = 1
 			}
 			System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
 			A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12
@@ -161,10 +196,10 @@ function void fn038eb4()
 		return
 	}
 
-	if (Grabber.checkGrabbingInstaShield(u32(0xffff0000 + objA0.s2objoff32.u16)))	// new to make sure an insta-shield isn't pulling the player right into the Grabber's arms
+	// ObjA7_GrabCharacter, loc_38EEE
+	if (instaShieldUsed || objA0.instaShieldMiss)
 		return
 
-	// ObjA7_GrabCharacter, loc_38EEE
 	objA0.s2routine_secondary += 0x02
 	A1 = 0xffff0000 + objA0.s2objoff32.u16
 	objA1.flags2e = 0x81
@@ -278,7 +313,7 @@ function void fn038f88()
 	D0.u8 = objA1.animation.sprite + 0x03
 	objA0.animation.sprite = D0.u8
 	D0.u8 = objA0.collision_property
-	if (D0.u8 != 0)
+	if (D0.u8 != 0 && u8[u32(0xffff0000 + objA0.s2objoff2c.u16 + 0x47)] == 0)	// added check for instaShieldMiss in base object's 0x417 offset
 	{
 		objA0.collision_property = 0
 		if (objA1.s2routine_secondary == 0x04)
@@ -303,7 +338,10 @@ function void fn038fe8()
 {
 	A1 = 0xffff0000 + objA0.s2objoff2c.u16
 	D0.u16 = objA1.s2objoff32.u16
-	if (D0.u16 != 0 && !Grabber.checkGrabbingInstaShield(u32(0xffff0000 + D0.u16)))
+	bool instaShieldDodge = Grabber.checkGrabbingInstaShield(u32(0xffff0000 + D0.u16))
+	if (instaShieldDodge && objA1.update_address == 0x038dba)
+		objA1.instaShieldMiss = 1
+	if (D0.u16 != 0)	// && !instaShieldDodge
 	{
 		A2 = 0xffff0000 + D0.u16
 		if (objA1.update_address == 0x038dba)	// if this object is the core Grabber object
