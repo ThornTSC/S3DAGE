@@ -11,6 +11,8 @@ function void YellowPlatform.BaseUpdate()
 
 function void YellowPlatform.Init()
 {
+	u8[A0 + 0x46] = layout.part			// needed for appropriate deletion later
+
 	objA0.base_state += 0x02
 	objA0.mapping_offset = s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50
 	objA0.sprite_attributes = 0xe418
@@ -93,16 +95,30 @@ function void YellowPlatform.PostSubObjectLoop()
 function void YellowPlatform.Main()
 {
 	fn0294f4()
-	D0.u16 = (u16[A0 + 0x32] & 0xff80) - level.despawn_position.x	// camera_x_pos_coarse in disassemblies
-	if (D0.u16 > 0x0280)
+	// These objects are subject to extreme pop-in. We load them in memory as the level starts and never unload them to always have them ready to be drawn.
+//	D0.u16 = (u16[A0 + 0x32] & 0xff80) - level.despawn_position.x	// camera_x_pos_coarse in disassemblies
+//	if (D0.u16 > 0x0280)
+//	{
+//		D0.u16 = (u16[A0 + 0x34] & 0xff80) - level.despawn_position.x
+//		if (D0.u16 > 0x0280)
+//		{
+//			YellowPlatform.CheckUnload()
+//			return
+//		}
+//	}
+
+	// However, we do need to unload them manually when the layout part changes. If the initialized layout part and current part differ, unload.
+	if (u8[A0 + 0x46] != layout.part)
 	{
-		D0.u16 = (u16[A0 + 0x34] & 0xff80) - level.despawn_position.x
-		if (D0.u16 > 0x0280)
+		D0.u16 = objA0.respawn_entry
+		if (D0.u16 != 0)
 		{
-			YellowPlatform.CheckUnload()
-			return
+			u8[0xffff0000 + D0.u16] &= ~0x80
 		}
+		UnloadObject()
+		return
 	}
+
 	DrawObject()
 }
 
@@ -170,4 +186,46 @@ function void fn02953e()
 		u8[A1 + 0x36] ^= 0x01
 	}
 	return
+}
+
+//////////////////////
+
+function void CPZ.loadYellowPlatforms()
+{
+	u32 backupA1 = A1
+	A1 = 0xffffb456
+
+	if (layout.part == 0)
+	{
+		CPZ.initPlatform(0x1e80, 0x0088, 0x00)
+		CPZ.initPlatform(0x3600, 0x0488, 0x0c)
+	}
+	else if (layout.part == 1)
+	{
+		CPZ.initPlatform(0x0e80, 0x0708, 0x0c)
+		CPZ.initPlatform(0x1500, 0x0708, 0x0c)
+		CPZ.initPlatform(0x1fc0, 0x0308, 0x06)
+		CPZ.initPlatform(0x2240, 0x0708, 0x06)
+		CPZ.initPlatform(0x2d00, 0x0508, 0x0c)
+	}
+	else
+	{
+		CPZ.initPlatform(0x1080, 0x0588, 0x0c)
+		CPZ.initPlatform(0x1700, 0x0688, 0x0c)
+		CPZ.initPlatform(0x2100, 0x0708, 0x0c)
+		CPZ.initPlatform(0x2ec0, 0x0508, 0x06)
+	}
+
+	A1 = backupA1
+}
+
+function void CPZ.initPlatform(u16 px, u16 py, u8 subtype)
+{
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x0293a0
+		objA1.position.x.u16 = px
+		objA1.position.y.u16 = py
+		objA1.subtype2c = subtype
+	}
 }

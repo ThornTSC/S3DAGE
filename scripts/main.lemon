@@ -580,7 +580,10 @@ function void TitleCard.Init()
 	}
 
 	if (unlock_act == 2)
+	{
 		u32[0xffffb40c] = 0x020fd2	// create CPZ background pillar in a specific object slot	// created alongside water surface in Sonic 2
+		CPZ.loadYellowPlatforms()
+	}
 
 	base.TitleCard.Init()
 }

@@ -198,6 +198,7 @@ function void CPZ.cameraBounds()
 			Level.InitializeWater()					// set water height
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
+			CPZ.loadYellowPlatforms()
 		}
 		else if (char.position.x.u16 > 0x4b00 && char.position.y.u16 > 0x0940 && layout.part == 0)	// in the transition area between Part 1 and Part 2 (hard)
 		{
@@ -223,6 +224,7 @@ function void CPZ.cameraBounds()
 			Level.InitializeWater()					// set water height
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
+			CPZ.loadYellowPlatforms()
 		}
 		else if (char.position.x.u16 < 0x0380 && char.position.y.u16 < 0x0100 && layout.part == 2)	// in the transition area between Part 2 and Part 1 (hard)
 		{
@@ -249,6 +251,7 @@ function void CPZ.cameraBounds()
 			Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
+			CPZ.loadYellowPlatforms()
 		}
 
 		else if (char.position.x.u16 < 0x300 && char.position.y.u16 == 0x04b0 && layout.part == 1)		// player character is in the upper transition tube and just switched acts
