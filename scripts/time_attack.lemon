@@ -12,43 +12,43 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x24020200	// use for latest stable version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. v24.02.02.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.02.02.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24061800	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. v24.06.18.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.06.18.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24062100	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. v24.06.21.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.06.21.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24070400	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. v24.07.04.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.07.04.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24071000	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. v24.07.10.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.07.10.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP > 0x24071000	// use for versions that DAGE has not updated to learn yet
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.9.2.0`A.I.R. New Version", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.0`A.I.R. New Version", 1, px, py)
 		return
 	#endif
 
 	if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.9.2.0`A.I.R. Unknown Version", 1, px, py)	// use for old preview/test versions or stable versions before v24.02.02.0 (via modified mod.json)
+	Letters.Show("``DAGE v1.10.0.0`A.I.R. Unknown Version", 1, px, py)	// use for old preview/test versions or stable versions before v24.02.02.0 (via modified mod.json)
 }
 
 
@@ -3250,7 +3250,7 @@ function void Standalone.onLevelStart()
 	challenge_greenspheres = 0		// ensure normal special stages are loaded
 	time_attack_end = 0			// make sure we aren't marked as finishing a challenge
 
-	layout.part = 0				// always 0 while testing
+	layout.part = 0
 
 	if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2 || time_attack == 1 || time_attack == 2)
 	{
@@ -7102,10 +7102,10 @@ function u16 Challenge.checkAndRenderFinish_unlockAct()
 		u8 flags = (global.zone_act.apparent == 0x0a00 || global.zone_act.apparent == 0x0b00 || global.zone_act.apparent == 0x0001 ) ? SPRITE_FLAG_PRIO : 0x00
 		Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00)
 
-
-		move_area.right = pole.x - (getScreenWidth() / 2) + (2 * getScreenExtend()) 	// Set the camera x maximum in a way that centers the goal pole.
-																						// move_area.right always seems to be 0x50 (decimal 80) greater than the camera lock,
-																						// likely due to compensating for widescreen.
+		// In theory we don't need this in unlockable acts right now, as signpost_loc and the pole location are the same
+//		move_area.right = pole.x - (getScreenWidth() / 2) + (2 * getScreenExtend()) 	// Set the camera x maximum in a way that centers the goal pole.
+																							// move_area.right always seems to be 0x50 (decimal 80) greater than the camera lock,
+																							// likely due to compensating for widescreen.
 		if (px >= pole.x)
 			return true
 	}
