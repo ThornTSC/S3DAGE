@@ -97,13 +97,24 @@ function void UpdateBackgroundScrolling.CPZ()
 	u16 cameraYOffset = (KnuxHardLayout && (u16[0xffffb010] < 0x4700 || camera.position.y.u16 > 0x0400)) ? 0x0800 : 0
 	s16 yShift = (camera.position.y.u16 + cameraYOffset) / 4
 
+	s64 parallaxShift = -(camera.position.x.u16 / 3) % 1280
+
 	// Fog and background transparency
 	if (palette_set >= 2)
 		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xdf00, 0, 0x188000ff, 0x10000)
 	Renderer.drawCustomSprite("cpz_background_transparencyfix", 0, 0, 0, 0, 0x10ff)
 
+	// Clouds for Revisited Mode
+	if (palette_set >= 2)
+	{
+		Renderer.drawCustomSprite("cpz_background_clouds_close", parallaxShift, 0 - yShift, 0, 0, 0x1101)
+		parallaxShift = -(camera.position.x.u16 / 4) % 640
+		Renderer.drawCustomSprite("cpz_background_clouds_far", parallaxShift, 42 - yShift, 0, 0, 0x1101)
+	}
+
+	parallaxShift = -(camera.position.x.u16 / 6) % 768		// this is the parallax rate for the standard level without DAGE additions
+
 	// Buildings
-	s64 parallaxShift = -(camera.position.x.u16 / 6) % 768
 	Renderer.drawCustomSprite("cpz_background_high", parallaxShift, 0 - yShift, 0, 0, 0x1100)
 
 	// Water (scroll offset is based on buildings before ripple is applied)

@@ -1,6 +1,9 @@
 {
 //	"cpz_background":  { "File": "cpz_background.bmp"},
 
+	"cpz_background_clouds_close":  { "File": "cpz_background_clouds.bmp", "Rect": "0,0,2560,32"},
+	"cpz_background_clouds_far":  { "File": "cpz_background_clouds.bmp", "Rect": "0,42,1280,16"},		// half the size of the clouds above
+
 	"cpz_background_high":  { "File": "cpz_background.bmp", "Rect": "0,0,1536,288"},		// lines 0 through 287
 
 	"cpz_background_water_line288":  { "File": "cpz_background.bmp", "Rect": "0,288,1536,1"},		// line 288
