@@ -5,11 +5,11 @@
 
 function void UpdateGamePause()
 {
-//	if (pause_menu && !original_mode)
-//	{
-//		base.UpdateGamePause()
-//		return
-//	}
+	if (pause_menu && !original_mode)
+	{
+		base.UpdateGamePause()
+		return
+	}
 
 	if (time_attack_end)
 		return
@@ -524,6 +524,7 @@ function u8 PauseMenu_Normal_Restart()
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 5)
 	{
 		checkpoint.number = 0
+		layout.part = 0
 		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 
 		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
@@ -864,6 +865,7 @@ function u8 PauseMenu_Challenges()
 		restart_timer = 0
 		exit_timer = 0
 		checkpoint.number = 0
+		layout.part = 0
 		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
