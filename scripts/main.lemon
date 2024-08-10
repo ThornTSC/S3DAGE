@@ -82,6 +82,7 @@ global s16 pole.y
 define u16 total_stars = u16[0x8402fe]
 
 // Dev cheat for gaining stars
+global u8 cheatEntry
 global u16 cheatStars
 
 global bool exitGame
@@ -7109,6 +7110,8 @@ function void TitleScreen()
 		if (u8[0xfffffc01] & 0x0e)
 			Renderer.drawCustomSprite("original_game_by", getScreenWidth() / 2 - 85, 60, 0x00, 0, 0x2000, 0, u16(u8[0xfffffc01] & 0x0e) * 96 / 0x0e)
 	#endif
+
+		cheatEntry = 0
 	}
 
 	outro.wait_time = 0
@@ -7257,7 +7260,9 @@ function void TitleScreen()
 		if (global.demo_countdown == 0)
 			break
 
-		if ((control.pad1.pressed | control.player2.pressed) & 0xe0)	// usually "& CONTROL_START", but switched to START, A, or C
+		Titlescreen.EnterCheat()
+
+		if (((control.pad1.pressed | control.player2.pressed) & 0xe0) && !(Input.buttonDown(BUTTON_L) || Input.buttonDown(BUTTON_R)))	// usually "& CONTROL_START", but switched to START, A, or C
 		{
 			global.game_mode = 0x0c
 			lives_counter = 3
@@ -7426,7 +7431,98 @@ function void fn00486c()
 	fn0048dc()
 }
 
+function void Titlescreen.EnterCheat()
+{
+	if (Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R) && !cheatStars)
+	{
+		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfffe, 0, 0xc0)
+		Renderer.drawText("sonic3_fontB", getScreenWidth()/2, getScreenHeight()/2, "ENTER CHEAT:", 0xffffffff, 5, 0, 0xffff, 0)
+	}
 
+	if (!(Input.buttonDown(BUTTON_L) || Input.buttonDown(BUTTON_R)) && cheatEntry != 11)
+		cheatEntry = 0
+	else if (cheatEntry == 0 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_A))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 1 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_B))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 2 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_RIGHT))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 3 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_A))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 4 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_C))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 5 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_A))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 6 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_DOWN))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 7 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_A))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 8 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_B))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 9 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R))
+	{
+		if ((control.pad1.pressed & CONTROL_RIGHT))
+			++cheatEntry
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+	else if (cheatEntry == 10 && Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R) && (control.pad1.pressed | CONTROL_A) && !cheatStars)
+	{
+		if ((control.pad1.pressed & CONTROL_A))
+		{
+			++cheatEntry
+			cheatStars = 100
+			playSound(0x46)
+		}
+		else if (control.pad1.pressed)
+			cheatEntry = 0
+	}
+}
 
 // Again, make sure to draw the title screen image with the correct colors. Also remove START GAME.
 // Function taken from menus\titlescreen.lemon
@@ -7544,7 +7640,7 @@ function void fn004a88()
 	D2 = titlescreen.selection
 
 	D0.u8 = (control.pad1.pressed | control.pad2.pressed)
-	if (D0 & CONTROL_UP)
+	if ((D0 & CONTROL_UP) && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
 	{
 		--D2.u8
 		if (D2.s8 < 0)
@@ -7552,7 +7648,7 @@ function void fn004a88()
 			D2.u8 = (levelselect.unlocked) ? 2 : 1
 		}
 	}
-	if (D0 & CONTROL_DOWN)
+	if ((D0 & CONTROL_DOWN) && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
 	{
 		++D2.u8
 		if (levelselect.unlocked)
@@ -7569,7 +7665,7 @@ function void fn004a88()
 	objA0.animation.sprite = D2.u8
 	titlescreen.selection = D2.u8
 
-	if ((D0.u8 & (CONTROL_UP | CONTROL_DOWN)) != 0)
+	if ((D0.u8 & (CONTROL_UP | CONTROL_DOWN)) != 0 && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
 	{
 		playSound(SFX_CLICK)
 	}
@@ -7587,7 +7683,82 @@ function void fn005b42()
 	VDP.setupVRAMWrite(0x8c40)
 	VDP.zeroVRAM(0x0a80)
 
-	base.fn005b42()
+	D2 = titlescreen.selection
+	D0.u8 = objA0.value26 & 0x7f
+	if (D0.u8 == 0)
+	{
+		D0.u8 = control.pad1.pressed
+		if ((D0 & CONTROL_UP) && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
+		{
+			objA0.value26 -= 8
+			s8[A0 + 0x27] = -8
+			--D2.u8
+			if (D2.u8 == 0xff)
+			{
+				D2.u8 = 1
+			}
+		}
+		if ((D0 & CONTROL_DOWN) && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
+		{
+			objA0.value26 += 8
+			s8[A0 + 0x27] = 8
+			++D2.u8
+			D2.u8 &= 0x01
+			if (D2.u8 >= 3)
+			{
+				D2 = 0
+			}
+		}
+		titlescreen.selection = D2.u8
+
+		if ((D0.u8 & (CONTROL_UP | CONTROL_DOWN)) != 0 && !(Input.buttonDown(BUTTON_L) && Input.buttonDown(BUTTON_R)))
+		{
+			playSound(SFX_CLICK)
+		}
+	}
+
+	if (objA0.value26 & 0x7f)
+	{
+		objA0.value26 += u8[A0 + 0x27]
+	}
+
+	D0.u8 = objA0.value26 + 0x98
+	LookupSinCos()
+	D1.s32 = s32(D1.s16) * 0x05
+	D0.s32 = s32(D0.s16) * 0x05
+	D1.s32 >>= 8
+	D0.s32 >>= 8
+	D3.u16 = u16[A0 + 0x44] - D1.s16
+	D2.u16 = u16[A0 + 0x46] - D0.s16
+	D1.u16 += u16[A0 + 0x44]
+	D0.u16 += u16[A0 + 0x46]
+	D4 = 0
+	D5 = 2
+	D6.u8 = objA0.value26 - 0xa0
+	if (D6.s8 < 0)
+	{
+		u32 tmp
+		tmp = D3
+		D3 = D1
+		D1 = tmp
+		tmp = D2
+		D2 = D0
+		D0 = tmp
+		tmp = D5
+		D5 = D4
+		D4 = tmp
+	}
+	++D5.u8
+
+	A2 = A0 + 0x18
+	u16[A2]   = D1.u16
+	u16[A2+2] = D0.u16
+	u16[A2+4] = D4.u16
+	u16[A2+6] = D3.u16
+	u16[A2+8] = D2.u16
+	u8[A2+11] = D5.u8
+
+	DrawObject()
 
 	PrintVersionNumber()
 
@@ -7858,7 +8029,9 @@ function void TitleScreen_SK()
 		if (global.demo_countdown == 0)
 			break
 
-		if ((control.pad1.pressed & CONTROL_START) == 0)
+		Titlescreen.EnterCheat()
+
+		if (!(((control.pad1.pressed | control.player2.pressed) & 0xe0) && !(Input.buttonDown(BUTTON_L) || Input.buttonDown(BUTTON_R))))	// usually "& CONTROL_START", but switched to START, A, or C
 			continue
 
 		global.game_mode = 0x0c
