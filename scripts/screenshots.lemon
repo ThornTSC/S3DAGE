@@ -15,8 +15,7 @@ function void DebugMode.Update()
 
 
 // Don't render the HUD
-//# address-hook(0x00db44) end(0x00dbb2)
-function void RenderHUD()
+function void RenderHUD_Orig()
 {
 }
 
