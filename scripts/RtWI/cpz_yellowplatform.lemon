@@ -45,6 +45,7 @@ function void YellowPlatform.SetSharedProperties()
 	objA1.box_size.x = 0x18
 	objA1.box_size.y = 0x08
 	u16[A1 + 0x30] = objA1.position.x.u16
+	u8[A1 + 0x46] = u8[A0 + 0x46]	// new line to add layout part to shared properties
 }
 
 function void YellowPlatform.SubObjectLoop()
@@ -141,6 +142,18 @@ function void YellowPlatform.CheckUnload()
 
 function void YellowPlatform.SubObject()
 {
+	// We need to unload the platforms manually when the layout part changes. If the initialized layout part and current part differ, unload.
+	if (u8[A0 + 0x46] != layout.part)
+	{
+		D0.u16 = objA0.respawn_entry
+		if (D0.u16 != 0)
+		{
+			u8[0xffff0000 + D0.u16] &= ~0x80
+		}
+		UnloadObject()
+		return
+	}
+
 	fn0294f4()
 	fn02953e()
 	DrawObject()
