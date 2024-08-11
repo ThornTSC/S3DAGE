@@ -111,7 +111,7 @@ include RtWI/?
 include CustomMenuFramework/?
 
 // Include future Sonic 3 AIR scripts to prepare them for Original Mode or later updates
-include FutureS3AIRScripts/?
+// include FutureS3AIRScripts/?
 
 // Include pause menu framework by FadeInside
 include menu_pause
@@ -18489,6 +18489,33 @@ function void FBZ2_CustomSprites()
 
 // In Original Mode, undo changes to the FBZ2 laser miniboss.
 // Functions taken from bosses\boss_fbz2_mid.lemon
+//# address-hook(0x06fd16) end(0x06fd28)
+function void fn06fd16()
+{
+	// Targets:
+	//  - 0x06fd38	-> objA0.base_state = 0x00  -> Initialization
+	//  - 0x06fdc0	-> objA0.base_state = 0x02  -> Waiting for player to reach the boss area
+	//  - 0x06fe00	-> objA0.base_state = 0x04  -> Deploying laser
+	//  - 0x06fe22	-> objA0.base_state = 0x06  -> Short wait time (used in various places, incl. during laser shots)
+	//  - 0x06feb2	-> objA0.base_state = 0x08  -> Charging laser, and wall movement if needed
+
+	call tableLookupAddress(0x06fd2e, objA0.base_state)
+
+    if (!original_mode)
+    {
+        // Destructible laser logic here and in other functions below was #contributed by HazelSpooder
+        if (objA0.base_state < 0x06)
+        {
+            // Prevent boss from being damaged too early
+            DrawObject()
+            return
+        }
+    }
+
+	fn070330()
+	Enemy.DrawDynamicObject()
+}
+
 //# address-hook(0x06fd38) end(0x06fdba)
 function void fn06fd38()
 {
