@@ -93,6 +93,9 @@ function void EHZ.cameraBounds()
 
 function void CPZ.cameraBounds()
 {
+	if (Mods.isModActive("Chaos The Impostor") && unlock_act == 2 && camera.position.x.u16 == 0 && camera.position.y.u16 == 0x018c)
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
+
 	A0 = 0xffffb000
 	bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 	if (Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS))
@@ -195,7 +198,7 @@ function void CPZ.cameraBounds()
 			DynamicObjectsLoading()					// load Part 2 objects
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 2 rings
-			Level.InitializeWater()					// set water height
+			call 0x007893				// set water height
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
 			CPZ.loadYellowPlatforms()
@@ -221,7 +224,7 @@ function void CPZ.cameraBounds()
 			DynamicObjectsLoading()					// load Part 2 objects
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 2 rings
-			Level.InitializeWater()					// set water height
+			call 0x007893				// set water height
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
 			CPZ.loadYellowPlatforms()
@@ -248,7 +251,7 @@ function void CPZ.cameraBounds()
 			DynamicObjectsLoading()					// load Part 1 objects
 			rings.update_routine = 0
 			UpdateListOfRingsAround()				// load Part 1 rings
-			Level.InitializeWater()					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
+			call 0x007893					// set water height. This moves the water to 0x0c00, below Part 1 where it can't be seen.
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 			clearRespawnTable = false
 			CPZ.loadYellowPlatforms()

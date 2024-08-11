@@ -2045,7 +2045,7 @@ function void RenderHUD_Challenges()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
+			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
 			u16 px = baseX + ((!time_attack_hud && hud.layout) ? 0x40 : 0x58)
 			if (!inPainWater || (level.framecounter & 0x08))
 			{
@@ -2250,6 +2250,9 @@ function void RenderHUD_Orig()
 		RenderHUD()							// While most HUD mods are disabled in Classic Mode, this one uses scripting
 		return								// and is best not interfered with.
 	}
+
+	System.callFunctionByName("RenderBoostBar")	// 3D in 2D Shadow boost bar is in standard RenderHUD(), so we need a copy in the Challenges variant
+	System.callFunctionByName("shadow.RenderBoostBar")	// same, but for Extra Slot Shadow
 
 #if STANDALONE
 	if (DEBUG_DISABLE_HUD)
@@ -2634,7 +2637,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	if (hud.layout == 2 && (time_attack == 1 || time_attack == 2) && (key == "hud_char_minutes" || key == "hud_char_seconds") && py == 0x18)
 		px += (time_attack_hud) ? -20 : 8
 
-	bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
+	bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
 	if ((inPainWater && !(level.framecounter & 0x08)) && (py == 0x10 || py == 0x28) && !(key == "hud_text_rings" || key == "hud_text_rings_red"))	// In pain water when ring count should flash, and element to draw is a digit at height of rings digits?
 		return																																		// Do not draw it. (Our custom functions for the Challenges HUD handles it for challenges.)
 

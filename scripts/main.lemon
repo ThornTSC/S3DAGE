@@ -986,7 +986,7 @@ function void fn01cacc()
 {
 	base.fn01cacc()
 
-	if (Mods.isModActive("Chaos The Impostor") && unlock_act)
+	if (Mods.isModActive("Chaos The Impostor") && unlock_act && (checkpoint.number & 0x7f) == 0)
 	{
 		D1 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2]
 		D0 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2 + 1]
@@ -996,7 +996,18 @@ function void fn01cacc()
 		u8[0xffffb020] = char.state.STANDING
 		u8[0xffffb02a] = 0
 		level.start_location = 0
+
+		if (unlock_act == 2)
+		{
+			layout.part = 0
+			camera.position.x.u16 = 0x0000
+			camera.foreground.x.u16 = 0x0000
+			camera.position.y.u16 = 0x018c
+			camera.foreground.y.u16 = 0x018c
+		}
 	}
+	if (Mods.isModActive("Chaos The Impostor") && unlock_act)
+		call 0x007893		// initialize water
 }
 
 
@@ -14415,6 +14426,7 @@ function void fn051d82()
 // Also set water for the proper unlockable acts.
 // Functions taken from maingame\maingame.lemon
 //# address-hook(0x007892) end(0x007a48)
+//# address-hook(0x007893)
 function void Level.InitializeWater()
 {
 	bool levelHasWater = false

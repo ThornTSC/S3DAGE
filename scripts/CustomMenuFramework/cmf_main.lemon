@@ -1173,10 +1173,10 @@ function void customMenu.displayTimes3D2DGlitches()
 	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
 	best_time_address = global.zone >= 0x0c ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 	best_time_address += 0x840000
+	if (setting.unlock_act)
+		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
 	if (time_attack == 2)
 		best_time_address += 0x120
-	if (setting.unlock_act)
-		best_time_address += 0x300
 
 	for (u8 i = 0; i <= 2; i++)
 	{
@@ -1248,10 +1248,10 @@ function void customMenu.displayTimesModded()
 	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
 	best_time_address = global.zone >= 0x0c ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 	best_time_address += 0x840000
+	if (setting.unlock_act)
+		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
 	if (time_attack == 2)
 		best_time_address += 0x120
-	if (setting.unlock_act)
-		best_time_address += 0x300
 
 	best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
 	best_time_minutes = u8[best_time_address + 1]
