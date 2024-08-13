@@ -85,7 +85,7 @@ function void fn02d47e()
 		// It's all likely unnecessary here.
 		if (u8[A0 + 0x29] & 0x01)
 		{
-			global.stage_type = 2
+			// global.stage_type = 2	// Unneeded if not entering a bonus stage or using a giant ring
 
 			u8 stage = u8[A0 + 0x48]	// Use previously selected bonus stage
 			if (original_mode)
@@ -113,7 +113,7 @@ function void fn02d47e()
 			global.game_mode = 0x34
 			playSound(0xaf)
 
-			checkpoint.rings = ring_counter
+			checkpoint.rings = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles) ? 0 : ring_counter
 			checkpoint.lives_granted = extra_lives_granted
 
 			// Set challenge green sphere stage.
@@ -130,8 +130,8 @@ function void fn02d47e()
 				char.bonus_effect &= ~char.bonus.ALL_SHIELDS
 				global.shields_backup_1 = 0
 				global.shields_backup_2 = 0
-				u16[0xfffffe50] = 0		// ring_counter backup
-				u8[0xfffffe61] = 0	// tracks lives given by 100 rings
+				level.backup.rings_2 = 0		// ring_counter backup
+				level.backup.lives_granted = 0	// tracks lives given by 100 rings
 			}
 
 			S2TitleCard.disappear = false

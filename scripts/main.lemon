@@ -13129,7 +13129,7 @@ function void SetupCharacterAtLastCheckpoint()
 
 	if (global.zone_act == 0x0201 && checkpoint.number == 6 && level.trigger08 != 1 && !original_mode)
 		level.trigger08 = 1		// if we are restarting from the loop's star post after that return, automatically throw the trigger
-	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1d00)
+	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend())
 	{
 		water.height.current = 0x0510
 		water.height.next = 0x0510
