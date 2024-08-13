@@ -12,43 +12,43 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x24020200	// use for latest stable version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.02.02.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.02.02.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24061800	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.06.18.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.06.18.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24062100	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.06.21.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.06.21.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24070400	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.07.04.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.07.04.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP == 0x24071000	// use for test version
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. v24.07.10.0", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.07.10.0", 1, px, py)
 		return
 	#endif
 	#if GAMEAPP > 0x24071000	// use for versions that DAGE has not updated to learn yet
 		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.10.0.0`A.I.R. New Version", 1, px, py)
+		Letters.Show("``DAGE v1.10.0.1`A.I.R. New Version", 1, px, py)
 		return
 	#endif
 
 	if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.10.0.0`A.I.R. Unknown Version", 1, px, py)	// use for old preview/test versions or stable versions before v24.02.02.0 (via modified mod.json)
+	Letters.Show("``DAGE v1.10.0.1`A.I.R. Unknown Version", 1, px, py)	// use for old preview/test versions or stable versions before v24.02.02.0 (via modified mod.json)
 }
 
 
