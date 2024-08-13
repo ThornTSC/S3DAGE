@@ -179,6 +179,7 @@ function void fn022688()
 	objA1.flags2a &= ~0x20
 	objA1.flags2a |= 0x02
 	charA1.jumping = 0
+	tails.carrying = 0		// make sure the game isn't trying to snap the main character to Tails's position
 	objA1.sprite_attributes &= ~0x80
 	D2.u16 = 0x0800
 	fn022902()
