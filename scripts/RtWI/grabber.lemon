@@ -14,14 +14,133 @@ define objA0.s2objoff32.u16 = u16[A0 + 0x32]
 define objA1.s2objoff32.u16 = u16[A1 + 0x32]
 define objA0.s2objoff34.u16 = u16[A0 + 0x34]
 define objA1.s2objoff34.u16 = u16[A1 + 0x34]
-define objA0.baseY = u16[A0 + 0x36]
 define objA0.s2routine_secondary = u8[A0 + 0x46]
 define objA1.s2routine_secondary = u8[A1 + 0x46]
-define objA0.instaShieldMiss = u8[A0 + 0x47]
-define objA1.instaShieldMiss = u8[A1 + 0x47]
 
 define charA1.spindash = u8[A1 + 0x3d]
 
+
+// If the player touches the Grabber's legs, collision for all other objects on screen, including the base Grabber, turns off.
+// This means an insta-shield can expand a player's hitbox in a way that should kill the Grabber but doesn't due to the legs.
+// We prevent that and also give immunity to other invincibility and invulnerability states by adding a check to object collision.
+// Function taken from maingame\character\character.lemon
+//# address-hook(0x00ff06) end(0x00ff5e)
+function void Character.CheckCollisionsWithDynamicObjects_partial()
+{
+#if STANDALONE
+	// Bounding box of player
+	if (DEBUG_DYNAMIC_COLLISIONS)
+		debugDrawRect(D2.u16, D3.u16, D4.u16, D5.u16, 0x8000ff00)
+#endif
+
+	u16 numObjects = global.dynamic_objects.size		// Actually it's twice the number of dynamic objects
+	A4 = addressof(global.dynamic_objects.size) + 2		// Resulting address: 0xffffe382
+	while (numObjects != 0)
+	{
+		// Get address of dynamic object
+		A1 = 0xffff0000 + u16[A4]
+		A4 += 2
+
+		// Offset into a list of hitbox sizes (the list looks a bit random)
+		u16 offset = objA1.collision_attributes
+		if (offset != 0)
+		{
+			// Targets:
+			//  - 0x04 x 0x04  -> (offset & collision_attributes.size) = collision.size.4x4
+			//  - 0x14 x 0x14  -> (offset & collision_attributes.size) = collision.size.20x20
+			//  - 0x0c x 0x14  -> (offset & collision_attributes.size) = collision.size.12x20
+			//  - 0x14 x 0x0c  -> (offset & collision_attributes.size) = collision.size.20x12
+			//  - 0x04 x 0x10  -> (offset & collision_attributes.size) = collision.size.4x16
+			//  - 0x0c x 0x12  -> (offset & collision_attributes.size) = collision.size.12x18
+			//  - 0x10 x 0x10  -> (offset & collision_attributes.size) = collision.size.16x16
+			//  - 0x06 x 0x06  -> (offset & collision_attributes.size) = collision.size.6x6
+			//  - 0x18 x 0x0c  -> (offset & collision_attributes.size) = collision.size.24x12
+			//  - 0x0c x 0x10  -> (offset & collision_attributes.size) = collision.size.12x16
+			//  - 0x10 x 0x08  -> (offset & collision_attributes.size) = collision.size.16x8
+			//  - 0x08 x 0x08  -> (offset & collision_attributes.size) = collision.size.8x8
+			//  - 0x14 x 0x10  -> (offset & collision_attributes.size) = collision.size.20x16
+			//  - 0x14 x 0x08  -> (offset & collision_attributes.size) = collision.size.20x8
+			//  - 0x0e x 0x0e  -> (offset & collision_attributes.size) = collision.size.14x14
+			//  - 0x18 x 0x18  -> (offset & collision_attributes.size) = collision.size.24x24
+			//  - 0x28 x 0x10  -> (offset & collision_attributes.size) = collision.size.40x16
+			//  - 0x10 x 0x18  -> (offset & collision_attributes.size) = collision.size.16x24
+			//  - 0x08 x 0x10  -> (offset & collision_attributes.size) = collision.size.8x16
+			//  - 0x20 x 0x70  -> (offset & collision_attributes.size) = collision.size.32x112
+			//  - 0x40 x 0x20  -> (offset & collision_attributes.size) = collision.size.64x32
+			//  - 0x80 x 0x20  -> (offset & collision_attributes.size) = collision.size.128x32
+			//  - 0x20 x 0x20  -> (offset & collision_attributes.size) = collision.size.32x32
+			//  - 0x08 x 0x08  -> (offset & collision_attributes.size) = collision.size.8x8_2
+			//  - 0x04 x 0x04  -> (offset & collision_attributes.size) = collision.size.4x4_2
+			//  - 0x20 x 0x08  -> (offset & collision_attributes.size) = collision.size.32x8
+			//  - 0x0c x 0x0c  -> (offset & collision_attributes.size) = collision.size.12x12
+			//  - 0x08 x 0x04  -> (offset & collision_attributes.size) = collision.size.8x4
+			//  - 0x18 x 0x04  -> (offset & collision_attributes.size) = collision.size.24x4
+			//  - 0x28 x 0x04  -> (offset & collision_attributes.size) = collision.size.40x4
+			//  - 0x04 x 0x08  -> (offset & collision_attributes.size) = collision.size.4x8
+			//  - 0x04 x 0x18  -> (offset & collision_attributes.size) = collision.size.4x24
+			//  - 0x04 x 0x28  -> (offset & collision_attributes.size) = collision.size.4x40
+			//  - 0x18 x 0x18  -> (offset & collision_attributes.size) = collision.size.24x24_2
+			//  - 0x18 x 0x18  -> (offset & collision_attributes.size) = collision.size.24x24_3
+			//  - 0x0c x 0x18  -> (offset & collision_attributes.size) = collision.size.12x24
+			//  - 0x48 x 0x08  -> (offset & collision_attributes.size) = collision.size.72x8
+			//  - 0x18 x 0x28  -> (offset & collision_attributes.size) = collision.size.24x40
+			//  - 0x10 x 0x04  -> (offset & collision_attributes.size) = collision.size.16x4
+			//  - 0x20 x 0x02  -> (offset & collision_attributes.size) = collision.size.32x2
+			//  - 0x10 x 0x1c  -> (offset & collision_attributes.size) = collision.size.16x28
+			//  - 0x0c x 0x24  -> (offset & collision_attributes.size) = collision.size.12x36
+			//  - 0x10 x 0x02  -> (offset & collision_attributes.size) = collision.size.16x2
+			//  - 0x04 x 0x40  -> (offset & collision_attributes.size) = collision.size.4x64
+			//  - 0x18 x 0x40  -> (offset & collision_attributes.size) = collision.size.24x64
+			//  - 0x20 x 0x10  -> (offset & collision_attributes.size) = collision.size.32x16
+			//  - 0x1c x 0x14  -> (offset & collision_attributes.size) = collision.size.28x20
+			//  - 0x10 x 0x02  -> (offset & collision_attributes.size) = collision.size.16x2_2
+			//  - 0x10 x 0x01  -> (offset & collision_attributes.size) = collision.size.16x1
+			//  - 0x02 x 0x08  -> (offset & collision_attributes.size) = collision.size.2x8
+			//  - 0x10 x 0x40  -> (offset & collision_attributes.size) = collision.size.16x64
+			//  - 0x0c x 0x04  -> (offset & collision_attributes.size) = collision.size.12x4
+			//  - 0x08 x 0x0c  -> (offset & collision_attributes.size) = collision.size.8x12
+			//  - 0x28 x 0x20  -> (offset & collision_attributes.size) = collision.size.40x32
+			//  - 0x40 x 0x02  -> (offset & collision_attributes.size) = collision.size.64x2
+			//  - 0x60 x 0x02  -> (offset & collision_attributes.size) = collision.size.96x2
+			//  - 0x28 x 0x28  -> (offset & collision_attributes.size) = collision.size.40x40
+			A2 = 0x00ff62 + (offset & collision_attributes.size) * 2
+			s16 hitbox.x = u8[A2]
+			s16 hitbox.y = u8[A2+1]
+
+			u16 px = objA1.position.x.u16 - hitbox.x
+			u16 py = objA1.position.y.u16 - hitbox.y
+			u16 sx = hitbox.x * 2
+			u16 sy = hitbox.y * 2
+
+		#if STANDALONE
+			if (DEBUG_DYNAMIC_COLLISIONS)
+			{
+				if ((offset & collision_attributes.flags) == collision.flag.ITEM)
+					debugDrawRect(px, py, sx, sy, 0x8000ff00)
+				else if ((offset & collision_attributes.flags) == collision.flag.SPECIAL)
+					debugDrawRect(px, py, sx, sy, 0x80ff0000)
+				else if ((offset & collision_attributes.flags) == collision.flag.THREAT)
+					debugDrawRect(px, py, sx, sy, 0x800000ff)
+				else
+					debugDrawRect(px, py, sx, sy, 0x80ff00ff)
+			}
+		#endif
+
+			// Special check for Grabber enemy to not grab an invincible, invulnerable, or insta-shielding character.
+			// It's possible that ensuring the object slot allocated to legs is after the Grabber via allocDynamicObjectAfterA0() would fix this too
+			// (to order the collision checks properly), but this check is a sure thing.
+			bool grabberCannotGrab = (objA1.update_address == 0x038f66 && ((char.bonus_effect & char.bonus.INVINCIBLE) || char.invuln.countdown))
+			if (checkBoxOverlap(D2.u16, D3.u16, D4.u16, D5.u16, px, py, sx, sy) && !grabberCannotGrab)	 // no "else" before Grabber check was made
+			{
+				// Collision found
+				Character.OnCollisionWithDynamicObject()
+				return
+			}
+		}
+
+		numObjects -= 2
+	}
+}
 
 //# address-hook(0x038dba) end(0x038dc4)
 function void Grabber.BaseUpdate()
@@ -31,7 +150,7 @@ function void Grabber.BaseUpdate()
 	else // if (objA0.base_state == 2)
 		Grabber.Main()
 
-	if (u8[0xffffb020] == 0x0e) // if character is using animation from being grabbed
+	if (u8[0xffffb020] == 0x0e && display_inputs) // if character is using animation from being grabbed and input tutorials are active
 	{
 		if (level.framecounter.low & 0x08)	// display alternating left and right inputs
 			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
@@ -51,11 +170,8 @@ function void Grabber.Init()
 	objA0.sprite_priority = 0x0200
 	objA0.box_size.x = 0x20	// upped from 0x10
 	objA0.box_size.y = 0x18
-	objA0.collision_attributes = 0x0b		// 0x0a is 16x8 collision. 8x8 collision as in Sonic 2 is 0x0b.
+	objA0.collision_attributes = 0x0b		// 8x8 collision as in Sonic 2. 16x8 collision is 0x0a.
 	objA0.base_state += 2
-
-	// Add a line that saves the Grabber's base y position. Each time it returns to this position, it can try to grab Sonic again after insta-shield forced a miss.
-	objA0.baseY = objA0.position.y.u16
 
 	D0.s16 = -0x0040
 	if (objA0.render_flags & 0x01)
@@ -73,21 +189,6 @@ function void Grabber.Init()
 
 function void Grabber.Main()
 {
-	// When the Grabber fully retracts, it can try to grab Sonic again after insta-shield forced a miss.
-	if (objA0.position.y.u16 == objA0.baseY)
-	{
-		if (objA0.instaShieldMiss)
-		{
-			objA0.s2routine_secondary = 0
-			objA0.velocity.y = 0
-		}
-		objA0.instaShieldMiss = 0
-	}
-	// We can also try again if Sonic's no longer insta-shielding.
-	if (!Grabber.checkGrabbingInstaShield(0xffffb000))
-		objA0.instaShieldMiss = 0 
-
-	objA0.instaShieldMiss = 0	// test line
 	if (objA0.s2routine_secondary == 0)
 		fn038e52()
 	else if (objA0.s2routine_secondary == 2)
@@ -139,15 +240,10 @@ function void fn038e52()
 
 function void fn038e84()
 {
-	if (!Grabber.checkGrabbingInstaShield(0xffffb010))
-	{
-		objA0.s2routine_secondary += 0x02
-		objA0.s2objoff2e.u16 = objA0.velocity.x
-		objA0.velocity.x = 0
-		objA0.s2objoff2c.s8 = 0x10
-	}
-	else
-		objA0.s2routine_secondary = 0
+	objA0.s2routine_secondary += 0x02
+	objA0.s2objoff2e.u16 = objA0.velocity.x
+	objA0.velocity.x = 0
+	objA0.s2objoff2c.s8 = 0x10
 }
 
 
@@ -158,31 +254,22 @@ function void fn038e9a()
 	{
 		return
 	}
-	if (!Grabber.checkGrabbingInstaShield(0xffffb010))
-	{
-		objA0.s2routine_secondary += 0x02
-		objA0.velocity.y = 0x0200
-		objA0.s2objoff2c.s8 = 0x40
-	}
-	else
-		objA0.s2routine_secondary = 0
+	objA0.s2routine_secondary += 0x02
+	objA0.velocity.y = 0x0200
+	objA0.s2objoff2c.s8 = 0x40
 }
 
 
 function void fn038eb4()
 {
-	bool instaShieldUsed = (Grabber.checkGrabbingInstaShield(u32(0xffff0000 + objA0.s2objoff32.u16)) || objA0.instaShieldMiss)	// new to make sure an insta-shield isn't pulling the player right into the Grabber's arms
-
-	if (objA0.s2objoff30.u8 == 0 || objA0.position.y.u16 >= objA0.baseY + 0x5c)		// Last check is new. 0x5c goes from a ceiling to a floor with a gap of one chunk in between.
+	if (objA0.s2objoff30.u8 == 0)
 	{
 		--objA0.s2objoff2c.s8
 		if (objA0.s2objoff2c.s8 != 0)
 		{
-			if (objA0.s2objoff2c.s8 == 0x20 || instaShieldUsed || objA0.position.y.u16 >= objA0.baseY + 0x5c)		// Last check is new. 0x5c goes from a ceiling to a floor with a gap of one chunk in between.
+			if (objA0.s2objoff2c.s8 == 0x20)
 			{
 				objA0.velocity.y = -objA0.velocity.y
-				if (objA0.position.y.u16 >= objA0.baseY + 0x5c)
-					objA0.instaShieldMiss = 1
 			}
 			System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
 			A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12
@@ -197,9 +284,6 @@ function void fn038eb4()
 	}
 
 	// ObjA7_GrabCharacter, loc_38EEE
-	if (instaShieldUsed || objA0.instaShieldMiss)
-		return
-
 	objA0.s2routine_secondary += 0x02
 	A1 = 0xffff0000 + objA0.s2objoff32.u16
 	objA1.flags2e = 0x81
@@ -221,22 +305,6 @@ function void fn038eb4()
 	u8[A0 + 0x37] = 0x20
 }
 
-function bool Grabber.checkGrabbingInstaShield(u32 charAddress)
-{
-	// New: check if the player character is using the Insta-Shield. If so, do not grab the player character.
-	u32 backupA0 = A0
-	A0 = charAddress	// place character object address in A0 to facilitate char.xxx definitions
-	bool hasInstaShield = false
-	if (Game.getSetting(SETTING_INSTA_SHIELD) || original_mode || time_attack)
-	{
-		if (((char.character == CHARACTER_SONIC) || (Mods.isModActive("Chaos The Impostor") && char.character == CHARACTER_TAILS)) && (char.bonus_effect & (char.bonus.ALL_SHIELDS | char.bonus.INVINCIBLE)) == 0)
-		{
-			hasInstaShield = (char.double_jump_state == 1)
-		}
-	}
-	A0 = backupA0	// restore current object to A0
-	return hasInstaShield
-}
 
 function void fn038f3e()
 {
@@ -313,7 +381,7 @@ function void fn038f88()
 	D0.u8 = objA1.animation.sprite + 0x03
 	objA0.animation.sprite = D0.u8
 	D0.u8 = objA0.collision_property
-	if (D0.u8 != 0 && u8[u32(0xffff0000 + objA0.s2objoff2c.u16 + 0x47)] == 0)	// added check for instaShieldMiss in base object's 0x417 offset
+	if (D0.u8 != 0)
 	{
 		objA0.collision_property = 0
 		if (objA1.s2routine_secondary == 0x04)
@@ -338,10 +406,7 @@ function void fn038fe8()
 {
 	A1 = 0xffff0000 + objA0.s2objoff2c.u16
 	D0.u16 = objA1.s2objoff32.u16
-	bool instaShieldDodge = Grabber.checkGrabbingInstaShield(u32(0xffff0000 + D0.u16))
-	if (instaShieldDodge && objA1.update_address == 0x038dba)
-		objA1.instaShieldMiss = 1
-	if (D0.u16 != 0)	// && !instaShieldDodge
+	if (D0.u16 != 0)
 	{
 		A2 = 0xffff0000 + D0.u16
 		if (objA1.update_address == 0x038dba)	// if this object is the core Grabber object
