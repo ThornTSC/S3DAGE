@@ -17,7 +17,7 @@ global u8 eggrobos_sonictails = 1
 global u8 eggrobos_knuckles = 1
 global u8 specialstages_knuckles
 global u8 roll_maintain
-global u8 green_sphere_palette
+// global u8 green_sphere_palette	// deprecated option
 global u8 greenspheres_music
 global u8 pause_menu
 define u8 theme.hud = u8[0x840273]
@@ -29,6 +29,7 @@ global bool display_inputs
 global bool original_mode
 global bool menu_initialized
 global bool fast_forward
+global bool originsDropDash
 
 // Define variables and number of frames per rev for L button spindash charge
 global u8 L_TailsAssist	// settings variable. 0 = Up+A only, 1 = L only, 2 = both
@@ -2320,7 +2321,6 @@ function void UpdatePaletteEffects.SuperForm.originalVersion(u8 characterVersion
 // Function taken from standalone\rendering\render_character.lemon and updated to match AIR commit b29d9f1
 function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
 {
-
 	bool isPlayer1 = (variant == 0)
 	u32 characterAddress = isPlayer1 ? 0xffffb000 : 0xffffb04a
 
@@ -2373,7 +2373,9 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 			// Special handling for Drop Dash & Super Peel-Out
 			if (char.state == char.state.SONIC_DROPDASH)
 			{
-				animationSpriteEx = CHAR_ANIMSPRITE_SONIC_DROPDASH + ((level.framecounter) & 0x0f)
+				animationSpriteEx = CHAR_ANIMSPRITE_SONIC_DROPDASH + ((level.framecounter >> 1) & 0x01)
+				if (originsDropDash)
+					animationSpriteEx = CHAR_ANIMSPRITE_SONIC_DROPDASH + ((level.framecounter) & 0x0f)
 			}
 			else if (!super.active && animationSprite >= 0x21 && animationSprite <= 0x30)
 			{
@@ -2427,7 +2429,13 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 
 			if (rotationMode != 0)
 			{
-				if (char.flags & char.flag.IN_AIR || global.zone == 0x0c) // Use in-air rotation in DDZ
+				bool useVanillaS3AIRRotation = true
+				if (Game.getSetting(SETTING_SMOOTH_ROTATION) == 2)
+				{
+					useVanillaS3AIRRotation = (char.flags & char.flag.IN_AIR || global.zone == 0x0c)	// Use in-air rotation in DDZ
+				}
+
+				if (useVanillaS3AIRRotation)
 				{
 					s8 oldRotation = isPlayer1 ? oldRotationPlayer1 : oldRotationPlayer2
 					flags = char.flags & char.flag.FACING_LEFT		// This really has to be "char.flags", not "char.render_flags"
@@ -2435,7 +2443,7 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 					angle = char.rotation
 					if (rotationMode == 1)
 					{
-						if (abs(s8(char.rotation)) <= 0x10 && abs(s8(oldRotation)) <= 0x10)
+						if (abs(s8(char.rotation)) <= 0x10 && abs(oldRotation) <= 0x10)
 						{
 							angle = 0
 						}
@@ -2445,28 +2453,30 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 							s8 diff = angle - oldRotation
 							angle = oldRotation + clamp(diff, -3, 3)
 						}
-					}	
+					}
 				}
 				else
 				{
+					// Mania-accurate rotation #contributed by Elsie The Pict
 					u8 oldRotation = isPlayer1 ? oldRotationPlayer1 : oldRotationPlayer2
 					flags = char.flags & char.flag.FACING_LEFT		// This really has to be "char.flags", not "char.render_flags"
 
 					angle = char.rotation
 					if (rotationMode == 1)
 					{
-						
 						if (char.rotation <= 0x04 || char.rotation >= 0xfc)
+						{
 							oldRotation = 0
+						}
 						else
 						{
 							u32 targetRotation = 0
 							if (char.rotation > 0x10 && char.rotation < 0xe8)
 								targetRotation = char.rotation
-								
+
 							u32 rotate = targetRotation - oldRotation
 							u32 shift = (abs(char.groundspeed) <= 0x6000) + 1
-							
+
 							if (abs(rotate) >= abs(rotate - 0x100))
 							{
 								if (abs(rotate - 0x200) < abs(rotate + 0x100))
@@ -2482,7 +2492,7 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 									oldRotation += (rotate + 0x100) >> shift
 							}
 						}
-						
+
 						angle = oldRotation & 0xff
 					}
 				}
@@ -2503,7 +2513,9 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 			}
 			else
 			{
-				key = stringformat("sonic_dropdash_%x", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_DROPDASH)
+				key = stringformat("sonic_dropdash_%d", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_DROPDASH)
+				if (originsDropDash)
+					key = stringformat("sonic_origins_dropdash_%x", animationSpriteEx - CHAR_ANIMSPRITE_SONIC_DROPDASH)
 			}
 		}
 		if (isPlayer1)

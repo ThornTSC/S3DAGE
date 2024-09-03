@@ -69,15 +69,15 @@
 				}
 			},
 			{
-				"InternalName": "GreenSphereBrightness",
-				"DisplayName": "Green Sphere Brightness",
-				"Variable": "green_sphere_palette",
-				"DefaultValue": "0",
+				"InternalName": "DropDashAnimation",
+				"DisplayName": "Drop Dash Animation",
+				"Variable": "originsDropDash",
+				"DefaultValue": "1",
 			 	"Category": "Appearance",
 				"Options":
 				{
-					"0": "Sonic Origins (default)",
-					"1": "Sonic Mania"
+					"0": "A.I.R.",
+					"1": "Sonic Origins (default)"
 				}
 			},
 			{

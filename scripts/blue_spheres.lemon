@@ -1053,6 +1053,8 @@ function void SpecialStage()
 		u32[0xfffffce8] = 0x00600020
 		u32[0xfffffcec] = 0x00c600a0
 
+		// Deprecated option for Mania-esque green spheres
+		/*
 		if (green_sphere_palette == 1)
 		{
 			// green sphere palette closer to Mania palette
@@ -1060,6 +1062,7 @@ function void SpecialStage()
 			u32[0xfffffce8] = 0x02800040
 			u32[0xfffffcec] = 0x04e002c0
 		}
+		*/
 	}
 
 	Enigma.decompress(0x0aef54, 0xffff5500, 0x0000)

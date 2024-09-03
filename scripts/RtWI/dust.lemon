@@ -18,7 +18,7 @@ function void fn018c94()
 	{
 		u8[A0 + 0x30] = 0	// As long as drop dash dust is the same object as other dust and water splashes, we can't render it at the same time as those other objects
 	}
-	if (u8[A0 + 0x30])
+	if (u8[A0 + 0x30] && originsDropDash)
 	{
 		Dust.animateDropDash()
 		return
