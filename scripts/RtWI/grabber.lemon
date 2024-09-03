@@ -671,7 +671,7 @@ function void S2.InheritParentXYFlip()
 //# address-hook(0x0367d0) end(0x0367f6)
 function void S2.LoadChildObject(u16 parentToChildOffset, u32 childObjectAddress, u8 childSubtype)
 {
-	if (allocDynamicObjectStd())
+	if (allocDynamicObjectAfterA0())
 	{
 		D0.u16 = parentToChildOffset
 		u16[A0 + D0.s16] = A1.u16
