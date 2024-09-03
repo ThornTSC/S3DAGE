@@ -136,34 +136,46 @@ function void UpdateGamePause()
 			{
 				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 				{
-					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 43, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 28, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					if ((global.game_mode & 0x7f) == 0x0c && global.zone_act != 0x1701)
 					{
-						Renderer.drawCustomSprite("change_theme_full", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 71, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 56, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 93, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 20, "+                     :\n Change theme", 0xffffffff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 73, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 58, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 98, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					}
 					else
 					{
-						Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 20, "+                     :\n Change theme", 0xffffffff, 3, 0, 0xfff1, 0)
 						Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					}
 					if (total_stars < unlock.theme.south)
-						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					{
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 25)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+					}
 					else if (total_stars < unlock.theme.westside)
-						Renderer.drawCustomSprite("50_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					{
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 50)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+					}
 
 					countTotalStars()
 					customMenu.countMedals()
 				}
 				else if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
 				{
-					Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)					
+					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 68, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth() - 43, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 28, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 20, "          +           :\n Change theme", 0xffffffff, 3, 0, 0xfff1, 0)				
 				}
 				if ((original_mode || global.pause_disabled || (global.zone >= 0x13 && global.zone <= 0x15) || global.zone_act == 0x1701) && PauseMenu_Basic())
 					break
@@ -208,14 +220,26 @@ function void UpdateGamePause()
 			{
 				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 				{
-					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 63, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 41, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 26, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-					Renderer.drawCustomSprite("change_theme", getScreenWidth() - 90, 22, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_B", getScreenWidth() - 68, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 43, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth() - 28, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 20, "          +           :\n Change theme", 0xffffffff, 3, 0, 0xfff1, 0)
 					if (total_stars < unlock.theme.south)
-						Renderer.drawCustomSprite("25_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					{
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 25)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+					}
 					else if (total_stars < unlock.theme.westside)
-						Renderer.drawCustomSprite("50_stars", getScreenWidth() - 105, 44, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+					{
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 50)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+					}
 
 					countTotalStars()
 					customMenu.countMedals()

@@ -1,4 +1,22 @@
 {
 	"hud_ring":  { "File": "hud_ring.png", "Rect": "0,0,16,16" },
-	"hud_ring_s2":  { "File": "hud_ring.png", "Rect": "16,0,16,16" }
+	"hud_ring_s2":  { "File": "hud_ring.png", "Rect": "16,0,16,16" },
+
+	// Emerald HUD for 100% Speedrun mode
+	"hud_chaos_1":  { "File": "hud_emeralds.png", "Rect": "0,0,16,13" },
+	"hud_chaos_2":  { "File": "hud_emeralds.png", "Rect": "16,0,16,13" },
+	"hud_chaos_3":  { "File": "hud_emeralds.png", "Rect": "32,0,16,13" },
+	"hud_chaos_4":  { "File": "hud_emeralds.png", "Rect": "48,0,16,13" },
+	"hud_chaos_5":  { "File": "hud_emeralds.png", "Rect": "64,0,16,13" },
+	"hud_chaos_6":  { "File": "hud_emeralds.png", "Rect": "80,0,16,13" },
+	"hud_chaos_7":  { "File": "hud_emeralds.png", "Rect": "96,0,16,13" },
+	"hud_chaos_empty":  { "File": "hud_emeralds.png", "Rect": "112,0,16,13" },
+	"hud_super_1":  { "File": "hud_emeralds.png", "Rect": "0,13,16,13" },
+	"hud_super_2":  { "File": "hud_emeralds.png", "Rect": "16,13,16,13" },
+	"hud_super_3":  { "File": "hud_emeralds.png", "Rect": "32,13,16,13" },
+	"hud_super_4":  { "File": "hud_emeralds.png", "Rect": "48,13,16,13" },
+	"hud_super_5":  { "File": "hud_emeralds.png", "Rect": "64,13,16,13" },
+	"hud_super_6":  { "File": "hud_emeralds.png", "Rect": "80,13,16,13" },
+	"hud_super_7":  { "File": "hud_emeralds.png", "Rect": "96,13,16,13" },
+	"hud_super_empty":  { "File": "hud_emeralds.png", "Rect": "112,13,16,13" }
 }

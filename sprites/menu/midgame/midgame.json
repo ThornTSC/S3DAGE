@@ -3,13 +3,6 @@
 	"paused":  { "File": "smallmenu.png", "Rect": "0, 120, 90,16", "Center": "45,8" },
 	"select_difficulty":  { "File": "difficulty_menu.png", "Rect": "0, 0, 272,16", "Center": "137,8" },
 
-	// Change theme text
-	"change_theme": {"File": "change_theme.png"},
-	"change_theme_full": {"File": "change_theme_full.png"},
-	"25_stars": {"File": "25_stars.png"},
-	"50_stars": {"File": "50_stars.png"},
-	"100_stars": {"File": "100_stars.png"},
-
 //	"select_difficulty":  { "File": "select_difficulty.png", "Center": "115,8" },
 
 	// Difficulty menu
@@ -24,11 +17,6 @@
 	
 //	"difficulty_hard_0":  { "File": "hard.png", "Center": "16,6" },
 //	"difficulty_hard_2":  { "File": "hard_selected.png", "Center": "16,6" },
-
-	"difficulty_normal_description":  { "File": "difficulty_normal_description.png", "Center": "102,0" },
-	"difficulty_hard_description":  { "File": "difficulty_hard_description.png", "Center": "140,0" },
-	"difficulty_hard_description_noemeralds":  { "File": "difficulty_hard_description_noemeralds.png", "Center": "140,0" },
-	"difficulty_hard_description_s2":  { "File": "difficulty_hard_description_s2.png", "Center": "135,0" },
 
 	// Normal game pause menu
 	"normal_continue_0":	  { "File": "smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected

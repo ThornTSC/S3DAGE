@@ -836,7 +836,7 @@ function void fn04d6b8()
 // Custom function to render the green S&K Logo as a background for the end of stage screens
 function void RenderSKLogoFullBG()
 {
-	if !(green_spheres.active)
+	if (!(green_spheres.active))
 		return
 	
 	Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)

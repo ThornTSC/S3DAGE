@@ -211,8 +211,7 @@ function void customMenu.mainLogicLoop()
 		return
 	}
 
-//	PrintVersionNumber()
-//	PrintVersionNumber()	// for some reason, the entirety of PrintVersionNumber() needs to be called twice to display in the Challenges menu
+	PrintVersionNumber()
 
 	// Keep track of how many options should be available on the left half of the Act Select / Challenges menu.
 	u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
@@ -329,12 +328,14 @@ function void customMenu.mainLogicLoop()
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 				if (pause_menu_selection == 0)
-					Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at the standard difficulty level.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 				else if (setting.unlock_act)
-					Renderer.drawCustomSprite("difficulty_hard_description_s2", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+				{
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with new routes\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2 - 125, getScreenHeight()/2 + 32 + (13 * 3) - 6, "Return from special stages with no rings or shields.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+				}
 				else
-					Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
-
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with new routes\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 			//	if (menuReady == true)
 			//	{
 					if ((control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
@@ -375,9 +376,6 @@ function void customMenu.mainLogicLoop()
 			//	else
 			//		menuReady = true
 			}
-			
-			// Clear out the text display queue so it doesn't show for one frame in levels.
-			Letters.ClearAll()
 
 			// Start level.
 			global.game_mode = 0x8c
@@ -1376,32 +1374,26 @@ function void customMenu.countMedals()
 		return
 	}
 
-	u8 spriteFlags = (global.game.paused) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
+	u8 spriteFlags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
 		Flicky.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)
 		South.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
-	else if (theme.hud == theme.westside && renderQueue == 0xfff1)
-		Westside.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
-	else if (theme.hud == theme.s3k && renderQueue == 0xfff1)	// done here since Saturn is default for menus and Angel/S3K has no script yet
-	{
-		Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
-		if (total_stars / 100 != 0)
-		{
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// tens (even if 0)
-		}
-		else if ((total_stars / 10) % 10 != 0)
-			Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue) // non-zero tens
-		
-		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// ones (even if 0)
-	}
+	else if ((theme.hud == theme.westside || theme.hud == theme.s3k) && renderQueue == 0xfff1)
+		Westside.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)		// Angel theme and Westside theme have identical star counters
 	else	// Saturn theme, also used in menus
 	{
+		s16 x_offset_pause = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 10 : 0
+//		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 8, 213, "TOTALS:                  * 100)", 0xe8d494ff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 168 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 178 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 188 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 198 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
+
 		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
-			x_offset -= 6
-		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+			x_offset -= 10
+		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
 		if (total_stars / 100 != 0)
 		{
 			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
@@ -1432,9 +1424,6 @@ function void DataSelect.drawCustomPlanes()
 			arrowShift = 0
 		if (arrowShift == 3)
 			arrowShift == -1
-
-		// Make sure the queue for string display is empty, else it may show the main menu text for one frame at the end of a Challenge
-		Letters.ClearAll()
 		
 		// Render the background and dim it
 		if (setting.unlock_act)
@@ -1477,9 +1466,21 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 169 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
 		}
 		if (total_stars < unlock.level.ehz)
-			Renderer.drawCustomSprite("50_stars", getScreenExtend() - 40 + 77, 142, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+		{
+			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 123, 138, "(Next zone:                  * 50)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
+			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 122, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 134, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 146, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 158, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+		}
 		else if (total_stars < unlock.level.cpz)
-			Renderer.drawCustomSprite("100_stars", getScreenExtend() - 40 + 75, 142, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+		{
+			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 124, 138, "(Next zone:                  * 100)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
+			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 120, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 132, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 144, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 156, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+		}
 
 
 
@@ -1658,17 +1659,12 @@ function void DataSelect.drawRevisitedSprites()
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art
-	Renderer.drawCustomSprite("text_dataselect", getScreenWidth()/2, 206, 0x00, SPRITE_FLAG_PRIO, 0x2010, 0, 0xffffff00, 0x10000)	// DATA SELECT text	// 0xff40ffff yellow
+	s16 y_offset = (time_attack) ? -21 : -18
+	Renderer.drawCustomSprite("text_dataselect", getScreenWidth()/2, getScreenHeight() + y_offset, 0x00, SPRITE_FLAG_PRIO, 0x2010, 0, 0xffffff00, 0x10000)	// DATA SELECT text	// 0xff40ffff yellow
 	if (time_attack == 4)
-	{
-		Letters.Main()
-		Letters.Show("Any% Speedrun", 1, getScreenWidth()/2 - 41, getScreenHeight() - 9)
-	}
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "Any% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 	else if (time_attack == 3)
-	{
-		Letters.Main()
-		Letters.Show("100% Speedrun", 1, getScreenWidth()/2 - 41, getScreenHeight() - 9)
-	}
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "100% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 }
 
 function void GameModeControlLoop()
@@ -1771,8 +1767,7 @@ function void customMenu.mainLogicLoop.main()
 	// Specific check for The ECSU Framework
 	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{
-		Letters.Main()
-		Letters.Show("`````Extra Character Slots (ECSU) must be placed at a higher`priority than D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2, "Extra Character Slots (ECSU) must be placed at a higher\npriority than D.A. Garden Edition. Reorder mods to continue.\n\n\n\nPress any button to return to the A.I.R. menu.", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
 		{
 			u32 backupA0 = A0
@@ -1790,8 +1785,7 @@ function void customMenu.mainLogicLoop.main()
 	// Specific check for the 3D2D Glitches mod
 	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && Mods.getModPriority("3D2D Glitches: Sonic 3 With Bluckles") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{
-		Letters.Main()
-		Letters.Show("`````Character mods must be placed at a higher priority than`D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2, "Character mods must be placed at a higher priority than\nD.A. Garden Edition. Reorder mods to continue.\n\n\n\nPress any button to return to the A.I.R. menu.", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
 		{
 			u32 backupA0 = A0
@@ -1816,8 +1810,7 @@ function void customMenu.mainLogicLoop.main()
 	}
 	if (Mods.isModActive(characterModName) && Mods.getModPriority(characterModName) < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{
-		Letters.Main()
-		Letters.Show("`````Character mods must be placed at a higher priority than`D.A. Garden Edition. Reorder mods to continue.```````Press any button to return to the A.I.R. menu.", 1, getScreenExtend() - 40 + 32, 36)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2, "Character mods must be placed at a higher priority than\nD.A. Garden Edition. Reorder mods to continue.\n\n\n\nPress any button to return to the A.I.R. menu.", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
 		{
 			u32 backupA0 = A0
@@ -1851,73 +1844,78 @@ function void customMenu.mainLogicLoop.main()
 
 	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
-	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 64, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
 	if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
-		Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 88, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
-	Renderer.drawCustomSprite("text_option_speedrunmode", getScreenExtend() - 40 + option_x, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 2) ? selectionTint : nonSelectionTint, 0x10000)
+		Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + option_x, 84, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 1) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_speedrunmode", getScreenExtend() - 40 + option_x, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 2) ? selectionTint : nonSelectionTint, 0x10000)
 
 	if (selectedMenuOption.main == 2)
 	{
-		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 116 - arrowShift, 116, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
-		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 176 + arrowShift, 116, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
+		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 116 - arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 176 + arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
 		if (selectedGameType == 0)
-			Renderer.drawCustomSprite("text_option_100", getScreenExtend() - 40 + option_x + 130, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+			Renderer.drawCustomSprite("text_option_100", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
 		else
-			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 108, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
 	
-	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 136, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
 	
-	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + option_x, 164, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 4) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + option_x, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 4) ? selectionTint : nonSelectionTint, 0x10000)
 	
-	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + option_x, 196, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 5) ? selectionTint : nonSelectionTint, 0x10000)
-
-	Letters.Main()
-	if (selectedMenuOption.main == 0)
-		Letters.Show("Play Sonic 3 & Knuckles`with new level layouts,`special stage layouts,`and colour schemes for`a fresh take on a classic.``Bring Tails along, or go solo`and seek out Red Star Rings!``Attempt a harder game`with Knuckles: more Badniks`and tricky special stages!", 1, getScreenExtend() - 40 + 212, 68)
-	else if (selectedMenuOption.main == 1)
-		Letters.Show("Experience the original`Sonic 3: D.A. Garden Edition`ROM hack (v1.02) as`released in October 2015.", 1, getScreenExtend() - 40 + 212, 68)
-	else if (selectedMenuOption.main == 2)
-		Letters.Show("Tackle Revisited Mode in`a streamlined game with`fewer cutscenes and no`level results. Choose a`100% (14-emerald) run`or an Any% (no emerald)`run and go! It's nonstop`gameplay from start to`finish!``Pair the game with a timer`and submit your best runs to`www.speedrun.com/s3airdag`to compete with others!``(Runs with non-audio mods`are invalid for submission.)", 1, getScreenExtend() - 40 + 212, 68)
-	else if (selectedMenuOption.main == 3)
-		// Letters.Show("Play any act in the game`in either Revisited or`Classic Mode, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!`Be quick, precise, and`above all careful!", 1, getScreenExtend() - 40 + 212, 68)
-		Letters.Show("Play any act, or earn`Star Medals in two`challenging modes!``TIME ATTACK:`Find the fastest route`and race to the goal!``TIME STONE TRIAL:`Grab Mini Time Stones`to stop the clock,`but lose your rings and`it starts up again!``Submit your best runs to`www.speedrun.com/s3airdag`to compete with others!", 1, getScreenExtend() - 40 + 212, 68)
-	else if (selectedMenuOption.main == 4)
-		Letters.Show("Tackle the classic`Blue Sphere game with`a tricky twist.``Touch green spheres to`turn them into blue`spheres. Plan your moves`carefully to create rings`and avoid red spheres!", 1, getScreenExtend() - 40 + 212, 68)
-	else if (selectedMenuOption.main == 5)
-		Letters.Show("Return to the A.I.R. menu`to change options or`exit the game.", 1, getScreenExtend() - 40 + 212, 68)
-
-		
-
-	// Old main menu display
-/*
-	Renderer.drawCustomSprite(stringformat("text_option_normalgametype_%d", selectedGameType), getScreenExtend() - 40 + 300, 20, 0x00, SPRITE_FLAG_PRIO, 0xe000)	// centered in json
-	u32 alpha = 0xffffffff	// full display
-	if (selectedMenuOption.main == 0)
-		alpha = 0xff40ffff	// 0xff40ffff yellow
-	Renderer.drawCustomSprite("text_option_normalgame", getScreenExtend() - 40 + 25, 12, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)	// 0xff40ffff yellow
-	alpha = 0xffffffff
-	if (selectedMenuOption.main == 1)
-		alpha = 0xff40ffff
-	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + 24, 68, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
-	alpha = 0xffffffff
-	if (selectedMenuOption.main == 2)
-		alpha = 0xff40ffff
-	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + 24, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
-	alpha = 0xffffffff
-	if (selectedMenuOption.main == 3)
-		alpha = 0xff40ffff
-	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + 25, 180, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, alpha, 0x10000)
+	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + option_x, 192, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 5) ? selectionTint : nonSelectionTint, 0x10000)
 
 	if (selectedMenuOption.main == 0)
 	{
-		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + 230 + 4 - arrowShift, 12 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type left arrow
-		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + 361 + 4 + arrowShift, 12 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// Game type right arrow
+		// Here, addition in py is lineheight * line number
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play Sonic 3 & Knuckles with\nnew level layouts, special\nstage layouts, and visuals\nfor a fresh take on a classic.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Take on an army of Eggrobos\nand trickier special stages\nin Knuckles's Hard difficulty!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Leave your sidekick behind\nand adventure alone to find\n                              !", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 11) - 12, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + (13 * 11) - 7, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
 	}
+	else if (selectedMenuOption.main == 1)
+	{
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Experience the original\nSonic 3: D.A. Garden Edition\nROM hack (v1.02) as\nreleased in October 2015.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	}
+	else if (selectedMenuOption.main == 2)
+	{
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Race through Revisited Mode in\na streamlined game with fewer\ncutscenes and no level results.\nChoose a 100% (14-emerald) run\nor an Any% (no emerald) run\nand go! It's nonstop gameplay\nfrom start to finish!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		
+		// Here, addition in py is lineheight * line number
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 8) - 6, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 6, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 6, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 
-	Letters.Main()
-	Letters.Show("Play Sonic 3 & Knuckles with new level layouts, special stage`layouts, and colour schemes for a fresh take on a classic.`Bring Tails along, or go solo and seek out Red Star Rings!`````Play any act or try to earn stars in two challenging modes!`Find the fastest route and race to the goal in Time Attack, or`freeze the clock and try not to get hurt in Time Stone Trial!`Go for the gold!`````Play the classic Blue Sphere game with a tricky twist.`Green Spheres become Blue Spheres when touched.`````Return to the A.I.R. menu to change options or exit the game.", 1, getScreenExtend() - 40 + 32, 36)
-*/
+	}
+	else if (selectedMenuOption.main == 3)
+	{
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play any act! Search for\n                              or win\n                                   in\ntwo challenging modes!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + 13, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + 13 + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 2), "Star Medals", 0xffff60ff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 283, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+		Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 295, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+		Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 307, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack: Race to the goal!\nTime Stone Trial: Grab Mini\nTime Stones to stop the clock!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 6) - 6, "Time Stone Trial:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
+
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 11) - 12, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	}
+	else if (selectedMenuOption.main == 4)
+	{
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Tackle the classic\nBlue Sphere game with\na tricky twist.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 4) - 6, "Touch green spheres to\nturn them into blue\nspheres. Plan your moves\ncarefully to create rings\nand avoid red spheres!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+
+	}
+	else if (selectedMenuOption.main == 5)
+	{
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Return to the A.I.R. menu\nto change options or\nexit the game.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	}
 
 	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))
 	{
@@ -2437,11 +2435,11 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 					if (pause_menu_selection == 0)
-						Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at the standard difficulty level.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 					else if (time_attack == 4)
-						Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 					else
-						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 
 //					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
@@ -2525,11 +2523,11 @@ function void fn00d42c()
 					Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 					Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 					if (pause_menu_selection == 0)
-						Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at the standard difficulty level.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 					else if (time_attack == 4)
-						Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 					else
-						Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 
 //					global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 
@@ -2654,11 +2652,11 @@ function void fn00d30c()
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
 				if (pause_menu_selection == 0)
-					Renderer.drawCustomSprite("difficulty_normal_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at the standard difficulty level.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 				else if (time_attack == 4)
-					Renderer.drawCustomSprite("difficulty_hard_description_noemeralds", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 				else
-					Renderer.drawCustomSprite("difficulty_hard_description", getScreenWidth()/2, getScreenHeight()/2 + 32, 0x00, SPRITE_FLAG_PRIO, 0xfff1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 
 //				global.characters = levelselect.characters	// set so Discord RPC reads correct choice
 

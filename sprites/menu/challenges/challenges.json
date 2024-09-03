@@ -31,7 +31,7 @@
 	"text_option_no":  { "File": "text_option_no.png", "Center": "7,4" },
 	"text_devtime":  { "File": "text_devtime.png"},		// left for compatibility with ECSU
 	"text_devtime_centered":  { "File": "text_devtime.png", "Center": "30,4" },
-	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "78,4" },
+	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "74,4" },
 	"rect_charoption_yellow":  { "File": "rect_charoption_yellow.png"},
 	"rect_charoption_red":  { "File": "rect_charoption_red.png"},
 	
@@ -39,7 +39,7 @@
 	"star_gold":  { "File": "star_gold.png"},
 	"star_silver":  { "File": "star_silver.png"},
 	"star_bronze":  { "File": "star_bronze.png"},
-	// "star_red":  { "File": "star_red.png"},
+	"star_red":  { "File": "star_red.png"},
 
 	// Digits, dash, and minutes/seconds symbols (Sonic 3D tall)
 	"S3D_digit_0": { "File": "Sonic3D_digits_tall.png", "Rect":  "0,0,8,16" },

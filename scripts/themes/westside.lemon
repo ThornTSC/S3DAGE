@@ -225,16 +225,20 @@ function void Westside.PauseMenu_Challenges()
 
 function void Westside.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 spriteFlags, u16 renderQueue)	// same font as Angel theme
 {
-	Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 126 + 79 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
-	if (starCount / 100 != 0)
+	Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 178 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 188 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 198 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 208 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+	if (total_stars / 100 != 0)
 	{
-		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
-		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// tens (even if 0)
 	}
-	else if ((starCount / 10) % 10 != 0)
-		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
+	else if ((total_stars / 10) % 10 != 0)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue) // non-zero tens
 	
-	Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 214 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+	Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", total_stars % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// ones (even if 0)
 }
 
 function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)

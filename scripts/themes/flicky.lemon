@@ -199,7 +199,11 @@ function void Flicky.PauseMenu_Challenges()
 
 function void Flicky.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 spriteFlags, u16 renderQueue)
 {
-	Renderer.drawCustomSprite("flicky_text_totalmedals", getScreenExtend() - 40 + 127 + 78 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 178 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 188 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 198 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 208 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("flicky_text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
 	if (starCount / 100 != 0)
 	{
 		Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds

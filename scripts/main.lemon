@@ -5,8 +5,8 @@
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version = "D.A. Garden Edition v1.10.0.1"
-#define DAGE_running = 0x1a01
+global u64 DAGE_version = "D.A. Garden Edition v1.10.0.2"
+#define DAGE_running = 0x1a02
 
 // Define variables for in-game settings
 global u8 palette_set
@@ -97,7 +97,6 @@ include eggrobo
 include palettes_weather
 include time_attack
 include ring_object_managers
-include string_display
 include movement_changes
 include rom_manipulations
 include music
@@ -135,6 +134,9 @@ global u8 hud.layout
 // Flag for unlockable levels
 global u16 unlock_act
 global u8 layout.part
+
+// Timer for unlock announcements
+global u16 unlock.timer
 
 // Number of stars for unlocks constants
 constant u16 unlock.theme.south = 25
@@ -189,6 +191,7 @@ function void showDebugText()
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
 //	debugWatch(0xffffb014, 2)
+	showUnlock()
 }
 
 // This function is the final one of any frame.
@@ -23973,3 +23976,40 @@ function void loadRSR()
 		zeroMemory(rsrAddress, rsrArraySize)		// should default to zero, but another mod may have tried to use this memory
 	}
 }
+
+function void showUnlock()
+{
+	if (!unlock.timer)	// this is the first frame of the unlock announcement
+		playSound(0x68)	// sound from text saying you can now be super/hyper or go to Hidden Palace
+
+	u64 unlockTypeString
+	u64 unlockString
+	if (total_stars < unlock.theme.westside)
+	{
+		unlockTypeString = "Theme Unlocked:"
+		unlockString = "South Island"
+	}
+	else if (total_stars < unlock.level.cpz)
+	{
+		unlockTypeString = "Zone and Theme Unlocked:"
+		unlockString = "Emerald Hill Zone and West Side Island"
+	}
+	else
+	{
+		unlockTypeString = "Zone Unlocked:"
+		unlockString = "Chemical Plant Zone"
+	}
+
+	constant u16 py_target = 32
+	u16 py = (unlock.timer < 30) ? (getScreenHeight() - (py_target * unlock.timer / 30)) : (unlock.timer > 270) ? (getScreenHeight() - (py_target * (300 - unlock.timer) / 30)) : (getScreenHeight() - py_target)
+	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py, unlockTypeString, 0x80b0ffff, 2, 0, 0xffff, 0)
+	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py + 13, unlockString, 0xffffffff, 2, 0, 0xffff, 0)
+
+	++unlock.timer
+	if (unlock.timer == 300)
+		unlock.timer = 0	// this function is not called on a value of 0 unless the unlock has occurred on this frame
+}
+constant u16 unlock.theme.south = 25
+constant u16 unlock.theme.westside = 50
+constant u16 unlock.level.ehz   = 50
+constant u16 unlock.level.cpz   = 100

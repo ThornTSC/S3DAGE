@@ -145,7 +145,7 @@
 	"flicky_time_stop_bonus": { "File": "flicky_hud.png", "Rect": "0,139,125,16", "Center": "62,8" },
 	"flicky_new_record": { "File": "flicky_hud.png", "Rect": "0,155,85,16", "Center": "43,8" },
 	"flicky_text_dev":  { "File": "flicky_text_dev.png"},	// small star medal pictures are stored with challenges menu pictures
-	"flicky_text_totalmedals":  { "File": "flicky_text_totalmedals.png", "Center": "78,4" },
+	"flicky_text_totalmedals":  { "File": "flicky_text_totalmedals.png", "Center": "74,4" },
 
 	"flicky_smalldigit_0": { "File": "flicky_hud.png", "Rect":  "75,82,8,8" },
 	"flicky_smalldigit_1": { "File": "flicky_hud.png", "Rect":  "83,82,8,8" },

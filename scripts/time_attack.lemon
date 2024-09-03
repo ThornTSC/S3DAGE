@@ -1,54 +1,62 @@
 global bool clean_screenshot = 0
 
 // Show version number on Challenge/Marathon end screens.
-// This function assumes Letters.Main() has already been called.
 function void PrintVersionNumber()
 {
-	Letters.Main()
+	u16 renderQueue = 0xe001
+	s32 length = Renderer.getTextWidth("version", "DAGE  v1.10.0.2")
+	#if GAMEAPP == 0x24020200	// use for latest stable version
+		length = Renderer.getTextWidth("version", "A.I.R. v24.02.02.0")
+	#endif
+	#if GAMEAPP == 0x24061800	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v24.06.18.0")
+	#endif
+	#if GAMEAPP == 0x24062100	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v24.06.21.0")
+	#endif
+	#if GAMEAPP == 0x24070400	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v24.07.04.0")
+	#endif
+	#if GAMEAPP == 0x24071000	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v24.07.10.0")
+	#endif
 
 	u16 px = 16
-	u16 py = 190 // (global.game_mode == 0x04 || global.game_mode == 0x58 || (global.zone_act == 0x0d01 && camera.foreground.x.u16 >= 0x0296)) ? 190 : 193	// the final check here is for the A.I.R. menu, which is the outro at a specific coordinate not in normal gameplay
+	if ((time_attack_end && !time_attack_hud) || (global.game_mode & 0x7f) >= 0x54)	// time attack left-aligned HUD
+		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
+	u16 py = 209 // (global.game_mode == 0x04 || global.game_mode == 0x58 || (global.zone_act == 0x0d01 && camera.foreground.x.u16 >= 0x0296)) ? 190 : 193	// the final check here is for the A.I.R. menu, which is the outro at a specific coordinate not in normal gameplay
+	if ((global.game_mode & 0x7f) == 0x54)
+	{
+		renderQueue += 0x1000
+		px += 8
+		py += 2
+	}
+	if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
+		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
 
 	#if GAMEAPP == 0x24020200	// use for latest stable version
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.02.02.0", 1, px, py)
+		Renderer.drawText("version", px, py, "DAGE  v1.10.0.2\nA.I.R. v24.02.02.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24061800	// use for test version
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.06.18.0", 1, px, py)
+		Renderer.drawText("version", px, py, "DAGE  v1.10.0.2\nA.I.R. v24.06.18.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24062100	// use for test version
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.06.21.0", 1, px, py)
+		Renderer.drawText("version", px, py, "DAGE  v1.10.0.2\nA.I.R. v24.06.21.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24070400	// use for test version
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.07.04.0", 1, px, py)
+		Renderer.drawText("version", px, py, "DAGE  v1.10.0.2\nA.I.R. v24.07.04.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24071000	// use for test version
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 91			// 16 pixels away from right edge, A.I.R. version number is 91 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. v24.07.10.0", 1, px, py)
+		Renderer.drawText("version", px, py, "DAGE  v1.10.0.2\nA.I.R. v24.07.10.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		return
+	#else
+		Renderer.drawText("version", px, py, "\nDAGE  v1.10.0.2", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
-	#if GAMEAPP > 0x24071000	// use for versions that DAGE has not updated to learn yet
-		if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-			px = getScreenWidth() - 16 - 96			// 16 pixels away from right edge, A.I.R. version message is 96 pixels long
-		Letters.Show("``DAGE v1.10.0.1`A.I.R. New Version", 1, px, py)
-		return
-	#endif
-
-	if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
-		px = getScreenWidth() - 16 - 120		// 16 pixels away from right edge, A.I.R. version message is 120 pixels long
-	Letters.Show("``DAGE v1.10.0.1`A.I.R. Unknown Version", 1, px, py)	// use for old preview/test versions or stable versions before v24.02.02.0 (via modified mod.json)
 }
 
 
@@ -63,7 +71,6 @@ function void PrintVersionNumber()
 // Function taken from maingame\maingame.lemon
 function void initializeMainGame()
 {
-	Letters.ClearAll()	// clear the text display queue to ensure previous text from menus does not show for one frame in a level
 	ApplyROMManipulations()
 
 	// Specific check for The ECSU Framework
@@ -792,11 +799,10 @@ function void LevelSelect()
 
 function void LevelSelect.init()
 {
-	Letters.ClearAll()
-	Letters.Main()
 	if (levelselect.selection != 0x20 && !original_mode)
 	{
-		Letters.Show("Press    to`change characters.", 1, getScreenWidth()/2 + 10, 201)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2 + 10, 193, "Press      to\nchange characters.", 0xe8d494ff, 1, 0, 0xe000, 0, 1)
+		Renderer.drawCustomSprite("@input_icon_button_X", getScreenWidth()/2 + 48, 197, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
 		Renderer.drawCustomSprite("@input_icon_button_X", getScreenWidth()/2 + 51, 201, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
 	}
 
@@ -973,7 +979,6 @@ function void fn007f62()
 	{
 		Renderer.resetSprites()	// Sprites must be manually reset in the level select menu, else they will not update each frame
 
-		// Before Letters.Show was added, additions to getScreenWidth()/2 were 70 and 86 for main + Tails pairings and 78 for solo characters.
 		if (levelselect.characters == 0)
 		{
 			Renderer.drawCustomSprite("continue_icon_sonic", getScreenWidth()/2 + 123, 216, 0, 0, 0xa000)
@@ -991,9 +996,8 @@ function void fn007f62()
 			Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 136, 216, 0, 0, 0xa000)
 		}
 
-		Letters.Main()
-		Letters.Show("Press    to`change characters.", 1, getScreenWidth()/2 + 10, 201)
-		Renderer.drawCustomSprite("@input_icon_button_X", getScreenWidth()/2 + 51, 201, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2 + 10, 193, "Press      to\nchange characters.", 0xe8d494ff, 1, 0, 0xe000, 0, 1)
+		Renderer.drawCustomSprite("@input_icon_button_X", getScreenWidth()/2 + 48, 197, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003)
 	}
 	else
 	{
@@ -1853,7 +1857,8 @@ function void RenderHUD_RedRings()
 	u16 py = getScreenHeight() - 16
 	if (time_attack_end && time_attack_hud == 0)
 		py -= 9	// 6 if version number is against bottom of screen as in older versions
-	u8 flags = (theme.westside && S2TitleCard.loaded) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
+//	u8 flags = (theme.westside && S2TitleCard.loaded) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
+	u8 flags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 	u16 renderQueue = (global.game.paused) ? 0xfff1 : 0xe008
 	// u8 ringNum = objA0.subtype2c & 0x1f
 	if (draw_HUD && !original_mode && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00 && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails))
@@ -1926,19 +1931,25 @@ function void RenderHUD_RedRings()
 // This is only the emerald count right now. The full-game timer is handed at the end of a frame.
 function void RenderHUD_Marathon()
 {
-	letters_marathonhud = true		// set a flag that says to monospace the character "1" in the marathon hud
-	Letters.Main()
-
-	u16 py = 201	// height without Red Star Rings HUD
-	if (time_attack == 3 && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00 && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails))	// Marathon with emeralds
-	{
-		if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
-			py -= 16	// move above Red Star Ring
-	}
 	if (time_attack == 3)
-		Letters.Show(stringformat("Chaos: %01d/7`Super: %01d/7", global.chaos_emeralds, global.super_emeralds), 1, getScreenWidth() - 73, py)
-	letters_marathonhud = false
-
+	{
+		u64 key
+		u16 emeraldIndex = 1
+		u16 px
+		u16 py
+		for (emeraldIndex; emeraldIndex <= 7; ++emeraldIndex)
+		{
+			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_%d", emeraldIndex) : "hud_chaos_empty"
+			px = getScreenWidth() - 16 - (16 * (8 - emeraldIndex))
+			py = 8
+			if (HUD.useMobileLivesDisplay())
+			{
+				px = 16 *  emeraldIndex
+				py = 200
+			}
+			Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, 0xe000, 0, 0xffffffff, 0x10000)
+		}
+	}
 //	RenderMarathonTimer()
 }
 
