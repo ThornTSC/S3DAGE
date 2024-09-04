@@ -323,7 +323,7 @@ function void PauseMenu_ChangeTheme()
 		if ((control.pad1.state & CONTROL_B) && customMenu.scrollRight())
 		{
 			theme.hud += 1
-			if (theme.hud == theme.max + 1)
+			if (theme.hud > theme.max)
 				theme.hud = 0
 
 			theme.hud += (hud.layout << 6)		// combine theme and layout values…
@@ -334,7 +334,9 @@ function void PauseMenu_ChangeTheme()
 		}
 		else if ((control.pad1.state & CONTROL_B) && customMenu.scrollLeft())
 		{
-			if (theme.hud == 0)
+			if (theme.hud > theme.max)
+				theme.hud = 0
+			else if (theme.hud == 0)
 				theme.hud = theme.max
 			else
 				theme.hud -= 1
@@ -353,7 +355,9 @@ function void PauseMenu_ChangeLayout()
 	u8 hud.layout.max = (time_attack == 1 || time_attack == 2) ? 2 : 3	// layout 3 is Classic, which we don't use in Challenges
 	if ((control.pad1.state & CONTROL_B) && customMenu.scrollUp())
 	{
-		if (hud.layout == 0)
+		if (hud.layout > hud.layout.max)
+			hud.layout = 0
+		else if (hud.layout == 0)
 		{
 			hud.layout = hud.layout.max
 			if (time_attack == 1 || time_attack == 2)
@@ -378,7 +382,9 @@ function void PauseMenu_ChangeLayout()
 	}
 	else if ((control.pad1.state & CONTROL_B) && customMenu.scrollDown())
 	{
-		if (hud.layout == hud.layout.max)
+		if (hud.layout > hud.layout.max)
+			hud.layout = 0
+		else if (hud.layout == hud.layout.max)
 		{
 			hud.layout = 0
 			if (time_attack == 1 || time_attack == 2)
