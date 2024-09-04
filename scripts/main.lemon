@@ -136,7 +136,8 @@ global u8 hud.layout
 global u16 unlock_act
 global u8 layout.part
 
-// Timer for unlock announcements
+// Flag and timer for unlock announcements
+global bool unlock.show
 global u16 unlock.timer
 
 // Number of stars for unlocks constants
@@ -192,7 +193,6 @@ function void showDebugText()
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
 //	debugWatch(0xffffb014, 2)
-	showUnlock()
 }
 
 // This function is the final one of any frame.
@@ -223,6 +223,10 @@ function void endOfFrame()
 	// This isn't the ideal place to do this, but every ideal place is already overwritten by many character mods, especially Extra Slot mods.
 	if (roll_maintain && !original_mode)
 		rollLeniency.CountFrames()
+
+	// Handle unlock announcements.
+	if (unlock.show)
+		Unlock.showUnlock()
 
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
@@ -23927,6 +23931,12 @@ function void RedStarRing_Collect()
 			objA0.value39 = 1							// set a flag that says to use blue/grey sparkles.
 		u8[redstarring_address] |= ringNum				// Mark the red star ring as collected
 		Audio.playAudio("redstarring", AudioContext.CONTEXT_SOUND)		// play Red Star Ring collection sound
+		if (!objA0.value39)
+		{
+			u16 total_stars_old = total_stars
+			countTotalStars()	// forces the counter to update
+			Unlock.checkForNewUnlock(total_stars_old, total_stars)
+		}
 
 		u32 rsrAddress = (unlock_act) ? 0x840580 : 0x840280
 		u64 key = (unlock_act) ? "RtWI_RSR" : "DAGE_RSR"
@@ -23989,13 +23999,35 @@ function void loadRSR()
 	}
 }
 
-function void showUnlock()
+
+
+
+function void Unlock.checkForNewUnlock(u16 total_stars_old, u16 total_stars)
 {
+	if (total_stars_old < unlock.theme.south && total_stars >= unlock.theme.south)
+		unlock.show = true
+	else if (total_stars_old < unlock.level.ehz && total_stars >= unlock.level.ehz)
+		unlock.show = true
+	else if (total_stars_old < unlock.level.cpz && total_stars >= unlock.level.cpz)
+		unlock.show = true
+}
+
+function void Unlock.showUnlock()
+{
+	bool validGameMode = (((global.game_mode & 0x7f) == 0x0c) || ((global.game_mode & 0x7f) == 0x34))
+	if (!validGameMode || level.restart || !timer.alldata)	// Rendering this currently slows menus, title cards, and game mode changes, so check we're fully in a level. Will need updating if special stages allow star collection.
+	{
+		unlock.show = false
+		unlock.timer = 0
+		return
+	}
+
 	if (!unlock.timer)	// this is the first frame of the unlock announcement
 		playSound(0x68)	// sound from text saying you can now be super/hyper or go to Hidden Palace
 
 	u64 unlockTypeString
 	u64 unlockString
+	// We compare to the *next* unlockable, as multiple stars can be earned at once via Challenges.
 	if (total_stars < unlock.theme.westside)
 	{
 		unlockTypeString = "Theme Unlocked:"
@@ -24003,8 +24035,8 @@ function void showUnlock()
 	}
 	else if (total_stars < unlock.level.cpz)
 	{
-		unlockTypeString = "Zone and Theme Unlocked:"
-		unlockString = "Emerald Hill Zone and West Side Island"
+		unlockTypeString = "Zone & Theme Unlocked:"
+		unlockString = "Emerald Hill Zone & West Side Island"
 	}
 	else
 	{
@@ -24014,14 +24046,19 @@ function void showUnlock()
 
 	constant u16 py_target = 32
 	u16 py = (unlock.timer < 30) ? (getScreenHeight() - (py_target * unlock.timer / 30)) : (unlock.timer > 270) ? (getScreenHeight() - (py_target * (300 - unlock.timer) / 30)) : (getScreenHeight() - py_target)
+	py += 6
+	u8 flags = ((global.game_mode & 0x7f) == 0x34) ? SPRITE_FLAG_PRIO : (SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT)		// allow rectangle to handle fade to white on special stage entrance properly
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py, unlockTypeString, 0x80b0ffff, 2, 0, 0xffff, 0)
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py + 13, unlockString, 0xffffffff, 2, 0, 0xffff, 0)
+	if (unlockString == "Emerald Hill Zone & West Side Island")
+		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenWidth()/2, py + 24, 0x00, flags, 0xfffe, 0, 180)
+	else
+		Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenWidth()/2, py + 24, 0x00, flags, 0xfffe, 0, 180)
 
 	++unlock.timer
 	if (unlock.timer == 300)
-		unlock.timer = 0	// this function is not called on a value of 0 unless the unlock has occurred on this frame
+	{
+		unlock.show = false
+		unlock.timer = 0
+	}
 }
-constant u16 unlock.theme.south = 25
-constant u16 unlock.theme.westside = 50
-constant u16 unlock.level.ehz   = 50
-constant u16 unlock.level.cpz   = 100

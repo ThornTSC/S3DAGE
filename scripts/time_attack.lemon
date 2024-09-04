@@ -7258,7 +7258,13 @@ function void Challenge.saveMedalsAndRecords()
 		medalType = 1
 
 	if (medalType > u8[best_time_address])		// If this medal is better than the previous one,
-		u8[best_time_address] = medalType		// put the value in shared memory.
+	{
+		medalCount += (medalType - u8[best_time_address])	// update the medal count and then
+		u8[best_time_address] = medalType					// put the value in shared memory.
+		u16 total_stars_old = total_stars
+		countTotalStars()	// forces the counter to update, which incorporates the medal value change
+		Unlock.checkForNewUnlock(total_stars_old, total_stars)
+	}
 
 	if (medalType)	// if we earned any medal at all this run
 	{
