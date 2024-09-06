@@ -2644,6 +2644,169 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 
 
 
+// Remove some character drawing corrections in Original Mode.
+// Function taken from maingame\character\character_graphics.lemon
+//# address-hook(0x012600) end(0x01286c)
+//# translated(0x012a2a) end(0x012a6e)
+function void UpdateSonicAnimation()
+{
+	if (char.state != char.state.former)
+	{
+		char.state.former = char.state
+		char.animation.frame = 0
+		char.animation.timer = 0
+		char.flags &= ~char.flag.PUSHING
+	}
+
+	if (!original_mode)
+		A1 = (super.active && char.state <= char.state.TRANSFORMING) ? 0x012c3a : 0x012aa6		// Fixed Super Sonic missing some animation states
+	else
+		A1 = (super.active) ? 0x012c3a : 0x012aa6
+
+	A1 = tableLookupAddress(A1, char.state * 2)
+	D0.u8 = u8[A1]
+
+	// D0.u8 is either:
+	//  - 0xff when running
+	//  - 0xfe when rolling (on ground or in air)
+	//  - between 0x00 and 0x7f in other cases (like standing, balancing, spring-jumping, getting hurt, etc.)
+
+	if (D0.u8 < 0x80)
+	{
+		updateSonicAnimationStanding()
+	}
+	else if (D0.u8 == 0xff)
+	{
+		updateSonicAnimationRunning()
+	}
+	else // if (D0.u8 == 0xfe)
+	{
+		updateSonicAnimationRolling()
+	}
+}
+
+function void updateSonicAnimationRunning()
+{
+	D0 = 0
+	if ((char.flags2d & 0x80) || char.rotation.x != 0)
+	{
+		updateCharacterAnimationRunning_shared()
+	}
+	else
+	{
+		D0.u8 = (s8(char.rotation) > 0) ? (char.rotation - 1) : char.rotation
+		D2.u8 = char.flags & char.flag.FACING_LEFT
+		if (D2.u8 == 0)
+			D0.s8 = -D0.s8 - 1
+
+		D0.u8 += 0x10
+		D1 = (D0.u8 & 0x80) ? (render_flag.FLIP_X | render_flag.FLIP_Y) : 0
+		D2.u8 ^= D1.u8
+
+		char.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+		char.render_flags |= D2.u8
+
+		if (char.flags & char.flag.PUSHING)
+		{
+			updateSonicAnimationPushing()
+			return
+		}
+
+		D0.u8 = (D0.u8 >> 4) & 0x06
+		D2.u16 = abs(char.groundspeed)
+		if (char.bonus_effect & char.bonus.INFINITE_INERTIA)
+			D2.u16 *= 2
+
+		if (char.character == CHARACTER_SONIC)
+		{
+			if (super.active == 0)
+			{
+				if (D2.u16 < 0x600)
+				{
+					// Sonic's walking animation
+					A1 = 0x012aee
+					D3.u8 = D0.u8 * 4
+				}
+				else
+				{
+					// Sonic's running animation
+					A1 = 0x012af8
+					D3.u8 = D0.u8 * 2
+				}
+			}
+			else
+			{
+				if (D2.u16 < 0x800)
+				{
+					// Super Sonic's walking animation
+					A1 = 0x012c7a
+					D3.u8 = D0.u8 * 4
+				}
+				else
+				{
+					// Super Sonic's running animation
+					A1 = 0x012c84
+					D3.u8 = D0.u8 * 2
+				}
+			}
+		}
+		else if (char.character == CHARACTER_TAILS)
+		{
+			if (D2.u16 < 0x600)
+			{
+				// Tails' walking animation
+				A1 = 0x015b04
+				D3.u8 = D0.u8 * 4
+			}
+			else if (D2.u16 < 0x700)
+			{
+				// Tails' running animation
+				A1 = 0x015b0e
+				D3.u8 = D0.u8 * 2
+			}
+			else
+			{
+				// Tails' faster running animation
+				A1 = 0x015bfe
+				D3.u8 = D0.u8
+			}
+		}
+		else if (char.character == CHARACTER_KNUCKLES)
+		{
+			if (D2.u16 < 0x600)
+			{
+				// Knuckles' walking animation
+				A1 = 0x017f3e
+				D3.u8 = D0.u8 * 4
+			}
+			else
+			{
+				// Knuckles' running animation
+				A1 = 0x017f48
+				D3.u8 = D0.u8 * 2
+			}
+		}
+
+		D0.u8 = u8[A1 + char.animation.frame + 1]	// Load next animation frame byte
+		if ((D0.u8 >= 0xfe && !original_mode) || (D0.u8 == 0xff && original_mode))		// 0xfe is possible in rare cases when Sonic touches ground while being carried by Tails
+		{
+			// Loop animation from the start
+			char.animation.frame = 0
+			D0.u8 = u8[A1 + 1]
+		}
+
+		char.animation.sprite = D0.u8 + D3.u8		// Change sprites based on rotations
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			char.animation.timer = max(0x800 - D2.s16, 0) >> 8
+			++char.animation.frame
+		}
+	}
+}
+
+
+
 // In Original Mode, remove AIR changes to avoid some animation quirks
 // Function taken from objects\shared.lemon
 //# address-hook(0x01e0a2)
