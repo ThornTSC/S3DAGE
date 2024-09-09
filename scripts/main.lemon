@@ -140,6 +140,9 @@ global u8 layout.part
 global bool unlock.show
 global u16 unlock.timer
 
+// Copy of level.giantrings_clear for use with the new on-screen counter during level results
+global u32 giantRingsCollected.array
+
 // Number of stars for unlocks constants
 constant u16 unlock.theme.south = 25
 constant u16 unlock.theme.westside = 50
@@ -5939,6 +5942,12 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		if (original_mode)
 			return false
 
+		// Extra check for displaying giant ring counter before branching to theme-specific level results. If (object is TOTAL text and not in a zone without giant rings or playing a modded character...)
+		if (objA0.animation.sprite == 0x0b && !unlock_act && (global.zone == 0x16 || global.zone <= 0x09) && !u8[0xffffe654] && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		{
+			GiantRings.displayNumberCollected(getScreenWidth()/2, px/8 + 189, 0xe008)
+		}
+
 		if (!System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			if (theme.hud == theme.flicky)
@@ -8401,11 +8410,13 @@ function void fn00d6d0_Orig()
 
 
 
-// Use classic time bonuses for Original Mode
+// Use classic time bonuses for Original Mode and create a copy of the collected giant rings array for the on-screen counter.
 // Function taken from maingame\hud\levelresults.lemon
 //# address-hook(0x02dae6) end(0x02dbc8)
 function void fn02dae6()
 {
+	giantRingsCollected.array = level.giantrings_clear	// When Act 2's totaling finishes, the usual array is set to 0 while the counter is still on screen
+
 	playMusic(MUSIC_CTRL_FADEOUT)
 
 	Kosinski.addToDMAQueue(0x0d6a62, 0xa400)
@@ -8622,7 +8633,7 @@ function void SetupCharacterAtStartPosition()
 	else
 	{
 		A1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x1e3cd8 : 0x1e3c18
-		if (global.zone_act == 0x0700)
+		if (global.zone_act == 0x0700 || global.zone_act.apparent == 0x0001)
 		{
 			if (level.start_location == 2)
 				A1 = 0x1e3cd8
@@ -9790,6 +9801,16 @@ function void LevelResults.AdvanceToNextAct()
 	if (!unlock_act)
 	{
 		base.LevelResults.AdvanceToNextAct()
+		// Special handling for AIZ, when Knuckles uses Sonic's path
+		if (global.zone == 0x00 && (isMainCharacter(CHARACTER_KNUCKLES) ||(Mods.isModActive("Chaos The Impostor") && global.characters == 2))  && camera.position.y.u16 < 0x400)
+		{
+			checkpoint.number = 4		// Used in AIZ1, but should not interfere with Act 2
+			level.start_location = 1	// Mark Sonic's path start for level restarts
+			checkpoint.x = 0x1240
+			checkpoint.y = 0x0358
+			Checkpoint.SaveCurrentState()
+			checkpoint.move_area.bottom = 0x0590	// Overwrite move_area.bottom.* backup accordingly
+		}
 		return
 	}
 
@@ -11012,7 +11033,22 @@ function void fn01c78c()
 	}
 }
 
-
+// Correct the camera x minimum in AIZ2 on the Sonic path when playing as Knuckles outside of Original Mode.
+// Function taken from level\01_aiz\level_aiz.lemon
+//# address-hook(0x01c64e) end(0x01c660)
+function void fn01c64e()
+{
+	if (isMainCharacter(CHARACTER_KNUCKLES) && (original_mode || level.start_location != 1))
+	{
+		camera.update_routine = 0x12
+		fn01c78c()
+	}
+	else
+	{
+		camera.update_routine = 0x02
+		fn01c664()
+	}
+}
 
 
 
@@ -12287,8 +12323,24 @@ function void fn030338()
 
 
 
-
-
+// For the door at the start of HCZ1 Sonic/Tails (end of Knux's area), do not allow off-screen Tails to open it.
+// Function taken from objects\04_cnz\cnz_trapdoor.lemon
+//# address-hook(0x030f58) end(0x030f84)
+function void fn030f58()
+{
+	D0.u16 = objA1.position.x.u16
+	if (D0.s16 >= D2.s16 && D0.u16 < D3.u16)
+	{
+		D0.u16 = objA1.position.y.u16
+		if (D0.u16 >= D4.u16 && D0.u16 < D5.u16 && s8[A1 + 0x2e] >= 0)
+		{
+			objA0.flags38 = 1
+		}
+	}
+	// This specific door in HCZ1 should not open if Knuckles is not the main character, or else Sonic + Tails can get a Knuckles-only giant ring.
+	if (global.zone_act == 0x0100 && objA0.position.x.u16 == 0x0af0 && objA0.position.y.u16 == 0x0660 && !isMainCharacter(CHARACTER_KNUCKLES))
+		objA0.flags38 = 0
+}
 
 
 
@@ -14618,7 +14670,7 @@ function void Level.InitializeWater()
 	}
 	else if (global.zone_act == 0x0001)		// Angel Island 2
 	{
-		levelHasWater = (global.zone_act.apparent != 0x01 || !isMainCharacter(CHARACTER_KNUCKLES))
+		levelHasWater = (global.zone_act.apparent != 0x01 || !isMainCharacter(CHARACTER_KNUCKLES) || level.start_location == 1)
 	#if STANDALONE
 		if (!levelHasWater && checkpoint.number != 0)	// Checkpoint 0 is Knuckles' start
 		{
@@ -24224,4 +24276,140 @@ function void Unlock.showUnlock()
 		unlock.show = false
 		unlock.timer = 0
 	}
+}
+
+constant array<u16> GiantRings.maxPossible =
+{
+//		S+T	S	T	K	K+T
+		2,	2,	2,	2,	2,	// AIZ1
+		2,	2,	2,	2,	2,	// AIZ2
+		5,	5,	5,	6,	6,	// HCZ1
+		5,	5,	5,	3,	8,	// HCZ2
+		5,	5,	5,	4,	4,	// MGZ1
+		5,	5,	5,	5,	5,	// MGZ2
+		4,	4,	4,	4,	4,	// CNZ1
+		7,	7,	7,	8,	9,	// CNZ2
+		4,	4,	4,	5,	5,	// FBZ1
+		3,	3,	3,	3,	3,	// FBZ2
+		2,	2,	2,	2,	2,	// ICZ1
+		4,	3,	4,	4,	5,	// ICZ2		// Sonic alone cannot get a giant ring on the "Knux" path near the end (that Tails can also reach)
+		4,	4,	3,	4,	4,	// LBZ1		// Tails alone cannot get a giant ring on a path the first tube transport takes Sonic/Knux to
+		4,	4,	4,	1,	1,	// LBZ2
+		6,	6,	6,	7,	7,	// MHZ1
+		3,	3,	3,	6,	6,	// MHZ2		// two giant rings on the Sonic/Tails path are difficult with Knux alone but still possible
+		6,	5,	6,	4,	4,	// SOZ1		// Sonic alone cannot get a giant ring to the right of a Knux-breakable wall beside a freefall Tails can fly up from below
+		3,	3,	3,	3,	3,	// SOZ2
+		3,	3,	3,	1,	1,	// LRZ1
+		6,	6,	6,	3,	8	// LRZ2		// Knux doesn't get to see results in this act. Add results at a later date, or perhaps show counter when end of act is approached.
+										// We *must* update giantRingsCollected.array before showing any counter if we don't make results!
+}
+constant array<u16> GiantRings.highestSubtype =
+{
+	2,	// AIZ1
+	6,	// AIZ2
+	6,	// HCZ1
+	14,	// HCZ2
+	8,	// MGZ1
+	13,	// MGZ2
+	6,	// CNZ1
+	15,	// CNZ2
+	6,	// FBZ1
+	9,	// FBZ2
+	2,	// ICZ1
+	7,	// ICZ2
+	4,	// LBZ1
+	9,	// LBZ2
+	7,	// MHZ1
+	13,	// MHZ2
+	6,	// SOZ1
+	9,	// SOZ2
+	3,	// LRZ1
+	11	// LRZ2
+}
+
+function void GiantRings.displayNumberCollected(u16 px, u16 py, u16 renderQueue)
+{
+	u8 charID = global.characters + useKnucklesAndTails
+	u8 zoneID = (global.zone == 0x16) ? 0x09 : global.zone
+	u8 actID = (global.zone == 0x16) ? 0x01 : global.act.apparent
+
+	u8 maxGiantRings = GiantRings.maxPossible[(10 * zoneID) + (5 * actID) + charID]
+
+	// Additional checks for using Knuckles and either Tails or damage boosts to take multiple paths in some acts by restarting from Data Select.
+	// When DAGE gets its own saves that occur every act, some of these will no longer be necessary if the level start location is saved.
+	// None of these checks account for using debug mode to collect more rings than normally allowed!
+	if (charID >= 3)
+	{
+		if (global.zone_act.apparent == 0x0001)
+		{
+			u16 AIZ2.SonicTailsPath = (giantRingsCollected.array & 0x0018)
+			u16 AIZ2.KnuxPath = (giantRingsCollected.array & 0x0060)
+			if (AIZ2.SonicTailsPath && AIZ2.KnuxPath)		// giant rings were obtained on both paths
+				maxGiantRings = 4
+		}
+		else if (global.zone_act.apparent == 0x0100)
+		{
+			u16 HCZ1.KnuxPath = (giantRingsCollected.array & 0x0002)
+			if (!HCZ1.KnuxPath && level.start_location == 1)	// started from the Sonic/Tails path, never collected the Knux path giant ring
+				maxGiantRings = 5
+		}
+		else if (global.zone_act.apparent == 0x0200)
+		{
+			u16 MGZ1.SonicTailsPath = (giantRingsCollected.array & 0x002e)
+			if (MGZ1.SonicTailsPath || level.start_location == 1)
+				maxGiantRings = 5
+			u16 MGZ1.KnuxPath = (giantRingsCollected.array & 0x01c0)
+			if (MGZ1.SonicTailsPath && MGZ1.KnuxPath)		// giant rings were obtained on both paths
+				maxGiantRings = 8
+		}
+		else if (global.zone_act.apparent == 0x0300)
+		{
+			u16 CNZ1.SonicTailsPath = (giantRingsCollected.array & 0x0006)
+			u16 CNZ1.KnuxPath = (giantRingsCollected.array & 0x0060)
+			if (CNZ1.SonicTailsPath && CNZ1.KnuxPath)		// giant rings were obtained on both paths
+				maxGiantRings = 6
+		}
+
+		// ICZ2, LBZ2, FBZ1, SOZ1, and LRZ1 do not need checks at this time, but this may change someday.
+
+		else if (zoneID == 0x09 && actID == 1)	// should be fine to check global.zone_act.apparent, but we use IDs in case a mod allows access to the LRZ2 boss
+		{
+			u16 LRZ2.SonicTailsPath = (giantRingsCollected.array & 0x06e0)		// ring IDs 4, 8, and 11 are on the Knux path, but 5-7, 9, and 10 require sidekick Tails or damage boosting
+			if (LRZ2.SonicTailsPath)
+				maxGiantRings = 8		// damage boosting allows access to every giant ring
+		}
+	}
+
+	u8 highestSubtype.act1 = GiantRings.highestSubtype[2 * zoneID]
+	u8 highestSubtype.act2 = GiantRings.highestSubtype[2 * zoneID + 1]
+	u8 giantRingsCollected.number
+
+	u16 bit
+	if (actID == 0)
+	{
+		// Count Act 1 giant rings
+		for (u8 i = 1; i <= highestSubtype.act1; ++i)	// D.A. Garden never uses subtype 0 for a giant ring, so this must start from i = 1 and use <= instead of <.
+		{
+			bit = (1 << i)
+			if (giantRingsCollected.array & bit)
+				giantRingsCollected.number += 1
+		}
+	}
+	else
+	{
+		// Count Act 2 giant rings
+		for (u8 i = highestSubtype.act1 + 1; i <= highestSubtype.act2; ++i)	// D.A. Garden never uses subtype 0 for a giant ring, so this must start from i = 1 and use <= instead of <.
+		{
+			bit = (1 << i)
+			if (giantRingsCollected.array & bit)
+				giantRingsCollected.number += 1
+		}
+	}
+
+	s16 y_offset = (getScreenWidth() - 400)/16	// we base the y position on TOTAL text x value, which changes with screen width at a rate of deltaY/deltaX = -1/16.
+	Renderer.drawCustomSprite("hud_giantring", px - 26, py - y_offset - 7, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+	u64 giantRingsObtained = stringformat("             * %d/%d", giantRingsCollected.number, maxGiantRings)
+	u32 tint = (giantRingsCollected.number == maxGiantRings) ? 0xffff60ff : 0xffffffff
+	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 6, py - y_offset, giantRingsObtained, tint, 2, 0, renderQueue, 0, 1)
+	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
 }
