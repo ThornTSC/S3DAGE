@@ -2923,7 +2923,7 @@ function bool fn00d458()
 		// Load additional data
 		u32 slotIndex = (A1 - 0xffffe6ac) / 0x0a
 		u32 address = 0x801100 + slotIndex * 0x20
-		if (u8[A1] == 0)
+		if (u8[A1] == 0 && !original_mode)
 		{
 			// Load score, but only for non-completed games
 			player.score = u32[address]

@@ -24413,3 +24413,77 @@ function void GiantRings.displayNumberCollected(u16 px, u16 py, u16 renderQueue)
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 6, py - y_offset, giantRingsObtained, tint, 2, 0, renderQueue, 0, 1)
 	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
 }
+
+
+
+
+
+// Do not save score in save slots in Original Mode. (Loading is handled in fn00d458() in cmf_main.lemon.)
+// Function taken from general\saveslots.lemon
+//# address-hook(0x00c434) end(0x00c4d0)
+function void SaveGameOnLevelFinished()
+{
+	// Save game slot
+	if (global.lock_on_state == 0 && global.active_saveslot != 0)
+	{
+		A1 = global.active_saveslot
+
+		// Get the number of the next zone (using the usual internal zone numbering, see definition of global.zone.apparent)
+		u8 offset = global.zone * 2 + global.act
+		u8 nextZone = u8[0x00c404 + offset]
+
+		bool gameCompleted = false
+		if (u8[A1] & 0x03)
+		{
+			// This gets entered only for already completed games
+			if (nextZone < u8[A1 + 0x03])
+			{
+				gameCompleted = true
+			}
+			else
+			{
+				// This is a weird case, supposedly needed for unlocking DDZ after collecting all Super Emeralds in an formerly complete game?
+				u8[A1] &= 0xfc
+			}
+		}
+
+		if (!gameCompleted)
+		{
+			u8[A1 + 0x03] = nextZone
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				gameCompleted = (nextZone >= 0x0c)
+			}
+			else if (isMainCharacter(CHARACTER_TAILS))
+			{
+				gameCompleted = (nextZone >= 0x0d)
+			}
+			else
+			{
+				gameCompleted = (nextZone >= 0x0e) || (nextZone == 0x0d && global.chaos_emeralds < 7)
+			}
+
+			if (gameCompleted)
+			{
+				u8[A1] = (global.chaos_emeralds < 7) ? 1 : (global.super_emeralds < 7) ? 2 : 3
+			}
+
+			u16[A1 + 0x04] = 0
+		}
+
+		lives_counter = min(lives_counter, 99)
+		u8[A1 + 0x08] = lives_counter
+
+		if (!original_mode)		// we don't want to alter saved score in Original Mode, as it always starts from 0.
+		{
+			// Store additional data
+			u32 slotIndex = (A1 - 0xffffe6ac) / 0x0a
+			u32 address = 0x801100 + slotIndex * 0x20
+			u32[address] = player.score
+		}
+
+		SaveGameSlot()
+	}
+
+	level.giantrings_clear = 0
+}
