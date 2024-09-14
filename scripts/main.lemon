@@ -24299,7 +24299,7 @@ constant array<u16> GiantRings.maxPossible =
 		3,	3,	3,	6,	6,	// MHZ2		// two giant rings on the Sonic/Tails path are difficult with Knux alone but still possible
 		6,	5,	6,	4,	4,	// SOZ1		// Sonic alone cannot get a giant ring to the right of a Knux-breakable wall beside a freefall Tails can fly up from below
 		3,	3,	3,	3,	3,	// SOZ2
-		3,	3,	3,	1,	1,	// LRZ1
+		3,	3,	3,	2,	2,	// LRZ1
 		6,	6,	6,	3,	8	// LRZ2		// Knux doesn't get to see results in this act. Add results at a later date, or perhaps show counter when end of act is approached.
 										// We *must* update giantRingsCollected.array before showing any counter if we don't make results!
 }
@@ -24323,8 +24323,8 @@ constant array<u16> GiantRings.highestSubtype =
 	13,	// MHZ2
 	6,	// SOZ1
 	9,	// SOZ2
-	3,	// LRZ1
-	11	// LRZ2
+	4,	// LRZ1
+	12	// LRZ2
 }
 
 function void GiantRings.displayNumberCollected(u16 px, u16 py, u16 renderQueue)
@@ -24374,7 +24374,7 @@ function void GiantRings.displayNumberCollected(u16 px, u16 py, u16 renderQueue)
 
 		else if (zoneID == 0x09 && actID == 1)	// should be fine to check global.zone_act.apparent, but we use IDs in case a mod allows access to the LRZ2 boss
 		{
-			u16 LRZ2.SonicTailsPath = (giantRingsCollected.array & 0x06e0)		// ring IDs 4, 8, and 11 are on the Knux path, but 5-7, 9, and 10 require sidekick Tails or damage boosting
+			u16 LRZ2.SonicTailsPath = (giantRingsCollected.array & 0x0dc0)		// ring IDs 5, 9, and 12 are on the Knux path, but 6-8, 10, and 11 require sidekick Tails or damage boosting
 			if (LRZ2.SonicTailsPath)
 				maxGiantRings = 8		// damage boosting allows access to every giant ring
 		}
