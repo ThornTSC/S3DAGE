@@ -1,5 +1,6 @@
 {
     "fbz_wall": { "File": "fbz_wall.bmp" },
+    "fbz_floorend": { "File": "fbz_floorend.bmp" },
     "fbz_tunneloverlay": { "File": "fbz_tunneloverlay.bmp" },
     "fbz_tunnellights": { "File": "fbz_tunnellights.bmp" },
     "fbz_pipe256": { "File": "fbz_pipe256.bmp" },
