@@ -2,8 +2,14 @@
     "fbz_wall": { "File": "fbz_wall.bmp" },
     "fbz_floorend": { "File": "fbz_floorend.bmp" },
     "fbz_tunneloverlay": { "File": "fbz_tunneloverlay.bmp" },
+    "fbz_door": { "File": "fbz_tunneloverlay.bmp", "Rect": "0,64,16,64" },
     "fbz_tunnellights": { "File": "fbz_tunnellights.bmp" },
     "fbz_pipe256": { "File": "fbz_pipe256.bmp" },
     "fbz_interior": { "File": "fbz_interior.bmp" },
-    "fbz_exterior": { "File": "fbz_exterior.bmp" }
+    "fbz_exterior": { "File": "fbz_exterior.bmp" },
+
+    "fbz_propeller0": { "File": "fbz_propeller.bmp", "Rect": "0,0,208,16", "Center": "104, 8" },
+    "fbz_propeller1": { "File": "fbz_propeller.bmp", "Rect": "0,16,208,16", "Center": "104, 8" },
+    "fbz_propeller2": { "File": "fbz_propeller.bmp", "Rect": "0,32,208,16", "Center": "104, 8" },
+    "fbz_propeller3": { "File": "fbz_propeller.bmp", "Rect": "0,16,208,16", "Center": "104, 8" }    // identical to fbz_propellor1
 }

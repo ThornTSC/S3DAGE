@@ -6600,6 +6600,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return true
 		}
 	}
+
+	// FBZ propeller for Act 2
+	if (objA0.update_address == 0x03c1ee && !original_mode)
+	{
+		Renderer.drawCustomSprite(stringformat("fbz_propeller%d", u8[A0 + 0x1d]), px, py , 0x00, (objA0.render_flags & 0x01) | SPRITE_FLAG_PRIO, renderQueue)	// frame to show is kept in offset 0x1d
+		return true
+	}	
 /*
 	// Characters in special stage. Add 46 to use new screen size.
 	if (objA0.update_address == 0x00903e || objA0.update_address == 0x00927a)
@@ -18212,9 +18219,9 @@ function void FBZ1_CustomSprites()
 		Renderer.drawCustomSprite("fbz_wall", 0x0180 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9800)
 		Renderer.drawCustomSprite("fbz_wall", 0x0180 - camera.foreground.x.u16, 0x0600 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9800)
 		
-		Renderer.drawCustomSprite("fbz_tunneloverlay", 0x0180 - camera.foreground.x.u16, 0x0100 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9f00)
+		Renderer.drawCustomSprite("fbz_tunneloverlay", 0x0180 - camera.foreground.x.u16, 0x0100 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9f01)
 		Renderer.drawCustomSprite("fbz_tunnellights", 0x0180 - camera.foreground.x.u16, 0x0100 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x8000)
-		Renderer.drawCustomSprite("fbz_tunneloverlay", 0x0180 - camera.foreground.x.u16, 0x0400 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9f00)
+		Renderer.drawCustomSprite("fbz_tunneloverlay", 0x0180 - camera.foreground.x.u16, 0x0400 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9f01)
 		Renderer.drawCustomSprite("fbz_tunnellights", 0x0180 - camera.foreground.x.u16, 0x0400 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x8000)
 
 		Renderer.drawCustomSprite("fbz_exterior", 0x0000 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x9800)
@@ -18713,7 +18720,7 @@ function void UpdateLevelTiles.FBZ2()
 function void FBZ2_CustomSprites()
 {
 	// Add floor end tapering where chunks meet walls without it
-	if (!original_mode)
+	if (!original_mode && (u8[0xffff8af8] != 0xb2))		// layout check to make sure we're not drawing indoor floor art while outside
 	{
 		Renderer.drawCustomSprite("fbz_floorend", 0x0980 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x0ae0 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
@@ -18723,6 +18730,17 @@ function void FBZ2_CustomSprites()
 		Renderer.drawCustomSprite("fbz_floorend", 0x16e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x1760 - camera.foreground.x.u16, 0x0900 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x1e60 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x2300 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+	}
+
+	if (!original_mode && u8[0xffff89ac] == 0x89 && global.game.paused)		// if we handle this here when not paused, the lights disappear one frame too late
+	{
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2380 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2400 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2410 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_door", 0x2580 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x9f01)
+		u32 rectColor = ((u16[0xfffffc4e] & 0x0000f) * 0x12000000) + ((u16[0xfffffc4e] & 0x000f0) * 0x12000)+ ((u16[0xfffffc4e] & 0x00f00) * 0x12) + 0xff	// rearrange the indoor purple background wall color data for a drawRect
+		Renderer.drawRect(0x2570 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 16, 64, rectColor, 0x9eff, 0, 1)
 	}
 
 	// Display inputs for dropping from overhead bars
@@ -18746,6 +18764,123 @@ function void FBZ2_CustomSprites()
 		Renderer.addSpriteMaskWorld(0x2aa0, 0x05e0, 0x2be0 - 0x2aa0, 0x0600 - 0x05e0, 0x9f80, 1)
 }
 
+
+
+
+// Add a new outdoor area to FBZ2.
+// Function taken from level\08_fbz\level_fbz.lemon
+//# address-hook(0x053234) end(0x053240)
+function void fn053234()
+{
+	D0.u16 = u16[0xffffb000 + 0x10]
+	D1.u16 = u16[0xffffb000 + 0x14]
+	call 0x053244 + level.display_routine
+
+	if (u16[0xffffb010] > 0x2280 && u16[0xffffb010] < 0x2880 && !original_mode)
+		FBZ2.newRouteArtSwap()
+}
+
+function void FBZ2.newRouteArtSwap()
+{
+	bool skyBackground = ((u16[0xffffb010] > 0x2300 && u16[0xffffb014] > 0x0b00) || (u16[0xffffb010] > 0x2540 && u16[0xffffb010] < 0x2840 && u16[0xffffb014] > 0x0a00) || (u16[0xffffb010] >= 0x2840 && camera.position.y.u16 > 0x0918))
+	bool outdoorChunks = ((u16[0xffffb010] > 0x2540 && u16[0xffffb010] <= 0x2578 && u16[0xffffb014] > 0x0a00 && u16[0xffffb014] < 0x0b40) || (u16[0xffffb010] > 0x2578 && u16[0xffffb010] < 0x2840 && u16[0xffffb014] > 0x0a00) || (u16[0xffffb010] >= 0x2840 && u16[0xffffb014] > 0x0a72))
+
+	u32 chunkAddress
+	if (outdoorChunks && u32[0xffff89ac] != 0x8989f089)
+	{
+		u32[0xffff89ac] = 0x8989f089
+		u32[0xffff89b0] = 0x898989ab
+		u32[0xffff89b4] = 0x89ab8989
+
+		u32[0xffff8a2a] = 0x8989f083
+		u32[0xffff8a2e] = 0x838383ab
+		u32[0xffff8a32] = 0x89ab8989
+
+		u32[0xffff8aa8] = 0x8989f000
+		u32[0xffff8aac] = 0x00ea008c
+		u32[0xffff8ab0] = 0xb8ab8989
+
+		u32[0xffff8b26] = 0x8989f000
+		u32[0xffff8b2a] = 0x009d0000
+		u32[0xffff8b2e] = 0x31ab8989
+
+		u32[0xffff8ba4] = 0xdcdcdd00
+		u32[0xffff8ba8] = 0x00000022
+		u32[0xffff8bac] = 0x22ab8989
+
+		u32[0xffff8c22] = 0x8989f022
+		u32[0xffff8c26] = 0x00000000
+		u32[0xffff8c2a] = 0x00ab8989
+	}
+	else if (!outdoorChunks && u32[0xffff89ac] != 0x10101021)
+	{
+		u32[0xffff89ac] = 0x10101021
+		u32[0xffff89b0] = 0xa1a1a1a1
+		u32[0xffff89b4] = 0xc86aa1a1
+
+		u32[0xffff8a2a] = 0xa1a11878
+		u32[0xffff8a2e] = 0x78787819
+		u32[0xffff8a32] = 0xc86aa1a1
+
+		u32[0xffff8aa8] = 0xa1a16b00
+		u32[0xffff8aac] = 0x00ea0016
+		u32[0xffff8ab0] = 0xd06aa1a1
+
+		u32[0xffff8b26] = 0x19a16b00
+		u32[0xffff8b2a] = 0x009d0000
+		u32[0xffff8b2e] = 0x316aa1a1
+
+		u32[0xffff8ba4] = 0x71727300
+		u32[0xffff8ba8] = 0x00000022
+		u32[0xffff8bac] = 0x226aa1a1
+
+		u32[0xffff8c22] = 0x21a16b22
+		u32[0xffff8c26] = 0x00000000
+		u32[0xffff8c2a] = 0x006aa1a1
+	}
+
+
+	if (u16[0xffffb014] > 0x0b7e)	// If the player is stuck under the first outside platform,
+		u8[0xffff8c25] = 0x35		// use the top-solid only variant to let the player back up.
+	else							// Otherwise, use the variant with thicker solidity
+		u8[0xffff8c25] = 0x22		// to support falls from above.
+
+	fillPlaneA_Default(camera.position.x.u16 - 0x40, camera.position.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+
+	if (outdoorChunks)
+	{
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2380 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2400 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_tunnellights", 0x2410 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
+		Renderer.drawCustomSprite("fbz_door", 0x2580 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x9f00)
+		Renderer.drawRect(0x2570 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 16, 64, 0x482448ff, 0x9eff, 0, 1)
+	}
+
+	// Handle background swap
+	if (u16[0xffffeed6] == 0)
+	{
+		if (!skyBackground)
+		{
+			fn052a2a()
+			return
+		}
+
+		fn05326a()
+	}
+	else
+	{
+		if (skyBackground)
+		{
+			fn052a2a()
+			return
+		}
+
+		u16[0xffffeed6] = 0
+		D0 = 8
+		D6 = 0
+		fn05327a()
+	}
+}
 
 
 // In Original Mode, undo changes to the FBZ2 laser miniboss.
@@ -20004,16 +20139,35 @@ function void fn0862fe()
 	#endif
 }
 
-// Note that these functions are NOT currently called by typical level routines; they are ONLY called in DAGE pausing!
-// The pause checks here are superfluous but left in for easier calls from a level routine in the future.
+
+
+//# address-hook(0x056bba) end(0x056bbe)
+function void UpdateLevelScrolling.LRZ1()
+{
+	LRZ1_CustomSprites()
+
+	// Call targets:
+	//  - 0x056bc2	-> level.scrolling_routine == 0x00	-> Default
+	//  - 0x056bc6	-> level.scrolling_routine == 0x04	-> Lava lake area
+	//  - 0x056bca	-> level.scrolling_routine == 0x08	-> Temporary state when leaving lava lake area (loads the background again)
+	//  - 0x056bce	-> level.scrolling_routine == 0x0c	-> ?
+	call 0x056bc2 + level.scrolling_routine
+}
+
+
+
+
 function void LRZ1_CustomSprites()
 {
+	Renderer.drawCustomSprite("lrz1_wallpathcover", 0x1340 , 0x08a0, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
 	if (global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
 	{
 		Renderer.addSpriteMaskWorld(camera.position.x.u16, 0x0710 + 176, getScreenWidth(), getScreenHeight() - 176, 0x9e00, 1)	
 	}
 }
 
+// Note that this function is NOT currently called by typical level routines; they are ONLY called in DAGE pausing!
+// The pause checks here are superfluous but left in for easier calls from a level routine in the future.
 function void LRZ2_CustomSprites()
 {
 	if (global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
@@ -24305,7 +24459,7 @@ constant array<u16> GiantRings.maxPossible =
 		4,	4,	4,	4,	4,	// CNZ1
 		7,	7,	7,	8,	9,	// CNZ2
 		4,	4,	4,	5,	5,	// FBZ1
-		4,	4,	4,	4,	4,	// FBZ2
+		5,	5,	5,	5,	5,	// FBZ2
 		2,	2,	2,	2,	2,	// ICZ1
 		4,	3,	4,	4,	5,	// ICZ2		// Sonic alone cannot get a giant ring on the "Knux" path near the end (that Tails can also reach)
 		4,	4,	3,	4,	4,	// LBZ1		// Tails alone cannot get a giant ring on a path the first tube transport takes Sonic/Knux to
@@ -24329,7 +24483,7 @@ constant array<u16> GiantRings.highestSubtype =
 	6,	// CNZ1
 	15,	// CNZ2
 	6,	// FBZ1
-	10,	// FBZ2
+	11,	// FBZ2
 	2,	// ICZ1
 	7,	// ICZ2
 	4,	// LBZ1
