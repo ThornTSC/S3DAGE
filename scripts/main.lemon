@@ -24314,7 +24314,7 @@ constant array<u16> GiantRings.maxPossible =
 		2,	2,	2,	2,	2,	// ICZ1
 		4,	3,	4,	4,	5,	// ICZ2		// Sonic alone cannot get a giant ring on the "Knux" path near the end (that Tails can also reach)
 		4,	4,	3,	4,	4,	// LBZ1		// Tails alone cannot get a giant ring on a path the first tube transport takes Sonic/Knux to
-		4,	4,	4,	1,	1,	// LBZ2
+		4,	4,	4,	2,	2,	// LBZ2
 		6,	6,	6,	7,	7,	// MHZ1
 		3,	3,	3,	6,	6,	// MHZ2		// two giant rings on the Sonic/Tails path are difficult with Knux alone but still possible
 		6,	5,	6,	4,	4,	// SOZ1		// Sonic alone cannot get a giant ring to the right of a Knux-breakable wall beside a freefall Tails can fly up from below
@@ -24338,7 +24338,7 @@ constant array<u16> GiantRings.highestSubtype =
 	2,	// ICZ1
 	7,	// ICZ2
 	4,	// LBZ1
-	9,	// LBZ2
+	10,	// LBZ2
 	7,	// MHZ1
 	13,	// MHZ2
 	6,	// SOZ1
