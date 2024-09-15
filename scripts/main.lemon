@@ -5,8 +5,8 @@
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version = "D.A. Garden Edition v1.10.0.2"
-#define DAGE_running = 0x1a02
+global u64 DAGE_version = "D.A. Garden Edition v1.10.1.0"
+#define DAGE_running = 0x1a10
 
 // Define variables for in-game settings
 global u8 palette_set
