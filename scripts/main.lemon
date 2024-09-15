@@ -11,6 +11,7 @@ global u64 DAGE_version = "D.A. Garden Edition v1.10.1.0"
 // Define variables for in-game settings
 global u8 palette_set
 global u8 rain_intensity
+global bool giant_ring_counter
 global u8 hcz_murkiness
 // global u8 new_title
 global u8 eggrobos_sonictails = 1
@@ -5943,7 +5944,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return false
 
 		// Extra check for displaying giant ring counter before branching to theme-specific level results. If (object is TOTAL text and not in a zone without giant rings or playing a modded character...)
-		if (objA0.animation.sprite == 0x0b && !unlock_act && (global.zone == 0x16 || global.zone <= 0x09) && !u8[0xffffe654] && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		if (giant_ring_counter && objA0.animation.sprite == 0x0b && !unlock_act && (global.zone == 0x16 || global.zone <= 0x09) && !u8[0xffffe654] && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			GiantRings.displayNumberCollected(getScreenWidth()/2, px/8 + 189, 0xe008)
 		}
@@ -18797,11 +18798,11 @@ function void FBZ2.newRouteArtSwap()
 		u32[0xffff8a32] = 0x89ab8989
 
 		u32[0xffff8aa8] = 0x8989f000
-		u32[0xffff8aac] = 0x00ea008c
+		u32[0xffff8aac] = 0x00e0008c
 		u32[0xffff8ab0] = 0xb8ab8989
 
 		u32[0xffff8b26] = 0x8989f000
-		u32[0xffff8b2a] = 0x009d0000
+		u32[0xffff8b2a] = 0x00ff0000
 		u32[0xffff8b2e] = 0x31ab8989
 
 		u32[0xffff8ba4] = 0xdcdcdd00
@@ -18823,11 +18824,11 @@ function void FBZ2.newRouteArtSwap()
 		u32[0xffff8a32] = 0xc86aa1a1
 
 		u32[0xffff8aa8] = 0xa1a16b00
-		u32[0xffff8aac] = 0x00ea0016
+		u32[0xffff8aac] = 0x00e00016
 		u32[0xffff8ab0] = 0xd06aa1a1
 
 		u32[0xffff8b26] = 0x19a16b00
-		u32[0xffff8b2a] = 0x009d0000
+		u32[0xffff8b2a] = 0x00ff0000
 		u32[0xffff8b2e] = 0x316aa1a1
 
 		u32[0xffff8ba4] = 0x71727300
