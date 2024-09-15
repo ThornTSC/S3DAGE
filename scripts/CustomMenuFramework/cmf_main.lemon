@@ -2223,7 +2223,9 @@ function void fn00d1fa()
 					}
 				}
 			}
-
+		#if STANDALONE
+			else	// Don't allow both left & right being pressed at the same time, as this leads to buggy behavior
+		#endif
 			if (control.pad1.pressed & CONTROL_RIGHT)	// not using new held button scroll here. Using classic Data Select behavior.
 			{
 				if (dataselect.slot_selected != 9)
@@ -2435,6 +2437,8 @@ function void fn00d42c_Orig()
 	}
 
 	objA0.animation.sprite = u16[A0 + 0x34] + 4
+	if (u16[A0 + 0x34] == 4)
+		--objA0.animation.sprite
 	fn00d69e()
 }
 
@@ -2662,7 +2666,8 @@ function void fn00d42c()
 				DataSelect.SharedGameSlotContinue()
 
 			#if STANDALONE
-				u8[A1 + 0x01] = global.game_random_base
+				if (!original_mode)
+					u8[A1 + 0x01] = global.game_random_base
 			#endif
 
 				sram.block_interrupts.u8 = 0xff
@@ -2977,11 +2982,14 @@ function bool fn00d458()
 		global.chaos_emeralds = D1.u8
 		global.super_emeralds = D2.u8
 	#if STANDALONE
-		global.game_random_base = u8[A1 + 0x01]
-		if (global.game_random_base == 0)
+		if (!original_mode)
 		{
-			// Intentionally not using the (more deterministic) "getRandomNumber" here
-			global.game_random_base = 1 + (System.rand() % 0xff)		// Avoid the 0 value
+			global.game_random_base = u8[A1 + 0x01]
+			if (global.game_random_base == 0)
+			{
+				// Intentionally not using the (more deterministic) "getRandomNumber" here
+				global.game_random_base = 1 + (System.rand() % 0xff)		// Avoid the 0 value
+			}
 		}
 	#endif
 
@@ -3109,4 +3117,30 @@ function void fn00d7ea()
 	objA0.velocity.y = objA0.position.y.u16
 
 	DrawObject()
+}
+
+
+
+// Remove art fix on data select Eggman in Original Mode.
+// Functions taken from menus\dataselect.lemon
+//# address-hook(0x00d7a4) end(0x00d7bc)
+function void fn00d7a4()
+{
+	objA0.render_flags = render_flag.COMPOUND
+	objA0.box_size.x = 0x30
+	objA0.compound.count = 0x01
+	objA0.compound.sprite1.animation.sprite = 0x08
+	objA0.base_state += 4
+	fn00d7c0()
+
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Remove that red mark on his forehead
+		setVRAM(0x6e8c, 0xaaaa)
+		setVRAM(0x6e90, 0xaaaa)
+		setVRAM(0x71ac, 0xaaaa)
+		setVRAM(0x71b0, 0xaaaa)
+	}
+#endif
 }

@@ -1314,7 +1314,7 @@ function void SetGlobalCharacters()
 		global.characters = levelselect.characters
 	#if STANDALONE
 		// Handle Knuckles & Tails
-		useKnucklesAndTails = (global.characters == 4 && time_attack != 1 && time_attack != 2)
+		useKnucklesAndTails = (global.characters == 4 && time_attack != 1 && time_attack != 2 && !original_mode)
 		global.characters = min(global.characters, 3)
 	#endif
 	}
