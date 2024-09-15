@@ -57,6 +57,18 @@
 				}
 			},
 			{
+				"InternalName": "GiantRingCounter",
+				"DisplayName": "Giant Ring Counter",
+				"Variable": "giant_ring_counter",
+				"DefaultValue": "1",
+			 	"Category": "Appearance",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
 				"InternalName": "HCZMurkyWater",
 				"DisplayName": "Hydrocity Water",
 				"Variable": "hcz_murkiness",
