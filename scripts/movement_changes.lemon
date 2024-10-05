@@ -679,105 +679,112 @@ function void Character.OnCollisionWithDynamicObject()
 			s16 vy = (global.inv_gravity) ? -char.velocity.y : char.velocity.y
 		#if STANDALONE
 			// Calculate if the player is moving up, specifically relative to the monitor
-			vy = char.velocity.y - objA1.velocity.y
+			if (!original_mode)
+				vy = char.velocity.y - objA1.velocity.y
 		#endif
 			bool movingUp = (objA1.render_flags & render_flag.FLIP_Y) ? (vy > 0) : (vy < 0)
 		#if STANDALONE
-			movingUp = (vy < 0)		// Velocity is normalised for inverted gravity anyway, so no need for fancy conditional checks
-
-			// If player and monitor are at different orientations, check if player is moving down instead of up
-			if ((objA1.render_flags & render_flag.FLIP_Y) != (char.render_flags & render_flag.FLIP_Y))
+			if (!original_mode)
 			{
-				movingUp = !movingUp
+				movingUp = (vy < 0)		// Velocity is normalised for inverted gravity anyway, so no need for fancy conditional checks
 
-				if (char.flags & char.flag.IN_AIR)
-					objA1.flags2a &= ~object.flag.P1_PUSHING
+				// If player and monitor are at different orientations, check if player is moving down instead of up
+				if ((objA1.render_flags & render_flag.FLIP_Y) != (char.render_flags & render_flag.FLIP_Y))
+				{
+					movingUp = !movingUp
+
+					if (char.flags & char.flag.IN_AIR)
+						objA1.flags2a &= ~object.flag.P1_PUSHING
+				}
+
+				movingUp = (movingUp && (abs(char.position.x.u16 - objA1.position.x.u16) < 0x12 || char.state == char.state.ROLLING))		// only bounce at a certain distance, otherwise push the player away when falling, #contributed by GFX32
 			}
-
-			movingUp = (movingUp && (abs(char.position.x.u16 - objA1.position.x.u16) < 0x12 || char.state == char.state.ROLLING))		// only bounce at a certain distance, otherwise push the player away when falling, #contributed by GFX32
 		#endif
 			if (movingUp)
 			{
-			#if STANDALONE
-				if ((objA1.flags2a & object.flag.P1_PUSHING) && (char.flags & char.flag.IN_AIR) && !original_mode)
+				if (!original_mode)
 				{
-					// In S3AIR, do not allow S&K's monitor opening from the side
-					//  -> This is done to be more consistent with other Sonic games, incl. Sonic 1, 2, CD, Mania and even Sonic 3 alone
-					//  -> The first check above tells us if the character is on a side of the monitor
-					//  -> The second one makes sure that you can always ground-based roll into a monitor (see e.g. first invincibility in MHZ 1, when spindashing into it from the right)
-					return
-				}
-				else if (Game.getSetting(SETTING_MONITOR_BEHAVIOR) == 0 || original_mode || time_attack)
-				{
-					// All you really need for Sonic & Knuckles monitor Behavior. everything else relevant is handled elsewhere
-					char.velocity.y = -char.velocity.y
+					if ((objA1.flags2a & object.flag.P1_PUSHING) && (char.flags & char.flag.IN_AIR) && !original_mode)
+					{
+						// In S3AIR, do not allow S&K's monitor opening from the side
+						//  -> This is done to be more consistent with other Sonic games, incl. Sonic 1, 2, CD, Mania and even Sonic 3 alone
+						//  -> The first check above tells us if the character is on a side of the monitor
+						//  -> The second one makes sure that you can always ground-based roll into a monitor (see e.g. first invincibility in MHZ 1, when spindashing into it from the right)
+						return
+					}
+					else if (Game.getSetting(SETTING_MONITOR_BEHAVIOR) == 0 || original_mode || time_attack)
+					{
+						// All you really need for Sonic & Knuckles monitor Behavior. everything else relevant is handled elsewhere
+						char.velocity.y = -char.velocity.y
+					}
+					else
+					{
+						// Improved code to prevent crushing and allow bouncing on ground, #contributed by GFX32
+
+						// If the player is below the monitor, it should bounce.
+						bool isBelow = (char.position.y.u16 > (objA1.position.y.u16 + objA1.hitbox_extends.y))
+
+						if (objA1.render_flags & render_flag.FLIP_Y)
+							isBelow = (char.position.y.u16 < (objA1.position.y.u16 - objA1.hitbox_extends.y))
+
+						// Not when spindashing!
+						if (char.state == char.state.SPINDASH)
+							isBelow = false
+
+						if (isBelow)
+						{
+							// Hit monitor from below, make it fall
+							u8[A1 + 0x3c] = 1
+
+							char.velocity.y = -char.velocity.y
+							objA1.velocity.y = -0x180
+
+							// Calculate how far the monitor is inside the player, then separate them; this attempts to prevent crushing collision on subsequent frames.
+							s16 dy = (objA1.position.y.u16 + objA1.hitbox_extends.y) - (char.position.y.u16 - char.hitbox_extends.y)
+
+							if (objA1.render_flags & render_flag.FLIP_Y)
+								dy = (objA1.position.y.u16 - objA1.hitbox_extends.y) - (char.position.y.u16 + char.hitbox_extends.y)
+
+							// Only push the player when in midair
+							if (char.flags & char.flag.IN_AIR)
+							{
+								dy /= 2
+								char.position.y.u16 += dy
+							}
+							objA1.position.y.u16 -= dy
+
+							if (u8[A1 + 0x3c] == 0)
+								u8[A1 + 0x3c] = 4
+
+							return
+						}
+					}
 				}
 				else
 				{
-					// Improved code to prevent crushing and allow bouncing on ground, #contributed by GFX32
-
-					// If the player is below the monitor, it should bounce.
-					bool isBelow = (char.position.y.u16 > (objA1.position.y.u16 + objA1.hitbox_extends.y))
-
-					if (objA1.render_flags & render_flag.FLIP_Y)
-						isBelow = (char.position.y.u16 < (objA1.position.y.u16 - objA1.hitbox_extends.y))
-
-					// Not when spindashing!
-					if (char.state == char.state.SPINDASH)
-						isBelow = false
-
-					if (isBelow)
+					if (objA1.flags2a & char.flag.IN_AIR)
 					{
-						// Hit monitor from below, make it fall
-						u8[A1 + 0x3c] = 1
+						// This block is a bit broken due to the above check, and falling monitors can crush the player, and is this really what we want?
+
+						if ((objA1.render_flags & render_flag.FLIP_Y) == 0)
+						{
+							if (char.position.y.u16 - 0x10 < objA1.position.y.u16)
+								return
+						}
+						else
+						{
+							if (char.position.y.u16 + 0x10 >= objA1.position.y.u16)
+								return
+						}
 
 						char.velocity.y = -char.velocity.y
 						objA1.velocity.y = -0x180
-
-						// Calculate how far the monitor is inside the player, then separate them; this attempts to prevent crushing collision on subsequent frames.
-						s16 dy = (objA1.position.y.u16 + objA1.hitbox_extends.y) - (char.position.y.u16 - char.hitbox_extends.y)
-
-						if (objA1.render_flags & render_flag.FLIP_Y)
-							dy = (objA1.position.y.u16 - objA1.hitbox_extends.y) - (char.position.y.u16 + char.hitbox_extends.y)
-
-						// Only push the player when in midair
-						if (char.flags & char.flag.IN_AIR)
-						{
-							dy /= 2
-							char.position.y.u16 += dy
-						}
-						objA1.position.y.u16 -= dy
-
 						if (u8[A1 + 0x3c] == 0)
 							u8[A1 + 0x3c] = 4
 
 						return
 					}
 				}
-			#else
-				if (objA1.flags2a & char.flag.IN_AIR)
-				{
-					// This block is a bit broken due to the above check, and falling monitors can crush the player, and is this really what we want?
-
-					if ((objA1.render_flags & render_flag.FLIP_Y) == 0)
-					{
-						if (char.position.y.u16 - 0x10 < objA1.position.y.u16)
-							return
-					}
-					else
-					{
-						if (char.position.y.u16 + 0x10 >= objA1.position.y.u16)
-							return
-					}
-
-					char.velocity.y = -char.velocity.y
-					objA1.velocity.y = -0x180
-					if (u8[A1 + 0x3c] == 0)
-						u8[A1 + 0x3c] = 4
-
-					return
-				}
-			#endif
 			}
 
 			if (A0 != 0xffffb000 && competition_mode.active == 0)
@@ -796,11 +803,11 @@ function void Character.OnCollisionWithDynamicObject()
 			{
 				canOpenMonitor = true
 			}
-			else if (char.state == char.state.SPINDASH)
+			else if (char.state == char.state.SPINDASH && !original_mode)
 			{
 				canOpenMonitor = true
 			}
-			else if (objA1.velocity.y < 0)
+			else if (objA1.velocity.y < 0 && !original_mode)
 			{
 				// Make monitors break over the player's head at different orientations. #contributed by Dynamic Lemons
 				if ((global.inv_gravity != (objA1.render_flags & render_flag.FLIP_Y) != 0))
@@ -816,7 +823,7 @@ function void Character.OnCollisionWithDynamicObject()
 			if (canOpenMonitor)
 			{
 			#if STANDALONE
-				if (!movingUp)
+				if (!movingUp || original_mode)
 			#endif
 				{
 					// Bounce off
