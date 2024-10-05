@@ -169,6 +169,8 @@ function void CPZ.cameraBounds()
 				objA1.update_address = 0x0837b2
 				objA1.position.x.u16 = signpost_loc
 				objA1.position.y.u16 = (KnuxHardLayout) ? 0x0260 : 0x04e0	// originally 0x03e0 for KnuxHard
+				if (KnuxHardLayout)
+					move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 			}
 		}
 		if (char.position.x.u16 > 0x4a00 && char.position.y.u16 < 0x0580 && layout.part == 0)	// in the joining tube between Part 1 and Part 2 (normal)
