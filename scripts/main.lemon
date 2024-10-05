@@ -4138,7 +4138,7 @@ function void fn0419fa()
 
 	#if STANDALONE
 		// Check character's orientation, is he faced away?
-		if (sign != ((u8[A1 + 0x2a] & char.flag.FACING_LEFT) != 0))
+		if (sign != ((u8[A1 + 0x2a] & char.flag.FACING_LEFT) != 0) && !original_mode)
 			return
 	#endif
 
@@ -4155,7 +4155,7 @@ function void fn0419fa()
 		}
 		else	// This setup for Original Mode causes a visible jitter that isn't in the ROM hack, but it's functionally correct.
 		{		// The jitter is actually the switch moving one frame before the character does.
-				// Even using the AIR script directly with the STANDALONE part stripped out show the jitter; this is likely not a DAGE bug.
+				// Even using the AIR script directly with the STANDALONE part stripped out shows the jitter; this is likely not a DAGE bug.
 			++u16[A0 + 0x36]
 			objA1.position.x.u16 += (sign ? -1 : 1)
 			if ((u16[A0 + 0x36] % 4) == 0)
