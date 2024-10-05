@@ -217,6 +217,14 @@ function void CPZ.cameraBounds()
 				u16[0xffffb05a] -= 0x4800
 				u16[0xffffb05e] -= 0x0800
 			}
+			for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
+			{
+				if (u32[objAddress] == 0x01a64a)	// move any spilled rings
+				{
+					u16[objAddress + 0x10] -= 0x4800
+					u16[objAddress + 0x14] -= 0x0800					
+				}
+			}
 			clearRespawnTable = true
 			layout.part = 2
 			fn01c362()								// load Part 2 layout
@@ -242,6 +250,14 @@ function void CPZ.cameraBounds()
 			{
 				u16[0xffffb05a] += 0x4800
 				u16[0xffffb05e] += 0x0800
+			}
+			for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
+			{
+				if (u32[objAddress] == 0x01a64a)	// move any spilled rings
+				{
+					u16[objAddress + 0x10] += 0x4800
+					u16[objAddress + 0x14] += 0x0800					
+				}
 			}
 			layout.part = 0
 			clearRespawnTable = true
