@@ -76,6 +76,7 @@
 		"^": "92 11 6 10",
 		"_": "131 11 4 10",
 		"*": "107 11 5 10",	// actually a multiplication sign
+		"`": "143 11 9 10", // actually a copyright sign
 
 		"a": "0 31 5 10",
 		"b": "6 31 5 10",

@@ -102,6 +102,7 @@ include ring_object_managers
 include movement_changes
 include rom_manipulations
 include music
+include credits
 include themes/?
 include RtWI/?
 

@@ -6157,7 +6157,7 @@ function void UpdateLevelTiles.Outro()		// main outro (falling from sky, ocean)
 	{
 		if (getScreenWidth() < 400)
 			Renderer.setScreenSize(400, 224)
-		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f12) * 8))
+//		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f12) * 8))
 	}
 
 	// s16[0xffffeec0] == 0x00	-> First part until Angel Island gets visible
@@ -6259,7 +6259,7 @@ function void UpdateLevelTiles.SSZ_Knuckles()
 	{
 		if (getScreenWidth() < 400)
 			Renderer.setScreenSize(400, 224)
-		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f1f) * 8))
+//		Renderer.drawCustomSprite("credits", getScreenWidth()/2 - 200, 0, 0, SPRITE_FLAG_PRIO, 0xe001, 0, min(255, (level.framecounter - 0x2f1f) * 8))
 	}
 
 	camera.foreground.y.u16 += camera.screenshake.offset

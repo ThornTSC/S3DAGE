@@ -1,4 +1,6 @@
 {
 	// Credits
-	"credits": { "File": "credits.png" }
+	"sonic3klogo": { "File": "sonic3klogo.png" },
+	"sonic2logo": { "File": "sonic2logo.png" }
+//	"credits": { "File": "credits.png" }
 }

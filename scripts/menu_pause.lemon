@@ -1097,6 +1097,9 @@ function void PauseMenu_DrawCustomSprites()
 
     else if (global.zone == 0x15)
         BonusSM.RenderRotatingMaze()
+
+	else if ((global.zone_act == 0x0d01 || global.zone_act == 0x0a01) && !original_mode && outro.scroll_speed)	// u32[0xffffb172] == 0x05ea52 && char.render_flags & render_flag.FLIP_X	// Check the outro for the Tornado flying left at full size.
+		Credits.DAGE()																														// In the post-island scene, it will be in this exact object slot.
 }
 
 
