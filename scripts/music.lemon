@@ -28,6 +28,10 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 		if ((KnucklesMainGameRandomGreenSphereStage || bluespheres.minigame_mode == 1 || challenge_greenspheres) && green_spheres.active)
 			soundKey = "greenspheres_speedup45"
 	}
+	else if (sfxId == 0xdc && original_mode && Audio.getAudioKeyType(MUSIC_CREDITSMEDLEY) == AudioKeyType.REMASTERED)
+	{
+		soundKey = "sk_credits"
+	}
 	
 	// Return base game or lower mod music
 	return base.Standalone.getModdedSoundKey(soundKey, sfxId, soundRegType)

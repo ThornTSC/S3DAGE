@@ -70,5 +70,8 @@
 	// Sound ID E1 is used for fading out music and is not available.
 
 	// Silence for custom pause menu (credit to FadeInside for concept)
-	"silence": { "File": "Silence.ogg", "Type": "Jingle"}
+	"silence": { "File": "Silence.ogg", "Type": "Jingle"},
+
+	// Sonic & Knuckles credits medley, used for Classic Mode
+	"sk_credits": { "File": "SK_Credits.ogg", "Type": "Jingle" }
 }
