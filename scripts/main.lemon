@@ -2113,6 +2113,9 @@ function void releaseSpindash()
 	u8[A6 + 0x20] = 0
 
 	playSound(SFX_SPINDASH_RELEASE)
+#if STANDALONE
+	Input.setControllerRumbleByAddress(A0, 0.0f, 1.0f, 150)
+#endif
 }
 
 
@@ -3025,10 +3028,16 @@ function void UpdateKnucklesGlideCollision()
 							camera.hyper_knux_shake = 0x14
 							Character.ClearEnemiesOnScreen()
 							playSound(0x49)
+						#if STANDALONE
+							Input.setControllerRumbleByAddress(A0, 0.5f, 1.0f, 200)
+						#endif
 						}
 						else
 						{
 							playSound(SFX_GRAB)
+						#if STANDALONE
+							Input.setControllerRumbleByAddress(A0, 0.5f, 0.0f, 200)
+						#endif
 						}
 
 						char.groundspeed = 0
@@ -3186,10 +3195,13 @@ function void UpdateKnucklesGlideCollision()
 				{
 					playSound(0x7e)
 				}
+			#if STANDALONE
+				Input.setControllerRumbleByAddress(A0, 0.2f, 0.2f, 100)
+			#endif
 			}
 			else
 			{
-				char.double_jump_state = 2
+				char.double_jump_state = 2		// Knuckles glide drop state
 				char.state = char.state.KNUX_FALLING
 				char.hitbox_extends.x = char.hitbox.default.x
 				char.hitbox_extends.y = char.hitbox.default.y
@@ -21391,6 +21403,9 @@ function void fn045170()
 		else
 		{
 			playSound(0x8a)
+		#if STANDALONE
+			Input.setControllerRumbleByAddress(A1, 0.25f, 0.0f, 200)
+		#endif
 			if ((abs(u16[A2 + 0x02]) > abs(objA1.velocity.x)) || original_mode)		// If in Original Mode or if the recorded speed is faster than current speed,
 				objA1.velocity.x = u16[A2 + 0x02]									// restore previous speed.
 			u16[A1 + 0x1c] = u16[A2 + 0x04]
@@ -24322,6 +24337,11 @@ function void RedStarRing_Collect()
 			u16 total_stars_old = total_stars
 			countTotalStars()	// forces the counter to update
 			Unlock.checkForNewUnlock(total_stars_old, total_stars)
+			Input.setControllerRumble(-1, 0.25f, 0x6000, 200)	// identical to rumble from fire shield dash sound
+		}
+		else
+		{
+			Input.setControllerRumble(-1, 0.0f, 0.2f, 200)	// identical to rumble from either ring sound
 		}
 
 		u32 rsrAddress = (unlock_act) ? 0x840580 : 0x840280

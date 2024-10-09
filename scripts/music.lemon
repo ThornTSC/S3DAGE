@@ -413,6 +413,8 @@ function void Standalone.playAudio(u8 sfxId)
 		}
 	}
 
+	Standalone.playRumbleEffectForAudio(sfxId)
+
 	u8 audioContext = (soundRegType != SoundRegType.TYPE_SOUND) ? AudioContext.CONTEXT_MUSIC : AudioContext.CONTEXT_SOUND
 	Audio.playAudio(soundKey, audioContext)
 }

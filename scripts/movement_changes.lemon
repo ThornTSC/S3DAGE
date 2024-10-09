@@ -517,6 +517,7 @@ function void Character.updateJumpMoves()
 							char.state = char.state.SONIC_DROPDASH
 							Audio.playAudio("dropdash_charge", AudioContext.CONTEXT_SOUND)
 						}
+						Input.setControllerRumbleByAddress(A0, 0.0f, 0.25f, 100)
 					}
 				}
 				else if (sonic.dropdash_counter > 0)

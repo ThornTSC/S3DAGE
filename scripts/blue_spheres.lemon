@@ -444,6 +444,9 @@ function void fn009b62()
 			if (bluespheres.lifted_height == 0)
 			{
 				playMusic(0x66)
+			#if STANDALONE
+				Input.setControllerRumble(-1, 0.4f, 1.0f, 400)
+			#endif
 			}
 			bluespheres.lifted_height += (bluespheres.lifted_height >= 0x7d) ? 4 : (bluespheres.lifted_height >= 0x3e) ? 3 : 2
 			return
@@ -4139,10 +4142,16 @@ function void fn02e512()
 
 
 // Don't allow speeding up special stage result point tallies in Original Mode
+// Also manually force two background colors during the fade to HPZ from special stage results.
 // Function taken from level\special\bs_results.lemon
 //# address-hook(0x02e410) end(0x02e4d2)
 function void fn02e410()
 {
+	if (original_mode)
+	{
+		base.fn02e410()
+		return
+	}
 	if (objA0.countdown_value != 0)
 	{
 		// Still waiting
@@ -4155,9 +4164,11 @@ function void fn02e410()
 			A1 = 0xfffffc00
 			u16[A1 + 0x42] = 0x0eee
 			u16[A1 + 0x44] = 0x0eee
+			u16[A1 + 0x46] = 0x0eee	// new line
 			u16[A1 + 0x4c] = 0x0eee
 			u16[A1 + 0x62] = 0x0eee
 			u16[A1 + 0x66] = 0x0eee
+			u16[A1 + 0x68] = 0x0eee	// new line
 			u16[A1 + 0x6e] = 0x0eee
 			u16[A1 + 0x70] = 0x0eee
 			u16[A1 + 0x7c] = 0x0eee
@@ -4216,6 +4227,9 @@ function void fn02e410()
 			if ((level.framecounter & 0x03) == 0)
 			{
 				playSound(SFX_CLICK)
+			#if STANDALONE
+				Input.setControllerRumble(-1, 0.0f, 0.1f, 100)
+			#endif
 			}
 		}
 		else

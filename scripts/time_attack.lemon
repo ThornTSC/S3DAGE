@@ -3169,12 +3169,14 @@ function void MiniTimeStone_Collect()
 			playSound(0xde)
 		else
 			playSound(0xdd)
+		Input.setControllerRumble(-1, 0.0f, 0.2f, 200)	// identical to rumble from either ring sound
 
 		freeze_time += 60	// freeze time for 1 second (60 frames)
 	}
 	else if (objA0.subtype2c == 1)
 	{
 		playSound(0xe0)		// formerly 0xb8
+		Input.setControllerRumble(-1, 0.5f, 0.5f, 300)	// identical to rumble from boss explosion / FBZ mine sound
 		freeze_time += 420	// freeze time for 7 seconds (420 frames)
 	}
 	MiniTimeStone_CollectAnimate()
@@ -6063,6 +6065,9 @@ function void LevelResults.UpdateBonusCounting()
 			if ((level.framecounter & 0x03) == 0)
 			{
 				playSound(SFX_CLICK)
+			#if STANDALONE
+				Input.setControllerRumble(-1, 0.0f, 0.25f, 100)
+			#endif
 			}
 		}
 		else
