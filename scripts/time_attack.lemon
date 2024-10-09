@@ -1261,7 +1261,7 @@ function void fn007e64()
 			u8 maxCharacterSelection = 3
 		#if STANDALONE
 			// Knuckles & Tails
-			if (Game.isSecretUnlocked(SECRET_KNUX_AND_TAILS) && time_attack != 1 && time_attack != 2 && !original_mode)
+			if (time_attack != 1 && time_attack != 2 && !original_mode)
 			{
 				maxCharacterSelection = 4
 			}

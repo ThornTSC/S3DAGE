@@ -392,6 +392,15 @@ function void discordRPC.setZoneImage()
 
 
 
+// Disconnect D.A. Garden Edition from A.I.R. achievements to avoid strange situations
+// such as "Secret Unlocked: Sonic Drop Dash" while DAGE handles it independently.
+// Function taken from main_oxygen.lemon
+function void Game.setAchievementComplete(u32 achievementId)
+{
+	return
+}
+
+
 
 // Change A.I.R. menu palette when new palettes are active
 // and add version text to the A.I.R. menu in A.I.R. versions that support it
@@ -8399,10 +8408,32 @@ function void DataSelectScreen()
 
 
 
-
-// Disable Knuckles & Tails in the data select in Original Mode
+// Always allow Knuckles and Tails in Data Select in Revisited Mode.
+// Disable Knuckles & Tails in the data select in Original Mode.
 // Function taken from menus\dataselect.lemon
 //# address-hook(0x00d6d0) end(0x00d70a)
+function void fn00d6d0()
+{
+	// Character selection
+	u8 character = D0.u8
+	if (u16[0xffffb04a + 0x30] == 0)
+	{
+		u8 maxCharacterSelection = 4
+
+		if (control.pad1.pressed & CONTROL_UP)
+		{
+			character = (character < maxCharacterSelection) ? (character + 1) : CHARS_SONIC_AND_TAILS
+			playSound(SFX_CLICK)
+		}
+		else if (control.pad1.pressed & CONTROL_DOWN)
+		{
+			character = (character > CHARS_SONIC_AND_TAILS) ? (character - 1) : maxCharacterSelection
+			playSound(SFX_CLICK)
+		}
+	}
+	D0 = character
+}
+
 function void fn00d6d0_Orig()
 {
 	// Character selection
