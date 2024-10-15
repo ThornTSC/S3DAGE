@@ -7029,7 +7029,7 @@ function void BonusSM.RenderRotatingMaze()
 
 	// The following code updates the positions of blocks around, depending on current rotation
 	A1 = lookupTableAddress
-	u8 angle = (u8[0xffffe400] & 0xfc)
+	u8 angle = (original_mode) ? (u8[0xffffe400] & 0xfc) : (u8[0xffffe400] & 0xff)
 	s32 sine   = lookupSin(angle)
 	s32 cosine = lookupCos(angle)
 	s32 stepX = cosine * 0x18
