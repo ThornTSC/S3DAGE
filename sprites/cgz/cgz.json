@@ -1,0 +1,30 @@
+{
+	"cgz_background":  { "File": "cgz_background.bmp"},
+
+	"cgz_background_sky": { "File": "cgz_background.bmp", "Rect": "0, 0,1024,48" },
+	"cgz_background_lights_veryfar": { "File": "cgz_background.bmp", "Rect": "0,48,1024,40" },
+	"cgz_background_buildings_far": { "File": "cgz_background.bmp", "Rect": "0,88,1024,16" },
+	"cgz_background_buildings_mid": { "File": "cgz_background.bmp", "Rect": "0,104,1024,16" },
+	"cgz_background_buildings_near": { "File": "cgz_background.bmp", "Rect": "0,120,1024,166" },
+
+	"cgz_wallbumpers":  { "File": "cgz_wallbumpers.bmp", "Center": "5, 96"},
+
+	"cgz_platform_0": { "File": "cgz_platform.bmp", "Rect": "0, 0,96,46", "Center": "48, 16" },		// true center is 48, 23
+	"cgz_platform_1": { "File": "cgz_platform.bmp", "Rect": "0,46,96,46", "Center": "48, 16" },		// true center is 48, 23
+	
+	"cgz_springbase": { "File": "cgz_springbase.bmp", "Center": "16, 8" },
+
+	"cgz_fan_0": { "File": "cgz_fan.bmp", "Rect": "0, 0,46,24", "Center": "23, 12" },
+	"cgz_fan_1": { "File": "cgz_fan.bmp", "Rect": "0,24,46,24", "Center": "23, 12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
+	"cgz_fan_2": { "File": "cgz_fan.bmp", "Rect": "0,48,46,24", "Center": "23, 12" },
+	"cgz_fan_3": { "File": "cgz_fan.bmp", "Rect": "0,72,46,24", "Center": "23, 12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
+
+	"bonusbubble_0": { "File": "bonusbubbles.png", "Rect": " 0,  0,32,32", "Center": "16, 16" },	// 1UP
+	"bonusbubble_1": { "File": "bonusbubbles.png", "Rect": "32,  0,32,32", "Center": "16, 16" },	// Rep
+	"bonusbubble_2": { "File": "bonusbubbles.png", "Rect": "64,  0,32,32", "Center": "16, 16" },	// Ring
+	"bonusbubble_3": { "File": "bonusbubbles.png", "Rect": "96,  0,32,32", "Center": "16, 16" },	// Empty
+	"bonusbubble_4": { "File": "bonusbubbles.png", "Rect": " 0, 32,32,32", "Center": "16, 16" },	// Black
+	"bonusbubble_5": { "File": "bonusbubbles.png", "Rect": "32, 32,32,32", "Center": "16, 16" },	// Fire Shield
+	"bonusbubble_6": { "File": "bonusbubbles.png", "Rect": "64, 32,32,32", "Center": "16, 16" },	// Bubble Shield
+	"bonusbubble_7": { "File": "bonusbubbles.png", "Rect": "96, 32,32,32", "Center": "16, 16" }		// Lightning Shield
+}

@@ -46,8 +46,14 @@ function u64 Standalone.getModdedSoundKey.unlockAct(u64 soundKey, u8 sfxId, u8 s
         	soundKey = (setting.ehz_music) ? "ehz2" : "ehz1"
 		else if (unlock_act == 2)
 			soundKey = "cpz"
+		else if (unlock_act == 3)
+			soundKey = MUSIC_CGZ
 	}
-    else if (sfxId == MUSIC_MAINBOSS)				// 0x19
+
+	if (unlock_act == 3)
+		return soundKey
+
+    if (sfxId == MUSIC_MAINBOSS)				// 0x19
         soundKey = "s2_boss"
 	else if (sfxId == MUSIC_SPECIALSTAGE && greenspheres_music && !original_mode)	// 0x1c
 	{
@@ -207,7 +213,7 @@ function void Standalone.playAudio(u8 sfxId)
 		else if (sfxId == 0x2a)
 		{
 			// Extra life jingle
-            if (unlock_act)
+            if (unlock_act && (unlock_act != 3))
             {
                 soundKey = "s2_1up"
             }

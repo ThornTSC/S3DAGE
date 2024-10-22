@@ -3,8 +3,8 @@
 //# address-hook(0x0187f0) end(0x018862)
 function void fn0187f0()
 {
-	u32 invinStarsArtLoc = (unlock_act) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
-	u16 invinStartArtLength = (unlock_act) ? 0x240 : 0x200
+	u32 invinStarsArtLoc = (unlock_act && (unlock_act != 3)) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
+	u16 invinStartArtLength = (unlock_act && (unlock_act != 3)) ? 0x240 : 0x200
 	updateSpritePattern(invinStarsArtLoc, Shield.targetInVRAM, invinStartArtLength)
 
 	D2 = 0
@@ -36,7 +36,7 @@ function void fn0187f0()
 // Function taken from objects\basics\shields.lemon
 function void Shield.sharedInit()
 {
-	if (unlock_act)
+	if (unlock_act && (unlock_act != 3))
 		objA0.shield.art_offset += 0x1beb1e	// shift form S&K data location to S3 alone data location, where versions for Sonic 2's palette are injected
 	base.Shield.sharedInit()
 }
@@ -48,9 +48,9 @@ function void LightningShield.Init()
 	//if (!DIRECT_OBJECT_RENDERING)
 #endif
 	{
-		u32 sparksArtAddress = (unlock_act) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
+		u32 sparksArtAddress = (unlock_act && (unlock_act != 3)) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
 		// Load sprite patterns for the sparks
-		if (!unlock_act || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
+		if (!unlock_act || unlock_act == 3 || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
 			updateSpritePattern(sparksArtAddress, 0xf760, 0x50)
 	}
 
@@ -69,7 +69,7 @@ function void LightningShield.Init()
 //# address-hook(0x019156) end(0x01919e)
 function void fn019156()
 {
-	u32 superStarsArtLoc = (unlock_act) ? 0x34a862 : 0x18bd44
+	u32 superStarsArtLoc = (unlock_act && (unlock_act != 3)) ? 0x34a862 : 0x18bd44
 	updateSpritePattern(superStarsArtLoc, Shield.targetInVRAM, 0x01a0)
 
 	objA0.mapping_offset = 0x0192de

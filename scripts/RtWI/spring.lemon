@@ -8,8 +8,8 @@ function void SpringVertical.BaseUpdate()
 //# address-hook(0x022d06) end(0x022d46)
 function void Spring.BaseUpdate()
 {
-	objA0.mapping_offset = (unlock_act) ? 0x221dea : 0x02375c	// formerly 0x880040
-	objA0.sprite_attributes = (unlock_act) ? 0x045c : 0x04a4
+	objA0.mapping_offset = (unlock_act && (unlock_act != 3)) ? 0x221dea : 0x02375c	// formerly 0x880040
+	objA0.sprite_attributes = (unlock_act && (unlock_act != 3)) ? 0x045c : 0x04a4
 	objA0.render_flags |= render_flag.WORLD
 	objA0.box_size.x = 0x10
 	objA0.box_size.y = 0x10
@@ -32,7 +32,7 @@ function void SpringHorizontal.Init()
 {
 	objA0.state = 2
 	objA0.animation.sprite = 3
-	objA0.sprite_attributes = (unlock_act) ? 0x0470 : 0x04b4
+	objA0.sprite_attributes = (unlock_act && (unlock_act != 3)) ? 0x0470 : 0x04b4
 	objA0.box_size.x = 8
 	objA0.update_address = 0x023050
 
@@ -55,7 +55,7 @@ function void SpringVertical.InitDiagonal()
 	{
 		objA0.sprite_attributes = 0x0478
 	}
-	if (unlock_act)
+	if (unlock_act && (unlock_act != 3))
 	{
 		objA0.sprite_attributes = 0x043c
 	}
@@ -73,7 +73,7 @@ function void SpringVertical.InitDiagonalFlipped()
 	{
 		objA0.sprite_attributes = 0x0478
 	}
-	if (unlock_act)
+	if (unlock_act && (unlock_act != 3))
 	{
 		objA0.sprite_attributes = 0x043c
 	}
@@ -90,7 +90,7 @@ function void Spring.SharedInit()
 		// Yellow spring
 		u16[A0 + 0x30] = -0x0a00
 		objA0.mapping_offset = (competition_mode.active) ? 0x023912 : 0x023772
-		if (unlock_act)
+		if (unlock_act && (unlock_act != 3))
 		{
 			objA0.mapping_offset = 0x221dea + 0x16	// formerly 0x880040 + 0x16
 			objA0.sprite_attributes += 0x2000	// next palette line

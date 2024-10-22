@@ -205,6 +205,8 @@ function bool customMenu.scrollRight()
 function void customMenu.mainLogicLoop()
 {
 	time_attack_end = 0
+	global.shields_backup_1 = 0
+	global.shields_backup_2 = 0
 	if (global.game_mode == 0x58)
 	{
 		customMenu.mainLogicLoop.main()
@@ -389,11 +391,11 @@ function void customMenu.mainLogicLoop()
 			// Start level.
 			global.game_mode = 0x8c
 			// Dev cheat for testing new levels without a menu option
-	//		if (Input.buttonDown(BUTTON_Y))
-	//		{
-	//			global.zone_act = 0x0200
-	//			setting.unlock_act = 2
-	//		}
+//			if (Input.buttonDown(BUTTON_Y))
+//			{
+//				global.zone_act = 0x0200
+//				setting.unlock_act = 3
+//			}
 			unlock_act = setting.unlock_act
 
 			playSound(0xaf)

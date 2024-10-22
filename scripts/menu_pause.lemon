@@ -177,7 +177,8 @@ function void UpdateGamePause()
 					Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth() - 28, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
 					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 20, "          +           :\n Change theme", 0xffffffff, 3, 0, 0xfff1, 0)				
 				}
-				if ((original_mode || global.pause_disabled || (global.zone >= 0x13 && global.zone <= 0x15) || global.zone_act == 0x1701) && PauseMenu_Basic())
+				bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+				if ((original_mode || global.pause_disabled || isBonusStage || global.zone_act == 0x1701) && PauseMenu_Basic())
 					break
                 else if (global.pause_disabled)
 				{
@@ -186,7 +187,7 @@ function void UpdateGamePause()
 				}
 				else if ((time_attack == 1 || time_attack == 2) && PauseMenu_Challenges())
 					break
-				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && global.zone_act != 0x1701 && PauseMenu_Normal())
+				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && unlock_act != 3 && global.zone_act != 0x1701 && PauseMenu_Normal())
 					break
 			}
 		}
@@ -635,7 +636,16 @@ function u8 PauseMenu_ExitGame()
 		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 		global.stage_type = 0
 		global.in_extra_stage = 0
-
+		global.shields_backup_1 = 0
+		global.shields_backup_2 = 0
+		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+		if (isBonusStage)
+		{
+			global.zone_act = checkpoint.zone_act
+			global.zone_act.apparent = checkpoint.zone_act.apparent
+			unlock_act = 0
+			setting.unlock_act = 0
+		}
 		if (global.game_mode == 0x34)
 		{
 			// bluespheres.movement_speed = 0
@@ -662,7 +672,16 @@ function u8 PauseMenu_ExitGame()
 		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 		global.stage_type = 0
 		global.in_extra_stage = 0
-
+		global.shields_backup_1 = 0
+		global.shields_backup_2 = 0
+		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+		if (isBonusStage)
+		{
+			global.zone_act = checkpoint.zone_act
+			global.zone_act.apparent = checkpoint.zone_act.apparent
+			unlock_act = 0
+			setting.unlock_act = 0
+		}
 		if (global.game_mode == 0x34)
 			restartSpecialStage = 1
 
@@ -1056,6 +1075,8 @@ function void PauseMenu_DrawCustomSprites()
 		EHZ_CustomSprites()
 	else if (unlock_act == 2)
 		CPZ_CustomSprites()
+	else if (unlock_act == 3)
+		CGZ_CustomSprites()
 	else if (global.zone_act == 0x0000)
 		AIZ1_CustomSprites()
 	else if (global.zone_act == 0x0100)

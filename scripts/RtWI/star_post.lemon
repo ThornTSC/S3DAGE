@@ -67,7 +67,131 @@ function void fn02d47e()
 {
 	if (!unlock_act)
 	{
-		base.fn02d47e()
+		if (u8[A0 + 0x29] != 0)
+		{
+			// This seems to get entered once for each of the four stars -- is this intended...?
+			if (u8[A0 + 0x29] & 0x01)
+			{
+				global.stage_type = 2
+
+			#if STANDALONE
+				// Use previously selected bonus stage
+				u8 stage = u8[A0 + 0x48]
+			#else
+				u8 stage = Checkpoint.selectBonusStage()
+			#endif
+				if (stage == 0)
+				{
+					// Slot machine (Original Mode), Chrome Gadget bonus stage (Revisited Mode)
+					D1.u16 = 0x1500
+					if (!original_mode)
+					{
+						D1.u16 = 0x0200
+						unlock_act = 3
+					}
+				}
+				else if (stage == 1)
+				{
+					// Glowing spheres
+					D1.u16 = 0x1400
+				}
+				else
+				{
+					// Gumball machine
+					D1.u16 = 0x1300
+				}
+
+				global.zone_act = D1.u16
+				global.zone_act.apparent = D1.u16
+				checkpoint.rings = ring_counter
+				checkpoint.lives_granted = extra_lives_granted
+				checkpoint.number = 0
+				level.restart.u8 = 1
+
+				// Backup of shields active before entering the Bonus Stage
+				D0.u8 = u8[0xffffb000 + 0x2b] & char.bonus.ALL_SHIELDS
+				global.shields_backup_1 = D0.u8
+				global.shields_backup_2 = D0.u8
+				global.in_extra_stage = 1
+				fn01bb7e()
+			}
+
+			u8[A0 + 0x29] = 0
+		}
+
+		u16[A0 + 0x34] += 10
+		u8 angle = u16[A0 + 0x34]
+		D0.s16 = lookupSin(angle) >> 5
+		D1.s16 = lookupCos(angle) >> 3
+		D3.u16 = D1.u16
+		D2.u16 = (u16[A0 + 0x34] & 0x3e0) >> 5
+		if (D2.s16 > 0x10)
+			D1.s16 = -D1.s16
+
+		D2.u16 &= 0x0f
+		if (D2.s16 > 0x08)
+		{
+			D2.s16 = -D2.s16
+			D2.u16 &= 0x07
+		}
+
+		D4 = 0
+		for (u16 k = 0; k < 3; ++k)
+		{
+			D2.u16 >>= 1
+			if (D2.u16 != 0)
+			{
+				D4.u16 += D1.u16
+			}
+			D1.s16 <<= 1
+		}
+
+		D4.s16 >>= 4
+		D0.u16 += D4.u16
+		++u16[A0 + 0x36]
+		D1.u16 = u16[A0 + 0x36]
+
+		if (D1.u16 != 0x80)
+		{
+			bool goto02d56a = false
+			if (D1.s16 > 0x180)
+			{
+				D1.s16 = 0x200 - D1.s16
+				if (D1.s16 < 0)
+				{
+					UnloadObject()
+					return
+				}
+
+				goto02d56a = true
+			}
+			else if (D1.s16 <= 0x80)
+			{
+				goto02d56a = true
+			}
+
+			if (goto02d56a)
+			{
+				D0.s32 = s32(D0.s16) * D1.s16
+				D3.s32 = s32(D3.s16) * D1.s16
+				D0.s16 >>= 7
+				D3.s16 >>= 7
+			}
+		}
+		else
+		{
+			objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.4x4_2)
+		}
+
+		objA0.position.x.u16 = u16[A0 + 0x30] + D3.u16
+		objA0.position.y.u16 = objA0.value32 + D0.u16
+		++objA0.animation.frame
+		D0.u16 = (objA0.animation.frame & 0x06) >> 1
+		if (D0.u16 == 3)
+			D0 = 1
+		objA0.animation.sprite = D0.u8
+		fn01b662()
+
 		if (level.restart.u8)	// entered a bonus stage
 		{
 			S2TitleCard.disappear = false

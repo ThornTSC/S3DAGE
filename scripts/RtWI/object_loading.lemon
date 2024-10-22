@@ -69,3 +69,802 @@ function void fn024d9a()
 		}
 	}
 }
+
+
+
+// Alterations to competition zone objects
+// Functions taken from level\competition\competition_objects.lemon
+
+// Yellow bumper objects in CGZ
+
+//# address-hook(0x032c6a) end(0x032d14)
+function void fn032c6a()
+{
+	objA0.box_size.x = (!competition_mode.active) ? 0x0c : 0x08
+	objA0.box_size.y = (!competition_mode.active) ? 0x60 : 0x40
+	objA0.animation.sprite = (objA0.subtype2c >> 4) & 0x07
+	if (objA0.animation.sprite != 0)
+	{
+		objA0.box_size.y = (!competition_mode.active) ? 0xc0 : 0x80
+	}
+
+	objA0.update_address = 0x032c92
+	fn032c92()
+}
+
+//# address-hook(0x032c92) end(0x032d14)
+function void fn032c92()
+{
+	D1.u16 = (!competition_mode.active) ? 0x18 : 0x10
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+
+	push(D4)
+	push(D3)
+	push(D2)
+	push(D1)
+	A1 = 0xffffb000
+	D6 = 3		// object.flag.P1_ON_OBJECT
+	fn01dccc()
+
+	if (D4.u8 == 0x01 && (u8[A1 + 0x2a] & char.flag.IN_AIR))
+	{
+		D1.u8 = objA0.flags2a
+		D0.u16 = objA0.position.x.u16 - u16[A1 + 0x10]
+		if (D0.s16 >= 0)
+		{
+			D1.u8 ^= 0x01
+		}
+		D1.u8 &= 0x01
+		if (D1.u8 == 0)
+		{
+			fn032d16()
+		}
+	}
+
+	D1 = pop()
+	D2 = pop()
+	D3 = pop()
+	D4 = pop()
+	A1 = 0xffffb04a
+	D6 = 4		// object.flag.P2_ON_OBJECT
+	fn01dccc()
+
+	if (D4.u8 == 0x01 && (u8[A1 + 0x2a] & char.flag.IN_AIR))
+	{
+		D1.u8 = objA0.flags2a
+		D0.u16 = objA0.position.x.u16 - u16[A1 + 0x10]
+		if (D0.s16 >= 0)
+		{
+			D1.u8 ^= 0x01
+		}
+		D1.u8 &= 0x01
+		if (D1.u8 == 0)
+		{
+			fn032d16()
+		}
+	}
+
+	// Draw object in single player act. The art is baked into the chunks in competition mode, so we do this here instead of in Standalone.onWriteToSpriteTable().
+	if (!competition_mode.active)
+	{
+		DrawObject()
+	}
+}
+
+//# address-hook(0x032d16) end(0x032dec)
+function void fn032d16()
+{
+	if (u8[A1 + 0x05] >= base_state.HURT)
+		return
+
+	u16[A1 + 0x1a] = (!competition_mode.active) ? 0x0600 : 0x0400
+	if ((objA0.flags2a & 0x01) == 0)
+	{
+		u8[A1 + 0x2a] &= ~char.flag.FACING_LEFT
+		s16[A1 + 0x18] = (!competition_mode.active) ? 0xa00 : 0x800		// using 0xa00 instead of a true 50% increase for a more natural feel
+	}
+	else
+	{
+		u8[A1 + 0x2a] |= char.flag.FACING_LEFT
+		s16[A1 + 0x18] = (!competition_mode.active) ? -0xa00 : -0x800		// using -0xa00 instead of a true 50% increase for a more natural feel
+	}
+
+	// Remove fly and glide states
+	if (!competition_mode.active)
+	{
+		u8[A1 + 0x40] = 0	// clear jumping flag, avoiding triggering jump abilities after touching the bumper
+		u8[A1 + 0x2f] = 0	// double jump ability flag
+		knuckles.glideclimbstate = 0
+		// Fix for bug when Tails carries other player and gets caught by the fan, as in HCZ fan fixes
+		if (u8[A1 + 0x38] == CHARACTER_TAILS && tails.carrying && !original_mode)
+		{
+			u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+			u8[0xffffb000 + 0x2e] = 0
+		}
+	}
+
+	objA1.value32 = 0x0f
+	u16[A1 + 0x1c] = u16[A1 + 0x18]
+	if ((u8[A1 + 0x2a] & char.flag.ROLLING) == 0)
+	{
+		objA1.state = char.state.RUNNING
+	}
+
+	if (objA0.subtype2c & 0x80)
+	{
+		u16[A1 + 0x1a] = 0
+	}
+	if (objA0.subtype2c & 0x01)
+	{
+		u16[A1 + 0x1c] = 0x01
+		u8[A1 + 0x27] = 0x01
+		objA1.state = char.state.RUNNING
+		u8[A1 + 0x30] = (objA0.subtype2c & 0x02) ? 1 : 3		// "char.rotation.x.count"
+		u8[A1 + 0x31] = 0x08									// "char.rotation.x.speed"
+		if (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+		{
+			s8[A1 + 0x27] = -s8[A1 + 0x27]
+			objA1.groundspeed = -objA1.groundspeed
+		}
+	}
+
+	D0.u8 = objA0.subtype2c & 0x0c
+	if (D0.u8 == 0x04)
+	{
+		u8[A1 + 0x46] = 0x0c
+		u8[A1 + 0x47] = 0x0d
+	}
+	if (D0.u8 == 0x08)
+	{
+		u8[A1 + 0x46] = 0x0e
+		u8[A1 + 0x47] = 0x0f
+	}
+	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.PUSHING)
+
+	objA0.flags2a &= ~object.flag.P1_PUSHING
+	objA0.flags2a &= ~object.flag.P2_PUSHING
+	playSound(0x7b)
+}
+
+
+
+
+
+
+// Large moving platform in CGZ
+
+//# address-hook(0x035a7a) end(0x035b10)
+function void fn035a7a()
+{
+	objA0.mapping_offset = 0x035bbc
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE3 | 0x0300)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0280
+	objA0.box_size.x = (!competition_mode.active) ? 0x30 : 0x20
+	objA0.box_size.y = (!competition_mode.active) ? 0x0c + 4 : 0x08	// the +4 assists with the SolidObject routine later to have characters sit on the visual top of the platform
+	objA0.value32 = objA0.position.y.u16
+	if (competition_mode.active)
+		objA0.flags2a |= 0x80		// flags the object so characters don't enter the balancing animation on the edge (in Competition mode, there are no balancing animations)
+
+	s16 x_offset = (!competition_mode.active) ? 0x18 : 0x10
+	s16 y_offset
+	bool loadHurtboxes = (!competition_mode.active) ? (objA0.position.x.u16 == 0x0780 && objA0.position.y.u16 == 0x02b0) : 1	// to save on object RAM, only load hurtboxes for the platform that gets used
+	if (loadHurtboxes)
+	{
+		if (allocDynamicObjectAfterA0())
+		{
+			// Left half of hurtbox under platform
+			objA1.update_address = 0x035b90
+			y_offset = (!competition_mode.active) ? 0x10 : 0x0c
+			u16[A1 + 0x10] = objA0.position.x.u16 - x_offset
+			u16[A1 + 0x14] = objA0.position.y.u16 + y_offset
+			objA1.collision_attributes = (!competition_mode.active) ? (collision.flag.THREAT | collision.size.24x12) : (collision.flag.THREAT | collision.size.16x4)
+			u16[A1 + 0x3e] = A0.u16
+			if (!competition_mode.active)
+			{
+				// Lightning shield protects from damage
+				objA1.flags2b = char.bonus.SHIELD_LIGHTNING
+			}
+
+			if (allocDynamicObjectAfterA0())
+			{
+				// Right half of hurtbox under platform
+				objA1.update_address = 0x035ba6
+				y_offset = (!competition_mode.active) ? 0x1a : 0x14
+				u16[A1 + 0x10] = objA0.position.x.u16 + x_offset
+				u16[A1 + 0x14] = objA0.position.y.u16 + y_offset
+				objA1.collision_attributes = (!competition_mode.active) ? (collision.flag.THREAT | collision.size.24x12) : (collision.flag.THREAT | collision.size.16x4)
+				u16[A1 + 0x3e] = A0.u16
+				if (!competition_mode.active)
+				{
+					// Lightning shield protects from damage
+					objA1.flags2b = char.bonus.SHIELD_LIGHTNING
+				}
+			}
+		}
+	}
+
+	objA0.update_address = 0x035b16
+	fn035b16()
+}
+
+
+//# address-hook(0x035b16) end(0x035b8a)
+function void fn035b16()
+{
+	// In this function, u16[A0 + 0x36] serves as the offset *in subpixels* (so first byte is pixels) from starting position.
+	D0.u8 = objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)
+	s16 platformSpeed
+	if (D0.u8 != 0)
+	{
+		platformSpeed = (D0.u8 == (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)) ? 0x100 : 0x80
+		if (!competition_mode.active)
+			platformSpeed = platformSpeed / 2 * 3
+		u16[A0 + 0x36] += platformSpeed
+		u16 maxDescent = (!competition_mode.active) ? 0xc000 : 0x8000
+		if (u16[A0 + 0x36] >= maxDescent)
+		{
+			u16[A0 + 0x36] = maxDescent
+		}
+	}
+	else if (u16[A0 + 0x36] != 0)
+	{
+		platformSpeed = (!competition_mode.active) ? 0x0180 : 0x0100
+		u16[A0 + 0x36] -= platformSpeed
+		if (u16[A0 + 0x36] > 0xf000)	// originally checked (s16[A0 + 0x36] < 0), but now that we move more than 0x8000 subpixels, we cannot use signed values
+		{
+			u16[A0 + 0x36] = 0
+		}
+	}
+	objA0.position.y.u16 = objA0.value32 + u8[A0 + 0x36]
+
+	D1 = objA0.box_size.x + 7
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	++objA0.animation.sprite
+	objA0.animation.sprite &= 0x03
+	DrawObject()
+}
+
+// Left half of hurtbox under platform
+//# address-hook(0x035b90) end(0x035ba0)
+function void fn035b90()
+{
+	A1 = 0xffff0000 + objA0.value3e
+	s16 y_offset = (!competition_mode.active) ? 0x06 : 0x08
+	objA0.position.y.u16 = u16[A1 + 0x14] + y_offset
+	AddAsDynamicObject()
+}
+
+// Right half of hurtbox under platform
+//# address-hook(0x035ba6) end(0x035bb6)
+function void fn035ba6()
+{
+	A1 = 0xffff0000 + objA0.value3e
+	s16 y_offset = (!competition_mode.active) ? 0x12 : 0x10
+	objA0.position.y.u16 = u16[A1 + 0x14] + y_offset
+	AddAsDynamicObject()
+}
+
+
+
+
+
+
+// CGZ retracting spring + base
+// We only concern ourselves with the functions that load, unload, and move the spring and its base.
+
+//# address-hook(0x023b38) end(0x023c0e)
+function void fn023b38()
+{
+	// Core object is the spring.
+	// The base is loaded here.
+	if (allocDynamicObjectAfterA0())
+	{
+		// Retracting spring base
+		objA1.update_address = 0x023ed0
+		objA1.mapping_offset = 0x023f4a
+		objA1.sprite_attributes = 0x0391
+		if (global.zone == 0x12)
+		{
+			objA1.mapping_offset = 0x023f52
+		}
+		u8[A1 + 0x2c] = objA0.subtype2c
+
+		D0.u16 = (objA0.subtype2c >> 2) & 0x1c
+		A2 = 0x023b18 + D0.u16
+		objA1.box_size.x = u8[(A2+=1)-1]
+		objA1.box_size.y = u8[(A2+=1)-1]
+		if (!competition_mode.active)
+		{
+			objA1.box_size.x = 0x14
+			objA1.box_size.y = 0x08
+		}
+		D0.u8 = u8[(A2+=1)-1]
+		u8[A1 + 0x22] = D0.u8
+		if (u8[A1 + 0x22] == 0)
+		{
+			objA1.update_address = 0x023f2a
+		}
+		objA0.subtype2c &= 0xf0
+		objA0.subtype2c |= u8[(A2+=1)-1]
+		u16[A1 + 0x10] = objA0.position.x.u16
+		u16[A1 + 0x14] = objA0.position.y.u16
+
+		D2 = 0
+		D3 = 0
+		if (D0.u8 == 0x01)
+		{
+			D2 = 0x0c
+			if ((objA0.flags2a & 0x01) == 0)
+			{
+				D2.s16 = -D2.s16
+			}
+			u16[A1 + 0x10] += D2.u16
+		}
+		if (D0.u8 == 0x02)
+		{
+			D3 = (!competition_mode.active) ? 0x10 : 0x0b
+			u16[A1 + 0x14] += D3.u16
+		}
+		if (D0.u8 == 0x03)
+		{
+			D3 = (!competition_mode.active) ? -0x10 : -0x0b
+			u16[A1 + 0x14] += D3.u16
+		}
+		u16[A1 + 0x30] = D2.u16
+		objA1.value32 = D3.u16
+		if (objA0.flags2a & 0x02)
+		{
+			objA0.flags2a &= ~0x02
+			u8[A0 + 0x3c] = 0x01
+		}
+		u8[A1 + 0x2a] = objA0.flags2a
+		objA1.render_flags = objA0.render_flags | render_flag.WORLD
+		objA1.sprite_priority = 0x0200
+		u16[A1 + 0x3e] = A0.u16
+		objA0.value3e = A1.u16
+	}
+
+	fn022d54()
+	fn023c12()
+
+	if (!competition_mode.active)
+	{
+		objA0.box_size.x = 0x20
+		objA0.box_size.y = 0x10
+	}
+}
+
+// CGZ retracting spring
+
+//# address-hook(0x023c8e) end(0x023ca0)
+function void fn023c8e()
+{
+	fn023cdc()
+	objA0.position.y.u16 = u16[A0 + 0x34] + u8[A0 + 0x36]
+//	if (!competition_mode.active)
+//		SpringHorizontal.Update()	// this function also deletes the spring when off screen
+//	else
+		SpringHorizontal.Update.CompetitionMode()
+}
+
+//# address-hook(0x023caa) end(0x023cbc)
+function void fn023caa()
+{
+	fn023cdc()
+	objA0.position.x.u16 = u8[A0 + 0x36] + objA0.value32
+//	if (!competition_mode.active)
+//		SpringVertical.Update()		// this function also deletes the spring when off screen
+//	else
+		SpringVertical.Update.CompetitionMode()
+}
+
+//# address-hook(0x023cc6) end(0x023cd8)
+function void fn023cc6()
+{
+	fn023cdc()
+	objA0.position.x.u16 = u8[A0 + 0x36] + objA0.value32
+//	if (!competition_mode.active)
+//		SpringVerticalFlipped.Update()	// this function also deletes the spring when off screen
+//	else
+		SpringVerticalFlipped.Update.CompetitionMode()
+}
+
+
+// CGZ retracting spring base
+
+//# address-hook(0x023ed0) end(0x023f24)
+function void fn023ed0()
+{
+	A1 = 0xffff0000 + objA0.value3e				// address of attached spring
+	D2.u16 = u16[A1 + 0x10] + u16[A0 + 0x30]
+	D3.u16 = u16[A1 + 0x14] + objA0.value32
+	objA0.position.x.u16 = D2.u16
+	objA0.position.y.u16 = D3.u16
+
+	if (objA0.subtype2c & 0x80)
+	{
+		D1.u16 = objA0.subtype2c & 0x0f
+		if (u8[0xfffff7e0 + D1.u16] != 0)	// 0xfffff7e0 is level.trigger00 and D1 is the level trigger to use
+		{
+			u16[A1 + 0x38] = 0x01
+		}
+	}
+
+	D1 = objA0.box_size.x + 7
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	if (objA0.position.x.u16 == 0x0490 && (u16[0xffffb042] + 0xffff0000 == A0.u16 || u16[0xffffb042 + 0x4a] == A0.u16))			// if the character was standing on this object and it's now in the wall, the character is no longer standing on it.
+	{
+		if (u16[0xffffb042] == A0.u16 && (objA0.flags2a & object.flag.P1_ON_OBJECT))
+		{
+			objA0.flags2a &= ~object.flag.P1_ON_OBJECT
+			u8[0xffffb02a] |= char.flag.IN_AIR
+			u8[0xffffb02a] &= ~char.flag.ON_OBJECT
+		}
+		if (u16[0xffffb042 + 0x4a] == A0.u16 && (objA0.flags2a & object.flag.P2_ON_OBJECT))
+		{
+			objA0.flags2a &= ~object.flag.P2_ON_OBJECT
+			u8[0xffffb02a + 0x4a] |= char.flag.IN_AIR
+			u8[0xffffb02a + 0x4a] &= ~char.flag.ON_OBJECT
+		}
+	}
+
+//	if (!competition_mode.active)
+//		DrawOrUnloadObject()
+//	else
+		DrawObject()
+}
+
+
+// Spring movement function
+//# address-hook(0x023cdc) end(0x023ece)
+function void fn023cdc()
+{
+	u16 springPosition.x = (!competition_mode.active) ? 0x2000 : 0x1800
+	u16 springMovement.x = (!competition_mode.active) ? 0x0b00 : 0x0800
+
+	if (s8[A0 + 0x2c] >= 0)
+	{
+		if (u16[A0 + 0x3a] != 0)
+		{
+			--u16[A0 + 0x3a]
+			if (u16[A0 + 0x3a] == 0 && (objA0.render_flags & render_flag.VISIBLE))
+			{
+				playSound(SFX_SPIKESMOVE)
+			}
+		}
+		else
+		{
+			if (u16[A0 + 0x38] != 0)
+			{
+				u16[A0 + 0x36] -= springMovement.x
+				if (s16[A0 + 0x36] < 0)
+				{
+					u16[A0 + 0x36] = 0
+					u16[A0 + 0x38] = 0
+					u16[A0 + 0x3a] = 0x3c
+				}
+			}
+			else
+			{
+				u16[A0 + 0x36] += springMovement.x
+				if (u16[A0 + 0x36] >= springPosition.x)
+				{
+					u16[A0 + 0x36] = springPosition.x
+					u16[A0 + 0x38] = 0x01
+					u16[A0 + 0x3a] = 0x3c
+				}
+			}
+		}
+		return
+	}
+
+	if (u8[A0 + 0x3c] != 0)
+	{
+		if (u16[A0 + 0x3a] != 0)
+		{
+			--u16[A0 + 0x3a]
+			if (u16[A0 + 0x3a] == 0)
+			{
+				u16[A0 + 0x38] = 0
+			}
+		}
+		else
+		{
+			if (u16[A0 + 0x38] == 0)
+			{
+				if (u16[A0 + 0x36] == 0)
+					return
+
+				u16[A0 + 0x36] -= springMovement.x
+				if (u16[A0 + 0x36] > 0)
+					return
+
+				u16[A0 + 0x36] = 0
+				D0.u8 = objA0.subtype2c & 0xf0
+				if (D0.u8 == 0xe0)
+				{
+					objA0.position.y.u16 += (!competition_mode.active) ? 0x20 : 0x16
+					objA0.flags2a ^= 0x02
+					objA0.render_flags ^= render_flag.FLIP_Y
+					objA0.subtype2c &= 0x0f
+					objA0.subtype2c |= 0xf0
+					objA0.update_address = 0x023c12
+					A1 = 0xffff0000 + objA0.value3e
+					s16[A1 + 0x32] = -s16[A1 + 0x32]
+				}
+				if (D0.u8 == 0xf0)
+				{
+					objA0.position.y.u16 -= (!competition_mode.active) ? 0x20 : 0x16
+					objA0.flags2a ^= 0x02
+					objA0.render_flags ^= render_flag.FLIP_Y
+					objA0.subtype2c &= 0x0f
+					objA0.subtype2c |= 0xe0
+					objA0.update_address = 0x023c12
+					A1 = 0xffff0000 + objA0.value3e
+					s16[A1 + 0x32] = -s16[A1 + 0x32]
+				}
+			}
+			else
+			{
+				u16[A0 + 0x36] += springMovement.x
+				if (u16[A0 + 0x36] >= springPosition.x)
+				{
+					u16[A0 + 0x36] = springPosition.x
+					u16[A0 + 0x3a] = 0xb4
+				}
+			}
+		}
+	}
+	else
+	{
+		if (u16[A0 + 0x3a] != 0)
+		{
+			--u16[A0 + 0x3a]
+			if (u16[A0 + 0x3a] == 0)
+			{
+				u16[A0 + 0x38] = 0
+			}
+		}
+		else
+		{
+			if (u16[A0 + 0x38] != 0)
+			{
+				u16[A0 + 0x36] -= springMovement.x
+				if (s16[A0 + 0x36] < 0)
+				{
+					u16[A0 + 0x36] = 0
+					u16[A0 + 0x3a] = 0xb4
+				}
+			}
+			else
+			{
+				if (u16[A0 + 0x36] == springPosition.x)
+					return
+
+				u16[A0 + 0x36] += springMovement.x
+				if (u16[A0 + 0x36] < springPosition.x)
+					return
+
+				u16[A0 + 0x36] = springPosition.x
+				D0.u8 = objA0.subtype2c & 0xf0
+				if (D0.u8 == 0xe0)
+				{
+					objA0.position.y.u16 += (!competition_mode.active) ? 0x20 : 0x16
+					objA0.flags2a ^= 0x02
+					objA0.render_flags ^= render_flag.FLIP_Y
+					objA0.subtype2c &= 0x0f
+					objA0.subtype2c |= 0xf0
+					objA0.update_address = 0x023c12
+					A1 = 0xffff0000 + objA0.value3e
+					s16[A1 + 0x32] = -s16[A1 + 0x32]
+				}
+				if (D0.u8 == 0xf0)
+				{
+					objA0.position.y.u16 -= (!competition_mode.active) ? 0x20 : 0x16
+					objA0.flags2a ^= 0x02
+					objA0.render_flags ^= render_flag.FLIP_Y
+					objA0.subtype2c &= 0x0f
+					objA0.subtype2c |= 0xe0
+					objA0.update_address = 0x023c12
+					A1 = 0xffff0000 + objA0.value3e
+					s16[A1 + 0x32] = -s16[A1 + 0x32]
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+// Fan functions taken from objects\02_hcz\hcz_fan.lemon
+
+//# address-hook(0x030580) end(0x03064c)
+function void fn030580()
+{
+	if (unlock_act == 3)
+	{
+		fn0309cc()
+		return
+	}
+
+	base.fn030580()
+}
+
+//# address-hook(0x0309cc) end(0x030a0a)
+function void fn0309cc()
+{
+	objA0.mapping_offset = 0x22f620
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE3 | 0x0300)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = (!competition_mode.active) ? 0x18 : 0x10
+	objA0.box_size.y = (!competition_mode.active) ? 0x18 : (!original_mode) ? 0x10 : 0x04
+
+	D0.u16 = ((objA0.subtype2c & 0x0f) + 8) << 4
+	u16[A0 + 0x36] = D0.u16
+	D0.u16 += 0x30
+	u16[A0 + 0x38] = D0.u16
+
+	objA0.update_address = 0x030a10
+	fn030a10()
+}
+
+
+//# address-hook(0x030a10) end(0x030a32)
+function void fn030a10()
+{
+	A1 = 0xffffb000
+	fn030a38()
+
+	A1 = 0xffffb04a
+	fn030a38()
+
+	++objA0.animation.sprite
+	u8 maxAnimationSprite = (!competition_mode.active) ? 3 : 2
+	if (objA0.animation.sprite > maxAnimationSprite)
+	{
+		objA0.animation.sprite = 0
+	}
+	DrawObject()
+}
+
+
+//# address-hook(0x030a38) end(0x030ace)
+function void fn030a38()
+{
+	if (u8[A1 + 0x05] >= base_state.HURT || u8[A1 + 0x2e] != 0)
+		return
+
+	u16 x_width = (!competition_mode.active) ? 0x18 : 0x14
+	u16 dx = u16[A1 + 0x10] - objA0.position.x.u16 + x_width
+	s16 dy = u8[0xfffffe84] + u16[A1 + 0x14] + u16[A0 + 0x36] - objA0.position.y.u16
+	u16 x_proximity = (!competition_mode.active) ? 0x30 : 0x28
+	if (dx < x_proximity && dy >= 0 && dy < u16[A0 + 0x38])
+	{
+		D1.u16 = dy - u16[A0 + 0x36]
+		if (D1.s16 >= 0)
+		{
+			D1.u16 ^= 0xffff
+			D1.u16 *= 2
+		}
+		D1.u16 += u16[A0 + 0x36]
+		D1.s16 = -D1.s16 >> 6
+		if (!competition_mode.active)
+			D1.s16 = D1.s16 * 3 / 2
+		u16[A1 + 0x14] += D1.u16	// set y speed
+		u8[A1 + 0x2a] |= char.flag.IN_AIR
+		objA1.flags2a &= ~char.flag.CONTROL_LOCK
+		u16[A1 + 0x1a] = 0
+		u8[A1 + 0x2f] = 0
+		u8[A1 + 0x40] = 0
+		u16[A1 + 0x1c] = 0x01
+
+		if (u8[A1 + 0x27] == 0)
+		{
+			u8[A1 + 0x27] = 0x01
+			objA1.state = char.state.RUNNING
+			u8[A1 + 0x30] = 0x7f		// "char.rotation.x.count"
+			u8[A1 + 0x31] = 0x08		// "char.rotation.x.speed"
+		}
+
+		// Fix for bug when Tails carries other player and gets caught by the fan, as in HCZ fan fixes
+		if (u8[A1 + 0x38] == CHARACTER_TAILS && tails.carrying && !original_mode)
+		{
+			u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+			u8[0xffffb000 + 0x2e] = 0
+		}
+	}
+}
+
+
+
+// Function taken from bonus_gs\gs_bonusbubble.bin
+//# address-hook(0x04a1e6) end(0x04a212)
+function void fn04a1e6()
+{
+	if (unlock_act != 3)
+	{
+		base.fn04a1e6()
+		return
+	}
+
+	call 0x04a1e8 + objA0.base_state
+}
+	
+//# address-hook(0x04a1e8) end(0x04a212)
+function void BonusBubble.Init()
+{
+	// Object init
+//	fn0612a8()				// assign bubble subtype. This alters collision attributes for the black bubble, so do this before the Init function sets them.
+	objA0.base_state += 2
+	objA0.mapping_offset = 0x04a294
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | 0x0364)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.sprite_priority = 0x0200
+	objA0.collision_attributes = (collision.flag.ITEM | collision.size.8x8)
+	objA0.hitbox_extends.x = 8
+	objA0.hitbox_extends.y = 8
+
+	BonusBubble.Main()
+}
+
+//# address-hook(0x04a1ea)
+function void BonusBubble.Main()
+{
+	AddAsDynamicObject()
+	// DrawObject() is not called. This is handled in CGZ_CustomSprites so the drawing in other loops of the level is handled properly.
+}
+
+//# address-hook(0x04a1ec)
+function void BonusBubble.AwardBonusAndVanish()
+{
+	D1.u8 = objA0.subtype2c
+	if (D1.u8 == 1)		// gumball bonus spring replace bubble
+	{
+		freeze_time += 300		// replace bubble acts as a time stop item monitor
+		if (!alternatingRingSoundState)
+			playSound(0xde)
+		else
+			playSound(0xdd)
+	}
+	else if (D1.u8 == 4)
+	{
+		u32 backupD0 = D0
+		D0.u16 = 0xb000		// needed for black bubble bounce
+		fn061176()
+		D0 = backupD0
+	}
+	else
+		fn061100()		// turns bubble subtype into item effect
+
+	u16[A0 + 0x3e] = 480	// disappear for eight seconds
+	objA0.base_state += 2
+}
+
+//# address-hook(0x04a1ee)
+function void BonusBubble.CountdownAndRespawn()
+{
+	--u16[A0 + 0x3e]
+	if (!u16[A0 + 0x3e])
+	{
+		global.random.seed = global.framecounter
+		fn0612a8()				// assign bubble subtype
+		objA0.collision_attributes = (collision.flag.ITEM | collision.size.8x8)		// remove special collision type from black bubble
+		objA0.base_state = 2
+	}
+}

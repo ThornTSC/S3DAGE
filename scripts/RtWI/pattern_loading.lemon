@@ -22,7 +22,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		base.RequestLoadingPatterns()
 		return
 	}
-	if (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52)	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	if (unlock_act != 3 && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
 	{
 		// Life icon art needed. Goes to 0xfa80.
 
@@ -192,5 +192,13 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("spiny_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)	// 0x12 bytes containing three scripts: horizontal Spiny, vertical Spiny, projectile
 		System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
 		System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// 0x18 bytes
+	}
+	else if (unlock_act == 3)
+	{
+		// Button
+		Nemesis.loadDataToVRAM(0x190ac4, 0x8ac0)
+
+		// Spikes and springs
+		Nemesis.loadDataToVRAM(0x1927fe, 0x9280)
 	}
 }

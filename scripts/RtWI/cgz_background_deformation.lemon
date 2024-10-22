@@ -1,0 +1,123 @@
+function void CGZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.CGZ()
+
+	BonusStage.UpdateTimeRemaining()
+
+	// Draw bonus bubbles
+	u32 backupA0 = A0
+	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
+	{
+		if (u32[objAddress] == 0x04a1e6 && u8[objAddress + 0x05] == 2)	// check for bonus bubbles with a base state of 2
+		{
+			A0 = objAddress
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)		
+		}
+	}
+	A0 = backupA0
+}
+
+function void UpdateBackgroundScrolling.CGZ()
+{
+	u16 cameraXPos = camera.position.x.u16 + 0x4000 + (0x600 * s8(competition_mode.current_lap.player1))		// we use a camera shift to stop the moon from scrolling off screen early
+	s64 parallaxShift = -(cameraXPos * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s16 yShift = 0 // camera.position.y.u16 / 56	// -8						// 56 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point. Alt idea: 28 and -32
+	Renderer.drawCustomSprite("cgz_background_sky", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 240 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_lights_veryfar", parallaxShift, 48 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 480 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_far", parallaxShift, 88 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 960 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_mid", parallaxShift, 104 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 1920 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_near", parallaxShift, 120 - yShift, 0, 0, 0x1100)
+}
+
+function void BonusStage.UpdateTimeRemaining()
+{
+	if (timer.alldata == 1)
+		BS_remainingTime = 2700 - 1
+	else if (BS_remainingTime != 0 && !global.game.paused && !freeze_time)
+		--BS_remainingTime
+
+	// Draw the timer
+	s16 px_timer = getScreenWidth() / 2
+	constant u16 timer_screentop = 12
+	constant u16 timer_screenbottom = 196		// getScreenHeight() of 224, minus 12 for empty space below HUD, minus 16 for height of digits
+	s16 py_timer = timer_screentop
+	u16 renderQueue_hud = 0xe800
+
+	u32 alpha = ((freeze_time >= 64) ? 255 : (freeze_time * 4)) << 24
+
+	u16 seconds = BS_remainingTime / 60
+	u16 frames = BS_remainingTime - (seconds * 60)
+	u16 centiseconds = (frames * 99 + 30) / 59
+
+	if (seconds > 99)
+	{
+		seconds = 99
+		centiseconds = 99
+	}
+
+	Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+	// Normal digits
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+	// Sphere time running out digits
+	if (BS_remainingTime <= 600 && (level.framecounter.low & 0x08) && !freeze_time)
+	{
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+		Renderer.drawCustomSprite("sonic2_specialdigit_period_red", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	}
+
+	// Sphere time bonus digits
+	if (freeze_time)
+	{
+		Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha + 0x00ffff00, 0x10000)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+		Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+	}
+
+	if (timer.alldata > 1 && !BS_remainingTime)
+	{
+		global.zone_act = checkpoint.zone_act
+		global.zone_act.apparent = checkpoint.zone_act.apparent
+		checkpoint.number = checkpoint.number.backup
+		global.stage_type = 0
+		level.restart.u8 = 2		// make a special flag that says to clear unlock_act *after* the palette fully fades, to avoid displaying improper art
+		checkpoint.rings = ring_counter
+		checkpoint.lives_granted = extra_lives_granted
+		global.shields_backup_1 = u8[0xffffb000 + 0x2b] & char.bonus.ALL_SHIELDS	
+	//	unlock_act = 0	
+	}
+}
+
+
+
+// If the level restart flag is set to 2, clear unlock_act while the screen is black to load the level.
+// Function taken from maingame\maingame.lemon
+function u32 MainGame.getLevelDataPointer()
+{
+	if (level.restart.u8 == 2)
+	{
+		level.restart.u8 = 1
+		unlock_act = 0
+	}
+
+	return base.MainGame.getLevelDataPointer()
+}

@@ -10,8 +10,10 @@ function void UpdateCameraBoundsInLevel()
 
 	if (unlock_act == 1)
 		EHZ.cameraBounds()
-	else
+	else if (unlock_act == 2)
 		CPZ.cameraBounds()
+	else if (unlock_act == 3)
+		CGZ.cameraBounds()
 
 	// Settings for all levels
 	D1 = 2
@@ -289,5 +291,60 @@ function void CPZ.cameraBounds()
 	{
 		move_area.left &= 0xfffe	// set final bit of camera position to 0
 		move_area.left += 2			// move camera position to next even number
+	}
+}
+
+function void CGZ.cameraBounds()
+{
+	u8[0xffffb037] |= 0x80		// set a flag saying the character cannot be hurt, although they can be knocked back
+	// If too far right
+	if (u16[0xffffb010] > 0x0980)
+	{
+		u16[0xffffb010] -= 0x0600
+		u16[0xffffb010 + 0x4a] -= 0x0600
+		camera.position.x.u16 -= 0x0600
+		camera.foreground.x.u16 -= 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		competition_mode.current_lap.player1 += 1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] -= 0x0600
+		}
+	}
+	// If too far left
+	else if (u16[0xffffb010] < 0x0380)
+	{
+		u16[0xffffb010] += 0x0600
+		u16[0xffffb010 + 0x4a] += 0x0600
+		camera.position.x.u16 += 0x0600
+		camera.foreground.x.u16 += 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		competition_mode.current_lap.player1 -= 1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] += 0x0600
+		}
+	}
+	// If too high
+	else if (u16[0xffffb014] < 0x0180 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
+	{
+		u16[0xffffb014] += 0x0180
+		u16[0xffffb014 + 0x4a] += 0x0180
+		camera.position.y.u16 += 0x0180
+		camera.foreground.y.u16 += 0x0180
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+	}
+	// If too low
+	else if (u16[0xffffb014] > 0x0300 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
+	{
+		u16[0xffffb014] -= 0x0180
+		u16[0xffffb014 + 0x4a] -= 0x0180
+		camera.position.y.u16 -= 0x0180
+		camera.foreground.y.u16 -= 0x0180
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
 	}
 }

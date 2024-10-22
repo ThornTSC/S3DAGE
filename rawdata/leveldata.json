@@ -392,5 +392,19 @@
 
     // Spin tube data
     "obj1E_a":  { "File": "../level/CPZ/Spin Tube Data/obj1E_a.bin" },
-    "obj1E_b":  { "File": "../level/CPZ/Spin Tube Data/obj1E_b.bin" }
+    "obj1E_b":  { "File": "../level/CPZ/Spin Tube Data/obj1E_b.bin" },
+
+  // CGZ
+    // Layout
+    "cgz_layout": { "File": "../level/CGZ/Layout/1.bin" },
+    "cgz_objects": { "File": "../level/CGZ/Object Pos/1.bin" },
+    "cgz_rings": { "File": "../level/CGZ/Ring Pos/1.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "cgz_tiles":  { "File": "../level/CGZ/Tiles/Primary.bin" },
+    "cgz_blocks":  { "File": "../level/CGZ/Blocks/Primary.bin" },
+    "cgz_chunks_p":  { "File": "../level/CGZ/Chunks/Primary.bin" },
+
+    // Collision
+    "cgz_collision":  { "File": "../level/CGZ/Collision/IndexesSK.bin" }
 }

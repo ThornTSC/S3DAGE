@@ -339,6 +339,12 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	}
 #endif
 
+	// Load CGZ palette
+	if (unlock_act == 3 && index == 0x0e)
+	{
+		index = 0x35
+	}
+
 	A1 = 0x0a872c + index * 8
 	u32 source = u32[A1]					// Something between 0x0a893c and 0x0a9d9c
 	u32 dest   = 0xffff0000 + u16[A1+4]		// Either 0xfffffc00 or 0xfffffc20
@@ -346,8 +352,14 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 
 	dest += ramAddress - 0xfc00				// With this, dest can be changed to non-faded palette and/or secondary palette
 	copyMemory(dest, source, bytes)
-	if (unlock_act)
+	if (unlock_act && unlock_act != 3)
 		System.loadExternalRawData("s2_character_palette", dest)
+	else if (unlock_act == 3 && palette_set >= 2)	// add prototype blues to CGZ background
+	{
+		System.loadExternalRawData("Palette0200", 0xfffffca0, 0, 0x20, 1, 1)		// temporary to get MGZ1 object palette line
+		u32[dest + 0x3a] += 0x02000200
+		u16[dest + 0x40] += 0x0200
+	}
 
 	u32 destRaw = dest		// This is newly introduced to preserve dest for rawdata loading later.
 
@@ -578,6 +590,8 @@ function void UpdatePaletteEffects.Default()
 			LevelPaletteUpdate.EHZ()
 		else if (unlock_act == 2)
 			LevelPaletteUpdate.CPZ()
+		else if (unlock_act == 3)
+			LevelPaletteUpdate.CGZ()
 		return
 	}
 
@@ -1203,6 +1217,8 @@ function void UpdateLevelScrolling.MGZ1()
 			EHZ_CustomSprites()
 		else if (unlock_act == 2)
 			CPZ_CustomSprites()
+		else if (unlock_act == 3)
+			CGZ_CustomSprites()
 		fn051158()	// call the most basic MGZ1 scroll routine
 		return
 	}
