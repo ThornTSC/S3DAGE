@@ -7,24 +7,87 @@
 	"cgz_background_buildings_mid": { "File": "cgz_background.bmp", "Rect": "0,104,1024,16" },
 	"cgz_background_buildings_near": { "File": "cgz_background.bmp", "Rect": "0,120,1024,166" },
 
-	"cgz_wallbumpers":  { "File": "cgz_wallbumpers.bmp", "Center": "5, 96"},
+	"cgz_wallbumpers":  { "File": "cgz_wallbumpers.bmp", "Center": "5,96"},
 
-	"cgz_platform_0": { "File": "cgz_platform.bmp", "Rect": "0, 0,96,46", "Center": "48, 16" },		// true center is 48, 23
-	"cgz_platform_1": { "File": "cgz_platform.bmp", "Rect": "0,46,96,46", "Center": "48, 16" },		// true center is 48, 23
+	"cgz_platform_0": { "File": "cgz_platform.bmp", "Rect": "0, 0,96,46", "Center": "48,16" },		// true center is 48, 23
+	"cgz_platform_1": { "File": "cgz_platform.bmp", "Rect": "0,46,96,46", "Center": "48,16" },		// true center is 48, 23
 	
 	"cgz_springbase": { "File": "cgz_springbase.bmp", "Center": "16, 8" },
 
-	"cgz_fan_0": { "File": "cgz_fan.bmp", "Rect": "0, 0,46,24", "Center": "23, 12" },
-	"cgz_fan_1": { "File": "cgz_fan.bmp", "Rect": "0,24,46,24", "Center": "23, 12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
-	"cgz_fan_2": { "File": "cgz_fan.bmp", "Rect": "0,48,46,24", "Center": "23, 12" },
-	"cgz_fan_3": { "File": "cgz_fan.bmp", "Rect": "0,72,46,24", "Center": "23, 12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
+	"cgz_fan_0": { "File": "cgz_fan.bmp", "Rect": "0, 0,46,24", "Center": "23,12" },
+	"cgz_fan_1": { "File": "cgz_fan.bmp", "Rect": "0,24,46,24", "Center": "23,12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
+	"cgz_fan_2": { "File": "cgz_fan.bmp", "Rect": "0,48,46,24", "Center": "23,12" },
+	"cgz_fan_3": { "File": "cgz_fan.bmp", "Rect": "0,72,46,24", "Center": "23,12" },	// frames 1 and 3 had their lower half and order swapped to better match Sonic 3 instead of Origins
 
-	"bonusbubble_0": { "File": "bonusbubbles.png", "Rect": " 0,  0,32,32", "Center": "16, 16" },	// 1UP
-	"bonusbubble_1": { "File": "bonusbubbles.png", "Rect": "32,  0,32,32", "Center": "16, 16" },	// Rep
-	"bonusbubble_2": { "File": "bonusbubbles.png", "Rect": "64,  0,32,32", "Center": "16, 16" },	// Ring
-	"bonusbubble_3": { "File": "bonusbubbles.png", "Rect": "96,  0,32,32", "Center": "16, 16" },	// Empty
-	"bonusbubble_4": { "File": "bonusbubbles.png", "Rect": " 0, 32,32,32", "Center": "16, 16" },	// Black
-	"bonusbubble_5": { "File": "bonusbubbles.png", "Rect": "32, 32,32,32", "Center": "16, 16" },	// Fire Shield
-	"bonusbubble_6": { "File": "bonusbubbles.png", "Rect": "64, 32,32,32", "Center": "16, 16" },	// Bubble Shield
-	"bonusbubble_7": { "File": "bonusbubbles.png", "Rect": "96, 32,32,32", "Center": "16, 16" }		// Lightning Shield
+	"bonusbubble_0": { "File": "bonusbubbles.png", "Rect": " 0, 0,32,32", "Center": "16,16" },	// 1UP
+	"bonusbubble_1": { "File": "bonusbubbles.png", "Rect": "32, 0,32,32", "Center": "16,16" },	// Rep
+	"bonusbubble_2": { "File": "bonusbubbles.png", "Rect": "64, 0,32,32", "Center": "16,16" },	// Ring
+	"bonusbubble_3": { "File": "bonusbubbles.png", "Rect": "96, 0,32,32", "Center": "16,16" },	// Empty
+	"bonusbubble_4": { "File": "bonusbubbles.png", "Rect": " 0,32,32,32", "Center": "16,16" },	// Black
+	"bonusbubble_5": { "File": "bonusbubbles.png", "Rect": "32,32,32,32", "Center": "16,16" },	// Fire Shield
+	"bonusbubble_6": { "File": "bonusbubbles.png", "Rect": "64,32,32,32", "Center": "16,16" },	// Bubble Shield
+	"bonusbubble_7": { "File": "bonusbubbles.png", "Rect": "96,32,32,32", "Center": "16,16" },	// Lightning Shield
+
+	"lap_0": { "File": "bonus_hud.png", "Rect": "  0,0,16,24" },
+	"lap_1": { "File": "bonus_hud.png", "Rect": " 16,0,16,24" },
+	"lap_2": { "File": "bonus_hud.png", "Rect": " 32,0,16,24" },
+	"lap_3": { "File": "bonus_hud.png", "Rect": " 48,0,16,24" },
+	"lap_4": { "File": "bonus_hud.png", "Rect": " 64,0,16,24" },
+	"lap_5": { "File": "bonus_hud.png", "Rect": " 80,0,16,24" },
+	"lap_6": { "File": "bonus_hud.png", "Rect": " 96,0,16,24" },
+	"lap_7": { "File": "bonus_hud.png", "Rect": "112,0,16,24" },
+	"lap_8": { "File": "bonus_hud.png", "Rect": "128,0,16,24" },
+	"lap_9": { "File": "bonus_hud.png", "Rect": "144,0,16,24" },
+
+	"bonus_timer_large_0": { "File": "bonus_hud.png", "Rect": "  0,24,16,24" },
+	"bonus_timer_large_1": { "File": "bonus_hud.png", "Rect": " 16,24,16,24" },
+	"bonus_timer_large_2": { "File": "bonus_hud.png", "Rect": " 32,24,16,24" },
+	"bonus_timer_large_3": { "File": "bonus_hud.png", "Rect": " 48,24,16,24" },
+	"bonus_timer_large_4": { "File": "bonus_hud.png", "Rect": " 64,24,16,24" },
+	"bonus_timer_large_5": { "File": "bonus_hud.png", "Rect": " 80,24,16,24" },
+	"bonus_timer_large_6": { "File": "bonus_hud.png", "Rect": " 96,24,16,24" },
+	"bonus_timer_large_7": { "File": "bonus_hud.png", "Rect": "112,24,16,24" },
+	"bonus_timer_large_8": { "File": "bonus_hud.png", "Rect": "128,24,16,24" },
+	"bonus_timer_large_9": { "File": "bonus_hud.png", "Rect": "144,24,16,24" },
+	"bonus_timer_large_period": { "File": "bonus_hud.png", "Rect": "120,52, 6, 6" },
+
+	"bonus_timer_small_0": { "File": "bonus_hud.png", "Rect": "  0,48,12,16" },
+	"bonus_timer_small_1": { "File": "bonus_hud.png", "Rect": " 12,48,12,16" },
+	"bonus_timer_small_2": { "File": "bonus_hud.png", "Rect": " 24,48,12,16" },
+	"bonus_timer_small_3": { "File": "bonus_hud.png", "Rect": " 36,48,12,16" },
+	"bonus_timer_small_4": { "File": "bonus_hud.png", "Rect": " 48,48,12,16" },
+	"bonus_timer_small_5": { "File": "bonus_hud.png", "Rect": " 60,48,12,16" },
+	"bonus_timer_small_6": { "File": "bonus_hud.png", "Rect": " 72,48,12,16" },
+	"bonus_timer_small_7": { "File": "bonus_hud.png", "Rect": " 84,48,12,16" },
+	"bonus_timer_small_8": { "File": "bonus_hud.png", "Rect": " 96,48,12,16" },
+	"bonus_timer_small_9": { "File": "bonus_hud.png", "Rect": "108,48,12,16" },
+	"bonus_timer_small_period": { "File": "bonus_hud.png", "Rect": "120,60, 4, 4" },
+
+	"bonus_timer_time": { "File": "bonus_hud.png", "Rect": "128,48,32,16", "Center": "16,8" },
+
+	"bonus_timer_large_0_purple": { "File": "bonus_hud.png", "Rect": "  0,64,16,24" },
+	"bonus_timer_large_1_purple": { "File": "bonus_hud.png", "Rect": " 16,64,16,24" },
+	"bonus_timer_large_2_purple": { "File": "bonus_hud.png", "Rect": " 32,64,16,24" },
+	"bonus_timer_large_3_purple": { "File": "bonus_hud.png", "Rect": " 48,64,16,24" },
+	"bonus_timer_large_4_purple": { "File": "bonus_hud.png", "Rect": " 64,64,16,24" },
+	"bonus_timer_large_5_purple": { "File": "bonus_hud.png", "Rect": " 80,64,16,24" },
+	"bonus_timer_large_6_purple": { "File": "bonus_hud.png", "Rect": " 96,64,16,24" },
+	"bonus_timer_large_7_purple": { "File": "bonus_hud.png", "Rect": "112,64,16,24" },
+	"bonus_timer_large_8_purple": { "File": "bonus_hud.png", "Rect": "128,64,16,24" },
+	"bonus_timer_large_9_purple": { "File": "bonus_hud.png", "Rect": "144,64,16,24" },
+	"bonus_timer_large_period_purple": { "File": "bonus_hud.png", "Rect": "120,92, 6, 6" },
+
+	"bonus_timer_small_0_purple": { "File": "bonus_hud.png", "Rect": "  0,88,12,16" },
+	"bonus_timer_small_1_purple": { "File": "bonus_hud.png", "Rect": " 12,88,12,16" },
+	"bonus_timer_small_2_purple": { "File": "bonus_hud.png", "Rect": " 24,88,12,16" },
+	"bonus_timer_small_3_purple": { "File": "bonus_hud.png", "Rect": " 36,88,12,16" },
+	"bonus_timer_small_4_purple": { "File": "bonus_hud.png", "Rect": " 48,88,12,16" },
+	"bonus_timer_small_5_purple": { "File": "bonus_hud.png", "Rect": " 60,88,12,16" },
+	"bonus_timer_small_6_purple": { "File": "bonus_hud.png", "Rect": " 72,88,12,16" },
+	"bonus_timer_small_7_purple": { "File": "bonus_hud.png", "Rect": " 84,88,12,16" },
+	"bonus_timer_small_8_purple": { "File": "bonus_hud.png", "Rect": " 96,88,12,16" },
+	"bonus_timer_small_9_purple": { "File": "bonus_hud.png", "Rect": "108,88,12,16" },
+	"bonus_timer_small_period_purple": { "File": "bonus_hud.png", "Rect": "120,100, 4, 4" },
+
+	"bonus_timer_time_purple": { "File": "bonus_hud.png", "Rect": "128,88,32,16", "Center": "16,8" }
 }

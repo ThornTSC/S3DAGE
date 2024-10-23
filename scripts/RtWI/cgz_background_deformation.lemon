@@ -4,6 +4,13 @@ function void CGZ_CustomSprites()
 
 	BonusStage.UpdateTimeRemaining()
 
+	// Render the goal pole
+	pole.x = 0x0690
+	pole.y = 0x02a0
+	u64 key = stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1)
+	u8 flags = 0 // SPRITE_FLAG_PRIO
+	Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00 - 1)
+
 	// Draw bonus bubbles
 	u32 backupA0 = A0
 	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
@@ -19,6 +26,38 @@ function void CGZ_CustomSprites()
 		}
 	}
 	A0 = backupA0
+
+	// Use competition_mode.current_lap.player2 as a lap counter.
+	// If it's 0 and the player is before the pole or the player1 value is -1, render 0. Also be careful of the 
+	// Otherwise, render the player2 value plus 1.
+	s8 lapNum = clamp(s8(competition_mode.current_lap.player2), 0, 0x7f) + 1
+	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && u16[0xffffb010] < pole.x && u16[0xffffb014] < 0x02a8))
+		lapNum = 0
+	u16 px = getScreenWidth() - 56
+	for (u32 value = lapNum;;)
+	{
+		Renderer.drawCustomSprite(stringformat("lap_%d", value % 10), px, 12, 0x00, SPRITE_FLAG_PRIO, 0xe800)
+		px -= 16
+		value /= 10
+		if (value == 0)
+			break
+	}
+
+	// Here and in the called function, we repurpose competition_mode.current_lap.player2 as a field to hold the highest awarded lap bonus
+	if (u16[0xffffb010] >= pole.x && s8(competition_mode.current_lap.player1) > competition_mode.current_lap.player2 && s8(competition_mode.current_lap.player1) > 0)
+		BonusStage.AwardLapBonus()	// function must be called after pole.x is defined
+
+	// Render LAP BONUS
+	if (u8[0xfffffff1])	// LAP BONUS display timer
+	{
+		if (!global.game.paused)
+			--u8[0xfffffff1]	// decrement timer
+		u16 currentRingBonus = CGZ.LapBonuses[min(competition_mode.current_lap.player2 - 1, 7)]
+		u16 ringX = (currentRingBonus < 10) ? -19 : -21
+		u16 textX = 9 // (currentRingBonus < 10) ? 9 : 9
+		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] + ringX, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", u16[0xffffb010] + textX, u16[0xffffb014] - 36, stringformat("+ %d", currentRingBonus), 0xffffffff, 2, 0, 0x9f01, 1, 1)
+	}
 }
 
 function void UpdateBackgroundScrolling.CGZ()
@@ -51,7 +90,7 @@ function void BonusStage.UpdateTimeRemaining()
 	s16 py_timer = timer_screentop
 	u16 renderQueue_hud = 0xe800
 
-	u32 alpha = ((freeze_time >= 64) ? 255 : (freeze_time * 4)) << 24
+	u32 alpha = ((freeze_time >= 64) ? 255 : (freeze_time * 4)) // << 24		// shift needed if using Sonic 2 special digits
 
 	u16 seconds = BS_remainingTime / 60
 	u16 frames = BS_remainingTime - (seconds * 60)
@@ -63,34 +102,52 @@ function void BonusStage.UpdateTimeRemaining()
 		centiseconds = 99
 	}
 
-	Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6 + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
 	// Normal digits
-	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4 + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4 + 32, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+	Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d", seconds / 10), px_timer - 31, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d", seconds % 10), px_timer - 15, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("bonus_timer_large_period", px_timer + 1, py_timer + 18, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds / 10), px_timer + 8, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds % 10), px_timer + 20, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud)	
 
 	// Sphere time running out digits
 	if (BS_remainingTime <= 600 && (level.framecounter.low & 0x08) && !freeze_time)
 	{
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
-		Renderer.drawCustomSprite("sonic2_specialdigit_period_red", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	//	Renderer.drawCustomSprite("sonic2_specialdigit_period_red", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+	//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini_red", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
+
+		Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d", seconds / 10), px_timer - 31, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d", seconds % 10), px_timer - 15, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)
+		Renderer.drawCustomSprite("bonus_timer_large_period", px_timer + 1, py_timer + 18, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds / 10), px_timer + 8, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds % 10), px_timer + 20, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)	
 	}
 
 	// Sphere time bonus digits
 	if (freeze_time)
 	{
-		Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha + 0x00ffff00, 0x10000)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
-		Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
-		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+//		Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha + 0x00ffff00, 0x10000)
+//		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+//		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", seconds % 10), px_timer - 9, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+//		Renderer.drawCustomSprite("sonic2_specialdigit_period", px_timer - 2, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+//		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_timer + 2, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+//		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_timer + 10, py_timer + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 2, 0, alpha + 0x00ff00e0, 0x10000)
+
+		Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d_purple", seconds / 10), px_timer - 31, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_large_%d_purple", seconds % 10), px_timer - 15, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha)
+		Renderer.drawCustomSprite("bonus_timer_large_period_purple", px_timer + 1, py_timer + 18, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d_purple", centiseconds / 10), px_timer + 8, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha)
+		Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d_purple", centiseconds % 10), px_timer + 20, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud +1, 0, alpha)	
 	}
 
 	if (timer.alldata > 1 && !BS_remainingTime)
@@ -120,4 +177,26 @@ function u32 MainGame.getLevelDataPointer()
 	}
 
 	return base.MainGame.getLevelDataPointer()
+}
+
+
+
+
+constant array<u16> CGZ.LapBonuses =
+{
+	5, 5, 10, 10, 15, 15, 20, 20
+}
+
+function void BonusStage.AwardLapBonus()
+{
+	ring_counter += CGZ.LapBonuses[min(competition_mode.current_lap.player2, 7)]
+	hud.dirty.rings = 0x80
+	if (checkForExtraLifeByRings())
+	{
+		gainExtraLife()
+	}
+	playSound(0x63)		// star post trigger sound
+	if (competition_mode.current_lap.player2 != 0x7f)
+		++competition_mode.current_lap.player2
+	u8[0xfffffff1] = 120	// use the free byte after level.start_location as a timer to display the LAP BONUS
 }

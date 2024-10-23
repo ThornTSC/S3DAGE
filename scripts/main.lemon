@@ -6,8 +6,8 @@ constant u8 DEBUG_DYNAMIC_COLLISIONS		= 0		// 1 enables character and normal obj
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version = "D.A. Garden Edition v1.10.2.0"
-#define DAGE_running = 0x1a20
+global u64 DAGE_version = "D.A. Garden Edition v1.11.0.0"
+#define DAGE_running = 0x1b00
 
 // Define variables for in-game settings
 global u8 palette_set
@@ -572,6 +572,8 @@ function void MainMenuBG.Update(u16 cameraForegroundX, u16 cameraBackgroundX)
 function void TitleCard.Init()
 {
 	competition_mode.current_lap.player1 = 0	// reset lap counter in circuit levels
+	competition_mode.current_lap.player2 = 0	// reset lap bonuses in circuit levels
+	u8[0xfffffff1] = 0							// reset LAP BONUS display timer
 	if (u8[0xffffe654])		// no Knuckles settings for Extra Character Slot characters
 	{
 		eggrobos_knuckles = 0
