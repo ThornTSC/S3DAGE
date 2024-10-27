@@ -15621,7 +15621,7 @@ function void Shield.SharedSpriteUpdate()
 function void fn089ff2()
 {
 	bool pushing = (objA0.flags2a & 0x20) && (control.pad1.state & (CONTROL_LEFT | CONTROL_RIGHT))
-	if (global.zone_act == 0x0501)
+	if (global.zone_act == 0x0501 && !original_mode)
 		pushing = (objA0.flags2a & 0x20) && (control.pad1.state & CONTROL_RIGHT)
 	if (pushing)
 	{
