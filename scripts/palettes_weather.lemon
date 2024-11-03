@@ -2375,7 +2375,10 @@ function void fn07654a()
 	if (palette_set < 2 || original_mode)	// S3&K or ROM hack palettes
 		copyMemory(0xfffffcc0, 0x0a945c, 0x40)
 	else					// redesigned palettes
+	{
 		System.loadExternalRawData("Palette0700", 0xfffffcc0, 0x20, 0x40, 1, 1)
+		u16[0xfffffcf2] = 0x0c66	// use a blue to better connect the MHZ2 and FBZ1 sky colors
+	}
 
 	if (allocDynamicObjectStd())
 	{
