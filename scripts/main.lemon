@@ -10260,6 +10260,18 @@ function void fn013efc()
 
 
 
+// In Sonic 2 acts, do not set the flag to load act 2 data as level results start.
+// Function taken from maingame\hud\levelresults.lemon
+//# address-hook(0x02dbca) end(0x02dc34)
+function void fn02dbca()
+{
+	base.fn02dbca()
+	if (unlock_act)
+		u8[0xffffeec6] = 0
+}
+
+
+
 // Control what to do after an unlockable act finishes its level results tally.
 // Empty function taken from standalone\gamecallbacks.lemon
 function void Standalone.onLevelFinished()
@@ -19142,12 +19154,13 @@ function void fn0837d8()
 	u32[A0 + 0x30] = isMainCharacter(CHARACTER_KNUCKLES) ? 0x083b58 : 0x083b4a
 	if (!unlock_act)
 		objA0.position.y.u16 = camera.position.y.u16 - 0x20
-	else
+	else	// create real signpost in unlockable acts and move it upward
 	{
 		objA0.velocity.y = -0x380	// + 0x0c to advance one frame if needed
 		// Set starting appearance to Eggman
 		objA0.animation.sprite = 3
 		objA0.animation.frame = 8
+		level.wait_for_results = 0xff	// we must set this here as there is no boss-ending function to set it elsewhere
 	}
 
 	// Move signpost in front of Gapsule in FBZ 1; #contributed by iCloudius
