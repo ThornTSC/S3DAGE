@@ -1934,7 +1934,7 @@ function void RenderHUD_RedRings()
 // This is only the emerald count right now. The full-game timer is handed at the end of a frame.
 function void RenderHUD_Marathon()
 {
-	if (time_attack == 3)
+	if (time_attack == 3 && unlock_act != 3)
 	{
 		u64 key
 		u16 emeraldIndex = 1
