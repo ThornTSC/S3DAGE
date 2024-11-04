@@ -28,10 +28,12 @@ function void CGZ_CustomSprites()
 	A0 = backupA0
 
 	// Use competition_mode.current_lap.player2 as a lap counter.
-	// If it's 0 and the player is before the pole or the player1 value is -1, render 0. Also be careful of the 
+	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
 	// Otherwise, render the player2 value plus 1.
 	s8 lapNum = clamp(s8(competition_mode.current_lap.player2), 0, 0x7f) + 1
-	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && u16[0xffffb010] < pole.x && u16[0xffffb014] < 0x02a8))
+	bool underStart = (u16[0xffffb010] > 0x0600 && u16[0xffffb010] < pole.x && u16[0xffffb014] < 0x02a8)
+	bool beforeStart = (u16[0xffffb010] <= 0x0600)
+	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && (underStart || beforeStart) && competition_mode.current_lap.player1 == 0))
 		lapNum = 0
 	u16 px = getScreenWidth() - 56
 	for (u32 value = lapNum;;)
