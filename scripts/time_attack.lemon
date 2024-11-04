@@ -5379,6 +5379,15 @@ function void fn041a6c()
 
 
 
+//# address-hook(0x076a12) end(0x076a84)
+function void fn076a12()
+{
+	if (time_attack != 1 && time_attack != 2)
+		base.fn076a12()
+}
+
+
+
 
 // SOZ2: Enforce ghosts in time attack modes.
 // Function taken from level\09_soz\09_soz2_ghostspawn.lemon

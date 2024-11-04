@@ -19930,9 +19930,6 @@ function void SOZ1_CustomSprites()
 		SOZ.drawDarkSandPitShallow120(0x3e00, 0x0910, 0x100)
 		SOZ.drawDarkSandPitShallow184(0x3e80, 0x04d0, 0x100)
 		SOZ.drawDarkSandPitShallow56(0x4100, 0x0a10, 0x100)
-
-		if (time_attack == 1 || time_attack == 2)	// draw the pyramid already in place
-			Renderer.drawCustomSprite("soz1_pyramid", 0x4250 - camera.foreground.x.u16, 0x07c0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 	}
 	if (original_mode || global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
 	{
@@ -19978,7 +19975,7 @@ function void SOZ2_CustomSprites()
 //# address-hook(0x055a9a) end(0x055b00)
 function void fn055a9a()
 {
-	if (u16[0xffffeec6] != 0)
+	if (u16[0xffffeec6] != 0 || (time_attack_end && camera.position.y.u16 >= 0x0960))
 	{
 		// Start pyramid rising
 		u16[0xffffeec6] = 0
@@ -20019,7 +20016,7 @@ function void fn055d94()
 	// Pyramid rising
 	if (camera.screenshake.state & 0x8000)
 	{
-		if (time_attack)
+		if (time_attack >= 3)
 		{
 			// Pyramid rising should be faster than fast forwarding the cutscene
 			u16[0xffffee9c] += 6
@@ -20043,7 +20040,8 @@ function void fn055d94()
 				s16[0xffffee9c] = 0x0280
 
 			#if STANDALONE
-				Game.endSkippableCutscene()
+				if (!time_attack)
+					Game.endSkippableCutscene()
 			#endif
 			}
 		}
