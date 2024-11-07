@@ -54,6 +54,7 @@ global s8 selectedMenuOption.main
 global s8 selectedMenuOptionLast
 global s8 selectedMenuOptionLast.main
 global s8 selectedGameType
+global s8 selectedGreenSphereType
 global u8 setting.levelselect.characters = 1
 global s16 setting.unlock_act
 global bool challenges_normalmode
@@ -1896,6 +1897,15 @@ function void customMenu.mainLogicLoop.main()
 		else
 			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
+	else if (selectedMenuOption.main == 4 && (unlock_flags & 0x0001))
+	{
+		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 108 - arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 186 + arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
+		if (selectedGreenSphereType == 0)
+			Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + option_x + 122, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+		else
+			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 128, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+	}
 	
 	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
 	
@@ -1988,6 +1998,10 @@ function void customMenu.mainLogicLoop.main()
 			global.game_mode = 0x2c		// Blue Sphere
 			time_attack = 0
 			green_spheres.active = 0x01		// set flag if entering the Blue Sphere game mode (Green Spheres for DAGE)
+			if (selectedGreenSphereType)
+				speedSpheres = 1
+			else
+				speedSpheres = 0
 			specialstages_knuckles.shared = specialstages_knuckles
 
 			if (setting.levelselect.characters == 0)
@@ -2065,6 +2079,11 @@ function void customMenu.mainLogicLoop.main()
 	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 2)
 	{
 		selectedGameType = (selectedGameType + 1) & 0x01	// change 0 to 1 or vice versa
+		playSound(0x5b)
+	}
+	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 4 && (unlock_flags & 0x0001))
+	{
+		selectedGreenSphereType = (selectedGreenSphereType + 1) & 0x01	// change 0 to 1 or vice versa
 		playSound(0x5b)
 	}
 /*

@@ -17,6 +17,18 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 	{
 		soundKey = "mainmenu"
 	}
+    else if (sfxId == MUSIC_CONTINUE && speedSpheres)				// 0x28
+	{
+        soundKey = "s2_results"
+	}
+    else if (sfxId == MUSIC_LEVELCLEAR && speedSpheres)				// 0x29
+	{
+        soundKey = "s2_actcomplete"
+	}
+    else if (sfxId == MUSIC_INVINCIBLE && speedSpheres)				// 0x2c
+	{
+        soundKey = "s2_super"
+	}
 	else if (sfxId == 0xf8 && greenspheres_music)
 	{
 		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
@@ -27,6 +39,9 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 		
 		if ((KnucklesMainGameRandomGreenSphereStage || bluespheres.minigame_mode == 1 || challenge_greenspheres) && green_spheres.active)
 			soundKey = "greenspheres_speedup45"
+		
+		if (speedSpheres)
+			soundKey = "s2_specialstage"
 	}
 	else if (sfxId == 0xdc && original_mode && Audio.getAudioKeyType(MUSIC_CREDITSMEDLEY) == AudioKeyType.REMASTERED)
 	{

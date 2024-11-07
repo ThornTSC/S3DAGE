@@ -25,7 +25,8 @@
 	"YellowSpheref": { "File": "YellowSphereF.png", "Rect": "0,0,8,8", "Center": "4,4" },
 
 	// Sonic & Knuckles Logo (in Green Spheres mode background)
-	"sklogo": { "File": "sklogo_green.png", "Rect": "0,0,96,64", "Center": "48,32" },
+	"sklogo_blue": { "File": "sklogo_blue.png", "Rect": "0,0,96,64", "Center": "48,32" },
+	"sklogo_green": { "File": "sklogo_green.png", "Rect": "0,0,96,64", "Center": "48,32" },
 
 	// Digits and seconds symbols (Blue Sphere)
 	"BlueSphere_digit_0": { "File": "BlueSphere_digits.png", "Rect":   "0,0,16,16" },
@@ -56,6 +57,9 @@
 	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_mini.png", "Rect": "120,0,5,4" },
 	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_mini.png", "Rect":  "0,12,44,12" },
 	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_mini.png", "Rect": "33,12,44,12" },
+
+	// Sonic 2 emeralds for results screen
+	"sonic2_emblem": { "File": "Sonic2_emblem.png", "Rect": "0,0,16,18"},
 
 	// Sonic 2 emeralds for results screen
 	"sonic2_emerald_00": { "File": "Sonic2_emeralds.png", "Rect":    "0,0,14,16", "Center": "7,8" },
@@ -205,6 +209,7 @@
 	// "hud_ring_s2" is identical in special stages and in a Sonic 2 main act
 	"sonic2_spheresicon": { "File": "Sonic2_spheresicon.png"},
 	"sonic2_timeframe": { "File": "Sonic2_timeframe.png", "Center": "26,14"},
+	"sonic2_getXrings": { "File": "Sonic2_getXrings.png", "Center": "43,7"},
 	"sonic2_getXXrings": { "File": "Sonic2_getXXrings.png", "Center": "47,7"},
 	"sonic2_getXXXrings": { "File": "Sonic2_getXXXrings.png", "Center": "51,7"},
 	"sonic2_ringtogo": { "File": "Sonic2_ringtogo.png", "Center": "44,-1"},

@@ -27,6 +27,8 @@
 	"s2_invin": { "File": "S2_Invincibility.ogg",  "LoopStart": 38679, "Type": "Music"},
 	"s2_invin_fast": { "File": "S2_Invincibility_F.ogg",  "LoopStart": 30897, "Type": "Music"},
 
+	"s2_results": { "File": "S2_Results.ogg", "Type": "Music"},	// no loop point needed
+
 	"s2_specialstage": { "File": "S2_SpecialStage.ogg",  "LoopStart": 496644, "Type": "Music"},
 
 	"s2_spring": { "File": "S2_Spring.ogg", "Type": "Sound"},

@@ -46,6 +46,7 @@ function void loadupCustomMenu()
 	// Load Challenge and Red Star Ring data
 	loadBestActTimes()
 	loadRSR()
+	loadUnlocks()
 
 	if (global.game_mode == 0x58)	// main menu, not Challenges menu
 	{
@@ -92,6 +93,7 @@ function void customMenu.setup()
 	draw_HUD = false					// Do not draw HUD in menus. initializeMainGame() will activate the HUD.
 	water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 	original_mode = 0					// Remove original mode in main menu
+	speedSpheres = 0					// Remove speed spheres in main menu
 	eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
 	specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 	restartSpecialStage = 0

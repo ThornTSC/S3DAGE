@@ -81,6 +81,9 @@ global bool sidekick
 global s16 pole.x
 global s16 pole.y
 
+// Define memory location to store unlocks (currently only speed spheres)
+define u16 unlock_flags = u16[0x8402fc]
+
 // Define memory location to store star count
 define u16 total_stars = u16[0x8402fe]
 
@@ -214,6 +217,7 @@ function void endOfFrame()
 		draw_HUD = false					// Do not draw HUD in menus. initializeMainGame() will activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
+		speedSpheres = 0					// Remove speed spheres in main menu
 		eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
 		specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 		restartSpecialStage = 0
@@ -7066,6 +7070,12 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
+	// Sonic 2 emeralds for Speed Sphere results screen
+	if ((objA0.update_address == 0x04e05c || objA0.update_address == 0x04e074) && speedSpheres)
+	{
+		Renderer.drawCustomSprite(stringformat("sonic2_emerald_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+	}
+
 	// Signpost sign when in Sonic 2 acts
 	if (objA0.update_address == 0x0837b2 && unlock_act)
 	{
@@ -7663,6 +7673,7 @@ function void TitleScreen()
 	*/
 
 	original_mode = 0
+	speedSpheres = 0
 	time_attack = 0
 	Renderer.setScreenSize(400, 224)
 	global.shields_backup_1 = 0
@@ -8529,6 +8540,7 @@ function void TitleScreen_SK()
 	*/
 
 	original_mode = 0
+	speedSpheres = 0
 	Renderer.setScreenSize(400, 224)
 
 	Kosinski.decompress(0x0cca20, 0xffff0000)
@@ -24906,6 +24918,16 @@ function void loadRSR()
 
 
 
+function void loadUnlocks()
+{
+	if (!System.loadPersistentData(0x8402fc, "DAGE_UnlockFlags", 2))
+	{
+		zeroMemory(0x8402fc, 2)		// should default to zero, but another mod may have tried to use this memory
+	}
+}
+
+
+
 
 function void Unlock.checkForNewUnlock(u16 total_stars_old, u16 total_stars)
 {
@@ -24932,8 +24954,15 @@ function void Unlock.showUnlock()
 
 	u64 unlockTypeString
 	u64 unlockString
+
+	if (challenge_greenspheres && unlock_act)	// check we're in an unlockable act in case Special Stage Time Attack awards a star medal
+	{
+		unlockTypeString = "Mode Unlocked:"
+		unlockString = "Speed Sphere"
+	}
+
 	// We compare to the *next* unlockable, as multiple stars can be earned at once via Challenges.
-	if (total_stars < unlock.theme.westside)
+	else if (total_stars < unlock.theme.westside)
 	{
 		unlockTypeString = "Theme Unlocked:"
 		unlockString = "South Island"

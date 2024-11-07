@@ -103,6 +103,7 @@ function void initializeMainGame()
 		draw_HUD = true						// Activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
+		speedSpheres = 0					// Remove speed spheres in main menu
 		unlock_act = 0						// Remove unlockable act flag in main menu
 		eggrobos_knuckles = 0				// Default to Normal difficulty
 		specialstages_knuckles = 0			// Default to Normal difficulty
@@ -737,6 +738,7 @@ function void LevelSelect()
 		draw_HUD = false					// Do not draw HUD in menus. initialiizeMainGame() will activate the HUD.
 		water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 		original_mode = 0					// Remove original mode in main menu
+		speedSpheres = 0					// Remove speed spheres in main menu
 		eggrobos_knuckles = 1				// Default to Hard difficulty (AIR Act Select uses Normal)
 		specialstages_knuckles = 1			// Default to Hard difficulty (AIR Act Select uses Normal) to make all special stages accessible in Level Select
 		restartSpecialStage = 0
@@ -759,6 +761,7 @@ function void LevelSelect()
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
 	loadBestActTimes()
 	loadRSR()
+	loadUnlocks()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
@@ -3464,6 +3467,7 @@ function void Standalone.onLevelStart()
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
 	loadBestActTimes()
 	loadRSR()
+	loadUnlocks()
 	countTotalStars()
 
 	if (!time_attack)

@@ -11,6 +11,8 @@
 
 	"text_option_100":  { "File": "text_option_100.png" },
 	"text_option_any":  { "File": "text_option_any.png" },
+	"text_option_classic":  { "File": "text_option_classicmode.png", "Rect": "0,0,51,16"},
+	"text_option_speed":  { "File": "text_option_speedrunmode.png", "Rect": "0,0,39,16"},
 
 	"text_option_actselectchallenges":  { "File": "text_option_actselectchallenges.png"},
 	

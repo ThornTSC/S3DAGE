@@ -5,6 +5,8 @@ global u16 bluespheres.blue_total
 global u8 showTimeGain
 global u8 showTimeGainTarget
 
+global bool speedSpheres
+global u16 bluespheres.rings_total
 
 
 // Apply fix for blue spheres ground not whiting out when returning to menus.
@@ -192,14 +194,23 @@ function void fn04c97e()
 	// Try to load progress from persistent data
 //	System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
 
-	if (green_spheres.active)
-		System.loadPersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
-	else
-		System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4)
+	if (speedSpheres)
+	{
+		if (!System.loadPersistentData(0xffffffa6, "DAGE_SpeedSphereGame", 4))
+			u32[0xffffffa6] = 0
+	}
+	else if (green_spheres.active)
+	{
+		if (!System.loadPersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4))
+			u32[0xffffffa6] = 0
+	}
+	else if (!System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4))
+		u32[0xffffffa6] = 0
 		
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
 	loadBestActTimes()
 	loadRSR()
+	loadUnlocks()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
@@ -340,8 +351,9 @@ function void fn04d488()
 		bluespheregame.current_stage = D1
 		BlueSphere.setGeneratedStage(bluespheregame.current_stage)
 
-
-	if (green_spheres.active)
+	if (speedSpheres)
+		System.savePersistentData(0xffffffa6, "DAGE_SpeedSphereGame", 4)
+	else if (green_spheres.active)
 		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
 	else
 	{
@@ -378,7 +390,9 @@ function void BlueSphereGame.advanceStages(u8 numStages)
 			u8[A2+3] -= 0x7d
 	}
 
-	if (green_spheres.active)
+	if (speedSpheres)
+		System.savePersistentData(0xffffffa6, "DAGE_SpeedSphereGame", 4)
+	else if (green_spheres.active)
 		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
 	else
 	{
@@ -395,7 +409,7 @@ function void BlueSphereGame.advanceStages(u8 numStages)
 
 function void BlueSphere.setGeneratedStage(u32 number)
 {
-	if (!challenge_greenspheres)
+	if (!challenge_greenspheres || speedSpheres)
 	{
 		u8[0xffffffa2] = number & 0x7f
 		u8[0xffffffa3] = (number * 3 + 1) % 0x7f
@@ -479,57 +493,73 @@ function void fn009b62()
 		A1 = 0x009d1e + (D0.s16 & 0x07) * 8
 		copyMemory(0xfffffc64, A1, 0x08)
 
-		if (challenge_greenspheres)
+		if (challenge_greenspheres || speedSpheres)
 		{
-		// Check the ROM location of the palette, which is written to 0xffffe446, to determine how to color the emerald
-			if ((challenge_greenspheres & 0x07) == 1)			// (u32[0xffffe446] == 0x0089fe || u32[0xffffe446] == 0x2d5384)		// S3 Stage 1
+			if (challenge_greenspheres && !(unlock_flags & 0x0001))
+			{
+				unlock_flags |= 0x0001	// u16[0x8402fc]
+				System.savePersistentData(0x8402fc, "DAGE_UnlockFlags", 2)
+				unlock.show = true
+			}
+
+			u8 emeraldColor = (speedSpheres) ? ((u8[0xffffffa4] + 1) & 0x07) : (challenge_greenspheres & 0x07)
+			// Commented out old method: check the ROM location of the palette, which is written to 0xffffe446, to determine how to color the emerald. No longer used.
+			if (emeraldColor == 1)			// (u32[0xffffe446] == 0x0089fe || u32[0xffffe446] == 0x2d5384)		// S3 Stage 1
 			{
 				u16[0xfffffc64] = 0x0ee8
 				u16[0xfffffc66] = 0x0ec0
 				u16[0xfffffc68] = 0x0e80
 				u16[0xfffffc6a] = 0x0e40					
 			}
-			else if ((challenge_greenspheres & 0x07) == 2)	// (u32[0xffffe446] == 0x008a24 || u32[0xffffe446] == 0x2d53aa)	// S3 Stage 2
+			else if (emeraldColor == 2)	// (u32[0xffffe446] == 0x008a24 || u32[0xffffe446] == 0x2d53aa)	// S3 Stage 2
 			{
 				u16[0xfffffc64] = 0x0e6a
 				u16[0xfffffc66] = 0x0c08
 				u16[0xfffffc68] = 0x0806
 				u16[0xfffffc6a] = 0x0604					
 			}
-			else if ((challenge_greenspheres & 0x07) == 3)	// (u32[0xffffe446] == 0x008a4a || u32[0xffffe446] == 0x2d53d0)	// S3 Stage 3
+			else if (emeraldColor == 3)	// (u32[0xffffe446] == 0x008a4a || u32[0xffffe446] == 0x2d53d0)	// S3 Stage 3
 			{
 				u16[0xfffffc64] = 0x0a6e
 				u16[0xfffffc66] = 0x000e
 				u16[0xfffffc68] = 0x000a
 				u16[0xfffffc6a] = 0x0006
 			}
-			else if ((challenge_greenspheres & 0x07) == 4)	// (u32[0xffffe446] == 0x008a70 || u32[0xffffe446] == 0x2d53f6)	// S3 Stage 4
+			else if (emeraldColor == 4)	// (u32[0xffffe446] == 0x008a70 || u32[0xffffe446] == 0x2d53f6)	// S3 Stage 4
 			{
 				u16[0xfffffc64] = 0x0eae
 				u16[0xfffffc66] = 0x0e6e
 				u16[0xfffffc68] = 0x0e4e
 				u16[0xfffffc6a] = 0x0e0e
 			}
-			else if ((challenge_greenspheres & 0x07) == 5)	// (u32[0xffffe446] == 0x008a96 || u32[0xffffe446] == 0x2d541c)	// S3 Stage 5
+			else if (emeraldColor == 5)	// (u32[0xffffe446] == 0x008a96 || u32[0xffffe446] == 0x2d541c)	// S3 Stage 5
 			{
 				u16[0xfffffc64] = 0x0aee
 				u16[0xfffffc66] = 0x00ce
 				u16[0xfffffc68] = 0x008a
 				u16[0xfffffc6a] = 0x0068					
 			}
-			else if ((challenge_greenspheres & 0x07) == 6)	// (u32[0xffffe446] == 0x008abc || u32[0xffffe446] == 0x2d5442)	// S3 Stage 6
+			else if (emeraldColor == 6)	// (u32[0xffffe446] == 0x008abc || u32[0xffffe446] == 0x2d5442)	// S3 Stage 6
 			{
 				u16[0xfffffc64] = 0x00ea
 				u16[0xfffffc66] = 0x00c6
 				u16[0xfffffc68] = 0x0082
 				u16[0xfffffc6a] = 0x0060
 			}
-			else if ((challenge_greenspheres & 0x07) == 7)	// (u32[0xffffe446] == 0x008ae2 || u32[0xffffe446] == 0x2d5468)	// S3 Stage 7
+			else if (emeraldColor == 7)	// (u32[0xffffe446] == 0x008ae2 || u32[0xffffe446] == 0x2d5468)	// S3 Stage 7
 			{
 				u16[0xfffffc64] = 0x0ccc
 				u16[0xfffffc66] = 0x0aaa
 				u16[0xfffffc68] = 0x0888
 				u16[0xfffffc6a] = 0x0444
+			}
+			// Hidden stages or Speed Sphere only stages
+			else if (emeraldColor == 0)	// (u32[0xffffe446] == 0x008ae2 || u32[0xffffe446] == 0x2d5468)	// S3 Stage 7
+			{
+				u16[0xfffffc64] = 0x0846
+				u16[0xfffffc66] = 0x0604
+				u16[0xfffffc68] = 0x0402
+				u16[0xfffffc6a] = 0x0200		
 			}
 		}
 		A1 = (global.sk_bluespheres) ? 0x0ae99e : 0x0ae3ec
@@ -580,7 +610,7 @@ function void fn009b62()
 				bluespheres.stage_exit_animation = 1
 				global.game_mode = (bluespheres.minigame_mode != 0) ? 0x30 : 0x48
 
-				if (challenge_greenspheres)
+				if (challenge_greenspheres || speedSpheres)
 				{
 					S2Special.swapRingsAndSpheres()
 					bluespheres.blue_remaining = 0		// ensure the results screen sees the special stage as won
@@ -686,7 +716,12 @@ function void fn04d6b8()
 		return
 
 	if (green_spheres.active)
-		Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+	{
+		if (speedSpheres)
+			Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
+		else
+			Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+	}
 
 	#if STANDALONE
 	// Do the following only once in total, i.e. only for the right object
@@ -699,7 +734,8 @@ function void fn04d6b8()
 		}
 
 		// Render the BG logo in the right colors again
-		Renderer.drawCustomSprite("sklogo", getScreenWidth() / 2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
+		u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
+		Renderer.drawCustomSprite(sklogo, getScreenWidth() / 2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
 	}
 #endif
 
@@ -862,32 +898,37 @@ function void RenderSKLogoFullBG()
 	if (!(green_spheres.active))
 		return
 	
-	Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+	if (speedSpheres)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
+	else
+		Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x16ff)	// hide areas on far right in widescreen using a black cover-up
 
-	Renderer.drawCustomSprite("sklogo", -80, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 48, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 176, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 304, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 432, 32, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
 
-	Renderer.drawCustomSprite("sklogo", -16, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 112, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 240, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 368, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 496, 96, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, -80, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo,  48, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 176, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 304, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 432, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
 
-	Renderer.drawCustomSprite("sklogo", -80, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 48, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 176, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 304, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 432, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, -16, 96, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 112, 96, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 240, 96, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 368, 96, 0x00, 0, 0x1700)		// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 496, 96, 0x00, 0, 0x1700)		// Render our custom S&K logo
 
-	Renderer.drawCustomSprite("sklogo", -16, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 112, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 240, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 368, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
-	Renderer.drawCustomSprite("sklogo", 496, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, -80, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo,  48, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 176, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 304, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 432, 160, 0x00, 0, 0x1700)	// Render our custom S&K logo
+
+	Renderer.drawCustomSprite(sklogo, -16, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 112, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 240, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 368, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+	Renderer.drawCustomSprite(sklogo, 496, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 }
 
 
@@ -926,7 +967,7 @@ function void fn04df04()
 	--u16[A0 + 0x30]
 	if (s16[A0 + 0x30] < 0)
 	{
-		if (bluespheres.rings_remaining == 0)
+		if (bluespheres.rings_remaining == 0)		// this is still valid for Speed Spheres due to the sphere/ring value swap
 		{
 		// We comment out loading the plane mappings for the PERFECT text.
 	//	#if !STANDALONE
@@ -986,7 +1027,7 @@ function void fn04df52()
 	}
 
 	// With the plane mappings gone, we use an image in the text's place that shows if the first byte of the horizontal scroll values is appropriate.
-	if (u8[0xffffe120] == 0)
+	if (u8[0xffffe120] == 0 && bluespheres.rings_remaining == 0)
 		Renderer.drawCustomSprite("results_perfect", getScreenWidth()/2, 81, 0, 0, 0x4001)
 }
 
@@ -1094,7 +1135,7 @@ function void SpecialStage()
 	Nemesis.loadDataToVRAM(0x0ad904, 0xd000)
 	Nemesis.loadDataToVRAM(0x0adf60, 0xb4e0)
 	Nemesis.loadDataToVRAM(0x0aeed0, 0xb360)
-	if (!challenge_greenspheres)
+	if (!challenge_greenspheres && !speedSpheres)
 	{
 		Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
 		Nemesis.loadDataToVRAM(0x0ad5f4, 0xdf00)
@@ -1133,7 +1174,7 @@ function void SpecialStage()
 	bluespheres.rings_flags = 0x80
 	bluespheres.current_gamespeed = 0x1000	// usually 0x1000
 	bluespheres.speedup_countdown = BlueSpheres.useGeneratedStages() ? 2700 : 1800
-	if (challenge_greenspheres)
+	if (challenge_greenspheres || speedSpheres)
 		bluespheres.speedup_countdown = 1
 	camera.foreground.x.u16 = 0
 	camera.foreground.y.u16 = 0
@@ -1298,7 +1339,7 @@ function void SpecialStage()
 //# address-hook(0x008df8) end(0x008e2a)
 function void fn008df8()
 {
-	if (!challenge_greenspheres)
+	if (!challenge_greenspheres && !speedSpheres)
 		base.fn008df8()
 }
 
@@ -1319,12 +1360,12 @@ function void fn00903e()
 	if (showTimeGainTarget)
 		showTimeGainTarget--
 
-	if (challenge_greenspheres && !BS_remainingTime && !bluespheres.stage_exit_animation)
+	if ((challenge_greenspheres || speedSpheres) && !BS_remainingTime && !bluespheres.stage_exit_animation)
 	{
 		// Game over
 		bluespheres.stage_exit_animation = 1
 		global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
-		if (challenge_greenspheres)
+		if (challenge_greenspheres || speedSpheres)
 		{
 			S2Special.swapRingsAndSpheres()
 			bluespheres.blue_remaining = 1		// do not let the results screen believe the stage was won
@@ -1344,17 +1385,17 @@ function void fn00903e()
 		{
 			// Increase speed (up to four times)
 			bluespheres.speedup_countdown = BlueSpheres.useGeneratedStages() ? 2700 : 1800
-			if (challenge_greenspheres)
+			if (challenge_greenspheres || speedSpheres)
 				bluespheres.speedup_countdown = 1
 			if (bluespheres.current_gamespeed < 0x2000)
 			{
-				if (challenge_greenspheres && bluespheres.started_running)	// speedup by 1.5 per frame, rounded down, achieving full speed in about 45.5 seconds
+				if ((challenge_greenspheres || speedSpheres) && bluespheres.started_running)	// speedup by 1.5 per frame, rounded down, achieving full speed in about 45.5 seconds
 				{
 					bluespheres.current_gamespeed++
 					if (level.framecounter.low & 0x01 && bluespheres.current_gamespeed < 0x2000)
 						bluespheres.current_gamespeed++
 				}
-				else if (!challenge_greenspheres)
+				else if (!challenge_greenspheres && !speedSpheres)
 				{
 					bluespheres.current_gamespeed += 0x400
 				}
@@ -1461,7 +1502,7 @@ function void fn00903e()
 	fn0091a2()
 
 	u32 backupA1 = A1
-	if (challenge_greenspheres && allocDynamicObjectStd() && timeBonusThisFrame)
+	if ((challenge_greenspheres || speedSpheres) && allocDynamicObjectStd() && timeBonusThisFrame)
 	{
 		objA1.update_address = 0x009040
 		objA1.position.x.u16 = getScreenWidth() / 2 + 28
@@ -1572,7 +1613,7 @@ function void fn04ceb6()
 function bool BlueSpheres.useGeneratedStages()
 {
 #if STANDALONE
-	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || challenge_greenspheres) && !original_mode)
+	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || challenge_greenspheres || speedSpheres) && !original_mode)
 		return true
 #endif
 	if (original_mode)
@@ -1595,10 +1636,14 @@ function void fn0085b0()
 		Renderer.setScreenSize(screen_width, 224)
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
-	if (challenge_greenspheres)
+	if (challenge_greenspheres || speedSpheres)
 	{
-		useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
-		BS_remainingTime = S2Special.BonusTime[challenge_greenspheres * 3 - 3] * 60
+		BS_remainingTime = 15 * 60
+		if (challenge_greenspheres)
+		{
+			useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
+			BS_remainingTime = S2Special.BonusTime[challenge_greenspheres * 3 - 3] * 60
+		}
 		timeBonusThisFrame = 0
 		bluespheres.blue_collected = 0
 		showTimeGain = 0
@@ -1721,7 +1766,7 @@ function void fn0085b0()
 		else
 		{
 			System.loadExternalRawData("GreenSphereGame", KosinskiRawdataBuffer)	// copy green sphere quarter layouts to shared memory (seems to be a length of 0x22b8)
-			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
+			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)					// decompress them
 		}
 
 		zeroMemory(0xfffff000, 0x600)
@@ -1777,6 +1822,7 @@ function void fn0085b0()
 		}
 
 		bluespheres.rings_remaining = 0
+		bluespheres.rings_total = 0
 		u16[0xffffffac] = 0
 
 		// To build the generated stage, cycle through 4 quarters that get selected individually
@@ -1784,6 +1830,7 @@ function void fn0085b0()
 		{
 			u16 type = u8[0xffffffa2 + quarter] & 0x7f
 			bluespheres.rings_remaining += u8[0xffff0000 + type]
+			bluespheres.rings_total += u8[0xffff0000 + type]
 			u16[0xffffffac] += u8[0xffff0080 + type]				// Affects the difficulty (stored in upper byte)
 
 			A2 = 0xffff0100 + (type << 8)
@@ -1810,7 +1857,9 @@ function void fn0085b0()
 		if (bluespheres.minigame_mode)			// get palette for normal Green Sphere stages
 		{
 			A1 = u32[0x0088ba + (u8[0xffffffa4] & 0x07) * 0x10]
-			if (u8[0xffffffa4] & 0x08)
+			if (speedSpheres && palette_set >= 2)
+				A1 += 0x2cc986		// offset to Sonic 2 stage palettes
+			if ((u8[0xffffffa4] & 0x08) && !speedSpheres)		// shift to Super Emerald stage palettes (not yet designed for Sonic 2 stages)
 			{
 				A1 += 0x0130
 			}
@@ -1835,7 +1884,7 @@ function void fn0085b0()
 
 
 		// new if statement to switch to new Special Stage palette offset
-		if (palette_set >= 2 && !original_mode && green_spheres.active && !challenge_greenspheres)
+		if (palette_set >= 2 && !original_mode && green_spheres.active && !challenge_greenspheres && !speedSpheres)
 			A1 += 0x2cb80e	// distance between old and new offsets
 	}
 
@@ -2154,7 +2203,7 @@ function void fn00972e()
 			// Game over
 			bluespheres.stage_exit_animation = 1
 			global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
-			if (challenge_greenspheres)
+			if (challenge_greenspheres || speedSpheres)
 			{
 				S2Special.swapRingsAndSpheres()
 				bluespheres.blue_remaining = 1		// do not let the results screen believe the stage was won
@@ -2224,7 +2273,7 @@ function void fn00972e()
 			if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 3])
 			{
 				bluespheres.current_gamespeed = 0x1000
-				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 1] * 60
+				BS_remainingTime += S2Special.BonusTime[challenge_greenspheres * 3 - 2] * 60
 				timeBonusThisFrame += S2Special.BonusTime[challenge_greenspheres * 3 - 2] * 60
 				showTimeGainTarget = 180
 				playSound(0x63)
@@ -2242,12 +2291,35 @@ function void fn00972e()
 				bluespheres.stage_exit_state = 1
 			}
 		}
+		else if (speedSpheres)
+		{
+			if (bluespheres.rings_collected == (bluespheres.rings_total * 25 / 100))
+			{
+				bluespheres.current_gamespeed = 0x1000
+				BS_remainingTime += 15 * 60
+				timeBonusThisFrame += 15 * 60
+				showTimeGainTarget = 180
+				playSound(0x63)
+			}
+			else if (bluespheres.rings_collected == (bluespheres.rings_total * 55 / 100))
+			{
+				bluespheres.current_gamespeed = 0x1000
+				BS_remainingTime += 15 * 60
+				timeBonusThisFrame += 15 * 60
+				showTimeGainTarget = 180
+				playSound(0x63)
+			}
+			else if (bluespheres.rings_collected == (bluespheres.rings_total * 85 / 100))
+			{
+				bluespheres.stage_exit_state = 1
+			}
+		}
 		bluespheres.rings_flags |= 0x80
 
 		u8 soundId = 0x33
 		if (bluespheres.minigame_mode == 0)
 		{
-			if (bluespheres.rings_collected >= 50 && !challenge_greenspheres && (bluespheres.rings_flags & 0x01) == 0)
+			if (bluespheres.rings_collected >= 50 && !challenge_greenspheres && !speedSpheres && (bluespheres.rings_flags & 0x01) == 0)
 			{
 				bluespheres.rings_flags |= 0x01
 				++continues_counter
@@ -2545,14 +2617,15 @@ function void BlueSpheres.OnBlueSphereCollected()
 
 	// Tie continues to spheres in Sonic 2 special stages instead of to rings. We need all spheres for a continue. (Commented version: we need at least half of the total spheres for a continue.)
 	u16 continueSpheres = bluespheres.blue_total	// (bluespheres.blue_total & 0x01) ? (bluespheres.blue_total + 1)/2 : bluespheres.blue_total/2
-	if (bluespheres.blue_collected >= continueSpheres && challenge_greenspheres && (bluespheres.rings_flags & 0x01) == 0)
+	if (bluespheres.blue_collected >= continueSpheres && (challenge_greenspheres || speedSpheres) && (bluespheres.rings_flags & 0x01) == 0)
 	{
 		bluespheres.rings_flags |= 0x01
-		++continues_counter
+		if (!speedSpheres)
+			++continues_counter
 		// Uncomment to reintroduce Perfect sound if conditions for continue and perfect are not the same
-//		if (bluespheres.blue_remaining == 0)
-//			Standalone.playAudio(0x68)	// Perfect sound // Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
-//		else
+		if (speedSpheres)	//		if (bluespheres.blue_remaining == 0)
+			Standalone.playAudio(0x68)	// Perfect sound // Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
+		else
 			Standalone.playAudio(0xac)	// Continue sound // Same as above.
 
 	#if STANDALONE
@@ -2564,7 +2637,7 @@ function void BlueSpheres.OnBlueSphereCollected()
 		return
 	}
 
-	if (bluespheres.blue_remaining == 0 && !challenge_greenspheres)
+	if (bluespheres.blue_remaining == 0 && !challenge_greenspheres && !speedSpheres)
 	{
 		bluespheres.stage_exit_state = 1
 		if (bluespheres.hitting_bumper != 0)
@@ -3090,7 +3163,7 @@ function void BlueSpheres.renderCustomSpheres()
 */
 
 	// Draw the HUD in Sonic 2 special stages
-	if (challenge_greenspheres)
+	if (challenge_greenspheres || speedSpheres)
 	{
 		// debugLog(stringformat("%d.%02d", BS_remainingTime / 60, ((BS_remainingTime % 60) * 99 + 30) / 59))
 		
@@ -3099,9 +3172,9 @@ function void BlueSpheres.renderCustomSpheres()
 		u16 spheresToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.rings_collected : bluespheres.blue_collected
 
 		// Draw "GET X RINGS" messages
-		u16 ringTargetFirst = S2Special.RingTargets[challenge_greenspheres * 3 - 3]
-		u16 ringTargetSecond = S2Special.RingTargets[challenge_greenspheres * 3 - 2]
-		u16 ringTargetThird = S2Special.RingTargets[challenge_greenspheres * 3 - 1]
+		u16 ringTargetFirst = (speedSpheres) ? (bluespheres.rings_total * 25 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 3]
+		u16 ringTargetSecond = (speedSpheres) ? (bluespheres.rings_total * 55 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 2]
+		u16 ringTargetThird = (speedSpheres) ? (bluespheres.rings_total * 85 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 1]
 		u16 ringTargetCurrent = ringTargetFirst
 		if (ringsToDisplay >= ringTargetSecond)
 			ringTargetCurrent = ringTargetThird
@@ -3116,7 +3189,12 @@ function void BlueSpheres.renderCustomSpheres()
 		
 		if (BS_displayedTime < 180 || showTimeGainTarget)	// normal duration of GET BLUE SPHERES message not reached or the previous ring target was just reached
 		{
-			if (ringTargetCurrent < 100)
+			if (ringTargetCurrent < 10)
+			{
+				Renderer.drawCustomSprite("sonic2_getXrings", px_ringtarget, py_ringtarget, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, alpha)		// single-digit ring target
+				px_ringtarget -= 4
+			}
+			else if (ringTargetCurrent < 100)
 				Renderer.drawCustomSprite("sonic2_getXXrings", px_ringtarget, py_ringtarget, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, alpha)	// two-digit ring target
 			else
 			{
@@ -3215,7 +3293,9 @@ function void BlueSpheres.renderCustomSpheres()
 			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini_yellow", px_ringstext + 48, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
 		px_ringtarget = px_ringstext + 71	// this aligns the rightmost digit, not the leftmost. Use 95 instead of 71 if using RINGS text instead of a ring icon
-		if (ringTargetCurrent < 100)
+		if (ringTargetCurrent < 10)
+			px_ringtarget -= 16
+		else if (ringTargetCurrent < 100)
 			px_ringtarget -= 8
 		for (u32 value = ringTargetCurrent;;)
 		{
@@ -3229,6 +3309,14 @@ function void BlueSpheres.renderCustomSpheres()
 			if (value == 0)
 				break
 		}
+
+		// Draw emblems
+		if (ringsToDisplay >= ringTargetFirst)
+			Renderer.drawCustomSprite("sonic2_emblem", px_ringstext, py_rings + 16, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		if (ringsToDisplay >= ringTargetSecond)
+			Renderer.drawCustomSprite("sonic2_emblem", px_ringstext + 16, py_rings + 16, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		if (ringsToDisplay >= ringTargetThird)
+			Renderer.drawCustomSprite("sonic2_emblem", px_ringstext + 32, py_rings + 16, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
 		// Draw the sphere counter
 		s16 px_spheres = getScreenWidth() - px_ringstext - 15	// this aligns the rightmost digits for current and target, not the leftmost
@@ -3257,7 +3345,9 @@ function void BlueSpheres.renderCustomSpheres()
 			Renderer.drawCustomSprite("sonic2_specialdigit_slash_mini_yellow", px_spheresOrig - 9, py_rings + 4, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
 		s16 px_spheretarget = px_spheresOrig + 14
-		if (bluespheres.blue_total < 100)
+		if (bluespheres.blue_total < 10)
+			px_spheretarget -= 16
+		else if (bluespheres.blue_total < 100)
 			px_spheretarget -= 8
 		for (u32 value = bluespheres.blue_total;;)
 		{
@@ -3531,7 +3621,7 @@ function void BlueSpheres.replacePlaneRendering()
 	Renderer.enableDefaultPlane(3, false)
 
 	// Manually render the HUD parts of this plane (blue spheres and rings counter)
-	if (!challenge_greenspheres)
+	if (!challenge_greenspheres && !speedSpheres)
 	{
 		Renderer.setupPlane(0, 0, 160, 32, 0x11, 3, 0x2f00)		// 0, 0, 160 in older versions of AIR and 0, 0, 120 in new versions
 		Renderer.setupPlane(getScreenWidth()-160, 0, 160, 32, 0x11, 3, 0x2f00)	// -160, 0, 160 in older versions of AIR and -120, 0, -120 in new versions.
