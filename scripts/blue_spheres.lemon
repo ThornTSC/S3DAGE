@@ -1638,7 +1638,7 @@ function void fn0085b0()
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 	if (challenge_greenspheres || speedSpheres)
 	{
-		BS_remainingTime = 15 * 60
+		BS_remainingTime = 20 * 60
 		if (challenge_greenspheres)
 		{
 			useSKLayouts = ((challenge_greenspheres & 0x0f) > 8)
