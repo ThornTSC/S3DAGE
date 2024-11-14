@@ -268,7 +268,10 @@ function void discordRPC.main()
 
 function void discordRPC.greenSphere()
 {
-	Game.setDiscordState(stringformat("Green Sphere Level %d", u32[0xffffffa6] + 1))
+	if (speedSpheres)
+		Game.setDiscordState(stringformat("Speed Sphere Level %d", u32[0xffffffa6] + 1))
+	else
+		Game.setDiscordState(stringformat("Green Sphere Level %d", u32[0xffffffa6] + 1))
 	Game.setDiscordLargeImage("gamemode_bluesphere")
 	if ((global.game_mode & 0x7f) == 0x34)
 		discordRPC.setCharacterImage()
