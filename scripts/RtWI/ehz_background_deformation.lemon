@@ -155,6 +155,8 @@ function void UpdateBackgroundScrolling.EHZ()
 	// Sky
 	s64 parallaxShift = -(camera.position.x.u16 * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
 	s16 yShift = camera.position.y.u16 / 50 - 8							// 50 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point.
+	if (palette_set < 2)
+		yShift = 0
 	Renderer.drawCustomSprite("ehz_background_sky_extra", parallaxShift, -16 - yShift, 0, 0, 0x1100)
 	Renderer.drawCustomSprite("ehz_background_sky", parallaxShift, 0 - yShift, 0, 0, 0x1100)
 
