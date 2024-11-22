@@ -1872,9 +1872,18 @@ function void fn0085b0()
 				A1 += 0x2cc986
 				// Note there is currently no palette change for S&K layouts.
 			}
-			else
+			else if (challenge_greenspheres)
 			{
 				A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]	// kept separate from above in case of future alterations
+				if (useSKLayouts)
+				{
+					A1 += 0x0130
+				}
+			}
+			else
+			{
+				// Find which palette to use
+				A1 = u32[0x0088ba + global.next_bluespheres * 0x10]
 				if (useSKLayouts)
 				{
 					A1 += 0x0130
