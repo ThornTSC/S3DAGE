@@ -1900,11 +1900,11 @@ function void customMenu.mainLogicLoop.main()
 	else if (selectedMenuOption.main == 4 && (unlock_flags & 0x0001))
 	{
 		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 108 - arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
-		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 186 + arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 182 + arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
 		if (selectedGreenSphereType == 0)
-			Renderer.drawCustomSprite("text_option_classic", getScreenExtend() - 40 + option_x + 122, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+			Renderer.drawCustomSprite("text_option_normal", getScreenExtend() - 40 + option_x + 122, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
 		else
-			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 128, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 126, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
 	
 	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)

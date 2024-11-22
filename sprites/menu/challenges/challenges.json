@@ -6,6 +6,7 @@
 	"leftarrow_large":  { "File": "leftarrow_large.png", "Center": "7,14" },
 	"rightarrow_large":  { "File": "rightarrow_large.png", "Center": "7,14" },
 	"text_option_NG":  { "File": "text_option_NG.png", "Center": "43,8" },
+	"text_option_normal":  { "File": "text_option_NG.png", "Rect": "0,0,47,16" },
 	"text_option_TA":  { "File": "text_option_TA.png", "Center": "42,8" },
 	"text_option_TST":  { "File": "text_option_TST.png", "Center": "60,8" },
 	"leftarrow_medium":  { "File": "leftarrow_medium.png", "Center": "4,8" },
@@ -23,7 +24,7 @@
 	// "text_gametype":  { "File": "text_gametype.png", "Center": "39,4" },
 	"text_musictype":  { "File": "text_musictype.png", "Center": "43,4" },		// off center to align with text_gametype
 	"text_option_revisited":  { "File": "text_option_revisited.png", "Center": "32,4" },	
-	"text_option_classic":  { "File": "text_option_classic.png", "Center": "25,4" },
+	"text_option_classic_small":  { "File": "text_option_classic.png", "Center": "25,4" },
 	"text_option_1player":  { "File": "text_option_1player.png", "Center": "30,4" },	// off center to align with selection arrows
 	"text_option_2player":  { "File": "text_option_2player.png", "Center": "32,4" },
 	"text_sidekick":  { "File": "text_sidekick.png", "Center": "38,4" },
