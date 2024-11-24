@@ -703,10 +703,16 @@ function void Credits.DAGE()
 		
 		Renderer.drawCustomSprite("sonic3air_logo", credits.text.center.x, 28, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, alpha.logo)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line - line/2, "A big thank you to all", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line/2, "supporters of this project", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 5*line, "Special Thanks", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 4*line, "All contributors to the", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 3*line, "Sonic the Hedgehog 3 and", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 2*line, "Sonic & Knuckles disassembly", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line + line/2, "YOU ARE THE BEST", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line, "A big thank you to all", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line, "supporters of this project", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 5*line, "YOU ARE THE BEST", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
 	}
 	else if (credits.screen.current == 18)	// start of Sonic 3 & Knuckles credits
 	{
