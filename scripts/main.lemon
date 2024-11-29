@@ -4348,7 +4348,71 @@ function void fn02438a()
 	}
 }
 
-// Function taken from objects\09_soz\soz_pushswitch.lemon
+// Functions taken from objects\09_soz\soz_pushswitch.lemon
+//# address-hook(0x0418e4) end(0x04197e)
+function void fn0418e4()
+{
+	A3 = 0xfffff7e0 + (objA0.subtype2c & 0x0f)
+	D1 = u8[A3]
+	u16[A0 + 0x36] = D1.u16
+	u8[A0 + 0x30] = u8[0xffffb000 + 0x2a]
+	u8[A0 + 0x31] = u8[0xffffb04a + 0x2a]
+
+	D1.u16 = 0x17
+	D2.u16 = 0x10
+	D3.u16 = 0x11
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	D4 = 0
+	fn0419c6()
+
+	D0.u16 = u16[A0 + 0x36]
+#if STANDALONE
+	// Avoid one-pixel-jittering of character when pushing the fully pushed switch
+	//  -> But not for the variant that is meant to be pushed by a rock; it leads to the rock not being held in place
+	if ((objA0.subtype2c & 0x80) == 0 && !original_mode)
+		++D0.u16
+#endif
+	D0.u16 >>= 2
+	if (objA0.flags2a & 0x01)
+		D0.s16 = -D0.s16
+	D0.u16 += u16[A0 + 0x44]
+	objA0.position.x.u16 = D0.u16
+
+	if (objA0.subtype2c & 0x80)
+	{
+		fn041aa8()
+	}
+
+	D1.u16 = u16[A0 + 0x36]
+	u8[A3] = D1.u8
+
+	D0.u16 = (u16[A0 + 0x44] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= 0x0280)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+
+		if (u16[A0 + 0x36] == 0)
+		{
+			UnloadObject()
+		}
+		else
+		{
+			objA0.update_address = 0x041984
+			fn041984()
+		}
+	}
+}
+
 //# address-hook(0x0419fa) end(0x041a6a)
 function void fn0419fa()
 {
@@ -4363,32 +4427,25 @@ function void fn0419fa()
 	if (((objA0.flags2a & 0x01) == 0) == sign)
 		return
 
-	#if STANDALONE
-		// Check character's orientation, is he faced away?
-		if (sign != ((u8[A1 + 0x2a] & char.flag.FACING_LEFT) != 0) && !original_mode)
-			return
-	#endif
+#if STANDALONE
+	// Check character's orientation, is he faced away?
+	if (sign != ((u8[A1 + 0x2a] & char.flag.FACING_LEFT) != 0) && !original_mode)
+		return
+#endif
 
 	if (u16[A0 + 0x36] != 0x80)
 	{
 		if (Game.getSetting(SETTING_FASTER_PUSH) && !original_mode)
 		{
 			u16[A0 + 0x36] = min(u16[A0 + 0x36] / 2 * 2 + 2, 0x80)
-			if ((u16[A0 + 0x36] % 4) == 0)
-			{
-				objA1.position.x.u16 += (sign ? -1 : 1)
-				playSound(0x69)
-			}
 		}
-		else	// This setup for Original Mode causes a visible jitter that isn't in the ROM hack, but it's functionally correct.
-		{		// The jitter is actually the switch moving one frame before the character does.
-				// Even using the AIR script directly with the STANDALONE part stripped out shows the jitter; this is likely not a DAGE bug.
+		else
 			++u16[A0 + 0x36]
+
+		if ((u16[A0 + 0x36] % 4) == 0)
+		{
 			objA1.position.x.u16 += (sign ? -1 : 1)
-			if ((u16[A0 + 0x36] % 4) == 0)
-			{
-				playSound(0x69)
-			}
+			playSound(0x69)
 		}
 	}
 
