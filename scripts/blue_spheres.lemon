@@ -1613,7 +1613,7 @@ function void fn04ceb6()
 function bool BlueSpheres.useGeneratedStages()
 {
 #if STANDALONE
-	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || challenge_greenspheres || speedSpheres) && !original_mode)
+	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || (challenge_greenspheres > 0x08 && challenge_greenspheres <= 0x10) || (challenge_greenspheres > 0x18 && challenge_greenspheres <= 0x20) || speedSpheres) && !original_mode)
 		return true
 #endif
 	if (original_mode)
@@ -1725,6 +1725,120 @@ function void fn0085b0()
 			System.loadExternalRawData("SKSS7_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
 
+		// Checks for Sonic 2 special stages (to be replaced with a stringformat function to generate the key once all 32 special stages are in place)
+		else if (challenge_greenspheres == 1)
+		{
+			System.loadExternalRawData("S2SS1", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS1", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS1", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS1", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 2)
+		{
+			System.loadExternalRawData("S2SS2", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS2", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS2", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS2", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 3)
+		{
+			System.loadExternalRawData("S2SS3", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS3", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS3", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS3", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 4)
+		{
+			System.loadExternalRawData("S2SS4", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS4", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS4", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS4", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 5)
+		{
+			System.loadExternalRawData("S2SS5", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS5", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS5", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS5", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 6)
+		{
+			System.loadExternalRawData("S2SS6", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS6", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS6", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS6", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 7)
+		{
+			System.loadExternalRawData("S2SS7", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS7", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS7", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS7", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 8)
+		{
+			System.loadExternalRawData("S2SS8", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS8", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS8", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS8", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x11)
+		{
+			System.loadExternalRawData("S2SS1K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS1K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS1K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS1K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x12)
+		{
+			System.loadExternalRawData("S2SS2K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS2K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS2K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS2K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x13)
+		{
+			System.loadExternalRawData("S2SS3K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS3K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS3K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS3K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x14)
+		{
+			System.loadExternalRawData("S2SS4K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS4K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS4K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS4K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x15)
+		{
+			System.loadExternalRawData("S2SS5K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS5K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS5K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS5K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x16)
+		{
+			System.loadExternalRawData("S2SS6K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS6K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS6K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS6K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x17)
+		{
+			System.loadExternalRawData("S2SS7K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS7K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS7K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS7K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		else if (challenge_greenspheres == 0x18)
+		{
+			System.loadExternalRawData("S2SS8K", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S2SS8K", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S2SS8K", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S2SS8K", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
 		// New if statement that activates yellow spheres instead of green spheres outside of Knux's Super Emerald Stages.
 		// 0 was used for testing green spheres being on, so make the flag 1 to disable them.
 //		if (isGeneratedStageInMainGame)
@@ -1743,6 +1857,22 @@ function void fn0085b0()
 		// new if statement to switch to new Special Stage palette offset
 		if (palette_set >= 2 && !original_mode)
 			A1 += 0x2cb80e	// distance between old and new offsets
+
+		// Get palettes for Sonic 2 special stages
+		if (challenge_greenspheres && palette_set >= 2)
+		{
+			A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]	// gets the appropriate DAGE Revisited palette	// 0x2cc986 is distance between base Sonic 3 offset and Sonic 2 offset
+			A1 += 0x2cc986
+			// Note there is currently no palette change for S&K layouts.
+		}
+		else if (challenge_greenspheres)
+		{
+			A1 = u32[0x0088ba + ((challenge_greenspheres - 1) & 0x07) * 0x10]	// kept separate from above in case of future alterations
+			if (useSKLayouts)
+			{
+				A1 += 0x0130
+			}
+		}
 	}
 	else
 	{
@@ -2049,6 +2179,10 @@ function void fn009580()
 		}
 	return
 	}
+
+	// Debug function to dump layouts
+//	if (Input.buttonDown(BUTTON_Y))
+//		debugDumpToFile("SS_layout.bin", 0xfffff100, 0x400)
 
 	// Base function starts here, with exception of not accepting control input in Original Mode until the fade-in stops
 	if (bluespheres.stage_exit_animation != 0)
@@ -2459,14 +2593,14 @@ function void S2Special.TimeBonus()
 
 constant array<u16> S2Special.RingTargets =
 {
-	20, 40, 65,		// S2 Special C-1
-	25, 50, 70,		// S2 Special C-2
-	25, 50, 80,		// S2 Special C-3
-	20, 40, 60,		// S2 Special C-4
-	40, 80, 130,	// S2 Special C-5
-	20, 40, 60,		// S2 Special C-6
-	40, 80, 120,	// S2 Special C-7
-	25, 50, 75,		// S2 Special C-Bonus
+	25, 55, 90,		// S2 Special C-1
+	25, 55, 80,		// S2 Special C-2
+	35, 75, 120,	// S2 Special C-3
+	30, 70, 120,	// S2 Special C-4
+	30, 60, 90,		// S2 Special C-5
+	30, 60, 90,		// S2 Special C-6
+	30, 60, 100,	// S2 Special C-7
+	25, 50, 80,		// S2 Special C-Bonus
 	30, 70, 100,	// S2 Special S-1
 	40, 75, 110,	// S2 Special S-2
 	25, 50, 85,		// S2 Special S-3
@@ -2475,14 +2609,14 @@ constant array<u16> S2Special.RingTargets =
 	25, 55, 85,		// S2 Special S-6
 	50, 100, 150,	// S2 Special S-7
 	35, 55, 85,		// S2 Special S-Bonus
-	45, 90, 135,	// S2 Special C-1 Hard
-	20, 40, 55,		// S2 Special C-2 Hard
-	40, 80, 120,	// S2 Special C-3 Hard
-	15, 35, 50,		// S2 Special C-4 Hard
-	50, 100, 140,	// S2 Special C-5 Hard
-	10, 25, 35,		// S2 Special C-6 Hard
-	20, 40, 60,		// S2 Special C-7 Hard
-	70, 140, 210,	// S2 Special C-Bonus Hard
+	30, 60, 90,		// S2 Special C-1 Hard
+	30, 60, 100,	// S2 Special C-2 Hard
+	35, 70, 105,	// S2 Special C-3 Hard
+	40, 90, 140,	// S2 Special C-4 Hard
+	35, 75, 115,	// S2 Special C-5 Hard
+	30, 65, 110,	// S2 Special C-6 Hard
+	45, 90, 135,	// S2 Special C-7 Hard
+	40, 80, 120,	// S2 Special C-Bonus Hard
 	15, 30, 45,		// S2 Special S-1 Hard
 	10, 25, 45,		// S2 Special S-2 Hard
 	20, 35, 55,		// S2 Special S-3 Hard
@@ -2495,14 +2629,14 @@ constant array<u16> S2Special.RingTargets =
 
 constant array<u8> S2Special.BonusTime = 
 {
-	25, 20, 15,		// S2 Special C-1
-	25, 10, 10,		// S2 Special C-2
-	30, 15, 15,		// S2 Special C-3
-	25, 10, 10,		// S2 Special C-4
+	20, 15, 15,		// S2 Special C-1
+	20, 15, 15,		// S2 Special C-2
+	20, 15, 15,		// S2 Special C-3
+	20, 15, 15,		// S2 Special C-4
 	20, 15, 15,		// S2 Special C-5
-	10, 10, 10,		// S2 Special C-6
-	15, 10, 10,		// S2 Special C-7
-	25, 20, 15,		// S2 Special C-Bonus
+	20, 15, 15,		// S2 Special C-6
+	20, 15, 15,		// S2 Special C-7
+	20, 15, 15,		// S2 Special C-Bonus
 	15, 15, 10,		// S2 Special S-1
 	20, 10, 10,		// S2 Special S-2
 	20, 15, 15,		// S2 Special S-3
@@ -2511,14 +2645,14 @@ constant array<u8> S2Special.BonusTime =
 	20, 15, 10,		// S2 Special S-6
 	15, 10, 10,		// S2 Special S-7
 	10, 10, 10,		// S2 Special S-Bonus
-	15, 15, 10,		// S2 Special C-1 Hard
-	10, 10, 10,		// S2 Special C-2 Hard
-	15, 15, 15,		// S2 Special C-3 Hard
-	20, 15, 10,		// S2 Special C-4 Hard
+	20, 15, 15,		// S2 Special C-1 Hard
+	20, 15, 15,		// S2 Special C-2 Hard
+	20, 15, 15,		// S2 Special C-3 Hard
+	20, 15, 15,		// S2 Special C-4 Hard
 	20, 15, 15,		// S2 Special C-5 Hard
-	15, 10, 10,		// S2 Special C-6 Hard
-	15, 15, 10,		// S2 Special C-7 Hard
-	10, 10, 10,		// S2 Special C-Bonus Hard
+	20, 15, 15,		// S2 Special C-6 Hard
+	20, 15, 15,		// S2 Special C-7 Hard
+	20, 15, 15,		// S2 Special C-Bonus Hard
 	25, 20, 15,		// S2 Special S-1 Hard
 	20, 15, 15,		// S2 Special S-2 Hard
 	10, 15, 15,		// S2 Special S-3 Hard
@@ -3334,7 +3468,10 @@ function void BlueSpheres.renderCustomSpheres()
 		s16 px_spheresOrig = px_spheres
 		s16 py_spheres = py_rings
 
-		Renderer.drawCustomSprite("sonic2_spheresicon", px_spheresOrig - 57, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		if (challenge_greenspheres > 0x10 || speedSpheres)
+			Renderer.drawCustomSprite("sonic2_spheresicon", px_spheresOrig - 57, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		else
+			Renderer.drawCustomSprite("sonic2_bluesphereicon", px_spheresOrig - 57, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
 		for (u32 value = spheresToDisplay;;)
 		{

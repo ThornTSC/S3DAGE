@@ -66,6 +66,24 @@
   "SKSS5_Orig":  { "File": "SKSS5_Orig.bin" },
   "SKSS7_Orig":  { "File": "SKSS7_Orig.bin" },
 
+  // Sonic 2 special stage layouts
+  "S2SS1":  { "File": "S2SS1.bin" },
+  "S2SS2":  { "File": "S2SS2.bin" },
+  "S2SS3":  { "File": "S2SS3.bin" },
+  "S2SS4":  { "File": "S2SS4.bin" },
+  "S2SS5":  { "File": "S2SS5.bin" },
+  "S2SS6":  { "File": "S2SS6.bin" },
+  "S2SS7":  { "File": "S2SS7.bin" },
+  "S2SS8":  { "File": "S2SS8.bin" },
+  "S2SS1K":  { "File": "S2SS1K.bin" },
+  "S2SS2K":  { "File": "S2SS2K.bin" },
+  "S2SS3K":  { "File": "S2SS3K.bin" },
+  "S2SS4K":  { "File": "S2SS4K.bin" },
+  "S2SS5K":  { "File": "S2SS5K.bin" },
+  "S2SS6K":  { "File": "S2SS6K.bin" },
+  "S2SS7K":  { "File": "S2SS7K.bin" },
+  "S2SS8K":  { "File": "S2SS8K.bin" },
+
   // Green Sphere game quarter layouts
   "GreenSphereGame":  { "File": "SKSS2.bin" },
 
