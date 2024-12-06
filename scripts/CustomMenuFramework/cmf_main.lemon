@@ -347,7 +347,7 @@ function void customMenu.mainLogicLoop()
 					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2 - 125, getScreenHeight()/2 + 32 + (13 * 3) - 6, "Return from special stages with no rings or shields.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 				}
 				else
-					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with new routes\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight()/2 + 32, "Play at a higher difficulty level with more Badniks\nand harder special stages.", 0xffffffff, 2, 0, 0xfff1, 0, 1)
 			//	if (menuReady == true)
 			//	{
 					if ((control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK)))
