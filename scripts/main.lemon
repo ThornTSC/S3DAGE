@@ -18087,6 +18087,21 @@ function void CutsceneKnuckles.loadPalette()
 
 
 
+
+// Implement a fix for versions v24.06.18.0 through v24.12.05.0 to make the MHZ2 Knuckles cutscene switch animate properly
+// Function taken from level\07_mhz\mhz2_knuckles_cutscene.lemon
+//# address-hook(0x063308) end(0x06331e)
+function void fn063308()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	bool leverDown = (u8[A1 + 0x22] == 2)
+	objA0.animation.sprite = leverDown ? 1 : 0
+	fn084920()		// Child.DrawSprite() in newest A.I.R. versions, but not in stable versions v24.02.02.0 or .1
+}
+
+
+
+
 function void MHZ2_CustomSprites()
 {
 	if (rain_intensity && palette_set >= 2)	// is weather enabled? All these checks do not need the palette_set variable checked, as original palette users are already sent to the base function
@@ -18108,12 +18123,12 @@ function void MHZ2_CustomSprites()
 			D0.u8 = ((level.framecounter.low + (camera.position.x.u16/4)) & 0x3F) // * 2	// rain is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
 			D1.u8 = ((level.framecounter.low - (camera.position.y.u16/8)) & 0x7F) // * 2	// rain is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
 			{
-			if (rain_intensity == 1)
-				Renderer.drawCustomSprite("snow0_light", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
-			else if (rain_intensity == 2)
-				Renderer.drawCustomSprite("snow0", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
-			else
-				Renderer.drawCustomSprite("snow0_heavy", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+				if (rain_intensity == 1)
+					Renderer.drawCustomSprite("snow0_light", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+				else if (rain_intensity == 2)
+					Renderer.drawCustomSprite("snow0", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+				else
+					Renderer.drawCustomSprite("snow0_heavy", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
 			}																								// Different values for the first nybble make the rain render above low plane foreground and above sprites,
 		}																									// as stated in the Oxygen handbook.
 		#endif
