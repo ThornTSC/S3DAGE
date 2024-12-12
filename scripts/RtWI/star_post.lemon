@@ -84,7 +84,7 @@ function void fn02d47e()
 				{
 					// Slot machine (Original Mode), Chrome Gadget bonus stage (Revisited Mode)
 					D1.u16 = 0x1500
-					if (!original_mode && !u8[0xffffe654])
+					if (!original_mode && !u8[0xffffe654] && !Mods.isModActive("Extra Character Slots"))
 					{
 						D1.u16 = 0x0200
 						unlock_act = 3
