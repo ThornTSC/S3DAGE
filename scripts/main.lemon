@@ -408,6 +408,10 @@ function void Game.setAchievementComplete(u32 achievementId)
 	return
 }
 
+function void Game.setSecretUnlocked(u32 secretId)
+{
+	return		// we have our own title screen cheats, and we don't want seeing DAGE Doomsday to unlock A.I.R. Doomsday
+}
 
 
 // Change A.I.R. menu palette when new palettes are active
