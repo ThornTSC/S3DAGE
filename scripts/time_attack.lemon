@@ -111,6 +111,7 @@ function void initializeMainGame()
 
 	if (!menu_initialized)
 	{
+		menu_initialized = 1
 		debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
 		marathon_timer = 0
 		time_attack = 0
@@ -746,6 +747,7 @@ function void LevelSelect()
 {
 	if (!menu_initialized)
 	{
+		menu_initialized = 1
 		debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
 		marathon_timer = 0
 		time_attack = 0
