@@ -37,6 +37,8 @@ function void CGZ_CustomSprites()
 		lapNum = 0
 	u16 px = getScreenWidth() - 56
 	u16 py = (time_attack == 3) ? 24 : 12
+	if (HUD.useMobileLivesDisplay())
+		py = getScreenHeight() - 32
 	for (u32 value = lapNum;;)
 	{
 		Renderer.drawCustomSprite(stringformat("lap_%d", value % 10), px, py, 0x00, SPRITE_FLAG_PRIO, 0xe800)
