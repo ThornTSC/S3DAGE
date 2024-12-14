@@ -74,13 +74,10 @@ function void fn02d47e()
 			{
 				global.stage_type = 2
 
-			#if STANDALONE
-				// Use previously selected bonus stage
-				u8 stage = u8[A0 + 0x48]
-			#else
-				u8 stage = Checkpoint.selectBonusStage()
-			#endif
-				if (stage == 0)
+				u8 stageChosen = u8[A0 + 0x48]	// Use previously selected bonus stage
+				if (original_mode)
+					stageChosen = Checkpoint.selectBonusStage()
+				if (stageChosen == 0)
 				{
 					// Slot machine (Original Mode), Chrome Gadget bonus stage (Revisited Mode)
 					D1.u16 = 0x1500
@@ -90,7 +87,7 @@ function void fn02d47e()
 						unlock_act = 3
 					}
 				}
-				else if (stage == 1)
+				else if (stageChosen == 1)
 				{
 					// Glowing spheres
 					D1.u16 = 0x1400
