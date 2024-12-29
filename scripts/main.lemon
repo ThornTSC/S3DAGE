@@ -97,7 +97,6 @@ global bool draw_HUD = 1
 global bool letters_marathonhud
 
 // Include other script files
-// string_display is Custom Text Display mod by ElspethThePict, allowed for other mods with credit given
 include blue_spheres
 include eggrobo
 include palettes_weather
