@@ -412,13 +412,56 @@ function void BlueSphere.setGeneratedStage(u32 number)
 {
 	if (!challenge_greenspheres || speedSpheres)
 	{
-		u8[0xffffffa2] = number & 0x7f
-		u8[0xffffffa3] = (number * 3 + 1) % 0x7f
-		u8[0xffffffa4] = (number * 5 + 2) % 0x7e
-		u8[0xffffffa5] = (number * 7 + 3) % 0x7d
+		if (number < 32)	// We ensure the first 32 stages are organized by difficulty and none share quadrants
+		{
+			System.loadExternalRawData("GreenSphereTimeAttackStages", 0xffffffa2, number * 4, 0x04, 1, 1)	// load premade quadrant configurations
+		}
+		else
+		{
+			number -= 32	// return to the "normal" stage generation rules after 32 stages.
+
+			// 15 of the premade stages can be found in the normal rotation, so remove duplicate stages.
+			// The first duplicate is Level 3858181, so players probably wouldn't ever see duplicates anyway, but we're nothing if not thorough!
+			// -1 represents the difference in displayed level number and internal value.
+			if (bluespheregame.current_stage >= 3858181 - 1)	// Level 4
+				++number
+			if (bluespheregame.current_stage >= 6356800 - 1)	// Level 10
+				++number
+			if (bluespheregame.current_stage >= 11444981 - 1)	// Level 28
+				++number
+			if (bluespheregame.current_stage >= 15597159 - 1)	// Level 27
+				++number
+			if (bluespheregame.current_stage >= 16410583 - 1)	// Level 26
+				++number
+			if (bluespheregame.current_stage >= 21574573 - 1)	// Level 22
+				++number
+			if (bluespheregame.current_stage >= 47209602 - 1)	// Level 11
+				++number
+			if (bluespheregame.current_stage >= 50483104 - 1)	// Level 9
+				++number
+			if (bluespheregame.current_stage >= 67500795 - 1)	// Level 29
+				++number
+			if (bluespheregame.current_stage >= 89610197 - 1)	// Level 12
+				++number
+			if (bluespheregame.current_stage >= 97037759 - 1)	// Level 21
+				++number
+			if (bluespheregame.current_stage >= 99282264 - 1)	// Level 23
+				++number
+			if (bluespheregame.current_stage >= 110428369 - 1)	// Level 32
+				++number
+			if (bluespheregame.current_stage >= 120366298 - 1)	// Level 19
+				++number
+			if (bluespheregame.current_stage >= 121674730 - 1)	// Level 25
+				++number
+
+			bluespheregame.stage_parts.part1 = number & 0x7f
+			bluespheregame.stage_parts.part2 = (number * 3 + 1) % 0x7f
+			bluespheregame.stage_parts.part3 = (number * 5 + 2) % 0x7e
+			bluespheregame.stage_parts.part4 = (number * 7 + 3) % 0x7d
+		}
 	}
 
-	// Code for Time Attack mode stage generation
+	// Old code for Time Attack mode stage generation. Only in place at the moment for accessing Sonic 2 special stages via level select until all stages are implemented.
 	else
 	{
 		System.loadExternalRawData("GreenSphereTimeAttackStages", 0xffffffa2, (challenge_greenspheres - 1) * 4, 0x04, 1, 1)	// load premade quadrant configurations
@@ -1946,6 +1989,8 @@ function void fn0085b0()
 		if (useGeneratedStage)
 			oddSum = (u8[0xffffffa2] + u8[0xffffffa3] + u8[0xffffffa4] + u8[0xffffffa5]) & 0x01
 		reverseStart = (oddSum && !challenge_greenspheres) | (!oddSum && challenge_greenspheres)
+		if (bluespheregame.current_stage < 32)
+			reverseStart = !reverseStart		// align the starting directions as they were in the original concept for these special stage layouts, opposite the logic used in the endless modes
 		if (reverseStart && useGeneratedStage)	// These opposite algorithms ensure Level 1 in both Challenge and normal Green Spheres starts forward-facing
 		{
 			bluespheres.direction += 0x80	// start a few stages facing the opposite direction to prevent counterclockwise movement from getting same-y
