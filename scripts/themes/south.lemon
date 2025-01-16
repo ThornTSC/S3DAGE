@@ -701,6 +701,8 @@ function bool South.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 function bool South.SpecialStageResultsContinue(s16 px, s16 py, s16 renderQueue)
 {
 	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+	if (global.game_mode == 0x48 && global.traded_emeralds)
+		prioFlag = true
 	string key = getCharacterContinueIcon(getMainCharacter())
 	Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 	return true

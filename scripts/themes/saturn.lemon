@@ -597,6 +597,8 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 function bool Saturn.SpecialStageResultsContinue(s16 px, s16 py, s16 renderQueue)
 {
 	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+	if (global.game_mode == 0x48 && global.traded_emeralds)
+		prioFlag = true
 	string key = getCharacterContinueIcon(getMainCharacter())
 	Renderer.drawCustomSprite(key, px, py + 6, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 	return true
