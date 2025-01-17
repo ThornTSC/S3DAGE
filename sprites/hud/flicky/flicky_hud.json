@@ -46,6 +46,9 @@
 	"flicky_hud_digit_7": { "File": "flicky_hud.png", "Rect": "56,107,8,16" },
 	"flicky_hud_digit_8": { "File": "flicky_hud.png", "Rect": "64,107,8,16" },
 	"flicky_hud_digit_9": { "File": "flicky_hud.png", "Rect": "72,107,8,16" },
+	"flicky_hud_plus": { "File": "flicky_hud.png","Rect": "108,123,8,16" },
+	"flicky_hud_multiply": { "File": "flicky_hud.png", "Rect": "116,123,8,16" },
+	"flicky_hud_slash": { "File": "flicky_hud.png", "Rect": "124,123,8,16" },
 
 	// Digits (level results)
 	"flicky_hud_digit_0_results": { "File": "flicky_hud.png", "Rect":  "0,187,8,16", "Center": "1,0"  },

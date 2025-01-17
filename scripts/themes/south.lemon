@@ -728,3 +728,15 @@ function bool South.GameTimeOver(s16 px, s16 py, s16 renderQueue)
 	else
 		return false
 }
+
+function void South.giantRingCounter(u16 px, u16 py, u16 renderQueue, u8 giantRingsCollected.number, u8 maxGiantRings)
+{
+	s16 y_offset = (getScreenWidth() - 400)/16	// we base the y position on TOTAL text x value, which changes with screen width at a rate of deltaY/deltaX = -1/16.
+	Renderer.drawCustomSprite("hud_giantring", px - 28, py - y_offset - 7, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+	u32 tint = (giantRingsCollected.number == maxGiantRings) ? 0xff00ffff : 0xffffffff
+	Renderer.drawCustomSprite("south_hud_multiply", px - 1, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite(stringformat("south_hud_digit_%d", giantRingsCollected.number), px + 6, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite("south_hud_slash", px + 14, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite(stringformat("south_hud_digit_%d", maxGiantRings), px + 20, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
+}

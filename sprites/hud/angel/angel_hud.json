@@ -124,6 +124,9 @@
 	"angel_smallchar_minutes": { "File": "angel_smallfont.png", "Rect": "380,0,8,8" },
 	"angel_smallchar_seconds": { "File": "angel_smallfont.png", "Rect": "388,0,8,8" },
 
+	"angel_hud_plus": { "File": "angel_minutesseconds.png","Rect": "16,0,8,12" },
+	"angel_hud_multiply": { "File": "angel_minutesseconds.png", "Rect": "24,0,8,12" },
+	"angel_hud_slash": { "File": "angel_minutesseconds.png", "Rect": "32,0,8,12" },
 
 	"angel_game":  { "File": "angel_gametimeover.png", "Rect": "0, 0,64,16", "Center": "0,0" },
 	"angel_time":  { "File": "angel_gametimeover.png", "Rect": "0,16,64,16", "Center": "0,0" },

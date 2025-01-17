@@ -43,6 +43,9 @@
 	"south_hud_digit_7": { "File": "south_hud.png", "Rect": "56,108,8,12" },
 	"south_hud_digit_8": { "File": "south_hud.png", "Rect": "64,108,8,12" },
 	"south_hud_digit_9": { "File": "south_hud.png", "Rect": "72,108,8,12" },
+	"south_hud_plus": { "File": "south_hud.png","Rect": "110,120,8,12" },
+	"south_hud_multiply": { "File": "south_hud.png", "Rect": "118,120,8,12" },
+	"south_hud_slash": { "File": "south_hud.png", "Rect": "126,120,8,12" },
 
 	// Digits (Chaos Emerald stage results)
 	"south_hud_digit_0_chaosstage": { "File": "south_hud.png", "Rect":  "0,120,8,12" },

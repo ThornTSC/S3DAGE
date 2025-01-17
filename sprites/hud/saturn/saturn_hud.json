@@ -46,6 +46,9 @@
 	"saturn_hud_digit_7": { "File": "saturn_hud.png", "Rect": "56,107,8,16", "Center": "1,0" },
 	"saturn_hud_digit_8": { "File": "saturn_hud.png", "Rect": "64,107,8,16", "Center": "1,0" },
 	"saturn_hud_digit_9": { "File": "saturn_hud.png", "Rect": "72,107,8,16", "Center": "1,0" },
+	"saturn_hud_plus": { "File": "saturn_hud.png","Rect": "108,123,8,16" },
+	"saturn_hud_multiply": { "File": "saturn_hud.png", "Rect": "116,123,8,16" },
+	"saturn_hud_slash": { "File": "saturn_hud.png", "Rect": "124,123,8,16" },
 
 	// Digits (for running out of time or zero rings, unique to Sonic Advance HUD)
 //	"hud_digit_0_red": { "File": "saturn_hud.png", "Rect":  "0,78,8,13" },

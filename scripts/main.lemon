@@ -25366,12 +25366,35 @@ function void GiantRings.displayNumberCollected(u16 px, u16 py, u16 renderQueue)
 		}
 	}
 
+	if (theme.hud == theme.saturn)
+		Saturn.giantRingCounter(px, py, renderQueue, giantRingsCollected.number, maxGiantRings)
+	else if (theme.hud == theme.flicky)
+		Flicky.giantRingCounter(px, py, renderQueue, giantRingsCollected.number, maxGiantRings)
+	else if (theme.hud == theme.south)
+		South.giantRingCounter(px, py, renderQueue, giantRingsCollected.number, maxGiantRings)
+	else if (theme.hud == theme.westside)
+		Westside.giantRingCounter(px, py, renderQueue, giantRingsCollected.number, maxGiantRings)
+	else
+	{
+		s16 y_offset = (getScreenWidth() - 400)/16	// we base the y position on TOTAL text x value, which changes with screen width at a rate of deltaY/deltaX = -1/16.
+		Renderer.drawCustomSprite("hud_giantring", px - 28, py - y_offset - 7, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+		u32 tint = (giantRingsCollected.number == maxGiantRings) ? 0xff00ffff : 0xffffffff
+		Renderer.drawCustomSprite("angel_hud_multiply", px - 1, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+		Renderer.drawCustomSprite(stringformat("hud_digit_%d", giantRingsCollected.number), px + 7, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+		Renderer.drawCustomSprite("angel_hud_slash", px + 14, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+		Renderer.drawCustomSprite(stringformat("hud_digit_%d", maxGiantRings), px + 21, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+		Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
+	}
+
+// Old method using built-in fonts instead of theme-specific PNG sprites
+/*
 	s16 y_offset = (getScreenWidth() - 400)/16	// we base the y position on TOTAL text x value, which changes with screen width at a rate of deltaY/deltaX = -1/16.
 	Renderer.drawCustomSprite("hud_giantring", px - 26, py - y_offset - 7, 0x00, SPRITE_FLAG_PRIO, renderQueue)
 	u64 giantRingsObtained = stringformat("             * %d/%d", giantRingsCollected.number, maxGiantRings)
 	u32 tint = (giantRingsCollected.number == maxGiantRings) ? 0xffff60ff : 0xffffffff
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 6, py - y_offset, giantRingsObtained, tint, 2, 0, renderQueue, 0, 1)
 	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
+*/
 }
 
 

@@ -794,3 +794,15 @@ function bool Westside.GameTimeOver(s16 px, s16 py, s16 renderQueue)	// same fon
 	else
 		return false
 }
+
+function void Westside.giantRingCounter(u16 px, u16 py, u16 renderQueue, u8 giantRingsCollected.number, u8 maxGiantRings)
+{
+	s16 y_offset = (getScreenWidth() - 400)/16	// we base the y position on TOTAL text x value, which changes with screen width at a rate of deltaY/deltaX = -1/16.
+	Renderer.drawCustomSprite("hud_giantring", px - 28, py - y_offset - 7, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+	u32 tint = (giantRingsCollected.number == maxGiantRings) ? 0xff00ffff : 0xffffffff
+	Renderer.drawCustomSprite("westside_hud_multiply", px - 2, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", giantRingsCollected.number), px + 6, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite("westside_hud_slash", px + 14, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", maxGiantRings), px + 21, py - y_offset - 2, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
+	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
+}
