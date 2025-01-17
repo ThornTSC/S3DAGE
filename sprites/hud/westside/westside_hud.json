@@ -45,7 +45,7 @@
 	"westside_hud_digit_7": { "File": "westside_hud.png", "Rect": "56,108,8,12" },
 	"westside_hud_digit_8": { "File": "westside_hud.png", "Rect": "64,108,8,12" },
 	"westside_hud_digit_9": { "File": "westside_hud.png", "Rect": "72,108,8,12" },
-	"westside_hud_plus": { "File": "westside_hud.png","Rect": "110,120,8,12" },
+	"westside_hud_plus": { "File": "westside_hud.png","Rect": "108,120,8,12" },
 	"westside_hud_multiply": { "File": "westside_hud.png", "Rect": "117,120,8,12" },
 	"westside_hud_slash": { "File": "westside_hud.png", "Rect": "125,120,8,12" },
 

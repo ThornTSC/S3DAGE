@@ -58,10 +58,35 @@ function void CGZ_CustomSprites()
 		if (!global.game.paused)
 			--u8[0xfffffff1]	// decrement timer
 		u16 currentRingBonus = CGZ.LapBonuses[min(competition_mode.current_lap.player2 - 1, 7)]
-		u16 ringX = (currentRingBonus < 10) ? -19 : -21
-		u16 textX = 9 // (currentRingBonus < 10) ? 9 : 9
-		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] + ringX, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", u16[0xffffb010] + textX, u16[0xffffb014] - 36, stringformat("+ %d", currentRingBonus), 0xffffffff, 2, 0, 0x9f01, 1, 1)
+
+		if (theme.hud == theme.saturn)
+			Saturn.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.flicky)
+			Flicky.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.south)
+			South.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.westside)
+			Westside.displayLapBonus(currentRingBonus)
+
+		else if (currentRingBonus < 10)
+		{
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010], u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+		}
+		else
+		{
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+		}
+
+	// Old method using built-in fonts instead of theme-specific PNG sprites
+		// u16 ringX = (currentRingBonus < 10) ? -19 : -21
+		// u16 textX = 9 // (currentRingBonus < 10) ? 9 : 9
+		// Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] + ringX, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", u16[0xffffb010] + textX, u16[0xffffb014] - 36, stringformat("+ %d", currentRingBonus), 0xffffffff, 2, 0, 0x9f01, 1, 1)
 	}
 }
 

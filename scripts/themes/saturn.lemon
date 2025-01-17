@@ -637,3 +637,20 @@ function void Saturn.giantRingCounter(u16 px, u16 py, u16 renderQueue, u8 giantR
 	Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", maxGiantRings), px + 23, py - y_offset - 4, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
 	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
 }
+
+function void Saturn.displayLapBonus(u16 currentRingBonus)
+{
+	if (currentRingBonus < 10)
+	{
+		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		Renderer.drawCustomSprite("saturn_hud_plus", u16[0xffffb010], u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
+	}
+	else
+	{
+		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		Renderer.drawCustomSprite("saturn_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
+		Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
+		Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
+	}
+}
