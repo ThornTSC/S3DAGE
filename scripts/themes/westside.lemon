@@ -149,6 +149,7 @@ function void Westside.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)   
 
 function void Westside.TAEndMenu()
 {
+	Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
 	if (TA_menu_selection < 3)
 	{
 		Renderer.drawCustomSprite(stringformat("westside_ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)

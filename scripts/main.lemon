@@ -57,7 +57,7 @@ global u8 air_time_p2
 global u16 medalCount
 global u8 time_attack	// Use 0 for a normal game. Use 1 for standard time attack and 2 for Time Stone Trial mode. Use 3 for Marathon and 4 for No Emeralds Marathon mode.
 define u8 time_attack_hud = u8[0x840270]	// Use 0 for left-aligned and 1 for center-aligned
-global u8 time_attack_end	// 1 when a time attack or Time Stone Trial has ended. Resets to 0 when a level loads in either of the two modes via Standalone.onLevelStart().
+global u8 time_attack_end	// 1 or more when a time attack or Time Stone Trial has ended. Resets to 0 when a level loads in either of the two modes via Standalone.onLevelStart(). Values above 1 are used for Flicky theme background fading.
 global u8 restart_timer
 global u8 exit_timer
 define u8 time_attack_hud.layout = u8[0x840271]

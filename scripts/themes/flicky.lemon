@@ -1,5 +1,13 @@
 function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
+	if (key == "flicky_hud_char_minutes")
+		key = "flicky_hud_char_colon"
+	else if (key == "flicky_hud_char_seconds")
+	{
+		key = "flicky_hud_char_decimal"
+		py += 12
+	}
+
 	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == 3) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
@@ -20,7 +28,7 @@ function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		return
 	}
 
-    u16 inputY = py
+    u16 inputY = (key == "flicky_hud_char_decimal") ? py - 12 : py
   	if ((time_attack == 1 || time_attack == 2) && py != 0x48 && !HUD.isShadowTarget(key))	// 0x48 is the height of Shadow's boost bar
 	{
         py -= 0x10
@@ -39,23 +47,27 @@ function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
     {
 		if (freeze_time >= 64)
 		{
-			if (key == "flicky_hud_char_minutes")
-				Renderer.drawCustomSprite("flicky_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
-			else if (key == "flicky_hud_char_seconds")
-				Renderer.drawCustomSprite("flicky_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
-			else if (key == "flicky_hud_char_colon")
+		//	if (key == "flicky_hud_char_minutes")
+		//		Renderer.drawCustomSprite("flicky_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+		//	else if (key == "flicky_hud_char_seconds")
+		//		Renderer.drawCustomSprite("flicky_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			if (key == "flicky_hud_char_colon")
 				Renderer.drawCustomSprite("flicky_hud_char_colon_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			else if (key == "flicky_hud_char_decimal")
+				Renderer.drawCustomSprite("flicky_hud_char_decimal_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
 			else if (key == "flicky_hud_text_time")
 				Renderer.drawCustomSprite("flicky_hud_text_time_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
 		}
 		else
 		{
-			if (key == "flicky_hud_char_minutes")
-				Renderer.drawCustomSprite("flicky_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
-			else if (key == "flicky_hud_char_seconds")
-				Renderer.drawCustomSprite("flicky_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
-			else if (key == "flicky_hud_char_colon")
+		//	if (key == "flicky_hud_char_minutes")
+		//		Renderer.drawCustomSprite("flicky_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+		//	else if (key == "flicky_hud_char_seconds")
+		//		Renderer.drawCustomSprite("flicky_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			if (key == "flicky_hud_char_colon")
 				Renderer.drawCustomSprite("flicky_hud_char_colon_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			else if (key == "flicky_hud_char_decimal")
+				Renderer.drawCustomSprite("flicky_hud_char_decimal_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
 			else if (key == "flicky_hud_text_time")
 				Renderer.drawCustomSprite("flicky_hud_text_time_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
 		}
@@ -113,16 +125,21 @@ function void Flicky.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)
     u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
 
     Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite("flicky_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite("flicky_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+//  Renderer.drawCustomSprite("flicky_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	Renderer.drawCustomSprite("flicky_hud_char_decimal", getScreenExtend() - 40 + medal_px + 0x08, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	Renderer.drawCustomSprite("flicky_hud_char_decimal", getScreenExtend() - 40 + medal_px + 0x08, medal_py + 3, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0f, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+    Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x17, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+//  Renderer.drawCustomSprite("flicky_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	Renderer.drawCustomSprite("flicky_hud_char_decimal", getScreenExtend() - 40 + medal_px + 0x1e, medal_py + 4, 0, SPRITE_FLAG_PRIO, 0xf003)
     Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
     Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
 }
 
 function void Flicky.TAEndMenu()
 {
+	u32 alpha = (12 * time_attack_end) << 24
+	Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, alpha + 0x00480000, 0x10000)
 	if (TA_menu_selection < 3)
 	{
 		Renderer.drawCustomSprite(stringformat("flicky_ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
@@ -135,6 +152,8 @@ function void Flicky.TAEndMenu()
 		Renderer.drawCustomSprite(stringformat("flicky_main_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
 		Renderer.drawCustomSprite(stringformat("flicky_air_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
+	if (time_attack_end < 16)
+		++time_attack_end
 }
 
 function void Flicky.PauseMenu_Normal()
@@ -325,6 +344,14 @@ function bool Flicky.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x0e)
     {
+		u16 startLoc = getScreenWidth() + 42			// where TOTAL text spawns
+		u16 finishLoc = getScreenWidth()/2 - 68			// where TOTAL text travels to
+		u16 totalDist = startLoc - finishLoc
+		u32 travelPercentDone = 100*(startLoc - px)/totalDist
+		u32 alpha = (travelPercentDone * 48/25) << 24
+		if (alpha > 0xc0000000)
+			alpha = 0xc0000000
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, alpha + 0x00480000, 0x10000)
         Renderer.drawCustomSprite("flicky_hud_text_time", px + 28, py, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
@@ -656,5 +683,5 @@ function void Flicky.giantRingCounter(u16 px, u16 py, u16 renderQueue, u8 giantR
 	Renderer.drawCustomSprite(stringformat("flicky_hud_digit_%d_results", giantRingsCollected.number), px + 7, py - y_offset - 4, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
 	Renderer.drawCustomSprite("flicky_hud_slash", px + 14, py - y_offset - 4, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
 	Renderer.drawCustomSprite(stringformat("flicky_hud_digit_%d_results", maxGiantRings), px + 23, py - y_offset - 4, 0x00, SPRITE_FLAG_PRIO, renderQueue, 0, tint, 0x10000)
-	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
+//	Renderer.drawCustomSprite("mgz_pillar_knuxshading", px, py - y_offset + 29, 0x00, SPRITE_FLAG_PRIO, renderQueue - 1, 0, 180)
 }

@@ -7560,7 +7560,6 @@ function void Challenge.manageEndMenu()
 		playSound(0x5b)
 	}
 
-	Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
 	if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		Flicky.TAEndMenu()
 	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
@@ -7571,12 +7570,14 @@ function void Challenge.manageEndMenu()
 		Westside.TAEndMenu()
 	else if (TA_menu_selection < 3)
 	{
+		Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
 		Renderer.drawCustomSprite(stringformat("ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 		Renderer.drawCustomSprite(stringformat("ta_select_act_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
 		Renderer.drawCustomSprite(stringformat("ta_exit_game_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 	else
 	{
+		Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
 		Renderer.drawCustomSprite(stringformat("cancel_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 		Renderer.drawCustomSprite(stringformat("main_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
 		Renderer.drawCustomSprite(stringformat("air_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)

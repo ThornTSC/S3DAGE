@@ -112,6 +112,7 @@
 
 	// Other characters for time
 	"flicky_hud_char_colon":   { "File": "flicky_hud.png", "Rect": "80,107,8,16" },
+	"flicky_hud_char_decimal":   { "File": "flicky_hud.png", "Rect": "80,110,8,5" },
 	"flicky_hud_char_minutes": { "File": "flicky_hud.png", "Rect": "88,107,8,16" },
 	"flicky_hud_char_seconds": { "File": "flicky_hud.png", "Rect": "96,107,8,16" },
 /*
@@ -141,6 +142,7 @@
 	// HUD elements for Challenges
 	"flicky_hud_text_time_chaosstage":	  { "File": "flicky_hud.png", "Rect": "0,139,31,16" },
 	"flicky_hud_char_colon_chaosstage":   { "File": "flicky_hud.png", "Rect": "80,123,8,16" },
+	"flicky_hud_char_decimal_chaosstage":   { "File": "flicky_hud.png", "Rect": "80,126,8,5" },
 	"flicky_hud_char_minutes_chaosstage": { "File": "flicky_hud.png", "Rect": "88,123,8,16" },
 	"flicky_hud_char_seconds_chaosstage": { "File": "flicky_hud.png", "Rect": "96,123,8,16" },
 
