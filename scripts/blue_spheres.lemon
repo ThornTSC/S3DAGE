@@ -3824,7 +3824,11 @@ function void BlueSpheres.replacePlaneRendering()
 
 function void BlueSpheres.renderCustomCharacterShadows()
 {
-	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !original_mode)
+	if (!(Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && System.getGlobalVariableValueByName("MFT_BS_DitherShadow"))
+	{
+		Renderer.drawSprite(getNumPlayers() < 2 ? "bluespheres_shadow_1P_dither" : "bluespheres_shadow_2P_dither", 144 + getScreenExtend(), 150, 0x00, 0, 0x3100)
+	}
+	else if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !original_mode)
 	{
 		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 143 + getScreenExtend(), 149, 0x00, 0, 0x3100)
 	}

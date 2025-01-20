@@ -4210,6 +4210,13 @@ function void Character.LandingOnGroundResetState()
 //# address-hook(0x012232) end(0x0122b8)
 function void SonicLandingBubbleBounce()
 {
+	// Check for Misc. Fixes and Tweaks Bubble Bounce options
+	if (Mods.isModActive("Misc. Fixes and Tweaks") && !original_mode)
+	{
+		if (SonicLandingBubbleBounce_MFaT() == 0)
+			return
+	}
+	
 	s16 force = (char.flags & char.flag.UNDERWATER) ? 0x400 : 0x780
 
 #if STANDALONE
@@ -4244,6 +4251,34 @@ function void SonicLandingBubbleBounce()
 
 	u8[0xffffcce8 + 0x20] = 2
 	playSound(SFX_BUBBLEBOUNCE)
+}
+
+// Misc. Fixes and Tweaks Bubble Bounce options
+function bool SonicLandingBubbleBounce_MFaT()
+{
+	if (System.getGlobalVariableValueByName("MFT_BubbleBounceCancel") >= 1)
+	{
+		u8 input_state   = control.player1.state
+
+		if (!(input_state & CONTROL_DOWN) && System.getGlobalVariableValueByName("MFT_BubbleBounceCancel") == 1)
+		{
+			return true
+		}
+		if ((input_state & CONTROL_ABC) && System.getGlobalVariableValueByName("MFT_BubbleBounceCancel") == 2)
+		{
+			return true
+		}
+		if ((input_state & CONTROL_ABC) && !(input_state & CONTROL_DOWN) && System.getGlobalVariableValueByName("MFT_BubbleBounceCancel") == 3)
+		{
+			return true
+		}
+	}
+	else
+	{
+		return true
+	}
+
+	return false
 }
 
 //# address-hook(0x00fe8e) end(0x00ff04)
@@ -9893,6 +9928,12 @@ function void fn0067ee()
 		// Hidden Palace Zone
 		u32[0xffffb172] = 0x044a0c
 	}
+
+	// Check for option from Misc. Fixes and Tweaks to leave sidekick Tails behind at the end of Hidden Palace Zone
+	if ((global.zone_act == 0x0a00 || global.zone == 0x0b || global.zone_act == 0x1700) && System.getGlobalVariableValueByName("MFT_LeaveTailsBehind") && isMainCharacter(CHARACTER_SONIC) && !original_mode)
+	{
+		u32[0xffffb04a] = 0
+	}
 }
 
 
@@ -11453,9 +11494,19 @@ function void fn01f8b4()
 	objA1.flags2a |= char.flag.IN_AIR
 	objA1.flags2a &= ~(char.flag.ROLLING | char.flag.ON_OBJECT)
 	u8[A1 + 0x2e] &= ~0x42
-	u8[A1 + 0x30] = 0
-	u8[A1 + 0x31] = 4
+	u8[A1 + 0x30] = 0		// "char.rotation.x.count"
+	u8[A1 + 0x31] = 4		// "char.rotation.x.speed"
 	objA0.flags2a &= ~bit
+
+	// Misc. Fixes and Tweaks also uses fn01f8b4() to fix the running animation being called while jumping in the tree. We do not wish to overwrite this bug fix in DAGE outside of Original Mode.
+	if ((control.player1.pressed & CONTROL_ABC) || (control.player2.pressed & CONTROL_ABC) || (control.tails.pressed & CONTROL_ABC) && !original_mode)
+	{
+		u8[A1 + 0x1e] = 0x0e
+		u8[A1 + 0x1f] = 0x07
+		objA1.state = char.state.ROLLING
+		objA1.flags2a |= char.flag.ROLLING
+		u8[A1 + 0x40] = 0x01
+	}
 }
 
 
@@ -12323,6 +12374,31 @@ function void fn061fc2()	// This function loads cutscene Knuckles in AIZ2.
 
 
 
+// Misc. Fixes and Tweaks compatibility with Original Mode: apply a fix to the direction Knuckles faces while jumping on switches in cutscenes, but not in Original Mode
+// Function taken from level\01_aiz\aiz2_post_boss_cutscene.lemon
+//# address-hook(0x06207a) end(0x06207a)
+function void fn06207a()
+{
+	if (!original_mode)
+		objA0.render_flags ^= 0x01
+	base.fn06207a()
+}
+
+// HCZ2 jump sprite orientation. Unused at the moment, but may be re-added in the future.
+// Theoretically isn't necessary because the cutscene will never exist in Original Mode, but this does ensure the fix is always in place for other modes.
+// Function taken from level\02_hcz\hcz2_knuckles_cutscene.lemon
+//# address-hook(0x062232) end(0x06223e)
+function void fn062232()
+{
+	objA0.base_state = 0x0a
+	objA0.render_flags ^= (original_mode) ? render_flag.FLIP_X : 0x00
+	fn062080()
+}
+
+// The CNZ2 cutscene seems very deliberate in having Knuckles appear to jump backwards, so neither DAGE nor MFaT apply fixes.
+
+
+
 // Remove a sidekick Tails position fix from Original Mode
 // Function taken from bosses\boss_aiz2.lemon
 //# address-hook(0x069588) end(0x0695a6)
@@ -12377,6 +12453,11 @@ function void fn065c56()
 	// "spawnSimpleChildObjects(0x084b12)" replaced by:
 	spawnSimpleChildObjects(0x084ad2, 1)		// Screen mover for the lower border
 }
+
+
+
+
+
 
 
 
@@ -12778,6 +12859,18 @@ function void fn030cf8()
 			{
 				u8[A0 + 0x34] = 0
 			}
+
+			// Misc. Fixes and Tweaks compatibility with jumping SFX/jumping in ball when escaping launcher
+			if (System.getGlobalVariableValueByName("MFT_HCZLauncher"))
+			{
+				u8[A1 + 0x1e] = 0x0e
+				u8[A1 + 0x1f] = 0x07
+				objA1.state = char.state.ROLLING
+				objA1.flags2a |= char.flag.ROLLING
+				u8[A1 + 0x40] = 0x01
+			}
+			if (System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX"))
+				playSound(SFX_JUMP)
 		}
 		return
 	}
@@ -12968,6 +13061,8 @@ function void fn032784()
 			return
 		}
 
+		if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+			playSound(SFX_JUMP)
 		u8[A1 + 0x40] = 0x01
 		u8[A1 + 0x1e] = 0x0e
 		u8[A1 + 0x1f] = 0x07
@@ -13100,6 +13195,144 @@ function void fn030f58()
 	if (global.zone_act == 0x0100 && objA0.position.x.u16 == 0x0af0 && objA0.position.y.u16 == 0x0660 && !isMainCharacter(CHARACTER_KNUCKLES))
 		objA0.flags38 = 0
 }
+
+
+
+// Add Origins sound effects to grabbing and jumping from conveyor belts
+// (Note: Origins also allows a higher jump height from conveyors. We do not implement this.)
+// Function taken from objects\02_hcz\hcz_conveyorbelt.lemon
+//# address-hook(0x031226) end(0x031458)
+function void fn031226()
+{
+	if (u8[A2] != 0)
+	{
+		if (debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT)
+		{
+			if (D1 & 0x0400)		// CONTROL_LEFT held
+			{
+				--objA1.position.x.u16
+				--u8[A2 + 0x06]
+				if (s8[A2 + 0x06] < 0)
+				{
+					u8[A2 + 0x06] = 0x07
+					u8[A2 + 0x08] += 0x10
+					u8[A2 + 0x08] &= 0x10
+				}
+			}
+
+			if (D1 & 0x0800)		// CONTROL_RIGHT held
+			{
+				++objA1.position.x.u16
+				--u8[A2 + 0x06]
+				if (s8[A2 + 0x06] < 0)
+				{
+					u8[A2 + 0x06] = 0x07
+					u8[A2 + 0x08] += 0x10
+					u8[A2 + 0x08] &= 0x10
+				}
+			}
+
+			// Check if jump button pressed
+			D1.u16 &= CONTROL_ABC
+			if (D1.u16 == 0)	// jump button not pressed
+			{
+				D0 = 0x02
+				if (objA0.flags2a & 0x01)
+				{
+					D0.s16 = -D0.s16
+				}
+				objA1.position.x.u16 += D0.u16
+				D0.u16 = objA1.position.x.u16
+				if (D0.u16 >= u16[A0 + 0x40] && D0.u16 < objA0.value42)
+				{
+					fn03145a()
+					D0 = objA1.animation.sprite
+
+					u32 backupA2 = A2
+					SetCharacterSpritePatterns()
+					A2 = backupA2
+					return
+				}
+			}
+			else	// jump button pressed
+			{
+				objA1.velocity.y = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? -0x200 : -0x500		// if Origins jump height is introduced, do so here
+				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0))
+					playSound(SFX_JUMP)
+			}
+		}
+
+		u8[A2] = 0
+		u8[A2+2] = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? 0x5a : 0x3c
+
+		objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+		objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+		objA1.state = char.state.ROLLING
+		u8[A1 + 0x27] = 0
+		objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+		objA1.flags2a &= ~char.flag.CONTROL_LOCK
+		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		u8[A1 + 0x40] = 0x01
+		return
+	}
+
+	if (u8[A2+2] != 0)
+	{
+		--u8[A2+2]
+		return
+	}
+
+	D0.u16 = objA1.position.x.u16
+	if (D0.u16 >= u16[A0 + 0x40] && D0.u16 < objA0.value42)
+	{
+		bool upperBelt = (u16[A1 + 0x1c] == 1)
+		u16 py = objA0.position.y.u16 + (upperBelt ? -0x14 : 0x14)
+
+		if (objA1.position.y.u16 > py && objA1.position.y.u16 <= py + 0x10)
+		{
+			if (debug_mode.state == 0 && u8[A1 + 0x05] < base_state.HURT && u8[A1 + 0x2e] == 0)
+			{
+				if (upperBelt)
+				{
+					objA1.position.y.u16 = objA0.position.y.u16 - 0x14
+					objA1.animation.sprite = 0x65		// Player characters' belt hanging sprite
+					u8[A2 + 0x04] = 0x80
+				}
+				else
+				{
+					if (objA1.velocity.y < 0)
+						return
+
+					objA1.animation.sprite = 0x63		// Player characters' belt hanging sprite
+					u8[A2 + 0x04] = 0
+				}
+
+				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
+					playSound(SFX_GRAB)
+
+				objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+				objA1.position.y.u16 = py
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				u8[A1 + 0x20] = 0
+				u8[A1 + 0x2e] = 3
+
+				u8[A2 + 0x06] = 0
+				u8[A2 + 0x08] = 0
+				u8[A2] = 1
+
+				D0 = objA1.animation.sprite
+
+				u32 backupA2 = A2
+				SetCharacterSpritePatterns()
+				A2 = backupA2
+			}
+		}
+	}
+}
+
+
 
 
 
@@ -13658,7 +13891,9 @@ function void fn06aeb6()
 
 	requestLoadingPatterns(0x6c)
 
-	u16[0xfffffc1e] = 0
+	// Base S3&K sets this color to black, but Origins sets it to dark grey (as does Misc. Fixes and Tweaks)
+	if (original_mode || (Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("Config_HCZ2boss_grey") == 0))
+		u16[0xfffffc1e] = 0
 
 	loadPaletteLine1(0x06bf0a)
 }

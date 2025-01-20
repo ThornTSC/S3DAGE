@@ -3147,6 +3147,12 @@ function void fn00d7ea()
 //# address-hook(0x00d7a4) end(0x00d7bc)
 function void fn00d7a4()
 {
+	if (Mods.isModActive("Misc. Fixes and Tweaks") && !original_mode)
+	{
+		base.fn00d7a4()
+		return
+	}
+
 	objA0.render_flags = render_flag.COMPOUND
 	objA0.box_size.x = 0x30
 	objA0.compound.count = 0x01
@@ -3158,10 +3164,12 @@ function void fn00d7a4()
 	if (!original_mode)
 	{
 		// Remove that red mark on his forehead
-		setVRAM(0x6e8c, 0xaaaa)
-		setVRAM(0x6e90, 0xaaaa)
-		setVRAM(0x71ac, 0xaaaa)
-		setVRAM(0x71b0, 0xaaaa)
+		// We make it white to match Origins.
+		// Origins actually has custom-drawn blue eyes for Eggman, which could be added in the future.
+		setVRAM(0x6e8c, 0xaa1a)
+		setVRAM(0x6e90, 0xaa1a)
+		setVRAM(0x71ac, 0xaa1a)
+		setVRAM(0x71b0, 0xaa1a)
 	}
 #endif
 }

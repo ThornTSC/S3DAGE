@@ -814,10 +814,43 @@ function void fn083c7c()
 //# address-hook(0x04fa4c) end(0x04fad6)
 function void fn04fa4c()
 {
-	if (palette_set < 2 || original_mode)	// do not apply the palette patch with redesigned palettes
+	if (palette_set < 2 || original_mode || global.zone == 0x0d)	// do not apply the palette patch with redesigned palettes unless we're in the outro
 	{
 		u32[0xfffffcf0] = u32[0x04fae4]
 		u32[0xfffffcf4] = u32[0x04fae8]
+	}
+
+	// Misc. Fixes and Tweaks option
+	if (System.getGlobalVariableValueByName("MFT_ST_AIZ_Consistency"))
+	{
+		if (global.zone == 0x0d)
+		{
+			u32[0xfffffcf0] = u32[0x04fae4]
+			u32[0xfffffcf4] = u32[0x04fae8]
+
+			fillMemory_u16(0xffff4990, 0x40, 0x004b)
+			fillMemory_u16(0xffff4d90, 0x40, 0x004b)
+
+			u16[0xffff3430] = 0x0402
+			fillMemory_u16(0xffff3432, 0x0c, 0x004b)
+
+			u16[0xffff343e] = 0x0002
+			fillMemory_u16(0xffff3fa0, 0x10, 0x004b)
+
+			u16[0xffff3fb4] = 0x000c
+			u16[0xffff3fb6] = 0x0406
+			u16[0xffff3fb8] = 0x004b
+			u16[0xffff3fba] = 0x004b
+
+			u16[0xffff3fbe] = 0x040a
+			u16[0xffff5820] = 0x040b
+			fillMemory_u16(0xffff5822, 0x0c, 0x004b)
+
+			u16[0xffff5834] = 0x000c
+			u16[0xffff5836] = 0x0406
+			fillMemory_u16(0xffff5838, 0x04, 0x004b)
+			return
+		}
 	}
 
 	fillMemory_u16(0xffff4c70, 0x10, 0x004b)

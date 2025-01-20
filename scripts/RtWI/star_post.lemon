@@ -67,6 +67,18 @@ function void fn02d47e()
 {
 	if (!unlock_act)
 	{
+		// Misc. Fixes and Tweaks bonus stage fade compatibility
+		if (u8[A0 + 0x29] & 0x01 && System.getGlobalVariableValueByName("MFT_BonusEntry") && !original_mode)
+		{
+			if (palette_fade.range != 0x003f)	// set to this value at start of FadeScreenToWhiteBlocking()
+			{
+				playSound(0xaf)
+				playMusic(MUSIC_CTRL_FADEOUT)
+				FadeScreenToWhiteBlocking()
+				yieldInWhiteScreen()
+			}
+		}
+
 		if (u8[A0 + 0x29] != 0)
 		{
 			// This seems to get entered once for each of the four stars -- is this intended...?
