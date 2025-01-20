@@ -24629,7 +24629,21 @@ function void fn05ac70()
 	fn05acfc()
 }
 
+//# address-hook(0x05e0f8) end(0x05e140)
+function void fn05e0f8()
+{
+	objA0.base_state = 0x02
+	objA0.mapping_offset = 0x14a8d6
+	objA0.sprite_attributes = (original_mode) ? (sprite_attribute.PRIORITY | 0x04da) : 0x04da
+	objA0.sprite_priority = 0x0180
+	objA0.animation.sprite = 0x07
+	objA0.position.x.u16 = 0x01e0 + getScreenExtend() * 2
+	objA0.position.y.u16 = 0xe0
+	objA0.velocity.x = -0x200
+	objA0.velocity.y = 0
 
+	copyMemory(0xfffffc00, 0x05cc2a, 0x20)
+}
 
 
 
