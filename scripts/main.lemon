@@ -13257,7 +13257,13 @@ function void fn031226()
 			else	// jump button pressed
 			{
 				objA1.velocity.y = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? -0x200 : -0x500		// if Origins jump height is introduced, do so here
-				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0))
+				bool dropDown = false
+				if (Input.buttonDown(BUTTON_DOWN) && !original_mode)		// CONTROL_DOWN held (cannot use D1 here because of &= operation used to check for jump buttons)
+				{
+					objA1.velocity.y = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? 0x0000 : 0x0020		// new control from Origins: down+jump to drop
+					dropDown = true
+				}
+				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0) && !dropDown)
 					playSound(SFX_JUMP)
 			}
 		}
@@ -13335,6 +13341,64 @@ function void fn031226()
 
 
 
+// Fix an original S3&K bug in which HCZ1 conveyor belts do not animate while the camera is at 0x0610 (i.e., the player is level with the water's surface)
+// Function taken from level\level_animation.lemon. The function is exclusively used to handle the HCZ1 water deformation effects.
+//# address-hook(0x02788c) end(0x02797a)
+function void fn02788c()
+{
+	D1 = u16[0xffffeee2]
+	if (D1.u16 != u16[A3])
+	{
+		u16[A3] = D1.u16
+		if (D1.u16 == 0)
+		{
+			fn02797e()
+			if (original_mode)
+				return
+		}
+
+		bool negativeD1 = (D1.s16 < 0)
+		D1.s16 = 0x60 - abs(D1.s16)
+		if (D1.s16 >= 0)
+		{
+			A4 = 0xffff7c00
+			A5 = 0x26d000 + D1.u16 * 96
+			u32 baseAddress = negativeD1 ? 0x2a6a60 : 0x2a6d60
+
+			for (u8 i = 0; i < 0x60; ++i)
+			{
+				A0 = baseAddress + u8[A5] * 4
+				u32[A4] = u32[A0]
+				u32[A4 + 0x0180] = u32[A0 + 0x0600]
+				A4 += 4
+				++A5
+			}
+
+			if (negativeD1)
+			{
+				updateSpritePattern(0xffff7c00, 0x5b80, 0x180)
+
+				if (s16[A3 + 0x02] >= 0)
+				{
+					u16[A3 + 0x02] = -1
+					fn0279ac()
+				}
+			}
+			else
+			{
+				updateSpritePattern(0xffff7c00, 0x5e80, 0x180)
+
+				if (u16[A3 + 0x02] != 0)
+				{
+					u16[A3 + 0x02] = 0
+					fn027984()
+				}
+			}
+		}
+	}
+
+	LevelTilesAnim.Default()
+}
 
 
 
