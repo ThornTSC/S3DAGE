@@ -9509,7 +9509,7 @@ function void SetupCharacterAtStartPosition()
 			}
 		}
 	#if STANDALONE
-		else if (global.zone == 0x13)
+		else if (global.zone == 0x13 && !original_mode)
 		{
 			// Gumball Machine:
 			// Do not allow for jumping in first frame
@@ -9518,7 +9518,7 @@ function void SetupCharacterAtStartPosition()
 			u8[0xffffb04a + 0x20] = char.state.STANDING
 			u8[0xffffb04a + 0x2a] |= char.flag.IN_AIR
 		}
-		else if (global.zone == 0x15)
+		else if (global.zone == 0x15)		// okay to leave in Original Mode, as getScreenExtend() returns 0 at screen width 320
 		{
 			// Slot Machine
 			D1.u16 -= getScreenExtend()
