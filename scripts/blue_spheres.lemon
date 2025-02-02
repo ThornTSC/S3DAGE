@@ -1092,8 +1092,8 @@ function void SpecialStage()
 	FadeScreenToWhiteBlocking()
 
 #if STANDALONE
-	// Add a small artificial delay here
-	u8 delayFrames = (original_mode || unlock_act) ? 112 : 12
+	// Add a small artificial delay here. 112 frames matches ROM hack / S3&K. 12 frames is pre-2025 A.I.R. 24 frames is current A.I.R.
+	u8 delayFrames = (original_mode || unlock_act) ? 112 : (time_attack >= 3) ? 12 : 24
 	for (u8 i = 0; i < delayFrames; ++i)
 		yieldInWhiteScreen()
 #else
