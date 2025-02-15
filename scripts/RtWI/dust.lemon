@@ -7,34 +7,13 @@ function void fn018d6a()
 	fn018d70()
 }
 
-
-
-// Give the drop dash a unique dust cloud
-// Function taken from objects\effects\dustcloud.lemon
-//# address-hook(0x018c94) end(0x018ca4)
-function void fn018c94()
-{
-	if (objA0.state != 2)	// Not a spin dash dust object
-	{
-		u8[A0 + 0x30] = 0	// As long as drop dash dust is the same object as other dust and water splashes, we can't render it at the same time as those other objects
-	}
-	if (u8[A0 + 0x30] && originsDropDash)
-	{
-		Dust.animateDropDash()
-		return
-	}
-	// Just update the animation and render
-	Object.animationUpdate(0x018dc0)
-	fn018d6a()
-	DrawObject()
-}
-
+// Give the drop dash a unique dust cloud 	// unique address hook of spin dash dust 0x018b3e + 2
+//# address-hook(0x018b40)
 function void Dust.animateDropDash()
 {
-	if (u8[A0 + 0x30] == 0x28 + 1)	// animation is 40 frames long
+	if (u8[A0 + 0x30] >= 0x28)	// animation is 40 frames long
 	{
-		objA0.state = 0		// reset dust object to doing/showing nothing
-		u8[A0 + 0x30] = 0
+		UnloadObject()
 		return
 	}
 

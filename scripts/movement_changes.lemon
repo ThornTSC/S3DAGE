@@ -334,7 +334,19 @@ function void releaseDropDash()
 	// Release drop dash!
 
 	// Show dust cloud
-	if (char.drown_countdown >= 12 && abs(s8(char.rotation)) < 0x1c)
+	if (originsDropDash)	//  && abs(s8(char.rotation)) < 0x1c to consider angle as in A.I.R., which Origins does not do
+	{
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = 0x018b40
+			u8[A1 + 0x20] = 0x02
+			u16[A1 + 0x10] = char.position.x.u16
+			u16[A1 + 0x14] = char.position.y.u16
+			u8[A1 + 0x23] = 0x01
+			u8[A1 + 0x2a] = char.flags & char.flag.FACING_LEFT
+		}
+	}
+	else if (char.drown_countdown >= 12 && abs(s8(char.rotation)) < 0x1c)
 	{
 		u8[A6 + 0x20] = 0x02
 		u16[A6 + 0x10] = char.position.x.u16

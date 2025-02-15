@@ -18,121 +18,116 @@
 	"sonic_origins_dropdash_f": { "File": "character_sonic_dropdash.bmp", "Rect": "32,128,32,32", "Center": "16,16" },
 
 	// Drop dash dust. We show 16 frames across multiple keys to use just one animation timer for ease of rendering.
-	// The animation timer starts at 0x01, so key numbers here align with the timer.
-	"dropdash_dust_00": { "File": "dropdash_dust.bmp", "Rect": "0,0,1,1"},	// 00 should never actually show, but is included as a fallback
+	"dropdash_dust_00": { "File": "dropdash_dust.bmp", "Rect": "0,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_01": { "File": "dropdash_dust.bmp", "Rect": "0,0,32,32", "Center": "16,12" },
+	"dropdash_dust_01": { "File": "dropdash_dust.bmp", "Rect": "32,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_02": { "File": "dropdash_dust.bmp", "Rect": "32,0,32,32", "Center": "16,12" },
+	"dropdash_dust_02": { "File": "dropdash_dust.bmp", "Rect": "64,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_03": { "File": "dropdash_dust.bmp", "Rect": "64,0,32,32", "Center": "16,12" },
+	"dropdash_dust_03": { "File": "dropdash_dust.bmp", "Rect": "96,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_04": { "File": "dropdash_dust.bmp", "Rect": "96,0,32,32", "Center": "16,12" },
-
+	"dropdash_dust_04": { "File": "dropdash_dust.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
 	"dropdash_dust_05": { "File": "dropdash_dust.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
-	"dropdash_dust_06": { "File": "dropdash_dust.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_06": { "File": "dropdash_dust.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
 	"dropdash_dust_07": { "File": "dropdash_dust.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
-	"dropdash_dust_08": { "File": "dropdash_dust.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_08": { "File": "dropdash_dust.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
 	"dropdash_dust_09": { "File": "dropdash_dust.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
-	"dropdash_dust_0a": { "File": "dropdash_dust.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_0a": { "File": "dropdash_dust.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
 	"dropdash_dust_0b": { "File": "dropdash_dust.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
-	"dropdash_dust_0c": { "File": "dropdash_dust.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_0c": { "File": "dropdash_dust.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 	"dropdash_dust_0d": { "File": "dropdash_dust.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 	"dropdash_dust_0e": { "File": "dropdash_dust.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
-	"dropdash_dust_0f": { "File": "dropdash_dust.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_0f": { "File": "dropdash_dust.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 	"dropdash_dust_10": { "File": "dropdash_dust.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 	"dropdash_dust_11": { "File": "dropdash_dust.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
-	"dropdash_dust_12": { "File": "dropdash_dust.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_12": { "File": "dropdash_dust.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 	"dropdash_dust_13": { "File": "dropdash_dust.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 	"dropdash_dust_14": { "File": "dropdash_dust.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
-	"dropdash_dust_15": { "File": "dropdash_dust.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_15": { "File": "dropdash_dust.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 	"dropdash_dust_16": { "File": "dropdash_dust.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 	"dropdash_dust_17": { "File": "dropdash_dust.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
-	"dropdash_dust_18": { "File": "dropdash_dust.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_18": { "File": "dropdash_dust.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_19": { "File": "dropdash_dust.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_1a": { "File": "dropdash_dust.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_1b": { "File": "dropdash_dust.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
-	"dropdash_dust_1c": { "File": "dropdash_dust.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_1c": { "File": "dropdash_dust.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_1d": { "File": "dropdash_dust.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_1e": { "File": "dropdash_dust.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_1f": { "File": "dropdash_dust.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
-	"dropdash_dust_20": { "File": "dropdash_dust.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_20": { "File": "dropdash_dust.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_21": { "File": "dropdash_dust.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_22": { "File": "dropdash_dust.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_23": { "File": "dropdash_dust.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
-	"dropdash_dust_24": { "File": "dropdash_dust.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_24": { "File": "dropdash_dust.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 	"dropdash_dust_25": { "File": "dropdash_dust.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 	"dropdash_dust_26": { "File": "dropdash_dust.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 	"dropdash_dust_27": { "File": "dropdash_dust.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
-	"dropdash_dust_28": { "File": "dropdash_dust.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 
 	// Sonic 2 version of drop dash dust
-	"dropdash_dust_s2_00": { "File": "dropdash_dust_s2.bmp", "Rect": "0,0,1,1"},	// 00 should never actually show, but is included as a fallback
+	"dropdash_dust_s2_00": { "File": "dropdash_dust_s2.bmp", "Rect": "0,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_s2_01": { "File": "dropdash_dust_s2.bmp", "Rect": "0,0,32,32", "Center": "16,12" },
+	"dropdash_dust_s2_01": { "File": "dropdash_dust_s2.bmp", "Rect": "32,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_s2_02": { "File": "dropdash_dust_s2.bmp", "Rect": "32,0,32,32", "Center": "16,12" },
+	"dropdash_dust_s2_02": { "File": "dropdash_dust_s2.bmp", "Rect": "64,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_s2_03": { "File": "dropdash_dust_s2.bmp", "Rect": "64,0,32,32", "Center": "16,12" },
+	"dropdash_dust_s2_03": { "File": "dropdash_dust_s2.bmp", "Rect": "96,0,32,32", "Center": "16,12" },
 
-	"dropdash_dust_s2_04": { "File": "dropdash_dust_s2.bmp", "Rect": "96,0,32,32", "Center": "16,12" },
-
+	"dropdash_dust_s2_04": { "File": "dropdash_dust_s2.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_05": { "File": "dropdash_dust_s2.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_06": { "File": "dropdash_dust_s2.bmp", "Rect": "128,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_06": { "File": "dropdash_dust_s2.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_07": { "File": "dropdash_dust_s2.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_08": { "File": "dropdash_dust_s2.bmp", "Rect": "160,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_08": { "File": "dropdash_dust_s2.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_09": { "File": "dropdash_dust_s2.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_0a": { "File": "dropdash_dust_s2.bmp", "Rect": "192,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_0a": { "File": "dropdash_dust_s2.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_0b": { "File": "dropdash_dust_s2.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_0c": { "File": "dropdash_dust_s2.bmp", "Rect": "224,0,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_0c": { "File": "dropdash_dust_s2.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_0d": { "File": "dropdash_dust_s2.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_0e": { "File": "dropdash_dust_s2.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_0f": { "File": "dropdash_dust_s2.bmp", "Rect": "0,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_0f": { "File": "dropdash_dust_s2.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_10": { "File": "dropdash_dust_s2.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_11": { "File": "dropdash_dust_s2.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_12": { "File": "dropdash_dust_s2.bmp", "Rect": "32,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_12": { "File": "dropdash_dust_s2.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_13": { "File": "dropdash_dust_s2.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_14": { "File": "dropdash_dust_s2.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_15": { "File": "dropdash_dust_s2.bmp", "Rect": "64,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_15": { "File": "dropdash_dust_s2.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_16": { "File": "dropdash_dust_s2.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_17": { "File": "dropdash_dust_s2.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_18": { "File": "dropdash_dust_s2.bmp", "Rect": "96,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_18": { "File": "dropdash_dust_s2.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_19": { "File": "dropdash_dust_s2.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_1a": { "File": "dropdash_dust_s2.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_1b": { "File": "dropdash_dust_s2.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_1c": { "File": "dropdash_dust_s2.bmp", "Rect": "128,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_1c": { "File": "dropdash_dust_s2.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_1d": { "File": "dropdash_dust_s2.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_1e": { "File": "dropdash_dust_s2.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_1f": { "File": "dropdash_dust_s2.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_20": { "File": "dropdash_dust_s2.bmp", "Rect": "160,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_20": { "File": "dropdash_dust_s2.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_21": { "File": "dropdash_dust_s2.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_22": { "File": "dropdash_dust_s2.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_23": { "File": "dropdash_dust_s2.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_24": { "File": "dropdash_dust_s2.bmp", "Rect": "192,32,32,32", "Center": "16,12" },
 
+	"dropdash_dust_s2_24": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_25": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
 	"dropdash_dust_s2_26": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_27": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" },
-	"dropdash_dust_s2_28": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" }
+	"dropdash_dust_s2_27": { "File": "dropdash_dust_s2.bmp", "Rect": "224,32,32,32", "Center": "16,12" }
 }
