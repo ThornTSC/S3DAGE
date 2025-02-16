@@ -4337,7 +4337,29 @@ function void Character.CheckCollisionsWithDynamicObjects()
 
 
 // Disable faster pushing in Original Mode.
-// Function taken from objects\level\rocks.lemon
+// Functions taken from objects\level\rocks.lemon
+//# address-hook(0x0200a2) end(0x0200ca)
+function void fn0200a2()
+{
+	D3.u8 = objA0.flags2a & (object.flag.P1_PUSHING | object.flag.P2_PUSHING)
+	if (D3.u8 != 0)
+	{
+		D2.u16 = objA0.position.x.u16
+
+		A1 = 0xffffb000
+		D0.u8 = objA0.value3a
+		D6 = 5		// object.flag.P1_PUSHING
+		fn0200cc()
+
+		A1 = 0xffffb04a
+		D0.u8 = objA0.value3b
+		D6 = 6		// object.flag.P2_PUSHING
+		fn0200cc()
+	}
+	else if (!original_mode)
+		u8[A0 + 0x44] = 7	// reset a timer used to play the pushing sound as frequently as Origins does
+}
+
 //# address-hook(0x0200cc) end(0x02011c)
 function void fn0200cc()
 {
@@ -4361,6 +4383,14 @@ function void fn0200cc()
 				{
 					A2 = 0xffff0000 + D0.u16
 					u8[A2] = (0x40 - u8[A0 + 0x43]) | 0x80
+					// Check to play sound as in Origins
+					if (u8[A0 + 0x44] == 0 && !original_mode)
+					{
+						playSound(0x69)
+						u8[A0 + 0x44] = 7	// reset a timer used to play the pushing sound as frequently as Origins does
+					}
+					else if (!original_mode)
+						--u8[A0 + 0x44]		// decrement the timer for playing the next push sfx
 				}
 			}
 		}
@@ -16894,7 +16924,9 @@ function void FlyBotAlert.CallFlyBot()
 
 
 // In Original Mode, don't allow midair moves after jumping from a cup elevator.
-// Function taken from objects\06_lbz\lbz_cupelevator.lemon
+// Outside of Original Mode, make jump sound effect when exiting and break sound when elevator goes flying.
+// (Note: at the moment, elevators starting on the left side of the pole do not make the first noise they should. Original bug.)
+// Functions taken from objects\06_lbz\lbz_cupelevator.lemon
 //# address-hook(0x026eda) end(0x02702c)
 function void fn026eda()
 {
@@ -16985,6 +17017,9 @@ function void fn026eda()
 			}
 			objA1.velocity.y = -0x480
 
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+				playSound(SFX_JUMP)
+
 			u8[A2] = 0
 			u8[A2 + 0x02] = 0x12
 			return
@@ -16998,6 +17033,65 @@ function void fn026eda()
 
 	D0 = objA0.value26
 	fn032610()
+}
+
+//# address-hook(0x026c6c) end(0x026d04)
+function void fn026c6c()
+{
+	if (objA0.countdown_value == 0x1000)
+	{
+		if ((objA0.flags2a & 0x01) == 0)
+		{
+			D0.u8 = objA0.value26 + 0x40
+			if (D0.u8 >= 0xf0)
+			{
+				objA0.value26 = 0xc0
+				A1 = 0xffff0000 + objA0.value42
+				u16[A1 + 0x30] = 0x7fff
+				u16[A0 + 0x36] += 2		// state value for elevator flying to right
+				if (!original_mode)
+					playSound(0x80)
+				return
+			}
+		}
+		else
+		{
+			D0.u8 = objA0.value26 + 0xc0
+			if (D0.u8 >= 0xf0)
+			{
+				objA0.value26 = 0x40
+				A1 = 0xffff0000 + objA0.value42
+				u16[A1 + 0x30] = 0x7fff
+				u16[A0 + 0x36] += 4		// state value for elevator flying to left
+				if (!original_mode)
+					playSound(0x80)
+				return
+			}
+		}
+	}
+	else
+	{
+		objA0.countdown_value += 0x10
+	}
+
+	D0.u8 = objA0.flags2e
+	objA0.value26 += D0.u8
+	if (objA0.sprite_priority == 0x0200)
+	{
+		if (s8[A0 + 0x26] < 0)
+		{
+			objA0.sprite_priority = 0x80
+			playSound(0x72)
+		}
+	}
+	else
+	{
+		if (s8[A0 + 0x26] >= 0)
+		{
+			objA0.sprite_priority = 0x0200
+			playSound(0x72)
+		}
+	}
 }
 
 
