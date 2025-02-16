@@ -21,6 +21,7 @@ function void ApplyROMManipulations_Original()
 	ROMManipulation.HCZ.SetBottomHeight_Original()
 	// ROMManipulation.CNZ2.KnucklesPreBossCutscene_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.HPZ.SecondMuralChunks_Original()	// handled elsewhere
+	ROMManipulation.OutroST.BackgroundScrolling_Original()
 	ROMManipulation.BonusSM.Probabilities_Original()
 	// ROMManipulation.ALZ.MusicFix_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.DPZ.LoopBugFix_Original()	// irrelevant in original ROM hack
@@ -160,6 +161,15 @@ function void ROMManipulation.HCZ.SetBottomHeight_Original()
 	u16[0x01bce4] = 0x1000
 }
 
+function void ROMManipulation.OutroST.BackgroundScrolling_Original()
+{
+	// Fix two broken lines in Sonic / Tails outro, and also in S3AIR main menu background
+	// Commented out + and - 1s are the fixes from Euka
+	u16[0x05b15a + 0x06] = 0x14 // - 1
+	u16[0x05b15a + 0x08] = 0x04 // + 1
+	u16[0x05b15a + 0x0a] = 0x1c // - 1
+	u16[0x05b15a + 0x0c] = 0x04 // + 1
+}
 
 function void ROMManipulation.BonusSM.Probabilities_Original()
 {

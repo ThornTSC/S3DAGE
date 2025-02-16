@@ -560,8 +560,10 @@ function void MainMenuBG.Update(u16 cameraForegroundX, u16 cameraBackgroundX)
 		fn04f0de()
 
 		// Manual correction for two lines with broken scrolling (also in outro)
-		u16[0xffffe0ee] = u16[0xffffe0f2]
-		u16[0xffffe16e] = u16[0xffffe172]
+		#if GAMEAPP < 0x25021500
+			u16[0xffffe0ee] = u16[0xffffe0f2]
+			u16[0xffffe16e] = u16[0xffffe172]
+		#endif
 		VDP.copyToVRAMbyDMA(0xffffe000, 0xf000, getScreenHeight() * 4)
 	}
 
@@ -10606,6 +10608,13 @@ function void ApplyROMManipulations()
 	ROMManipulation.AIZ1.KnucklesIntroCritters()
 	ROMManipulation.AIZ2.StartPosition()
 	ROMManipulation.AIZ2.BlimpSequenceBombs()
+
+		// Fix two broken lines in Sonic / Tails outro, and also in S3AIR main menu background. Covered in ROMManipulation.OutroST.BackgroundScrolling() for GAMEAPP >= 0x25021500.
+		u16[0x05b15a + 0x06] = 0x14 - 1
+		u16[0x05b15a + 0x08] = 0x04 + 1
+		u16[0x05b15a + 0x0a] = 0x1c - 1
+		u16[0x05b15a + 0x0c] = 0x04 + 1
+		
 	ROMManipulation.BonusSM.Probabilities()
 	ROMManipulation.ALZ.MusicFix()
 	ROMManipulation.DPZ.LoopBugFix()
