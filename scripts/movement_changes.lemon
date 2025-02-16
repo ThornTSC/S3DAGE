@@ -100,6 +100,138 @@ function void Character.LandingOnGroundStandUp()
 
 
 
+// Allow holding the L button to crouch when appropriate, a step in allowing it to charge the spin dash.
+// Function taken from maingame\character\character.lemon
+function void Character.updateUprightOnGroundInner()
+{
+	u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
+	bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
+
+	// These are in order:
+	//  - maximum speed
+	//  - maximum acceleration
+	//  - maximum deceleration
+	D6.u16 = u16[A4]
+	D5.u16 = u16[A4 + 2]
+	D4.u16 = u16[A4 + 4]
+
+	if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
+	{
+		// Camera move state:
+		//   0 = no input up/down
+		//   1 = up/down pressed, but still in delay
+		//   2 = up/down pressed, actual movement (limit may be reached)
+		u8 cameraMoveState = 0
+
+		if (char.hlock_countdown == 0)
+		{
+			// Movement left or right
+			if (input_state & CONTROL_LEFT)
+			{
+				// Though the original code uses different functions for the three characters here, they actually are identical
+				PressedLeftWhileUprightOnGround()
+			}
+			if (input_state & CONTROL_RIGHT)
+			{
+				// Though the original code uses different functions for the three characters here, they actually are identical
+				PressedRightWhileUprightOnGround()
+			}
+
+			// Standing upright?
+			D0.u8 = (char.rotation + 0x20) & 0xc0
+			if (D0.u8 == 0 && char.groundspeed == 0)
+			{
+				char.flags &= ~char.flag.PUSHING
+				char.state = char.state.STANDING
+
+				checkForBalancing()
+
+				// Can only look up/down when state was not changed to balancing
+				if (char.state == char.state.STANDING)
+				{
+					if ((input_state & (CONTROL_UP | CONTROL_DOWN)) || (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a))
+					{
+						cameraMoveState = 1
+						char.state = ((input_state & CONTROL_DOWN) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)) ? char.state.COWERING : char.state.LOOKING_UP
+
+						// Start camera movement after countdown
+						++char.look_up_down_timer
+						if (char.look_up_down_timer >= Character.look_up_down_delay)
+						{
+							cameraMoveState = 2
+							char.look_up_down_timer = Character.look_up_down_delay
+
+							if (char.state == char.state.COWERING)
+							{
+								// Move camera down (or up in inverse gravity)
+								if (global.inv_gravity == 0)
+								{
+									if (u16[A5] != 0x08)
+										u16[A5] -= 2
+								}
+								else
+								{
+									if (u16[A5] != 0xd8)
+										u16[A5] += 2
+								}
+							}
+							else
+							{
+								// Move camera up (or down in inverse gravity)
+								if (global.inv_gravity == 0)
+								{
+									if (u16[A5] != 0xc8)
+										u16[A5] += 2
+								}
+								else
+								{
+									if (u16[A5] != 0x18)
+										u16[A5] -= 2
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (cameraMoveState < 2)
+		{
+			if (cameraMoveState < 1)
+			{
+				char.look_up_down_timer = 0
+			}
+
+			centerCameraYOffset()
+		}
+
+		// Decelerate
+		if (isSuperActive)
+		{
+			D5.u16 = 0x0c
+		}
+
+		if ((input_state & (CONTROL_LEFT | CONTROL_RIGHT)) == 0)	// No left or right pressed
+		{
+			if (char.groundspeed != 0)
+			{
+				if (char.groundspeed > 0)
+					char.groundspeed = max(char.groundspeed - D5.s16, 0)
+				else
+					char.groundspeed = min(char.groundspeed + D5.s16, 0)
+			}
+		}
+	}
+
+	char.velocity.x = (s32(lookupCos(char.rotation)) * char.groundspeed) >> 8
+	char.velocity.y = (s32(lookupSin(char.rotation)) * char.groundspeed) >> 8
+
+	Character.UpdateControlOnGroundShared()
+}
+
+
+
+
 // Allow holding the L button to charge the spin dash.
 // Function taken from maingame\character\character.lemon
 //# translated(0x011bde) end(0x011cf0)
@@ -116,6 +248,7 @@ function bool Character.UpdateSpindash()
 
 	u8 input_state   = (char.character == CHARACTER_TAILS) ? control.tails.state   : control.player1.state
 	u8 input_pressed = (char.character == CHARACTER_TAILS) ? control.tails.pressed : control.player1.pressed
+	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
 
 	if (char.spindash == 0)
 	{
@@ -146,7 +279,7 @@ function bool Character.UpdateSpindash()
 	}
 	else
 	{
-		if (input_state & CONTROL_DOWN)
+		if ((input_state & CONTROL_DOWN) || L_held)
 		{
 			// Update spindash
 			if (char.spindash_charge > 0)

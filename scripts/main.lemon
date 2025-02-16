@@ -3532,14 +3532,16 @@ function void UpdateKnucklesGlideCollision()
 function void Character.CheckForStartRolling()
 {
 	u8 input_state = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
+	bool L_pressed = (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
+	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
 
 	if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
 	{
 		if ((input_state & (CONTROL_LEFT | CONTROL_RIGHT)) == 0)	// No left or right pressed
 		{
-			if (input_state & CONTROL_DOWN)
+			if ((input_state & CONTROL_DOWN) || (L_pressed && abs(char.groundspeed) < 0x100))
 			{
-				if (abs(char.groundspeed) >= 0x100)
+				if (abs(char.groundspeed) >= 0x100 && (input_state & CONTROL_DOWN))
 				{
 					// Start rolling
 					u32 onObjectAddress = 0xffff0000 + char.object_standing_on
@@ -3574,7 +3576,7 @@ function void Character.CheckForStartRolling()
 			else
 			{
 				// Stop crouching
-				if (char.state == char.state.COWERING)
+				if (char.state == char.state.COWERING && !L_held)
 					char.state = char.state.RUNNING
 
 			#if STANDALONE
