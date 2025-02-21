@@ -1188,7 +1188,7 @@ function void TailsTails.Update()
 			D0 = 4	// Set appropriate tail animation manually, because char.state isn't actually set for character pushing animation
 		}
 	}
-	if (u8[A2 + 0x22] >= 0x69 && u8[A2 + 0x22] <= 0x77)		// Range of Tails' spiral cylinder frames
+	if ((u8[A2 + 0x22] >= 0x69 && u8[A2 + 0x22] <= 0x77) && !original_mode)		// Range of Tails' spiral cylinder frames
 	{
 		D0 = 0	// Hide tails
 	}
