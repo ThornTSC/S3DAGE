@@ -1143,6 +1143,10 @@ function void updateGameObjectLoopRenderPaused()
 			{
 				DrawObject()
 			}
+			else if (D0 == 0x018b40)	// drop dash dust
+			{
+				Dust.animateDropDash()
+			}
 		}
 
 		if (D0 == 0x009040)

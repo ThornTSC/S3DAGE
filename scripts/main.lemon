@@ -2817,7 +2817,9 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 
 	// Render character
 	if (isDropDashSprite)		// if this is a drop dash charging sprite,
-		angle = 0				// do not rotate it
+	{
+		angle = global.inv_gravity ? 128 : 0				// do not rotate it
+	}
 
 	if (asSmallGhost)
 	{
