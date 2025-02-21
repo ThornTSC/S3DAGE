@@ -320,6 +320,11 @@ function void SonicUpdateRingCollection()
 		box.pos.y = char.position.y.u16 - 0x40
 		box.size.x = 0x80
 		box.size.y = 0x80
+		if (u8[0xffffee18] != 0xff && box.pos.y > 0xff00 && !original_mode)	// if the first byte of level.vertical_wrap is not set to wrap but this value is wrapping
+		{
+			box.size.y -= abs(s16(box.pos.y))	// reduce the box size by how much the box's upper y bound is underflowing,
+			box.pos.y = 0						// and set the top of the box to the top of the screen
+		}
 	}
 	else
 	{
