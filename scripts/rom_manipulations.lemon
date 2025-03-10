@@ -15,6 +15,7 @@ function void ApplyROMManipulations_Original()
 	ROMManipulation.RepairSpriteMappings_Original()
 	ROMManipulation.RepairAnimations_Original()
 	ROMManipulation.CutsceneKnucklesPalette_Original()
+	ROMManipulation.AIZ.MusicFix_Original()
 	// ROMManipulation.AIZ1.KnucklesIntroCritters_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.AIZ2.StartPosition_Original()	// handled elsewhere and not the same as base S3&K
 	ROMManipulation.AIZ2.BlimpSequenceBombs_Original()
@@ -123,6 +124,19 @@ function void ROMManipulation.CutsceneKnucklesPalette_Original()
 	u16[0x066912 + 0x04] = 0x084e
 	u16[0x066912 + 0x06] = 0x040c
 	u16[0x066912 + 0x08] = 0x0206
+}
+
+
+function void ROMManipulation.AIZ.MusicFix_Original()
+{
+	// Fix for bugged PSG data in the AIZ 1 and 2 emulated music data, #contributed by Legobouwer
+	//  -> The issue is caused by the music using smpsFMAlterVol (E5, E6) instead of smpsPSGAlterVol (EC); this code corrects this for both acts
+	u8[0x2c9a0b] = 0xe5
+	u8[0x2c9a35] = 0xe5
+	u8[0x2cadba] = 0xe6
+	u8[0x2cadd3] = 0xe6
+	u8[0x2cafc3] = 0xe6
+	u8[0x2cafdc] = 0xe6
 }
 
 

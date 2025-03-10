@@ -10607,6 +10607,19 @@ function void ApplyROMManipulations()
 
 	ROMManipulation.RepairAnimations()
 	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
+
+	#if GAMEAPP <= 0x25021500
+	// Fix for bugged PSG data in the AIZ 1 and 2 emulated music data, #contributed by Legobouwer
+	//  -> The issue is caused by the music using smpsFMAlterVol (E5, E6) instead of smpsPSGAlterVol (EC); this code corrects this for both acts
+	// Covered in ROMManipulation.AIZ.MusicFix() in later A.I.R. builds.
+	u8[0x2c9a0b] = 0xec
+	u8[0x2c9a35] = 0xec
+	u8[0x2cadba] = 0xec
+	u8[0x2cadd3] = 0xec
+	u8[0x2cafc3] = 0xec
+	u8[0x2cafdc] = 0xec
+	#endif
+
 	ROMManipulation.AIZ1.KnucklesIntroCritters()
 	ROMManipulation.AIZ2.StartPosition()
 	ROMManipulation.AIZ2.BlimpSequenceBombs()
