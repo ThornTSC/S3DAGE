@@ -13787,8 +13787,130 @@ function void fn03077e()
 
 
 
+// Add a fan's y position and range to a spawned bubble's memory, to support despawning the bubble at the top of the fan's range
+// Function taken from objects\02_hcz\hcz_fan.lemon
+//# address-hook(0x03064e) end(0x030778)
+function void fn03064e()
+{
+	if (objA0.subtype2c & 0x20)
+	{
+		if (level.trigger00 == 0)
+		{
+			D0.u16 = u16[A0 + 0x40]
+			DrawOrUnloadObjectByD0()
+			return
+		}
+
+		objA0.subtype2c &= ~0x20
+		objA0.subtype2c |= 0x10
+	}
+
+	bool goto0306c2 = false
+	if (u8[A0 + 0x42] == 0)
+	{
+		if ((objA0.subtype2c & 0x10) == 0)
+		{
+			--u16[A0 + 0x30]
+			if (s16[A0 + 0x30] < 0)
+			{
+				u8[A0 + 0x32] ^= 0x01
+				u16[A0 + 0x30] = (u8[A0 + 0x32] & 0x01) ? 0x78 : 0xb4
+				u16[A0 + 0x34] = 0
+			}
+
+			goto0306c2 = (u8[A0 + 0x32] == 0)
+		}
+		else
+		{
+			goto0306c2 = true
+		}
+	}
+
+	bool goto0306f2 = false
+	if (!goto0306c2)
+	{
+		--objA0.animation.timer
+		if (s8(objA0.animation.timer) < 0)
+		{
+			if (u16[A0 + 0x34] < 0x0400)
+			{
+				u16[A0 + 0x34] += 0x2a
+				objA0.animation.timer = u8[A0 + 0x34]
+
+				++objA0.animation.sprite
+				if (objA0.animation.sprite >= 5)
+					objA0.animation.sprite = 0
+
+				goto0306f2 = true
+			}
+		}
+	}
+	else
+	{
+		A1 = 0xffffb000
+		fn03077e()
+
+		A1 = 0xffffb04a
+		fn03077e()
+
+		--objA0.animation.timer
+		if (s8(objA0.animation.timer) < 0)
+		{
+			objA0.animation.timer = 0
+
+			++objA0.animation.sprite
+			if (objA0.animation.sprite >= 5)
+				objA0.animation.sprite = 0
+		}
+
+		goto0306f2 = true
+	}
+
+	if (goto0306f2)
+	{
+		if (objA0.render_flags & render_flag.VISIBLE)
+		{
+			if (((level.framecounter.low + 1) & 0x0f) == 0)
+			{
+				playSound(0xc1)
+			}
+		}
+
+		if (objA0.subtype2c & 0x40)
+		{
+			if ((level.framecounter.low & 0x03) == 0)
+			{
+				// Create a new bubble
+				if (allocDynamicObjectStd())
+				{
+					objA1.update_address = 0x030834
+					objA1.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
+					objA1.box_size.x = 0x04
+					objA1.sprite_priority = 0x0300
+					objA1.sprite_attributes = 0x045c
+					objA1.mapping_offset = 0x02fcb2
+					objA1.position.x.u16 = objA0.position.x.u16
+
+					GetRandomNumber()
+					objA1.position.x.u16 += (D0.u16 & 0x0f) - 8
+					objA1.position.y.u16 = objA0.position.y.u16
+					if (!original_mode)
+					{
+						u16[A1 + 0x36] = u16[A0 + 0x36]
+						objA1.value3e = objA0.position.y.u16	// store fan's y position
+					}
+					objA1.velocity.y = -0x800
+				}
+			}
+		}
+	}
+
+	D0.u16 = u16[A0 + 0x40]
+	DrawOrUnloadObjectByD0()
+}
+
 // Use original fan bubble despawning behaviors in Original Mode.
-// Also implement bubbles disappearing when off screen on the sides as well, not just above the screen.
+// Also implement bubbles disappearing when off screen on the sides as well, not just above the screen, and at the top of a fan's range.
 // Function taken from objects\02_hcz\hcz_fan.lemon
 //# address-hook(0x030834) end(0x03084a)
 function void fn030834()
@@ -13798,7 +13920,7 @@ function void fn030834()
 	{
 		// Also despawn when far enough off screen in any direction except below the screen
 		//  -> Without this, there's kind of a spam of bubbles in HCZ 1 (around X=0x1f40, Y=0x08c0) that can prevent regular object spawn
-		shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10) || (objA0.position.x.u16 < camera.position.x.u16 - 0x10) || (objA0.position.x.u16 > camera.position.x.u16 + getScreenWidth() + 0x10)
+		shouldDespawn = shouldDespawn || (objA0.position.y.u16 < camera.position.y.u16 - 0x10) || (objA0.position.x.u16 < camera.position.x.u16 - 0x10) || (objA0.position.x.u16 > camera.position.x.u16 + getScreenWidth() + 0x10) || (objA0.position.y.u16 <= (objA0.value3e - u16[A0 + 0x36])) || (objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x0080)
 	}
 	if (shouldDespawn)
 	{
