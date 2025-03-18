@@ -4341,6 +4341,7 @@ function void Character.CheckCollisionsWithDynamicObjects()
 
 
 // Disable faster pushing in Original Mode.
+// Also add pushing sound effect to rocks as in Origins.
 // Functions taken from objects\level\rocks.lemon
 //# address-hook(0x0200a2) end(0x0200ca)
 function void fn0200a2()
@@ -10986,6 +10987,55 @@ function void fn01c550_Orig()
 
 
 
+// Adjust some timings for Original Mode and add Origins sound effects outside of Original Mode
+// Functions taken from level\01_aiz\intro_sonic.lemon
+//# address-hook(0x067572) end(0x067592)
+function void fn067572()	// Sonic jumping from the Tornado
+{
+	if (!original_mode)
+		playSound(SFX_JUMP)
+	
+	base.fn067572()
+}
+
+// If in Original Mode, we also un-tweak a counter here that is adjusted in AIR
+//# address-hook(0x0675c0) end(0x0675f6)
+function void fn0675c0()	// Sonic is offscreen after jumping. Actual transformation is handled in other functions. Origins adds a star trail (not added in DAGE yet).
+{
+	if (!original_mode)
+		playSound(SFX_SUPERTRANSFORM)
+	
+	objA0.velocity.x -= 0x40
+	UpdateMovementStraightSimple()
+	if (objA0.position.x.u16 >= 0x40)
+		return
+
+	objA0.base_state = 0x0c
+	objA0.position.x.u16 = 0x40
+	objA0.countdown_value = 0x05
+	objA0.countdown_callback = 0x0675fa
+	u16[A0 + 0x3a] = (original_mode) ? 63 : 47	// Tweaked in AIR
+
+	fn067996()
+}
+
+//# address-hook(0x067624) end(0x06764c)
+function void fn067624()
+{
+	fn0679b8()
+	Object.CountdownAndTrigger()
+
+	objA0.position.x.u16 += 4
+	if (objA0.position.x.u16 >= 512 - 320 + getScreenWidth())
+	{
+		objA0.base_state = 0x10
+		u16[A0 + 0x3a] = (original_mode) ? 0x1f : 0x0f
+	}
+}
+
+
+
+
 // Smooth out a rough camera transition at the start of AIZ1.
 // Function taken from level\01_aiz\level_aiz.lemon
 //# address-hook(0x01caae) end(0x01caca)
@@ -11098,6 +11148,26 @@ function void AIZ1.ChangeBackgroundForKnuckles()
 }
 
 
+
+// Add Origins sound effect for when Knuckles hits the ground after getting blown backward
+// Function taken from level\07_mhz\intro_knuckles.lemon
+//# address-hook(0x0635c8) end(0x0635f0)
+function void fn0635c8()
+{
+	MoveWithGravity20()
+	CheckGroundCollision()
+	if (D1.s16 >= 0)
+		return
+	
+//	if (!original_mode)		// cutscene does not play in Original Mode
+		playSound(0x90)
+
+	objA0.position.y.u16 += D1.u16
+	objA0.base_state = 0x0a
+	objA0.countdown_callback = 0x0635fc
+
+	Object.ResetAnimationProgress(0x0668d0)		// Cutscene Knuckles unconscious, getting up, shaking head to shaking fist animation data
+}
 
 
 
@@ -12449,9 +12519,8 @@ function void fn06207a()
 	base.fn06207a()
 }
 
-// HCZ2 jump sprite orientation. Unused at the moment, but may be re-added in the future.
-// Theoretically isn't necessary because the cutscene will never exist in Original Mode, but this does ensure the fix is always in place for other modes.
-// Function taken from level\02_hcz\hcz2_knuckles_cutscene.lemon
+// HCZ2 jump sprite orientation. Used in ICZ2 in DAGE.
+// Functions taken from level\02_hcz\hcz2_knuckles_cutscene.lemon
 //# address-hook(0x062232) end(0x06223e)
 function void fn062232()
 {
@@ -12460,7 +12529,37 @@ function void fn062232()
 	fn062080()
 }
 
-// The CNZ2 cutscene seems very deliberate in having Knuckles appear to jump backwards, so neither DAGE nor MFaT apply fixes.
+//# address-hook(0x0620aa) end(0x0620e0)
+function void fn0620aa()
+{
+	Object.AnimationProgressByLocalA1()
+	UpdateMovementSimple()
+
+	if (objA0.velocity.y >= 0)
+	{
+		CheckGroundCollision()
+		if (D1.s16 < 0)
+		{
+			if (objA0.flags38 & 0x04)
+			{
+				objA0.base_state += 2
+				
+				if (!original_mode && objA0.update_address == 0x062124)		// HCZ2 cutscene Knux
+					objA0.render_flags &= ~render_flag.FLIP_X				// clean up our direction switch from jumping in fn062232()
+				objA0.position.y.u16 += D1.u16
+				fn062056()
+			}
+			else
+			{
+				objA0.flags38 |= 0x04
+				objA0.velocity.x = -objA0.velocity.x
+				objA0.velocity.y = -objA0.velocity.y
+			}
+		}
+	}
+}
+
+// The CNZ2 lights out cutscene seems very deliberate in having Knuckles appear to jump backwards, so neither DAGE nor MFaT apply fixes.
 
 
 
