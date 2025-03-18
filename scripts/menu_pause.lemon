@@ -62,8 +62,11 @@ function void UpdateGamePause()
 
 		// Pause currently playing game music and sounds
 		#if GAMEAPP >= 0x25021500
-		Audio.pauseContext(AudioContext.CONTEXT_MUSIC)
-		Audio.pauseContext(AudioContext.CONTEXT_SOUND)
+		if (!(global.game_mode == 0x0c && isSonicIntro() && global.level_started == 0 && !original_mode))
+		{
+			Audio.pauseContext(AudioContext.CONTEXT_MUSIC)
+			Audio.pauseContext(AudioContext.CONTEXT_SOUND)
+		}
 		#endif
 	}
 
@@ -99,7 +102,7 @@ function void UpdateGamePause()
 
 		if (global.game_mode == 0x0c)
 		{
-			if (global.game_mode == 0x0c && isSonicIntro() && global.level_started == 0 && !original_mode)
+			if (isSonicIntro() && global.level_started == 0 && !original_mode)
 			{
 				// Skip AIZ 1 Sonic intro
 				//  -> Note that the Knuckles intro has its own handler
