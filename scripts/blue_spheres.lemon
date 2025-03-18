@@ -410,7 +410,7 @@ function void BlueSphereGame.advanceStages(u8 numStages)
 
 function void BlueSphere.setGeneratedStage(u32 number)
 {
-	if (!challenge_greenspheres || speedSpheres)
+	if (!challenge_greenspheres || speedSpheres || (challenge_greenspheres && BlueSpheres.useGeneratedStages()))
 	{
 		if (number < 32)	// We ensure the first 32 stages are organized by difficulty and none share quadrants
 		{
@@ -1926,8 +1926,15 @@ function void fn0085b0()
 		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)
 		if (challenge_greenspheres)	// This is the same result as normal Green Sphere stages. We keep it separate for now just in case it requires special functionality later.
 		{
-			System.loadExternalRawData("GreenSphereGame", KosinskiRawdataBuffer)	// copy green sphere quarter layouts to shared memory
-			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
+			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
+			{
+				System.loadExternalRawData("GreenSphereGame", KosinskiRawdataBuffer)	// copy green sphere quarter layouts to shared memory
+				Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
+			}
+			else
+			{
+				Kosinski.decompress(u32[0x1e407c], 0xffff0000)
+			}
 		}
 		else if (((!specialstages_knuckles && bluespheres.minigame_mode == 0) || (isGeneratedStageInMainGame && (!isMainCharacter(CHARACTER_KNUCKLES) || !useSKLayouts))) || !green_spheres.active)
 		{
@@ -1946,9 +1953,10 @@ function void fn0085b0()
 		zeroMemory(0xfffff000, 0x600)
 
 	#if STANDALONE
-		if (challenge_greenspheres)
-			BlueSphere.setGeneratedStage(0)	// the input value doesn't matter, as challenge_greenspheres will override it
-		else if (isGeneratedStageInMainGame)
+//		if (challenge_greenspheres)
+//			BlueSphere.setGeneratedStage(0)	// the input value doesn't matter, as challenge_greenspheres will override it
+//		else if (isGeneratedStageInMainGame)
+		if (isGeneratedStageInMainGame)
 		{
 			// Most of the "magic numbers" you see are more or less arbitrary numbers
 			u32 stageNumber = 0x13571113 + u32(global.game_random_base) * 0x09070503 + global.next_bluespheres + global.sk_bluespheres * 8
@@ -2457,7 +2465,7 @@ function void fn00972e()
 		}
 
 		++bluespheres.rings_collected
-		if (challenge_greenspheres)
+		if (challenge_greenspheres && !BlueSpheres.useGeneratedStages())
 		{
 			if (bluespheres.rings_collected == S2Special.RingTargets[challenge_greenspheres * 3 - 3])
 			{
@@ -2480,7 +2488,7 @@ function void fn00972e()
 				bluespheres.stage_exit_state = 1
 			}
 		}
-		else if (speedSpheres)
+		else if (speedSpheres || (challenge_greenspheres && BlueSpheres.useGeneratedStages()))
 		{
 			if (bluespheres.rings_collected == (bluespheres.rings_total * 25 / 100))
 			{
@@ -3361,9 +3369,9 @@ function void BlueSpheres.renderCustomSpheres()
 		u16 spheresToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.rings_collected : bluespheres.blue_collected
 
 		// Draw "GET X RINGS" messages
-		u16 ringTargetFirst = (speedSpheres) ? (bluespheres.rings_total * 25 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 3]
-		u16 ringTargetSecond = (speedSpheres) ? (bluespheres.rings_total * 55 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 2]
-		u16 ringTargetThird = (speedSpheres) ? (bluespheres.rings_total * 85 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 1]
+		u16 ringTargetFirst = (speedSpheres || BlueSpheres.useGeneratedStages()) ? (bluespheres.rings_total * 25 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 3]
+		u16 ringTargetSecond = (speedSpheres || BlueSpheres.useGeneratedStages()) ? (bluespheres.rings_total * 55 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 2]
+		u16 ringTargetThird = (speedSpheres || BlueSpheres.useGeneratedStages()) ? (bluespheres.rings_total * 85 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 1]
 		u16 ringTargetCurrent = ringTargetFirst
 		if (ringsToDisplay >= ringTargetSecond)
 			ringTargetCurrent = ringTargetThird
