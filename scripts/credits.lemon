@@ -478,7 +478,7 @@ function void Credits.DAGE()
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line/2, "Sonic the Hedgehog CD", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line/2, "Sonic 3D: Flickies' Island", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line + line/2, "Sonic Advance 3", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line + line/2, "Sonic Colors", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line + line/2, "Sonic Lost World", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line + line/2, "Sonic Origins", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 	}
 	else if (credits.screen.current == 4)	// start of Sonic 3 D.A. Garden Edition (ROM Hack) credits
