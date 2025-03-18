@@ -8069,6 +8069,9 @@ function void TitleScreen()
 			Renderer.drawCustomSprite("bg_title_screen", getScreenExtend() - 40, 0, 0x00, 0, 0x1100)
 		else
 			Renderer.drawCustomSprite("bg_title_screen_new", getScreenExtend() - 40, 0, 0x00, 0, 0x1100)
+		
+		if (cheatStars)
+			Renderer.drawText("sonic3_fontB", getScreenWidth() - 8, 4, "UNLOCK ALL CHEAT ENABLED", 0xffffffff, 3, 0, 0xffef, 0, 1)
 	#endif
 
 	while (true)
@@ -8408,6 +8411,9 @@ function void fn0048dc()
 		Renderer.drawCustomSprite("bg_title_screen_new_line223", SwScrl_RippleData[(rippleShiftIndex +  0) % 66] / 3, 223, 0, 0, 0x1101)
 	}
 
+	if (cheatStars)
+		Renderer.drawText("sonic3_fontB", getScreenWidth() - 8, 4, "UNLOCK ALL CHEAT ENABLED", 0xffffffff, 3, 0, 0xffef, 0, 1)
+
 	// Also draw the "Angel Island Revisited" text and others
 	++airHighlightAnimationTimer
 	s16 time = airHighlightAnimationTimer - 80
@@ -8597,6 +8603,9 @@ function void fn005b42()
 
 	Renderer.drawCustomSprite(stringformat("sktitle_start_game_%d", titlescreen.selection), getScreenWidth()/2, getScreenHeight() - 24, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	Renderer.drawCustomSprite(stringformat("sktitle_air_menu_%d", titlescreen.selection), getScreenWidth()/2, getScreenHeight() - 12, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+
+	if (cheatStars)
+		Renderer.drawText("sonic3_fontB", getScreenWidth() - 8, 4, "UNLOCK ALL CHEAT ENABLED", 0xffffffff, 3, 0, 0xffef, 0, 1)
 }
 
 

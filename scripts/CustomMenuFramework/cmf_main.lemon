@@ -1415,12 +1415,14 @@ function void customMenu.countMedals()
 
 	u8 spriteFlags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
+	u16 starCount = (cheatStars) ? (total_stars - cheatStars) : total_stars
+
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
-		Flicky.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
+		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)
-		South.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)
+		South.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
 	else if ((theme.hud == theme.westside || theme.hud == theme.s3k) && renderQueue == 0xfff1)
-		Westside.TotalStars(total_stars, x_offset, y_offset, spriteFlags, renderQueue)		// Angel theme and Westside theme have identical star counters
+		Westside.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)		// Angel theme and Westside theme have identical star counters
 	else	// Saturn theme, also used in menus
 	{
 		s16 x_offset_pause = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 10 : 0
@@ -1433,15 +1435,15 @@ function void customMenu.countMedals()
 		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
 			x_offset -= 10
 		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
-		if (total_stars / 100 != 0)
+		if (starCount / 100 != 0)
 		{
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", total_stars / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// tens (even if 0)
 		}
-		else if ((total_stars / 10) % 10 != 0)
-			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (total_stars / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
+		else if ((starCount / 10) % 10 != 0)
+			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
 		
-		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", total_stars % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
 	}
 }
 
@@ -1897,7 +1899,7 @@ function void customMenu.mainLogicLoop.main()
 		else
 			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
-	else if (selectedMenuOption.main == 4 && (unlock_flags & 0x0001))
+	else if (selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{
 		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 108 - arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
 		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 182 + arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
@@ -2081,7 +2083,7 @@ function void customMenu.mainLogicLoop.main()
 		selectedGameType = (selectedGameType + 1) & 0x01	// change 0 to 1 or vice versa
 		playSound(0x5b)
 	}
-	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 4 && (unlock_flags & 0x0001))
+	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{
 		selectedGreenSphereType = (selectedGreenSphereType + 1) & 0x01	// change 0 to 1 or vice versa
 		playSound(0x5b)
