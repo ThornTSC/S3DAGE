@@ -1,90 +1,106 @@
 {
 	// PAUSED text
-	"westside_paused":  { "File": "westside_smallmenu.png", "Rect": "0, 120, 91,16", "Center": "46,8" },
+	"westside_paused":  { "File": "westside_smallmenu.png", "Rect": "0, 132, 91,16", "Center": "46,8" },
 
 	// Normal game pause menu
-	"westside_normal_continue_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected
-	"westside_normal_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
-	"westside_normal_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
+	"westside_normal_continue_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 108, 64,12", "Center": "32,6" },	// selected
+	"westside_normal_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
+	"westside_normal_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
+	"westside_normal_continue_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
 	
-	"westside_normal_restart_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 72, 55,12", "Center": "28,6" },
-	"westside_normal_restart_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 72, 55,12", "Center": "28,6" },	// selected
-	"westside_normal_restart_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 72, 55,12", "Center": "28,6" },
+	"westside_normal_restart_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 72, 56,12", "Center": "28,6" },
+	"westside_normal_restart_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 72, 56,12", "Center": "28,6" },	// selected
+	"westside_normal_restart_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 72, 56,12", "Center": "28,6" },
+	"westside_normal_restart_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 72, 56,12", "Center": "28,6" },
+
+	"westside_normal_options_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
+	"westside_normal_options_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
+	"westside_normal_options_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 120, 55,12", "Center": "28,6" },	// selected
+	"westside_normal_options_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
 	
-	"westside_normal_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_normal_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_normal_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"westside_normal_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_normal_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_normal_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_normal_exit_game_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 73,12", "Center": "37,6" },	// selected
 
 	// Normal game pause menu for Restart
-	"westside_normal_cancel_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 36, 48,12", "Center": "24,6" },	// selected
-	"westside_normal_cancel_4":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
-	"westside_normal_cancel_5":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
+	"westside_normal_cancel_10":	  { "File": "westside_smallmenu.png", "Rect": "80, 36, 48,12", "Center": "24,6" },	// selected
+	"westside_normal_cancel_11":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
+	"westside_normal_cancel_12":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
 	
-	"westside_normal_star_post_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
-	"westside_normal_star_post_4":	  { "File": "westside_smallmenu.png", "Rect": "80, 84, 70,12", "Center": "35,6" },	// selected
-	"westside_normal_star_post_5":	  { "File": "westside_smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
+	"westside_normal_star_post_10":	  { "File": "westside_smallmenu.png", "Rect": "0, 84, 71,12", "Center": "36,6" },
+	"westside_normal_star_post_11":	  { "File": "westside_smallmenu.png", "Rect": "80, 84, 71,12", "Center": "36,6" },	// selected
+	"westside_normal_star_post_12":	  { "File": "westside_smallmenu.png", "Rect": "0, 84, 71,12", "Center": "36,6" },
 	
-	"westside_normal_act_start_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
-	"westside_normal_act_start_4":	  { "File": "westside_smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
-	"westside_normal_act_start_5":	  { "File": "westside_smallmenu.png", "Rect": "80, 96, 70,12", "Center": "35,6" },	// selected
+	"westside_normal_act_start_10":	  { "File": "westside_smallmenu.png", "Rect": "0, 96, 71,12", "Center": "36,6" },
+	"westside_normal_act_start_11":	  { "File": "westside_smallmenu.png", "Rect": "0, 96, 71,12", "Center": "36,6" },
+	"westside_normal_act_start_12":	  { "File": "westside_smallmenu.png", "Rect": "80, 96, 71,12", "Center": "36,6" },	// selected
 
 	// Pause menu for Exit Game
-	"westside_cancel_6":	  { "File": "westside_smallmenu.png", "Rect": "80, 36, 48,12", "Center": "24,6" },	// selected
-	"westside_cancel_7":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
-	"westside_cancel_8":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
+	"westside_cancel_20":	  { "File": "westside_smallmenu.png", "Rect": "80, 36, 48,12", "Center": "24,6" },	// selected
+	"westside_cancel_21":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
+	"westside_cancel_22":	  { "File": "westside_smallmenu.png", "Rect": "0, 36, 48,12", "Center": "24,6" },
 	
-	"westside_main_menu_6":	  { "File": "westside_smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
-	"westside_main_menu_7":	  { "File": "westside_smallmenu.png", "Rect": "80, 48, 76,12", "Center": "38,6" },	// selected
-	"westside_main_menu_8":	  { "File": "westside_smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
+	"westside_main_menu_20":	  { "File": "westside_smallmenu.png", "Rect": "0, 48, 77,12", "Center": "39,6" },
+	"westside_main_menu_21":	  { "File": "westside_smallmenu.png", "Rect": "80, 48, 77,12", "Center": "39,6" },	// selected
+	"westside_main_menu_22":	  { "File": "westside_smallmenu.png", "Rect": "0, 48, 77,12", "Center": "39,6" },
 	
-	"westside_air_menu_6":	  { "File": "westside_smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
-	"westside_air_menu_7":	  { "File": "westside_smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
-	"westside_air_menu_8":	  { "File": "westside_smallmenu.png", "Rect": "80, 60, 68,12", "Center": "34,6" },	// selected
+	"westside_air_menu_20":	  { "File": "westside_smallmenu.png", "Rect": "0, 60, 69,12", "Center": "35,6" },
+	"westside_air_menu_21":	  { "File": "westside_smallmenu.png", "Rect": "0, 60, 69,12", "Center": "35,6" },
+	"westside_air_menu_22":	  { "File": "westside_smallmenu.png", "Rect": "80, 60, 69,12", "Center": "35,6" },	// selected
 
 	// Special Stage pause menu
 	"westside_ss_continue_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected
 	"westside_ss_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	"westside_ss_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
+	"westside_ss_continue_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	
 	"westside_ss_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	"westside_ss_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
 	"westside_ss_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+	"westside_ss_retry_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
+
+	"westside_ss_options_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
+	"westside_ss_options_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
+	"westside_ss_options_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 120, 55,12", "Center": "28,6" },	// selected
+	"westside_ss_options_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 120, 55,12", "Center": "28,6" },
 	
 	"westside_ss_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
 	"westside_ss_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_ss_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"westside_ss_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
+	"westside_ss_exit_game_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
 
 	// Challenges pause menu
-	"westside_challenge_pause_continue_0":	  { "File": "westside_smallmenu.png", "Rect": "80,108, 63,12", "Center": "32,6" },	// selected
-	"westside_challenge_pause_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
-	"westside_challenge_pause_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
-	"westside_challenge_pause_continue_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
+	"westside_challenge_pause_continue_0":	  { "File": "westside_smallmenu.png", "Rect": "80,108, 64,12", "Center": "32,6" },	// selected
+	"westside_challenge_pause_continue_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
+	"westside_challenge_pause_continue_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
+	"westside_challenge_pause_continue_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 108, 64,12", "Center": "32,6" },
 
 	"westside_challenge_pause_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	"westside_challenge_pause_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
 	"westside_challenge_pause_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	"westside_challenge_pause_retry_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	
-	"westside_challenge_pause_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
-	"westside_challenge_pause_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
-	"westside_challenge_pause_select_act_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 12, 78,12", "Center": "39,6" },	// selected
-	"westside_challenge_pause_select_act_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
+	"westside_challenge_pause_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 79,12", "Center": "40,6" },
+	"westside_challenge_pause_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 79,12", "Center": "40,6" },
+	"westside_challenge_pause_select_act_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 12, 79,12", "Center": "40,6" },	// selected
+	"westside_challenge_pause_select_act_3":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 79,12", "Center": "40,6" },
 	
-	"westside_challenge_pause_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_challenge_pause_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_challenge_pause_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_challenge_pause_exit_game_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"westside_challenge_pause_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_challenge_pause_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_challenge_pause_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_challenge_pause_exit_game_3":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 73,12", "Center": "37,6" },	// selected
 
 	// End of Time Attack / Time Stone Trial menu
 	"westside_ta_retry_0":	  { "File": "westside_smallmenu.png", "Rect": "80, 0, 41,12", "Center": "21,6" },	// selected
 	"westside_ta_retry_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	"westside_ta_retry_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 0, 41,12", "Center": "21,6" },
 	
-	"westside_ta_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
-	"westside_ta_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 12, 78,12", "Center": "39,6" },	// selected
-	"westside_ta_select_act_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 78,12", "Center": "39,6" },
+	"westside_ta_select_act_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 79,12", "Center": "40,6" },
+	"westside_ta_select_act_1":	  { "File": "westside_smallmenu.png", "Rect": "80, 12, 79,12", "Center": "40,6" },	// selected
+	"westside_ta_select_act_2":	  { "File": "westside_smallmenu.png", "Rect": "0, 12, 79,12", "Center": "40,6" },
 	
-	"westside_ta_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_ta_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"westside_ta_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"westside_ta_exit_game_0":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_ta_exit_game_1":	  { "File": "westside_smallmenu.png", "Rect": "0, 24, 73,12", "Center": "37,6" },
+	"westside_ta_exit_game_2":	  { "File": "westside_smallmenu.png", "Rect": "80, 24, 73,12", "Center": "37,6" }	// selected
 }

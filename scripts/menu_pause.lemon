@@ -59,6 +59,12 @@ function void UpdateGamePause()
 		global.game.paused = true
 		pause_menu_selection = 0
 		clean_screenshot = false
+
+		// Pause currently playing game music and sounds
+		#if GAMEAPP >= 0x25021500
+		Audio.pauseContext(AudioContext.CONTEXT_MUSIC)
+		Audio.pauseContext(AudioContext.CONTEXT_SOUND)
+		#endif
 	}
 
 	syncZ80_variantB(0x01)
@@ -130,7 +136,9 @@ function void UpdateGamePause()
 			PauseMenu_DrawCustomSprites()
             A0 = backupA0
 
+			#if GAMEAPP < 0x25021500
 			Audio.playOverride("silence", AudioContext.CONTEXT_MUSIC, 1, 0)	// create a track that is a fraction of a second of silence, and restart it every frame
+			#endif
 
 			if (!clean_screenshot)
 			{
@@ -216,7 +224,10 @@ function void UpdateGamePause()
 			RenderSprites()
             A0 = backupA0
 
+			#if GAMEAPP < 0x25021500
 			Audio.playOverride("silence", AudioContext.CONTEXT_MUSIC, 1, 0)	// create a track that is a fraction of a second of silence, and restart it every frame
+			#endif
+
 			if (!clean_screenshot)
 			{
 				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
@@ -307,6 +318,10 @@ function void UpdateGamePause()
 	held_time.down = 0
 	held_time.right = 0
 	held_time.left = 0
+
+	#if GAMEAPP >= 0x25021500
+	Standalone.onResumeAfterPause()
+	#endif
 }
 
 
@@ -416,23 +431,31 @@ function u8 PauseMenu_Normal()
 	if (u8[0xffffb005] == 0x06) 	// If the player character is dying,
 		return PauseMenu_Basic()	// remove the restart options until the life counter ticks down by 1.
 
-	if (pause_menu_selection >= 3 && pause_menu_selection <= 5)
+	if (pause_menu_selection >= 0x10 && pause_menu_selection <= 0x12)
 		return PauseMenu_Normal_Restart()
-	else if (pause_menu_selection >= 6)
+	else if (pause_menu_selection >= 0x20)
 		return PauseMenu_ExitGame()
 
 	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
-			pause_menu_selection = 2
+			pause_menu_selection = 3
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			--pause_menu_selection
+		#endif
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
-		if (pause_menu_selection > 2)
+		if (pause_menu_selection > 3)
 			pause_menu_selection = 0
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			++pause_menu_selection
+		#endif
 		playSound(0x5b)
 	}
 
@@ -458,26 +481,46 @@ function u8 PauseMenu_Normal()
 		{
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			#if GAMEAPP < 0x25021500
 			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("normal_restart_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-			Renderer.drawCustomSprite(stringformat("normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_restart_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#else
+			Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_restart_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 8
+			Renderer.drawCustomSprite(stringformat("normal_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 8
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#endif
 		}
 	}
 
 	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
+		#if GAMEAPP >= 0x25021500
+		Audio.resumeContext(AudioContext.CONTEXT_MUSIC)
+		Audio.resumeContext(AudioContext.CONTEXT_SOUND)
+		#else
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
-		pause_menu_selection = 3
+		pause_menu_selection = 0x10
 		return 0
 	}
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	#if GAMEAPP >= 0x25021500
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
-		pause_menu_selection = 6
+		Game.openOptionsMenu()
+		return 0
+	}
+	#endif
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 3)
+	{
+		pause_menu_selection = 0x20
 		return 0
 	}
 
@@ -491,15 +534,15 @@ function u8 PauseMenu_Normal_Restart()
 	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
-		if (pause_menu_selection < 3)
-			pause_menu_selection = 5
+		if (pause_menu_selection < 0x10)
+			pause_menu_selection = 0x12
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
-		if (pause_menu_selection > 5)
-			pause_menu_selection = 3
+		if (pause_menu_selection > 0x12)
+			pause_menu_selection = 0x10
 		playSound(0x5b)
 	}
 
@@ -526,19 +569,19 @@ function u8 PauseMenu_Normal_Restart()
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
 			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("normal_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("normal_star_post_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-			Renderer.drawCustomSprite(stringformat("normal_act_start_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_cancel_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_star_post_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("normal_act_start_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 		}
 	}
 
-	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 3) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 0x10) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		pause_menu_selection = 1
 		return 0
 	}
 
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 4)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x11)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue.
@@ -549,10 +592,12 @@ function u8 PauseMenu_Normal_Restart()
 
 		restartAtCheckpoint()
 		global.game.paused = false
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 5)
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x12)
 	{
 		checkpoint.number = 0
 		layout.part = 0
@@ -564,7 +609,9 @@ function u8 PauseMenu_Normal_Restart()
 
 		level.restart = 1
 		global.game.paused = false
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 
@@ -578,15 +625,15 @@ function u8 PauseMenu_ExitGame()
 	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
-		if (pause_menu_selection < 6)
-			pause_menu_selection = 8
+		if (pause_menu_selection < 0x20)
+			pause_menu_selection = 0x22
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
-		if (pause_menu_selection > 8)
-			pause_menu_selection = 6
+		if (pause_menu_selection > 0x22)
+			pause_menu_selection = 0x20
 		playSound(0x5b)
 	}
 
@@ -613,22 +660,22 @@ function u8 PauseMenu_ExitGame()
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
 			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("main_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-			Renderer.drawCustomSprite(stringformat("air_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("cancel_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("main_menu_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("air_menu_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 		}
 	}
 
-	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 6) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	if ((control.pad1.pressed & 0xe0 && pause_menu_selection == 0x20) || (control.pad1.pressed & CONTROL_B))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
-		if (time_attack == 1 || time_attack == 2)
+//		if (time_attack == 1 || time_attack == 2)
 			pause_menu_selection = 3	// Challenge menu EXIT GAME
-		else
-			pause_menu_selection = 2	// Normal menu EXIT GAME
+//		else
+//			pause_menu_selection = 2	// Normal menu EXIT GAME
 		return 0
 	}
 
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 7)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x21)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		restart_timer = 0
 		exit_timer = 0
@@ -661,10 +708,12 @@ function u8 PauseMenu_ExitGame()
 		global.game_mode = 0x58
 		global.game.paused = false
 
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 8)
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x22)
 	{
 		restart_timer = 0
 		exit_timer = 0
@@ -694,7 +743,9 @@ function u8 PauseMenu_ExitGame()
 
 		global.game.paused = false
 
-		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent the A.I.R. menu music from playing
+		#if GAMEAPP < 0x25021500
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		playMusic(0x2f)			// force this to be the current active music, else the level music and menu music play at the same time
 		exitGame = 1
 //		Game.returnToMainMenu()
@@ -709,21 +760,33 @@ function u8 PauseMenu_ExitGame()
 
 function u8 PauseMenu_Basic()
 {
-	if (pause_menu_selection >= 6)
+	if (pause_menu_selection >= 0x20)
 		return PauseMenu_ExitGame()
 
 	if (customMenu.scrollUp() && !clean_screenshot && !(!original_mode && (control.pad1.state & CONTROL_B)))
 	{
-		pause_menu_selection -= 2
+		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
-			pause_menu_selection = 2
+			pause_menu_selection = 3
+		if (pause_menu_selection == 1)	// options
+			pause_menu_selection = 0
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			pause_menu_selection = 0
+		#endif
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown() && !clean_screenshot && !(!original_mode && (control.pad1.state & CONTROL_B)))
 	{
-		pause_menu_selection += 2
-		if (pause_menu_selection > 2)
+		pause_menu_selection += 1
+		if (pause_menu_selection > 3)
 			pause_menu_selection = 0
+		if (pause_menu_selection == 1)	// options
+			pause_menu_selection = 2
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			pause_menu_selection = 3
+		#endif
 		playSound(0x5b)
 	}
 
@@ -749,20 +812,39 @@ function u8 PauseMenu_Basic()
 		{
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			#if GAMEAPP < 0x25021500
 			Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#else
+			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("normal_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#endif
 		}
 	}
 
 	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
+		#if GAMEAPP >= 0x25021500
+		Audio.resumeContext(AudioContext.CONTEXT_MUSIC)
+		Audio.resumeContext(AudioContext.CONTEXT_SOUND)
+		#else
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	#if GAMEAPP >= 0x25021500
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
-		pause_menu_selection = 6
+		Game.openOptionsMenu()
+		return 0
+	}
+	#endif
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 3)
+	{
+		pause_menu_selection = 0x20
 		return 0
 	}
 
@@ -774,21 +856,29 @@ function u8 PauseMenu_Basic()
 
 function u8 PauseMenu_BlueSphere()
 {
-	if (pause_menu_selection >= 6)
+	if (pause_menu_selection >= 0x20)
 		return PauseMenu_ExitGame()
 
 	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection -= 1
 		if (pause_menu_selection < 0)
-			pause_menu_selection = 2
+			pause_menu_selection = 3
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			--pause_menu_selection
+		#endif
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
 	{
 		pause_menu_selection += 1
-		if (pause_menu_selection > 2)
+		if (pause_menu_selection > 3)
 			pause_menu_selection = 0
+		#if GAMEAPP < 0x25021500
+		if (pause_menu_selection == 2)	// options
+			++pause_menu_selection
+		#endif
 		playSound(0x5b)
 	}
 
@@ -814,16 +904,29 @@ function u8 PauseMenu_BlueSphere()
 		{
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+			#if GAMEAPP < 0x25021500
 			Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("ss_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("ss_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-			Renderer.drawCustomSprite(stringformat("ss_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("ss_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("ss_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+			Renderer.drawCustomSprite(stringformat("ss_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#else
+			Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+			Renderer.drawCustomSprite(stringformat("ss_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("ss_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 8
+			Renderer.drawCustomSprite(stringformat("ss_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 8
+			Renderer.drawCustomSprite(stringformat("ss_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			#endif
 		}
 	}
 
 	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
+		#if GAMEAPP >= 0x25021500
+		Audio.resumeContext(AudioContext.CONTEXT_MUSIC)
+		Audio.resumeContext(AudioContext.CONTEXT_SOUND)
+		#else
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -836,12 +939,21 @@ function u8 PauseMenu_BlueSphere()
 			SpecialStage()
 		}
 
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
-	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
+	#if GAMEAPP >= 0x25021500
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
-		pause_menu_selection = 6
+		Game.openOptionsMenu()
+		return 0
+	}
+	#endif
+	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 3)
+	{
+		pause_menu_selection = 0x20
 		return 0
 	}
 
@@ -855,7 +967,7 @@ function u8 PauseMenu_BlueSphere()
 
 function u8 PauseMenu_Challenges()
 {
-	if (pause_menu_selection >= 6)
+	if (pause_menu_selection >= 0x20)
 		return PauseMenu_ExitGame()
 
 	if (customMenu.scrollUp() && !clean_screenshot && !(control.pad1.state & CONTROL_B))
@@ -896,15 +1008,21 @@ function u8 PauseMenu_Challenges()
 			Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 			Renderer.drawCustomSprite("paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
 			Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-			Renderer.drawCustomSprite(stringformat("challenge_pause_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-			Renderer.drawCustomSprite(stringformat("challenge_pause_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 6
-			Renderer.drawCustomSprite(stringformat("challenge_pause_select_act_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 6
-			Renderer.drawCustomSprite(stringformat("challenge_pause_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("challenge_pause_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+			Renderer.drawCustomSprite(stringformat("challenge_pause_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 6
+			Renderer.drawCustomSprite(stringformat("challenge_pause_select_act_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 6
+			Renderer.drawCustomSprite(stringformat("challenge_pause_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 		}
 	}
 
 	if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
+		#if GAMEAPP >= 0x25021500
+		Audio.resumeContext(AudioContext.CONTEXT_MUSIC)
+		Audio.resumeContext(AudioContext.CONTEXT_SOUND)
+		#else
+		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 1)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -926,7 +1044,9 @@ function u8 PauseMenu_Challenges()
 
 		level.restart = 1
 		global.game.paused = false
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 2)
@@ -947,12 +1067,14 @@ function u8 PauseMenu_Challenges()
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
 
 		global.game.paused = false
+		#if GAMEAPP < 0x25021500
 		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
+		#endif
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 3)
 	{
-		pause_menu_selection = 6
+		pause_menu_selection = 0x20
 		return 0
 	}
 

@@ -7553,8 +7553,8 @@ function void Challenge.manageEndMenu()
 		TA_menu_selection -= 1
 		if (TA_menu_selection < 0)
 			TA_menu_selection = 2
-		else if (TA_menu_selection == 5)		// off top end of EXIT GAME menu
-			TA_menu_selection = 8
+		else if (TA_menu_selection == 0x1f)		// off top end of EXIT GAME menu
+			TA_menu_selection = 0x22
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollDown())
@@ -7562,8 +7562,8 @@ function void Challenge.manageEndMenu()
 		TA_menu_selection += 1
 		if (TA_menu_selection == 3)
 			TA_menu_selection = 0
-		if (TA_menu_selection > 8)		// off bottom end of EXIT GAME menu
-			TA_menu_selection = 6
+		if (TA_menu_selection > 0x22)		// off bottom end of EXIT GAME menu
+			TA_menu_selection = 0x20
 		playSound(0x5b)
 	}
 
@@ -7578,16 +7578,16 @@ function void Challenge.manageEndMenu()
 	else if (TA_menu_selection < 3)
 	{
 		Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
-		Renderer.drawCustomSprite(stringformat("ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
-		Renderer.drawCustomSprite(stringformat("ta_select_act_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
-		Renderer.drawCustomSprite(stringformat("ta_exit_game_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("ta_retry_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("ta_select_act_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("ta_exit_game_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 	else
 	{
 		Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
-		Renderer.drawCustomSprite(stringformat("cancel_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
-		Renderer.drawCustomSprite(stringformat("main_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
-		Renderer.drawCustomSprite(stringformat("air_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("cancel_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("main_menu_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("air_menu_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 
 	if (control.pad1.pressed & 0xe0 && TA_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -7619,7 +7619,7 @@ function void Challenge.manageEndMenu()
 	}
 	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 2)
 	{
-		TA_menu_selection = 6
+		TA_menu_selection = 0x20
 
 	//	checkpoint.number = 0
 	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
@@ -7629,12 +7629,12 @@ function void Challenge.manageEndMenu()
 		return
 	}
 
-	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 6 || (TA_menu_selection >= 6 && (control.pad1.pressed & CONTROL_B)))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 0x20 || (TA_menu_selection >= 0x20 && (control.pad1.pressed & CONTROL_B)))	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		TA_menu_selection = 2
 	}
 
-	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 7)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
+	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 0x21)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
 	{
 		restart_timer = 0
 		exit_timer = 0
@@ -7646,7 +7646,7 @@ function void Challenge.manageEndMenu()
 
 		global.game_mode = 0x58
 	}
-	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 8)
+	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 0x22)
 	{
 		restart_timer = 0
 		exit_timer = 0

@@ -152,15 +152,15 @@ function void Westside.TAEndMenu()
 	Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, 204)		// menu border rectangle (80% opacity)
 	if (TA_menu_selection < 3)
 	{
-		Renderer.drawCustomSprite(stringformat("westside_ta_retry_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
-		Renderer.drawCustomSprite(stringformat("westside_ta_select_act_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
-		Renderer.drawCustomSprite(stringformat("westside_ta_exit_game_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_ta_retry_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_ta_select_act_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("westside_ta_exit_game_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 	else
 	{
-		Renderer.drawCustomSprite(stringformat("westside_cancel_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
-		Renderer.drawCustomSprite(stringformat("westside_main_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
-		Renderer.drawCustomSprite(stringformat("westside_air_menu_%d", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_cancel_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+		Renderer.drawCustomSprite(stringformat("westside_main_menu_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// center of screen vertically
+		Renderer.drawCustomSprite(stringformat("westside_air_menu_%x", TA_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 }
 
@@ -168,10 +168,18 @@ function void Westside.PauseMenu_Normal()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-    Renderer.drawCustomSprite(stringformat("westside_normal_restart_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_restart_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#else
+	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+	Renderer.drawCustomSprite(stringformat("westside_normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	Renderer.drawCustomSprite(stringformat("westside_normal_restart_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 8
+	Renderer.drawCustomSprite(stringformat("westside_normal_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 8
+	Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#endif
 }
 
 function void Westside.PauseMenu_Restart()
@@ -179,9 +187,9 @@ function void Westside.PauseMenu_Restart()
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite(stringformat("westside_normal_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-    Renderer.drawCustomSprite(stringformat("westside_normal_star_post_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-    Renderer.drawCustomSprite(stringformat("westside_normal_act_start_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_cancel_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_star_post_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_normal_act_start_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 }
 
 function void Westside.PauseMenu_ExitGame()
@@ -189,28 +197,43 @@ function void Westside.PauseMenu_ExitGame()
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite(stringformat("westside_cancel_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-    Renderer.drawCustomSprite(stringformat("westside_main_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-    Renderer.drawCustomSprite(stringformat("westside_air_menu_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_cancel_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_main_menu_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_air_menu_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 }
 
 function void Westside.PauseMenu_Basic()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#else
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite(stringformat("westside_normal_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_normal_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_normal_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#endif
 }
 
 function void Westside.PauseMenu_BlueSphere()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite(stringformat("westside_ss_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-    Renderer.drawCustomSprite(stringformat("westside_ss_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
-    Renderer.drawCustomSprite(stringformat("westside_ss_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_ss_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+    Renderer.drawCustomSprite(stringformat("westside_ss_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically
+    Renderer.drawCustomSprite(stringformat("westside_ss_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#else
+	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+	Renderer.drawCustomSprite(stringformat("westside_ss_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	Renderer.drawCustomSprite(stringformat("westside_ss_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 8
+	Renderer.drawCustomSprite(stringformat("westside_ss_options_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 8
+	Renderer.drawCustomSprite(stringformat("westside_ss_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	#endif
 }
 
 function void Westside.PauseMenu_Challenges()
@@ -218,10 +241,10 @@ function void Westside.PauseMenu_Challenges()
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
 	Renderer.drawCustomSprite("westside_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
 	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_continue_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
-	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_retry_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 6
-	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_select_act_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 6
-	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_exit_game_%d", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_continue_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_retry_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically - 8
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_select_act_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)	// center of screen vertically + 8
+	Renderer.drawCustomSprite(stringformat("westside_challenge_pause_exit_game_%x", pause_menu_selection), getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, 255)
 }
 
 function void Westside.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 spriteFlags, u16 renderQueue)	// same font as Angel theme

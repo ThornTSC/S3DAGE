@@ -1,10 +1,11 @@
 {
 	// PAUSED text
-	"saturn_paused":  { "File": "saturn_smallmenu.png", "Rect": "0, 160, 96,16", "Center": "49,8" },
+	"saturn_paused":  { "File": "saturn_smallmenu.png", "Rect": "0, 176, 96,16", "Center": "49,8" },
 
 	// Normal game pause menu
 	"saturn_normal_continue":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
 	"saturn_normal_restart":	  { "File": "saturn_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,7" },
+	"saturn_normal_options":	  { "File": "saturn_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,7" },
 	"saturn_normal_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 
 	// Normal game pause menu for Restart
@@ -20,6 +21,7 @@
 	// Special Stage pause menu
 	"saturn_ss_continue":	  { "File": "saturn_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,7" },
 	"saturn_ss_retry":	  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
+	"saturn_ss_options":	  { "File": "saturn_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,7" },
 	"saturn_ss_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
 
 	// Challenges pause menu
@@ -31,5 +33,5 @@
 	// End of Time Attack / Time Stone Trial menu
 	"saturn_ta_retry":		  { "File": "saturn_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,7" },
 	"saturn_ta_select_act":	  { "File": "saturn_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "41,7" },
-	"saturn_ta_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" },
+	"saturn_ta_exit_game":	  { "File": "saturn_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,7" }
 }

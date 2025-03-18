@@ -132,9 +132,9 @@ function void Saturn.TAEndMenu()
 	}
 	else
 	{
-		Renderer.drawCustomSprite("saturn_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 6) ? selectionTint : nonSelectionTint, 0x10000)
-		Renderer.drawCustomSprite("saturn_main_menu", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 7) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
-		Renderer.drawCustomSprite("saturn_air_menu", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 8) ? selectionTint : nonSelectionTint, 0x10000)
+		Renderer.drawCustomSprite("saturn_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 0x20) ? selectionTint : nonSelectionTint, 0x10000)
+		Renderer.drawCustomSprite("saturn_main_menu", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 0x21) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
+		Renderer.drawCustomSprite("saturn_air_menu", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO, 0xe001, 0, (TA_menu_selection == 0x22) ? selectionTint : nonSelectionTint, 0x10000)
 	}
 }
 
@@ -142,10 +142,18 @@ function void Saturn.PauseMenu_Normal()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
     Renderer.drawCustomSprite("saturn_normal_continue", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
     Renderer.drawCustomSprite("saturn_normal_restart", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
-    Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#else
+	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+	Renderer.drawCustomSprite("saturn_normal_continue", getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("saturn_normal_restart", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically - 8
+	Renderer.drawCustomSprite("saturn_normal_options", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically + 8
+	Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#endif
 }
 
 function void Saturn.PauseMenu_Restart()
@@ -153,9 +161,9 @@ function void Saturn.PauseMenu_Restart()
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite("saturn_normal_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
-    Renderer.drawCustomSprite("saturn_normal_star_post", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 4) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
-    Renderer.drawCustomSprite("saturn_normal_act_start", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 5) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_normal_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x10) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_normal_star_post", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x11) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
+    Renderer.drawCustomSprite("saturn_normal_act_start", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x12) ? selectionTint : nonSelectionTint, 0x10000)
 }
 
 function void Saturn.PauseMenu_ExitGame()
@@ -163,28 +171,43 @@ function void Saturn.PauseMenu_ExitGame()
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
-    Renderer.drawCustomSprite("saturn_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 6) ? selectionTint : nonSelectionTint, 0x10000)
-    Renderer.drawCustomSprite("saturn_main_menu", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 7) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
-    Renderer.drawCustomSprite("saturn_air_menu", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 8) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_cancel", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x20) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_main_menu", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x21) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
+    Renderer.drawCustomSprite("saturn_air_menu", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0x22) ? selectionTint : nonSelectionTint, 0x10000)
 }
 
 function void Saturn.PauseMenu_Basic()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
     Renderer.drawCustomSprite("saturn_normal_continue", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
-    Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0,(pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0,(pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#else
+    Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+    Renderer.drawCustomSprite("saturn_normal_continue", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_normal_options", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
+    Renderer.drawCustomSprite("saturn_normal_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#endif
 }
 
 function void Saturn.PauseMenu_BlueSphere()
 {
     Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff0, 0, 0xc0)	// dim background
     Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
+	#if GAMEAPP < 0x25021500
     Renderer.drawCustomSprite("3_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
     Renderer.drawCustomSprite("saturn_ss_continue", getScreenWidth()/2, getScreenHeight()/2 - 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
     Renderer.drawCustomSprite("saturn_ss_retry", getScreenWidth()/2, getScreenHeight()/2, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically
-    Renderer.drawCustomSprite("saturn_ss_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
+    Renderer.drawCustomSprite("saturn_ss_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 16, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#else
+	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
+	Renderer.drawCustomSprite("saturn_ss_continue", getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("saturn_ss_retry", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically - 8
+	Renderer.drawCustomSprite("saturn_ss_options", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically + 8
+	Renderer.drawCustomSprite("saturn_ss_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
+	#endif
 }
 
 function void Saturn.PauseMenu_Challenges()
@@ -193,8 +216,8 @@ function void Saturn.PauseMenu_Challenges()
 	Renderer.drawCustomSprite("saturn_paused", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)	// PAUSED text
 	Renderer.drawCustomSprite("4_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 	Renderer.drawCustomSprite("saturn_challenge_pause_continue", getScreenWidth()/2, getScreenHeight()/2 - 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
-	Renderer.drawCustomSprite("saturn_challenge_pause_retry", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically - 6
-	Renderer.drawCustomSprite("saturn_challenge_pause_select_act", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically + 6
+	Renderer.drawCustomSprite("saturn_challenge_pause_retry", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 1) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically - 8
+	Renderer.drawCustomSprite("saturn_challenge_pause_select_act", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)	// center of screen vertically + 8
 	Renderer.drawCustomSprite("saturn_challenge_pause_exit_game", getScreenWidth()/2, getScreenHeight()/2 + 24, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2, 0, (pause_menu_selection == 3) ? selectionTint : nonSelectionTint, 0x10000)
 }
 

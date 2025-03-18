@@ -1,6 +1,6 @@
 {
 	// PAUSED text
-	"paused":  { "File": "smallmenu.png", "Rect": "0, 120, 90,16", "Center": "45,8" },
+	"paused":  { "File": "smallmenu.png", "Rect": "0, 132, 90,16", "Center": "45,8" },
 	"select_difficulty":  { "File": "difficulty_menu.png", "Rect": "0, 0, 272,16", "Center": "137,8" },
 
 //	"select_difficulty":  { "File": "select_difficulty.png", "Center": "115,8" },
@@ -22,53 +22,69 @@
 	"normal_continue_0":	  { "File": "smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected
 	"normal_continue_1":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	"normal_continue_2":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
+	"normal_continue_3":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	
 	"normal_restart_0":	  { "File": "smallmenu.png", "Rect": "0, 72, 55,12", "Center": "28,6" },
 	"normal_restart_1":	  { "File": "smallmenu.png", "Rect": "80, 72, 55,12", "Center": "28,6" },	// selected
 	"normal_restart_2":	  { "File": "smallmenu.png", "Rect": "0, 72, 55,12", "Center": "28,6" },
+	"normal_restart_3":	  { "File": "smallmenu.png", "Rect": "0, 72, 55,12", "Center": "28,6" },
+
+	"normal_options_0":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
+	"normal_options_1":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
+	"normal_options_2":	  { "File": "smallmenu.png", "Rect": "80, 120, 54,12", "Center": "28,6" },	// selected
+	"normal_options_3":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
 	
 	"normal_exit_game_0":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
 	"normal_exit_game_1":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"normal_exit_game_2":	  { "File": "smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"normal_exit_game_2":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
+	"normal_exit_game_3":	  { "File": "smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
 
 	// Normal game pause menu for Restart
-	"normal_cancel_3":	  { "File": "smallmenu.png", "Rect": "80, 36, 47,12", "Center": "24,6" },	// selected
-	"normal_cancel_4":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
-	"normal_cancel_5":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
+	"normal_cancel_10":	  { "File": "smallmenu.png", "Rect": "80, 36, 47,12", "Center": "24,6" },	// selected
+	"normal_cancel_11":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
+	"normal_cancel_12":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
 	
-	"normal_star_post_3":	  { "File": "smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
-	"normal_star_post_4":	  { "File": "smallmenu.png", "Rect": "80, 84, 70,12", "Center": "35,6" },	// selected
-	"normal_star_post_5":	  { "File": "smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
+	"normal_star_post_10":	  { "File": "smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
+	"normal_star_post_11":	  { "File": "smallmenu.png", "Rect": "80, 84, 70,12", "Center": "35,6" },	// selected
+	"normal_star_post_12":	  { "File": "smallmenu.png", "Rect": "0, 84, 70,12", "Center": "35,6" },
 	
-	"normal_act_start_3":	  { "File": "smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
-	"normal_act_start_4":	  { "File": "smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
-	"normal_act_start_5":	  { "File": "smallmenu.png", "Rect": "80, 96, 70,12", "Center": "35,6" },	// selected
+	"normal_act_start_10":	  { "File": "smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
+	"normal_act_start_11":	  { "File": "smallmenu.png", "Rect": "0, 96, 70,12", "Center": "35,6" },
+	"normal_act_start_12":	  { "File": "smallmenu.png", "Rect": "80, 96, 70,12", "Center": "35,6" },	// selected
 
 	// Pause menu for Exit Game
-	"cancel_6":	  { "File": "smallmenu.png", "Rect": "80, 36, 47,12", "Center": "24,6" },	// selected
-	"cancel_7":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
-	"cancel_8":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
+	"cancel_20":	  { "File": "smallmenu.png", "Rect": "80, 36, 47,12", "Center": "24,6" },	// selected
+	"cancel_21":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
+	"cancel_22":	  { "File": "smallmenu.png", "Rect": "0, 36, 47,12", "Center": "24,6" },
 	
-	"main_menu_6":	  { "File": "smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
-	"main_menu_7":	  { "File": "smallmenu.png", "Rect": "80, 48, 76,12", "Center": "38,6" },	// selected
-	"main_menu_8":	  { "File": "smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
+	"main_menu_20":	  { "File": "smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
+	"main_menu_21":	  { "File": "smallmenu.png", "Rect": "80, 48, 76,12", "Center": "38,6" },	// selected
+	"main_menu_22":	  { "File": "smallmenu.png", "Rect": "0, 48, 76,12", "Center": "38,6" },
 	
-	"air_menu_6":	  { "File": "smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
-	"air_menu_7":	  { "File": "smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
-	"air_menu_8":	  { "File": "smallmenu.png", "Rect": "80, 60, 68,12", "Center": "34,6" },	// selected
+	"air_menu_20":	  { "File": "smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
+	"air_menu_21":	  { "File": "smallmenu.png", "Rect": "0, 60, 68,12", "Center": "34,6" },
+	"air_menu_22":	  { "File": "smallmenu.png", "Rect": "80, 60, 68,12", "Center": "34,6" },	// selected
 
 	// Special Stage pause menu
 	"ss_continue_0":	  { "File": "smallmenu.png", "Rect": "80, 108, 63,12", "Center": "32,6" },	// selected
 	"ss_continue_1":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	"ss_continue_2":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
+	"ss_continue_3":	  { "File": "smallmenu.png", "Rect": "0, 108, 63,12", "Center": "32,6" },
 	
 	"ss_retry_0":	  { "File": "smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
 	"ss_retry_1":	  { "File": "smallmenu.png", "Rect": "80, 0, 39,12", "Center": "20,6" },	// selected
 	"ss_retry_2":	  { "File": "smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
+	"ss_retry_3":	  { "File": "smallmenu.png", "Rect": "0, 0, 39,12", "Center": "20,6" },
+
+	"ss_options_0":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
+	"ss_options_1":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
+	"ss_options_2":	  { "File": "smallmenu.png", "Rect": "80, 120, 54,12", "Center": "28,6" },	// selected
+	"ss_options_3":	  { "File": "smallmenu.png", "Rect": "0, 120, 54,12", "Center": "28,6" },
 	
 	"ss_exit_game_0":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
 	"ss_exit_game_1":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
-	"ss_exit_game_2":	  { "File": "smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
+	"ss_exit_game_2":	  { "File": "smallmenu.png", "Rect": "0, 24, 72,12", "Center": "36,6" },
+	"ss_exit_game_3":	  { "File": "smallmenu.png", "Rect": "80, 24, 72,12", "Center": "36,6" },	// selected
 
 	// Challenges pause menu
 	"challenge_pause_continue_0":	  { "File": "smallmenu.png", "Rect": "80,108, 63,12", "Center": "32,6" },	// selected

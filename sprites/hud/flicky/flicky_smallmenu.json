@@ -1,58 +1,74 @@
 {
 	// PAUSED text
-	"flicky_paused":  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 96,16", "Center": "49,8" },
+	"flicky_paused":  { "File": "flicky_smallmenu.png", "Rect": "0, 176, 96,16", "Center": "49,8" },
 
 	// Normal game pause menu
 	"flicky_normal_continue_0":	  { "File": "flicky_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,8" },	// selected
 	"flicky_normal_continue_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
 	"flicky_normal_continue_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
+	"flicky_normal_continue_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
 	
 	"flicky_normal_restart_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,8" },
 	"flicky_normal_restart_1":	  { "File": "flicky_smallmenu.png", "Rect": "80, 96, 56,16", "Center": "29,8" },	// selected
 	"flicky_normal_restart_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,8" },
+	"flicky_normal_restart_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "29,8" },
+
+	"flicky_normal_options_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
+	"flicky_normal_options_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
+	"flicky_normal_options_2":	  { "File": "flicky_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "29,8" },	// selected
+	"flicky_normal_options_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
 	
 	"flicky_normal_exit_game_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
 	"flicky_normal_exit_game_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
-	"flicky_normal_exit_game_2":	  { "File": "flicky_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,8" },	// selected
+	"flicky_normal_exit_game_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
+	"flicky_normal_exit_game_3":	  { "File": "flicky_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,8" },	// selected
 
 	// Normal game pause menu for Restart
-	"flicky_normal_cancel_3":	  { "File": "flicky_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,8" },	// selected
-	"flicky_normal_cancel_4":	  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
-	"flicky_normal_cancel_5":	  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
+	"flicky_normal_cancel_10":	  { "File": "flicky_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,8" },	// selected
+	"flicky_normal_cancel_11":	  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
+	"flicky_normal_cancel_12":	  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
 	
-	"flicky_normal_star_post_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,8" },
-	"flicky_normal_star_post_4":	  { "File": "flicky_smallmenu.png", "Rect": "80, 112, 72,16", "Center": "37,8" },	// selected
-	"flicky_normal_star_post_5":	  { "File": "flicky_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,8" },
+	"flicky_normal_star_post_10":	  { "File": "flicky_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,8" },
+	"flicky_normal_star_post_11":	  { "File": "flicky_smallmenu.png", "Rect": "80, 112, 72,16", "Center": "37,8" },	// selected
+	"flicky_normal_star_post_12":	  { "File": "flicky_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "37,8" },
 	
-	"flicky_normal_act_start_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,8" },
-	"flicky_normal_act_start_4":	  { "File": "flicky_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,8" },
-	"flicky_normal_act_start_5":	  { "File": "flicky_smallmenu.png", "Rect": "80, 128, 72,16", "Center": "37,8" },	// selected
+	"flicky_normal_act_start_10":	  { "File": "flicky_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,8" },
+	"flicky_normal_act_start_11":	  { "File": "flicky_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "37,8" },
+	"flicky_normal_act_start_12":	  { "File": "flicky_smallmenu.png", "Rect": "80, 128, 72,16", "Center": "37,8" },	// selected
 
 	// Pause menu for Exit Game
-	"flicky_cancel_6":		  { "File": "flicky_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,8" },	// selected
-	"flicky_cancel_7":		  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
-	"flicky_cancel_8":		  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
+	"flicky_cancel_20":		  { "File": "flicky_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "25,8" },	// selected
+	"flicky_cancel_21":		  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
+	"flicky_cancel_22":		  { "File": "flicky_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "25,8" },
 	
-	"flicky_main_menu_6":	  { "File": "flicky_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,8" },
-	"flicky_main_menu_7":	  { "File": "flicky_smallmenu.png", "Rect": "80, 64, 72,16", "Center": "37,8" },	// selected
-	"flicky_main_menu_8":	  { "File": "flicky_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,8" },
+	"flicky_main_menu_20":	  { "File": "flicky_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,8" },
+	"flicky_main_menu_21":	  { "File": "flicky_smallmenu.png", "Rect": "80, 64, 72,16", "Center": "37,8" },	// selected
+	"flicky_main_menu_22":	  { "File": "flicky_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "37,8" },
 	
-	"flicky_air_menu_6":	  { "File": "flicky_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,8" },
-	"flicky_air_menu_7":	  { "File": "flicky_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,8" },
-	"flicky_air_menu_8":	  { "File": "flicky_smallmenu.png", "Rect": "80, 80, 68,16", "Center": "35,8" },	// selected
+	"flicky_air_menu_20":	  { "File": "flicky_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,8" },
+	"flicky_air_menu_21":	  { "File": "flicky_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "35,8" },
+	"flicky_air_menu_22":	  { "File": "flicky_smallmenu.png", "Rect": "80, 80, 68,16", "Center": "35,8" },	// selected
 
 	// Special Stage pause menu
 	"flicky_ss_continue_0":	  { "File": "flicky_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,8" },	// selected
 	"flicky_ss_continue_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
 	"flicky_ss_continue_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
+	"flicky_ss_continue_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "33,8" },
 	
 	"flicky_ss_retry_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,8" },
 	"flicky_ss_retry_1":	  { "File": "flicky_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "21,8" },	// selected
 	"flicky_ss_retry_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,8" },
+	"flicky_ss_retry_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "21,8" },
+
+	"flicky_ss_options_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
+	"flicky_ss_options_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
+	"flicky_ss_options_2":	  { "File": "flicky_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "29,8" },	// selected
+	"flicky_ss_options_3":	  { "File": "flicky_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "29,8" },
 	
 	"flicky_ss_exit_game_0":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
 	"flicky_ss_exit_game_1":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
-	"flicky_ss_exit_game_2":	  { "File": "flicky_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,8" },	// selected
+	"flicky_ss_exit_game_2":	  { "File": "flicky_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "37,8" },
+	"flicky_ss_exit_game_3":	  { "File": "flicky_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "37,8" },	// selected
 
 	// Challenges pause menu
 	"flicky_challenge_pause_continue_0":	  { "File": "flicky_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "33,8" },	// selected
