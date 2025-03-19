@@ -11988,6 +11988,85 @@ function void fn02219e()
 	u8[A0 + 0x25] = 0
 }
 
+// Make sure the sfx from jumping from a vine (added in Origins) don't play in Original Mode
+//# address-hook(0x0220c2) end(0x02219c)
+function void fn0220c2()
+{
+#if STANDALONE
+	if (debug_mode.state)
+	{
+		u8[A2] = 0
+		return
+	}
+#endif
+
+	if (u8[A2] == 0)
+	{
+		fn0222f4()
+		return
+	}
+
+	if (s8[A2] > 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			D1.u8 = D0.u8 & CONTROL_ABC
+			if (D1.u8 == 0)
+			{
+				fn0221ec()
+				return
+			}
+
+			u8[A2] = 0
+			u8[A1 + 0x2e] = 0
+			if (u16[A0 + 0x30] != 0x01)
+			{
+				D1.s16 = s16(objA0.position.x.u16 - objA0.value42) << 7
+				objA1.velocity.x = D1.u16
+				D1.s16 = s16(objA0.position.y.u16 - u16[A0 + 0x44]) << 7
+				objA1.velocity.y = D1.u16
+				u8[A2 + 0x02] = 0x3c
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				objA1.velocity.y -= 0x380
+			}
+			else
+			{
+				u8[A2 + 0x02] = 0x3c
+				A3 = 0xffff0000 + u16[A0 + 0x3c]
+				u8 angle = u8[A3 + 0x26]
+				objA1.velocity.x = lookupCos(angle) << 3
+				objA1.velocity.y = lookupSin(angle) << 3
+			}
+
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+				playSound(SFX_JUMP)
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.state = char.state.ROLLING
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			u8[A1 + 0x40] = 1
+			return
+		}
+	}
+	else
+	{
+		u8[A1 + 0x2a] |= char.flag.IN_AIR
+		objA1.velocity.x = 0x300
+		objA1.velocity.y = 0x200
+	}
+
+	u8[A1 + 0x2e] = 0
+	u8[A2] = 0
+	u8[A2 + 0x02] = 0x3c
+}
 
 //# address-hook(0x022258) end(0x0222d0)
 function void fn022258()
@@ -13362,7 +13441,100 @@ function void fn030f58()
 
 
 
-// Add Origins sound effects to grabbing and jumping from conveyor belts
+// Add Origins sound effect to grabbing HCZ1 breakable bars
+// Function taken from objects\02_hcz\hcz_breakablebar.lemon
+//# address-hook(0x01edec) end(0x01eeea)
+function void fn01edec()
+{
+	if (u8[A2] != 0)
+	{
+		D0.u16 = objA0.position.y.u16 - u16[A0 + 0x36]
+		if (D1 & 0x0100)		// CONTROL_UP held
+		{
+			--objA1.position.y.u16
+			if (D0.u16 >= objA1.position.y.u16)
+			{
+				objA1.position.y.u16 = D0.u16
+			}
+		}
+
+		D0.u16 += u16[A0 + 0x38]
+		if (D1 & 0x0200)		// CONTROL_DOWN held
+		{
+			++objA1.position.y.u16
+			if (D0.u16 < objA1.position.y.u16)
+			{
+				objA1.position.y.u16 = D0.u16
+			}
+		}
+
+		// Check if jump button pressed
+		D1.u16 &= CONTROL_ABC
+		if (D1.u16 == 0)
+			return
+
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+		level.HCZ_breakable_bar_flags &= ~(1 << D2.u8)
+		u8[A1 + 0x2e] &= ~control_flag.DISABLE_UPDATE
+		if ((objA0.subtype2c & 0x40) == 0)
+		{
+			objA0.value3a = 0x01
+		}
+		return
+	}
+
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		return
+	}
+
+	D1 = objA0.box_size.y
+	D0.u16 = objA0.position.y.u16 - D1.u16
+	D2.u16 = objA1.position.y.u16
+	if (D2.u16 >= D0.u16)
+	{
+		D0.u16 += D1.u16 * 2
+		if (D2.u16 < D0.u16)
+		{
+			D0.u16 = objA0.position.x.u16 + 0x14
+			if (D0.u16 < objA1.position.x.u16 && D0.u16 + 0x10 >= objA1.position.x.u16)
+			{
+				if (u8[A1 + 0x05] < base_state.HURT && u8[A1 + 0x2e] == 0)
+				{
+					D0.u16 = objA0.position.y.u16 - u16[A0 + 0x36]
+					if (D0.u16 >= objA1.position.y.u16)
+					{
+						objA1.position.y.u16 = D0.u16
+					}
+					D0.u16 += u16[A0 + 0x38]
+					if (D0.u16 < objA1.position.y.u16)
+					{
+						objA1.position.y.u16 = D0.u16
+					}
+
+					objA1.velocity.x = 0
+					objA1.velocity.y = 0
+					D0.u16 = objA0.position.x.u16 + 0x14
+					objA1.position.x.u16 = D0.u16
+					objA1.state = char.state.HOLDING_ON
+					objA1.flags2a &= ~char.flag.FACING_LEFT
+					u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+					level.HCZ_breakable_bar_flags |= (1 << (D2.u8 & 7))
+					u8[A2] = 0x01
+
+					if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
+						playSound(SFX_GRAB)
+				}
+			}
+		}
+	}
+}
+
+
+
+// Add Origins sound effects to grabbing and jumping from HCZ1 conveyor belts
 // (Note: Origins also allows a higher jump height from conveyors. We do not implement this.)
 // Function taken from objects\02_hcz\hcz_conveyorbelt.lemon
 //# address-hook(0x031226) end(0x031458)
@@ -15007,8 +15179,10 @@ function void fn03438e()
 					objA1.velocity.x = -objA1.velocity.x
 					objA1.position.x.u16 -= 0x20
 				}
-
-				playSound(0x67)
+				if (System.getGlobalVariableValueByName("MFT_MGZRelief_SFX") && !original_mode)
+					playSound(0x70)
+				else
+					playSound(0x67)	// sound from base S3&K. Origins uses the same sound as when pushing AIZ rocks.
 			}
 		}
 	}
@@ -15017,7 +15191,337 @@ function void fn03438e()
 }
 
 
+// Remove the jump sound from MGZ columns you run in a spiral down in Original Mode
+// In Origins, characters jump off in ball form and downward momentum is taken into account; we do not do that in DAGE.
+// Function taken from objects\03_mgz\mgz_spiralrun.lemon
+//# address-hook(0x033cac) end(0x033f64)
+function void fn033cac()
+{
+	u8 bit = (1 << D6.u8)
+	if ((objA0.flags2a & bit) == 0)
+	{
+		if (u8[A2 + 0x04] != 0)
+		{
+			--u8[A2 + 0x04]
+			if (u8[A2 + 0x04] == 0)
+			{
+				u8[A1 + 0x2e] &= ~control_flag.DISABLE_UPDATE
+			}
 
+			D0.s32 = objA1.velocity.x
+			D0 <<= 8
+			objA1.position.x += D0
+			D0.s32 = objA1.velocity.y
+			objA1.velocity.y += 0x38
+			D0 <<= 8
+			objA1.position.y += D0
+			return
+		}
+
+		D1 = u8[A1 + 0x1e] + 0x24
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + D1.u16
+		D1.u16 *= 2
+		if (D0.u16 < D1.u16)
+		{
+			D0.u16 = objA1.position.y.u16 - objA0.position.y.u16
+			if (D0.u16 < 0x20)
+			{
+				if (u8[A1 + 0x2e] == 0 && debug_mode.state == 0 && (u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+				{
+					D0.u8 = u8[A1 + 0x26]
+					D0.u8 &= 0x7f
+					if (D0.u16 == 0x40)
+					{
+						u32[A2] = objA1.position.y
+						u16[A2] = u16[A2] - objA0.position.y.u16
+						fn033c34()
+
+						D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+						if (D0.s16 >= 0)
+						{
+							objA1.render_flags |= render_flag.FLIP_X
+							u8[A1 + 0x26] = 0x40
+							u8[A2 + 0x05] = 0
+						}
+						else
+						{
+							objA1.render_flags &= ~render_flag.FLIP_X
+							u8[A1 + 0x26] = -0x40
+							u8[A2 + 0x05] = 0x80
+						}
+
+						objA1.render_flags |= render_flag.FLIP_Y
+						u8[A1 + 0x2e] |= (control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION)
+						objA1.state = char.state.RUNNING
+					}
+				}
+			}
+		}
+		return
+	}
+
+	if (debug_mode.state == 0)
+	{
+		// Check if jump button pressed
+		if (D5.u16 & CONTROL_ABC)
+		{
+			u8[A2 + 0x04] = 0x08
+			u8[A1 + 0x2e] |= 0x01
+			u8[A1 + 0x2a] |= 0x03
+			u8[A1 + 0x40] = 0
+			objA1.velocity.x = -0x800
+			objA1.velocity.y = -0x200
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+			if (D0.s16 >= 0)
+			{
+				objA1.velocity.x = -objA1.velocity.x
+				u8[A1 + 0x2a] &= ~0x01
+			}
+
+			if (!original_mode)
+				playSound(SFX_JUMP)
+		}
+		else
+		{
+			D0.u16 = u16[A1 + 0x1c]
+			if (D0.s16 < 0)
+			{
+				D0.s16 = -D0.s16
+				if (D0.u16 < 0x0400)
+				{
+					u16[A1 + 0x1c] = -0x400
+				}
+			}
+			else
+			{
+				if (D0.u16 < 0x0400)
+				{
+					u16[A1 + 0x1c] = 0x400
+				}
+			}
+
+			D0.u16 = objA1.position.y.u16 - objA0.position.y.u16
+			if (D0.u16 < u16[A0 + 0x3c])
+			{
+				D0.u16 = u16[A1 + 0x1c]
+				if (D0.s16 < 0)
+				{
+					D0.s16 = -D0.s16
+					if (D0.u16 >= 0xc00)
+					{
+						u16[A1 + 0x1c] = -0xc00
+						objA1.velocity.y = 0xc00
+					}
+				}
+				else
+				{
+					if (D0.u16 >= 0xc00)
+					{
+						u16[A1 + 0x1c] = 0xc00
+						objA1.velocity.y = 0xc00
+					}
+				}
+
+				D0.s32 = objA1.velocity.y
+				D0 <<= 6
+				D1 = D0
+				D0 *= 3
+				u32[A2] += D0
+				D0 = u16[A2]
+				D0 = u32(D0.u16) * 0x0155
+				D0 >>= 8
+				D2 = D0.u16
+				D0.u8 += u8[A2 + 0x05]
+				LookupSinCos()
+				D3.u16 = D1.u16
+				D1.s16 >>= 3
+				D1.u16 += objA0.position.x.u16
+				D0 = u8[A1 + 0x1e]
+				D0.s32 = s32(D0.s16) * D3.s16
+				D0.s16 >>= 8
+				D1.u16 += D0.u16
+				objA1.position.x.u16 = D1.u16
+				objA1.position.y.u16 = u16[A2] + objA0.position.y.u16
+				D0 = 0
+				objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+				if (D2.u8 < 0x80)
+				{
+					objA1.sprite_attributes |= sprite_attribute.PRIORITY
+				}
+				D2.u16 = u8(0x40 - D2.u8)
+				D2.u16 = D2 / 0x0b
+				objA1.animation.sprite = u8[0x033f6c + D2.s16]		// Player characters' corkscrew vertical running sprites
+
+				D0 = objA1.animation.sprite
+				SetCharacterSpritePatterns()
+				return
+			}
+			else
+			{
+				D0.u16 = u16[A1 + 0x1c]
+				if (D0.s16 < 0)
+				{
+					D0.s16 = -D0.s16
+					if (D0.u16 >= 0xc00)
+					{
+						u16[A1 + 0x1c] = -0xc00
+						objA1.velocity.y = 0xc00
+					}
+				}
+				else
+				{
+					if (D0.u16 >= 0xc00)
+					{
+						u16[A1 + 0x1c] = 0xc00
+						objA1.velocity.y = 0xc00
+					}
+				}
+
+				D0.s32 = objA1.velocity.y
+				D0 <<= 6
+				D1 = D0
+				D0 *= 3
+				D0 += u32[A2]
+				D0 = (D0 << 16) + (D0 >> 16)
+				D0 = u32(D0.u16) * 0x0155
+				D0 >>= 8
+				D2 = D0.u16
+				D0.u8 += u8[A2 + 0x05]
+				LookupSinCos()
+				D3.u16 = D1.u16
+				D1.s16 >>= 3
+				D1.u16 += objA0.position.x.u16
+				D0 = u8[A1 + 0x1e]
+				D0.s32 = s32(D0.s16) * D3.s16
+				D0.s16 >>= 8
+				D1.u16 += D0.u16
+				objA1.position.x.u16 = D1.u16
+			}
+		}
+	}
+
+	if (objA0.flags2a & 0x01)
+	{
+		u8[A1 + 0x26] += 0x80
+	}
+
+	u8[A1 + 0x2a] &= ~char.flag.ROLLING
+	objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+	objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+	objA1.state.both = char.state.RUNNING2
+	u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+	objA0.flags2a &= ~bit
+	u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION)
+	objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+}
+
+
+
+// In Original Mode, do not play jump SFX when leaping from an MGZ pulley
+// and do not allow special moves.
+// Function taken from objects\03_mgz\mgz_yoyo.lemon
+function void fn0349ba()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			if ((D0.u8 & CONTROL_ABC) == 0)
+			{
+				D2.u16 = objA0.position.x.u16 - 0x26
+				D3.u16 = objA0.position.y.u16 + 0x2e
+				D0.u16 = u16[A0 + 0x3c]
+				D3.u16 += D0.u16
+				D0.u16 >>= 1
+				if (objA0.flags2a & 0x01)
+				{
+					D2.u16 += 0x4c
+					D0.s16 = -D0.s16
+				}
+				D2.u16 -= D0.u16
+				objA1.position.x.u16 = D2.u16
+				objA1.position.y.u16 = D3.u16
+				return
+			}
+
+			// Jump off
+			objA1.velocity.x = (objA0.flags2a & 0x01) ? 0x400 : -0x400
+			objA1.velocity.y = -0x600
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.state = char.state.ROLLING
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+
+			if (!original_mode)
+			{
+				// Set jump flag to allow for immediate mid-jump action
+				u8[A1 + 0x40] = 1
+				// Play jump sound if MFaT setting doesn't disable it
+				if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+					playSound(SFX_JUMP)
+			}
+		}
+
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+	}
+	else
+	{
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+			if (u8[A2 + 0x02] != 0)
+			{
+				return
+			}
+		}
+
+		D2.u16 = objA0.position.x.u16 - 0x26
+		D3.u16 = objA0.position.y.u16 + 0x2e
+		D0.u16 = u16[A0 + 0x3c]
+		D3.u16 += D0.u16
+		D0.u16 >>= 1
+		if (objA0.flags2a & 0x01)
+		{
+			D2.u16 += 0x4c
+			D0.s16 = -D0.s16
+		}
+		D2.u16 -= D0.u16
+
+		D0.u16 = objA1.position.x.u16 - D2.u16 + 0x0c
+		D1.u16 = objA1.position.y.u16 - D3.u16 + 0x0c
+		if (D0.u16 < 0x18 && D1.u16 < 0x18)
+		{
+			if (u8[A1 + 0x2e] == 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				D0.u16 = objA1.velocity.x
+				if (objA0.flags2a & 0x01)
+					D0.s16 = -D0.s16
+
+				if (D0.s16 < 0)
+				{
+					objA1.velocity.x = 0
+					objA1.velocity.y = 0
+					objA1.groundspeed = 0
+					objA1.position.x.u16 = D2.u16
+					objA1.position.y.u16 = D3.u16
+					objA1.state = char.state.PULLEY
+					u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+					if (objA0.flags2a & 0x01)
+						u8[A1 + 0x2a] |= 0x01
+					else
+						u8[A1 + 0x2a] &= ~0x01
+					u16[A0 + 0x34] = 0x10
+					u8[A2] = 1
+
+					playSound(0x64)
+				}
+			}
+		}
+	}
+}
 
 
 
@@ -15505,6 +16009,80 @@ function void fn044a26()
 	UnloadObject()
 }
 
+
+// Add Origins sound effect for leaping from CNZ mesh cylinders.
+// Function taken from objects\04_cnz\cnz_verticalcylinder.lemon
+//# address-hook(0x033ade) end(0x033c14)
+function void fn033ade()
+{
+	u8 bit = (1 << D6.u8)
+
+	if (debug_mode.state == 0)
+	{
+		// Check if jump button pressed
+		D5.u16 &= CONTROL_ABC
+		if (D5.u16 != 0)
+		{
+			objA1.velocity.x = -0x800
+			objA1.velocity.y = -0x200
+			u8[A1 + 0x2a] |= (char.flag.FACING_LEFT | char.flag.IN_AIR)
+			u8[A1 + 0x40] = 0
+
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+			if (D0.s16 >= 0)
+			{
+				objA1.velocity.x = -objA1.velocity.x
+				u8[A1 + 0x2a] &= ~char.flag.FACING_LEFT
+			}
+
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+				playSound(SFX_JUMP)
+		}
+		else
+		{
+			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+				D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 + u16[A0 + 0x38]
+				if (D0.u16 < u16[A0 + 0x3a])
+				{
+					if (objA0.velocity.y >= 0 || D0.u16 > 0x10)
+					{
+						objA1.position.y.u16 += objA0.velocity.y
+					}
+
+					fn033bba()
+					return
+				}
+				else if (D0.u16 == u16[A0 + 0x3a])
+				{
+					if ((u8[A2] & 0x7f) != 0)
+					{
+						fn033bba()
+						return
+					}
+					else
+					{
+						objA1.velocity.x = (s8[A2] >= 0) ? 0x100 : -0x100
+						objA1.velocity.y = 0
+						objA1.groundspeed = objA1.velocity.x
+						u8[A1 + 0x2a] |= char.flag.IN_AIR
+					}
+				}
+			}
+		}
+	}
+
+	u8[A1 + 0x26] = 0
+	u8[A1 + 0x2a] &= ~char.flag.ROLLING
+	objA1.hitbox_extends.x = char.hitbox.x.UPRIGHT
+	objA1.hitbox_extends.y = char.hitbox.y.UPRIGHT
+	objA1.state.both = char.state.RUNNING2
+	u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+	objA0.flags2a &= ~bit
+	u8[A1 + 0x2e] &= ~(control_flag.DISABLE_WALLS | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+	objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+	u8[A2 + 0x01] = 0x10
+}
 
 
 
@@ -16192,6 +16770,7 @@ function void fn065d46()
 
 // Edit the target water height when the switch to turn the CNZ2 lights on is activated.
 // The time attack check is removed, as we use the normal water settings in DAGE time attack modes.
+// We also check if the button is pressed to call the appropriate SFX, matching Origins.
 // Function taken from level\04_cnz\cnz2_knuckles_lights_out.lemon
 //# address-hook(0x065d8c) end(0x065dd0)
 function void fn065d8c()
@@ -16201,6 +16780,9 @@ function void fn065d8c()
 		base.fn065d8c()
 		return
 	}
+
+	Button.checkIfPressed()		// calling this function allows the button SFX to play when the lights come back on
+	
 	fn065dec()
 	objA0.animation.sprite = 0
 
@@ -17361,7 +17943,9 @@ function void fn026c6c()
 
 
 
+
 // In Original Mode, tube transport elevators in LBZ1 take the original game's length of time to stop spinning
+// and are suspectible to the bug in which another transport elevator blocks the exit.
 // Functions taken from objects\06_lbz\lbz_tubestransport.lemon
 //# address-hook(0x029eb2) end(0x029f32)
 function void fn029eb2()
@@ -17458,8 +18042,276 @@ function void fn029fcc()
 	fn02a018()
 }
 
+//# address-hook(0x02a106) end(0x02a216)
+function void fn02a106()
+{
+	D0.u8 = u8[A2]
+	if (D0.u8 == 0)
+	{
+		if (debug_mode.state != 0)
+			return
+
+		if (A1 != 0xffffb04a || (objA0.flags2a & object.flag.P2_ON_OBJECT) == 0 || u8[A2-1] == 0)
+		{
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 3
+			if (objA0.flags2a & 0x01)
+				D0.u16 += 0x0a
+			if (D0.u16 >= 0x10)
+				return
+
+			D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x20
+			if (D1.u16 >= 0x40)
+				return
+
+			if (u8[A1 + 0x2e] != 0 || (objA1.flags2a & char.flag.IN_AIR) != 0)
+				return
+		}
+
+		u8[A2] += 2
+		u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		u8[A1 + 0x20] = 0
+		u8[A1 + 0x40] = 0
+		objA1.velocity.x = 0
+		objA1.velocity.y = 0
+		objA1.groundspeed = 0
+		objA1.flags2a &= ~(char.flag.PUSHING | char.flag.IN_AIR)
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16 + 0x18 - u8[A1 + 0x1e]
+		// Make sure that character is "on" the object as it's possible that this did not get set accordingly before
+		//  -> If not set, this leads to a closed transporter already blocking the way at the exit point
+		//  -> So you would just pop out of the transporter when reaching the end of the ride (you've certainly seen this happening before)
+		if (!original_mode)
+		{
+			objA1.flags2a |= char.flag.ON_OBJECT
+			u16[A1 + 0x42] = A0.u16
+		}
+
+		objA0.flags2a &= ~object.flag.P1_PUSHING
+	}
+	else
+	{
+		D0.u8 -= 2
+		if (D0.u8 != 0)
+			return
+
+		objA1.position.x.u16 = objA0.position.x.u16
+		D0.u16 = objA0.position.y.u16 + 0x18
+		D1 = u8[A1 + 0x1e]
+		D0.u16 -= D1.u16
+		objA1.position.y.u16 = D0.u16
+		if (objA0.flags2e == 0x08)
+		{
+			objA1.flags2a |= char.flag.FACING_LEFT
+			u8[A1 + 0x2e] = 0
+			u8[A2] += 2
+		}
+
+	#if STANDALONE
+		if (!debug_mode.state)		// leaving this even in Original Mode to avoid serious issues
+	#endif
+		{
+			D0 = objA0.value26
+			objA1.animation.sprite = u8[0x02a218 + D0.u16]		// Player characters' spinning standing sprites
+			objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+			D0.u8 = u8[0x02a224 + D0.u16]
+			objA1.render_flags |= D0.u8
+			D0 = objA1.animation.sprite
+
+			u32 backupA2 = A2
+			SetCharacterSpritePatterns()
+			A2 = backupA2
+		}
+	}
+}
 
 
+
+// Add Origins SFX to grabbing and releasing the LBZ crane ziplines.
+// Functions taken from objects\06_lbz\lbz_ridegrapple.lemon
+//# address-hook(0x0266b0) end(0x026792)
+function void fn0266b0()
+{
+#if STANDALONE
+	if (debug_mode.state)
+		return
+#endif
+
+	if (u8[A2] == 0)
+	{
+		fn0267a4()
+		return
+	}
+
+	if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+	{
+		// Check if jump button pressed
+		D0.u8 &= CONTROL_ABC
+		if (D0.u8 == 0)
+		{
+			if (D0 & 0x0400)		// CONTROL_LEFT held
+			{
+				u8[A1 + 0x2a] |= 0x01
+			}
+			if (D0 & 0x0800)		// CONTROL_RIGHT held
+			{
+				u8[A1 + 0x2a] &= ~0x01
+			}
+
+			objA0.flags2a = u8[A1 + 0x2a]
+			objA1.render_flags = (objA1.render_flags & ~char.flag.FACING_LEFT) | (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+			objA1.position.x.u16 = u16[A3 + 0x10]
+			objA1.position.y.u16 = u16[A3 + 0x14] + 0x24
+
+			fn026768()
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 2] = (D0.u16 & 0x0f00) ? 0x3c : 0x12		// Any direction held?
+
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+				playSound(SFX_JUMP)
+			
+			objA1.velocity.x = objA0.velocity.x
+			objA1.velocity.y = -0x380
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.state = char.state.ROLLING
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			u8[A1 + 0x40] = 0x01
+		}
+	}
+	else
+	{
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 2] = 0x3c
+	}
+}
+
+//# address-hook(0x0267a4) end(0x02682c)
+function void fn0267a4()
+{
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		if (u8[A2 + 0x02] != 0)
+			return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x18
+	if (D0.u16 < 0x20 && D1.u16 < 0x18)
+	{
+		if (u8[A1 + 0x2e] == 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+		{
+		#if STANDALONE
+			// Ignore for Tails while he's carrying the main player
+			if (A1 == 0xffffb04a && tails.carrying && !original_mode)
+				return
+		#endif
+
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0)))
+				playSound(SFX_GRAB)
+
+			objA0.flags2a = u8[A1 + 0x2a]
+
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+			objA1.position.x.u16 = objA0.position.x.u16
+			objA1.position.y.u16 = objA0.position.y.u16 + 0x24
+			objA1.state = char.state.HANGING
+			u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+			u8[A1 + 0x3d] = 0
+
+			u8[A2] = 1
+			fn026768()
+		}
+	}
+}
+
+
+// Add Origins grabbing and jumping SFX to LBZ2 crane lifts
+// Function taken from objects\06_lbz\lbz_grapple.lemon
+//# address-hook(0x0290f2) end(0x029214)
+function void fn0290f2()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < base_state.HURT)
+		{
+			// Check if jump button pressed
+			if ((D0.u8 & CONTROL_ABC) == 0)
+			{
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x94
+				return
+			}
+
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2+2] = ((D0.u16 & 0x0f00) == 0) ? 0x12 : 0x3c	// Any direction held?
+			if (D0 & 0x0400)		// CONTROL_LEFT held
+			{
+				objA1.velocity.x = -0x200
+			}
+			if (D0 & 0x0800)		// CONTROL_RIGHT held
+			{
+				objA1.velocity.x = 0x200
+			}
+
+			objA1.velocity.y = -0x380
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.state = char.state.ROLLING
+			u8[A1 + 0x27] = 0
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			objA1.flags2a &= ~char.flag.CONTROL_LOCK
+			u8[A1 + 0x40] = 1
+
+			if (!original_mode && !((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)))
+				playSound(SFX_JUMP)
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2+2] = 0x3c
+		}
+	}
+	else
+	{
+		if (u8[A2+2] != 0)
+		{
+			--u8[A2+2]
+			if (u8[A2+2] != 0)
+				return
+		}
+
+		D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x88
+		if (D0.u16 < 0x20 && D1.u16 < 0x18)
+		{
+			if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < base_state.HURT && debug_mode.state == 0)
+			{
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x94
+				objA1.state = char.state.HANGING
+				u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+				u8[A2] = 0x01
+
+				if (!original_mode && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX"))
+					playSound(SFX_GRAB)
+				else
+					playSound(SFX_CLICK)	// we'll still use a mechanical click sound in non-original mode unless we also replicate Origins' smoothed movement patterns for these objects
+			}
+		}
+	}
+}
 
 
 
@@ -18385,28 +19237,30 @@ function void fn074fd2()
 		{
 			u8[A1 + 0x2c] = 0x04
 		}
-		// This resets the character state, but is unnecessary, #contributed by TheMushrunt
-		if (u8[A0 + 0x30] == 0 && original_mode)
+		if (original_mode)
 		{
-			stopCharacterWinPose(0xffffb000)
+			// This resets the character state, but is unnecessary, #contributed by TheMushrunt
+			if (u8[A0 + 0x30] == 0 && original_mode)
+			{
+				stopCharacterWinPose(0xffffb000)
+			}
+			// This object looks broken and is unnecessary, so leave it out in S3AIR, fix #contributed by Legobouwer
+			// "spawnChildObjects(0x075186)" replaced by:
+			spawnChildObject(0x074e12, 0x00, 0, 16)
 		}
-	#if !STANDALONE
-		// This object looks broken and is unnecessary, so leave it out in S3AIR, fix #contributed by Legobouwer
-		// "spawnChildObjects(0x075186)" replaced by:
-		spawnChildObject(0x074e12, 0x00, 0, 16)
-
-	#else
-		// Release main character if he was grabbed (can happen if second character makes the final hit)
-		if (u8[0xffffb000 + 0x2e] & 0x81)
-			u8[0xffffb000 + 0x2e] &= ~0x81
-
-		bool isKnucklesFight = (camera.position.y.u16 < 0x0500)
-		if (!isKnucklesFight)
+		else
 		{
-			// Change in standalone: No music fade-out to (very brief) level music before level results
-			objA0.update_address = 0x08566a
+			// Release main character if he was grabbed (can happen if second character makes the final hit)
+			if (u8[0xffffb000 + 0x2e] & 0x81)
+				u8[0xffffb000 + 0x2e] &= ~0x81
+
+			bool isKnucklesFight = (camera.position.y.u16 < 0x0500)
+			if (!isKnucklesFight)
+			{
+				// Change in standalone: No music fade-out to (very brief) level music before level results
+				objA0.update_address = 0x08566a
+			}
 		}
-	#endif
 		return
 	}
 
