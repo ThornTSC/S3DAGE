@@ -1,6 +1,6 @@
 function void South.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
-	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == 3) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)))
+	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == 3) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "south_hud_lives_icon_sonic" && key != "south_hud_lives_icon_tails" && key != "south_hud_lives_icon_miles" && key != "south_hud_lives_icon_knuckles"))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
 		u32 alpha = 0xffffffff
