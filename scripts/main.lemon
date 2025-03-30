@@ -24967,6 +24967,96 @@ function void fn04952a()
 
 
 
+// Support Misc. Fixes and Tweaks's alternate sound effect option for DEZ hang carriers only outside of Original Mode.
+// Function taken from objects\13_dez\dez_hangcarrier.lemon
+//# address-hook(0x04703e) end(0x04717c)
+function void fn04703e()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < 0x04)
+		{
+			if ((D0.u8 & CONTROL_ABC) == 0)
+			{
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x28
+				if ((level.framecounter.low & 0x0f) == 0)
+				{
+					playSound(0xd0)
+				}
+				return
+			}
+
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x12
+
+			if (D0.u16 & 0x0f00)	// Any direction held?
+			{
+				u8[A2 + 0x02] = 0x3c
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				else if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+			}
+
+			objA1.velocity.y = -0x380
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.state = char.state.ROLLING
+			u8[A1 + 0x27] = 0
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			objA1.flags2a &= ~char.flag.CONTROL_LOCK
+			u8[A1 + 0x2e] = 0
+			u8[A1 + 0x40] = 1
+		}
+		else
+		{
+			u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x3c
+		}
+		return
+	}
+
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x28
+	if (D0.u16 < 0x20 && D1.u16 < 0x18)
+	{
+		if ((u8[A1 + 0x2e] & control_flag.DISABLE_INTERACTION) == 0 && u8[A1 + 0x05] < 0x04 && debug_mode.state == 0)
+		{
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			u16[A1 + 0x1c] = 0
+			objA1.position.x.u16 = objA0.position.x.u16
+			objA1.position.y.u16 = objA0.position.y.u16 + 0x28
+			objA1.state = char.state.HANGING
+			// This interferes with the drop dash and does not seem to be necessary (also see FBZ monkeybars -> "fn03a8b8")
+			if (original_mode)
+				objA1.flags2a &= ~char.flag.IN_AIR
+			u8[A1 + 0x2e] = 1
+
+			u8[A2] = 1
+
+			if (!original_mode && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX"))
+				playSound(SFX_GRAB)
+			else
+				playSound(SFX_CLICK)
+		}
+	}
+}
+
+
+
 
 
 // Import Legobouwer's version of the collapsing DEZ staircase for consistency with AIR, overwriting the hand-ported version from previous versions of DAGE.
@@ -25221,11 +25311,52 @@ function void fn0480d4()
 
 
 
+// Add Origins switch sound effect to DEZ gravity switches
+// Function taken from objects\13_dez\dez_gravityswitch.lemon
+//# address-hook(0x048ad6) end(0x048b3a)
+function void fn048ad6()
+{
+	D1.u16 = 0x1b
+	D2.u16 = 0x08
+	D3.u16 = 0x09
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	D6 = (D6 << 16) + (D6 >> 16)
+	if (D6.u16 & 0x14)
+	{
+		objA0.animation.sprite = 1
+		objA0.update_address = 0x048b7e
+		u16[A0 + 0x30] = 3
+
+		D0 = (objA0.render_flags & render_flag.FLIP_Y) ? -8 : 8		// D0 is used inside "fn048b40()"
+		objA0.position.y.u16 += D0
+
+		A1 = 0xffffb000
+		D2.u16 = D6.u16
+		D3.u16 = 0x14
+		fn048b40()
+
+		A1 = 0xffffb04a
+		D2.u16 = D6.u16
+		D3.u16 = 0x28
+		fn048b40()
+
+		playSound(0x73)
+		if (!original_mode)
+			playSound(SFX_CLICK)
+	}
+
+	DrawOrUnloadObject()
+}
+
+
+
 
 
 // Create functions for long (256 px) platform movements that Euka did not port to lemonscript, as they were unused in the vanilla game.
 // Most similar routines are in objects\10_lrz\lrz_blockerplatform.lemon but are called from other levels too.
-// The original ROM hack uses these platorm movements in DEZ2, so Original Mode needs them too.
+// The original ROM hack uses these platform movements in DEZ2, so Original Mode needs them too.
 //# address-hook(0x02594c) end(0x02595e)
 function void fn02594c()
 {
@@ -25829,6 +25960,26 @@ function void fn082a82()
 }
 
 
+
+
+// Add Origins sound effect to bullets fired from first DDZ1 boss.
+// This could also be done at 0x081f14 by using a base function, but this method maintains compatibility with Misc. Fixes and Tweaks.
+// Function taken from bosses\boss_ddz1.lemon
+//# address-hook(0x081eca)
+function void fn081eca()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value < 0)
+	{
+		objA0.countdown_value = 0x60
+
+		// "spawnSimpleChildObjects(0x08326e)" replaced by:
+		spawnSimpleChildObjects(0x081f14, 1)		// Cannon bullets
+		if (!original_mode)
+			playSound(0x98)
+	}
+	fn081ede()
+}
 
 
 
