@@ -10423,6 +10423,31 @@ function void fn013efc()
 }
 
 
+// If using an L button spindash as the main character, put control inputs into the backup to mimic a normal spindash for sidekick Tails to see.
+// Function taken from maingame\character\character.lemon
+//# address-hook(0x010d66) end(0x010dd8)
+function void Character.WriteToPositionBackup()
+{
+	base.Character.WriteToPositionBackup()
+
+	if (competition_mode.active || original_mode || !L_Spindash || A0 != 0xffffb000)
+		return
+
+	// u16[A1] = control.player1 is run in the base function, leaving A1 to point to the pressed and held controller state backups.
+	if (Input.buttonDown(BUTTON_L))
+	{
+		u8[A1] |= CONTROL_DOWN
+		u8[A1+1] |= CONTROL_DOWN
+		if (!L_Spindash_Charge)	// L_Spindash_Charge resets to 0 the instant L_Spindash_Charge == L_Spindash_ChargeInterval.
+		{
+			u16[A1] |= CONTROL_C
+			u16[A1+1] |= CONTROL_C
+		}
+	}
+}
+
+
+
 
 // In Sonic 2 acts, do not set the flag to load act 2 data as level results start.
 // Function taken from maingame\hud\levelresults.lemon
