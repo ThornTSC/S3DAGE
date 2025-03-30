@@ -23875,6 +23875,23 @@ function void fn07ac7a()
 }
 
 
+// Adjust GHZ boss platform x position based on screen width.
+// The adjustment is not equal to the difference in screen resolution for aesthetic and gameplay purposes.
+// Function taken from objects\12_ssz\ssz_platform.lemon
+//# address-hook(0x044a68) end(0x044a9a)
+function void fn044a68()
+{
+	if (objA0.position.y.u16 == 0x0840)
+	{
+		s16 offset = (400 - getScreenWidth())/4		// this offset aligns Original Mode and Revisited 320x224 platform positions
+		if (objA0.position.x.u16 == 0x016c)
+			objA0.position.x.u16 = 0x016c + offset
+		else if (objA0.position.x.u16 == 0x0294)
+			objA0.position.x.u16 = 0x0294 - offset
+	}
+	base.fn044a68()
+}
+
 
 // Edit functions that change GHZ boss speed in AIR for Original Mode
 // Functions taken from bosses\boss_ssz_mid1.lemon
