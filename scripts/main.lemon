@@ -7043,17 +7043,17 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		u32 highlight4 = ((level.framecounter.low - 24) % 32 < 8 ? 0x20b0ff : 0xffffff)
 		if (objA0.subtype2c < 0x80)		// star post respawns player facing right
 		{
-			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
-			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
-			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
-			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
+			Renderer.drawCustomSprite("rightarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
 		}
 		else	// star post respawns player facing left
 		{
-			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
-			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
-			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
-			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x1c, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight4, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 - 0x10, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight3, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x10, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight2, 0x10000)
+			Renderer.drawCustomSprite("leftarrow_medium", objA0.position.x.u16 + 0x1c, objA0.position.y.u16 + 0x08 - camera.screenshake.prev_offset, 0x00, 0x20, 0x9d7a, 0, alpha + highlight1, 0x10000)
 		}
 	}
 
@@ -20634,6 +20634,11 @@ function void FBZ1_CustomSprites()
 		Renderer.drawCustomSprite("fbz_pipe256", 0x1400 - camera.foreground.x.u16, 0x07b0 - camera.foreground.y.u16, 0, 0, 0x2100)
 		Renderer.drawCustomSprite("fbz_floorend", 0x0680 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x0c60 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1be0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1be0 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1e40 - camera.foreground.x.u16, 0x0a00 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x25e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x2700 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 	}
 }
 
@@ -21042,14 +21047,27 @@ function void FBZ2_CustomSprites()
 	if (!original_mode && (u8[0xffff8af8] != 0xb2))		// layout check to make sure we're not drawing indoor floor art while outside
 	{
 		Renderer.drawCustomSprite("fbz_floorend", 0x0980 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x0a00 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x0ae0 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x0d00 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x05e0 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x1460 - camera.foreground.x.u16, 0x0a00 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x16e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x1760 - camera.foreground.x.u16, 0x0900 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1840 - camera.foreground.x.u16, 0x0780 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1b60 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1c80 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x1e60 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x2300 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x2700 - camera.foreground.x.u16, 0x04c0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+
+		// These floor end taper images are within the screen shake area. They're not *quite* accurately positioned when paused, but the offset is barely noticeable.
+		if (level.vertical_wrap < 0x0600)	// if not in the boss area
+		{
+			s8 shakeOffset = (global.game.paused) ? min(camera.screenshake.offset, camera.screenshake.prev_offset) - 2 : camera.screenshake.offset
+			Renderer.drawCustomSprite("fbz_floorend", 0x2f00 - camera.foreground.x.u16, 0x0640 - camera.foreground.y.u16 - shakeOffset, 0, SPRITE_FLAG_PRIO, 0x3fff)
+			Renderer.drawCustomSprite("fbz_floorend", 0x3000 - camera.foreground.x.u16, 0x05c0 - camera.foreground.y.u16 - shakeOffset, 0, SPRITE_FLAG_PRIO, 0x3fff)
+		}
 	}
 
 	if (!original_mode && u8[0xffff89ac] == 0x89 && global.game.paused)		// if we handle this here when not paused, the lights disappear one frame too late
