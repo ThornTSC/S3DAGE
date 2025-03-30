@@ -36,9 +36,13 @@ function void CGZ_CustomSprites()
 	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && (underStart || beforeStart) && competition_mode.current_lap.player1 == 0))
 		lapNum = 0
 	u16 px = getScreenWidth() - 56
-	u16 py = (time_attack == 3) ? 24 : 12
+	u16 py = 12
 	if (HUD.useMobileLivesDisplay())
+	{
 		py = getScreenHeight() - 32
+		if (time_attack == 3)	// emerald HUD is displayed
+			py -= 24
+	}
 	for (u32 value = lapNum;;)
 	{
 		Renderer.drawCustomSprite(stringformat("lap_%d", value % 10), px, py, 0x00, SPRITE_FLAG_PRIO, 0xe800)

@@ -3,7 +3,7 @@
 	"hud_ring":  { "File": "hud_ring.png", "Rect": "0,0,16,16" },
 	"hud_ring_s2":  { "File": "hud_ring.png", "Rect": "16,0,16,16" },
 
-	// Emerald HUD for 100% Speedrun mode
+	// Full size emerald icons
 	"hud_chaos_1":  { "File": "hud_emeralds.png", "Rect": "0,0,16,13" },
 	"hud_chaos_2":  { "File": "hud_emeralds.png", "Rect": "16,0,16,13" },
 	"hud_chaos_3":  { "File": "hud_emeralds.png", "Rect": "32,0,16,13" },
@@ -19,5 +19,23 @@
 	"hud_super_5":  { "File": "hud_emeralds.png", "Rect": "64,13,16,13" },
 	"hud_super_6":  { "File": "hud_emeralds.png", "Rect": "80,13,16,13" },
 	"hud_super_7":  { "File": "hud_emeralds.png", "Rect": "96,13,16,13" },
-	"hud_super_empty":  { "File": "hud_emeralds.png", "Rect": "112,13,16,13" }
+	"hud_super_empty":  { "File": "hud_emeralds.png", "Rect": "112,13,16,13" },
+
+	// Emerald HUD for 100% Speedrun mode
+	"hud_chaos_mini_1":  { "File": "hud_emeralds_mini.png", "Rect": "0,0,10,8" },
+	"hud_chaos_mini_2":  { "File": "hud_emeralds_mini.png", "Rect": "10,0,10,8" },
+	"hud_chaos_mini_3":  { "File": "hud_emeralds_mini.png", "Rect": "20,0,10,8" },
+	"hud_chaos_mini_4":  { "File": "hud_emeralds_mini.png", "Rect": "30,0,10,8" },
+	"hud_chaos_mini_5":  { "File": "hud_emeralds_mini.png", "Rect": "40,0,10,8" },
+	"hud_chaos_mini_6":  { "File": "hud_emeralds_mini.png", "Rect": "50,0,10,8" },
+	"hud_chaos_mini_7":  { "File": "hud_emeralds_mini.png", "Rect": "60,0,10,8" },
+	"hud_chaos_mini_empty":  { "File": "hud_emeralds_mini.png", "Rect": "70,0,10,8" },
+	"hud_super_mini_1":  { "File": "hud_emeralds_mini.png", "Rect": "0,8,10,8" },
+	"hud_super_mini_2":  { "File": "hud_emeralds_mini.png", "Rect": "10,8,10,8" },
+	"hud_super_mini_3":  { "File": "hud_emeralds_mini.png", "Rect": "20,8,10,8" },
+	"hud_super_mini_4":  { "File": "hud_emeralds_mini.png", "Rect": "30,8,10,8" },
+	"hud_super_mini_5":  { "File": "hud_emeralds_mini.png", "Rect": "40,8,10,8" },
+	"hud_super_mini_6":  { "File": "hud_emeralds_mini.png", "Rect": "50,8,10,8" },
+	"hud_super_mini_7":  { "File": "hud_emeralds_mini.png", "Rect": "60,8,10,8" },
+	"hud_super_mini_empty":  { "File": "hud_emeralds_mini.png", "Rect": "70,8,10,8" }
 }

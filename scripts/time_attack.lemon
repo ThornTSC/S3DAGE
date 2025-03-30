@@ -1967,6 +1967,17 @@ function void RenderHUD_RedRings()
 // This is only the emerald count right now. The full-game timer is handed at the end of a frame.
 function void RenderHUD_Marathon()
 {
+	constant array<u16> emeraldDistFromBottomRight =
+	{
+		51, 40,	// 1
+		59, 32,	// 2
+		43, 32,	// 3
+		67, 40,	// 4
+		35, 40,	// 5
+		75, 32,	// 6
+		27, 32	// 7
+	}
+
 	if (time_attack == 3)
 	{
 		u64 key
@@ -1975,14 +1986,12 @@ function void RenderHUD_Marathon()
 		u16 py
 		for (emeraldIndex; emeraldIndex <= 7; ++emeraldIndex)
 		{
-			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_%d", emeraldIndex) : "hud_chaos_empty"
-			px = getScreenWidth() - 16 - (16 * (8 - emeraldIndex))
-			py = 8
-			if (HUD.useMobileLivesDisplay())
-			{
-				px = 16 *  emeraldIndex
-				py = 200
-			}
+			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_mini_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_mini_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_mini_%d", emeraldIndex) : "hud_chaos_mini_empty"
+			px = getScreenWidth() - emeraldDistFromBottomRight[2 * (emeraldIndex - 1)]
+			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
+			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == 3)
+			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
+				py += 14
 			Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, 0xe000, 0, 0xffffffff, 0x10000)
 		}
 	}
