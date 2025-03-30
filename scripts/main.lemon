@@ -22261,8 +22261,15 @@ function void fn04301c()
 {
 	if (u8[A2] == 0 && objA0.flags2a & (1 << D6.u8) && A1 == 0xffffb000 && display_inputs && !original_mode)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		if (L_Spindash)
+		{
+			Renderer.drawCustomSprite("@input_icon_button_L", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		}
+		else
+		{
+			Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		}
 	}
 
 	base.fn04301c()
