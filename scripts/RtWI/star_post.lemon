@@ -97,6 +97,9 @@ function void fn02d47e()
 					{
 						D1.u16 = 0x0200
 						unlock_act = 3
+						// The foreground camera must be set to prevent the CGZ retractable spring, which has its palette loaded during the title card, from showing on screen.
+						camera.foreground.x = 0x05b40000
+						camera.foreground.y = 0x022c0000
 					}
 				}
 				else if (stageChosen == 1)
