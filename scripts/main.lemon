@@ -16825,7 +16825,7 @@ function void fn065d8c()
 	fn065dec()
 	objA0.animation.sprite = 0
 
-	if (objA0.flags2a & 0x18)
+	if (objA0.flags2a & 0x18 || (global.zone_act == 0x0300 && u16[0xffffb010] > 0x217c && u8[0xfffffaa3] != 0))
 	{
 		objA0.animation.sprite = 1
 
