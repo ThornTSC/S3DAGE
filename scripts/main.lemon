@@ -206,6 +206,11 @@ function void showDebugText()
 // This function is the final one of any frame.
 function void endOfFrame()
 {
+	if (musicDelay && theme.hud != theme.flicky && !global.game.paused)
+		playMusic(level.default_music)
+	else if (musicDelay && (global.game_mode & 0x7f) != 0x0c)
+		musicDelay = false
+
 	if (exitGame)
 	{
 		exitGame = 0
@@ -223,6 +228,7 @@ function void endOfFrame()
 		fast_forward = false
 		unlock_act = 0
 		Audio.stopChannel(0)
+		musicDelay = false
 
 		menu_initialized = 0
 		Game.returnToMainMenu()
@@ -422,6 +428,7 @@ function void MainMenuBG.Run()
 	AIR_menu_run = 1
 	unlock_act = 0
 	time_attack_end = 0
+	musicDelay = false
 
 	held_time.up = 0
 	held_time.down = 0
@@ -592,24 +599,7 @@ function void TitleCard.Init()
 		specialstages_knuckles = 0
 	}
 
-	bool hudLoaded = true
-	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
-	{
-		theme.hud = theme.saturn								// else use the theme matching the menu
-		hud.layout = 3											// with the classic layout
-		hudLoaded = false
-	}
-//	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
-//	{
-		if (hudLoaded)
-			hud.layout = (theme.hud >> 6)
-		theme.hud &= 0x3f		// set HUD to matching theme constant
-//	}
-
-	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
-	{
-		theme.hud &= 0xc0	// keep HUD layout but zero out HUD theme (theme.s3k = 0)
-	}
+	InitHUDTheme()
 
 	if (time_attack == 1 || time_attack == 2)
 	{
@@ -691,6 +681,30 @@ function void TitleCard.Init()
 	u8[A0 + 0x48] = 0xff
 	objA0.base_state += 2
 }
+
+function void InitHUDTheme()
+{
+	bool hudLoaded = true
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+	{
+		theme.hud = theme.saturn								// else use the theme matching the menu
+		hud.layout = 3											// with the classic layout
+		hudLoaded = false
+	}
+//	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
+//	{
+		if (hudLoaded)
+			hud.layout = (theme.hud >> 6)
+		theme.hud &= 0x3f		// set HUD to matching theme constant
+//	}
+
+	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no HUD themes for Extra Character Slot characters
+	{
+		theme.hud &= 0xc0	// keep HUD layout but zero out HUD theme (theme.s3k = 0)
+	}
+}
+
+
 
 
 
@@ -6187,15 +6201,37 @@ function void UpdateCameraPositionY()
 
 
 
-// Allow the South theme to edit the movement of title card text.
+// Allow the South and Flicky themes to edit the movement of title card text,
+// and load PLCs earlier than base S3&K would.
 // Function taken from maingame\hud\titlecard.lemon
 //# address-hook(0x02d95c) end(0x02d99a)
 function void TitleCard.TextElement.Update()
 {
+	if (original_mode)
+	{
+		base.TitleCard.TextElement.Update()
+		return
+	}
+
 	if (theme.hud == theme.south)
 		South.TitleCard.TextElement.Update()
+	else if (theme.hud == theme.flicky)
+		Flicky.TitleCard.TextElement.Update()
 	else
 		base.TitleCard.TextElement.Update()
+
+	if (global.zone == 0x0c || global.zone == 0x17)
+		return
+
+	// Load PLCs early
+	A1 = 0xffff0000 + u16[A0 + 0x48]
+	D0 = u16[A1 + 0x32]
+	if (D0.u16 == 1 && (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11))	// we use the zone name display to load PLCs, as the zone name sets D0 before other text elements do
+	{
+		addPatternLoadingCue(0x08399a)		// Spike and Springs
+		fn02f77c()
+		StartLoadingPatternsForZone()
+	}
 }
 
 
@@ -6365,69 +6401,59 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			return Westside.TitleCardText(px, py, renderQueue)
 
-/*
-		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
-		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
-		{
-			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
-		}
 
-		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
-		{
-			Renderer.drawCustomSprite("titlecard_act2", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
-		}
-		else if (objA0.animation.sprite == 0x02 && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c) // exclude HPZ, SSZ, and DDZ from drawing act numbers
-		{
-			Renderer.drawCustomSprite(stringformat("titlecard_act%d", global.act.apparent + 1), px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
-		}
-*/
+		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
 		if (objA0.animation.sprite == 0x02 && unlock_act)
 		{
 			return true		// do not render an act number in unlockable acts
 		}
-/*
-		// Originally the word "zone", now white bars
-		else if (objA0.animation.sprite == 0x03)
+
+		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
-			Renderer.drawCustomSprite("titlecard_whitebars", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("angel_titlecard_act2", px, py + 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
-*/
+		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
+		{
+			Renderer.drawCustomSprite("angel_titlecard_act2", px, py + 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return true
+		}
+		else if (objA0.animation.sprite == 0x02 && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c) // exclude HPZ, SSZ, and DDZ from drawing act numbers
+		{
+			Renderer.drawCustomSprite(stringformat("angel_titlecard_act%d", global.act.apparent + 1), px, py + 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return true
+		}
+
 		else if (objA0.animation.sprite == 0x03)
 		{
 			Renderer.drawCustomSprite("angel_titlecard_zone", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
-/*
+
 		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
-		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
-		{
-			Renderer.drawCustomSprite(stringformat("titlecard_zone%d", objA0.animation.sprite - 4), px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
-		}
-*/
 		else if (objA0.animation.sprite == 0x06 && unlock_act)
 		{
 			Renderer.drawCustomSprite(stringformat("angel_titlecard_unlock%04d", unlock_act), px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
-/*
+		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
+		{
+			Renderer.drawCustomSprite(stringformat("angel_titlecard_zone%d", objA0.animation.sprite - 4), px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return true
+		}
+
 		// "Bonus"
 		else if (objA0.animation.sprite == 0x12 || objA0.animation.sprite == 0x13)
 		{
-			Renderer.drawCustomSprite("titlecard_bonus", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
+			Renderer.drawCustomSprite("angel_titlecard_bonus", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return false
 		}
 		// "Stage"
 		else if (objA0.animation.sprite == 0x14)
 		{
-			Renderer.drawCustomSprite("titlecard_stage", px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return true
+			Renderer.drawCustomSprite("angel_titlecard_stage", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			return false
 		}
-*/
 	}
 
 	// Level results texts
@@ -6523,11 +6549,11 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			Renderer.drawCustomSprite("angel_zone_text", px, py + 24, 0, SPRITE_FLAG_PRIO, 0xe008)
 			return true
 		}
-	//	else if (objA0.animation.sprite == 0x0f && new_title)
-	//	{
-	//		Renderer.drawCustomSprite(stringformat("titlecard_act%d", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px, py - 0x28, 0, SPRITE_FLAG_PRIO, 0xe008)
-	//		return true
-	//	}
+		else if (objA0.animation.sprite == 0x0f)
+		{
+			Renderer.drawCustomSprite(stringformat("angel_titlecard_act%d", global.zone_act == 0x1600 ? 2 : global.act.apparent + 1), px + 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
+		}
 	}
 
 	// GAME/TIME OVER text
@@ -6545,21 +6571,24 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return Westside.GameTimeOver(px, py, renderQueue)
 		}
 
+		if (original_mode)
+			return false
+
 		// Standard theme requires renderhook due to unlockable act palettes
 		if (objA0.animation.sprite == 0)
 		{
-			Renderer.drawCustomSprite("angel_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
-			return false
+			Renderer.drawCustomSprite("angel_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
 		}
 		else if (objA0.animation.sprite == 1 || objA0.animation.sprite == 3)	// first goes with GAME, second with TIME
 		{
-			Renderer.drawCustomSprite("angel_over", (global.time_over) ? px + 12 : px + 8, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)	// first goes with TIME, second with GAME
-			return false
+			Renderer.drawCustomSprite("angel_over", (global.time_over) ? px + 12 : px + 8, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)	// first goes with TIME, second with GAME
+			return true
 		}
 		else if (objA0.animation.sprite == 2)
 		{
-			Renderer.drawCustomSprite("angel_time", px - 57, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
-			return false
+			Renderer.drawCustomSprite("angel_time", px - 57, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
+			return true
 		}
 		else
 			return false

@@ -1,3 +1,5 @@
+global bool musicDelay		// True when the Flicky title card is active as a level initializes, so that the level music waits until the 
+
 function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
 	if (key == "flicky_hud_char_minutes")
@@ -257,10 +259,75 @@ function void Flicky.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 s
 	Renderer.drawCustomSprite(stringformat("flicky_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
 }
 
+function void Flicky.TitleCard.TextElement.Update()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x48]
+	D0 = u16[A1 + 0x32]
+	if (D0.u16 != 0)
+	{
+		if (!(objA0.render_flags & render_flag.VISIBLE))
+		{
+			--u16[A1 + 0x30]
+			UnloadObject()
+			return
+		}
+
+		if (D0.u16 == 1 && objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x14 && musicDelay)	// release the musicDelay as soon as the palette fade in is over
+		{
+			playMusic(level.default_music)
+			musicDelay = false
+		}
+
+		// We add 0x40 here for title cards outside of act transitions to keep the text on screen longer, as the act number takes longer to show than in other themes due to the global tint.
+		// We also drastically slow the rate at which text leaves.
+		u8 textHoldTime = (u8[A1 + 0x3e]) ? u8[A0 + 0x28] : u8[A0 + 0x28] + 0x40
+		if (D0.u8 >= textHoldTime)
+		{
+			objA0.position.x.u16 += (objA0.animation.sprite == 0x03) ? 0x04 : 0x20		// adds 0x20 in x position when moving out normally
+			u32 timeToEndTitleCard = 0x0000012a		// time at 320px screen width that other title cards end
+			if (getScreenWidth() >= 336)				// it takes longer to end at higher screen widths as the text travels farther
+				timeToEndTitleCard++
+			if (getScreenWidth() >= 400)				// it takes longer to end at higher screen widths as the text travels farther
+				timeToEndTitleCard++
+			if (getScreenWidth() >= 464)				// it takes longer to end at higher screen widths as the text travels farther
+				timeToEndTitleCard++
+			if (timer.alldata == timeToEndTitleCard && u8[A1 + 0x3e])	// time that other themes have removed text and ended the title card in an act transition.
+			{
+				level.results_done = 0xff
+				// This should be unneeded now that PLCs are handled much earlier, when D0.u16 == 1
+//				if (global.zone_act != 0x1700)
+//				{
+//					fn02f77c()
+//					StartLoadingPatternsForZone()
+//				}
+			}
+		}
+	}
+	else
+	{
+		// Appearing or showing. The rate at which text elements enter is 25% of the rate of movement in other themes.
+		// We thus set the theme to cover 25% of the distance for the relevant object, which is still off screen in screen widths between 320px and 496px.
+		if (objA0.position.x.u16 > u16[A0 + 0x46])
+		{
+			if (objA0.animation.sprite == 0x03 && !objA0.value32)
+			{
+				objA0.value32 = 1
+				u16 zoneTextFinalPosition = getScreenExtend() + 380
+				objA0.position.x.u16 = zoneTextFinalPosition + (objA0.position.x.u16 - zoneTextFinalPosition)/4
+			}
+			objA0.position.x.u16 = max(objA0.position.x.u16 - ((objA0.animation.sprite == 0x03) ? 0x04 : 0x10), u16[A0 + 0x46])		// subtracts 0x10 in x position when moving in normally
+			u8[A1 + 0x34] = 0xff
+		}
+	}
+	DrawObject()
+}
 
 
 function bool Flicky.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 {
+	// With the newest iteration of the title cards, no bar is necessary.
+	return true
+/*
 	if (objA0.update_address == 0x02d8e2)   // title card bars are currently the old DAGE default and do not have flicky_ prefix at this time
 	{
 		u64 barKey = "titlecard_bluebar"
@@ -277,7 +344,10 @@ function bool Flicky.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 		Renderer.drawCustomSprite(barKey, px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 		return true
 	}
+*/
 }
+
+
 function bool Flicky.TitleCardText(s16 px, s16 py, s16 renderQueue)
 {
 	// Next, code for zone and act names.
@@ -290,32 +360,50 @@ function bool Flicky.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		}
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
-			Renderer.drawCustomSprite("flicky_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			Renderer.drawCustomSprite("flicky_titlecard_act2", 91, px - 196, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
 		{
-			Renderer.drawCustomSprite("flicky_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			Renderer.drawCustomSprite("flicky_titlecard_act2", 91, px - 196, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c) // exclude HPZ, SSZ, and DDZ from drawing act numbers
 		{
-			Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.act.apparent + 1), px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.act.apparent + 1), 91, px - 196, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
 			return true
 		}
-		// Originally the word "zone", now white bars
+		// Originally the word "zone", now also handling zone name and act number (Sonic 3D 16-bit moves them all in unison)
 		else if (objA0.animation.sprite == 0x03)
 		{
-			Renderer.drawCustomSprite("flicky_titlecard_zone_text", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			u16 movementScaleBase = px - 252 - getScreenExtend()
+			Renderer.drawCustomSprite("flicky_titlecard_zone_text", px/4 - 15 + 4*movementScaleBase, 98, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// px for being in position is 252 + getScreenExtend()
+
+			if (unlock_act)
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_unlock%04d", unlock_act), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// getScreenWidth() - px - 128
+			else if (global.zone_act == 0x1600)
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone9", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+			else if (global.zone_act == 0x1601)
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone13", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+			else if (global.zone_act == 0x1700)
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone11", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+			else
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone%d", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+			
+			if (global.zone_act == 0x1600 || global.zone_act == 0x1700)		// LRZ2 boss, DEZ2 final boss
+				Renderer.drawCustomSprite("flicky_titlecard_act2", 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
+			else if (!unlock_act && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c)	// don't draw anything in an unlockable act, HPZ, SSZ, or DDZ, but prevent the original graphic from showing
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.act.apparent + 1), 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
+
 			return true
 		}
 		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
-			if (unlock_act)
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_unlock%04d", unlock_act), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			else
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			if (unlock_act)
+//				Renderer.drawCustomSprite(stringformat("flicky_titlecard_unlock%04d", unlock_act), 48 + getScreenExtend(), 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// getScreenWidth() - px - 128
+//			else
+//				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone%d", objA0.animation.sprite - 4), 48 + getScreenExtend(), 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
 			return true
 		}
 		// "Bonus"
@@ -416,7 +504,7 @@ function bool Flicky.LevelResults(s16 px, s16 py, s16 renderQueue)
     }
     else if (objA0.animation.sprite == 0x0f && (global.zone_act == 0x0a00 || unlock_act))	// show "Zone" in SSZ.
     {
-        Renderer.drawCustomSprite("flicky_titlecard_zone_text", px - 28, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
+        Renderer.drawCustomSprite("flicky_titlecard_zone_text", px - 32, py + 16, 0, SPRITE_FLAG_PRIO, 0xe008)
         return true
     }
     else if (objA0.animation.sprite == 0x0f)
@@ -680,17 +768,17 @@ function bool Flicky.GameTimeOver(s16 px, s16 py, s16 renderQueue)
 {
 	if (objA0.animation.sprite == 0)
 	{
-		Renderer.drawCustomSprite("flicky_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("flicky_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else if (objA0.animation.sprite == 1 || objA0.animation.sprite == 3)	// first goes with GAME, second with TIME
 	{
-		Renderer.drawCustomSprite("flicky_over", px + 8, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("flicky_over", px + 8, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else if (objA0.animation.sprite == 2)
 	{
-		Renderer.drawCustomSprite("flicky_time", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("flicky_time", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else

@@ -106,6 +106,9 @@ function void customMenu.setup()
 	held_time.left = 0
 	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
 	unlock_act = 0				// ensure this flag isn't left over from elsewhere
+	musicDelay = false
+
+	InitHUDTheme()
 
 	if (global.pause_disabled)
 	{

@@ -51,7 +51,25 @@
     "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" },
     "titlecard_unlock0002_menu":  { "File": "Title_CPZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
 
-    "angel_titlecard_zone":  { "File": "angel_zonenames.png", "Rect": "0,0,72,24", "Center": "36,12" },
-    "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,24,160,24", "Center": "32,12" },
-    "angel_titlecard_unlock0002":  { "File": "angel_zonenames.png", "Rect": "0,48,198,24", "Center": "70,12" }
+    // Actual S3&K title card parts
+	"angel_titlecard_zone0":  { "File": "angel_zonenames.png", "Rect": "0,0,160,24", "Center": "32,12" },
+	"angel_titlecard_zone1":  { "File": "angel_zonenames.png", "Rect": "0,24,144,24", "Center": "16,12" },
+	"angel_titlecard_zone2":  { "File": "angel_zonenames.png", "Rect": "0,48,200,24", "Center": "72,12" },
+	"angel_titlecard_zone3":  { "File": "angel_zonenames.png", "Rect": "0,72,192,24", "Center": "64,12" },
+	"angel_titlecard_zone4":  { "File": "angel_zonenames.png", "Rect": "0,96,200,24", "Center": "72,12" },
+	"angel_titlecard_zone5":  { "File": "angel_zonenames.png", "Rect": "0,120,88,24", "Center": "-40,12" },
+	"angel_titlecard_zone6":  { "File": "angel_zonenames.png", "Rect": "0,144,160,24", "Center": "32,12" },
+	"angel_titlecard_zone7":  { "File": "angel_zonenames.png", "Rect": "0,168,208,24", "Center": "80,12" },
+	"angel_titlecard_zone8":  { "File": "angel_zonenames.png", "Rect": "0,192,160,24", "Center": "32,12" },
+	"angel_titlecard_zone9":  { "File": "angel_zonenames.png", "Rect": "0,216,128,24", "Center": "0,12" },
+	"angel_titlecard_zone10":  { "File": "angel_zonenames.png", "Rect": "0,240,200,24", "Center": "72,12" },
+	"angel_titlecard_zone11":  { "File": "angel_zonenames.png", "Rect": "0,264,136,24", "Center": "8,12" },
+	"angel_titlecard_zone12":  { "File": "angel_zonenames.png", "Rect": "0,288,208,24", "Center": "80,12" },
+	"angel_titlecard_zone13":  { "File": "angel_zonenames.png", "Rect": "0,312,184,24", "Center": "56,12" },
+	"angel_titlecard_bonus":  { "File": "angel_zonenames.png", "Rect": "0,336,88,24", "Center": "0,12" },
+	"angel_titlecard_stage":  { "File": "angel_zonenames.png", "Rect": "96,336,88,24", "Center": "0,12" },
+
+    "angel_titlecard_zone":  { "File": "angel_zonenames.png", "Rect": "0,360,72,24", "Center": "36,12" },
+    "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,384,160,24", "Center": "32,12" },
+    "angel_titlecard_unlock0002":  { "File": "angel_zonenames.png", "Rect": "0,408,198,24", "Center": "70,12" }
 }

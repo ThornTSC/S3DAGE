@@ -116,6 +116,7 @@ function void UpdateGamePause()
 				S2TitleCard.disappear = false
 				S2TitleCard.loaded = false
 				S2TitleCard.full = true
+				musicDelay = false
 				level.restart = 1
 				break
 			}
@@ -431,7 +432,7 @@ function void PauseMenu_ChangeLayout()
 
 function u8 PauseMenu_Normal()
 {
-	if (u8[0xffffb005] == 0x06) 	// If the player character is dying,
+	if (u8[0xffffb005] == base_state.DIED || u8[0xffffb005] == base_state.DROWNED) 	// If the player character is dying,
 		return PauseMenu_Basic()	// remove the restart options until the life counter ticks down by 1.
 
 	if (pause_menu_selection >= 0x10 && pause_menu_selection <= 0x12)
@@ -610,6 +611,7 @@ function u8 PauseMenu_Normal_Restart()
 		camera.background.y = 0		// fix for the AIZ1 background issue.
 		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
 
+		musicDelay = false
 		level.restart = 1
 		global.game.paused = false
 		#if GAMEAPP < 0x25021500
@@ -708,6 +710,7 @@ function u8 PauseMenu_ExitGame()
 		u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
 		zeroMemory(0xfffff100, 0x500)	// Clear out data used when loading level patterns, else the main game may try to access special stage data or vice versa.
 
+		musicDelay = false
 		global.game_mode = 0x58
 		global.game.paused = false
 
@@ -744,6 +747,7 @@ function u8 PauseMenu_ExitGame()
 		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
 			System.setGlobalVariableValueByName("ChaosForm", 0)
 
+		musicDelay = false
 		global.game.paused = false
 
 		#if GAMEAPP < 0x25021500
@@ -1045,6 +1049,7 @@ function u8 PauseMenu_Challenges()
 		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
 			System.setGlobalVariableValueByName("ChaosForm", 0)
 
+		musicDelay = false
 		level.restart = 1
 		global.game.paused = false
 		#if GAMEAPP < 0x25021500

@@ -8,9 +8,13 @@
 	// HUD texts
 	"flicky_hud_text_score":	  { "File": "flicky_hud.png", "Rect": "0,0,39,16" },
 	"flicky_hud_text_time":	  { "File": "flicky_hud.png", "Rect": "0,16,39,16" },
-	"flicky_hud_text_time_red":  { "File": "flicky_hud.png", "Rect": "35,20,1,1" },		// Empty pixel
 	"flicky_hud_text_rings":	  { "File": "flicky_hud.png", "Rect": "0,32,39,16" },
+	"flicky_hud_text_time_red":  { "File": "flicky_hud.png", "Rect": "35,20,1,1" },		// Empty pixel
 	"flicky_hud_text_rings_red": { "File": "flicky_hud.png", "Rect": "35,20,1,1" },		// Empty pixel
+
+	"flicky_hud_text_score_actual":	  { "File": "flicky_hud.png", "Rect": "88,187,34,16" },
+	"flicky_hud_text_time_actual":	  { "File": "flicky_hud.png", "Rect": "88,203,24,16" },
+	"flicky_hud_text_rings_actual":	  { "File": "flicky_hud.png", "Rect": "88,219,31,16" },
 
 	// Additional texts for level results
 	"flicky_hud_text_ring":  { "File": "flicky_hud.png", "Rect": "0,32,31,16" },
@@ -151,6 +155,8 @@
 	"flicky_new_record": { "File": "flicky_hud.png", "Rect": "0,155,85,16", "Center": "43,8" },
 	"flicky_text_dev":  { "File": "flicky_text_dev.png"},	// small star medal pictures are stored with challenges menu pictures
 	"flicky_text_totalmedals":  { "File": "flicky_text_totalmedals.png", "Center": "74,4" },
+
+	"flicky_hud_text_best_actual":	  { "File": "flicky_hud.png", "Rect": "123,203,27,16" },
 
 	"flicky_smalldigit_0": { "File": "flicky_hud.png", "Rect":  "75,82,8,8" },
 	"flicky_smalldigit_1": { "File": "flicky_hud.png", "Rect":  "83,82,8,8" },

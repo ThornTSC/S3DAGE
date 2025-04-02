@@ -802,17 +802,17 @@ function bool Westside.GameTimeOver(s16 px, s16 py, s16 renderQueue)	// same fon
 {
 	if (objA0.animation.sprite == 0)
 	{
-		Renderer.drawCustomSprite("south_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("south_game", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else if (objA0.animation.sprite == 1 || objA0.animation.sprite == 3)	// first goes with GAME, second with TIME
 	{
-		Renderer.drawCustomSprite("south_over", px + 8, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("south_over", px + 8, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else if (objA0.animation.sprite == 2)
 	{
-		Renderer.drawCustomSprite("south_time", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, renderQueue)
+		Renderer.drawCustomSprite("south_time", px - 72, py - 8, 0, SPRITE_FLAG_PRIO, 0xe008)
 		return true
 	}
 	else

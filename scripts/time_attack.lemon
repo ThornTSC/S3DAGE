@@ -392,10 +392,7 @@ function void initializeMainGame()
 		}
 
 		level.default_music = musicId
-		if (musicId != 0)
-		{
-			playMusic(musicId)
-		}
+		// music playing is moved slightly later in function to introduce isAnyIntro for Flicky theme music start control
 
 		bool isAnyIntro = false
 		if (global.zone_act == 0)
@@ -417,6 +414,17 @@ function void initializeMainGame()
 			Nemesis.loadDataToVRAM(0x193308, 0xb240)
 			
 			isAnyIntro = true
+		}
+
+		if (musicId != 0)
+		{
+			if (theme.hud == theme.flicky && !isAnyIntro && !level.skip_titlecard && global.zone_act != 0x1701 && !original_mode)
+				musicDelay = true
+			else
+			{
+				musicDelay = false
+				playMusic(musicId)
+			}
 		}
 
 		if (!isAnyIntro && global.zone_act != 0x1701 && !level.skip_titlecard)
