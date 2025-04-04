@@ -342,6 +342,7 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 }
 
 // Run timers for Sonic 2 title cards outside of their rendering code so they still operate normally during a theme switch mid-title card.
+// We also make timing adjustments to the bar element here for the Saturn theme to help keep the title on screen just a bit longer.
 // Function taken from maingame\hud\titlecard.lemon
 //# address-hook(0x02d8e2) end(0x02d926)
 function void TitleCard.RedBarElement.Update()
@@ -375,8 +376,20 @@ function void TitleCard.RedBarElement.Update()
 
 		if (D0.u8 >= u8[A0 + 0x28])
 		{
-			objA0.position.y.u16 -= 0x20
-
+			if (theme.hud == theme.saturn && !original_mode)
+			{
+				// Copied from Flicky theme's code for triggering things before the text leaves the screen
+				u32 timeToEndTitleCard = 0x0000012a		// time at 320px screen width that other title cards end
+				if (getScreenWidth() >= 336)				// it takes longer to end at higher screen widths as the text travels farther
+					timeToEndTitleCard++
+				if (getScreenWidth() >= 400)				// it takes longer to end at higher screen widths as the text travels farther
+					timeToEndTitleCard++
+				if (getScreenWidth() >= 464)				// it takes longer to end at higher screen widths as the text travels farther
+					timeToEndTitleCard++
+				if (timer.alldata == timeToEndTitleCard && u8[A1 + 0x3e])	// time that other themes have removed text and ended the title card in an act transition.
+					level.results_done = 0xff
+			}
+			objA0.position.y.u16 -= (theme.hud == theme.saturn && !original_mode) ? 0x02 : 0x20	// slow the retreat of the title card bar in the Saturn theme to keep the zone name legible a bit longer
 		}
 	}
 	else

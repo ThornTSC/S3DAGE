@@ -6343,7 +6343,7 @@ function void TitleCard.Show()
 					StartLoadingPatternsForZone()
 				}
 			}
-			else if (global.zone != 0x0c && global.zone_act != 0x1700)
+			else if (global.zone != 0x0c && global.zone_act != 0x1700 && original_mode)
 			{
 				addPatternLoadingCue(0x08399a)		// Spike and Springs
 				fn02f77c()

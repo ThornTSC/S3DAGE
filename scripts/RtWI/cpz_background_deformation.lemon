@@ -101,7 +101,7 @@ function void UpdateBackgroundScrolling.CPZ()
 
 	// Fog and background transparency
 	if (palette_set >= 2)
-		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xdf00, 0, 0x188000ff, 0x10000)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, (level.framecounter < 0x0018 && !exitGame && !level.restart) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO, 0xdf00, 0, 0x188000ff, 0x10000)
 	Renderer.drawCustomSprite("cpz_background_transparencyfix", 0, 0, 0, 0, 0x10fe)		// prevent issues with transparency in background
 	Renderer.drawCustomSprite("cpz_background_transparencyfix", camera.position.x.u16, water.height.current, 0, SPRITE_FLAG_WORLDSPACE, 0x10fe)	// redraw fix underwater to make it use underwater palette
 

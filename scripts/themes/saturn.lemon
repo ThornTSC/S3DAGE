@@ -34,30 +34,35 @@ function void Saturn.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	}
 	if (px >= 0x58 && px <= 0x68 && py == 0x28 && hud.layout == 1)	// Rings in Mania HUD position
 		px -= 0x18								// move to classic position
-	Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690)	// title card is active, rendering lives text/icon/numbers in either classic or mobile positions
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the HUD while the title card is up.
+
+	Renderer.drawCustomSprite(key, px, py, 0, flags, renderQueue)
 	if (inputY == 0x18 && freeze_time)	// HUD graphics have a base py of 0x08, and the TIME row is 0x10 beyond that
     {
 		if (freeze_time >= 64)
 		{
 			if (key == "saturn_hud_char_minutes")
-				Renderer.drawCustomSprite("saturn_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+				Renderer.drawCustomSprite("saturn_hud_char_minutes_chaosstage", px, py, 0, flags, renderQueue + 1, 0, 255)
 			else if (key == "saturn_hud_char_seconds")
-				Renderer.drawCustomSprite("saturn_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+				Renderer.drawCustomSprite("saturn_hud_char_seconds_chaosstage", px, py, 0, flags, renderQueue + 1, 0, 255)
 			else if (key == "saturn_hud_char_colon")
-				Renderer.drawCustomSprite("saturn_hud_char_colon_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+				Renderer.drawCustomSprite("saturn_hud_char_colon_chaosstage", px, py, 0, flags, renderQueue + 1, 0, 255)
 			else if (key == "saturn_hud_text_time")
-				Renderer.drawCustomSprite("saturn_hud_text_time_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+				Renderer.drawCustomSprite("saturn_hud_text_time_chaosstage", px, py, 0, flags, renderQueue + 1, 0, 255)
 		}
 		else
 		{
 			if (key == "saturn_hud_char_minutes")
-				Renderer.drawCustomSprite("saturn_hud_char_minutes_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+				Renderer.drawCustomSprite("saturn_hud_char_minutes_chaosstage", px, py, 0, flags, renderQueue + 1, 0, freeze_time * 4)
 			else if (key == "saturn_hud_char_seconds")
-				Renderer.drawCustomSprite("saturn_hud_char_seconds_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+				Renderer.drawCustomSprite("saturn_hud_char_seconds_chaosstage", px, py, 0, flags, renderQueue + 1, 0, freeze_time * 4)
 			else if (key == "saturn_hud_char_colon")
-				Renderer.drawCustomSprite("saturn_hud_char_colon_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+				Renderer.drawCustomSprite("saturn_hud_char_colon_chaosstage", px, py, 0, flags, renderQueue + 1, 0, freeze_time * 4)
 			else if (key == "saturn_hud_text_time")
-				Renderer.drawCustomSprite("saturn_hud_text_time_chaosstage", px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+				Renderer.drawCustomSprite("saturn_hud_text_time_chaosstage", px, py, 0, flags, renderQueue + 1, 0, freeze_time * 4)
 		}
     }
 }
@@ -228,18 +233,94 @@ function bool Saturn.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 {
 	if (objA0.update_address == 0x02d8e2)
 	{
-		u64 barKey = "saturn_titlecard_bluebar"
+		u64 backdropKeyLight = "saturn_titlecard_bluebg_light"
+		u64 backdropKeyDark = "saturn_titlecard_bluebg_dark"
+		u64 verticalBarKey = "saturn_titlecard_whitebar"
 		if (global.zone == 0x0c) // special yellow bar for The Doomsday Zone
-			barKey = "saturn_titlecard_yellowbar"
+		{
+			backdropKeyLight = "saturn_titlecard_yellowbg_light"
+			backdropKeyDark = "saturn_titlecard_yellowbg_dark"
+		}
 		else if (global.characters == 2)
-			barKey = "saturn_titlecard_orangebar"
-		else if (global.characters >= 3)
-			barKey = "saturn_titlecard_redbar"
+		{
+			backdropKeyLight = "saturn_titlecard_orangebg_light"
+			backdropKeyDark = "saturn_titlecard_orangebg_dark"
+		}
+		else if (global.characters == 3)
+		{
+			backdropKeyLight = "saturn_titlecard_greenbg_light"
+			backdropKeyDark = "saturn_titlecard_greenbg_dark"
+			verticalBarKey = "saturn_titlecard_yellowbar"
+		}
+
+		s16 backdropYLight = getScreenHeight()/2 + ((objA0.value32 < 14) ? s16[A0 + 0x32] * getScreenHeight()/14 - getScreenHeight() : 0)
+		s16 backdropYDark = getScreenHeight()/2 - ((objA0.value32 < 14) ? s16[A0 + 0x32] * getScreenHeight()/14 - getScreenHeight() : 0)
+		s16 backdropXLight = backdropYLight + (getScreenWidth() - 224)/2
+		s16 backdropXDark = backdropYDark + (getScreenWidth() - 224)/2
+		s16 horizontalBarPosition = 9 + getScreenExtend()/2 + ((objA0.value32 < 28) ? getScreenWidth() - (getScreenWidth()/20 * (objA0.value32 - 8)) : 0)
+		s16 verticalBarPosition = ((objA0.value32 < 22) ? 120/7 * (objA0.value32 - 7) - 240 : 0)
+		if (global.zone == 0x0c)
+		{
+			// Doomsday loads so fast that the bars can't even make it all the way to their locked positions! We need to speed the bars up a bit.
+			horizontalBarPosition = 9 + getScreenExtend()/2 + ((objA0.value32 < 24) ? getScreenWidth() - (getScreenWidth()/20 * (objA0.value32 - 4)) : 0)
+			verticalBarPosition = ((objA0.value32 < 18) ? 120/7 * (objA0.value32 - 3) - 240 : 0)			
+		}
+		s16 animationTimer = objA0.value3e
+		u8 alpha = 255
+
+		if (S2TitleCard.disappear)		// We assume that the timer will be at more than 0'02"00 when finishing a level or entering a special/bonus stage
+		{
+			backdropYLight = getScreenHeight()/2 - ((animationTimer > 4) ? -((animationTimer - 4) * getScreenHeight()/14) : 0)
+			backdropYDark = getScreenHeight()/2 + ((animationTimer > 4) ? -((animationTimer - 4) * getScreenHeight()/14) : 0)
+			backdropXLight = backdropYLight + (getScreenWidth() - 224)/2
+			backdropXDark = backdropYDark + (getScreenWidth() - 224)/2
+			horizontalBarPosition = 9 + getScreenExtend()/2 + (getScreenWidth()/8 * max (0, animationTimer - 60))/4
+			verticalBarPosition = -(300/7 * animationTimer)/4
+		}
+		if (S2TitleCard.full)
+		{
+			Renderer.drawCustomSprite(backdropKeyLight, backdropXLight, backdropYLight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
+			Renderer.drawCustomSprite(backdropKeyDark, backdropXDark, backdropYDark, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
+		}
+		else
+		{
+			alpha = 212
+		}
+		if (objA0.value32 >= 7 || S2TitleCard.disappear)
+		{
+			Renderer.drawCustomSprite(verticalBarKey, 33 + 3*getScreenExtend()/4, verticalBarPosition, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a, 0, alpha)
+			Renderer.drawCustomSprite("saturn_titlecard_redbar", horizontalBarPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b, 0, alpha)
+
+			if (unlock_act)
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_unlock%04d", unlock_act), horizontalBarPosition - 197 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 57, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else if (global.zone_act == 0x1600)
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone9", global.zone), horizontalBarPosition - 197 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 57, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else if (global.zone_act == 0x1601)
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone13", global.zone), horizontalBarPosition - 197 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 57, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else if (global.zone_act == 0x1700)
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone11", global.zone), horizontalBarPosition - 197 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 57, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", global.zone), horizontalBarPosition - 197 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 57, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+
+			if (global.zone_act == 0x1600 || global.zone_act == 0x1700)		// LRZ2 boss, DEZ2 final boss
+				Renderer.drawCustomSprite("saturn_titlecard_act2", horizontalBarPosition - 65 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 36, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else if (!unlock_act && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c)	// don't draw anything in an unlockable act, HPZ, SSZ, or DDZ, but prevent the original graphic from showing
+				Renderer.drawCustomSprite(stringformat("saturn_titlecard_act%d", global.act.apparent + 1), horizontalBarPosition - 65 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 36, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+
+			if (unlock_act)
+				Renderer.drawCustomSprite("rtwilogo", horizontalBarPosition - 144 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 118, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+			else
+				Renderer.drawCustomSprite("dagelogo", horizontalBarPosition - 120 - getScreenExtend()/2 + getScreenWidth(), getScreenHeight() - 111, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00c, 0, alpha)
+		}
+
+		// Remove fade-in for Saturn theme, where we want to reveal the level in full color behind the title card
+		if (level.framecounter == 1 && S2TitleCard.full)	// the frame before the framecounter advances, SetPaletteFadedOut() and SetPaletteToBlack() have run
+		{
+			copyMemory(0xfffffc00, 0xfffffc80, 0x80)	// above water palette
+			copyMemory(0xfffff080, 0xfffff000, 0x80)	// underwater palette (note: fade target and displayed palettes are in the opposite order as they are above water)
+			palette_fade.count = 0						// tell the fading functions to fade one entry (this byte is number of colors minus 1), which is always black anyway
+		}
 		
-		if (unlock_act)
-			barKey = stringformat("%s_rtwi", barKey)
-	
-		Renderer.drawCustomSprite(barKey, px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 		return true
 	}
 }
@@ -249,50 +330,52 @@ function bool Saturn.TitleCardText(s16 px, s16 py, s16 renderQueue)
 	if (objA0.update_address == 0x02d95c && !original_mode)
 	{
 		// Act number, found by checking which mappings will be used since the actual zone ID order is unwieldy.
-		if (objA0.animation.sprite == 0x02 && unlock_act)
+		if (objA0.animation.sprite == 0x02)	//  && unlock_act
 		{
-			return true	// don't draw anything but prevent the original graphic from showing
+			return true	// don't draw anything, as we handle this in Saturn.TitleCardBar()
 		}
+/*
 		if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1600) // force "Act 2" to show in the LRZ2 boss level
 		{
-			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act == 0x1700) // force "Act 2" to show in the DEZ2 final boss level
 		{
-			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_act2", px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x02 && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c) // exclude HPZ, SSZ, and DDZ from drawing act numbers
 		{
-			Renderer.drawCustomSprite(stringformat("saturn_titlecard_act%d", global.act.apparent + 1), px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite(stringformat("saturn_titlecard_act%d", global.act.apparent + 1), px + 6, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
-		// Originally the word "zone", now white bars
+*/
+		// Originally the word "zone", now handled in Saturn.TitleCardBar()
 		else if (objA0.animation.sprite == 0x03)
 		{
-			Renderer.drawCustomSprite("saturn_titlecard_zone_text", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			Renderer.drawCustomSprite("saturn_titlecard_zone_text", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
-		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy
+		// Zone name, found by checking which mappings will be used since the actual zone ID order is unwieldy, now handled in Saturn.TitleCardBar()
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
-			if (unlock_act)
-				Renderer.drawCustomSprite(stringformat("saturn_titlecard_unlock%04d", unlock_act), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			else
-				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+//			if (unlock_act)
+//				Renderer.drawCustomSprite(stringformat("saturn_titlecard_unlock%04d", unlock_act), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+//			else
+//				Renderer.drawCustomSprite(stringformat("saturn_titlecard_zone%d", objA0.animation.sprite - 4), px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
 		// "Bonus"
 		else if (objA0.animation.sprite == 0x12 || objA0.animation.sprite == 0x13)
 		{
-			Renderer.drawCustomSprite("saturn_titlecard_bonus", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_bonus", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
 		// "Stage"
 		else if (objA0.animation.sprite == 0x14)
 		{
-			Renderer.drawCustomSprite("saturn_titlecard_stage", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+			Renderer.drawCustomSprite("saturn_titlecard_stage", px, py, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			return true
 		}
 	}
