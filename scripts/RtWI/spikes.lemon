@@ -1,9 +1,30 @@
 // Use Sonic 2 spike VRAM location when needed. New mappings are not necessary.
+// We also recreate the Origins wall spike effect in FBZ by setting a flag here, which is checked in function void fn0240e2().
 // Function taken from objects\basics\spikes.lemon
 //# address-hook(0x023f84) end(0x024022)
 function void Spikes.Init()
 {
 	base.Spikes.Init()
+
+	if (objA0.update_address == 0x0240e2 && global.zone == 0x04 && !original_mode)	//  && (level.framecounter.low % 0x10 < 8)
+	{
+/*
+		u8[A0 + 0x42] = level.framecounter.low % 0x10
+		if (!(objA0.render_flags & render_flag.FLIP_X))
+			u8[A0 + 0x42] += 8
+		if (u8[A0 + 0x42] >= 8)
+			--objA0.position.y.u16
+		return
+*/
+		u16[A0 + 0x42] = objA0.position.y.u16
+		if (level.framecounter.low % 0x10 >= 8)
+		{
+			--objA0.position.y.u16
+			objA0.render_flags |= render_flag.FLIP_Y
+		}
+		return
+	}
+
 	if (unlock_act)
 		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE1 | 0x0434)
 }

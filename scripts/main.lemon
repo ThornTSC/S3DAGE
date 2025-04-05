@@ -4355,7 +4355,7 @@ function void Character.CheckCollisionsWithDynamicObjects()
 
 
 // Disable faster pushing in Original Mode.
-// Also add pushing sound effect to rocks as in Origins.
+// Also add pushing sound effect to rocks and spikes as in Origins.
 // Functions taken from objects\level\rocks.lemon
 //# address-hook(0x0200a2) end(0x0200ca)
 function void fn0200a2()
@@ -4416,7 +4416,33 @@ function void fn0200cc()
 	}
 }
 
-// Function taken from objects\basics\spikes.lemon
+// Functions taken from objects\basics\spikes.lemon
+//# address-hook(0x024356) end(0x024388)
+function void fn024356()
+{
+	D3.u8 = objA0.flags2a & (object.flag.P1_PUSHING | object.flag.P2_PUSHING)
+	if (D3.u8 != 0)
+	{
+		// Spikes are being pushed
+		D2.u16 = objA0.position.x.u16
+
+		A1 = 0xffffb000
+		D0.u8 = u8[A0 + 0x3e]
+		D6 = 5		// object.flag.P1_PUSHING
+		fn02438a()
+
+		A1 = 0xffffb04a
+		D0.u8 = u8[A0 + 0x3f]
+		D6 = 6		// object.flag.P2_PUSHING
+		fn02438a()
+	}
+	else if (!original_mode)
+		u8[A0 + 0x44] = 2	// reset a timer used to play the pushing sound as frequently as Origins does
+
+	u8[A0 + 0x3e] = u8[0xffffb000 + 0x2a]
+	u8[A0 + 0x3f] = u8[0xffffb04a + 0x2a]
+}
+
 //# address-hook(0x02438a) end(0x0243b8)
 function void fn02438a()
 {
@@ -4432,6 +4458,15 @@ function void fn02438a()
 				--u16[A0 + 0x3c]
 				++objA0.position.x.u16
 				++objA1.position.x.u16
+
+				// Check to play sound as in Origins
+				if (u8[A0 + 0x44] == 0 && !original_mode)
+				{
+					playSound(0x69)
+					u8[A0 + 0x44] = 2	// reset a timer used to play the pushing sound as frequently as Origins does
+				}
+				else if (!original_mode)
+					--u8[A0 + 0x44]		// decrement the timer for playing the next push sfx
 			}
 		}
 	}
@@ -4534,6 +4569,14 @@ function void fn0419fa()
 		if ((u16[A0 + 0x36] % 4) == 0)
 		{
 			objA1.position.x.u16 += (sign ? -1 : 1)
+
+		// Play push sound if MFaT setting doesn't lower the frequency
+		if (Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_PushSFXFrequency") == 1 && !original_mode)
+		{
+			if (!(Audio.isPlayingAudio(0x69)))
+				playSound(0x69)
+		}
+		else
 			playSound(0x69)
 		}
 	}
@@ -13172,16 +13215,19 @@ function void fn030cf8()
 			}
 
 			// Misc. Fixes and Tweaks compatibility with jumping SFX/jumping in ball when escaping launcher
-			if (System.getGlobalVariableValueByName("MFT_HCZLauncher"))
+			if (!original_mode)
 			{
-				u8[A1 + 0x1e] = 0x0e
-				u8[A1 + 0x1f] = 0x07
-				objA1.state = char.state.ROLLING
-				objA1.flags2a |= char.flag.ROLLING
-				u8[A1 + 0x40] = 0x01
+				if (System.getGlobalVariableValueByName("MFT_HCZLauncher"))
+				{
+					u8[A1 + 0x1e] = 0x0e
+					u8[A1 + 0x1f] = 0x07
+					objA1.state = char.state.ROLLING
+					objA1.flags2a |= char.flag.ROLLING
+					u8[A1 + 0x40] = 0x01
+				}
+				if (System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX"))
+					playSound(SFX_JUMP)
 			}
-			if (System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX"))
-				playSound(SFX_JUMP)
 		}
 		return
 	}
@@ -13592,7 +13638,7 @@ function void fn01edec()
 					level.HCZ_breakable_bar_flags |= (1 << (D2.u8 & 7))
 					u8[A2] = 0x01
 
-					if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
+					if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
 						playSound(SFX_GRAB)
 				}
 			}
@@ -13667,7 +13713,7 @@ function void fn031226()
 					objA1.velocity.y = (u8[A1 + 0x2a] & char.flag.UNDERWATER) ? 0x0000 : 0x0020		// new control from Origins: down+jump to drop
 					dropDown = true
 				}
-				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0) && !dropDown)
+				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0) && !dropDown)
 					playSound(SFX_JUMP)
 			}
 		}
@@ -13717,7 +13763,7 @@ function void fn031226()
 					u8[A2 + 0x04] = 0
 				}
 
-				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") & System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
+				if (!original_mode && !(Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0))
 					playSound(SFX_GRAB)
 
 				objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
@@ -19502,6 +19548,7 @@ function void fn074952()
 
 
 // In Original Mode, revert the MHZ pulley to its normal speed and enable the debug cheat.
+// We also add the jump sounds as in Origins when a player jumps off.
 // Functions taken from objects\07_mhz\mhz_elevator.lemon
 //# address-hook(0x03e472) end(0x03e4e6)
 function void fn03e472()
@@ -19595,6 +19642,10 @@ function void fn03e508()
 		objA1.state = char.state.ROLLING
 		objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
 		u8[A1 + 0x40] = 0x01
+
+		// Play jump sound if MFaT setting doesn't disable it
+		if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+			playSound(SFX_JUMP)
 	}
 	else
 	{
@@ -19659,7 +19710,7 @@ function void fn03e598()
 //# address-hook(0x03e5f2) end(0x03e652)
 function void fn03e5f2()
 {
-	if (A1 != 0xffffb04a && u16[A0 + 0x34] != 0x40 && display_inputs && !original_mode)		// A1 not sidekick Tails. Offset 0x34 increments by 0x04 each frame down is held, up to a maximum of 0x40.
+	if (A1 != 0xffffb04a && u16[A0 + 0x34] != 0x40 && u8[A3 + 0x2c] != 0 && display_inputs && !original_mode)		// A1 not sidekick Tails. Offset 0x34 increments by 0x04 each frame down is held, up to a maximum of 0x40.
 	{																						// This implementation is incomplete; the 0x40 maximum is lowered if the pulley device is near/at the ceiling.
 		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
 	}
@@ -19668,6 +19719,360 @@ function void fn03e5f2()
 }
 
 
+
+
+// Add Origins jump sound to jumping from MHZ poles.
+// Function taken from objects\07_mhz\mhz_verticalpole.lemon. There are other places this can be handled, but we maximize Misc. Fixes and Tweaks compatibility.
+//# address-hook(0x03f17a) end(0x03f1c6)
+function void fn03f17a()
+{
+	base.fn03f17a()
+
+	// Play jump sound if MFaT setting doesn't disable it
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+		playSound(SFX_JUMP)
+}
+
+// Function taken from objects\07_mhz\mhz_horizontalpole.lemon
+//# address-hook(0x03ed6e) end(0x03efb8)
+function void fn03ed6e()
+{
+	if (u8[A2] != 0)
+	{
+		if (debug_mode.state == 0 && u8[A1 + 0x05] < 0x04)
+		{
+			if (D1 & 0x0400)		// CONTROL_LEFT held
+			{
+				D0.u16 = objA0.position.x.u16 - 0x16
+				if (D0.s16 < s16[A1 + 0x10])
+				{
+					--objA1.position.x.u16
+					--u8[A2 + 0x06]
+					if (s8[A2 + 0x06] < 0)
+					{
+						u8[A2 + 0x06] = 0x07
+						u8[A2 + 0x08] += 0x10
+						u8[A2 + 0x08] &= 0x10
+					}
+				}
+			}
+
+			if (D1 & 0x0800)		// CONTROL_RIGHT held
+			{
+				D0.u16 = objA0.position.x.u16 + 0x15
+				if (D0.s16 > s16[A1 + 0x10])
+				{
+					++objA1.position.x.u16
+					--u8[A2 + 0x06]
+					if (s8[A2 + 0x06] < 0)
+					{
+						u8[A2 + 0x06] = 0x07
+						u8[A2 + 0x08] += 0x10
+						u8[A2 + 0x08] &= 0x10
+					}
+				}
+			}
+
+			// Check if jump button pressed
+			D1.u16 &= CONTROL_ABC
+			if (D1.u16 == 0)
+			{
+				bool goto03ee8c = false
+
+				if (u8[A2 + 0x04] == 0x28)
+				{
+					objA1.state = char.state.STRAIGHTJUMP
+					objA1.state.former = 0
+					D0.u16 = s16[A3] + (s16[A3] >> 1)
+					objA1.velocity.y = D0.u16
+					goto03ee8c = true
+				}
+
+				if (u8[A2 + 0x04] == 0x05)
+				{
+					objA1.state.both = 0
+					objA1.velocity.y = u16[A3]
+					goto03ee8c = true
+				}
+
+				if (goto03ee8c)
+				{
+					u8[A2] = 0
+					u8[A2 + 0x02] = 0x08
+					u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+					u8[A1 + 0x40] = 0
+					u8[A1 + 0x3d] = 0
+					u8[A1 + 0x05] = 0x02
+					objA1.flags2a |= char.flag.IN_AIR
+					objA1.flags2a &= ~char.flag.CONTROL_LOCK
+					u8[A1 + 0x2f] = 0
+					u8[A1 + 0x27] = 0
+				}
+				else
+				{
+					fn03efba()
+
+					D0 = objA1.animation.sprite
+					u32 backupA2 = A2
+					SetCharacterSpritePatterns()
+					A2 = backupA2
+				}
+				return
+			}
+
+			objA1.velocity.y = -0x500
+			if (objA1.flags2a & char.flag.UNDERWATER)
+			{
+				objA1.velocity.y = -0x200
+			}
+		}
+
+		u8[A2] = 0
+		u8[A2 + 2] = (objA1.flags2a & char.flag.UNDERWATER) ? 0x3c : 0x1e
+
+		u8[A1 + 0x2e] &= ~(control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		u8[A1 + 0x40] = 0x01
+		objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+		objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+		objA1.state = char.state.ROLLING
+		objA1.flags2a |= char.flag.ROLLING
+		objA1.flags2a &= ~char.flag.CONTROL_LOCK
+		u8[A1 + 0x27] = 0
+
+		// Play jump sound if MFaT setting doesn't disable it
+		if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+			playSound(SFX_JUMP)
+
+		return
+	}
+
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x16
+	if (D0.u16 < 0x2c)
+	{
+		D0.u16 = objA0.position.y.u16 + 0x14
+		if (D0.u16 < objA1.position.y.u16)
+		{
+			D0.u16 += 0x10
+			if (D0.u16 >= objA1.position.y.u16)
+			{
+				if (debug_mode.state == 0 && u8[A1 + 0x05] < 0x04)
+				{
+					if (u8[A1 + 0x2e] == 0)
+					{
+						u16[A3] = objA1.velocity.y
+						objA1.velocity.x = 0
+						objA1.velocity.y = 0
+						objA1.groundspeed = 0
+						objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+						objA1.position.y.u16 = objA0.position.y.u16 + 0x14
+						u8[A1 + 0x20] = 0
+						u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+						objA1.animation.sprite = 0x94		// Player characters' bar hanging sprites
+						u8[A2 + 0x04] = 0
+						u8[A2 + 0x06] = 0
+						u8[A2 + 0x08] = 0
+
+						if (s16[A3] <= -0x400)
+						{
+							objA1.animation.sprite = 0x95		// Player characters' bar hanging sprites
+							u8[A2 + 0x04] = 0x20
+							u8[A2 + 0x08] = 0x10
+						}
+						else if (s16[A3] >= 0x0400)
+						{
+							objA1.animation.sprite = 0x95		// Player characters' bar hanging sprites
+							u8[A2 + 0x04] = 0x21
+							u8[A2 + 0x08] = 0x10
+						}
+
+						u8[A2] = 1
+						D0 = objA1.animation.sprite
+						u32 backupA2 = A2
+						SetCharacterSpritePatterns()
+						A2 = backupA2
+						playSound(SFX_GRAB)
+					}
+				}
+			}
+		}
+	}
+}
+
+
+// Add Origins jump sound to jumping from MHZ mushroom parachutes.
+// Function taken from objects\07_mhz\mhz_parachute.lemon.
+//# address-hook(0x03f5c2) end(0x03f6a2)
+function void fn03f5c2()
+{
+	if (u8[A2] == 0)
+	{
+		fn03f6fe()
+		return
+	}
+
+	if (objA1.render_flags & render_flag.VISIBLE)
+	{
+		if (u8[A1 + 0x05] < 0x04 && debug_mode.state == 0)
+		{
+			if (u16[A0 + 0x34] == objA1.velocity.x && u16[A0 + 0x36] == objA1.velocity.y)
+			{
+				// Check if jump button pressed
+				if ((D0.u8 & CONTROL_ABC) == 0)
+				{
+					objA1.position.x.u16 = objA0.position.x.u16
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x25
+					objA1.velocity.x = objA0.velocity.x
+					objA1.velocity.y = objA0.velocity.y
+
+					pushAll()
+					A0 = A1
+					Character.CheckCollision()
+					popAll()
+
+					fn03f6a6()
+				}
+				else
+				{
+					u16[A1 + 0x42] = 0
+					u8[A1 + 0x2e] = 0
+					u8[A2] = 0
+					u8[A2 + 0x02] = 0x12
+
+					if (D0 & 0x0f00)	// Any direction held?
+					{
+						u8[A2 + 0x02] = 0x3c
+					}
+					if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.velocity.x = -0x200
+					}
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.velocity.x = 0x0200
+					}
+
+					objA1.velocity.y = -0x380
+					objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+					objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+					objA1.state = char.state.ROLLING
+					objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+					u8[A1 + 0x40] = 0x01
+
+					// Play jump sound if MFaT setting doesn't disable it
+					if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+						playSound(SFX_JUMP)
+				}
+				return
+			}
+
+			objA1.velocity.y = -0x100
+		}
+	}
+	else
+	{
+		objA1.velocity.y = -0x100
+	}
+
+	u16[A1 + 0x42] = 0
+	u8[A1 + 0x2e] = 0
+	u8[A2] = 0
+	u8[A2 + 0x02] = 0x3c
+}
+
+
+
+
+// Add Origins jump sound to jumping from MHZ swings.
+// Functions taken from objects\07_mhz\mhz_swingvine.lemon
+//# address-hook(0x02291a) end(0x022a22)
+function void fn02291a()
+{
+	// This is 0 as long as character is not hanging on
+	if (u8[A2] == 0)
+	{
+		fn022af8()
+		return
+	}
+
+	if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < 0x04 && debug_mode.state == 0)
+	{
+		// Check if jump button pressed
+		if ((D0.u8 & CONTROL_ABC) == 0)
+		{
+			if (u16[A0 + 0x30] != 0)
+			{
+				fn022a5c()
+			}
+			else
+			{
+				// Let go
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x14
+				A3 = 0xffff0000 + u16[A0 + 0x3c]
+				u8 angle = u8[A3 + 0x26]
+				if (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+					angle = -angle
+				D0.u16 = (angle + 8) >> 4
+				objA1.animation.sprite = u8[0x022a4c + D0.u16]		// Player characters' hanging sprites
+
+				fn022a28()
+			}
+			return
+		}
+
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		if (u16[A0 + 0x30] != 1)
+		{
+			D1.u16 = objA0.position.x.u16 - objA0.value42
+			objA1.velocity.x = D1.s16 << 7
+			D1.u16 = objA0.position.y.u16 - u16[A0 + 0x44]
+			objA1.velocity.y = D1.s16 << 7
+
+			u8[A2 + 0x02] = 0x3c
+			if (D0 & 0x0400)		// CONTROL_LEFT held
+			{
+				objA1.velocity.x = -0x200
+			}
+			if (D0 & 0x0800)		// CONTROL_RIGHT held
+			{
+				objA1.velocity.x = 0x200
+			}
+			objA1.velocity.y -= 0x380
+		}
+		else
+		{
+			u8[A2 + 0x02] = 0x3c
+			A3 = 0xffff0000 + u16[A0 + 0x3c]
+			D0.u8 = u8[A3 + 0x26]
+			LookupSinCos()
+			objA1.velocity.x = D1.s16 * 12
+			objA1.velocity.y = D0.s16 * 12
+		}
+
+		objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+		objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+		objA1.state = char.state.ROLLING
+		objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+		u8[A1 + 0x40] = 1
+
+		// Play jump sound if MFaT setting doesn't disable it
+		if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+			playSound(SFX_JUMP)
+	}
+	else
+	{
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2 + 0x02] = 0x3c
+	}
+}
 
 
 
@@ -20368,6 +20773,7 @@ function void fn039f7e()
 
 
 // Remove rolling flag in FBZ vertical cylinders to prevent running out of speed and falling down.
+// We also correct some behaviors when jumping inside a vertical cylinder.
 // Functions taken from objects\08_fbz\fbz_staticcylinder.lemon
 //# address-hook(0x03a314) end(0x03a466)
 function void fn03a314()
@@ -20460,6 +20866,17 @@ function void fn03a314()
 		u8[A1 + 0x27] = 0xc0
 		u8[A1 + 0x30] = 0			// "char.rotation.x.count"
 		u8[A1 + 0x31] = 0x04		// "char.rotation.x.speed"
+
+		// Correct jumping behaviors. Origins doesn't allow jumping at all, but we choose to be more generous than that.
+		if (((control.player1.pressed & CONTROL_ABC) || (control.player2.pressed & CONTROL_ABC) || (control.tails.pressed & CONTROL_ABC)) && !original_mode)
+		{
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.state = char.state.ROLLING
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			u8[A1 + 0x40] = 0x01
+			objA1.velocity.y = -0x380
+		}
 	}
 }
 
@@ -20533,6 +20950,560 @@ function void fn03a480()
 		objA1.flags2a &= ~char.flag.ROLLING
 	D0 = objA1.animation.sprite
 	SetCharacterSpritePatterns()
+}
+
+
+// Make FBZ wall spikes appear to alternate which points are sticking out as in Origins.
+// An initial setup for this is done in function void Spikes.Init(), where u16[A0 + 0x42] holds the base y position.
+// Function taken from objects\basics\spikes.lemon
+//# address-hook(0x0240e2) end(0x024138)
+function void fn0240e2()
+{
+	fn0242b6()
+
+	if (!original_mode && global.zone == 0x04)
+	{
+		if ((level.framecounter.low % 0x08 == 0))
+		{
+			objA0.render_flags ^= render_flag.FLIP_Y
+			if (level.framecounter.low % 0x10 == 0)
+				objA0.position.y.u16 = u16[A0 + 0x42]
+			else
+				objA0.position.y.u16 = u16[A0 + 0x42] - 1
+		}
+	}
+
+	D1 = objA0.box_size.x + 11
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	D6 = (D6 << 16) + (D6 >> 16)
+	D6.u16 &= 0x03
+	if (D6.u16 != 0)
+	{
+		D0.u8 = D6.u8 & 0x01
+		if (D0.u8 != 0)
+		{
+			A1 = 0xffffb000
+			DamageCharacter()
+			objA0.flags2a &= ~object.flag.P1_PUSHING
+		}
+		D6.u8 &= 0x02
+		if (D6.u8 != 0)
+		{
+			A1 = 0xffffb04a
+			DamageCharacter()
+			objA0.flags2a &= ~object.flag.P2_PUSHING
+		}
+	}
+
+	D0.u16 = u16[A0 + 0x30]
+	DrawOrUnloadObjectByD0()
+}
+
+
+
+
+// Play the Origins sound effects for when the Blaster badnik in FBZ fires.
+// Function taken from objects\08_fbz\fbz_blaster.lemon
+//# address-hook(0x08957a) end(0x0895a0)
+function void fn08957a()
+{
+	if (fn0896d6())
+		return
+
+	--objA0.value39
+	if (s8(objA0.value39) >= 0)
+		return
+
+	objA0.base_state = 0x08
+	objA0.countdown_callback = 0x08956a
+
+	// "spawnChildObjects(0x089726)" replaced by:
+	spawnChildObject(0x089626, 0x00, -27, -22)
+
+	// "spawnProjectileChildObjectsInDir(0x08972e)" replaced by:
+	spawnProjectileChildObjectInDir(0x086d4a, 0x00, -32, -32, -512, -1024, 0x08970e, 0x089771, 0x08562c)
+
+	// Play jump sound if MFaT setting doesn't disable it
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("origins_sounds") == 0)) && !original_mode)
+	{
+		playSound(0x4d)		// shooting noise for bullet
+		playSound(0x9a)		// noise for ejecting spent bullet casing
+	}
+}
+
+
+
+// Play the Origins sound effect for jumping on FBZ monkey bars (stationary and moving)
+// Functions taken from objects\08_fbz\fbz_monkeybars.lemon
+//# address-hook(0x03a8b8) end(0x03aa58)
+function void fn03a8b8()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && debug_mode.state == 0 && u8[A1 + 0x05] < 0x04)
+		{
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 == 0)
+			{
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.flags2a |= char.flag.FACING_LEFT
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.flags2a &= ~char.flag.FACING_LEFT
+				}
+				objA1.render_flags &= ~char.flag.FACING_LEFT
+				objA1.render_flags |= (u8[A1 + 0x2a] & char.flag.FACING_LEFT)
+				objA1.position.y.u16 = objA0.position.y.u16 + 0x9c
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2 + 0x02] = 0x12
+				D0.u16 &= 0x0f00			// Any direction held?
+				if (D0.u16 != 0)
+				{
+					u8[A2 + 0x02] = 0x3c
+				}
+				if (D0 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+				if (D0 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x0200
+				}
+				objA1.velocity.y = -0x380
+				objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+				objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+				objA1.state = char.state.ROLLING
+				u8[A1 + 0x27] = 0
+				objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+				objA1.flags2a &= ~(char.flag.ON_OBJECT | char.flag.CONTROL_LOCK)
+				u8[A1 + 0x40] = 1
+				u16[A1 + 0x42] = 0
+
+				// Play jump sound if MFaT setting doesn't disable it
+				if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+					playSound(SFX_JUMP)
+			}
+		}
+		else
+		{
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x3c
+
+			u8[A1 + 0x2e] = 0
+			u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+			u16[A1 + 0x42] = 0
+		}
+		return
+	}
+
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		if (u8[A2 + 0x02] != 0)
+			return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 0x90
+	if (D0.u16 < 0x20 && D1.u16 < 0x18)
+	{
+		if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < 0x04 && debug_mode.state == 0)
+		{
+		#if STANDALONE
+			// Ignore for Tails while he's carrying the main player
+			//  -> The other way round gets handled further below
+			if (A1 == 0xffffb04a && tails.carrying && !original_mode)
+				return
+		#endif
+
+			if (u8[A1 + 0x2a] & char.flag.ON_OBJECT)
+			{
+				A3 = 0xffff0000 + u16[A1 + 0x42]
+				if (u32[A3] == 0x03aa5a)
+				{
+					D0.u16 = A2.u16 - A0.u16
+					A3 += D0.u16
+					if (u8[A3 + 0x04] != 0)
+						return
+
+					u8[A3] = 0
+					u8[A3 + 0x02] = 0x3c
+				}
+			}
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+			objA1.position.x.u16 = objA0.position.x.u16
+			objA1.position.y.u16 = objA0.position.y.u16 + 0x9c
+			objA1.state = char.state.HANGING
+			objA1.flags2a |= char.flag.ON_OBJECT
+			u8[A1 + 0x2e] = control_flag.DISABLE_UPDATE
+			u16[A1 + 0x42] = A0.u16
+
+			u8[A2] = 0x01
+			playSound(SFX_GRAB)
+
+		#if STANDALONE
+			u8[A1 + 0x3d] = 0	// Clear char.spindash
+
+			// If player is carried by Tails, this connection should better get resolved now
+			if (tails.carrying && !original_mode)
+			{
+				tails.carrying = 0		// Seems to be this simple, or is anything else needed here?
+			}
+		#endif
+		}
+	}
+}
+
+//# address-hook(0x03aa7e) end(0x03ac36)
+function void fn03aa7e()
+{
+	if (u8[A2] == 0)
+	{
+		fn03ac86()
+		return
+	}
+
+	if ((objA1.render_flags & render_flag.VISIBLE) && debug_mode.state == 0 && u8[A1 + 0x05] < 0x04)
+	{
+		// Check if jump button pressed
+		D0.u8 &= CONTROL_ABC
+		if (D0.u8 == 0)
+		{
+			while (true)
+			{
+				if (u8[A2 + 0x04] == 0)
+				{
+					D2.u16 = objA0.value3e - 0x10
+					if (D0 & 0x0400)		// CONTROL_LEFT held
+					{
+						objA1.flags2a |= char.flag.FACING_LEFT
+						D1.u16 = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+						if (D1.u16 != 0)
+						{
+							u8[A2 + 0x04] = 4
+							u8[A2 + 0x02] = 1
+						}
+					}
+					if (D0 & 0x0800)		// CONTROL_RIGHT held
+					{
+						objA1.flags2a &= ~char.flag.FACING_LEFT
+						D1.u16 = objA1.position.x.u16 - objA0.position.x.u16 + D2.u16
+						if (D1.u16 != D2.u16 * 2)
+						{
+							u8[A2 + 0x04] = 4
+							u8[A2 + 0x02] = 0
+						}
+					}
+
+					D0.u8 = u8[A1 + 0x2a] & char.flag.FACING_LEFT
+					objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+					objA1.render_flags |= D0.u8
+					objA1.position.y.u16 = objA0.position.y.u16 + 0x12
+					if (u8[A2 + 0x04] == 0)
+					{
+						break
+					}
+				}
+
+				--u8[A2 + 0x06]
+				if (s8[A2 + 0x06] >= 0)
+					break
+
+				u8[A2 + 0x06] = 7
+				D1 = u8[A2 + 0x04]
+				if (D1.u8 == 2)
+				{
+					playSound(SFX_GRAB)
+				}
+				--D1.u16
+				u8[A1 + 0x20] = (D1.u16 == 0) ? char.state.HANGING : char.state.RUNNING
+
+				D1.u8 += u8[A2 + 0x08]
+				objA1.animation.sprite = u8[0x03ac38 + D1.s16]		// Player characters' monkey bar sprites
+				D1.s16 = s8[0x03ac40 + D1.s16]
+				if (u8[A2 + 0x02] != 0)
+				{
+					D1.s16 = -D1.s16
+				}
+			#if STANDALONE
+				if (A1 == 0xffffb000)
+					globalCameraOffsetX -= D1.s16
+			#endif
+				objA1.position.x.u16 += D1.s16
+
+				--u8[A2 + 0x04]
+				if (u8[A2 + 0x04] != 0)
+					break
+
+				fn03ac48()
+
+				u8[A2 + 0x06] = 0
+				u8[A2 + 0x08] ^= 0x04
+
+				if ((D0.u16 & 0x0c00) == 0)
+					break
+			}
+		}
+		else
+		{
+			u8[A2] = 0
+			u8[A2 + 0x02] = 0x12
+
+			D0.u16 &= 0x0f00		// Any direction held?
+			if (D0.u16 != 0)
+			{
+				u8[A2 + 0x02] = 0x3c
+			}
+			if (D0 & 0x0400)		// CONTROL_LEFT held
+			{
+				objA1.velocity.x = -0x200
+			}
+			if (D0 & 0x0800)		// CONTROL_RIGHT held
+			{
+				objA1.velocity.x = 0x200
+			}
+			objA1.velocity.y = -0x380
+			objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+			objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+			objA1.state = char.state.ROLLING
+			objA1.animation.sprite = 0x96		// Set player character's jumping sprite
+			u8[A1 + 0x27] = 0
+			objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+			objA1.flags2a &= ~(char.flag.ON_OBJECT | char.flag.CONTROL_LOCK)
+			u8[A1 + 0x2e] = 0
+			u8[A1 + 0x40] = 1
+			u16[A1 + 0x42] = 0
+
+			// Play jump sound if MFaT setting doesn't disable it
+			if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+				playSound(SFX_JUMP)
+		}
+
+		D0 = objA1.animation.sprite
+		u32 backupA2 = A2
+		SetCharacterSpritePatterns()
+		A2 = backupA2
+	}
+	else
+	{
+		fn03ab24()
+	}
+}
+
+
+
+// Play the Origins sound effect for grabbing FBZ propeller poles.
+// We also add a jump sound for jumping off, even though Origins does not, for consistency with MHZ poles.
+// Functions taken from objects\08_fbz\fbz_verticalpropeller.lemon
+//# address-hook(0x03c0d0) end(0x03c19a)
+function void fn03c0d0()
+{
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x0c
+	if (D0.u16 < 0x18)
+	{
+		D1.u16 = u16[A0 + 0x36]
+		D0.u16 = objA0.position.y.u16 - objA1.position.y.u16 + 0x10
+		if (D0.u16 < u16[A0 + 0x36] && debug_mode.state == 0 && u8[A1 + 0x05] < 0x04 && u8[A1 + 0x2e] == 0)
+		{
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+			objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+			D0.u8 = u8[A1 + 0x1e]
+			u8[A1 + 0x1e] = u8[A1 + 0x44]
+			u8[A1 + 0x1f] = u8[A1 + 0x45]
+
+			if (u8[A1 + 0x2a] & char.flag.ROLLING)
+			{
+				objA1.flags2a &= ~char.flag.ROLLING
+				D0.s8 -= u8[A1 + 0x44]
+				objA1.position.y.u16 += D0.s8
+			}
+
+			objA1.position.x.u16 = objA0.position.x.u16
+			D0.u16 = objA0.position.y.u16
+			if (D0.u16 < objA1.position.y.u16)
+			{
+				objA1.position.y.u16 = D0.u16
+			}
+
+			objA1.render_flags &= ~render_flag.FLIP_Y
+			u8[A1 + 0x20] = 0
+			objA1.flags2a |= char.flag.IN_AIR
+			objA1.flags2a &= ~char.flag.FACING_LEFT
+			u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+
+			// Play grab sound if MFaT setting doesn't disable it
+			if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0)) && !original_mode)
+				playSound(SFX_GRAB)
+
+			u8[A2 + 0x04] = 0xe0
+			u8[A2] = 1
+
+			fn03c010()
+			fn03bffe()
+		}
+	}
+}
+
+//# address-hook(0x03c068) end(0x03c090)
+function void fn03c068()
+{
+	objA1.velocity.x = (D1 & 0x0400) ? -0x1000 : 0x1000		// CONTROL_LEFT held
+	objA1.velocity.y = -0x100
+	objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+	objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+	objA1.state = char.state.ROLLING
+	objA1.flags2a |= char.flag.ROLLING
+
+	// Play jump sound
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("new_sounds") == 0)) && !original_mode)
+		playSound(SFX_JUMP)
+
+	fn03c096()
+}
+
+
+
+// Play the Origins sound effects for the FBZ spider transport
+// We also remove a speed change when playing Original Mode.
+// Functions taken from objects\08_fbz\fbz_spider.lemon
+//# address-hook(0x03d11e) end(0x03d1ac)
+function void fn03d11e()
+{
+	// Going down to grab character
+	if (u16[A0 + 0x34] < 0x40)
+	{
+		// A little bit faster please
+		u16[A0 + 0x34] += (original_mode) ? 1 : 2
+	}
+
+	objA0.position.y.u16 = u16[A0 + 0x34] + u16[A0 + 0x46]
+	objA0.compound.sprite1.position.y = objA0.position.y.u16
+	objA0.compound.sprite1.animation.sprite = (u16[A0 + 0x34] + 7) >> 3
+
+	A1 = 0xffffb000
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	if (D0.u16 < 0x20)
+	{
+		D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 - 5
+		if (D0.u16 < 0x14)
+		{
+			if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+			{
+				objA1.state = char.state.GRABBED
+				u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_WALLS | control_flag.DISABLE_UPDATE)
+				u8[A1 + 0x3d] = 0
+				u8[A1 + 0x2a] = 0
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				u8[A1 + 0x1e] = u8[A1 + 0x44]
+				u8[A1 + 0x1f] = u8[A1 + 0x45]
+
+				// Play grab sound if MFaT setting doesn't disable it
+				if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0)) && !original_mode)
+					playSound(SFX_GRAB)
+
+				objA0.update_address = 0x03d1b2
+			}
+		}
+	}
+
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x03d220) end(0x03d272)
+function void fn03d220()
+{
+	if (u16[A0 + 0x34] != 0)
+	{
+		// A little bit faster please
+		u16[A0 + 0x34] -= (original_mode) ? 1 : 2
+
+		if (u16[A0 + 0x34] == 0)
+		{
+			objA0.update_address = 0x03d278
+		}
+	}
+
+	objA0.position.y.u16 = u16[A0 + 0x34] + u16[A0 + 0x46]
+	objA0.compound.sprite1.position.y = objA0.position.y.u16
+	objA0.compound.sprite1.animation.sprite = (u16[A0 + 0x34] + 7) >> 3
+
+	A1 = 0xffff0000 + u16[A0 + 0x3c]
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+	u16[0xffffb000 + 0x10] = objA0.position.x.u16
+	u16[0xffffb000 + 0x14] = objA0.position.y.u16 + 0x10
+
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x03d278) end(0x03d2f0)
+function void fn03d278()
+{
+	if (u8[A0 + 0x36] == 0)
+	{
+		// Accelerate
+		// A little bit faster please
+		u32[A0 + 0x30] += (original_mode) ? 0x1000 : 0x2000
+
+		D0.u16 = objA0.position.x.u16 - u16[A0 + 0x44]
+		if (D0.s16 >= s16[A0 + 0x38])
+		{
+			u8[A0 + 0x36] = 0x01
+		}
+	}
+	else
+	{
+		// Decelerate
+		// A little bit faster please
+		u32[A0 + 0x30] -= (original_mode) ? 0x1000 : 0x2000
+
+		if (u32[A0 + 0x30] == 0)
+		{
+			A1 = 0xffffb000
+			u8[A1 + 0x20] = 0
+			u8[A1 + 0x2e] = 0
+			u8[A1 + 0x2a] |= char.flag.IN_AIR
+			objA0.update_address = 0x03d2f6
+			objA0.animation.sprite = 0x0a
+			A1 = 0xffff0000 + u16[A0 + 0x3c]
+			u8[A1 + 0x22] = 0
+
+			// Play release sound if MFaT setting doesn't disable the initial grab sound. (MFaT doens't have a setting for the release sound, so we aim for consistency.)
+			if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0)) && !original_mode)
+				playSound(0x7c)
+		}
+	}
+
+	objA0.position.x += u32[A0 + 0x30]
+	objA0.velocity.x = objA0.position.x.u16
+
+	A1 = 0xffff0000 + u16[A0 + 0x3c]
+	objA1.position.x.u16 = objA0.position.x.u16
+	u16[0xffffb000 + 0x10] = objA0.position.x.u16
+
+	DrawOrUnloadObject()
 }
 
 
@@ -22163,6 +23134,122 @@ function void fn08f0ca()
 
 
 
+// Origins does not have a jump sound for releasing SOZ light switches, but that is inconsistent with its other changes, so we add it.
+// We also make a fix for Tails assist flight interactions only outside of Original Mode and allow an MFaT setting to swap the click sound for a grab sound.
+// Function taken from objects\09_soz\soz_lightswitch.lemon
+//# address-hook(0x040f52) end(0x04108e)
+function void fn040f52()
+{
+	if (u8[A2] != 0)
+	{
+		if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < 0x04)
+		{
+			// Check if jump button pressed
+			D0.u8 &= CONTROL_ABC
+			if (D0.u8 == 0)
+			{
+				bool goto040fd8 = false
+				if (s8[A0 + 0x2c] < 0)
+				{
+					push(A2)
+					push(A1)
+					fn00f8ea()
+					A1 = pop()
+					A2 = pop()
+
+					goto040fd8 = (D1.s16 <= 0)
+				}
+
+				if (!goto040fd8)
+				{
+					objA1.position.y.u16 = objA0.velocity.y + 0x30
+					return
+				}
+			}
+			else
+			{
+				u8[A1 + 0x2e] = 0
+				u8[A2] = 0
+				u8[A2+2] = 0x12
+
+				if (D0.u16 & 0x0f00)		// Any direction held?
+				{
+					u8[A2+2] = 0x3c
+				}
+
+				if (D0.u16 & 0x0800)		// CONTROL_RIGHT held
+				{
+					objA1.velocity.x = 0x200
+				}
+				else if (D0.u16 & 0x0400)		// CONTROL_LEFT held
+				{
+					objA1.velocity.x = -0x200
+				}
+
+				objA1.velocity.y = -0x380
+				objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+				objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+				objA1.state = char.state.ROLLING
+				u8[A1 + 0x27] = 0
+				objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+				objA1.flags2a &= ~char.flag.CONTROL_LOCK
+				u8[A1 + 0x40] = 1
+
+				// Play jump sound if MFaT setting doesn't disable it
+				if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Jump_SFX") == 0)) && !original_mode)
+					playSound(SFX_JUMP)
+
+				return
+			}
+		}
+
+		u8[A1 + 0x2e] = 0
+		u8[A2] = 0
+		u8[A2+2] = 0x3c
+	}
+	else
+	{
+		if (u8[A2+2] != 0)
+		{
+			--u8[A2+2]
+			if (u8[A2+2] != 0)
+				return
+		}
+
+		#if STANDALONE
+			// Don't react for any of the two if Tails is carrying the other character
+			if (tails.carrying && !original_mode)
+				return
+		#endif
+
+		u16 dx = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+		u16 dy = objA1.position.y.u16 - objA0.velocity.y - 0x30
+		if (dx < 0x20 && dy < 0x18)
+		{
+			if (s8[A1 + 0x2e] >= 0 && u8[A1 + 0x05] < 0x04 && debug_mode.state == 0)
+			{
+				objA1.velocity.x = 0
+				objA1.velocity.y = 0
+				objA1.groundspeed = 0
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.velocity.y + 0x30
+				objA1.state = char.state.HANGING
+				u8[A1 + 0x2e] = 1
+
+				u8[A2] = 1
+
+				// Play grab sound if MFaT setting prefers it over the click sound
+				if (((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_GRAB_SFX") == 1)) && !original_mode)
+					playSound(SFX_GRAB)
+				else
+					playSound(SFX_CLICK)
+			}
+		}
+	}
+}
+
+
+
 // Do not enable fix to SOZ2 boss Egg Mobile priority in Original Mode
 // Function taken from bosses\boss_soz2.lemon
 //# address-hook(0x077822) end(0x077842)
@@ -22234,6 +23321,59 @@ function void fn0781e4()
 }
 
 
+
+// Enable a fix to the falling animation at the end of SOZ2 when not in Original Mode.
+// Functions taken from scripts\bosses\boss_soz2.lemon
+
+// Player 1
+//# address-hook(0x077966) end(0x0779be)
+function void fn077966()
+{
+	if (move_area.bottom.target >= 0x0700)
+	{
+		move_area.bottom.current = 0x0800
+	}
+
+	A1 = 0xffffb000
+	if (objA1.position.x.u16 < 0x5468)
+	{
+		fn086334()
+		return
+	}
+
+	objA0.position.x.u16 = objA1.position.x.u16
+	objA0.position.y.u16 = objA1.position.y.u16
+	objA0.velocity.x = objA1.velocity.x
+	objA0.velocity.y = 0
+
+	if (u8[A1 + 0x38] != CHARACTER_KNUCKLES)
+	{
+		objA0.update_address = 0x0779c0
+		objA1.state = (original_mode) ? char.state.GOT_HURT : char.state.FALLING_PANIC
+		u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+	}
+	else
+	{
+		objA0.update_address = 0x077a3e
+	}
+}
+
+// Sidekick Tails
+//# address-hook(0x077a6e) end(0x077a94)
+function void fn077a6e()
+{
+	if ((u8[0xfffffab8] & 0x01) == 0)
+		return
+
+	objA0.update_address = 0x077a98
+	A1 = 0xffffb04a
+	u8[A1 + 0x0a] &= ~0x80
+	objA1.state = (original_mode) ? char.state.GOT_HURT : char.state.FALLING_PANIC
+	u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+	player2.control_override = 0
+
+	fn077a98()
+}
 
 
 // In Original Mode, restore one of the Death Egg appearances in the LRZ1 background for Knuckles.
@@ -22550,6 +23690,71 @@ function void LRZ2_CustomSprites()
 
 
 
+// Add sound to grabbing an LRZ2 turbine to match Origins.
+// Function taken from objects\10_lrz\lrz_turbine.lemon
+//# address-hook(0x044434) end(0x044508)
+function void fn044434()
+{
+	if (u8[A2 + 0x02] != 0)
+	{
+		--u8[A2 + 0x02]
+		if (u8[A2 + 0x02] == 0)
+		{
+			objA1.sprite_priority = 0x0100
+		}
+		return
+	}
+
+	D0.u16 = objA1.position.x.u16 - objA0.position.x.u16 + 0x10
+	if (D0.u16 < 0x20)
+	{
+		D1 = 0x70
+		D0.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x50
+		if (D0.u16 >= 0x18)
+		{
+			D1 = 0x30
+			D0.u16 -= 0x40
+			if (D0.u16 >= 0x18)
+			{
+				D0.u16 -= 0x40
+				if (D0.u16 >= 0x18)
+					return
+
+				D1 = -0x10
+			}
+		}
+
+		if (debug_mode.state == 0 && u8[A1 + 0x05] < 0x04 && u8[A1 + 0x2e] == 0)
+		{
+			if (D1.u8 == 0x30 && s16[A1 + 0x0a] >= 0)
+				return
+
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			objA1.groundspeed = 0
+			objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+			objA1.position.x.u16 = objA0.position.x.u16
+
+			// Play grab sound if MFaT setting doesn't disable it
+			if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") == 0)) && !original_mode)
+				playSound(SFX_GRAB)
+
+			D0.u8 = ((level.framecounter.low & 0x07) - 4) * 4
+			D1.u8 += D0.u8
+			u8[A2 + 0x04] = D1.u8
+			u8[A1 + 0x20] = 0
+			u8[A1 + 0x2e] = 3
+			u8[A2] = 1
+
+			fn04450a()
+
+			D0 = objA1.animation.sprite
+			u32 backupA2 = A2
+			SetCharacterSpritePatterns()
+			A2 = backupA2
+		}
+	}
+}
 
 
 
@@ -23252,6 +24457,7 @@ function void fn085b44()
 
 
 // Make HPZ boss (Knuckles) behaviors match the original game / ROM hack in Original Mode
+// and add Origins sound effects outside of Original Mode
 // Functions taken from bosses\boss_hpz_knuckles.lemon
 //# address-hook(0x063e7c) end(0x063eba)
 function void fn063e7c()
@@ -23290,6 +24496,66 @@ function void fn06401c()
 	A1 = 0x0667c1
 	fn084580()
 }
+
+// Knuckles landing from glide
+//# address-hook(0x064164) end(0x06417e)
+function void fn064164()
+{
+	base.fn064164()
+
+	// Play landing sound if MFaT setting doesn't disable it
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_KnucklesHPZ_sfx") == 0)) && !original_mode)
+		playSound(0x4c)
+}
+
+// Knuckles spin dashing
+//# address-hook(0x064184) end(0x0641c0)
+function void fn064184()
+{
+	if ((global.framecounter.low & 0x0f) == 0)
+	{
+		// Play spin dash charge sound if MFaT setting doesn't disable it
+		if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_KnucklesHPZ_sfx") == 0)) && !original_mode)
+			playSound(SFX_SPINDASH_CHARGE)
+		else
+			playSound(SFX_ROLL)
+	}
+
+	Object.AnimationProgressByLocalA1.CheckEnd()
+	--objA0.countdown_value
+	if (objA0.countdown_value < 0)	// release spin dash
+	{
+		fn064222()
+		// Play spin dash release sound if MFaT setting doesn't disable it
+		if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_KnucklesHPZ_sfx") == 0)) && !original_mode)
+			playSound(SFX_SPINDASH_RELEASE)
+		return
+	}
+
+	if (objA0.countdown_value == 0x2b)
+	{
+		objA0.flags38 &= ~0x01
+
+		// "spawnSimpleChildObjects(0x0665fc)" replaced by:
+		spawnSimpleChildObjects(0x064c24, 1)		// Spin dash dust
+	}
+
+	A3 = 0x064056
+	fn0660be()
+}
+
+// Knuckles crouching/guarding
+//# address-hook(0x0641c4) end(0x0641e6)
+//# address-hook(0x063f7a) end(0x063fd2)
+function void fn063f7a()
+{
+	base.fn063f7a()
+
+	// Play guarding sound. Not covered in MFaT, but aligned for consistency with its other sounds.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_KnucklesHPZ_sfx") == 0)) && !original_mode)
+		playSound(0x9a)
+}
+
 
 //# address-hook(0x06429e) end(0x0642ea)
 function void fn06429e()
@@ -23491,7 +24757,7 @@ function void HPZ.hub_CustomSprites()
 }
 
 
-// Undo AIR fixes to the HPZ cutscene in Original Mode.
+// Undo AIR fixes to the HPZ cutscene in Original Mode and add Origins sounds.
 // Functions taken from level\11_hpz\hpz_cutscene.lemon
 //# address-hook(0x06471a) end(0x064752)
 function void fn06471a()
@@ -23553,6 +24819,137 @@ function void fn066348()
 		}
 	}
 }
+
+//# address-hook(0x065068) end(0x0650ce)
+function void fn065068()
+{
+	D0.u16 = u16[0xfffffaba]
+	if (D0.u16 != 0)
+	{
+		A1 = 0xffff0000 + D0.u16
+		D0.u16 = objA1.position.y.u16 - 0x18
+		if (D0.u16 <= objA0.position.y.u16)
+		{
+			objA0.update_address = 0x0650d4
+			objA0.animation.sprite = 2
+			camera.screenshake.state = 0x14
+			playSound(0xcc)
+			// Play extra grab sound from MFaT if called for
+			if (System.getGlobalVariableValueByName("MFT_Misc_Grab_SFX") && !original_mode)
+				playSound(SFX_GRAB)
+
+			// "spawnSimpleChildObjects(0x06661e)" replaced by:
+			spawnSimpleChildObjects(0x06518a, 15)
+
+			// "spawnSimpleChildObjects(0x066638)" replaced by:
+			spawnSimpleChildObjects(0x065226, 5)
+
+			fn0650d4()
+			return
+		}
+
+		D0.u16 = objA0.velocity.y + 0x80
+		if (D0.s16 >= 0)
+		{
+			objA0.velocity.y = D0.u16
+		}
+		D2.u8 = u8[A0 + 0x1a]
+		D3.u8 = objA0.value3a + D2.u8
+		u8[A0 + 0x43] = D3.u8
+	}
+
+	MoveAndFlipWithParent()
+	fn084920()
+}
+
+// Robotnik takes the Master Emerald
+//# address-hook(0x06518a) end(0x0651a8)
+function void fn06518a()
+{
+	base.fn06518a()
+
+	// Play the sound of Robotnik taking the Master Emerald again, which elongates it, if MFaT setting doesn't disable it.
+	// This could be called right after the first play in fn065068(), but that would cause it to play three times with MFaT enabled.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_ExtraCutsceneSFX") != 2)) && !original_mode)
+		playSound(0xcc)
+}
+
+// Knuckles grabs the Master Emerald
+//# address-hook(0x06482a) end(0x064844)
+function void fn06482a()
+{
+	base.fn06482a()
+
+	// Play a grab sound when Knuckles latches onto the Master Emerald if MFaT setting doesn't disable it.
+	// MFaT doesn't actually cover this Origins sound, but we respect MFaT flags for consistency.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_ExtraCutsceneSFX") != 2)) && !original_mode)
+		playSound(SFX_GRAB)
+}
+
+// Knuckles hits the ground after being electrocuted
+//# address-hook(0x0648b8) end(0x0648dc)
+function void fn0648b8()
+{
+	base.fn0648b8()
+
+	// Play a ka-thunk sound when Knuckles hits the ground electrocuted if MFaT setting doesn't disable it.
+	// MFaT doesn't actually cover this Origins sound, but we respect MFaT flags for consistency.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_ExtraCutsceneSFX") != 2)) && !original_mode)
+		playSound(0x90)
+}
+
+// Player and Knuckles start falling
+//# address-hook(0x064964) end(0x06497e)
+function void fn064964()
+{
+	// Floor explodes below the characters
+	objA0.base_state = 0x46
+	objA0.animation.sprite = 0x02
+	u8[0xffffeec4] = 0xff
+	camera.screenshake.state = 0x14
+
+	// "spawnSimpleChildObjects(0x06663e)" replaced by:
+	spawnSimpleChildObjects(0x0655b2, 1)
+
+#if STANDALONE
+	// Change characters to the falling animations
+	if ((u8[0xffffb000 + 0x20] == char.state.RUNNING || u8[0xffffb000 + 0x20] == char.state.STANDING) && !original_mode)
+	{
+		u8[0xffffb000 + 0x20] = char.state.FALLING_PANIC
+		u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+	}
+	if ((u8[0xffffb04a + 0x20] == char.state.RUNNING || u8[0xffffb04a + 0x20] == char.state.STANDING) && !original_mode)
+	{
+		u8[0xffffb04a + 0x20] = char.state.FALLING_PANIC
+		u8[0xffffb04a + 0x2a] |= char.flag.IN_AIR
+	}
+#endif
+}
+
+// Knuckles hits the ground after the floor collapses
+//# address-hook(0x06498a) end(0x0649a8)
+function void fn06498a()
+{
+	base.fn06498a()
+
+	// Play a ka-thunk sound when Knuckles hits the ground electrocuted if MFaT setting doesn't disable it.
+	// MFaT doesn't actually cover this Origins sound, but we respect MFaT flags for consistency.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_ExtraCutsceneSFX") != 2)) && !original_mode)
+		playSound(0x90)
+}
+
+// Knuckles moves offscreen, and (unseen) jumps up the small stairs
+//# address-hook(0x064b22) end(0x064b64)
+function void fn064b22()
+{
+	base.fn064b22()
+
+	// Play a jump sound when Knuckles leaps over the stairs offscreen.
+	// MFaT doesn't actually cover this Origins sound, but we respect MFaT flags for consistency.
+	if (!((Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("MFT_ExtraCutsceneSFX") != 2)) && !original_mode)
+		playSound(SFX_JUMP)
+}
+
 
 
 
