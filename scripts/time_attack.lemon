@@ -1912,7 +1912,7 @@ function void RenderHUD_RedRings()
 		py -= 9	// 6 if version number is against bottom of screen as in older versions
 //	u8 flags = (theme.westside && S2TitleCard.loaded) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 	u8 flags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
-	u16 renderQueue = (global.game.paused) ? 0xfff1 : 0xe008
+	u16 renderQueue = (global.game.paused && !clean_screenshot) ? 0xfff1 : 0xe008
 	// u8 ringNum = objA0.subtype2c & 0x1f
 	if (draw_HUD && !original_mode && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00 && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails))
 	{
