@@ -864,6 +864,19 @@ function void BonusBubble.CountdownAndRespawn()
 	{
 		global.random.seed = global.framecounter
 		fn0612a8()				// assign bubble subtype
+		if (objA0.subtype2c != 0x01)	// if we didn't get a time freeze bubble
+		{
+			++competition_mode.item_flag			// add to a counter building to a guaranteed time freeze
+			if (competition_mode.item_flag >= 7)
+			{
+				objA0.subtype2c = 0x01				// make a time freeze bubble
+				competition_mode.item_flag = 0
+			}				
+		}
+		else
+		{
+			competition_mode.item_flag = 0
+		}
 		objA0.collision_attributes = (collision.flag.ITEM | collision.size.8x8)		// remove special collision type from black bubble
 		objA0.base_state = 2
 	}
