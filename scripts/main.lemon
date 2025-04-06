@@ -885,7 +885,7 @@ function void fn01a67a()
 {
 	D6 = global.inv_gravity ? 0x01a662 : 0x01a64a
 	// Standalone uses a higher limit for number of spilled rings on screen at once
-	u16 maxRings = (original_mode) ? 32 : 48
+	u16 maxRings = (original_mode|| (global.characters == 3 && eggrobos_knuckles)) ? 32 : 48
 
 	A1 = A0
 	D5 = (u8[A0 + 0x3f] == 0) ? ring_counter : ring_counter.player2
