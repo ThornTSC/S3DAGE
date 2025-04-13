@@ -101,6 +101,13 @@ function void initializeMainGame()
 {
 	ApplyROMManipulations()
 
+	// Clear out the special restart flag used for new bonus stages. The flag ensures art is not unloaded before the bonus stage fully fades out.
+	if (level.restart.u8 == 2)
+	{
+		level.restart.u8 = 1
+		unlock_act = 0
+	}
+
 	// Specific check for The ECSU Framework
 	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{

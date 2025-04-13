@@ -190,7 +190,7 @@ function void BonusStage.UpdateTimeRemaining()
 		global.zone_act.apparent = checkpoint.zone_act.apparent
 		checkpoint.number = checkpoint.number.backup
 		global.stage_type = 0
-		level.restart.u8 = 2		// make a special flag that says to clear unlock_act *after* the palette fully fades, to avoid displaying improper art
+		level.restart.u8 = 2		// make a special flag that says to clear unlock_act *after* the palette fully fades, to avoid displaying improper art. We manage this flag in initializeMainGame(), which runs on the frame the zone loads.
 		checkpoint.rings = ring_counter
 		checkpoint.lives_granted = extra_lives_granted
 		global.shields_backup_1 = u8[0xffffb000 + 0x2b] & char.bonus.ALL_SHIELDS	
@@ -200,18 +200,7 @@ function void BonusStage.UpdateTimeRemaining()
 
 
 
-// If the level restart flag is set to 2, clear unlock_act while the screen is black to load the level.
-// Function taken from maingame\maingame.lemon
-function u32 MainGame.getLevelDataPointer()
-{
-	if (level.restart.u8 == 2)
-	{
-		level.restart.u8 = 1
-		unlock_act = 0
-	}
 
-	return base.MainGame.getLevelDataPointer()
-}
 
 
 
