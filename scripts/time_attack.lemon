@@ -2878,7 +2878,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		px += (time_attack_hud) ? -20 : 8
 
 	bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
-	if ((inPainWater && !(level.framecounter & 0x08)) && (py == 0x10 || py == 0x28) && !(key == "hud_text_rings" || key == "hud_text_rings_red"))	// In pain water when ring count should flash, and element to draw is a digit at height of rings digits?
+	if ((inPainWater && !(level.framecounter & 0x08)) && ((py == 0x10 && px < getScreenWidth()/2) || py == 0x28) && !(key == "hud_text_rings" || key == "hud_text_rings_red"))	// In pain water when ring count should flash, and element to draw is a digit at height of rings digits?
 		return																																		// Do not draw it. (Our custom functions for the Challenges HUD handles it for challenges.)
 
 	u64 theme_key
