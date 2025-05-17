@@ -671,13 +671,16 @@ function void Credits.DAGE()
 
 		Renderer.drawCustomSprite("sonic3air_logo", credits.text.center.x, 28, 0x00, SPRITE_FLAG_PRIO, renderQueue)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 3*line, "Additional Credits", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 2*line, "Carjem Generations", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line, "MarkeyJester", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y, "Linncaki", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line, "flamewing", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line, "Hyllian", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line, "Sewer56", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 4*line - line/2, "Additional Credits", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 3*line - line/2, "Carjem Generations", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 2*line - line/2, "MarkeyJester", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line - line/2, "Linncaki", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line/2, "flamewing", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line/2, "Hyllian", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line + line/2, "Maxim Stepin", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line + line/2, "Cameron Zemek", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line + line/2, "Jules Blok", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 4*line + line/2, "Sewer56", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 	}
 	else if (credits.screen.current == 16)
 	{
