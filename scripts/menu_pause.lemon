@@ -596,9 +596,7 @@ function u8 PauseMenu_Normal_Restart()
 
 		restartAtCheckpoint()
 		global.game.paused = false
-		#if GAMEAPP < 0x25021500
-		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
-		#endif
+		Audio.stopChannel(1)	// stop the silence audio track or any ongoing waits for jingles (e.g., 1UP jingle) to end
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x12)
@@ -614,9 +612,7 @@ function u8 PauseMenu_Normal_Restart()
 		musicDelay = false
 		level.restart = 1
 		global.game.paused = false
-		#if GAMEAPP < 0x25021500
-		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
-		#endif
+		Audio.stopChannel(1)	// stop the silence audio track or any ongoing waits for jingles (e.g., 1UP jingle) to end
 		return 1
 	}
 
@@ -714,9 +710,7 @@ function u8 PauseMenu_ExitGame()
 		global.game_mode = 0x58
 		global.game.paused = false
 
-		#if GAMEAPP < 0x25021500
-		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
-		#endif
+		Audio.stopChannel(1)	// stop the silence audio track or any ongoing waits for jingles (e.g., 1UP jingle) to end
 		return 1
 	}
 	else if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0x22)
@@ -750,9 +744,7 @@ function u8 PauseMenu_ExitGame()
 		musicDelay = false
 		global.game.paused = false
 
-		#if GAMEAPP < 0x25021500
-		Audio.stopChannel(1)	// stop the silence audio track so that its override does not prevent some sounds from playing
-		#endif
+		Audio.stopChannel(1)	// stop the silence audio track or any ongoing waits for jingles (e.g., 1UP jingle) to end
 		playMusic(0x2f)			// force this to be the current active music, else the level music and menu music play at the same time
 		exitGame = 1
 //		Game.returnToMainMenu()
