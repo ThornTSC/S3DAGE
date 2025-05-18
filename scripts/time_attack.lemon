@@ -101,6 +101,10 @@ function void initializeMainGame()
 {
 	ApplyROMManipulations()
 
+	S2TitleCard.full = true
+	S2TitleCard.disappear = false
+	S2TitleCard.loaded = false
+
 	// Clear out the special restart flag used for new bonus stages. The flag ensures art is not unloaded before the bonus stage fully fades out.
 	if (level.restart.u8 == 2)
 	{
