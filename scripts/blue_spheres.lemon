@@ -4441,11 +4441,6 @@ function void fn02e512()
 //# address-hook(0x02e410) end(0x02e4d2)
 function void fn02e410()
 {
-	if (original_mode)
-	{
-		base.fn02e410()
-		return
-	}
 	if (objA0.countdown_value != 0)
 	{
 		// Still waiting
@@ -4456,17 +4451,17 @@ function void fn02e410()
 			global.fade_timer = 0x16
 
 			A1 = 0xfffffc00
-			u16[A1 + 0x42] = 0x0eee
-			u16[A1 + 0x44] = 0x0eee
-			u16[A1 + 0x46] = 0x0eee	// new line
-			u16[A1 + 0x4c] = 0x0eee
-			u16[A1 + 0x62] = 0x0eee
-			u16[A1 + 0x66] = 0x0eee
-			u16[A1 + 0x68] = 0x0eee	// new line
-			u16[A1 + 0x6e] = 0x0eee
-			u16[A1 + 0x70] = 0x0eee
-			u16[A1 + 0x7c] = 0x0eee
-			u16[A1 + 0x7e] = 0x0eee
+			fillMemory_u16(A1 + 0x42, 4, 0x0eee)
+			fillMemory_u16(A1 + 0x4c, 2, 0x0eee)
+			fillMemory_u16(A1 + 0x62, 2, 0x0eee)
+			fillMemory_u16(A1 + 0x66, 2, 0x0eee)
+			fillMemory_u16(A1 + 0x6e, 4, 0x0eee)
+			fillMemory_u16(A1 + 0x7c, 4, 0x0eee)
+			if (!original_mode)
+			{
+				u16[A1 + 0x46] = 0x0eee	// new line
+				u16[A1 + 0x68] = 0x0eee	// new line
+			}
 		}
 
 		u16 countdownCompare = (original_mode ? 289 : 269)
