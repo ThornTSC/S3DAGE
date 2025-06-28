@@ -5541,6 +5541,10 @@ function bool Character.CheckStartJump()
 	char.flags |= char.flag.IN_AIR
 	char.flags &= ~char.flag.PUSHING
 
+	// If we are on a rising staircase underwater, we detach our position from the stair rising underneath us so we don't get stuck
+	if (!original_mode && (u32[0xffff0000 + char.object_standing_on] == 0x0476fe || u32[0xffff0000 + char.object_standing_on] == 0x0476ea) && (char.flags & char.flag.UNDERWATER) && (char.flags & char.flag.ON_OBJECT))
+		char.position.y.u16 -= 0x03
+
 	char.jumping = 1
 	char.on_convex_surface = 0
 
