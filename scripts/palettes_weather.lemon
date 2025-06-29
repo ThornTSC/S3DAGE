@@ -1813,6 +1813,43 @@ function void UpdateLevelScrolling.ICZ2()
 
 
 
+
+// Do not load the HCZ2 palette after the ICZ2 Knuckles cutscene.
+// Function taken from hcz2_knuckles_cutscene.lemon
+//# address-hook(0x062242) end(0x06227a)
+function void fn062242()
+{
+	Object.AnimationProgressByLocalA1()
+	if (objA0.render_flags & render_flag.VISIBLE)
+		return
+
+	// Reload the palette post-cutscene. We should only do this in HCZ2. In ICZ2, moving into the underground cave takes care of this.
+	if (global.zone_act == 0x0101)
+	{
+		if (palette_set < 2 || original_mode)
+			loadPaletteLine1(0x0a8dfc)
+		else
+			System.loadExternalRawData("Palette0101", 0xfffffc20, 0x00, 0x20, 1, 1)
+	}
+
+	// "spawnChildObjects(0x062280)" replaced by:
+	spawnChildObject(0x084aa4, 0x00, 0, 0)		// Screen mover for the upper border
+	spawnChildObject(0x084a48, 0x02, 0, 0)		// Screen mover for the right border
+
+	if (allocDynamicObjectStd())
+	{
+		// Create the object that fades out the Knuckles theme and starts the level music afterwards
+		objA1.update_address = 0x085b0a
+	}
+	fn0851e4()
+	Object.TriggerUnloading()
+}
+
+
+
+
+
+
 // Sets the ICZ2 palette and alters the in-cave palette
 //# address-hook(0x23e1aa) end(0x23e1d8)
 function void fn23e1aa()

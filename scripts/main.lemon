@@ -17463,6 +17463,11 @@ function void fn053d78()
 		{
 			if (u16[0xffffb010] > 0x3980 && u16[0xffffb010] < 0x3a00)
 			{
+				if (u16[0xffffb014] > 0x06a0 && move_area.left > 0x0740)
+				{
+					// Move the minimum x position for the camera back slowly. A direct jump to the default can make the camera lurch in a way that renders the cave background incorrectly.
+					move_area.left -= 2
+				}
 				if (camera.position.y.u16 >= 0x0780)
 				{
 					// Switch to indoors
