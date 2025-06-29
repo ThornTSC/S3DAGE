@@ -2020,7 +2020,18 @@ function void RenderHUD_Marathon()
 			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == 3)
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
 				py += 14
-			Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, 0xe000, 0, 0xffffffff, 0x10000)
+
+			// Draw the emerald
+			Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, 0xe000)
+
+			// Every fourth frame, draw an empty emerald frame atop a collected emerald to make it flicker
+			if (key != "hud_chaos_mini_empty" && key != "hud_super_mini_empty" && !(level.framecounter.low & 0x03) && !global.game.paused)
+			{
+				if (u8[0xffffffb1 + emeraldIndex] == 1)
+					Renderer.drawCustomSprite("hud_chaos_mini_empty", px, py, 0, SPRITE_FLAG_PRIO, 0xe001)
+				else
+					Renderer.drawCustomSprite("hud_super_mini_empty", px, py, 0, SPRITE_FLAG_PRIO, 0xe001)
+			}
 		}
 	}
 //	RenderMarathonTimer()
