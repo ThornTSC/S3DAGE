@@ -68,9 +68,14 @@ function bool rollLeniency.CheckMaintainRoll()
 // Function taken from maingame\character\character.lemon
 function void Character.LandingOnGroundStandUp()
 {
-	if (roll_maintain && !original_mode)
+	// Check for exactly 1 in roll_maintain, as a value of 2 means we are actively setting the character win pose and should in fact run the base function
+	if (roll_maintain == 1 && !original_mode)
 		if rollLeniency.CheckMaintainRoll()
 			return
+	
+	// Revert roll_maintain back to 1 when needed
+	if (roll_maintain == 2)
+		roll_maintain = 1
 	
 	if (!original_mode)
 	{

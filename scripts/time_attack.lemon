@@ -6217,6 +6217,8 @@ function void StartCharacterWinPose()
 			// Correct position, so character is not partially in the ground
 			u32 backupA0 = A0
 			A0 = A1
+			if (roll_maintain)
+				roll_maintain = 2	// set a special check that Character.LandingOnGroundStandUp() will look at to not run roll leniency checks, which interfere with this position fix
 			Character.LandingOnGroundStandUp()
 			A0 = backupA0
 		}
@@ -6227,16 +6229,16 @@ function void StartCharacterWinPose()
 
 	objA1.velocity.x = 0
 	objA1.velocity.y = 0
-	u16[A1 + 0x1c] = 0
+	objA1.groundspeed = 0
 	objA1.state = (time_attack < 3) ? char.state.WIN_POSE : char.state.STANDING
 	if (objA1.state == char.state.STANDING)
 		objA1.render_flags &= 0xfe	// make the character face to the right if standing, preparing for the next act
 	objA1.flags2a &= ~char.flag.PUSHING
-	u8[A1 + 0x2e] = 0x81
+	u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
 	u8[A1 + 0x3d] = 0
 
-	objA0.flags2a &= ~0x20
-	objA0.flags2a &= ~0x40
+	objA0.flags2a &= ~object.flag.P1_PUSHING
+	objA0.flags2a &= ~object.flag.P2_PUSHING
 }
 
 
@@ -7493,8 +7495,6 @@ function void Challenge.setEndPlayerPosition()
 	char.drown_countdown = 30	// reset the drowning counter of the character in A0, which can be active at the end of HCZ2
 	if (!(u8[0xffffb02a] & 0x02) &&  u8[0xffffb020] != char.state.WIN_POSE)	// if not in the air and not already posing,
 	{
-		if (char.state == char.state.ROLLING || char.state == char.state.SPINDASH)
-			char.position.y.u16 -= (char.character == CHARACTER_TAILS) ? 1 : 5	// remove character roll height change
 		StartCharacterWinPose()													// start win pose
 	}
 }
