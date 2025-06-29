@@ -7463,7 +7463,7 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 
 // Allow a DEZ retracting spring in DEZ1 to use correct graphics for its base.
 // Render hyper stars fully opaque in Original Mode.
-// Also makes a check from AIR commits after the latest stable build.
+// Also includes super emerald flicker setting, necessary to compensate for differences in current stable and test A.I.R. versions.
 // Function taken from standalone\rendering\renderhooks.lemon
 function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16 renderQueue)
 {
@@ -7491,13 +7491,19 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 		return true
 	}
 
-	// Trees in the background before the AIZ 2 boss. In 6 Aug 2023 AIR commit 6a4b5dc.
-	if (objA0.update_address == 0x05068a)
+	// Super Emerald when active
+	if (objA0.update_address == 0x09089e && Game.getSetting(SETTING_GFX_ANTIFLICKER) >= 1)
 	{
-		// Draw trees over the full screen height, to avoid occasional visible gaps there
-		Renderer.drawVdpSprite(px, py+64, size, index, 0x1f00)
-		Renderer.drawVdpSprite(px, py-64, size, index, 0x1f00)
-		return false
+		if (global.framecounter.low & 0x01)
+		{
+			Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+		}
+		else
+		{
+			u32 glow = abs((global.framecounter.low & 0x7f) - 0x40)
+			Renderer.drawVdpSpriteWithTint(px, py, size, index, renderQueue, 0xffc0c0c0 - 0x10101 * glow, 0x10101 * glow)
+		}
+		return true
 	}
 
 	return base.Standalone.onDrawVdpSprite(px, py, size, index, renderQueue)
@@ -7505,49 +7511,6 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 
 
 
-
-
-// Make sure digits drawn in act results do not disappear before leaving the screen.
-// Fix from 12 Aug 2023 AIR commit eda7347
-// Function taken from maingame\hud\levelresults.lemon
-//# translated(0x02de04) end(0x02de4e)
-function bool fn02de04()
-{
-	A1 = 0xffff0000 + u16[A0 + 0x48]
-	D0.u16 = u16[A1 + 0x32]
-	if (D0.u16 != 0)
-	{
-	#if STANDALONE
-		// In standalone, we don't call "DrawObject", so the visibility flag does not get updated automatically
-		s16 px = s16(objA0.position.x.u16) - 0x80
-		if (px + objA0.box_size.x >= 0 && px < getScreenWidth())
-			objA0.render_flags |= render_flag.VISIBLE
-		else
-			objA0.render_flags &= ~render_flag.VISIBLE
-	#endif
-
-		if (!(objA0.render_flags & render_flag.VISIBLE))
-		{
-			--u16[A1 + 0x30]
-			UnloadObject()
-			return true
-		}
-
-		if (D0.u8 < u8[A0 + 0x28])
-			return false
-
-		objA0.position.x.u16 += (objA0.base_state != 0) ? 0x20 : -0x20
-	}
-	else
-	{
-		s16 diff = u16[A0 + 0x46] - objA0.position.x.u16
-		if (diff != 0)
-		{
-			objA0.position.x.u16 += clamp(diff, -0x10, 0x10)
-		}
-	}
-	return false
-}
 
 
 
