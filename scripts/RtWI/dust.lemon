@@ -19,7 +19,7 @@ function void Dust.animateDropDash()
 
 	// Here, A2 holds the address of the character and 0x04 is the render_flags offset.
 	objA0.sprite_attributes = u16[0xffffcc54 + 0x0a]	// sprite attributes should match spin dash dust attributes
-	bool prioFlag = ((objA0.sprite_attributes & 0x8000) != 0)
+	bool prioFlag = ((objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0)
 	if (unlock_act && (unlock_act != 3))
 		Renderer.drawCustomSprite(stringformat("dropdash_dust_s2_%02x", u8[A0 + 0x30]), objA0.position.x.u16, objA0.position.y.u16, 0, (u8[0xffffb004] & 0x03) | SPRITE_FLAG_WORLDSPACE | (prioFlag ? SPRITE_FLAG_PRIO : 0), 0x9f7e)	// draw object at same renderQueue priority as spin dash dust
 	else
