@@ -25981,9 +25981,9 @@ function void fn0593ec()
 		move_area.bottom.target = move_area.bottom.current
 		Level.GetCameraPosition()
 		level.scrolling_routine = 0
-		u16[0xFFFFEEAA] = 0x0FFF  // D.A. Garden added these three
-		u16[0xFFFFEEAC] = 0x0FF0  // lines in ASM to remove
-		u16[0xFFFFEEAE] = 0x007C  // vertical wrapping after Act 1.
+		level.height.bitmask = 0x0fff		// D.A. Garden added these three
+		level.height.tilemask = 0x0ff0		// lines in ASM to remove
+		level.chunksize.bitmask = 0x007c	// vertical wrapping after Act 1.
 	}
 
 	WriteScrollOffsets()
