@@ -5718,8 +5718,56 @@ function void fn063d1a()
 
 
 
-// SSZ1 opening: direct time attack check from base game to use DAGE time attack flag
-// Function taken from level\12_ssz\ssz_start.lemon
+// SSZ1 opening: direct time attack check from base game to use DAGE time attack flag.
+// Also do not allow cutscene skipping if cutscene does not exist: recent A.I.R. builds added a skippable cutscene trigger here.
+// Functions taken from level\12_ssz\ssz_start.lemon
+//# address-hook(0x057c1e) end(0x057cd0)
+function void fn057c1e()
+{
+	if (!allocDynamicObjectAfterA0())
+		return
+
+	objA0.update_address = 0x057cd2
+	objA0.position.y.u16 = 0x1000
+	u16[A0 + 0x38] = 0xff00
+	u16[A0 + 0x3c] = A1.u16
+
+	objA1.update_address = 0x0459b4
+	objA1.render_flags = (render_flag.COMPOUND | render_flag.WORLD)
+	objA1.box_size.y = 0x80
+	objA1.box_size.x = 0x18
+	objA1.sprite_priority = 0x80
+	objA1.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | 0x035c)
+	objA1.mapping_offset = 0x046b3c
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+	objA1.compound.count = 0x02
+	u16[A1 + 0x44] = objA0.position.y.u16 - 0x88
+	u8[A1 + 0x46] = 0x18
+	u16[A1 + 0x48] = A0.u16
+
+	if (global.act == 0)
+	{
+		if (allocDynamicObjectAfterA1())
+		{
+			objA1.update_address = 0x057e34
+			u16[A1 + 0x2c] = 0x60
+
+		#if STANDALONE
+			if (!time_attack)
+				Game.startSkippableCutscene()
+		#endif
+		}
+	}
+
+	u8[0xffffeed6] = 0xff
+	A1 = 0xffffb000
+	objA1.position.y.u16 = camera.position.y.u16 + 0x65
+	objA1.state = char.state.RUNNING
+	u8[A1 + 0x22] = 0
+	u8[A1 + 0x2e] = (control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+}
+
 //# address-hook(0x065730) end(0x065758)
 function void fn065730()
 {
@@ -5734,6 +5782,7 @@ function void fn065730()
 		u8[0xffffeeda] = 0xff
 		u16[0xfffffa9a] = 0		// if this flag from the opening cutscenes isn't cleared, the last boss of the act won't load all graphics
 		UnloadObject()
+		Game.endSkippableCutscene()
 		return
 	}
 #endif
