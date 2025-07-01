@@ -1805,6 +1805,27 @@ function void customMenu.mainLogicLoop.main()
 	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xffff80a0, 0x10000)					// background
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)
 
+	// Check if the length of a text string with a custom font outputs 0. If so, the user is experiencing the text loading failure in A.I.R. v24.02.02.0/1 and must unzip the mod.
+	if (!Renderer.getTextWidth("sonic_r_credits_small", "Test"))
+	{
+		Renderer.drawText("sonic3_fontB", getScreenWidth()/2, getScreenHeight()/2 - 72, "ERROR", 0xff0000ff, 5, 0, 0xe001, 0, 1)
+		Renderer.drawText("sonic3_fontB", getScreenWidth()/2, getScreenHeight()/2, "\n\nYour current version of Sonic 3 A.I.R. does not\nsupport loading mods with custom fonts\nfrom ZIP archives. To resolve this error:\n\n* Unzip Sonic 3: D.A. Garden Edition and remove\n  the ZIP archive from the mods folder, or\n\n* Windows users can update to the latest\n  A.I.R. test build from the A.I.R. options menu\n  by checking for All incl. test builds updates\n  in the SYSTEM category.\n\n\n\nPress any button to return to the A.I.R. menu.", 0xffffffff, 5, 0, 0xe000, 0, 1)
+		Renderer.drawText("sonic3_fontB", getScreenWidth()/2 - 42, getScreenHeight()/2 + 24, "All incl. test builds", 0xffc000ff, 4, 0, 0xe001, 0, 1)
+		Renderer.drawText("sonic3_fontB", getScreenWidth()/2 - 160, getScreenHeight()/2 + 40, "* RECOMMENDED *", 0xffff00ff, 4, 0, 0xe001, 0, 1)
+		if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_B) || (control.pad1.pressed & CONTROL_C))
+		{
+			u32 backupA0 = A0
+			FadeOutScreenBlocking()
+			A0 = backupA0
+
+			// Do not fade out music in this case. Data Select music is meant to kept playing
+			exitGame = 1
+		//	Game.returnToMainMenu()
+		//	yieldExecution()
+		}
+		return
+	}
+
 	// Specific check for The ECSU Framework
 	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{

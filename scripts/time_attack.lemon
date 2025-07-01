@@ -112,6 +112,13 @@ function void initializeMainGame()
 		unlock_act = 0
 	}
 
+	// Check if the length of a text string with a custom font outputs 0. If so, the user is experiencing the text loading failure in A.I.R. v24.02.02.0/1 and must unzip the mod.
+	if (!Renderer.getTextWidth("sonic_r_credits_small", "Test"))
+	{
+		global.game_mode = 0x58		// go to D.A. Garden Edition main menu, which has an error trapper for failure to load fonts
+		return
+	}
+
 	// Specific check for The ECSU Framework
 	if (Mods.isModActive("Extra Character Slots") && Mods.getModPriority("Extra Character Slots") < Mods.getModPriority("Sonic 3: D.A. Garden Edition"))
 	{
