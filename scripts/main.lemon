@@ -6838,7 +6838,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 
 			if (objA0.subtype2c == 0x0f && level.framecounter % 6 > 1)	// use level frame counter to make Time Freeze item flicker
 			{
-				key = (unlock_act) ? "s2_monitor_icon_timefreeze" : "monitor_icon_timefreeze"
+				if (time_attack == 2)
+					key = (unlock_act) ? "s2_monitor_icon_timefreeze" : "monitor_icon_timefreeze"
+				else
+					key = (unlock_act) ? "s2_monitor_icon_25ring" : "monitor_icon_25ring"
 				Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue + 1)
 			}
 

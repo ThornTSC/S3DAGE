@@ -6737,12 +6737,10 @@ function void MonitorIntact.Init()
 
 	objA0.subtype2c = Monitor.getRandomizedType(objA0.subtype2c, false)
 
-	if (objA0.subtype2c == 0x0f && time_attack != 2)	// If an item is set for Time Stone Trial mode and we're not in that mode,
-		objA0.subtype2c = 0x03							// revert it to a standard item (currently only Time Freeze to Super Ring).
-	else if (objA0.subtype2c == 0x01 && time_attack == 2)	// If in Time Stone Trial mode, convert 1UPs
+	if (objA0.subtype2c == 0x01 && time_attack == 2)		// If in Time Stone Trial mode, convert 1UPs
 		objA0.subtype2c = 0x0f								// into Time Freeze.
 	else if (objA0.subtype2c == 0x01 && time_attack == 1)	// If in standard Time Attack mode, convert 1UPs
-		objA0.subtype2c = 0x03								// into Super Rings.
+		objA0.subtype2c = 0x0f								// into 25 Rings (type shared with time freeze).
 #endif
 
 	if (objA0.respawn_entry)
@@ -6851,12 +6849,12 @@ function u8 Monitor.getRandomizedType(u8 type, bool hiddenMonitor)
 		}
 	}
 
-	if (Game.getSetting(SETTING_INFINITE_LIVES) && !original_mode && time_attack != 2)	// || time_attack
+	if (Game.getSetting(SETTING_INFINITE_LIVES) && !original_mode)	// || time_attack
 	{												// We deliberately don't include this check from vanilla AIR here, as we have a custom correction in MonitorIntact.Init().
 		// Replace extra life monitors
 		if (type == 0x01)
 		{
-			type = 0x03
+			type = 0x0f	// 25 rings
 		}
 	}
 
@@ -6927,6 +6925,10 @@ function void ItemEffect.UpdateDefaultInternal()
 	{
 		ItemEffect.ApplyTimeFreeze()
 	}
+	else if (objA0.state == 0x0f)	// 25 rings
+	{
+		ItemEffect.Apply25Rings()
+	}
 	else
 #endif
 	{
@@ -6953,6 +6955,32 @@ function void ItemEffect.ApplyTimeFreeze()
 		playSound(0xde)
 	else
 		playSound(0xdd)
+}
+
+function void ItemEffect.Apply25Rings()
+{
+	++u16[A2]
+
+	ring_counter = min(ring_counter + 25, 999)
+	player.total_rings = min(player.total_rings + 25, 999)
+	hud.dirty.rings |= 0x01
+
+	if (checkForExtraLifeByRings())
+	{
+		if (A1 == 0xffffb000)
+		{
+			ItemEffect.ApplyExtraLifePlayer1()
+		}
+		else
+		{
+			// Kinda harsh, but yeah, Player 2 gets hurt for initiating a 1-up
+			ItemEffect.ApplyRobotnik()
+		}
+	}
+	else
+	{
+		playSound(0xb0)		// level results finished tallying sound
+	}
 }
 
 
@@ -6982,7 +7010,7 @@ function u64 Monitor.getIconSpriteKey(u8 type)
 	else if (type == 0x0b)
 		key = "monitor_icon_classicshield"
 	else if (type == 0x0f)
-		key = "monitor_icon_timefreeze"
+		key = (time_attack == 2) ? "monitor_icon_timefreeze" : "monitor_icon_25ring"
 
 	if (unlock_act)
 		key = stringformat("s2_%s", key)
