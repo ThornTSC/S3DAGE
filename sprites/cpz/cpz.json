@@ -38,6 +38,8 @@
 	"cpz_layouttransition":  { "File": "cpz_layouttransition.bmp"},									// this helps to disguise the layout transition between Part 1 and Part 2 Hard
 	"cpz_layouttransition_obj":  { "File": "cpz_layouttransition_obj.bmp"},
 
+	"cpz_tunnel":  { "File": "cpz_tunnel.bmp"},
+
 	"cpz_background_interior":  { "File": "cpz_background_interior.bmp"},
 
 	// Sonic 2 Pocky

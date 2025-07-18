@@ -14,7 +14,11 @@ function void CPZ_CustomSprites()
 		Renderer.drawCustomSprite("cpz_layouttransition", 0x0100, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x0300, 0x00f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 		Renderer.drawCustomSprite("cpz_layouttransition_obj", 0x0360, 0x00f0, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
-		
+
+		// Tunnel background leading into final area, which can be overwritten by the background pillar
+		Renderer.drawCustomSprite("cpz_tunnel", 0x4600, 0x0680, 0, SPRITE_FLAG_WORLDSPACE, 0x9c7f)
+
+		// Final area		
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0180, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0200, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
 		Renderer.drawCustomSprite("cpz_background_interior", 0x4680, 0x0280, 0, SPRITE_FLAG_WORLDSPACE, 0x1200)
