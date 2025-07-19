@@ -58,6 +58,9 @@
 	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_mini.png", "Rect":  "0,12,44,12" },
 	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_mini.png", "Rect": "33,12,44,12" },
 
+	// Sonic 2 special stage background
+	"sonic2_background": { "File": "Sonic2_background.bmp", "Center": "128,128"},
+
 	// Sonic 2 emeralds for results screen
 	"sonic2_emblem": { "File": "Sonic2_emblem.png", "Rect": "0,0,16,18"},
 

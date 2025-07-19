@@ -246,6 +246,14 @@ function void endOfFrame()
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
 
+	if (global.game_mode == 0x34 && (challenge_greenspheres || speedSpheres))
+	{
+		for (u8 i = 0; i < 16; ++i)
+		{
+			Renderer.setPaletteColorPacked(0xa0 + i, u16[0x802240 + (i * 2)])
+		}
+	}
+
 	discordRPC.main()
 }
 
@@ -582,6 +590,63 @@ function void MainMenuBG.Update(u16 cameraForegroundX, u16 cameraBackgroundX)
 }
 
 
+// Add a fade to the Sonic 2 special stage background
+// Function taken from general\screenfades.lemon
+//# address-hook(0x003d50) end(0x003d7c)
+function void FadePaletteToWhite()
+{
+	// Go through primary (k==0) and secondary (k==1) palette
+	for (u8 k = 0; k < 2; ++k)
+	{
+		A0 = ((k == 0) ? 0xfffffc00 : 0xfffff080) + palette_fade.offset
+		for (u8 i = 0; i <= palette_fade.count; ++i)
+		{
+			FadeColorToWhite()
+		}
+	}
+
+	if (challenge_greenspheres || speedSpheres)
+	{
+		for (u32 colorToFade = 0x802240; colorToFade < 0x80225e; colorToFade += 2)
+		{
+			if ((u32[colorToFade] & 0x0e00) < 0x0e00)
+				u32[colorToFade] += 0x0200
+			if ((u32[colorToFade] & 0x00e0) < 0x00e0)
+				u32[colorToFade] += 0x0020
+			if ((u32[colorToFade] & 0x000e) < 0x000e)
+				u32[colorToFade] += 0x0002
+		}
+	}
+
+#if STANDALONE
+	if (EXTENDED_CHARACTER_PALETTES)
+	{
+		for (u8 k = 0; k < 2; ++k)
+		{
+			A0 = ((k == 0) ? 0x802000 : 0x802300)
+			A1 = ((k == 0) ? 0x802180 : 0x802480)
+			for (u16 i = 0; i < 0xc0; ++i)
+			{
+				FadeColorToWhite()
+			}
+		}
+	}
+
+	if (globalComponentTintColorR > 0)
+		globalComponentTintColorR = max(globalComponentTintColorR - 0x25, 0)
+	else if (globalComponentTintColorG > 0)
+		globalComponentTintColorG = max(globalComponentTintColorG - 0x25, 0)
+	else if (globalComponentTintColorB > 0)
+		globalComponentTintColorB = max(globalComponentTintColorB - 0x25, 0)
+
+	if (globalComponentAddedColorR < 0xff)
+		globalComponentAddedColorR = min(globalComponentAddedColorR + 0x25, 0xff)
+	else if (globalComponentAddedColorG < 0xff)
+		globalComponentAddedColorG = min(globalComponentAddedColorG + 0x25, 0xff)
+	else if (globalComponentAddedColorB < 0xff)
+		globalComponentAddedColorB = min(globalComponentAddedColorB + 0x25, 0xff)
+#endif
+}
 
 
 // We cut out exceptions to some settings for Extra Character Slot characters, as ECSU overwrites other

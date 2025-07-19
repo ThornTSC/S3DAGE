@@ -7,7 +7,13 @@ global u8 showTimeGainTarget
 
 global bool speedSpheres
 global u16 bluespheres.rings_total
+global s16 bluespheres.background_offset.x
+global s16 bluespheres.background_offset.y_base
+global s16 bluespheres.background_offset.y
 
+define sonic2BackgroundStarColor1 = u16[0x80225c]
+define sonic2BackgroundStarColor2 = u16[0x80225e]
+global u16 sonic2BackgroundPaletteRotation
 
 // Apply fix for blue spheres ground not whiting out when returning to menus.
 // Function taken from general\interrupts.lemon
@@ -539,6 +545,11 @@ function void fn009b62()
 
 		if (challenge_greenspheres || speedSpheres)
 		{
+			bool chaosStage = ((challenge_greenspheres > 0 && challenge_greenspheres <= 8) || (challenge_greenspheres > 0x10 && challenge_greenspheres <= 0x18) && !bluespheres.minigame_mode && !speedSpheres)
+			bool superStage = ((challenge_greenspheres > 8 && challenge_greenspheres <= 0x10) || (challenge_greenspheres > 0x18 && challenge_greenspheres <= 0x20) && !bluespheres.minigame_mode && !speedSpheres)
+			if ((global.chaos_emeralds == 6 && chaosStage) || (global.super_emeralds == 6 && superStage))
+				sonic2BackgroundPaletteRotation = 1
+			
 			if (challenge_greenspheres && !(unlock_flags & 0x0001))
 			{
 				unlock_flags |= 0x0001	// u16[0x8402fc]
@@ -1156,7 +1167,7 @@ function void SpecialStage()
 	if (!original_mode)	// no green sphere palette in original mode
 	{
 		// new code for green spheres
-		// green sphere palette from concept vid, translated by Fred Bronze
+		// green sphere palette from concept vid, translated by Liliam
 		u32[0xfffffce4] = 0x00c600a0
 		u32[0xfffffce8] = 0x00600020
 		u32[0xfffffcec] = 0x00c600a0
@@ -1190,6 +1201,9 @@ function void SpecialStage()
 		VDP.zeroVRAM(0xb120 - 0xabe0)	// GET BLUE SPHERES and PERFECT texts should not show in Sonic 2 special stages
 		VDP.setupVRAMWrite(0xdf00)
 		VDP.zeroVRAM(0xe000 - 0xdf00)	// graphics bookending the text should not show
+		System.loadExternalRawData("PaletteS2SSBG", 0x802240 + 0x0300)
+		fillMemory_u16(0x802240, 0x20, 0x0eee)
+		sonic2BackgroundPaletteRotation = 0
 	}
 	Nemesis.loadDataToVRAM(0x0ad650, 0xf020)
 
@@ -1734,6 +1748,13 @@ function void fn0085b0()
 		bluespheres.position.x = u16[A2+2]
 		bluespheres.position.y = u16[A2+4]
 		bluespheres.rings_remaining = u16[A2+6]
+
+		if (challenge_greenspheres || speedSpheres)
+		{
+			// Set the "former" position values to match so the background does not try to move on initialization
+			u16[0xffffe434] = u16[A2+2]
+			u16[0xffffe436] = u16[A2+4]
+		}
 
 		// Special check for Original Mode Sonic 3 Special Stage 6
 		if (original_mode && !useSKLayouts && global.next_bluespheres == 5)
@@ -2374,6 +2395,9 @@ function void fn009580()
 	{
 		fn00972e()
 	}
+
+	// Get x offset for Sonic 2 background by looking at the current rotation
+	bluespheres.background_offset.x = 4 * (bluespheres.direction & 0x3f)
 }
 
 
@@ -3221,9 +3245,95 @@ function void fn009f44()
 
 
 
+// Track how much the player has moved in order to draw the Speed Sphere background correctly
+// Taken from \scripts\general\bluesphere\bluespheres.lemon
+//# address-hook(0x009d5e) end(0x009d9c)
+function void fn009d5e()
+{
+	if (challenge_greenspheres || speedSpheres)
+	{
+		BlueSpheres.calculateSonic2BackgroundOffsets()
+	}
+
+	base.fn009d5e()
+}
+
+function void BlueSpheres.calculateSonic2BackgroundOffsets()
+{
+	// Get x offset for Sonic 2 background by looking at the current rotation.
+	// This is also done in fn009580() to capture the rotation in real time instead of on a one-frame delay,
+	// but must be present here for rendering purposes.
+	bluespheres.background_offset.x = 4 * (bluespheres.direction & 0x3f)
+
+	// Get y offset by looking at forward and backward movement
+	if (!bluespheres.started_running)
+	{
+		bluespheres.background_offset.y_base = -0xc0
+	}
+	else
+	{
+		bool backwards = (((bluespheres.movement_speed < 0) && !bluespheres.hitting_bumper) || ((bluespheres.movement_speed >= 0) && bluespheres.hitting_bumper))
+		s16 x_change = abs(bluespheres.position.x - u16[0xffffe434])
+		if (backwards)
+			x_change = -x_change
+		s16 y_change = abs(bluespheres.position.y - u16[0xffffe436])
+		if (backwards)
+			y_change = -y_change
+		bluespheres.background_offset.y_base -= x_change + y_change
+	}
+
+	bluespheres.background_offset.y = (((bluespheres.background_offset.y_base & 0x1fff) >> 4) & 0x00ff)
+}
 
 
 
+// Add Sonic 2 special stage background palette to fade-in from white
+//# address-hook(0x003c82) end(0x003ca2)
+function void BlueSpheres.FadeIn()
+{
+	palette_fade.range = 0x003f
+	SetPaletteToWhite()
+
+	s16 countdown = 0x15
+	while (countdown >= 0)
+	{
+		global.frame_state = 0x12
+		waitForNextFrame()
+
+		FadeInFromWhite()
+		if ((countdown % 3) == 0 && (challenge_greenspheres || speedSpheres))
+		{
+			for (u32 colorToFade = 0x802240; colorToFade < 0x80225c; colorToFade += 2)
+			{
+				if ((u32[colorToFade] & 0x0e00) > (u32[colorToFade + 0x0300] & 0x0e00))
+					u32[colorToFade] -= 0x0200
+				if ((u32[colorToFade] & 0x00e0) > (u32[colorToFade + 0x0300] & 0x00e0))
+					u32[colorToFade] -= 0x0020
+				if ((u32[colorToFade] & 0x000e) > (u32[colorToFade + 0x0300] & 0x000e))
+					u32[colorToFade] -= 0x0002
+			}
+		}
+		LoadRequiredSpritePatterns()
+		--countdown
+
+	#if GAMEAPP
+		UpdateGameObjects()
+		RenderSprites()
+
+		if (global.game_mode != 0x30)	// Not in results screen of Blue Spheres mode
+		{
+			BlueSpheres.RenderSpheres()
+			BlueSpheres.renderCustomGround()
+			BlueSpheres.renderCustomCharacterShadows()
+		}
+	#elif STANDALONE
+		if (global.game_mode != 0x30)	// Not in results screen of Blue Spheres mode
+		{
+			Renderer.setViewport(getScreenExtend(), 0, 320, 224, 0x0000)
+		}
+	#endif
+	}
+}
 
 // Make green spheres translucent when touched, as AIR does for blue spheres.
 // Add 46 to sphere position for new screen size
@@ -3359,10 +3469,60 @@ function void BlueSpheres.renderCustomSpheres()
 	// End of timer HUD code.
 */
 
-	// Draw the HUD in Sonic 2 special stages
+	// Draw the HUD and background in Sonic 2 special stages
 	if (challenge_greenspheres || speedSpheres)
 	{
-		// debugLog(stringformat("%d.%02d", BS_remainingTime / 60, ((BS_remainingTime % 60) * 99 + 30) / 59))
+		constant array<u16> S2Special.BackgroundStarColors = 
+		{
+			0x0eee,
+			0x0ccc,
+			0x0aaa,
+			0x0888,
+			0x0888,
+			0x0aaa,
+			0x0ccc,
+			0x0eee
+		}
+
+		// Draw background
+		if (palette_set >= 2)
+		{
+			// Rotate star palette
+			sonic2BackgroundStarColor1 = S2Special.BackgroundStarColors[((level.framecounter.low & 0xf8) >> 3) % 8]
+			sonic2BackgroundStarColor2 = S2Special.BackgroundStarColors[(((level.framecounter.low + 32) & 0xf8) >> 3) % 8]
+
+			// Rotate background palette if the final emerald is being collected. The rotation is simply moving all non-star, non-transparency colors one entry to the left
+			// and the former leftmost non-transparent entry to the rightmost non-star color.
+			if ((sonic2BackgroundPaletteRotation % 4) == 1 && !global.game.paused)
+			{
+				u16 firstColor = u16[0x802242]
+				for (u32 colorAddress = 0x802242; colorAddress < 0x80225a; ++colorAddress)
+				{
+					u16[colorAddress] = u16[colorAddress + 2]
+				}
+				u16[0x80225a] = firstColor
+			}
+			if (sonic2BackgroundPaletteRotation)
+				++sonic2BackgroundPaletteRotation
+
+			constant u8 backgroundPaletteLine = 0xa0
+
+			// Draw top row
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 512 + bluespheres.background_offset.x, getScreenHeight()/2 - 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 256 + bluespheres.background_offset.x, getScreenHeight()/2 - 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + bluespheres.background_offset.x, getScreenHeight()/2 - 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + 256 + bluespheres.background_offset.x, getScreenHeight()/2 - 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			// Draw middle row
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 512 + bluespheres.background_offset.x, getScreenHeight()/2 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 256 + bluespheres.background_offset.x, getScreenHeight()/2 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + bluespheres.background_offset.x, getScreenHeight()/2 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + 256 + bluespheres.background_offset.x, getScreenHeight()/2 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			// Draw bottom row
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 512 + bluespheres.background_offset.x, getScreenHeight()/2 + 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 - 256 + bluespheres.background_offset.x, getScreenHeight()/2 + 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + bluespheres.background_offset.x, getScreenHeight()/2 + 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+			Renderer.drawCustomSprite("sonic2_background", getScreenWidth()/2 + 256 + bluespheres.background_offset.x, getScreenHeight()/2 + 256 + bluespheres.background_offset.y, backgroundPaletteLine, SPRITE_FLAG_PRIO, 0x1100)
+		}
 		
 		u16 renderQueue_hud = 0xe800
 		u16 ringsToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.blue_collected : bluespheres.rings_collected

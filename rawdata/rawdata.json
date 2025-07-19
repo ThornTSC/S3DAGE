@@ -84,6 +84,9 @@
   "S2SS7K":  { "File": "S2SS7K.bin" },
   "S2SS8K":  { "File": "S2SS8K.bin" },
 
+  // Sonic 2 special stage background (palette rotation is hardcoded)
+  "PaletteS2SSBG":  { "File": "PaletteS2SSBG.bin" },
+
   // Green Sphere game quarter layouts
   "GreenSphereGame":  { "File": "SKSS2.bin" },
 
