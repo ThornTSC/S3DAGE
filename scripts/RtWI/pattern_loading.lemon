@@ -92,6 +92,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 
 		// Animation scripts for objects. These must be handled after all other art if we intend to use the same address as above.
 		System.loadExternalRawData("masher_animation", s2_decompression_buffer_2)
+		System.loadExternalRawData("buzzer_animation", s2_decompression_buffer_2 + 0x20)
 	}
 
 	else if (unlock_act == 2)	// CPZ
