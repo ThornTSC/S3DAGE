@@ -9,6 +9,7 @@
 
 
 // Correct underwater palette for Sonic and Tails to match new DAGE water palettes
+// and adjust grays in Knuckles' palette in unlockable acts
 // Taken from \scripts\maingame\character\character_palette.lemon
 function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVariant)
 {
@@ -46,6 +47,11 @@ function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVa
 		// Normal palette variant
 		sourceAddress = (character != CHARACTER_KNUCKLES) ? 0x0a8a3c : 0x0a8afc
 		copyMemory(targetAddress, sourceAddress, 0x20)
+		if ((targetAddress == 0x802080 || targetAddress == 0x802200) && !u8[0xffffe654] && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && unlock_act && unlock_act != 3)		// loading Knuckles's palette in unlockable acts
+		{
+			System.loadExternalRawData("s2_character_palette", targetAddress + 0x18, 0x0e, 6, 1, 1)		// load grays
+			u16[targetAddress + 0x1e] = 0x0000															// place black in appropriate palette entry
+		}
 	}
 	else
 	{
