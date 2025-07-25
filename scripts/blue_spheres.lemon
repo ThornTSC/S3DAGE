@@ -557,7 +557,7 @@ function void fn009b62()
 				unlock.show = true
 			}
 
-			u8 emeraldColor = (speedSpheres) ? ((u8[0xffffffa4] + 1) & 0x07) : (challenge_greenspheres & 0x07)
+			u8 emeraldColor = (speedSpheres) ? ((bluespheregame.current_stage < 32) ? ((bluespheregame.current_stage + 1) & 0x07) : ((u8[0xffffffa4] + 1) & 0x07)) : (challenge_greenspheres & 0x07)
 			// Commented out old method: check the ROM location of the palette, which is written to 0xffffe446, to determine how to color the emerald. No longer used.
 			if (emeraldColor == 1)			// (u32[0xffffe446] == 0x0089fe || u32[0xffffe446] == 0x2d5384)		// S3 Stage 1
 			{
@@ -2062,6 +2062,8 @@ function void fn0085b0()
 		if (bluespheres.minigame_mode)			// get palette for normal Green Sphere stages
 		{
 			A1 = u32[0x0088ba + (u8[0xffffffa4] & 0x07) * 0x10]
+			if (bluespheregame.current_stage < 32)
+				A1 = u32[0x0088ba + (bluespheregame.current_stage & 0x07) * 0x10]	// run palettes in order early in Speed Sphere, as the first four stages alternate two palettes. Same algorithm for Green Sphere for consistency.
 			if (speedSpheres && palette_set >= 2)
 				A1 += 0x2cc986		// offset to Sonic 2 stage palettes
 			if ((u8[0xffffffa4] & 0x08) && !speedSpheres)		// shift to Super Emerald stage palettes (not yet designed for Sonic 2 stages)
