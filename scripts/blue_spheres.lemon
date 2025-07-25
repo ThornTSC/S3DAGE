@@ -1170,7 +1170,7 @@ function void SpecialStage()
 		// green sphere palette from concept vid, translated by Liliam
 		u32[0xfffffce4] = 0x00c600a0
 		u32[0xfffffce8] = 0x00600020
-		u32[0xfffffcec] = 0x00c600a0
+		u32[0xfffffcec] = u32[0xfffffce4]
 
 		// Deprecated option for Mania-esque green spheres
 		/*
