@@ -221,5 +221,47 @@
 
 	// Angel theme SPHERE text for results screen
 	"hud_text_sphere_chaosstage":	{ "File": "text_sphere.png", "Rect": "0,0,48,12" },
-	"hud_text_sphere_superstage":	{ "File": "text_sphere.png", "Rect": "48,0,48,12" }
+	"hud_text_sphere_superstage":	{ "File": "text_sphere.png", "Rect": "48,0,48,12" },
+
+	// Sonic 2 Sonic special stage sprites
+	"sonic2_bluesphere_sonic_run02": { "File": "Sonic2_sonic.png", "Rect":  "0,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_run03": { "File": "Sonic2_sonic.png", "Rect":  "32,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_run00": { "File": "Sonic2_sonic.png", "Rect":  "64,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_run01": { "File": "Sonic2_sonic.png", "Rect":  "96,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_jump00": { "File": "Sonic2_sonic.png", "Rect":  "0,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_jump01": { "File": "Sonic2_sonic.png", "Rect":  "32,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_sonic_stand": { "File": "Sonic2_sonic.png", "Rect":  "64,57,31,55", "Center": "16,47" },
+
+	// Sonic 2 Tails special stage sprites
+	"sonic2_bluesphere_tails_run00": { "File": "Sonic2_tails.png", "Rect":  "0,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_tails_run01": { "File": "Sonic2_tails.png", "Rect":  "32,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_tails_run02": { "File": "Sonic2_tails.png", "Rect":  "64,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_tails_run03": { "File": "Sonic2_tails.png", "Rect":  "96,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_tails_jump00": { "File": "Sonic2_tails.png", "Rect":  "0,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_tails_jump01": { "File": "Sonic2_tails.png", "Rect":  "32,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_tails_stand": { "File": "Sonic2_tails.png", "Rect":  "64,56,32,56", "Center": "16,48" },
+
+	"sonic2_bluesphere_tails_tails_0x01": { "File": "Sonic2_tails_tails.png", "Rect": "4,4,16,24", "Center": "8,22" },
+	"sonic2_bluesphere_tails_tails_0x02": { "File": "Sonic2_tails_tails.png", "Rect": "24,4,24,24", "Center": "8,14" },
+	"sonic2_bluesphere_tails_tails_0x03": { "File": "Sonic2_tails_tails.png", "Rect": "48,8,24,16", "Center": "8,6" },
+	"sonic2_bluesphere_tails_tails_0x04": { "File": "Sonic2_tails_tails.png", "Rect": "76,4,16,24", "Center": "8,14" },
+	"sonic2_bluesphere_tails_tails_0x05": { "File": "Sonic2_tails_tails.png", "Rect": "100,0,16,32", "Center": "8,22" },
+	"sonic2_bluesphere_tails_tails_0x06": { "File": "Sonic2_tails_tails.png", "Rect": "120,4,24,24", "Center": "16,22" },
+	"sonic2_bluesphere_tails_tails_0x07": { "File": "Sonic2_tails_tails.png", "Rect": "146,4,18,24", "Center": "10,22" },	// extends two more pixels left in Sonic 2 than in Sonic 3
+	"sonic2_bluesphere_tails_tails_0x08": { "File": "Sonic2_tails_tails.png", "Rect": "172,4,16,24", "Center": "8,22" },
+	"sonic2_bluesphere_tails_tails_0x09": { "File": "Sonic2_tails_tails.png", "Rect": "192,4,24,24", "Center": "16,14" },
+	"sonic2_bluesphere_tails_tails_0x0a": { "File": "Sonic2_tails_tails.png", "Rect": "216,8,24,16", "Center": "16,6" },
+	"sonic2_bluesphere_tails_tails_0x0b": { "File": "Sonic2_tails_tails.png", "Rect": "244,4,16,24", "Center": "8,14" },
+	"sonic2_bluesphere_tails_tails_0x0c": { "File": "Sonic2_tails_tails.png", "Rect": "268,0,16,32", "Center": "8,22" },
+	"sonic2_bluesphere_tails_tails_0x0d": { "File": "Sonic2_tails_tails.png", "Rect": "288,4,24,24", "Center": "8,22" },
+	"sonic2_bluesphere_tails_tails_0x0e": { "File": "Sonic2_tails_tails.png", "Rect": "316,4,18,24", "Center": "8,22" },	// extends two more pixels right in Sonic 2 than in Sonic 3
+
+	// Sonic 2 Knuckles special stage sprites
+	"sonic2_bluesphere_knuckles_run00": { "File": "Sonic2_knuckles.png", "Rect":  "0,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_run01": { "File": "Sonic2_knuckles.png", "Rect":  "32,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_run02": { "File": "Sonic2_knuckles.png", "Rect":  "64,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_run03": { "File": "Sonic2_knuckles.png", "Rect":  "96,0,32,56", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_jump00": { "File": "Sonic2_knuckles.png", "Rect":  "0,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_jump01": { "File": "Sonic2_knuckles.png", "Rect":  "32,56,32,40", "Center": "16,48" },
+	"sonic2_bluesphere_knuckles_stand": { "File": "Sonic2_knuckles.png", "Rect":  "64,56,35,58", "Center": "19,46" }
 }
