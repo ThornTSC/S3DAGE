@@ -3,5 +3,11 @@
 	"timeattack_pole_01": { "File": "timeattack_pole.png", "Rect":  "0,0,12,60", "Center": "6,30" },
 	"timeattack_pole_02": { "File": "timeattack_pole.png", "Rect": "13,0,12,60", "Center": "6,30" },
 	"timeattack_pole_03": { "File": "timeattack_pole.png", "Rect": "26,0,12,60", "Center": "6,30" },
-	"timeattack_pole_04": { "File": "timeattack_pole.png", "Rect": "39,0,12,60", "Center": "6,30" }
+	"timeattack_pole_04": { "File": "timeattack_pole.png", "Rect": "39,0,12,60", "Center": "6,30" },
+
+	// Sonic 2 Time Attack Pole ()
+	"s2_timeattack_pole_01": { "File": "s2_timeattack_pole.bmp", "Rect":  "0,0,16,48", "Center": "8,18" },
+	"s2_timeattack_pole_02": { "File": "s2_timeattack_pole.bmp", "Rect": "16,0,16,48", "Center": "8,18" },
+	"s2_timeattack_pole_03": { "File": "s2_timeattack_pole.bmp", "Rect": " 0,0,16,48", "Center": "8,18" },
+	"s2_timeattack_pole_04": { "File": "s2_timeattack_pole.bmp", "Rect": "32,0,16,48", "Center": "8,18" }
 }
