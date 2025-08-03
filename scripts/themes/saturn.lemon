@@ -81,17 +81,26 @@ function void Saturn.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 rend
 				px -= 12		// move to the left
 		}
 	}
-	Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+
+	Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", digit), px, py, 0, flags, renderQueue)
 	if (inputY == 0x18 && freeze_time)	// HUD graphics have a base py of 0x08, and the TIME row is 0x10 beyond that
 		if (freeze_time >= 64)
-			Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d_chaosstage", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, 255)
+			Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d_chaosstage", digit), px, py, 0, flags, renderQueue + 1, 0, 255)
 		else
-			Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d_chaosstage", digit), px, py, 0, SPRITE_FLAG_PRIO, renderQueue + 1, 0, freeze_time * 4)
+			Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d_chaosstage", digit), px, py, 0, flags, renderQueue + 1, 0, freeze_time * 4)
 }
 
 function void Saturn.BestText(u16 px, u16 py, u16 renderQueue)
 {
-    Renderer.drawCustomSprite("saturn_hud_text_best", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+
+	Renderer.drawCustomSprite("saturn_hud_text_best", px, py, 0, flags, renderQueue)
 }
 
 function void Saturn.NewRecordText()
@@ -106,7 +115,11 @@ function void Saturn.TimeStopBonusText()
 
 function void Saturn.DevText(u16 medal_py)
 {
-    Renderer.drawCustomSprite("saturn_text_dev", getScreenWidth() - 97, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)   
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+
+	Renderer.drawCustomSprite("saturn_text_dev", getScreenWidth() - 97, medal_py, 0, flags, 0xe008)   
 }
 
 function void Saturn.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)
@@ -117,13 +130,17 @@ function void Saturn.TargetTime(u16 medal_px, u16 medal_py, u8 medalOffset)
     u16 medal_time_frames = u8[medal_time_address + 3]
     u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
 
-    Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite("saturn_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite("saturn_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
-    Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	u8 flags = SPRITE_FLAG_PRIO
+	if (u32[0xffffb250] == 0x2d690)	// title card is active
+		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint while the title card is up. (Should be the same for the main HUD, but that's hidden for longer)
+
+	Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite("saturn_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite("saturn_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py, 0, flags, 0xe008)
+	Renderer.drawCustomSprite(stringformat("saturn_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py, 0, flags, 0xe008)
 }
 
 function void Saturn.TAEndMenu()
