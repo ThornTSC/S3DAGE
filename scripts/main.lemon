@@ -16293,7 +16293,104 @@ function void fn032208()
 		Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
 	else if (onBarrel && display_inputs && !original_mode)
 		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-	base.fn032208()
+
+	D1.u16 = u16[A0 + 0x3c]
+	D0.u16 = objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)
+	if (D0.u16 != D1.u16)
+	{
+		u16[A0 + 0x3c] = D0.u16
+		D0.u16 -= D1.u16
+		if (D0.s16 >= 0)
+		{
+			D0.u16 = abs(objA0.velocity.y)
+			if (D0.u16 < 0x0200)
+			{
+				D0.u16 = objA0.position.y.u16 - u16[A0 + 0x30] + 0x40
+				if (D0.u16 < 0x80)
+				{
+					objA0.velocity.y += 0x0400
+					D0.u16 = objA0.value3e
+					if (D0.s16 <= objA0.velocity.y)
+					{
+						objA0.velocity.y = D0.u16
+					}
+				}
+			}
+		}
+	}
+
+	UpdateMovementStraightSimple()
+	D5 = 0
+	if (objA0.flags2a & object.flag.P1_ON_OBJECT)
+	{
+		D5.u8 = control.player1.state
+	}
+	if (objA0.flags2a & object.flag.P2_ON_OBJECT)
+	{
+		D5.u8 |= control.tails.state
+	}
+
+	s16 offset = objA0.position.y.u16 - u16[A0 + 0x30]
+	if (offset == 0)
+	{
+		if (abs(objA0.velocity.y) < 0x80)
+		{
+			objA0.velocity.y = 0
+		}
+
+	#if STANDALONE
+		if (abs(objA0.velocity.y) < 0x400 && !original_mode)
+		{
+			// Fight doom: Give the barrel a nudge when it's standing still
+			if ((D5 & CONTROL_UP) && objA0.velocity.y <= 0)
+			{
+				objA0.velocity.y = -0x400
+			}
+			else if ((D5 & CONTROL_DOWN) && objA0.velocity.y >= 0)
+			{
+				objA0.velocity.y = 0x400
+			}
+		}
+	#endif
+	}
+	else if (offset < 0)
+	{
+		D0.u16 = objA0.value3e
+		if (D0.s16 <= objA0.velocity.y)
+			return
+
+		objA0.velocity.y += 0x20
+		if (objA0.velocity.y >= 0)
+		{
+			if (D5 & CONTROL_DOWN)
+			{
+				objA0.velocity.y += (original_mode) ? 0x20 : 0x28	// A bit faster than usual
+			}
+		}
+		else
+		{
+			objA0.velocity.y += 0x10
+		}
+	}
+	else
+	{
+		D0.s16 = -s16(objA0.value3e)
+		if (D0.s16 >= objA0.velocity.y)
+			return
+
+		objA0.velocity.y -= 0x20
+		if (objA0.velocity.y < 0)
+		{
+			if (D5 & CONTROL_UP)
+			{
+				objA0.velocity.y -= (original_mode) ? 0x20 : 0x28
+			}
+		}
+		else
+		{
+			objA0.velocity.y -= 0x10
+		}
+	}
 }
 
 
