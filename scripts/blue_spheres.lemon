@@ -3327,6 +3327,9 @@ function void BlueSpheres.FadeIn()
 			BlueSpheres.RenderSpheres()
 			BlueSpheres.renderCustomGround()
 			BlueSpheres.renderCustomCharacterShadows()
+
+			if (challenge_greenspheres || speedSpheres)		// track player position updates for use in scrolling Sonic 2 background during fade in,
+				fn009d5e()									// as the usual call to this doesn't run during the fade in
 		}
 	#elif STANDALONE
 		if (global.game_mode != 0x30)	// Not in results screen of Blue Spheres mode
