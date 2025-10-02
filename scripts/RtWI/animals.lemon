@@ -49,7 +49,7 @@ function void fn02c8b8()
 
 		// Randomly decide which critter to spawn
 		D0.u16 = getRandomNumber() & 0x01
-		bool isEagle = (unlock_act == 2 && D0.u16 == 1)
+		bool isEagle = (unlock_act == s2_CPZ && D0.u16 == 1)
 		objA0.sprite_attributes = (D0.u16 == 0) ? 0x0580 : 0x0592
 
 		// Decides the two critter's movement pattern for each zone
@@ -69,11 +69,11 @@ function void fn02c8b8()
 		// Squirrel, chicken	-> global.zone = 0x0c	-> DDZ
 		// Flicky, chicken		-> global.zone = 0x0d	-> Outro S/T
 
-		u16 zoneID = (unlock_act == 1) ? 0x04 : (unlock_act == 2) ? 0x03 : global.zone	// EHZ uses the same animals as Flying Battery, and CPZ as Carnival Night (with eagle instead of Flicky)
+		u16 zoneID = (unlock_act == s2_EHZ) ? 0x04 : (unlock_act == s2_CPZ) ? 0x03 : global.zone	// EHZ uses the same animals as Flying Battery, and CPZ as Carnival Night (with eagle instead of Flicky)
 		D1 = global.zone * 2 + D0.u16
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			D1 = 0x04 * 2 + D0.u16	// EHZ uses the same animals as Flying Battery
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			D1 = 0x03 * 2 + D0.u16	// and CPZ as Carnival Night (with eagle instead of Flicky)
 		D0.u8 = u8[0x02c7ba + D1.s16]
 		u8[A0 + 0x30] = D0.u8

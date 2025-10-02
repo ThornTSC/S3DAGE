@@ -227,7 +227,7 @@ function void customMenu.mainLogicLoop()
 
 	// Keep track of how many options should be available on the left half of the Act Select / Challenges menu.
 	u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
-	if (maxSettingsOption == maxNormalGameSettingsOption && setting.unlock_act == 1)
+	if (maxSettingsOption == maxNormalGameSettingsOption && setting.unlock_act == s2_EHZ)
 		maxSettingsOption = (moddedTailsCharacter) ? 3 : 4
 
 	if (setting.unlock_act && total_stars < unlock.level.ehz)		// Dev cheated to gain stars, selected EHZ, removed stars
@@ -237,7 +237,7 @@ function void customMenu.mainLogicLoop()
 	}
 	else if (setting.unlock_act && total_stars < unlock.level.cpz)		// Dev cheated to gain stars, selected EHZ, removed stars
 	{
-		setting.unlock_act = 1
+		setting.unlock_act = s2_EHZ
 		selectedZoneAct = 0x0200		// Make selection become EHZ
 	}
 
@@ -640,7 +640,7 @@ function void customMenu.selectZone()
 		{
 			if (total_stars >= unlock.level.ehz)
 			{
-				setting.unlock_act = 1
+				setting.unlock_act = s2_EHZ
 				selectedZoneAct = 0x0200	// Make selection become EHZ
 				setting.original_mode = 0	// disallow Original Mode
 			}
@@ -707,7 +707,7 @@ function void customMenu.selectAct()
 	// Select an act.
 	if (customMenu.scrollRight() || Input.buttonPressed(BUTTON_R))
 	{
-		if (setting.unlock_act == 1 && selectedMenuOption == 3)		// On EHZ with music option selected?
+		if (setting.unlock_act == s2_EHZ && selectedMenuOption == 3)		// On EHZ with music option selected?
 			selectedMenuOption = 4									// This option doesn't exist on other levels, so move the cursor.
 
 		if (setting.unlock_act)				// Pressed right on unlockable act?
@@ -723,7 +723,7 @@ function void customMenu.selectAct()
 		{
 			if (total_stars >= unlock.level.ehz)
 			{
-				setting.unlock_act = 1
+				setting.unlock_act = s2_EHZ
 				selectedZoneAct = 0x0200	// Make selection become EHZ
 				setting.original_mode = 0	// disallow Original Mode
 			}
@@ -741,7 +741,7 @@ function void customMenu.selectAct()
 	}
 	else if (customMenu.scrollLeft() || Input.buttonPressed(BUTTON_L))
 	{
-		if (setting.unlock_act == 1 && selectedMenuOption == 3)		// On EHZ with music option selected?
+		if (setting.unlock_act == s2_EHZ && selectedMenuOption == 3)		// On EHZ with music option selected?
 			selectedMenuOption = 4									// This option doesn't exist on other levels, so move the cursor.
 
 		if (setting.unlock_act)				// Pressed left on unlockable act?
@@ -1546,7 +1546,7 @@ function void DataSelect.drawCustomPlanes()
 
 		if (time_attack)
 		{
-			if (setting.unlock_act == 1)
+			if (setting.unlock_act == s2_EHZ)
 			{
 				Renderer.drawCustomSprite("text_musictype", getScreenExtend() - 40 + 43 + 39 + 16, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
 				if (setting.ehz_music == 0)
@@ -1561,22 +1561,22 @@ function void DataSelect.drawCustomPlanes()
 			}
 
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
-			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
-			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			if (exit_threshold == 1)
-				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
-				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
 			if (selectedMenuOption == 4)
 			{
-				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
 			}
 		}
 		else
 		{
-			if (setting.unlock_act == 1)
+			if (setting.unlock_act == s2_EHZ)
 			{
 				Renderer.drawCustomSprite("text_musictype", getScreenExtend() - 40 + 43 + 39, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// GAME/MUSIC TYPE text
 				if (setting.ehz_music == 0)
@@ -1592,16 +1592,16 @@ function void DataSelect.drawCustomPlanes()
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
 			if (System.getGlobalVariableValueByName("DAGE_characterID") != 2)
 			{
-				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, (setting.unlock_act == 1) ? 209 : 201 , 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, (setting.unlock_act == s2_EHZ) ? 209 : 201 , 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 				if (sidekick == 1)
-					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
+					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
 				else
-					Renderer.drawCustomSprite("text_option_no", getScreenExtend() - 40 + 158 + 7, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)			// HOLD text
+					Renderer.drawCustomSprite("text_option_no", getScreenExtend() - 40 + 158 + 7, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)			// HOLD text
 				if (selectedMenuOption == 4)
 				{
-					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK left arrow
-					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, (setting.unlock_act == 1) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK right arrow
+					Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 - arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK left arrow
+					Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// SIDEKICK right arrow
 				}
 			}
 		}

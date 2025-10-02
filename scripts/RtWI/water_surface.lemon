@@ -20,7 +20,7 @@ function void WaterSurface.Init()
 	objA0.box_size.x = 0x80
 	objA0.box_size.y = 0x20
 	u16[A0 + 0x30] = objA0.position.x.u16
-	if (unlock_act == 3)		// Aquatic Ruin Zone
+	if (unlock_act == s3_CGZ)		// Aquatic Ruin Zone
 	{
 		objA0.base_state += 0x02
 		objA0.mapping_offset = s2_mappings_address + 0x1000	// ARZ mappings offset

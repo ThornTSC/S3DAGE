@@ -146,7 +146,7 @@ function void UpdateGamePause()
 
 			if (!clean_screenshot)
 			{
-				bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+				bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_CGZ)
 				if (!(original_mode || System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 				{
 					Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth() - 43, 25, 0x00, SPRITE_FLAG_PRIO + 0x08 + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
@@ -199,7 +199,7 @@ function void UpdateGamePause()
 				}
 				else if ((time_attack == 1 || time_attack == 2) && PauseMenu_Challenges())
 					break
-				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && unlock_act != 3 && global.zone_act != 0x1701 && PauseMenu_Normal())
+				else if ((time_attack != 1 && time_attack != 2) && !original_mode && (global.zone < 0x13 || global.zone > 0x15) && unlock_act != s3_CGZ && global.zone_act != 0x1701 && PauseMenu_Normal())
 					break
 			}
 		}
@@ -305,7 +305,7 @@ function void UpdateGamePause()
 	//	}
 
 		PauseMenu_ChangeTheme()
-		if ((global.game_mode & 0x7f) == 0x0c && !original_mode && global.zone_act != 0x1701 && unlock_act != 3 && (global.zone < 0x13 || global.zone > 0x15))
+		if ((global.game_mode & 0x7f) == 0x0c && !original_mode && global.zone_act != 0x1701 && unlock_act != s3_CGZ && (global.zone < 0x13 || global.zone > 0x15))
 			PauseMenu_ChangeLayout()
 	}
 
@@ -686,7 +686,7 @@ function u8 PauseMenu_ExitGame()
 		global.in_extra_stage = 0
 		global.shields_backup_1 = 0
 		global.shields_backup_2 = 0
-		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_CGZ)
 		if (isBonusStage)
 		{
 			global.zone_act = checkpoint.zone_act
@@ -723,7 +723,7 @@ function u8 PauseMenu_ExitGame()
 		global.in_extra_stage = 0
 		global.shields_backup_1 = 0
 		global.shields_backup_2 = 0
-		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+		bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_CGZ)
 		if (isBonusStage)
 		{
 			global.zone_act = checkpoint.zone_act
@@ -1193,11 +1193,11 @@ function void PauseMenu_DrawCustomSprites()
 		Dust.animateDropDash()
 	A0 = backupA0
 
-	if (unlock_act == 1)
+	if (unlock_act == s2_EHZ)
 		EHZ_CustomSprites()
-	else if (unlock_act == 2)
+	else if (unlock_act == s2_CPZ)
 		CPZ_CustomSprites()
-	else if (unlock_act == 3)
+	else if (unlock_act == s3_CGZ)
 		CGZ_CustomSprites()
 	else if (global.zone_act == 0x0000)
 		AIZ1_CustomSprites()

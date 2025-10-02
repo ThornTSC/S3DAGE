@@ -694,7 +694,7 @@ function void fn023cdc()
 //# address-hook(0x030580) end(0x03064c)
 function void fn030580()
 {
-	if (unlock_act == 3)
+	if (unlock_act == s3_CGZ)
 	{
 		fn0309cc()
 		return
@@ -795,7 +795,7 @@ function void fn030a38()
 //# address-hook(0x04a1e6) end(0x04a212)
 function void fn04a1e6()
 {
-	if (unlock_act != 3)
+	if (unlock_act != s3_CGZ)
 	{
 		base.fn04a1e6()
 		return

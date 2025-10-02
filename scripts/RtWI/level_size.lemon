@@ -8,11 +8,11 @@ function void UpdateCameraBoundsInLevel()
 		return
 	}
 
-	if (unlock_act == 1)
+	if (unlock_act == s2_EHZ)
 		EHZ.cameraBounds()
-	else if (unlock_act == 2)
+	else if (unlock_act == s2_CPZ)
 		CPZ.cameraBounds()
-	else if (unlock_act == 3)
+	else if (unlock_act == s3_CGZ)
 		CGZ.cameraBounds()
 
 	// Settings for all levels
@@ -96,7 +96,7 @@ function void EHZ.cameraBounds()
 
 function void CPZ.cameraBounds()
 {
-	if (Mods.isModActive("Chaos The Impostor") && unlock_act == 2 && camera.position.x.u16 == 0 && camera.position.y.u16 == 0x018c)
+	if (Mods.isModActive("Chaos The Impostor") && unlock_act == s2_CPZ && camera.position.x.u16 == 0 && camera.position.y.u16 == 0x018c)
 		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())	// redraw screen
 
 	A0 = 0xffffb000

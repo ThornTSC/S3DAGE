@@ -561,7 +561,7 @@ function void DynamicObjectsLoading.Init()
 
 		// u32 defaultA3 = 0xffffeb00				// standard object respawn table
 		u32 defaultA3 = object_respawn_table		// new object respawn table location
-		if (global.zone == 0x14 || unlock_act == 3)
+		if (global.zone == 0x14 || unlock_act == s3_CGZ)
 		{
 			// Special handling for Glowing Spheres bonus stage
 			//  -> It uses object spawning (unlike the other bonus stages), but may not change the actual object respawn table
@@ -645,7 +645,7 @@ function void ObjectSpawning.SpawnFixedObject()
 	u8 objectType	 = u8[A0+4]
 	u8 objectSubtype = u8[A0+5]
 
-	if (!unlock_act || unlock_act == 3)
+	if (!unlock_act || unlock_act == s3_CGZ)
 		objA1.update_address = u32[A4 + u16(objectType) * 4]
 	else
 		objA1.update_address = S2.ObjectTable[objectType]
@@ -692,7 +692,7 @@ function bool conditionalSpawnDynamicObject(bool considerLevelWrap, bool forceYP
 		}
 	}
 
-	u32 updateAddress = (unlock_act && unlock_act != 3) ? S2.ObjectTable[objectType] : u32[A4 + u16(objectType) * 4]
+	u32 updateAddress = (unlock_act && unlock_act != s3_CGZ) ? S2.ObjectTable[objectType] : u32[A4 + u16(objectType) * 4]
 
 	// Set flag in respawn table entry
 	u8[A3] |= 0x80

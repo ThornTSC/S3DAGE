@@ -96,7 +96,7 @@ function void fn02d47e()
 					if (!original_mode && !u8[0xffffe654] && !Mods.isModActive("Extra Character Slots"))
 					{
 						D1.u16 = 0x0200
-						unlock_act = 3
+						unlock_act = s3_CGZ
 						// The foreground camera must be set to prevent the CGZ retractable spring, which has its palette loaded during the title card, from showing on screen.
 						camera.foreground.x = 0x05b40000
 						camera.foreground.y = 0x022c0000

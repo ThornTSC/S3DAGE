@@ -57,15 +57,15 @@ function u64 Standalone.getModdedSoundKey.unlockAct(u64 soundKey, u8 sfxId, u8 s
     // Fast music tracks do not need to be called separately
     if (sfxId == MUSIC_MGZ1)						// 0x05
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
         	soundKey = (setting.ehz_music) ? "ehz2" : "ehz1"
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			soundKey = "cpz"
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			soundKey = MUSIC_CGZ
 	}
 
-	if (unlock_act == 3)
+	if (unlock_act == s3_CGZ)
 		return soundKey
 
     if (sfxId == MUSIC_MAINBOSS)				// 0x19
@@ -228,7 +228,7 @@ function void Standalone.playAudio(u8 sfxId)
 		else if (sfxId == 0x2a)
 		{
 			// Extra life jingle
-            if (unlock_act && (unlock_act != 3))
+            if (unlock_act && (unlock_act != s3_CGZ))
             {
                 soundKey = "s2_1up"
             }

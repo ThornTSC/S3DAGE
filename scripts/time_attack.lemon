@@ -531,7 +531,7 @@ function void initializeMainGame()
 		u32[0xffffb172] = 0x0383bc		// HCZ run-on-water handler
 		u8[0xffffb19e] = 1
 	}
-	else if (unlock_act == 2)
+	else if (unlock_act == s2_CPZ)
 	{
 		u32[0xffffcf82] = 0x0208dc		// Sonic 2 water surface
 	}
@@ -563,7 +563,7 @@ function void initializeMainGame()
 		{
 			global.in_extra_stage = 0
 		}
-		else if ((global.zone < 0x13 && unlock_act != 3) || (global.zone > 0x15 && global.zone_act != 0x1701))
+		else if ((global.zone < 0x13 && unlock_act != s3_CGZ) || (global.zone > 0x15 && global.zone_act != 0x1701))
 		{
 			global.shields_backup_2 = 0
 			global.in_extra_stage = 0
@@ -1710,14 +1710,14 @@ function void RenderSprites()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == 3)
+				if (hud.layout != 3 || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == 3)
+			else if (hud.layout != 3 || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1824,14 +1824,14 @@ function void fn00db3c()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == 3)
+				if (hud.layout != 3 || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == 3)
+			else if (hud.layout != 3 || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1864,14 +1864,14 @@ function void fn00db3c()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == 3)
+				if (hud.layout != 3 || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == 3)
+			else if (hud.layout != 3 || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1903,7 +1903,7 @@ function void RenderHUD_RedRings()
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
 		return
 
-	if (unlock_act == 3)
+	if (unlock_act == s3_CGZ)
 		return
 
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone.apparent) + global.act.apparent	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
@@ -2024,7 +2024,7 @@ function void RenderHUD_Marathon()
 			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_mini_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_mini_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_mini_%d", emeraldIndex) : "hud_chaos_mini_empty"
 			px = getScreenWidth() - emeraldDistFromBottomRight[2 * (emeraldIndex - 1)]
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
-			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == 3)
+			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
 				py += 14
 
@@ -2050,7 +2050,7 @@ function void RenderHUD_Marathon()
 //# address-hook(0x00db44) end(0x00dbb2)
 function void RenderHUD()
 {
-	if (unlock_act != 3)
+	if (unlock_act != s3_CGZ)
 	{
 		base.RenderHUD()
 		return
@@ -2072,7 +2072,7 @@ function void RenderHUD()
 	s16 baseY = 0x08
 	u16 renderQueue = 0xe000
 
-	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == 3)
+	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 #if STANDALONE
 	if (!debug_mode.state)
 	{
@@ -2235,7 +2235,7 @@ function void RenderHUD_Challenges()
 	s16 baseY = 0x08
 	u16 renderQueue = 0xe000
 
-	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == 3)
+	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 #if STANDALONE
 	if (!debug_mode.state)
 	{
@@ -2307,7 +2307,7 @@ function void RenderHUD_Challenges()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
+			bool inPainWater = (unlock_act == s2_CPZ && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
 			u16 px = baseX + ((!time_attack_hud && hud.layout) ? 0x40 : 0x58)
 			if (!inPainWater || (level.framecounter & 0x08))
 			{
@@ -2605,7 +2605,7 @@ function void RenderHUD_Orig()
 
 
 			u16 px = baseX + (!isBonusStage && hud.layout != 3 ? 0x58 : 0x40)	// in theory hud.layout should always be 3 here
-//			bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
+//			bool inPainWater = (unlock_act == s2_CPZ && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active)
 //			if (!inPainWater || (level.framecounter & 0x08))
 //			{
 				for (u32 value = ring_counter;;)
@@ -2886,10 +2886,10 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		{
 			alpha = 0xff0000ff
 		}
-		key = (unlock_act && unlock_act != 3) ? "hud_ring_s2" : "hud_ring"
+		key = (unlock_act && unlock_act != s3_CGZ) ? "hud_ring_s2" : "hud_ring"
 		if (theme.hud == theme.south)
 			px += 1
-		if ((global.zone < 0x13 || global.zone > 0x15) && unlock_act != 3)		// not a bonus stage
+		if ((global.zone < 0x13 || global.zone > 0x15) && unlock_act != s3_CGZ)		// not a bonus stage
 			py -= 32
 
 		Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, renderQueue, 0, alpha, 0x10000)
@@ -2899,7 +2899,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	if (hud.layout == 2 && (time_attack == 1 || time_attack == 2) && (key == "hud_char_minutes" || key == "hud_char_seconds") && py == 0x18)
 		px += (time_attack_hud) ? -20 : 8
 
-	bool inPainWater = (unlock_act == 2 && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
+	bool inPainWater = (unlock_act == s2_CPZ && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
 	if ((inPainWater && !(level.framecounter & 0x08)) && ((py == 0x10 && px < getScreenWidth()/2) || py == 0x28) && !(key == "hud_text_rings" || key == "hud_text_rings_red"))	// In pain water when ring count should flash, and element to draw is a digit at height of rings digits?
 		return																																		// Do not draw it. (Our custom functions for the Challenges HUD handles it for challenges.)
 
@@ -2932,7 +2932,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		}
 	}
 
-	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == 3) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
+	if (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == s3_CGZ) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
 		u32 alpha = 0xffffffff
@@ -3703,7 +3703,7 @@ function void Standalone.onRestartAtCheckpoint()
 		if (global.zone_act == 0x0201 && checkpoint.number == 6)
 			level.trigger08 = 1	// If we went through the "loop" of MGZ2 and returned to the star post, set the loop's trigger ID
 
-		if (unlock_act == 2 && checkpoint.number <= 7)
+		if (unlock_act == s2_CPZ && checkpoint.number <= 7)
 			layout.part = 0		// Make sure we restart in the correct part of CPZ
 
 		// Handle achievements
@@ -7451,14 +7451,14 @@ function u16 Challenge.checkAndRenderFinish_unlockAct()
 	pole.y = -1
 
 	// EHZ
-	if (unlock_act == 1)
+	if (unlock_act == s2_EHZ)
 	{
 		pole.x = 0x6740
 		pole.y = 0x0444
 	}
 	
 	// CPZ
-	if (unlock_act == 2)
+	if (unlock_act == s2_CPZ)
 	{
 		pole.x = (layout.part == 2) ? 0x4a00 : (layout.part == 1) ? 0x3440 : -1
 		pole.y = (layout.part == 2) ? 0x0280 : (layout.part == 1) ? 0x0500 : -1

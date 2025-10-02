@@ -3,7 +3,7 @@
 //# address-hook(0x018d6a) end(0x018d6a)
 function void fn018d6a()
 {
-	D6 = (unlock_act && (unlock_act != 3)) ? 0x349122 : 0x18a604		// Dust art in the Sonic 2 palette is injected at the Sonic 3 alone dust location
+	D6 = (unlock_act && (unlock_act != s3_CGZ)) ? 0x349122 : 0x18a604		// Dust art in the Sonic 2 palette is injected at the Sonic 3 alone dust location
 	fn018d70()
 }
 
@@ -20,7 +20,7 @@ function void Dust.animateDropDash()
 	// Here, A2 holds the address of the character and 0x04 is the render_flags offset.
 	objA0.sprite_attributes = u16[0xffffcc54 + 0x0a]	// sprite attributes should match spin dash dust attributes
 	bool prioFlag = ((objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0)
-	if (unlock_act && (unlock_act != 3))
+	if (unlock_act && (unlock_act != s3_CGZ))
 		Renderer.drawCustomSprite(stringformat("dropdash_dust_s2_%02x", u8[A0 + 0x30]), objA0.position.x.u16, objA0.position.y.u16, 0, (u8[0xffffb004] & 0x03) | SPRITE_FLAG_WORLDSPACE | (prioFlag ? SPRITE_FLAG_PRIO : 0), 0x9f7e)	// draw object at same renderQueue priority as spin dash dust
 	else
 		Renderer.drawCustomSprite(stringformat("dropdash_dust_%02x", u8[A0 + 0x30]), objA0.position.x.u16, objA0.position.y.u16, 0, (u8[0xffffb004] & 0x03) | SPRITE_FLAG_WORLDSPACE | (prioFlag ? SPRITE_FLAG_PRIO : 0), 0x9f7e)		// draw object at same renderQueue priority as spin dash dust

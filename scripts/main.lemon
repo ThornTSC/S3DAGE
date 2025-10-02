@@ -164,6 +164,13 @@ constant u32 s2_levelanimation_address = 0x870800
 constant u32 s2_mappings_address = 0x880000
 constant u32 s2_decompression_buffer_2 = 0x890000
 
+// unlock_act constants
+constant u16 s2_EHZ = 1
+constant u16 s2_CPZ = 2
+constant u16 s3_CGZ = 3
+
+
+
 
 // This is the first function called in a frame.
 /*
@@ -330,9 +337,9 @@ function void discordRPC.mainGame()
 	else if (time_attack == 3)
 		gameType = "100% Speedrun"
 
-	if (unlock_act == 1)
+	if (unlock_act == s2_EHZ)
 		gameType = "Emerald Hill Zone"
-	else if (unlock_act == 2)
+	else if (unlock_act == s2_CPZ)
 		gameType = "Chemical Plant Zone"
 	// else if (time_attack == 4)	// unused, as it's a special case that won't state emerald count
 	//	gameType = "Any% Speedrun"
@@ -673,12 +680,12 @@ function void TitleCard.Init()
 		hud.layout = time_attack_hud.layout
 	}
 
-	if (unlock_act == 2)
+	if (unlock_act == s2_CPZ)
 	{
 		u32[0xffffb40c] = 0x020fd2	// create CPZ background pillar in a specific object slot	// created alongside water surface in Sonic 2
 		CPZ.loadYellowPlatforms()
 	}
-	if (unlock_act == 3)
+	if (unlock_act == s3_CGZ)
 	{
 		// Create the retracting spring object. Natural spawning means it may not load until after the switch is pressed, thus "ignoring" the switch on Lap 1.
 		u32 backupA1 = A1
@@ -732,7 +739,7 @@ function void TitleCard.Init()
 		// Death Egg Boss
 		D0 = 11
 	}
-	else if (unlock_act == 3)
+	else if (unlock_act == s3_CGZ)
 	{
 		// Chrome Gadget bonus stage
 		D0 = 20
@@ -778,7 +785,7 @@ function void InitHUDTheme()
 //# address-hook(0x006a76) end(0x006bd6)
 function void InitializeGameCharacters()
 {
-	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == 3)
+	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_CGZ)
 	// One of the bonus stages?
 	if (isBonusStage)
 	{
@@ -802,7 +809,7 @@ function void InitializeGameCharacters()
 			u8[0xffffee30] = 0xff
 			return
 		}
-		else if (unlock_act == 3)		// CGZ bonus stage
+		else if (unlock_act == s3_CGZ)		// CGZ bonus stage
 		{
 			ring_counter = checkpoint.rings
 			extra_lives_granted = checkpoint.lives_granted
@@ -1162,7 +1169,7 @@ function u16 getTileAndAngle()
 		u8 tileForm = u8[A2 + tileType * 2]
 		if (tileForm != 0)
 		{
-			u32 angleArray = (unlock_act && (unlock_act != 3)) ? s2_angles_address : 0x096000
+			u32 angleArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_angles_address : 0x096000
 			u8 angle = u8[angleArray + tileForm]
 			if (tile & 0x0400)	// Flip horizontally
 			{
@@ -1194,7 +1201,7 @@ function s16 getCollisionIndentX()
 			iy = 15 - iy
 		}
 
-		u32 xArray = (unlock_act && (unlock_act != 3)) ? s2_heightmapsrotated_address : 0x097100
+		u32 xArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_heightmapsrotated_address : 0x097100
 		s16 indent = s8[xArray + (tileForm * 0x10) + iy]
 		if (indent != 0)
 		{
@@ -1223,7 +1230,7 @@ function s16 getCollisionIndentY()
 			ix = 15 - ix
 		}
 
-		u32 yArray = (unlock_act && (unlock_act != 3)) ? s2_heightmaps_address : 0x096100
+		u32 yArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_heightmaps_address : 0x096100
 		s16 indent = s8[yArray + (tileForm * 0x10) + ix]
 		if (indent != 0)
 		{
@@ -1250,11 +1257,11 @@ function void fn0076a6()
 	if (unlock_act)
 	{
 		D0 = 0x0df370	// location of S2&K object position pointers and data
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			System.loadExternalRawData("ehz_collision", D0)
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_collision", D0)
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_collision", D0)	
 	}
 	else
@@ -1290,7 +1297,7 @@ function void fn01cacc()
 		u8[0xffffb02a] = 0
 		level.start_location = 0
 
-		if (unlock_act == 2)
+		if (unlock_act == s2_CPZ)
 		{
 			layout.part = 0
 			camera.position.x.u16 = 0x0000
@@ -1315,11 +1322,11 @@ function void fn007812()
 //	u32 backupA1 = A1
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
 		A1 = s2_decompression_buffer
 	}
@@ -1402,11 +1409,11 @@ function void fn01c2b0()
 	D7 = D0
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)				// decompress them to their proper RAM
 	}
@@ -1432,11 +1439,11 @@ function void fn01c2b0()
 	key = stringformat("%s_chunks_p", getZoneInitials(global.zone))
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
 	}
@@ -1644,9 +1651,9 @@ function void fn01c362()
 
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 		{
 			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
@@ -1656,7 +1663,7 @@ function void fn01c362()
 			else 
 				Standalone.loadRawLevelData("cpz_layout_2", global.zone_act, 0xffff8000)
 		}
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			Standalone.loadRawLevelData("cgz_layout", global.zone_act, 0xffff8000)
 	}
 	else if (!original_mode)
@@ -1684,9 +1691,9 @@ function void LevelObjectTableBuilder.buildObjects()
 	u32 bytes
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 		{
 			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
@@ -1696,7 +1703,7 @@ function void LevelObjectTableBuilder.buildObjects()
 			else
 				bytes = Standalone.loadRawLevelData("cpz_objects_2", global.zone_act, A0)
 		}
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			bytes = Standalone.loadRawLevelData("cgz_objects", global.zone_act, A0)
 	}
 	else if (!original_mode)
@@ -1851,9 +1858,9 @@ function void LevelRingsTableBuilder.buildRings()
 	u32 bytes
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 		{
 			bool KnuxHard = (layout.part == 2)
 			if (layout.part == 0)
@@ -1863,7 +1870,7 @@ function void LevelRingsTableBuilder.buildRings()
 			else
 				bytes = Standalone.loadRawLevelData("cpz_rings_2", global.zone_act, A1)
 		}
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			bytes = Standalone.loadRawLevelData("cgz_rings", global.zone_act, A1)
 	}
 	else if (!original_mode)
@@ -6355,7 +6362,7 @@ function void TitleCard.Wait()
 
 	if (allocDynamicObjectAfterA0())
 	{
-		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == 3))
+		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == s3_CGZ))
 		{
 			// Bonus stage
 			A2 = 0x02dab4
@@ -6440,7 +6447,7 @@ function void TitleCard.Show()
 			}
 		}
 
-		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == 3))
+		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == s3_CGZ))
 		{
 			// Do nothing for bonus stages and Hidden Palace emerald cave
 		}
@@ -6730,7 +6737,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		u64 key = stringformat("minitimestone_0%d", animFrame)
 		if (unlock_act)
 			key = stringformat("minitimestone_0%d_s2", animFrame)
-		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401 || unlock_act == 2) ? 0xa000 : 0x02000
+		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401 || unlock_act == s2_CPZ) ? 0xa000 : 0x02000
 		if (objA0.subtype2c == 0)
 			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, miniTimeStoneRenderQueue, 0, 255)
 		else
@@ -6739,7 +6746,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	}
 	if ((objA0.update_address == 0x01a51c) && objA0.base_state >= 0x06)	// sparkle while stone disappears, also mirrored compared to rings
 	{
-		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401 || unlock_act == 2) ? 0xa000 : 0x02000
+		u16 miniTimeStoneRenderQueue = (global.zone_act == 0x0401 || unlock_act == s2_CPZ) ? 0xa000 : 0x02000
 		u64 sparkleKey = (unlock_act) ? "minitimestone_sparkle_s2" : "minitimestone_sparkle"
 		if (objA0.animation.sprite == 4)
 		{
@@ -6783,7 +6790,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		if (objA0.value26)		// if red star ring is for another character,
 			alpha = 0x80c0c0c0	// render very faintly
 		u64 key = stringformat("%s_0%d", ringKey, animFrame)
-		u16 redStarRingRenderQueue = (global.zone_act == 0x0401 || unlock_act == 2) ? 0xa000 : 0x02000
+		u16 redStarRingRenderQueue = (global.zone_act == 0x0401 || unlock_act == s2_CPZ) ? 0xa000 : 0x02000
 
 		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue, 0, alpha, 0x10000)
 		if (objA0.value26)
@@ -6812,7 +6819,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			px_hud += 36
 		else if (sparkleNum == 0x10)
 			px_hud += 48
-		u16 sparkleRenderQueue = (global.zone_act == 0x0401 || unlock_act == 2) ? 0xa000 : 0x02000
+		u16 sparkleRenderQueue = (global.zone_act == 0x0401 || unlock_act == s2_CPZ) ? 0xa000 : 0x02000
 
 		if (objA0.animation.sprite == 4)
 		{
@@ -7373,7 +7380,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	// Sonic 2 Flicky and Locky
 	if (unlock_act && objA0.update_address == 0x02c778 && u8[A0 + 0x30] == 5)
 	{
-		if (unlock_act == 2)
+		if (unlock_act == s2_CPZ)
 			Renderer.drawCustomSprite(stringformat("s2_locky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 		else
 			Renderer.drawCustomSprite(stringformat("s2_flicky_%02x", objA0.animation.sprite), px, py, 0x00, (objA0.render_flags & 0x01) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
@@ -10637,7 +10644,7 @@ function void Standalone.onLevelFinished()
 		return
 	}
 
-	if (unlock_act == 1 && total_stars >= unlock.level.cpz)		// in EHZ with enough stars to play CPZ
+	if (unlock_act == s2_EHZ && total_stars >= unlock.level.cpz)		// in EHZ with enough stars to play CPZ
 	{
 		++unlock_act
 		// Trigger the fade out and loading of next zone
@@ -13353,7 +13360,7 @@ function void fn030cf8()
 //# address-hook(0x006d6c) end(0x006d9a)
 function void UpdateWaterSurfaceLevel()
 {
-	if (unlock_act == 2 && layout.part >= 1)
+	if (unlock_act == s2_CPZ && layout.part >= 1)
 		UpdateWaterSurfaceLevel.CPZ()
 	else
 		base.UpdateWaterSurfaceLevel()
@@ -15074,7 +15081,7 @@ function void SetupCharacterAtLastCheckpoint()
 
 	if (global.zone_act == 0x0201 && checkpoint.number == 6 && level.trigger08 != 1 && !original_mode)
 		level.trigger08 = 1		// if we are restarting from the loop's star post after that return, automatically throw the trigger
-	else if (unlock_act == 2 && layout.part == 1 && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend())
+	else if (unlock_act == s2_CPZ && layout.part == 1 && camera.position.x.u16 >= 0x1de0 + 0x0700 - getScreenExtend())
 	{
 		water.height.current = 0x0510
 		water.height.next = 0x0510
@@ -16878,7 +16885,7 @@ function void fn051d82()
 function void Level.InitializeWater()
 {
 	bool levelHasWater = false
-	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601 || unlock_act == 2)
+	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601 || unlock_act == s2_CPZ)
 	{
 		levelHasWater = true
 	}
@@ -16940,7 +16947,7 @@ function void Level.InitializeWater()
 		u16 waterHeight = u16[0x006d2c + offset]
 		if (original_mode && global.zone_act == 0x0301)		// Original Mode CNZ2 lines up with base S3&K
 			waterHeight = 0x0a90
-		if (unlock_act == 2)	// Chemical Plant Zone
+		if (unlock_act == s2_CPZ)	// Chemical Plant Zone
 		{
 			bool KnuxHardLayout = (layout.part == 2)
 			waterHeight = (KnuxHardLayout) ? 0x0590 : (layout.part == 1 && (checkpoint.number & 0x7f) <= 10) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
@@ -28084,7 +28091,7 @@ function bool Standalone.useMultiSampleCollision()
 	u32 tablePointer = 0x817000
 
 	// Setup the lookup table if not done already
-	if (u16[tablePointer] != (global.zone_act | 0x8080) || unlock_act == 2)		// Add 0x8080 mainly to avoid having 0x0000 for AIZ 1
+	if (u16[tablePointer] != (global.zone_act | 0x8080) || unlock_act == s2_CPZ)		// Add 0x8080 mainly to avoid having 0x0000 for AIZ 1
 	{
 		u32 backupA1 = A1
 		u16[tablePointer] = (global.zone_act | 0x8080)
@@ -28120,7 +28127,7 @@ function bool Standalone.useMultiSampleCollision()
 		}
 		else if (global.zone_act == 0x0200)
 		{
-			if (unlock_act == 2)
+			if (unlock_act == s2_CPZ)
 				CPZ.MultiSampleCollision()
 			
 			// MGZ 1

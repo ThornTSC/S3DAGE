@@ -47,7 +47,7 @@ function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVa
 		// Normal palette variant
 		sourceAddress = (character != CHARACTER_KNUCKLES) ? 0x0a8a3c : 0x0a8afc
 		copyMemory(targetAddress, sourceAddress, 0x20)
-		if ((targetAddress == 0x802080 || targetAddress == 0x802200) && !u8[0xffffe654] && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && unlock_act && unlock_act != 3)		// loading Knuckles's palette in unlockable acts
+		if ((targetAddress == 0x802080 || targetAddress == 0x802200) && !u8[0xffffe654] && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && unlock_act && unlock_act != s3_CGZ)		// loading Knuckles's palette in unlockable acts
 		{
 			System.loadExternalRawData("s2_character_palette", targetAddress + 0x18, 0x0e, 6, 1, 1)		// load grays
 			u16[targetAddress + 0x1e] = 0x0000															// place black in appropriate palette entry
@@ -199,7 +199,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 #endif
 
 	// Load CGZ palette
-	if (unlock_act == 3 && index == 0x0e)
+	if (unlock_act == s3_CGZ && index == 0x0e)
 	{
 		index = 0x35
 	}
@@ -211,9 +211,9 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 
 	dest += ramAddress - 0xfc00				// With this, dest can be changed to non-faded palette and/or secondary palette
 	copyMemory(dest, source, bytes)
-	if (unlock_act && unlock_act != 3)
+	if (unlock_act && unlock_act != s3_CGZ)
 		System.loadExternalRawData("s2_character_palette", dest)
-	else if (unlock_act == 3)
+	else if (unlock_act == s3_CGZ)
 	{
 		System.loadExternalRawData("Palette0200", 0xfffffca0, 0, 0x20, 1, 1)		// temporary to get MGZ1 object palette line
 		if (palette_set >= 2)	// add prototype blues to CGZ background
@@ -294,7 +294,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 #endif
 
 	// New code for loading palettes from rawdata
-	if (unlock_act == 1 && index == 0x0e)
+	if (unlock_act == s2_EHZ && index == 0x0e)
 	{
 		if (palette_set >= 2)
 			System.loadExternalRawData("ehz_palette", destRaw)
@@ -303,7 +303,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		else
 			System.loadExternalRawData("ehz_palette_s2", destRaw)
 	}
-	else if (unlock_act == 2 && index == 0x0e)
+	else if (unlock_act == s2_CPZ && index == 0x0e)
 	{
 		if (palette_set >= 2)
 			System.loadExternalRawData("cpz_palette", destRaw)
@@ -448,11 +448,11 @@ function void UpdatePaletteEffects.Default()
 	{
 		UpdatePaletteEffects.SuperForm()	// this must always be called to allow super transformations; a control lock is handled inside
 
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			LevelPaletteUpdate.EHZ()
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			LevelPaletteUpdate.CPZ()
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			LevelPaletteUpdate.CGZ()
 		return
 	}
@@ -1108,11 +1108,11 @@ function void UpdateLevelScrolling.MGZ1()
 {
 	if (unlock_act)
 	{
-		if (unlock_act == 1)
+		if (unlock_act == s2_EHZ)
 			EHZ_CustomSprites()
-		else if (unlock_act == 2)
+		else if (unlock_act == s2_CPZ)
 			CPZ_CustomSprites()
-		else if (unlock_act == 3)
+		else if (unlock_act == s3_CGZ)
 			CGZ_CustomSprites()
 		fn051158()	// call the most basic MGZ1 scroll routine
 		return

@@ -22,7 +22,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		base.RequestLoadingPatterns()
 		return
 	}
-	if (unlock_act != 3 && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	if (unlock_act != s3_CGZ && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
 	{
 		// Life icon art needed. Goes to 0xfa80.
 
@@ -39,7 +39,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 	if (D0.u16 != 0x12)		// MGZ1 Primary, now unlockable acts
 		return
 
-	if (unlock_act == 1)	// EHZ
+	if (unlock_act == s2_EHZ)	// EHZ
 	{
 		// Primary
 		System.loadExternalRawData("ehz_waterfall_mappings", s2_mappings_address + 0x0186)
@@ -95,7 +95,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("buzzer_animation", s2_decompression_buffer_2 + 0x20)
 	}
 
-	else if (unlock_act == 2)	// CPZ
+	else if (unlock_act == s2_CPZ)	// CPZ
 	{
 		// Primary
 		System.loadExternalRawData("cpz_pillar_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c)	// 0x64 bytes
@@ -194,7 +194,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
 		System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// 0x18 bytes
 	}
-	else if (unlock_act == 3)
+	else if (unlock_act == s3_CGZ)
 	{
 		// Button
 		Nemesis.loadDataToVRAM(0x190ac4, 0x8ac0)
