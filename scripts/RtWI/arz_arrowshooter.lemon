@@ -1,0 +1,140 @@
+//# address-hook(0x025694) end(0x02569e)
+function void ARZArrowShooter.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ARZArrowShooter.Init()
+	else if (objA0.base_state == 2)
+		ARZArrowShooter.Main()
+	else if (objA0.base_state == 4)
+		ARZArrowShooter.ShootArrow()
+	else if (objA0.base_state == 6)
+		ARZArrow.Init()
+	else // if (objA0.base_state == 8)
+		ARZArrow.Main()
+}
+
+//# address-hook(0x0256ac) end(0x025710)
+function void ARZArrowShooter.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = 0x025804		// get a new mappings offset!
+	objA0.sprite_attributes = 0x0417
+	objA0.render_flags |= 0x04
+	objA0.sprite_priority = 0x0180
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.animation.sprite = 0x01
+	objA0.subtype2c &= 0x0f
+	ARZArrowShooter.Main()
+}
+
+//# address-hook(0x0256e0) end(0x025710)
+function void ARZArrowShooter.Main()
+{
+	if (objA0.state != 0x02)
+	{
+		D2 = 0
+		A1 = 0xffffb000
+		ARZArrowShooter.DetectPlayer()
+		A1 = 0xffffb04a
+		ARZArrowShooter.DetectPlayer()
+		if (D2.u8 == 0 && objA0.state != 0)
+		{
+			D2 = 0x02
+		}
+		objA0.state = D2.u8
+	}
+	ARZArrowShooter.Animate()
+}
+
+//# address-hook(0x025706) end(0x025710)
+function void ARZArrowShooter.Animate()
+{
+	System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// replace with correct animation
+	A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06														// replace with correct offset
+	Object.AnimationUpdate()
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x025714) end(0x025728)
+function void ARZArrowShooter.DetectPlayer()
+{
+	D0.u16 = objA0.position.x.u16 - objA1.position.x.u16
+	if (carryFlag())
+	{
+		D0.s16 = -D0.s16
+	}
+	if (D0.u16 < 0x40)
+	{
+		D2 = 0x01
+	}
+}
+
+//# address-hook(0x02572a) end(0x025776)
+function void ARZArrowShooter.ShootArrow()
+{
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = objA0.update_address
+		objA1.base_state = 0x06		// this is += in original code, made = for clarity (as it always starts from 0)
+		objA1.mapping_offset = objA0.mapping_offset
+		objA1.sprite_attributes = objA0.sprite_attributes
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		objA1.render_flags = objA0.render_flags
+		objA1.flags2a = objA0.flags2a
+		playSound(SFX_BOMBFALL)		// place proper SFX! 0xdb in Sonic 2.
+	}
+	objA0.base_state -= 0x02
+	ARZArrowShooter.Animate()		// this code is actually duplicated in Sonic 2 instead of a jsr
+}
+
+//# address-hook(0x02577a) end(0x0257ea)
+function void ARZArrow.Init()
+{
+	objA0.base_state += 0x02
+	objA0.box_size.y = 0x08
+	objA0.box_size.x = 0x10
+	objA0.sprite_priority = 0x0200		// already fixed
+	objA0.collision_attributes = 0x9b
+	objA0.box_size.x = 0x08
+	objA0.box_size.y = 0x10
+	objA0.animation.sprite = 0
+	objA0.velocity.x = 0x0400
+	if (objA0.flags2a & 0x01)
+	{
+		objA0.velocity.x = -objA0.velocity.x
+	}
+	playSound(SFX_BOMBFALL)		// place proper SFX! 0xae in Sonic 2.
+	ARZArrow.Main()
+}
+
+//# address-hook(0x0257be) end(0x0257ea)
+function void ARZArrow.Main()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	if (objA0.flags2a & 0x01)
+	{
+		ARZArrow.Main.XFlip()
+		return
+	}
+	D3 = -8
+	CheckLeftWallCollision()
+	if (D1.s16 < 0)
+	{
+		UnloadObject()
+	}
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x0257de) end(0x0257ea)
+function void ARZArrow.Main.XFlip()
+{
+	D3 = 0x08
+	CheckRightWallCollision()
+	if (D1.s16 < 0)
+	{
+		UnloadObject()
+	}
+	DrawOrUnloadObject()
+}

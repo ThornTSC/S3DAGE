@@ -744,7 +744,7 @@ constant array<u32> S2.ObjectTable =
 	0x01a51a,	// 0x1f		// Ring
 	0x01a51a,	// 0x20		// Ring
 	0x01a51a,	// 0x21		// Ring
-	0x01a51a,	// 0x22		// Ring
+	0x025694,	// 0x22		// ARZ arrow shooter and arrow projectile
 	0x01a51a,	// 0x23		// Ring
 	0x01a51a,	// 0x24		// Ring
 	0x01a51a,	// 0x25		// Ring
