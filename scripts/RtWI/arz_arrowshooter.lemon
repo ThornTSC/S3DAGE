@@ -60,7 +60,7 @@ function void ARZArrowShooter.Animate()
 function void ARZArrowShooter.DetectPlayer()
 {
 	D0.u16 = objA0.position.x.u16 - objA1.position.x.u16
-	if (carryFlag())
+	if (D0.s16 < 0)
 	{
 		D0.s16 = -D0.s16
 	}

@@ -71,7 +71,8 @@ function void EHZ.cameraBounds()
 		if (camera.position.x.u16 >= 0x6500)
 			move_area.bottom.target = 0x0390	// once the boss is reached, the highest allowed camera position becomes 0x0388 in LevEvents_EHZ
 		move_area.left = 0
-		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
+		if (!time_attack_end)
+			move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 		if (u16[0xffffb010] >= signpost_loc && time_attack != 1 && time_attack != 2)
 		{
 			level.scrolling_routine = 4
@@ -107,7 +108,7 @@ function void CPZ.cameraBounds()
 	u16 signpost_loc = (KnuxHardLayout) ? 0x4a00 : (layout.part == 1) ? 0x3440 : 0x7f00 // originally 0x3f40 in KnuxHardLayout
 
 //	move_area.left = 0
-	if (!KnuxHardLayout)
+	if (!KnuxHardLayout && !time_attack_end)
 		move_area.right = signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend())
 
 	if (level.scrolling_routine < 4)
@@ -149,11 +150,14 @@ function void CPZ.cameraBounds()
 						move_area.right = rightBoundary
 					else
 					{
-						move_area.left = camera.position.x.u16
-						move_area.right += 4
-						if (u16[0xffffb010] > camera.position.x.u16 + (getScreenWidth()/2) && u16[0xffffb010] > 0x4880)		// if we're outpacing the camera,
-							move_area.right += 4																			// scroll faster
-						move_area.right = min(signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend()), move_area.right)
+						if (!time_attack_end)
+						{
+							move_area.left = camera.position.x.u16
+							move_area.right += 4
+							if (u16[0xffffb010] > camera.position.x.u16 + (getScreenWidth()/2) && u16[0xffffb010] > 0x4880)		// if we're outpacing the camera,
+								move_area.right += 4																			// scroll faster
+							move_area.right = min(signpost_loc - (getScreenWidth() / 2) + (2 * getScreenExtend()), move_area.right)
+						}
 					}
 				}
 			}

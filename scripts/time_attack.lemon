@@ -7432,10 +7432,10 @@ function u16 Challenge.checkAndRenderFinish()
 		u8 flags = (global.zone_act.apparent == 0x0a00 || global.zone_act.apparent == 0x0b00 || global.zone_act.apparent == 0x0001 ) ? SPRITE_FLAG_PRIO : 0x00
 		Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00)
 
-
-		move_area.right = pole.x - (getScreenWidth() / 2) + (2 * getScreenExtend()) 	// Set the camera x maximum in a way that centers the goal pole.
-																						// move_area.right always seems to be 0x50 (decimal 80) greater than the camera lock,
-																						// likely due to compensating for widescreen.
+		if (!time_attack_end)
+			move_area.right = pole.x - (getScreenWidth() / 2) + (2 * getScreenExtend()) 	// Set the camera x maximum in a way that centers the goal pole.
+																							// move_area.right always seems to be 0x50 (decimal 80) greater than the camera lock,
+																							// likely due to compensating for widescreen.
 		if (px >= pole.x)
 			return true
 	}
@@ -7536,8 +7536,8 @@ function void Challenge.applyTimeStopBonus()
 function void Challenge.setEndCameraPosition()
 {
 	s16 py = s16[0xffffb014]
-	if (global.zone_act != 0x0401)
-		move_area.left = pole.x - (getScreenWidth() / 2)		// This currently causes some rendering issues if a spin dash delays the camera right at the pole.
+//	if (global.zone_act != 0x0401)
+//		move_area.left = pole.x - (getScreenWidth() / 2)		// This currently causes some rendering issues if a spin dash delays the camera right at the pole.
 																// We redraw plane A later to correct this, but that's not possible at the end of FBZ2 due to the quake rendering.
 
 	// These vertical positions will need to be adapted to each act, or can be done through boss arena scripts.
@@ -7561,6 +7561,14 @@ function void Challenge.setEndCameraPosition()
 		move_area.bottom.target = pole.y - getScreenHeight() + 0x20
 	else if (global.zone_act.apparent == 0x0a00)					// SSZ1 needs a screen lock since it doesn't end in the boss area
 		move_area.bottom.target = pole.y - getScreenHeight() + 0x20
+
+	move_area.right.target = u16[0xffffb010] - getScreenWidth()/2
+	if (move_area.right > move_area.right.target)
+	{
+		move_area.right &= 0xfffe	// set final bit of max camera x position to 0
+		move_area.right -= 2		// move max camera x position to next even number
+	}
+		
 
 	if (global.zone_act.apparent != 0x0401)	// refreshing plane A in FBZ2's ending causes issues because of the dual-plane display.
 		fillPlaneA_Default(camera.position.x.u16, camera.position.y.u16, getScreenWidth(), getScreenHeight())	// refresh the screen to avoid visual glitches caused by spindash camera delay or LBZ1 building loading
