@@ -87,6 +87,12 @@ define u16 unlock_flags = u16[0x8402fc]
 // Define memory location to store star count
 define u16 total_stars = u16[0x8402fe]
 
+// Define memory location to store Green/Speed Sphere progress
+constant u32 greenSphereProgressAddress = 0x8405f8
+constant u32 speedSphereProgressAddress = 0x8405fc
+define u32 greenSphereProgress = u32[greenSphereProgressAddress]
+define u32 speedSphereProgress = u32[speedSphereProgressAddress]
+
 // Dev cheat for gaining stars
 global u8 cheatEntry
 global u16 cheatStars
@@ -7413,14 +7419,14 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		else if (objA0.box_size.x == 3)
 			py += 24
 		
-		Renderer.drawCustomSprite(stringformat("sonic2_emerald_%02x", objA0.box_size.x), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", objA0.box_size.x + 1), px - 8, py - 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}
 
 	// Sonic 2 emeralds for Speed Sphere results screen
 	if ((objA0.update_address == 0x04e05c || objA0.update_address == 0x04e074) && speedSpheres)
 	{
-		Renderer.drawCustomSprite(stringformat("sonic2_emerald_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", objA0.animation.sprite + 1), px - 8, py - 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 	}
 
 	// Signpost sign when in Sonic 2 acts
@@ -28524,6 +28530,14 @@ function void loadRSR()
 	}
 }
 
+
+function void loadEndlessProgress()
+{
+	if (!System.loadPersistentData(0x8405f8, "DAGE_GreenSphereGame", 4))
+		greenSphereProgress = 0
+	if (!System.loadPersistentData(0x8405fc, "DAGE_SpeedSphereGame", 4))
+		speedSphereProgress = 0
+}
 
 
 function void loadUnlocks()

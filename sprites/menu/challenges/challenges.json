@@ -9,6 +9,7 @@
 	"text_option_normal":  { "File": "text_option_NG.png", "Rect": "0,0,47,16" },
 	"text_option_TA":  { "File": "text_option_TA.png", "Center": "42,8" },
 	"text_option_TST":  { "File": "text_option_TST.png", "Center": "60,8" },
+	"text_option_endless":  { "File": "text_option_endlessmode.png", "Center": "48,8" },
 	"leftarrow_medium":  { "File": "leftarrow_medium.png", "Center": "4,8" },
 	"rightarrow_medium":  { "File": "rightarrow_medium.png", "Center": "4,8" },
 	"text_hudposition":  { "File": "text_hudposition.png", "Center": "47,4" },
@@ -35,6 +36,8 @@
 	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "74,4" },
 	"rect_charoption_yellow":  { "File": "rect_charoption_yellow.png"},
 	"rect_charoption_red":  { "File": "rect_charoption_red.png"},
+	"rect_specialoption_yellow":  { "File": "rect_specialoption_yellow.png"},
+	"rect_specialoption_red":  { "File": "rect_specialoption_red.png"},
 	
 	// Stars
 	"star_gold":  { "File": "star_gold.png"},

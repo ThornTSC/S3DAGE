@@ -54,7 +54,7 @@ global s8 selectedMenuOption.main
 global s8 selectedMenuOptionLast
 global s8 selectedMenuOptionLast.main
 global s8 selectedGameType
-global s8 selectedGreenSphereType
+global bool selectedSpecialStageType
 global u8 setting.levelselect.characters = 1
 global s16 setting.unlock_act
 global bool challenges_normalmode
@@ -227,6 +227,8 @@ function void customMenu.mainLogicLoop()
 
 	// Keep track of how many options should be available on the left half of the Act Select / Challenges menu.
 	u8 maxSettingsOption = (setting.time_attack) ? 4 : maxNormalGameSettingsOption
+//	if (selectedZoneAct >= 0xff00 && setting.time_attack == 1)
+//		maxSettingsOption = 5
 	if (maxSettingsOption == maxNormalGameSettingsOption && setting.unlock_act == s2_EHZ)
 		maxSettingsOption = (moddedTailsCharacter) ? 3 : 4
 
@@ -249,11 +251,11 @@ function void customMenu.mainLogicLoop()
 		customMenu.selectAct()
 	else if (selectedMenuOption == 2)
 		customMenu.selectTAMode()
-//	else if (selectedMenuOption == 3 && time_attack)
+//	else if (selectedMenuOption == 3 && setting.time_attack)
 //		customMenu.selectHudPosition()
 	else if (selectedMenuOption == 3)	// not time attack
 		customMenu.selectGameType()
-	else if (selectedMenuOption == 4 && time_attack)
+	else if (selectedMenuOption == 4 && setting.time_attack)
 	{
 		exit_threshold = customMenu.selectRetryAndExit(exit_threshold)
 	}
@@ -315,7 +317,7 @@ function void customMenu.mainLogicLoop()
 		//	bool menuReady = false
 			pause_menu_selection = 0
 
-			while ((!setting.original_mode || setting.unlock_act) && !time_attack && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ
+			while ((!setting.original_mode || setting.unlock_act) && !time_attack && selectedZoneAct < 0xff00 && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ, not a special stage selection
 			{
 				global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 				waitForNextFrame()
@@ -404,11 +406,49 @@ function void customMenu.mainLogicLoop()
 			checkpoint.number = 0
 			checkpoint.x = 0
 			checkpoint.y = 0
-
-			// Fade out the screen.
-			u32 backupA0 = A0
-			FadeOutScreenBlocking()
-			A0 = backupA0
+			if (selectedZoneAct >= 0xff00)
+			{
+				global.game_mode = 0x34		// in special stage
+				if (setting.time_attack)	// Setup special stage time attack
+				{
+					global.game_mode = 0x34		// in special stage
+					bluespheres.minigame_mode = 0
+					u8 stageID = (selectedZoneAct & 0x00ff)
+					global.next_bluespheres = (stageID & 0x07)
+					if (stageID >= 0x08 && stageID < 0x10)
+						global.sk_bluespheres = 1
+					else if (stageID >= 0x10 && stageID < 0x18)
+						challenge_greenspheres = stageID - 0x0f
+					if (selectedSpecialStageType)
+					{
+						specialstages_knuckles = 1
+						if (challenge_greenspheres)
+							challenge_greenspheres |= 0x0010
+					}
+					else
+					{
+						specialstages_knuckles = 0
+						challenge_greenspheres &= 0x000f
+					}
+				}
+				else						// Setup endless modes
+				{
+					global.game_mode = 0x2c		// blue spheres game starting screen
+//					bluespheres.minigame_mode = 1
+//					bluespheregame.fully_unlocked = 1
+					speedSpheres = selectedSpecialStageType ? 1 : 0
+//					bluespheregame.current_stage = selectedSpecialStageType ? speedSphereProgress : greenSphereProgress
+//					BlueSphere.setGeneratedStage(bluespheregame.current_stage)
+					green_spheres.active = 0x01
+				}
+			}
+			else
+			{
+				// Fade to black if not entering a special stage.
+				u32 backupA0 = A0
+				FadeOutScreenBlocking()
+				A0 = backupA0
+			}
 
 			// Save TA settings
 			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
@@ -426,6 +466,9 @@ function void customMenu.mainLogicLoop()
 				setting.levelselect.characters = 4
 
 			original_mode = (setting.time_attack || unlock_act) ? 0 : setting.original_mode
+			if (setting.time_attack == 1 && selectedZoneAct >= 0xff18)
+				original_mode = 1
+			time_attack = setting.time_attack
 			if (original_mode)
 				Renderer.setScreenSize(320, 224)
 			else
@@ -434,7 +477,8 @@ function void customMenu.mainLogicLoop()
 			
 			if (!setting.time_attack)
 				challenges_normalmode = 1
-			Standalone.onRestartAtCheckpoint()	// using this instead of Standalone.onLevelStart() because it properly resets "fake checkpoints" in time attack modes
+			if (selectedZoneAct < 0xff00)
+				Standalone.onRestartAtCheckpoint()	// using this instead of Standalone.onLevelStart() because it properly resets "fake checkpoints" in time attack modes
 
 		//	level.restart = 1
 		//	GameMode.MainGame()
@@ -464,7 +508,7 @@ function void customMenu.mainLogicLoop()
 
 		global.characters = setting.levelselect.characters	// global.character is needed early in order to have controller LEDs read properly when Standalone.onLevelStart() runs
 		// Handle Knuckles & Tails
-		useKnucklesAndTails = (global.characters == 4 && time_attack != 1 && time_attack != 2)
+		useKnucklesAndTails = (global.characters == 4 && setting.time_attack != 1 && setting.time_attack != 2)
 		global.characters = min(global.characters, 3)
 	}
 	// This code exits to the base D.A. Garden menu or backs out of selecting a character.
@@ -474,7 +518,7 @@ function void customMenu.mainLogicLoop()
 		if (selectedMenuOption == 6)
 		{
 			selectedMenuOption = selectedMenuOptionLast
-			if (selectedMenuOption == 3 && setting.unlock_act != 1) // && (time_attack == 1 || time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+			if (selectedMenuOption == 3 && setting.unlock_act != 1) // && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 			{
 				selectedMenuOption = 4
 				selectedMenuOptionLast = selectedMenuOption
@@ -498,14 +542,24 @@ function void customMenu.mainLogicLoop()
 	}
 	else if (customMenu.scrollUp())
 	{
-		if (selectedMenuOption == 4 && setting.unlock_act != 1)
+		if (selectedMenuOption == 4 && selectedZoneAct >= 0xff00 && time_attack == 1)
+		{
+			selectedMenuOption -= 1
+			playSound(0x5b)			
+		}
+		else if (selectedMenuOption == 4 && setting.unlock_act != 1)
 		{
 			selectedMenuOption = 2
 			playSound(0x5b)
 		}
-		else if (selectedMenuOption == 4 && setting.unlock_act != 1 && (time_attack == 1 || time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+		else if (selectedMenuOption == 4 && setting.unlock_act != 1 && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 		{
 			selectedMenuOption = 2
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff08 && setting.time_attack)
+		{
+			selectedZoneAct -= 8
 			playSound(0x5b)
 		}
 		else if (selectedMenuOption > 0 && selectedMenuOption <= maxSettingsOption)		// used to be 5 when retry and exit were separate
@@ -520,10 +574,18 @@ function void customMenu.mainLogicLoop()
 		}
 		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
 		{
-			setting.levelselect.characters -= 1
-			if (setting.levelselect.characters == 0)
-				setting.levelselect.characters = 3
-			playSound(0x5b)
+			if (selectedZoneAct < 0xff00)
+			{
+				setting.levelselect.characters -= 1
+				if (setting.levelselect.characters == 0)
+					setting.levelselect.characters = 3
+				playSound(0x5b)
+			}
+			else if (setting.time_attack == 0 && (unlock_flags & 0x0001) || (setting.time_attack == 1 && selectedZoneAct < 0xff18))
+			{
+				selectedSpecialStageType = !selectedSpecialStageType
+				playSound(0x5b)
+			}
 
 			// Set controller LEDs (for game controllers that support it) depending on character selection.
 			{
@@ -538,14 +600,24 @@ function void customMenu.mainLogicLoop()
 	}
 	else if (customMenu.scrollDown())
 	{
-		if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2  && setting.unlock_act != 1)
+		if (selectedMenuOption == 2 && selectedZoneAct >= 0xff00 && time_attack == 1)
+		{
+			selectedMenuOption += 1
+			playSound(0x5b)			
+		}
+		else if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2  && setting.unlock_act != 1)
 		{
 			selectedMenuOption = 4
 			playSound(0x5b)
 		}
-		else if (selectedMenuOption == 2 && setting.unlock_act != 1 && (time_attack == 1 || time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+		else if (selectedMenuOption == 2 && setting.unlock_act != 1 && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 		{
 			selectedMenuOption = 4
+			playSound(0x5b)
+		}
+		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff00 && selectedZoneAct < 0xff18 && setting.time_attack)
+		{
+			selectedZoneAct += 8
 			playSound(0x5b)
 		}
 		else if (selectedMenuOption < maxSettingsOption)			// used to be 5 when retry and exit were separate
@@ -560,11 +632,18 @@ function void customMenu.mainLogicLoop()
 		}
 		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
 		{
-			setting.levelselect.characters += 1
-			if (setting.levelselect.characters >= 4)
-				setting.levelselect.characters = 1
-			playSound(0x5b)
-
+			if (selectedZoneAct < 0xff00)
+			{
+				setting.levelselect.characters += 1
+				if (setting.levelselect.characters >= 4)
+					setting.levelselect.characters = 1
+				playSound(0x5b)
+			}
+			else if (setting.time_attack == 0 && (unlock_flags & 0x0001) || (setting.time_attack == 1 && selectedZoneAct < 0xff18))
+			{
+				selectedSpecialStageType = !selectedSpecialStageType
+				playSound(0x5b)
+			}
 			// Set controller LEDs (for game controllers that support it) depending on character selection.
 			{
 				// Player 1
@@ -633,10 +712,13 @@ function void customMenu.selectZone()
 			if (setting.unlock_act > 2 || total_stars < unlock.level.cpz)		// Pressed right on final unlocked act?
 			{
 				setting.unlock_act = 0
-				selectedZoneAct = 0x0000		// Make selection become AIZ1
+				selectedZoneAct = 0xff00	// Make selection become Special Stage
+				setting.original_mode = 0	// disallow Original Mode
+				if (setting.time_attack == 2)
+					setting.time_attack = 1	// disallow Time Stone Trial
 			}
 		}
-		else if (selectedZoneAct >= 0x0b00)	// Pressed right on DEZ?
+		else if (selectedZoneAct >= 0x0b00 && selectedZoneAct < 0xff00)	// Pressed right on DEZ?
 		{
 			if (total_stars >= unlock.level.ehz)
 			{
@@ -645,7 +727,16 @@ function void customMenu.selectZone()
 				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
-				selectedZoneAct -= 0x0b00	// Make selection become AIZ
+			{
+				selectedZoneAct = 0xff00	// Make selection become Special Stage
+				setting.original_mode = 0	// disallow Original Mode
+				if (setting.time_attack == 2)
+					setting.time_attack = 1	// disallow Time Stone Trial
+			}
+		}
+		else if (selectedZoneAct >= 0xff00)	// Pressed Right on Special Stage?
+		{
+			selectedZoneAct = 0x0000		// Make selection become AIZ
 		}
 		else if (selectedZoneAct == 0x0901)	// Pressed right on LRZ2?
 		{
@@ -676,6 +767,13 @@ function void customMenu.selectZone()
 		}
 		else if (selectedZoneAct <= 0x0001)	// Pressed left on AIZ?
 		{
+			selectedZoneAct = 0xff00		// Make selection become Special Stage
+			setting.original_mode = 0		// disallow Original Mode
+			if (setting.time_attack == 2)
+				setting.time_attack = 1		// disallow Time Stone Trial
+		}
+		else if (selectedZoneAct >= 0xff00)	// Pressed left on Special Stage?
+		{
 			if (total_stars >= unlock.level.ehz)
 			{
 				setting.unlock_act = (total_stars >= unlock.level.cpz) ? 2 : 1	// Make selection become EHZ or CPZ depending on total stars
@@ -683,7 +781,7 @@ function void customMenu.selectZone()
 				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
-				selectedZoneAct += 0x0b00	// Make selection become DEZ
+				selectedZoneAct = 0x0b00	// Make selection become DEZ
 		}
 		else if (selectedZoneAct == 0x0a01)	// Pressed right on SSZ?
 		{
@@ -708,7 +806,7 @@ function void customMenu.selectAct()
 	if (customMenu.scrollRight() || Input.buttonPressed(BUTTON_R))
 	{
 		if (setting.unlock_act == s2_EHZ && selectedMenuOption == 3)		// On EHZ with music option selected?
-			selectedMenuOption = 4									// This option doesn't exist on other levels, so move the cursor.
+			selectedMenuOption = 4											// This option doesn't exist on other levels, so move the cursor.
 
 		if (setting.unlock_act)				// Pressed right on unlockable act?
 		{
@@ -716,7 +814,10 @@ function void customMenu.selectAct()
 			if (setting.unlock_act > 2 || total_stars < unlock.level.cpz)		// Pressed right on final unlocked act?
 			{
 				setting.unlock_act = 0
-				selectedZoneAct = 0x0000		// Make selection become AIZ1
+				selectedZoneAct = 0xff00	// Make selection become Special Stage
+				setting.original_mode = 0	// disallow Original Mode
+				if (setting.time_attack == 2)
+					setting.time_attack = 1	// disallow Time Stone Trial
 			}
 		}
 		else if (selectedZoneAct == 0x0b01)	// Pressed right on DEZ2?
@@ -728,13 +829,37 @@ function void customMenu.selectAct()
 				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
-				selectedZoneAct = 0x0000	// Make selection become AIZ1
+			{
+				selectedZoneAct = 0xff00	// Make selection become Special Stage
+				setting.original_mode = 0	// disallow Original Mode
+				if (setting.time_attack == 2)
+					setting.time_attack = 1	// disallow Time Stone Trial
+			}
+		}
+		else if (selectedZoneAct >= 0xff00)	// Pressed Right on Special Stage?
+		{
+			if (setting.time_attack && ((selectedZoneAct & 0x0007) != 7))
+			{
+				++selectedZoneAct
+			}
+			else
+				selectedZoneAct = 0x0000		// Make selection become AIZ1
 		}
 		else
 		{
 			selectedZoneAct += 1
 			if (selectedZoneAct & 0x0002)	// Act value has become 2?
 				selectedZoneAct += 0xfe		// Make selection become next zone's Act 1
+		}
+		if (selectedZoneAct >= 0xff00)	// on Special Stage after selection has occurred
+		{
+			if (selectedMenuOption == 3)	// music option selected?
+				selectedMenuOption = 4		// move to character select option
+//			else if (selectedMenuOption == 6)	// We've navigated here while in the character select from a level
+//				if (setting.levelselect.characters == 3)	// Knuckles is the bottom option, where HARD is for time attack and SPEED is for endless
+//					selectedSpecialStageType = 1
+//				else
+//					selectedSpecialStageType = 0
 		}
 		playSound(0x5b)
 		customMenu.matchActToSelection()
@@ -752,7 +877,18 @@ function void customMenu.selectAct()
 		}
 		else if (selectedZoneAct == 0x0000)	// Pressed left on AIZ1?
 		{
-			if (total_stars >= unlock.level.ehz)
+			selectedZoneAct = (setting.time_attack) ? 0xff07 : 0xff00		// Make selection become Special Stage
+			setting.original_mode = 0		// disallow Original Mode		
+			if (setting.time_attack == 2)
+				setting.time_attack = 1		// disallow Time Stone Trial	
+		}
+		else if (selectedZoneAct >= 0xff00)	// Pressed left on Special Stage?
+		{
+			if (setting.time_attack && ((selectedZoneAct & 0x0007) != 0))
+			{
+				--selectedZoneAct
+			}			
+			else if (total_stars >= unlock.level.ehz)
 			{
 				setting.unlock_act = (total_stars >= unlock.level.cpz) ? 2 : 1	// Make selection become EHZ or CPZ depending on total stars
 				selectedZoneAct = 0x0200
@@ -766,6 +902,16 @@ function void customMenu.selectAct()
 			selectedZoneAct -= 1
 			if (selectedZoneAct & 0x00f0)	// Act value has underflowed to 0xff?
 				selectedZoneAct -= 0xfe		// Make selection become previous zone's Act 2
+		}
+		if (selectedZoneAct >= 0xff00)	// on Special Stage after selection has occurred
+		{
+			if (selectedMenuOption == 3)	// music option selected?
+				selectedMenuOption = 4		// move to character select option
+//			else if (selectedMenuOption == 6)	// We've navigated here while in the character select from a level
+//				if (setting.levelselect.characters == 3)	// Knuckles is the bottom option, where HARD is for time attack and SPEED is for endless
+//					selectedSpecialStageType = 1
+//				else
+//					selectedSpecialStageType = 0
 		}
 		playSound(0x5b)
 		customMenu.matchActToSelection()
@@ -785,6 +931,14 @@ function void customMenu.matchActToSelection()
 		global.zone_act = 0x1601							// switch menu ID for in-game ID
 	else if (global.zone_act == 0x0a01)						// SSZ was selected
 		global.zone_act = 0x0a00							// switch menu ID for in-game ID
+	else if (selectedZoneAct >= 0xff00)						// Special Stage was selected
+	{
+		global.zone_act = 0x0000								// set actual zone ID to AIZ
+		global.next_bluespheres = (selectedZoneAct && 0x0007)	// set special stage ID
+		global.sk_bluespheres = (selectedZoneAct >= 0xff08 && selectedZoneAct < 0xff10) ? 1 : 0	// set S&K stage flag if needed
+		challenge_greenspheres = (selectedZoneAct >= 0xff10 && selectedZoneAct < 0xff17) ? global.next_bluespheres + 1 : 0	// partially set challenge_greenspheres flag. The +0x10 for Hard stages comes as the stage is loaded.
+		// Need a line here for prototype stages when implemented
+	}
 }
 
 
@@ -792,36 +946,38 @@ function void customMenu.selectTAMode()
 {
 	if (customMenu.scrollLeft())
 	{
-		if (time_attack == 0)
+		if (setting.time_attack == 0)
 			if (setting.original_mode)	// was on Classic Mode
 				setting.original_mode = 0
-			else						// was on Revisited Mode
-				time_attack = 2
+			else if (selectedZoneAct >= 0xff00)	// was on Special Stage with Endless mode selected
+				setting.time_attack = 1
+			else						// Revisited Mode selected
+				setting.time_attack = 2
 		else							// was on Time Attack or Time Stone Trial
 		{
-			time_attack--
-			if ((time_attack == 0 && !setting.unlock_act) && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+			setting.time_attack--
+			if ((setting.time_attack == 0 && !setting.unlock_act) && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")) && selectedZoneAct < 0xff00)	// only set Classic Mode when allowed
 				setting.original_mode = 1
 		}
-		setting.time_attack = time_attack
 		playSound(0x5b)
 	}
 	else if (customMenu.scrollRight())
 	{
-		if (time_attack == 2)			// was on Time Stone Trial
-			time_attack = 0
+		if (setting.time_attack == 2)			// was on Time Stone Trial
+			setting.time_attack = 0
 		else
 		{
-			if ((time_attack == 0 && !setting.unlock_act) && !setting.original_mode && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
+			if ((setting.time_attack == 0 && !setting.unlock_act) && !setting.original_mode && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")) && selectedZoneAct < 0xff00)
 				setting.original_mode = 1
+			else if (selectedZoneAct >= 0xff00 && setting.time_attack)	// was on Special Stage with Time Attack selected
+				setting.time_attack = 0
 			else
 			{
-				time_attack++
-				if (time_attack)
+				setting.time_attack++
+				if (setting.time_attack)
 					setting.original_mode = 0
 			}
 		}
-		setting.time_attack = time_attack
 		playSound(0x5b)
 	}
 }
@@ -899,7 +1055,26 @@ function void customMenu.selectCharacter()
 */
 
 function void customMenu.displayTimes()
-{	
+{
+	if (selectedZoneAct >= 0xff00)
+	{
+		if (setting.time_attack)
+			customMenu.displayTimesSpecial()
+		else
+		{
+			if (!(unlock_flags & 0x0001))
+				customMenu.displayEndlessProgress(greenSphereProgressAddress, 65)
+				// Text lines used if both selections are shown but Speed Sphere is locked
+			//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 283, 138, "To unlock:", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+			//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 283, 151, "Obtain a Chaos\nEmerald in an\nunlockable zone.", 0xe8d494ff, 1, 0, 0xffef, 0, 1)
+			else
+			{
+				customMenu.displayEndlessProgress(greenSphereProgressAddress, 14)
+				customMenu.displayEndlessProgress(speedSphereProgressAddress, 116)
+			}
+		}
+		return
+	}	
 	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && setting.time_attack != 0)
 	{
 		customMenu.displayTimes3D2DGlitches()
@@ -911,6 +1086,7 @@ function void customMenu.displayTimes()
 		return
 	}
 
+	time_attack = setting.time_attack	// must be set for loadMedalTimes(), which looks at time_attack in case loading somehow happens outside of menus
 	loadMedalTimes()
 
 	u16 px = 250	// horizontal position of all times
@@ -921,7 +1097,7 @@ function void customMenu.displayTimes()
 	best_time_address += 0x840000
 	if (setting.unlock_act)
 		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
-	if (time_attack == 2)
+	if (setting.time_attack == 2)
 		best_time_address += 0x120
 	
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone) + global.act	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
@@ -943,7 +1119,7 @@ function void customMenu.displayTimes()
 		u16 frames = best_time_frames
 		u16 centiseconds = (frames * 99 + 30) / 59
 
-		if (time_attack)
+		if (setting.time_attack)
 		{
 			if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
 			{
@@ -984,14 +1160,14 @@ function void customMenu.displayTimes()
 		else if (i == 2)
 			charKey = "continue_icon_knuckles"
 
-		u16 medal_change_X = ((time_attack && u8[best_time_address] > 0)) ? 16 : 0	// subtract 16 pixels from character X position to make medal fit if needed
+		u16 medal_change_X = ((setting.time_attack && u8[best_time_address] > 0)) ? 16 : 0	// subtract 16 pixels from character X position to make medal fit if needed
 		u16 normalgame_change_X = 0
 		u16 normalgame_change_Y = 0
 		bool drawSidekick = sidekick
 		if ((setting.original_mode && i == 2 && !setting.unlock_act))
 			drawSidekick = 0
 
-		if (!time_attack)
+		if (!setting.time_attack)
 		{
 			normalgame_change_X = 40
 			normalgame_change_Y = -2
@@ -1006,7 +1182,7 @@ function void customMenu.displayTimes()
 			Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 77 + normalgame_change_X + 16, 44 + (68 * i) + normalgame_change_Y, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
 
 		// Draw appropriate medal if relevant
-		if (time_attack && u8[best_time_address] > 0 && u8[best_time_address] <= 3)	// medal earned (should always be 3 or less, but adding upper bound for safety)
+		if (setting.time_attack && u8[best_time_address] > 0 && u8[best_time_address] <= 3)	// medal earned (should always be 3 or less, but adding upper bound for safety)
 		{
 			if (u8[best_time_address] == 3)
 			{
@@ -1041,7 +1217,7 @@ function void customMenu.displayTimes()
 			u16 medal_time_frames = u8[medal_time_address + 3]
 			u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
 
-			if (time_attack && !(j == 0 && u8[best_time_address] < 3))	// if we aren't about to draw dev times without a gold medal earned
+			if (setting.time_attack && !(j == 0 && u8[best_time_address] < 3))	// if we aren't about to draw dev times without a gold medal earned
 			{
 				if (j == 0)
 				{
@@ -1201,7 +1377,6 @@ function void customMenu.displayTimes()
 }
 
 
-
 function void customMenu.displayTimes3D2DGlitches()
 {
 	u16 px = 250	// horizontal position of all times
@@ -1212,7 +1387,7 @@ function void customMenu.displayTimes3D2DGlitches()
 	best_time_address += 0x840000
 	if (setting.unlock_act)
 		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
-	if (time_attack == 2)
+	if (setting.time_attack == 2)
 		best_time_address += 0x120
 
 	for (u8 i = 0; i <= 2; i++)
@@ -1287,7 +1462,7 @@ function void customMenu.displayTimesModded()
 	best_time_address += 0x840000
 	if (setting.unlock_act)
 		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
-	if (time_attack == 2)
+	if (setting.time_attack == 2)
 		best_time_address += 0x120
 
 	best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
@@ -1326,7 +1501,7 @@ function void customMenu.displayTimesModded()
 		dy = 12
 
 	bool drawSidekick = sidekick * 8
-	if (setting.original_mode || moddedTailsCharacter || time_attack)
+	if (setting.original_mode || moddedTailsCharacter || setting.time_attack)
 		drawSidekick = 0
 
 	// Draw character continue icon, shifted left if a medal has been earned
@@ -1334,6 +1509,179 @@ function void customMenu.displayTimesModded()
 	Renderer.drawCustomSprite(charKey, getScreenWidth()/2 + 117 - drawSidekick, 44 + 68 + dy, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
 	if (drawSidekick)
 		Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 117 + drawSidekick, 44 + 68 + dy, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+}
+
+
+function void customMenu.displayTimesSpecial()
+{
+	loadMedalTimesSpecial()		// must create!
+
+	u16 px = 250	// horizontal position of all times
+	u16 py = 52		// vertical position of best Sonic time
+
+	// Initial setup. This code is duplicated in Standalone.onLevelStart() in case the menu is skipped.
+	best_time_address = (global.zone >= 0x0c) ? 0x54 : (0x08 * global.zone) + (0x04 * global.act)	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
+	best_time_address += 0x840000
+	if (setting.unlock_act)
+		best_time_address = 0x840300 + (4 * (setting.unlock_act - 1))
+	if (setting.time_attack == 2)
+		best_time_address += 0x120
+
+	for (u8 i = 0; i <= 2; i++)
+	{
+		best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+		best_time_minutes = u8[best_time_address + 1]
+		best_time_seconds = u8[best_time_address + 2]
+		best_time_frames = u8[best_time_address + 3]
+
+		u16 minutes = best_time_minutes
+		u16 seconds = best_time_seconds
+		u16 frames = best_time_frames
+		u16 centiseconds = (frames * 99 + 30) / 59
+
+		if (setting.time_attack)
+		{
+			if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
+			{
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+			}
+			else if (best_time <= u32[0x840240 + (0x10 * i)])
+			{
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+			}
+			else
+			{
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+			}
+		}
+		
+		// Draw character continue icon, shifted left if a medal has been earned
+		u64 charKey = "continue_icon_sonic"
+		if (i == 1)
+			charKey = "continue_icon_tails"
+		else if (i == 2)
+			charKey = "continue_icon_knuckles"
+
+		u16 medal_change_X = ((setting.time_attack && u8[best_time_address] > 0)) ? 16 : 0	// subtract 16 pixels from character X position to make medal fit if needed
+		u16 normalgame_change_X = 0
+		u16 normalgame_change_Y = 0
+		bool drawSidekick = sidekick
+		if ((setting.original_mode && i == 2 && !setting.unlock_act))
+			drawSidekick = 0
+
+		if (!setting.time_attack)
+		{
+			normalgame_change_X = 40
+			normalgame_change_Y = -2
+			if (drawSidekick && i != 1)
+				normalgame_change_X -= 8
+			if ((setting.original_mode && !setting.unlock_act) || debug_mode.enabled || (i != 1 && sidekick) || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+				normalgame_change_Y = 12
+		}
+		
+		Renderer.drawCustomSprite(charKey, getScreenWidth()/2 + 77 - medal_change_X + normalgame_change_X, 44 + (68 * i) + normalgame_change_Y, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+		if (i != 1 && drawSidekick && !time_attack)
+			Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 77 + normalgame_change_X + 16, 44 + (68 * i) + normalgame_change_Y, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+
+		// Draw appropriate medal if relevant
+		if (setting.time_attack && u8[best_time_address] > 0 && u8[best_time_address] <= 3)	// medal earned (should always be 3 or less, but adding upper bound for safety)
+		{
+			if (u8[best_time_address] == 3)
+			{
+				Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 278 + 12 - 4, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 278 + 12    , 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 278 + 12 + 4, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+			}
+			else if (u8[best_time_address] == 2)
+			{
+				Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 278 + 12 - 2, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+				Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 278 + 12 + 2, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+			}
+			else
+				Renderer.drawCustomSprite(stringformat("medal_%02d_00", u8[best_time_address]), getScreenExtend() - 40 + 278 + 12, 20 + (68 * i) + 12, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+		}
+
+		// Draw Dev time and Medal times
+		u16 medal_px = px + 80	// horizontal position of dev times and medal times
+		for (u8 j = 0; j <= 3; j++)
+		{
+			u16 medal_py = py	// vertical position of silver medal time
+			if (j == 0)
+				medal_py -= 24	// vertical position of dev time
+			else if (j == 1)
+				medal_py -= 8	// vertical position of gold medal time
+			else if (j == 3)
+				medal_py += 8	// vertical position of bronze medal time
+
+			u32 medal_time_address = 0x840240 + (0x10 * i) + (0x04 * j)
+			u16 medal_time_minutes = u8[medal_time_address + 1]
+			u16 medal_time_seconds = u8[medal_time_address + 2]
+			u16 medal_time_frames = u8[medal_time_address + 3]
+			u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
+
+			if (setting.time_attack && !(j == 0 && u8[best_time_address] < 3))	// if we aren't about to draw dev times without a gold medal earned
+			{
+				if (j == 0)
+				{
+					Renderer.drawCustomSprite("text_devtime_centered", getScreenExtend() - 40 + medal_px - 4 + 30, medal_py - 8 + 4, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)	// draw "DEV TIME" text
+				}
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_smallchar_minutes", getScreenExtend() - 40 + medal_px + 0x07, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_seconds / 10), getScreenExtend() - 40 + medal_px + 0x0d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_seconds % 10), getScreenExtend() - 40 + medal_px + 0x15, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("S3D_smallchar_seconds", getScreenExtend() - 40 + medal_px + 0x1d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_centiseconds / 10), getScreenExtend() - 40 + medal_px + 0x25, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_centiseconds % 10), getScreenExtend() - 40 + medal_px + 0x2d, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? noDim : dim, 0x10000)
+			}
+		}
+	}
+}
+
+function void loadMedalTimesSpecial()
+{
+	return		// does nothing yet!
+
+	// Load dev and medal times
+	u32 medalTimeOffset = ((0x10 * (setting.unlock_act - 1)) + (0x0480 * (time_attack - 1)))
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840240, medalTimeOffset, 0x10, 1, 1)			// load Sonic times
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840250, medalTimeOffset + 0x0180, 0x10, 1, 1)	// load Tails times
+	System.loadExternalRawData("MedalTimes_RtWI", 0x840260, medalTimeOffset + 0x0300, 0x10, 1, 1)	// load Knuckles times
+}
+
+
+function void customMenu.displayEndlessProgress(u32 levelNumberAddress, s16 py)
+{
+	u32 levelNumber = u32[levelNumberAddress]
+	s16 px = getScreenWidth() - 20	// horizontal position of all times
+
+	for (u32 value = levelNumber + 1;;)
+	{
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", value % 10), px, py + 8, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType) ? noDim : dim, 0x10000)
+		px -= 8
+		value /= 10
+		if (value == 0)
+			break
+	}
+
+	// Draw appropriate medal if relevant. We award a single medal when each mode clears Level 100.
 }
 
 
@@ -1467,7 +1815,9 @@ function void DataSelect.drawCustomPlanes()
 			arrowShift == -1
 		
 		// Render the background and dim it
-		if (setting.unlock_act)
+		if (selectedZoneAct >= 0xff00)
+			Renderer.drawCustomSprite("bg_special", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
+		else if (setting.unlock_act)
 			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
 		else
 			Renderer.drawCustomSprite(stringformat("bg_%04x", selectedZoneAct), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
@@ -1475,11 +1825,26 @@ function void DataSelect.drawCustomPlanes()
 
 		// Render the border rectangles around the options and best times
 		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
-		Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 82 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Tails/mod best times border rectangle (80% opacity)
-		if (!System.getGlobalVariableValueByName("DAGE_characterName"))
+		if (selectedZoneAct >= 0xff00)
 		{
-			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 14 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Sonic best times border rectangle (80% opacity)
-			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Knuckles best times border rectangle (80% opacity)
+			if ((setting.time_attack == 1 && selectedZoneAct < 0xff18) || setting.time_attack == 0 && (unlock_flags & 0x0001))
+			{
+				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Normal best times border rectangle (80% opacity)
+				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Hard best times border rectangle (80% opacity)
+			}
+			else
+			{
+				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Prototype best times border rectangle (80% opacity)
+			}
+		}
+		else
+		{
+			Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 82 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Tails/mod best times border rectangle (80% opacity)
+			if (!System.getGlobalVariableValueByName("DAGE_characterName"))
+			{
+				Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 14 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Sonic best times border rectangle (80% opacity)
+				Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenExtend() - 40 + 244 + 74, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Knuckles best times border rectangle (80% opacity)
+			}
 		}
 
 		// Render options
@@ -1488,6 +1853,8 @@ function void DataSelect.drawCustomPlanes()
 			zoneKey = stringformat("titlecard_unlock%04x_menu", setting.unlock_act)
 		else if (selectedZoneAct == 0x0a00)	// HPZ
 			zoneKey = "titlecard_zoneHPZ_menu"
+		else if (selectedZoneAct >= 0xff00)	// Special Stage
+			zoneKey = "titlecard_specialstage_menu"
 		Renderer.drawCustomSprite(zoneKey, getScreenExtend() - 40 + 133, 47, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 0) ? noDim : dim, 0x10000)	// Zone name image
 		if (selectedMenuOption == 0)
 		{
@@ -1495,16 +1862,64 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 216 + 7 + arrowShift, 30 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ZONE right arrow
 		}
 
-		u64 actKey = stringformat("titlecard_act%01x", (selectedZoneAct & 0x0001) + 1)
-		if ((selectedZoneAct & 0xff00) == 0x0a00 || setting.unlock_act)	// HPZ or SSZ, or an unlockable act
-			actKey = "titlecard_singleact"
-		if (selectedZoneAct == 0x0a01 && System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// special check for Chaos the Impostor SSZ1
-			actKey = "titlecard_act1"
-		Renderer.drawCustomSprite(actKey, getScreenExtend() - 40 + 84 + 22, 88 - 64, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 1) ? noDim : dim, 0x10000)	// ACT X image, shifted due to Center in key
+		// Draw ACT icon
+		if (selectedZoneAct < 0xff00)
+		{
+			u64 actKey = stringformat("titlecard_act%01x", (selectedZoneAct & 0x0001) + 1)
+			if ((selectedZoneAct & 0xff00) == 0x0a00 || setting.unlock_act)	// HPZ or SSZ, or an unlockable act
+				actKey = "titlecard_singleact"
+			if (selectedZoneAct == 0x0a01 && System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// special check for Chaos the Impostor SSZ1
+				actKey = "titlecard_act1"
+			Renderer.drawCustomSprite(actKey, getScreenExtend() - 40 + 84 + 22, 88 - 64, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 1) ? noDim : dim, 0x10000)	// ACT X image, shifted due to Center in key
+		}
+		else if (setting.time_attack)
+		{
+			u32 emeraldDim = 0x60e0e0e0
+
+			// Draw Sonic 3 Chaos Emeralds
+			u8 py_emeralds = 78
+			for (u8 i = 0; i < 7; ++i)
+			{
+				Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i) ? noDim : emeraldDim, 0x10000)
+			}
+			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7) ? noDim : emeraldDim, 0x10000)
+
+			// Draw Sonic & Knuckles Super Emeralds
+			py_emeralds += 17
+			for (u8 i = 0; i < 7; ++i)
+			{
+				Renderer.drawCustomSprite(stringformat("hud_super_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 8) ? noDim : emeraldDim, 0x10000)
+			}
+			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7 + 8) ? noDim : emeraldDim, 0x10000)
+
+			// Draw Sonic 2 Chaos Emeralds
+			py_emeralds += 17
+			for (u8 i = 0; i < 7; ++i)
+			{
+				Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x10) ? noDim : emeraldDim, 0x10000)
+			}
+			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7 + 0x10) ? noDim : emeraldDim, 0x10000)
+
+			// Draw Prototype stage blue spheres
+			py_emeralds += 17
+			for (u8 i = 0; i < 8; ++i)
+			{
+				Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
+			}
+		}
+
 		if (selectedMenuOption == 1)
 		{
-			Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 62 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
-			Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 169 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
+			if (selectedZoneAct < 0xff00)
+			{
+				Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 62 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
+				Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 169 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
+			}
+			else
+			{
+				Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 36 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
+				Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 194 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
+			}
 		}
 		if (total_stars < unlock.level.ehz)
 		{
@@ -1523,16 +1938,16 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 156, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
 		}
 
-
-
-		if (time_attack == 0)
-			if (!setting.original_mode)
-				Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + 70, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// NORMAL GAME text
+		if (setting.time_attack == 0)
+			if (selectedZoneAct >= 0xff00)
+				Renderer.drawCustomSprite("text_option_endless", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// ENDLESS MODE text
+			else if (!setting.original_mode)
+				Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + 70, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// REVISITED MODE text
 			else
-				Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + 76, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// NORMAL GAME text
-		if (time_attack == 1)
+				Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + 76, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// CLASSIC MODE text
+		else if (setting.time_attack == 1)
 			Renderer.drawCustomSprite("text_option_TA", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME ATTACK text
-		else if (time_attack == 2)
+		else if (setting.time_attack == 2)
 			Renderer.drawCustomSprite("text_option_TST", getScreenExtend() - 40 + 62 + 60, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME STONE TRIAL text
 		if (selectedMenuOption == 2)
 		{
@@ -1541,10 +1956,10 @@ function void DataSelect.drawCustomPlanes()
 		}
 
 		u16 moddedTailsCharacterBackup = moddedTailsCharacter
-		if (setting.unlock_act && (time_attack == 1 || time_attack == 2))
+		if (setting.unlock_act && (setting.time_attack == 1 || setting.time_attack == 2))
 			moddedTailsCharacter = 0	// ignore this flag when drawing text in unlockable act challenge menus
 
-		if (time_attack)
+		if (setting.time_attack)
 		{
 			if (setting.unlock_act == s2_EHZ)
 			{
@@ -1561,17 +1976,17 @@ function void DataSelect.drawCustomPlanes()
 			}
 
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
-			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
-			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			if (exit_threshold == 1)
-				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
-				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
 			if (selectedMenuOption == 4)
 			{
-				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
 			}
 		}
 		else
@@ -1624,9 +2039,18 @@ function void DataSelect.drawCustomPlanes()
 		{
 			u64 rectKey = (level.framecounter.low & 0x08) ? "rect_charoption_yellow" : "rect_charoption_red"	// change rectangle color every 8 frames
 			u16 rectYPos = 11 + (68 * (setting.levelselect.characters - 1))
-			if (System.getGlobalVariableValueByName("DAGE_characterName"))
-				rectYPos = 11 + 68
-			Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 241, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection
+			if (selectedZoneAct < 0xff00)		// special stage not selected
+			{
+				if (System.getGlobalVariableValueByName("DAGE_characterName"))
+					rectYPos = 11 + 68
+				Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 241, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection
+			}
+			else
+			{
+				rectKey = (level.framecounter.low & 0x08) ? "rect_specialoption_yellow" : "rect_specialoption_red"			// change rectangle color every 8 frames
+				rectYPos = ((setting.time_attack == 1 && selectedZoneAct >= 0xff18) || !(unlock_flags & 0x0001)) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
+				Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 257, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection			
+			}
 		}
 //		Renderer.drawCustomSprite("continue_icon_sonic", getScreenWidth()/2 + 77, 44, 0, SPRITE_FLAG_PRIO, 0xf003)
 //		Renderer.drawCustomSprite("continue_icon_tails", getScreenWidth()/2 + 78, 112, 0, SPRITE_FLAG_PRIO, 0xf003)
@@ -1637,9 +2061,9 @@ function void DataSelect.drawCustomPlanes()
 //		Renderer.drawCustomSprite("text_devtime", getScreenExtend() - 40 + 326 + 30, 156 + 4, 0, SPRITE_FLAG_PRIO, 0xf003)
 
 		u32 extra_char_address = 0x8fe677 + (u8(selectedZoneAct >> 0x08) * 0x02 + u8(selectedZoneAct)) * 0x03
-		extra_char_address += 0x48 * time_attack
+		extra_char_address += 0x48 * setting.time_attack
 
-		if (!System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !u8[0xffffe654] && time_attack)
+		if (!System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !u8[0xffffe654] && setting.time_attack)
 		{
 			if (!(u8[extra_char_address + 0x00] > 0x00 && Renderer.hasCustomSprite(stringformat("dataSel_slot%d", u8[extra_char_address + 0x00]))))
 			{
@@ -1700,11 +2124,11 @@ function void DataSelect.drawRevisitedSprites()
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art
-	s16 y_offset = (time_attack) ? -21 : -18
+	s16 y_offset = (setting.time_attack) ? -21 : -18
 	Renderer.drawCustomSprite("text_dataselect", getScreenWidth()/2, getScreenHeight() + y_offset, 0x00, SPRITE_FLAG_PRIO, 0x2010, 0, 0xffffff00, 0x10000)	// DATA SELECT text	// 0xff40ffff yellow
-	if (time_attack == 4)
+	if (setting.time_attack == 4)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "Any% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
-	else if (time_attack == 3)
+	else if (setting.time_attack == 3)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "100% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 }
 
@@ -1924,10 +2348,10 @@ function void customMenu.mainLogicLoop.main()
 	{
 		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 108 - arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
 		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 182 + arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
-		if (selectedGreenSphereType == 0)
-			Renderer.drawCustomSprite("text_option_normal", getScreenExtend() - 40 + option_x + 122, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+		if (selectedSpecialStageType == 0)
+			Renderer.drawCustomSprite("text_option_normal", getScreenExtend() - 40 + option_x + 122, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Normal
 		else
-			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 126, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 126, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)		// Speed
 	}
 	
 	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
@@ -2021,7 +2445,7 @@ function void customMenu.mainLogicLoop.main()
 			global.game_mode = 0x2c		// Blue Sphere
 			time_attack = 0
 			green_spheres.active = 0x01		// set flag if entering the Blue Sphere game mode (Green Spheres for DAGE)
-			if (selectedGreenSphereType)
+			if (selectedSpecialStageType)
 				speedSpheres = 1
 			else
 				speedSpheres = 0
@@ -2106,7 +2530,7 @@ function void customMenu.mainLogicLoop.main()
 	}
 	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{
-		selectedGreenSphereType = (selectedGreenSphereType + 1) & 0x01	// change 0 to 1 or vice versa
+		selectedSpecialStageType = (selectedSpecialStageType + 1) & 0x01	// change 0 to 1 or vice versa
 		playSound(0x5b)
 	}
 /*

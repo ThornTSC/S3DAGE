@@ -7165,7 +7165,13 @@ function void Challenge.checkRestartShortcut()
 			System.setGlobalVariableValueByName("ChaosForm", 0)
 
 		time_attack_end = 0			// This isn't needed in theory, but better safe than sorry!
-		level.restart = 1
+		if (global.game_mode == 0x34)
+		{
+			restartSpecialStage = 1
+			playMusic(MUSIC_CTRL_STOP)		// stop music
+		}
+		else
+			level.restart = 1
 	}
 }
 
@@ -7707,13 +7713,13 @@ function void Challenge.manageEndMenu()
 		playSound(0x5b)
 	}
 
-	if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		Flicky.TAEndMenu()
-	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		Saturn.TAEndMenu()
-	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		South.TAEndMenu()
-	else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+	else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		Westside.TAEndMenu()
 	else if (TA_menu_selection < 3)
 	{
@@ -7741,7 +7747,15 @@ function void Challenge.manageEndMenu()
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
 
-		level.restart = 1
+		if (global.game_mode == 0x34)
+		{
+			restartSpecialStage = 1
+			SpecialStage()
+		}
+		else
+		{
+			level.restart = 1
+		}
 	}
 	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 1)
 	{
@@ -7755,6 +7769,11 @@ function void Challenge.manageEndMenu()
 		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
+		if (global.game_mode == 0x34)
+		{
+			restartSpecialStage = 1
+			bluespheres.stage_exit_animation = 1
+		}
 		return
 	}
 	else if (control.pad1.pressed & 0xe0 && TA_menu_selection == 2)
@@ -7783,6 +7802,13 @@ function void Challenge.manageEndMenu()
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
+	
+		if (global.game_mode == 0x34)
+		{
+			// bluespheres.movement_speed = 0
+			restartSpecialStage = 1
+			bluespheres.stage_exit_animation = 1
+		}
 
 		global.game_mode = 0x58
 	}
@@ -7792,6 +7818,8 @@ function void Challenge.manageEndMenu()
 		exit_timer = 0
 		checkpoint.number = 0
 		global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
+		if (global.game_mode == 0x34)
+			restartSpecialStage = 1
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue

@@ -380,6 +380,156 @@ function void fn04d488()
 	bluespheregame.menu_selection = 1
 }
 
+
+
+// Upon getting a PERFECT, make stage advancement bonus based on difficulty instead of a static 10.
+//# address-hook(0x04da7e) end(0x04dde6)
+function void fn04da7e()
+{
+	playMusic(MUSIC_CTRL_FADEOUT)
+#if STANDALONE
+	changeMusicTempo(0)
+#endif
+	fn04c8e4()
+
+	copyMemory(0xfffffc80, 0x04de08, 0x80)
+
+	// Special Stage results-related graphics. Loaded here for the Emerald sprites
+	Kosinski.decompress(0x15bac0, 0xffff0000)	// Special stage results text + Chaos emeralds and Sonic's continue icon
+	Kosinski.decompress(0x15c130, A1)			// Knuckles and Tails' continue icons
+	updateSpritePattern(0xffff0000, BlueSphereGame.Emeralds.targetInVRAM, A1.u16 >> 1)
+
+	// Smaller text sprites and code digits
+	Kosinski.decompress(0x1897de, 0xffff4000)
+	updateSpritePattern(0xffff4000, BlueSphereGame.Menu.targetInVRAM, 0x06d0)
+
+	Nemesis.loadDataToVRAM(0x0dde34, BlueSphereGame.TextTiles.targetInVRAM)
+	Nemesis.loadDataToVRAM(0x189c7c, BlueSphereGame.BGLogo.targetInVRAM)		// Sonic & Knuckles head logo
+
+	A1 = 0x04de88	// "CONGRATULATIONS!"
+	D2.u16 = 0x030a
+	D6.u16 = (sprite_attribute.PRIORITY | (BlueSphereGame.TextTiles.targetInVRAM >> 5))
+	fn05b318()
+
+	// Mapping for Sonic & Knuckles head logo in the background
+	Enigma.decompress(0x189c4e, 0xffff8000, (sprite_attribute.PALETTE.LINE3 | (BlueSphereGame.BGLogo.targetInVRAM >> 5)))
+
+	fn04dea2()
+
+	bluespheregame.menu_selection = 1
+	u32[0xffffb000] = 0x04def8
+	u32[0xffffb04a] = 0x04df86	// Character
+	u32[0xffffb1bc] = 0x04d03e	// Level text and number
+	u16[0xffffb1bc + 0x14] = 0x90
+	u32[0xffffb862] = 0x04e012	// Emeralds
+
+	UpdateGameObjects()
+	RenderSprites()
+
+	playMusic(MUSIC_LEVELCLEAR)
+	VDP.Config.setActiveDisplay(true)
+
+#if STANDALONE
+	// Load characters extended palettes
+	loadCharacterPalette(CHARACTER_SONIC,    0x802180, 0)
+	loadCharacterPalette(CHARACTER_TAILS,    0x8021c0, 0)
+	loadCharacterPalette(CHARACTER_KNUCKLES, 0x802200, 0)
+	// Load fading versions
+	loadCharacterPalette(CHARACTER_SONIC,    0x802000, 0)
+	loadCharacterPalette(CHARACTER_TAILS,    0x802040, 0)
+	loadCharacterPalette(CHARACTER_KNUCKLES, 0x802080, 0)
+#endif
+
+	BlueSpheres.FadeIn()
+
+	while (true)
+	{
+		global.frame_state = 0x1a
+		Kosinski.ProcessDecompressionQueue()
+		waitForNextFrame()
+
+		UpdateGameObjects()
+		RenderSprites()
+		Kosinski.ProcessModules()
+		if (global.game_mode != 0x30)
+			break
+	}
+
+	if (bluespheres.rings_remaining != 0)
+	{
+		if (s8(bluespheregame.enable_progress) >= 0 && bluespheregame.fully_unlocked != 0)
+		{
+			// Next stage
+			BlueSphereGame.advanceStages(1)
+		}
+		return
+	}
+
+	playMusic(MUSIC_CTRL_FADEOUT)
+	FadeOutScreenBlocking()
+	fn04c8e4()
+
+	zeroMemory(0xfffffa80, 0x80)
+	copyMemory(0xfffffc80, 0x0a8a3c, 0x20)
+	copyMemory(0xfffffca0, 0x0a8afc, 0x20)
+	copyMemory(0xfffffcc0, 0x04de68, 0x20)
+	copyMemory(0xfffffce0, 0x060aba, 0x20)
+
+	Nemesis.loadDataToVRAM(0x189c7c, BlueSphereGame.Background.targetInVRAM)		// Sonic & Knuckles head logo
+
+	Nemesis.LoadMultipleToVRAM(0x04dde8)		// Robotnik + Egg Mobile and critter art for perfect results screen
+
+	Kosinski.decompress(0x16416e, 0xffff0000)	// Small Sonic & Knuckles title logo
+	Kosinski.decompress(0x0de364, A1)			// "& Knuckles" subtitle (might be loaded for the trademark sign?)
+	Kosinski.decompress(0x17fcbc, A1)			// Master Emerald sprite
+	Kosinski.decompress(0x163248, A1)			// Robotnik posing sprites
+	Kosinski.decompress(0x15fdde, A1)			// Egg Robo head sprites
+
+	updateSpritePattern(0xffff0000, BlueSphereGame.SKTitleLogo.targetInVRAM, A1.u16 >> 1)
+
+	// Repeating Sonic & Knuckles head logo background
+	Enigma.decompress(0x189c4e, 0xffff8000, (sprite_attribute.PALETTE.LINE2 | (BlueSphereGame.Background.targetInVRAM >> 5)))
+	fn04dea2()
+
+	u32[0xffffb04a] = 0x04d03e	// Level text and number
+	u16[0xffffb04a + 0x14] = 0xc0
+	u32[0xffffb3c2] = 0x04e0a4	// "Difficulty" text
+
+	UpdateGameObjects()
+	RenderSprites()
+
+	super.active = 0
+	super.palettefx.state = 0
+	global.characters = CHARS_SONIC_ALONE
+	playMusic(MUSIC_INVINCIBLE)
+
+	VDP.Config.setActiveDisplay(true)
+
+	Menu.FadeInAfterInit()
+
+	while (true)
+	{
+		global.frame_state = 0x1a
+		Kosinski.ProcessDecompressionQueue()
+		waitForNextFrame()
+
+		UpdateGameObjects()
+		RenderSprites()
+		Kosinski.ProcessModules()
+		UpdatePaletteEffects.SuperForm()
+
+		if ((bluespheregame.shown_difficulty == bluespheregame.difficulty_level) && control.pad1.pressed != 0)
+			break
+	}
+
+	if (s8(bluespheregame.enable_progress) >= 0 && bluespheregame.fully_unlocked != 0)
+	{
+		// Advance 10 stages
+		BlueSphereGame.advanceStages(bluespheregame.difficulty_level + 1 + 1)	// first +1 is to align difficulty in RAM with displayed difficulty, second is to account for the expected one-stage advancement for any clear at all
+	}
+}
+
+
 function void BlueSphereGame.advanceStages(u8 numStages)
 {
 	bluespheregame.current_stage += numStages
@@ -528,16 +678,19 @@ function void fn009b62()
 		D1.s16 <<= 3
 		D2.u16 -= D0.u16
 		D3.u16 -= D1.u16
-
+		if (time_attack == 1)
+		{
+			playMusic(MUSIC_CTRL_FADEOUT)	// fade out music
+		}
 		A1 = 0xfffff100
 		D0.u16 = ((D2.u16 + 0x80) >> 8) & 0x1f
 		D1.u16 = ((D3.u16 + 0x80) >> 8) & 0x1f
 		D1.u16 = (D1.u16 << 5) | D0.u16
-		if (!challenge_greenspheres || unlock_act)
+		if ((!challenge_greenspheres || unlock_act) && time_attack != 1)
 			u8[A1 + D1.s16] = (global.sk_bluespheres) ? 0x0d : 0x0b
 		u16[0xffffe44e] = D1.u16
 		u16[0xffffe428] = 0x0800
-		u8[0xffffe44d] = 0x78
+		bluespheres.emerald_jingle_countdown = 0x78
 
 		D0 = (bluespheres.minigame_mode == 0) ? global.next_bluespheres : u8[0xffffffa4]
 		A1 = 0x009d1e + (D0.s16 & 0x07) * 8
@@ -625,17 +778,26 @@ function void fn009b62()
 		if (kosinski.waiting_modules == 0)
 		{
 			u16[0xffffe44a] = 0
-			--u8[0xffffe44d]
-			if (u8[0xffffe44d] == 0)
+			if (!time_attack_end)
+				--bluespheres.emerald_jingle_countdown	// decrement counter to time emerald is touched
+			if (bluespheres.emerald_jingle_countdown == 0 && !time_attack_end)
 			{
-				if (challenge_greenspheres && !unlock_act)		// if Special Stage Time Attack,
+				if (time_attack == 1)
 				{
-					playMusic(MUSIC_CTRL_FADEOUT)	// fade out music
-					return							// do not load the emerald
+					time_attack_end = 1
+					TA_menu_selection = 0
 				}
-				++bluespheres.stage_exit_state
-				playMusic(0x2b)
+				else
+				{
+					++bluespheres.stage_exit_state
+					playMusic(0x2b)
+				}
 			}
+		}
+		if (time_attack_end)
+		{
+			Challenge.manageEndMenu()
+			return								// do not load the emerald
 		}
 	}
 	else if (bluespheres.stage_exit_state == 3)
@@ -719,7 +881,8 @@ function void BlueSphereGame()
 #endif
 
 	u8[0xffffffa1] = 0
-	global.game_mode = 0x2c
+	global.game_mode = 0x54		// 0x2c
+	selectedZoneAct = 0xff00
 	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
 	unlock_act = 0				// ensure this flag isn't left over from elsewhere
 
@@ -889,7 +1052,7 @@ function void fn04d6b8()
 			{
 				// Back to the main menu
 				playSound(0xad)
-				global.game_mode = 0x58
+				global.game_mode = 0x54		// 0x58 for main menu
 
 				u32 backupA0 = A0
 				FadeOutScreenBlocking()
@@ -1044,7 +1207,7 @@ function void fn04df04()
 
 	if (bluespheres.rings_remaining != 0 && control.pad1.pressed != 0)
 	{
-		global.game_mode = 0x2c
+		global.game_mode = 0x2c	// 0x54 to return to Challenges menu
 	}
 }
 
@@ -1058,13 +1221,13 @@ function void fn04df52()
 		--u16[A0 + 0x30]
 		if (s16[A0 + 0x30] < 0)
 		{
-			global.game_mode = 0x2c
+			global.game_mode = 0x2c	// 0x54 to return to Challenges menu
 		}
 	}
 
 	if (control.pad1.pressed != 0)
 	{
-		global.game_mode = 0x2c
+		global.game_mode = 0x2c		// 0x54 to return to Challenges menu
 	}
 
 	D0.u8 = global.framecounter.low & 0x0f
@@ -1104,7 +1267,7 @@ function void SpecialStage()
 
 #if STANDALONE
 	// Add a small artificial delay here. 112 frames matches ROM hack / S3&K. 12 frames is pre-2025 A.I.R. 24 frames is current A.I.R.
-	u8 delayFrames = (original_mode || unlock_act) ? 112 : (time_attack >= 3) ? 12 : 24
+	u8 delayFrames = ((original_mode || unlock_act) && !restartSpecialStage) ? 112 : (time_attack >= 3) ? 12 : 24
 	for (u8 i = 0; i < delayFrames; ++i)
 		yieldInWhiteScreen()
 #else
@@ -1190,6 +1353,7 @@ function void SpecialStage()
 	Nemesis.loadDataToVRAM(0x0ad904, 0xd000)
 	Nemesis.loadDataToVRAM(0x0adf60, 0xb4e0)
 	Nemesis.loadDataToVRAM(0x0aeed0, 0xb360)
+	
 	if (!challenge_greenspheres && !speedSpheres)
 	{
 		Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
@@ -1281,7 +1445,6 @@ function void SpecialStage()
 
 	VDP.Config.setActiveDisplay(true)
 	BlueSpheres.FadeIn()
-
 	while (true)
 	{
 		if (restartSpecialStage == 1)
@@ -1690,7 +1853,9 @@ function void fn0085b0()
 {
 	u16 reverseStart = 0
 
-	if (!original_mode)
+	if (time_attack && !original_mode)
+		Renderer.setScreenSize(400, 224)
+	else if (!original_mode)
 		Renderer.setScreenSize(screen_width, 224)
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
@@ -1715,7 +1880,7 @@ function void fn0085b0()
 	if (!useGeneratedStage)
 	{
 		// Main game stages
-		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)	// new check for Knuckles
+		if ((isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1) && useSKLayouts && specialstages_knuckles && !original_mode)	// new check for Knuckles
 		{
 			System.loadExternalRawData("HardSuperEmeralds", KosinskiRawdataBuffer)	// copy Hard Super Emerald special stage layouts to shared memory
 			Kosinski.decompress(KosinskiRawdataBuffer, 0xffff0000)				// decompress them
@@ -1724,7 +1889,8 @@ function void fn0085b0()
 		else
 			Kosinski.decompress(u32[0x1e4078], 0xffff0000)
 
-		global.next_bluespheres = BlueSpheres.getNextOpenStageIndex()
+		if (time_attack != 1)
+			global.next_bluespheres = BlueSpheres.getNextOpenStageIndex()
 
 		// Load level layout, either from S3 or S&K
 		A2 = useSKLayouts ? 0x008590 : 0x25e2d8
@@ -1732,7 +1898,7 @@ function void fn0085b0()
 		if (!useSKLayouts)
 		{
 			A2 += 0x200000
-			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles && !original_mode)	// new check for Knuckles
+			if ((isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1) && specialstages_knuckles && !original_mode)	// new check for Knuckles
 				A2 += 0x0679b0	// shift to ROM location of Knuckles' chaos emerald layouts
 		}
 		
@@ -1757,7 +1923,7 @@ function void fn0085b0()
 		}
 
 		// Special check for Original Mode Sonic 3 Special Stage 6
-		if (original_mode && !useSKLayouts && global.next_bluespheres == 5)
+		if (original_mode && time_attack != 1 && !useSKLayouts && global.next_bluespheres == 5)
 		{
 			System.loadExternalRawData("S3SS6_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
 			System.loadExternalRawData("S3SS6_Orig", 0xffffe426, 0x400, 2, 0, 1)
@@ -1765,7 +1931,7 @@ function void fn0085b0()
 			System.loadExternalRawData("S3SS6_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
 		// Special check for Original Mode Sonic 3 Secret Special Stage
-		if (original_mode && !useSKLayouts && global.next_bluespheres == 7)
+		if (original_mode && time_attack != 1 && !useSKLayouts && global.next_bluespheres == 7)
 		{
 			System.loadExternalRawData("S3SS8_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
 			System.loadExternalRawData("S3SS8_Orig", 0xffffe426, 0x400, 2, 0, 1)
@@ -1773,7 +1939,7 @@ function void fn0085b0()
 			System.loadExternalRawData("S3SS8_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
 		// Special check for Original Mode Sonic & Knuckles Special Stage 5
-		else if (original_mode && useSKLayouts && global.next_bluespheres == 4)
+		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 4)
 		{
 			System.loadExternalRawData("SKSS5_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
 			System.loadExternalRawData("SKSS5_Orig", 0xffffe426, 0x400, 2, 0, 1)
@@ -1782,12 +1948,84 @@ function void fn0085b0()
 		}
 
 		// Special check for Original Mode Sonic & Knuckles Special Stage 7
-		else if (original_mode && useSKLayouts && global.next_bluespheres == 6)
+		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 6)
 		{
 			System.loadExternalRawData("SKSS7_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
 			System.loadExternalRawData("SKSS7_Orig", 0xffffe426, 0x400, 2, 0, 1)
 			System.loadExternalRawData("SKSS7_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
 			System.loadExternalRawData("SKSS7_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 1
+		else if (time_attack == 1 && selectedZoneAct == 0xff18)
+		{
+			System.loadExternalRawData("ProtoSS1", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS1", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS1", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS1", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 2
+		else if (time_attack == 1 && selectedZoneAct == 0xff19)
+		{
+			System.loadExternalRawData("ProtoSS2", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS2", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS2", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS2", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 3
+		else if (time_attack == 1 && selectedZoneAct == 0xff1a)
+		{
+			System.loadExternalRawData("ProtoSS3", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS3", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS3", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS3", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 4
+		else if (time_attack == 1 && selectedZoneAct == 0xff1b)
+		{
+			System.loadExternalRawData("ProtoSS4", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS4", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS4", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS4", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 5
+		else if (time_attack == 1 && selectedZoneAct == 0xff1c)
+		{
+			System.loadExternalRawData("ProtoSS5", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS5", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS5", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS5", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 6
+		else if (time_attack == 1 && selectedZoneAct == 0xff1d)
+		{
+			System.loadExternalRawData("ProtoSS6", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS6", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS6", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS6", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 7
+		else if (time_attack == 1 && selectedZoneAct == 0xff1e)
+		{
+			System.loadExternalRawData("ProtoSS7", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS7", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS7", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS7", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+
+		// Special check for 2013 Version Special Stage 8
+		else if (time_attack == 1 && selectedZoneAct == 0xff1f)
+		{
+			System.loadExternalRawData("ProtoSS8", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("ProtoSS8", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("ProtoSS8", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("ProtoSS8", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
 
 		// Checks for Sonic 2 special stages (to be replaced with a stringformat function to generate the key once all 32 special stages are in place)
@@ -1908,7 +2146,7 @@ function void fn0085b0()
 		// 0 was used for testing green spheres being on, so make the flag 1 to disable them.
 //		if (isGeneratedStageInMainGame)
 //			yellow_spheres = 1	// yellow sphere flag enabled
-//		else if (!useSKLayouts || !isMainCharacter(CHARACTER_KNUCKLES) || (isMainCharacter(CHARACTER_KNUCKLES) && !specialstages_knuckles))
+//		else if (!useSKLayouts || !(isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1) || (isMainCharacter(CHARACTER_KNUCKLES) && !specialstages_knuckles))
 //			yellow_spheres = 1
 //		else
 //			yellow_spheres = 0
@@ -1920,7 +2158,7 @@ function void fn0085b0()
 			A1 += 0x0130
 		}
 		// new if statement to switch to new Special Stage palette offset
-		if (palette_set >= 2 && !original_mode)
+		if (palette_set >= 2 && !original_mode && !(time_attack == 1 && selectedZoneAct >= 0xff18))
 			A1 += 0x2cb80e	// distance between old and new offsets
 
 		// Get palettes for Sonic 2 special stages
@@ -1944,7 +2182,7 @@ function void fn0085b0()
 		// Bluespheres mini-game mode
 //		yellow_spheres = 1 // new line to ensure green spheres are not overwriting yellow spheres
 
-		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles && !original_mode)
+		bool KnucklesMainGameRandomGreenSphereStage = (useGeneratedStage && (isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1) && useSKLayouts && specialstages_knuckles && !original_mode)
 		if (challenge_greenspheres)	// This is the same result as normal Green Sphere stages. We keep it separate for now just in case it requires special functionality later.
 		{
 			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
@@ -2426,6 +2664,7 @@ function void fn00972e()
 			// Game over
 			bluespheres.stage_exit_animation = 1
 			global.game_mode = (bluespheres.minigame_mode == 0) ? 0x48 : 0x2c
+//			global.game_mode = (bluespheres.minigame_mode || time_attack) ? 0x54 : 0x48		// use this if we choose to return straight to the Challenges menu
 			if (challenge_greenspheres || speedSpheres)
 			{
 				S2Special.swapRingsAndSpheres()
@@ -2540,7 +2779,7 @@ function void fn00972e()
 		bluespheres.rings_flags |= 0x80
 
 		u8 soundId = 0x33
-		if (bluespheres.minigame_mode == 0)
+		if (bluespheres.minigame_mode == 0 && time_attack != 1)
 		{
 			if (bluespheres.rings_collected >= 50 && !challenge_greenspheres && !speedSpheres && (bluespheres.rings_flags & 0x01) == 0)
 			{
@@ -3290,6 +3529,7 @@ function void BlueSpheres.calculateSonic2BackgroundOffsets()
 
 
 // Add Sonic 2 special stage background palette to fade-in from white
+// and ensure object interactions work during fade-in
 //# address-hook(0x003c82) end(0x003ca2)
 function void BlueSpheres.FadeIn()
 {
@@ -3328,8 +3568,14 @@ function void BlueSpheres.FadeIn()
 			BlueSpheres.renderCustomGround()
 			BlueSpheres.renderCustomCharacterShadows()
 
+			if (!original_mode)		// track player-object collision responses during fade in,
+			{
+				fn009dde()			// as the usual call to this doesn't run during the fade in
+			}
 			if (challenge_greenspheres || speedSpheres)		// track player position updates for use in scrolling Sonic 2 background during fade in,
+			{
 				fn009d5e()									// as the usual call to this doesn't run during the fade in
+			}
 		}
 	#elif STANDALONE
 		if (global.game_mode != 0x30)	// Not in results screen of Blue Spheres mode
@@ -3342,10 +3588,21 @@ function void BlueSpheres.FadeIn()
 
 // Make green spheres translucent when touched, as AIR does for blue spheres.
 // Add 46 to sphere position for new screen size
-// We also manage the HUD display for time attack here, as the function is called every frame in special stages.
+// We also manage the HUD display for time attack and exit/restart functions here, as the function is called every frame in special stages.
 // Taken from \scripts\general\bluesphere\bluespheres.lemon
 function void BlueSpheres.renderCustomSpheres()
 {
+	// Add timer HUD here and check for restart or exit.
+	if (time_attack == 1)
+	{
+		BlueSpheres.displayTotalTime()
+	}
+	if (time_attack == 1 || bluespheres.minigame_mode)
+	{
+		Challenge.checkRestartShortcut()
+		Challenge.checkExitShortcut()
+	}
+
 	if (original_mode && bluespheres.lifted_height == 0)	// The original code is bugged to not draw lifted spheres without custom rendering, unfortunately.
 	{
 		// This is a copy of the portion of BlueSpheres.RenderSpheres() that is called only if NOT the GAMEAPP.
@@ -3437,42 +3694,6 @@ function void BlueSpheres.renderCustomSpheres()
 	}
 
 	// From here on is AIR's custom sphere rendering.
-/*
-	// Add timer HUD here.
-	u16 px_hud = getScreenWidth() / 2 - 14	// subtract 49 instead for non-small digits without TIME/BEST
-	u16 py_hud = 14	// place the BEST time at getScreenHeight() - 14 - 16. Show either Normal or Perfect best time based on a menu option. Use 12 for non-small digits.
-	u16 renderQueue_hud = 0xe800
-
-	u16 minutes = BS_displayedTime / 3600
-	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
-	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
-	u16 centiseconds = (frames * 99 + 30) / 59
-
-	// TIME and timer
-	Renderer.drawCustomSprite("BlueSphere_smalltext_time", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-
-	// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
-	py_hud = getScreenHeight() - 14 - 16
-
-	Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	// End of timer HUD code.
-*/
 
 	// Draw the HUD and background in Sonic 2 special stages
 	if (challenge_greenspheres || speedSpheres)
@@ -3576,7 +3797,7 @@ function void BlueSpheres.renderCustomSpheres()
 		// Draw the timer
 		s16 px_timer = getScreenWidth() / 2
 		constant u16 timer_screentop = 12
-		constant u16 timer_screenbottom = 196		// getScreenHeight() of 224, minus 12 for empty space below HUD, minus 16 for height of digits
+		u16 timer_screenbottom = getScreenHeight() - 28		// getScreenHeight() of 224, minus 12 for empty space below HUD, minus 16 for height of digits
 		s16 py_timer = timer_screenbottom
 
 		u16 seconds = BS_remainingTime / 60
@@ -3860,6 +4081,129 @@ function void BlueSpheres.renderCustomSpheres()
 }
 
 
+function void BlueSpheres.displayTotalTime()
+{
+	u16 px_hud = max(getScreenWidth()/2 - 100, 72) - 24 - 32
+	u16 py_hud = getScreenHeight() - 24
+	u16 renderQueue_hud = 0xe800
+
+	u16 minutes = BS_displayedTime / 3600
+	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+	u16 centiseconds = (frames * 99 + 30) / 59
+
+	if (!challenge_greenspheres)	// S3&K HUD
+	{
+		// TIME and timer
+		Renderer.drawCustomSprite("BlueSphere_smalltext_time", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+		px_hud = getScreenWidth() - px_hud - 112 + 14
+		Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		
+		py_hud += 11
+		// Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_ringicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	}
+	else	// Sonic 2 HUD
+	{
+		px_hud = max(getScreenWidth()/2 - 100, 72) - 24 - 32
+		// TIME and timer
+		Renderer.drawCustomSprite("sonic2_time", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+		// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+		px_hud = getScreenWidth() - px_hud - 112 + 14
+		Renderer.drawCustomSprite("sonic2_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		
+		py_hud += 11
+		// Renderer.drawCustomSprite("sonic2_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite((challenge_greenspheres >= 0x10) ? "BlueSphere_greensphereicon_small" : "BlueSphere_bluesphereicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", minutes % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", seconds % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	}
+
+	// Old setup
+/*
+	u16 px_hud = getScreenWidth() / 2 - 14	// subtract 49 instead for non-small digits without TIME/BEST
+	u16 py_hud = 14	// place the BEST time at getScreenHeight() - 14 - 16. Show either Normal or Perfect best time based on a menu option. Use 12 for non-small digits.
+	u16 renderQueue_hud = 0xe800
+
+	u16 minutes = BS_displayedTime / 3600
+	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+	u16 centiseconds = (frames * 99 + 30) / 59
+
+	// TIME and timer
+	Renderer.drawCustomSprite("BlueSphere_smalltext_time", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+	// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+	py_hud = getScreenHeight() - 14 - 16
+
+	Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+*/
+}
 
 
 function void BlueSpheres.renderCustomGround()
@@ -3927,7 +4271,7 @@ function void BlueSpheres.renderCustomGround()
 	BlueSpheres.replacePlaneRendering()
 
 	// Render glow effect for background
-	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && selectedZoneAct < 0xff18)
 	{
 		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000, 0, tint, 0x10000)
 	}
@@ -3973,7 +4317,7 @@ function void BlueSpheres.renderCustomGround()
 	Renderer.drawSprite(spriteKey2, 0, 0, 0x100, SPRITE_FLAG_FULLY_OPAQUE, 0x3000)		// Draw fully opaque (here meant only as a rendering optimization, primarily for software renderer)
 
 	// Render glow effect on top
-	if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02)
+	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && selectedZoneAct < 0xff18)
 	{
 		Renderer.drawCustomSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30, 0x00, 0, 0x3100, 0, tint, 0x10000)
 	}
@@ -4024,12 +4368,18 @@ function void S2Special.swapRingsAndSpheres()
 }
 
 
+// In time attack mode, return to the Challenges menu.
 // In marathon mode, skip blue spheres results screen.
 // We also handle Sonic 2 special stage result values here.
 // Function taken from level\special\bs_results.lemon
 //# address-hook(0x02e3da) end(0x02e40e)
 function void fn02e3da()
 {
+	if (time_attack == 1)
+	{
+		global.game_mode = 0x54
+		return
+	}
 	if (time_attack)	// Skip level results and award bonuses directly. The continue is actually awarded the moment 50 rings are collected, not in results.
 	{
 		global.game_mode = 0x0c

@@ -47,6 +47,7 @@ function void loadupCustomMenu()
 	loadBestActTimes()
 	loadRSR()
 	loadUnlocks()
+	loadEndlessProgress()
 
 	if (global.game_mode == 0x58)	// main menu, not Challenges menu
 	{

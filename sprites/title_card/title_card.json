@@ -15,7 +15,7 @@
     "titlecard_singleact":  { "File": "Title_Act.png", "Rect": "0,0,77,48", "Center": "22,-64" },
     "titlecard_whitebars":  { "File": "Title_WhiteBars.png", "Rect": "0,0,47,21", "Center": "38,-64" },
   
-    "titlecard_zone0":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "19,-16" },  // Rect3 - Center1 = 152 for all entries
+    "titlecard_zone0":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "19,-16" },  // Center1 = Rect3 - 152 for all entries
     "titlecard_zone1":  { "File": "Title_HCZ.png", "Rect": "0,0,139,66", "Center": "-13,-16" }, // in order to right-align them all
     "titlecard_zone2":  { "File": "Title_MGZ.png", "Rect": "0,0,196,66", "Center": "44,-16" },
     "titlecard_zone3":  { "File": "Title_CNZ.png", "Rect": "0,0,194,66", "Center": "42,-16" },
@@ -31,6 +31,7 @@
     "titlecard_zone13":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "34,-16" },
     "titlecard_bonus":  { "File": "Title_Bonus.png", "Rect": "0,0,76,57", "Center": "-42,-16" },
     "titlecard_stage":  { "File": "Title_Stage.png", "Rect": "0,0,73,57", "Center": "-22,-16" },
+    "titlecard_specialstage":  { "File": "Title_SpecialStage.png", "Rect": "0,0,163,57", "Center": "11,-16" },
 
     // Same as above, but with proper centers rather than centers meant for title card alignment.
     // The numbering is also different, aligned with the player-facing zone order instead of internal zone IDs.
@@ -48,6 +49,7 @@
     "titlecard_zone0b_menu":  { "File": "Title_DEZ.png", "Rect": "0,0,141,66", "Center": "71,33" },
     "titlecard_zone0c_menu":  { "File": "Title_DDZ.png", "Rect": "0,0,180,66", "Center": "90,33" },
     "titlecard_zoneHPZ_menu":  { "File": "Title_HPZ.png", "Rect": "0,0,186,66", "Center": "93,33" },
+    "titlecard_specialstage_menu":  { "File": "Title_SpecialStage.png", "Rect": "0,0,163,57", "Center": "92,33" },  // centered as if image is 21px wider due to not having the word ZONE attached
     "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" },
     "titlecard_unlock0002_menu":  { "File": "Title_CPZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
 

@@ -66,6 +66,16 @@
   "SKSS5_Orig":  { "File": "SKSS5_Orig.bin" },
   "SKSS7_Orig":  { "File": "SKSS7_Orig.bin" },
 
+  // 2013 version special stage layouts
+  "ProtoSS1":  { "File": "ProtoSS1.bin" },
+  "ProtoSS2":  { "File": "ProtoSS2.bin" },
+  "ProtoSS3":  { "File": "ProtoSS3.bin" },
+  "ProtoSS4":  { "File": "ProtoSS4.bin" },
+  "ProtoSS5":  { "File": "ProtoSS5.bin" },
+  "ProtoSS6":  { "File": "ProtoSS6.bin" },
+  "ProtoSS7":  { "File": "ProtoSS7.bin" },
+  "ProtoSS8":  { "File": "ProtoSS8.bin" },
+
   // Sonic 2 special stage layouts
   "S2SS1":  { "File": "S2SS1.bin" },
   "S2SS2":  { "File": "S2SS2.bin" },

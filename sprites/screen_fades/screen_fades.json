@@ -5,9 +5,10 @@
 	// Menu border rectangles
 	"blackscreen_optionsdim":  { "File": "blackscreen.png", "Rect": "0,0,229,60", "Center": "114,30" },
 	"blackscreen_besttimesdim_rect":  { "File": "blackscreen.png", "Rect": "0,0,148,60", "Center": "74,30" },
+	"blackscreen_specialbesttimesdim_rect":  { "File": "blackscreen.png", "Rect": "0,0,132,94", "Center": "66,47" },
 
 	// Pause menu background rectangle
 	"2_option_dim":  { "File": "blackscreen.png", "Rect": "0,0,89,39", "Center": "45,19" },
 	"3_option_dim":  { "File": "blackscreen.png", "Rect": "0,0,89,55", "Center": "45,27" },
-	"4_option_dim":  { "File": "blackscreen.png", "Rect": "0,0,89,71", "Center": "45,35" },
+	"4_option_dim":  { "File": "blackscreen.png", "Rect": "0,0,89,71", "Center": "45,35" }
 }

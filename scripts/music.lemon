@@ -10,7 +10,7 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 	{
 		bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 
-		if (isMainCharacter(CHARACTER_KNUCKLES) && useSKLayouts && specialstages_knuckles)
+		if ((isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1) && useSKLayouts && specialstages_knuckles)
 			soundKey = "greenspheres_speedup"
 	}
 	else if (sfxId == 0x2f && ((global.game_mode) & 0x7f) == 0x58)

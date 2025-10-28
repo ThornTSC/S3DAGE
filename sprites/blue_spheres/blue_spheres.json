@@ -41,37 +41,49 @@
 	"BlueSphere_digit_9": { "File": "BlueSphere_digits.png", "Rect": "144,0,16,16" },
 		
 	"BlueSphere_char_seconds": { "File": "BlueSphere_digits.png", "Rect": "160,0,5,5" },
-	
+
 	// Digits and seconds symbols (Blue Sphere small)
-	"BlueSphere_smalldigit_0": { "File": "BlueSphere_digits_mini.png", "Rect":   "0,0,12,12" },
-	"BlueSphere_smalldigit_1": { "File": "BlueSphere_digits_mini.png", "Rect":  "12,0,12,12" },
-	"BlueSphere_smalldigit_2": { "File": "BlueSphere_digits_mini.png", "Rect":  "24,0,12,12" },
-	"BlueSphere_smalldigit_3": { "File": "BlueSphere_digits_mini.png", "Rect":  "36,0,12,12" },
-	"BlueSphere_smalldigit_4": { "File": "BlueSphere_digits_mini.png", "Rect":  "48,0,12,12" },
-	"BlueSphere_smalldigit_5": { "File": "BlueSphere_digits_mini.png", "Rect":  "60,0,12,12" },
-	"BlueSphere_smalldigit_6": { "File": "BlueSphere_digits_mini.png", "Rect":  "72,0,12,12" },
-	"BlueSphere_smalldigit_7": { "File": "BlueSphere_digits_mini.png", "Rect":  "84,0,12,12" },
-	"BlueSphere_smalldigit_8": { "File": "BlueSphere_digits_mini.png", "Rect":  "96,0,12,12" },
-	"BlueSphere_smalldigit_9": { "File": "BlueSphere_digits_mini.png", "Rect": "108,0,12,12" },
+	"BlueSphere_smalldigit_0": { "File": "BlueSphere_digits_mini.png", "Rect":   "0,0,8,12" },
+	"BlueSphere_smalldigit_1": { "File": "BlueSphere_digits_mini.png", "Rect":   "8,0,8,12" },
+	"BlueSphere_smalldigit_2": { "File": "BlueSphere_digits_mini.png", "Rect":  "16,0,8,12" },
+	"BlueSphere_smalldigit_3": { "File": "BlueSphere_digits_mini.png", "Rect":  "24,0,8,12" },
+	"BlueSphere_smalldigit_4": { "File": "BlueSphere_digits_mini.png", "Rect":  "32,0,8,12" },
+	"BlueSphere_smalldigit_5": { "File": "BlueSphere_digits_mini.png", "Rect":  "40,0,8,12" },
+	"BlueSphere_smalldigit_6": { "File": "BlueSphere_digits_mini.png", "Rect":  "48,0,8,12" },
+	"BlueSphere_smalldigit_7": { "File": "BlueSphere_digits_mini.png", "Rect":  "56,0,8,12" },
+	"BlueSphere_smalldigit_8": { "File": "BlueSphere_digits_mini.png", "Rect":  "64,0,8,12" },
+	"BlueSphere_smalldigit_9": { "File": "BlueSphere_digits_mini.png", "Rect":  "72,0,8,12" },
 		
-	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_mini.png", "Rect": "120,0,5,4" },
-	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_mini.png", "Rect":  "0,12,44,12" },
-	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_mini.png", "Rect": "33,12,44,12" },
+	"BlueSphere_smallchar_seconds": { "File": "BlueSphere_digits_mini.png", "Rect": "80,0,4,5" },
+	"BlueSphere_smalltext_best": { "File": "BlueSphere_digits_mini.png", "Rect":  "0,12,32,12" },
+	"BlueSphere_smalltext_time": { "File": "BlueSphere_digits_mini.png", "Rect": "24,12,32,12" },
+	
+	// Digits and seconds symbols (Blue Sphere small, old version)
+	"BlueSphere_smalldigit_0_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":   "0,0,12,12" },
+	"BlueSphere_smalldigit_1_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "12,0,12,12" },
+	"BlueSphere_smalldigit_2_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "24,0,12,12" },
+	"BlueSphere_smalldigit_3_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "36,0,12,12" },
+	"BlueSphere_smalldigit_4_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "48,0,12,12" },
+	"BlueSphere_smalldigit_5_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "60,0,12,12" },
+	"BlueSphere_smalldigit_6_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "72,0,12,12" },
+	"BlueSphere_smalldigit_7_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "84,0,12,12" },
+	"BlueSphere_smalldigit_8_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "96,0,12,12" },
+	"BlueSphere_smalldigit_9_old": { "File": "BlueSphere_digits_mini_old.png", "Rect": "108,0,12,12" },
+		
+	"BlueSphere_smallchar_seconds_old": { "File": "BlueSphere_digits_mini_old.png", "Rect": "120,0,5,4" },
+	"BlueSphere_smalltext_best_old": { "File": "BlueSphere_digits_mini_old.png", "Rect":  "0,12,44,12" },
+	"BlueSphere_smalltext_time_old": { "File": "BlueSphere_digits_mini_old.png", "Rect": "33,12,44,12" },
+
+	// Time Attack HUD elements
+	"BlueSphere_ringicon_small": { "File": "BlueSphere_ringicon_small.png" },
+	"BlueSphere_bluesphereicon_small": { "File": "BlueSphere_bluesphereicon_small.png" },
+	"BlueSphere_greensphereicon_small": { "File": "BlueSphere_greensphereicon_small.png" },
 
 	// Sonic 2 special stage background
 	"sonic2_background": { "File": "Sonic2_background.bmp", "Center": "128,128"},
 
 	// Sonic 2 emeralds for results screen
 	"sonic2_emblem": { "File": "Sonic2_emblem.png", "Rect": "0,0,16,18"},
-
-	// Sonic 2 emeralds for results screen
-	"sonic2_emerald_00": { "File": "Sonic2_emeralds.png", "Rect":    "0,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_01": { "File": "Sonic2_emeralds.png", "Rect":   "14,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_02": { "File": "Sonic2_emeralds.png", "Rect":   "28,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_03": { "File": "Sonic2_emeralds.png", "Rect":   "42,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_04": { "File": "Sonic2_emeralds.png", "Rect":   "56,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_05": { "File": "Sonic2_emeralds.png", "Rect":   "70,0,14,16", "Center": "7,8" },
-	"sonic2_emerald_06": { "File": "Sonic2_emeralds.png", "Rect":   "84,0,14,16", "Center": "7,8" },
 
 	// Digits and seconds symbols (Sonic 2)
 	"sonic2_specialdigit_0": { "File": "Sonic2_specialdigits.png", "Rect":   "0,0,8,16" },
@@ -144,7 +156,10 @@
 	"sonic2_specialdigit_7_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "56,0,8,12" },
 	"sonic2_specialdigit_8_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "64,0,8,12" },
 	"sonic2_specialdigit_9_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "72,0,8,12" },
-	"sonic2_specialdigit_slash_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "80,0,6,16" },
+	"sonic2_specialdigit_slash_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "80,0,6,12" },
+	"sonic2_specialdigit_seconds_mini": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "86,0,4,12" },
+	"sonic2_best": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "0,12,32,16" },
+	"sonic2_time": { "File": "Sonic2_specialdigits_mini.png", "Rect":  "24,12,32,16" },
 
 	"sonic2_specialdigit_0_mini_green": { "File": "Sonic2_specialdigits_mini_green.png", "Rect":   "0,0,8,12" },
 	"sonic2_specialdigit_1_mini_green": { "File": "Sonic2_specialdigits_mini_green.png", "Rect":   "8,0,8,12" },
