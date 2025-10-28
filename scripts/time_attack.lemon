@@ -7434,7 +7434,7 @@ function u16 Challenge.checkAndRenderFinish()
 	if (pole.x != -1 && pole.y != -1)
 	{
 		// Render the goal pole
-		u64 key = stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1)
+		u64 key = (time_attack_end) ? stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1) : "timeattack_pole_03"
 		u8 flags = (global.zone_act.apparent == 0x0a00 || global.zone_act.apparent == 0x0b00 || global.zone_act.apparent == 0x0001 ) ? SPRITE_FLAG_PRIO : 0x00
 		Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00)
 
