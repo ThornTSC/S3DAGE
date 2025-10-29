@@ -16320,9 +16320,9 @@ function void fn032208()
 {
 	bool onBarrel = objA0.flags2a & object.flag.P1_ON_OBJECT
 	if (objA0.velocity.y < 0 && onBarrel && display_inputs && !original_mode)
-		Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_up", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	else if (onBarrel && display_inputs && !original_mode)
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 
 	D1.u16 = u16[A0 + 0x3c]
 	D0.u16 = objA0.flags2a & (object.flag.P1_ON_OBJECT | object.flag.P2_ON_OBJECT)
@@ -19925,7 +19925,7 @@ function void fn03e5f2()
 {
 	if (A1 != 0xffffb04a && u16[A0 + 0x34] != 0x40 && u8[A3 + 0x2c] != 0 && display_inputs && !original_mode)		// A1 not sidekick Tails. Offset 0x34 increments by 0x04 each frame down is held, up to a maximum of 0x40.
 	{																						// This implementation is incomplete; the 0x40 maximum is lowered if the pulley device is near/at the ceiling.
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 
 	base.fn03e5f2()
@@ -21832,13 +21832,13 @@ function void FBZ1_CustomSprites()
 	// Display hanging inputs
 	if (u16[0xffffb010] > 0x0b60 && u16[0xffffb010] < 0x0ba0 && u16[0xffffb014] > 0x0840 && u16[0xffffb014] < 0x0880 && display_inputs && !original_mode && !global.game.paused && !level.trigger01)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 	else if (u16[0xffffb010] > 0x1b20 && u16[0xffffb010] < 0x1b60 && u16[0xffffb014] > 0x7c0 && u16[0xffffb014] < 0x0800 && display_inputs && !original_mode && !global.game.paused && !level.trigger02)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 
 	// Display pipe along which piston moves and floor end tapering where chunks meet walls without it
@@ -22296,18 +22296,18 @@ function void FBZ2_CustomSprites()
 	// Display inputs for dropping from overhead bars
 	if (u16[0xffffb010] > 0x0f60 && u16[0xffffb010] < 0x0fa0 && u16[0xffffb014] > 0x840 && u16[0xffffb014] < 0x0880 && display_inputs && !original_mode && !global.game.paused && !level.trigger02)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 	else if (u16[0xffffb010] > 0x17e0 && u16[0xffffb010] < 0x1820 && u16[0xffffb014] > 0x840 && u16[0xffffb014] < 0x0880 && display_inputs && !original_mode && !global.game.paused && !level.trigger06)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 	else if (u16[0xffffb010] > 0x1f60 && u16[0xffffb010] < 0x1fa0 && u16[0xffffb014] > 0x780 && u16[0xffffb014] < 0x07c0 && display_inputs && !original_mode && !global.game.paused && !level.trigger0b)
 	{
-		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+		Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+		Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 	}
 
 	if (global.game.paused)		// a sprite mask for the laser miniboss is hidden when the game is paused
@@ -23645,12 +23645,12 @@ function void fn04301c()
 	{
 		if (L_Spindash)
 		{
-			Renderer.drawCustomSprite("@input_icon_button_L", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_L", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 		}
 		else
 		{
-			Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_down", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_A", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 		}
 	}
 
@@ -23683,16 +23683,16 @@ function void fn0881fe()
 		if (display_inputs && A1 == 0xffffb000 && !original_mode)	// u16[A0 + 0x44] holds the last two bytes of the character's object address. It would be 0x004a for sidekick Tails.
 		{
 			if (level.framecounter.low & 0x08)	// display alternating left and right inputs
-				Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+				Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 			else
-				Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+				Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 			/*	
-			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 - 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 + 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
-			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xffff)
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 - 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 - 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x08, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_left", getScreenWidth()/2 + 0x18, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_right", getScreenWidth()/2 + 0x28, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 			*/
 		}
 		--objA0.countdown_value
