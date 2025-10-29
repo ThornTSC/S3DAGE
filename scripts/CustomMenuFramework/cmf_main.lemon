@@ -1737,13 +1737,28 @@ function void customMenu.countMedals()
 	u16 x_offset = 0
 	u16 y_offset = 0
 	u16 renderQueue = 0xf003
+	constant u16 stars.timer.max = 300
 
 	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34)
 	{
 		x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
-		y_offset = 2
+		if (stars.timer && stars.timer < 16)	// counter is active and ascending
+			y_offset = 10 - (stars.timer / 2)
+		else if (stars.timer >= 16 && stars.timer < stars.timer.max - 16)				// counter is active and in place
+			y_offset = 2
+		else	// counter is descending
+		{
+			y_offset = (stars.timer / 2) - 140 + 1		// + 1 accounts for truncation instead of rounding
+			if (global.game.paused)
+			{
+				stars.timer = 0					// don't show the counter descending off screen if we're still paused
+				y_offset = 2
+			}
+		}
 		renderQueue = 0xfff1
 	}
+	else
+		stars.timer = 0
 
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
 	{
@@ -1773,12 +1788,12 @@ function void customMenu.countMedals()
 		Westside.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)		// Angel theme and Westside theme have identical star counters
 	else	// Saturn theme, also used in menus
 	{
-		s16 x_offset_pause = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 10 : 0
+		s16 x_offset_inlevel = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 10 : 0
 //		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 8, 213, "TOTALS:                  * 100)", 0xe8d494ff, 1, 0, renderQueue, 0, 1)
-		Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 168 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 178 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 188 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 198 + x_offset + x_offset_pause, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 168 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 178 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 188 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 198 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
 
 		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
 			x_offset -= 10
@@ -1792,6 +1807,13 @@ function void customMenu.countMedals()
 			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", (starCount / 10) % 10), getScreenExtend() - 40 + 237 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue) // non-zero tens
 		
 		Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount % 10), getScreenExtend() - 40 + 245 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// ones (even if 0)
+	}
+
+	if (stars.timer)
+	{
+		++stars.timer
+		if (stars.timer == stars.timer.max)
+			stars.timer = 0
 	}
 }
 

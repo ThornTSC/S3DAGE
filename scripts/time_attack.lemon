@@ -7629,7 +7629,16 @@ function void Challenge.saveMedalsAndRecords()
 		medalCount += (medalType - u8[best_time_address])	// update the medal count and then
 		u8[best_time_address] = medalType					// put the value in shared memory.
 		u16 total_stars_old = total_stars
-		countTotalStars()	// forces the counter to update, which incorporates the medal value change
+		countTotalStars()	// forces the counter to update
+		if (stars.timer)	// if counter is already on screen from collecting a red star ring within the past five seconds
+		{
+			if (stars.timer >= 284)					// If counter is leaving screen,
+				stars.timer = 300 - stars.timer		// start moving it up from the same position.
+			else if (stars.timer > 16)	// If counter is in place,
+				stars.timer = 16		// reset its in-place duration.
+		}
+		else
+			stars.timer = 1		// begin to display the counter on screen -- see customMenu.countMedals()
 		Unlock.checkForNewUnlock(total_stars_old, total_stars)
 	}
 

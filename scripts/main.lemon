@@ -147,9 +147,10 @@ global u8 hud.layout
 global u16 unlock_act
 global u8 layout.part
 
-// Flag and timer for unlock announcements
+// Flags and timers for on-screen announcements
 global bool unlock.show
 global u16 unlock.timer
+global u16 stars.timer
 
 // Copy of level.giantrings_clear for use with the new on-screen counter during level results
 global u32 giantRingsCollected.array
@@ -255,6 +256,8 @@ function void endOfFrame()
 	// Handle unlock announcements.
 	if (unlock.show)
 		Unlock.showUnlock()
+	if (stars.timer)
+		customMenu.countMedals()
 
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
@@ -28487,6 +28490,7 @@ function void RedStarRing_Collect()
 		{
 			u16 total_stars_old = total_stars
 			countTotalStars()	// forces the counter to update
+			stars.timer = 1		// display the counter on screen -- see customMenu.countMedals()
 			Unlock.checkForNewUnlock(total_stars_old, total_stars)
 			Input.setControllerRumble(-1, 0.25f, 0x6000, 200)	// identical to rumble from fire shield dash sound
 		}
@@ -28644,6 +28648,8 @@ function void Unlock.showUnlock()
 		unlock.timer = 0
 	}
 }
+
+
 
 constant array<u16> GiantRings.maxPossible =
 {
