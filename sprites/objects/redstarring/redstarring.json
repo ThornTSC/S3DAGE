@@ -13,5 +13,6 @@
 	// Character icons
 	"rsr_icon_sonic":           { "File": "lifeicons_noborder.png", "Rect":" 0,0,16,16", "Center": "8,8" },
 	"rsr_icon_tails":           { "File": "lifeicons_noborder.png", "Rect":"16,0,16,16", "Center": "8,8" },
-	"rsr_icon_knuckles":        { "File": "lifeicons_noborder.png", "Rect":"32,0,16,16", "Center": "8,8" }
+	"rsr_icon_knuckles":        { "File": "lifeicons_noborder.png", "Rect":"32,0,16,16", "Center": "8,8" },
+	"rsr_icon_x":               { "File": "lifeicons_noborder.png", "Rect":"48,0,16,16", "Center": "8,8" }
 }

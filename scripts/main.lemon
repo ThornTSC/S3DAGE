@@ -6791,22 +6791,36 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		// Use smoother ring rotation based on standalone\rendering\renderhooks.lemon
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8	// divide by 2 instead of 4 to animate at double speed
 		u8 ringNum = objA0.subtype2c & 0x1f
-		u64 ringKey = ((u8[redstarring_address] & ringNum) || objA0.value26) ? "medal_02" : "redstarring"
 		u32 alpha = ((u8[redstarring_address] & ringNum)) ? 0xa0c0c0c0 : 0xffffffff
-		if (objA0.value26)		// if red star ring is for another character,
-			alpha = 0x80c0c0c0	// render very faintly
+		if ((objA0.value26) || (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails))		// if red star ring is for another character or sidekick is present,
+			alpha = 0x80c0c0c0			// render very faintly
+		u64 ringKey = ((u8[redstarring_address] & ringNum) || alpha == 0x80c0c0c0) ? "medal_02" : "redstarring"
 		u64 key = stringformat("%s_0%d", ringKey, animFrame)
 		u16 redStarRingRenderQueue = (global.zone_act == 0x0401 || unlock_act == s2_CPZ) ? 0xa000 : 0x02000
 
 		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue, 0, alpha, 0x10000)
-		if (objA0.value26)
+		if (alpha == 0x80c0c0c0)	// rendering faintly (for another character or sidekick is present)
 		{
 			if (objA0.subtype2c <= 0x30)
+			{
 				Renderer.drawCustomSprite("rsr_icon_sonic", px + 8, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
+				if (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails)
+				{
+					Renderer.drawCustomSprite("rsr_icon_tails", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
+					Renderer.drawCustomSprite("rsr_icon_x", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 2, 0, 0x78ffffff, 0x10000)
+				}
+			}
 			else if (objA0.subtype2c <= 0x50)
 				Renderer.drawCustomSprite("rsr_icon_tails", px + 8, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else
+			{
 				Renderer.drawCustomSprite("rsr_icon_knuckles", px + 8, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
+				if (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails)
+				{
+					Renderer.drawCustomSprite("rsr_icon_tails", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
+					Renderer.drawCustomSprite("rsr_icon_x", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 2, 0, 0x78ffffff, 0x10000)
+				}
+			}
 		}
 		return true
 	}
@@ -28317,12 +28331,12 @@ function void RedStarRing()
 		return
 	}
 
-	// Do not show Red Star Rings if a sidekick Tails is present
-	if (global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
-	{
-		UnloadObject()
-		return
-	}
+	// Old behavior: do not show Red Star Rings if a sidekick Tails is present
+//	if (global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
+//	{
+//		UnloadObject()
+//		return
+//	}
 
 	// We set the most significant bit for Knux's rings, the next bit for Tails's, and the last bit for Sonic's.
 	// The lower 5 bits represent the rings themselves, with the least significant bit representing the first ring.
@@ -28331,9 +28345,21 @@ function void RedStarRing()
 	// Knux:  0x81, 0x82, 0x84, 0x88, 0x90
 	u8 ringNum = objA0.subtype2c & 0x1f
 
-	// Check to see if the red star ring is meant for another character and mark byte 0x26 with an offset if so.
-	if (global.characters == 1 && objA0.subtype2c > 0x30)							// max subtype for Sonic's red star rings
+	// Check to see if the red star ring is meant for another character and mark byte 0x26 with an offset if so. Also ensure red star rings are handled properly when sidekick Tails is present.
+	if (global.characters == CHARS_SONIC_AND_TAILS && objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address] & ringNum))	// a Sonic red star ring with sidekick Tails present
 	{
+		UnloadObject()		// only display Sonic's red star rings if we haven't picked them up yet
+		return
+	}
+	if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && objA0.subtype2c > 0x80 && objA0.subtype2c <= 0x90 && (u8[redstarring_address] & ringNum))	// a Knuckles red star ring with sidekick Tails present
+	{
+		UnloadObject()		// only display Knuckles's red star rings if we haven't picked them up yet
+		return
+	}
+
+	if (global.characters <= CHARS_SONIC_ALONE && objA0.subtype2c > 0x30)							// max subtype for Sonic's red star rings
+	{
+
 		s8[A0 + 0x26] = 24	// assume a Tails red star ring, 24 bytes ahead
 		if (objA0.subtype2c > 0x40 && objA0.subtype2c <= 0x50 && (u8[redstarring_address + 24] & ringNum))	// a Tails red star ring
 		{
@@ -28347,7 +28373,7 @@ function void RedStarRing()
 			return
 		}
 	}
-	else if (global.characters == 2 && (objA0.subtype2c <= 0x40 || objA0.subtype2c > 0x50))	// range of Tails's red star rings
+	else if (global.characters == CHARS_TAILS_ALONE && (objA0.subtype2c <= 0x40 || objA0.subtype2c > 0x50))	// range of Tails's red star rings
 	{
 		s8[A0 + 0x26] = -24	// assume a Sonic red star ring, 24 bytes prior
 		if (objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address - 24] & ringNum))	// a Sonic red star ring
@@ -28362,7 +28388,7 @@ function void RedStarRing()
 			return
 		}
 	}
-	else if (global.characters == 3 && objA0.subtype2c < 0x80)						// min subtype for Knux's red star rings
+	else if (global.characters == CHARS_KNUCKLES_ALONE && objA0.subtype2c < 0x80)		// min subtype for Knux's red star rings
 	{
 		s8[A0 + 0x26] = -48	// assume a Sonic red star ring, 48 bytes prior
 		if (objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address - 48] & ringNum))	// a Sonic red star ring
@@ -28404,7 +28430,7 @@ function void RedStarRing_Init()
 	objA0.sprite_priority = 0x0100
 
 	u8[A0 + 0x28] = 0x4e	// 0x47	// collision response bitfield
-	if (objA0.value26)
+	if (objA0.value26 || global.characters == CHARS_SONIC_AND_TAILS || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails))
 		u8[A0 + 0x28] = 0	// empty collision response bitfield
 
 	objA0.box_size.x = 0x0c
