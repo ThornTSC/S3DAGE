@@ -6795,7 +6795,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8	// divide by 2 instead of 4 to animate at double speed
 		u8 ringNum = objA0.subtype2c & 0x1f
 		u32 alpha = ((u8[redstarring_address] & ringNum)) ? 0xa0c0c0c0 : 0xffffffff
-		if ((objA0.value26) || (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails))		// if red star ring is for another character or sidekick is present,
+		if (objA0.value26 || objA0.value42)		// if red star ring is for another character or sidekick is present when the red star ring prohibits that,
 			alpha = 0x80c0c0c0			// render very faintly
 		u64 ringKey = ((u8[redstarring_address] & ringNum) || alpha == 0x80c0c0c0) ? "medal_02" : "redstarring"
 		u64 key = stringformat("%s_0%d", ringKey, animFrame)
@@ -6807,7 +6807,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			if (objA0.subtype2c <= 0x30)
 			{
 				Renderer.drawCustomSprite("rsr_icon_sonic", px + 8, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
-				if (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails)
+				if (objA0.value42)
 				{
 					Renderer.drawCustomSprite("rsr_icon_tails", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
 					Renderer.drawCustomSprite("rsr_icon_x", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 2, 0, 0x78ffffff, 0x10000)
@@ -6818,7 +6818,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			else
 			{
 				Renderer.drawCustomSprite("rsr_icon_knuckles", px + 8, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
-				if (global.characters == CHARS_SONIC_AND_TAILS) || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails)
+				if (objA0.value42)
 				{
 					Renderer.drawCustomSprite("rsr_icon_tails", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 1, 0, 0xa0ffffff, 0x10000)
 					Renderer.drawCustomSprite("rsr_icon_x", px + 24, py + 8, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, redStarRingRenderQueue + 2, 0, 0x78ffffff, 0x10000)
@@ -28349,16 +28349,16 @@ function void RedStarRing()
 	u8 ringNum = objA0.subtype2c & 0x1f
 
 	// Check to see if the red star ring is meant for another character and mark byte 0x26 with an offset if so. Also ensure red star rings are handled properly when sidekick Tails is present.
-	if (global.characters == CHARS_SONIC_AND_TAILS && objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address] & ringNum))	// a Sonic red star ring with sidekick Tails present
-	{
-		UnloadObject()		// only display Sonic's red star rings if we haven't picked them up yet
-		return
-	}
-	if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && objA0.subtype2c > 0x80 && objA0.subtype2c <= 0x90 && (u8[redstarring_address] & ringNum))	// a Knuckles red star ring with sidekick Tails present
-	{
-		UnloadObject()		// only display Knuckles's red star rings if we haven't picked them up yet
-		return
-	}
+//	if (global.characters == CHARS_SONIC_AND_TAILS && objA0.subtype2c > 0x20 && objA0.subtype2c <= 0x30 && (u8[redstarring_address] & ringNum))	// a Sonic red star ring with sidekick Tails present
+//	{
+//		UnloadObject()		// only display Sonic's red star rings if we haven't picked them up yet
+//		return
+//	}
+//	if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && objA0.subtype2c > 0x80 && objA0.subtype2c <= 0x90 && (u8[redstarring_address] & ringNum))	// a Knuckles red star ring with sidekick Tails present
+//	{
+//		UnloadObject()		// only display Knuckles's red star rings if we haven't picked them up yet
+//		return
+//	}
 
 	if (global.characters <= CHARS_SONIC_ALONE && objA0.subtype2c > 0x30)							// max subtype for Sonic's red star rings
 	{
@@ -28432,9 +28432,23 @@ function void RedStarRing_Init()
 	objA0.render_flags = render_flag.WORLD
 	objA0.sprite_priority = 0x0100
 
+	u8 ringNum = objA0.subtype2c & 0x1f			// get the pure ring ID from the bitfield first
+	u8 ringChar = objA0.subtype2c & 0xe0		// get the character bits separately: 0x20 for Sonic rings, 0x40 for Tails rings, and 0x80 for Knuckles rings
+	objA0.value2f = (ringNum == 0x01) ? 0 : (ringNum == 0x02) ? 1 : (ringNum == 0x04) ? 2 : (ringNum == 0x08) ? 3 : 4	// store its position in lookup tables, the HUD, menus, etc. in offset 0x2f
+
 	u8[A0 + 0x28] = 0x4e	// 0x47	// collision response bitfield
-	if (objA0.value26 || global.characters == CHARS_SONIC_AND_TAILS || (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails))
-		u8[A0 + 0x28] = 0	// empty collision response bitfield
+	if (global.characters != CHARS_SONIC_ALONE && ringChar == 0x20 && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, objA0.value2f))
+	{
+		u8[A0 + 0x28] = 0	// empty collision response bitfield for Sonic red star rings if not Sonic alone and the red star ring prohibits sidekick Tails
+		objA0.value42 = 1	// set a flag showing sidekick Tails blocks this ring, which shows even if the active character isn't Sonic
+	}
+	else if (!(global.characters == CHARS_KNUCKLES_ALONE && !useKnucklesAndTails) && ringChar == 0x80 && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, objA0.value2f))
+	{
+		u8[A0 + 0x28] = 0	// empty collision response bitfield for Knuckles red star rings if not Knuckles alone and the red star ring prohibits sidekick Tails
+		objA0.value42 = 1	// set a flag showing sidekick Tails blocks this ring, which shows even if the active character isn't Knuckles
+	}
+	else if (objA0.value26)
+		u8[A0 + 0x28] = 0	// empty collision response bitfield for red star rings from other characters
 
 	objA0.box_size.x = 0x0c
 	objA0.box_size.y = 0x0c		// added to hopefully cut down on pop in/out
@@ -28472,6 +28486,7 @@ function void RedStarRing_Animate()
 }
 
 
+// Code is added to Character.OnCollisionWithDynamicObject() in the check for collision.flag.ITEM to make sure sidekick Tails cannot pick up Red Star Rings.
 //# address-hook(0x04777c)
 function void RedStarRing_Collect()
 {
@@ -28544,6 +28559,114 @@ function void RedStarRing_Unload()
 {
 	UnloadObject()
 }
+
+
+
+constant array<u16> SonicRSR.prohibitSidekick =
+{
+//		1	2	3	4	5
+		0,	0,	0,	0,	1,	// AIZ1
+		0,	1,	0,	0,	0,	// AIZ2
+		0,	0,	0,	0,	0,	// HCZ1
+		0,	0,	0,	0,	0,	// HCZ2
+		0,	0,	0,	0,	0,	// MGZ1
+		1,	0,	0,	0,	0,	// MGZ2
+		0,	0,	0,	0,	0,	// CNZ1
+		0,	0,	0,	0,	0,	// CNZ2
+		0,	0,	0,	0,	0,	// FBZ1
+		0,	0,	0,	0,	0,	// FBZ2
+		0,	0,	0,	0,	0,	// ICZ1
+		0,	1,	0,	0,	0,	// ICZ2
+		0,	1,	0,	0,	0,	// LBZ1
+		0,	0,	0,	0,	0,	// LBZ2
+		0,	0,	0,	0,	0,	// MHZ1
+		1,	0,	0,	0,	0,	// MHZ2
+		0,	0,	0,	0,	0,	// SOZ1
+		0,	0,	0,	0,	0,	// SOZ2
+		0,	0,	0,	0,	0,	// LRZ1
+		0,	0,	0,	0,	0,	// LRZ2		// boss act also calls this
+		0,	0,	0,	0,	0,	// SSZ
+		0,	0,	0,	0,	1,	// HPZ		// out of order to fill an otherwise empty spot
+		0,	0,	0,	1,	0,	// DEZ1
+		0,	0,	0,	0,	0,	// DEZ2		// boss act also calls this
+		0,	0,	0,	0,	0	// DDZ		// unused at the moment
+}
+
+constant array<u16> SonicRSR.prohibitSidekick.unlockAct =
+{
+//		1	2	3	4	5
+		0,	0,	0,	1,	0,	// EHZ
+		0,	0,	0,	0,	0	// CPZ
+}
+
+function bool RedStarRing_RequiresSonicAlone(u16 currentZoneAndAct, u8 rsrID)
+{
+	if (unlock_act)
+		return SonicRSR.prohibitSidekick.unlockAct[(5 * (unlock_act - 1)) + rsrID]
+
+	u8 zoneID = (currentZoneAndAct == 0x1700) ? 0x0c : (currentZoneAndAct == 0x1601) ? 0x0a : (currentZoneAndAct == 0x1600) ? 0x09 : u16(currentZoneAndAct) >> 8	// remap DEZ/LRZ boss acts and HPZ to zone IDs fitting the lookup table
+//	debugLog(stringformat("zoneID = 0x%02x", zoneID))
+	u8 actID = (currentZoneAndAct == 0x1700) ? 0x01 : (currentZoneAndAct == 0x1600) ? 0x01 : (u16(currentZoneAndAct) & 0x00ff)	// remap DEZ/LRZ boss acts to be Act 2
+//	debugLog(stringformat("actID = 0x%02x", actID))
+
+//	debugLog(stringformat("returnValue = 0x%02x", SonicRSR.prohibitSidekick[(10 * zoneID) + (5 * actID) + rsrID]))
+	return SonicRSR.prohibitSidekick[(10 * zoneID) + (5 * actID) + rsrID]
+}
+
+constant array<u16> KnuxRSR.prohibitSidekick =
+{
+//		1	2	3	4	5
+		0,	1,	0,	0,	0,	// AIZ1
+		0,	0,	0,	0,	0,	// AIZ2
+		0,	0,	0,	0,	0,	// HCZ1
+		0,	0,	0,	0,	0,	// HCZ2
+		0,	0,	0,	0,	0,	// MGZ1
+		1,	0,	0,	0,	0,	// MGZ2
+		0,	0,	0,	0,	0,	// CNZ1
+		0,	0,	0,	0,	0,	// CNZ2
+		0,	0,	0,	0,	0,	// FBZ1
+		0,	0,	0,	0,	0,	// FBZ2
+		0,	0,	0,	0,	0,	// ICZ1
+		0,	0,	0,	0,	0,	// ICZ2
+		0,	0,	0,	0,	0,	// LBZ1
+		0,	0,	0,	0,	0,	// LBZ2
+		0,	0,	0,	0,	0,	// MHZ1
+		0,	0,	0,	0,	0,	// MHZ2
+		0,	0,	0,	0,	0,	// SOZ1
+		0,	0,	0,	0,	0,	// SOZ2
+		0,	0,	0,	0,	0,	// LRZ1
+		0,	0,	0,	0,	0,	// LRZ2		// boss act also calls this
+		0,	0,	0,	0,	0,	// SSZ
+		0,	0,	0,	0,	0,	// HPZ		// out of order to fill an otherwise empty spot
+		0,	0,	0,	0,	0,	// DEZ1
+		0,	0,	0,	0,	0,	// DEZ2		// boss act also calls this
+		0,	0,	0,	0,	0	// DDZ		// unused at the moment
+}
+
+constant array<u16> KnuxRSR.prohibitSidekick.unlockAct =
+{
+//		1	2	3	4	5
+		0,	0,	0,	0,	0,	// EHZ
+		0,	0,	0,	0,	0	// CPZ
+}
+
+function bool RedStarRing_RequiresKnuxAlone(u16 currentZoneAndAct, u8 rsrID)
+{
+	if (unlock_act)
+		return KnuxRSR.prohibitSidekick.unlockAct[(5 * (unlock_act - 1)) + rsrID]
+
+	u8 zoneID = (currentZoneAndAct == 0x1700) ? 0x0c : (currentZoneAndAct == 0x1601) ? 0x0a : (currentZoneAndAct == 0x1600) ? 0x09 : u16(currentZoneAndAct) >> 8	// remap DEZ/LRZ boss acts and HPZ to zone IDs fitting the lookup table
+//	debugLog(stringformat("zoneID = 0x%02x", zoneID))
+	u8 actID = (currentZoneAndAct == 0x1700) ? 0x01 : (currentZoneAndAct == 0x1600) ? 0x01 : (u16(currentZoneAndAct) & 0x00ff)	// remap DEZ/LRZ boss acts to be Act 2
+//	debugLog(stringformat("actID = 0x%02x", actID))
+
+//	debugLog(stringformat("returnValue = 0x%02x", KnuxRSR.prohibitSidekick[(10 * zoneID) + (5 * actID) + rsrID]))
+	return KnuxRSR.prohibitSidekick[(10 * zoneID) + (5 * actID) + rsrID]
+}
+
+
+
+
 
 function void loadRSR()
 {

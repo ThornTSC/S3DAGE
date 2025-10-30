@@ -689,6 +689,7 @@ function void Character.updateJumpMoves()
 	}
 }
 
+// Code is added to the check for collision.flag.ITEM to make sure sidekick Tails cannot pick up Red Star Rings.
 //# address-hook(0x00ffd4) end(0x010214)
 function void Character.OnCollisionWithDynamicObject()
 {
@@ -813,6 +814,9 @@ function void Character.OnCollisionWithDynamicObject()
 	}
 	else if (D1.u8 == collision.flag.ITEM)
 	{
+		if (A0 != 0xffffb000 && objA1.update_address == 0x047776)	// if a red star ring was touched by not the main character (i.e., sidekick Tails),
+			return													// do nothing. This keeps the object state as uncollected.
+		
 		D0.u8 = (objA1.collision_attributes & collision_attributes.size)
 		if (D0.u8 != collision.size.16x16)
 		{

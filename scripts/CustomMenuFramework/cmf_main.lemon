@@ -1173,7 +1173,7 @@ function void customMenu.displayTimes()
 			normalgame_change_Y = -2
 			if (drawSidekick && i != 1)
 				normalgame_change_X -= 8
-			if ((setting.original_mode && !setting.unlock_act) || debug_mode.enabled || (i != 1 && sidekick) || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+			if ((setting.original_mode && !setting.unlock_act) || debug_mode.enabled || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))	//  || (i != 1 && sidekick)
 				normalgame_change_Y = 12
 		}
 		
@@ -1235,10 +1235,13 @@ function void customMenu.displayTimes()
 
 		// Draw Red Star Rings (collected and uncollected)
 		u32 alpha
+		u32 alphaX
 		u32 uncollected = 0x80c0c0c0
 		u32 uncollectedDim = 0x80909090
+		u32 uncollectedX = 0xa8ffffff
+		u32 uncollectedXDim = 0xa8c8c8c8
 		u64 ringKey
-		if (!setting.time_attack && (!setting.original_mode || setting.unlock_act) && !debug_mode.enabled && (!sidekick || i == 1) && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
+		if (!setting.time_attack && (!setting.original_mode || setting.unlock_act) && !debug_mode.enabled && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))		//  && (!sidekick || i == 1)
 		{
 			if (u8[redstarring_address] & 0x01)
 			{
@@ -1248,7 +1251,12 @@ function void customMenu.displayTimes()
 			else
 			{
 				alpha = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollected : uncollectedDim
+				alphaX = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollectedX : uncollectedXDim
 				ringKey = "medal_02_00"
+				if (i == 0 && sidekick && RedStarRing_RequiresSonicAlone(global.zone_act, 0))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 70, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
+				else if (i == 2 && sidekick && RedStarRing_RequiresKnuxAlone(global.zone_act, 0))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 70, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
 			}
 			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 70, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
 
@@ -1260,7 +1268,12 @@ function void customMenu.displayTimes()
 			else
 			{
 				alpha = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollected : uncollectedDim
+				alphaX = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollectedX : uncollectedXDim
 				ringKey = "medal_02_00"
+				if (i == 0 && sidekick && RedStarRing_RequiresSonicAlone(global.zone_act, 1))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 94, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
+				else if (i == 2 && sidekick && RedStarRing_RequiresKnuxAlone(global.zone_act, 1))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 94, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
 			}
 			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 94, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
 
@@ -1272,7 +1285,12 @@ function void customMenu.displayTimes()
 			else
 			{
 				alpha = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollected : uncollectedDim
+				alphaX = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollectedX : uncollectedXDim
 				ringKey = "medal_02_00"
+				if (i == 0 && sidekick && RedStarRing_RequiresSonicAlone(global.zone_act, 2))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 118, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
+				else if (i == 2 && sidekick && RedStarRing_RequiresKnuxAlone(global.zone_act, 2))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 118, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
 			}
 			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 118, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
 
@@ -1284,7 +1302,12 @@ function void customMenu.displayTimes()
 			else
 			{
 				alpha = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollected : uncollectedDim
+				alphaX = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollectedX : uncollectedXDim
 				ringKey = "medal_02_00"
+				if (i == 0 && sidekick && RedStarRing_RequiresSonicAlone(global.zone_act, 3))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 142, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
+				else if (i == 2 && sidekick && RedStarRing_RequiresKnuxAlone(global.zone_act, 3))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 142, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
 			}
 			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 142, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
 
@@ -1296,7 +1319,12 @@ function void customMenu.displayTimes()
 			else
 			{
 				alpha = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollected : uncollectedDim
+				alphaX = (selectedMenuOption == 6 && setting.levelselect.characters == i + 1) ? uncollectedX : uncollectedXDim
 				ringKey = "medal_02_00"
+				if (i == 0 && sidekick && RedStarRing_RequiresSonicAlone(global.zone_act, 4))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 166, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
+				else if (i == 2 && sidekick && RedStarRing_RequiresKnuxAlone(global.zone_act, 4))
+					Renderer.drawCustomSprite("rsr_icon_x", getScreenWidth()/2 + 166, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004 + 1, 0, alphaX, 0x10000)
 			}
 			Renderer.drawCustomSprite(ringKey, getScreenWidth()/2 + 166, py + 6, 0, SPRITE_FLAG_PRIO, 0xf004, 0, alpha, 0x10000)	// (12, 12) is center of medal
 /*
@@ -2387,9 +2415,9 @@ function void customMenu.mainLogicLoop.main()
 		// Here, addition in py is lineheight * line number
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play Sonic 3 & Knuckles with\nnew level layouts, special\nstage layouts, and visuals\nfor a fresh take on a classic.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Take on an army of Eggrobos\nand trickier special stages\nin Knuckles's Hard difficulty!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Leave your sidekick behind\nand adventure alone to find\n                              !", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 11) - 12, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + (13 * 11) - 7, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Keep your eyes peeled for\n                              to unlock\nnew themes and levels!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + (13 * 10) - 7, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
 	}
 	else if (selectedMenuOption.main == 1)
 	{
