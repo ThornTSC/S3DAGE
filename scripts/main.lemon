@@ -12677,6 +12677,7 @@ function void fn0500e6()
 
 // Undo AIR's adjustments for the camera position in the AIZ2 boss in Original Mode,
 // as they prevent the right-side pit from being on screen.
+// Function taken from bosses\boss_aiz2.lemon
 //# address-hook(0x069456) end(0x069466)
 function void fn069456()
 {
@@ -12702,6 +12703,40 @@ function void fn069456()
 	fn06946a()
 }
 
+
+
+// Ensure that some S3&K speedrun tech to advance multiple levels works with glitch fixes off, but cannot happen
+// in a normal run. This aligns with the speedrunning community's decision to disallow certain glitches
+// from the original S3&K game in A.I.R. runs, yet provdes a way to perform the glitch in the game.
+// The glitch is dependent upon spawning the AIZ2 boss twice, so we run a check to see if the boss was already loaded
+// by looking for the boss's object palette.
+// We also perform some Original Mode reversions here.
+// Function taken from bosses\boss_aiz2.lemon
+//# address-hook(0x0691a8) end(0x0691c6)
+function void fn0691a8()
+{
+	if (Game.getSetting(SETTING_FIX_GLITCHES) && (!original_mode) && u16[0xfffffc24] == 0x0caa)		// If the boss has already loaded its object palette,
+		return																						// do not load the boss again.
+
+	objA0.update_address = 0x0691c8
+
+#if STANDALONE
+	// Clear this "pointer", otherwise the Knuckles cutscene could get triggered too early
+	if (!original_mode)
+		u16[0xfffffaa4] = 0
+#endif
+
+	bool isKnucklesBoss = isMainCharacter(CHARACTER_KNUCKLES)
+#if STANDALONE
+	// Needed to support Knuckles on the upper path
+	if (!original_mode)
+		isKnucklesBoss = (camera.position.y.u16 >= 0x200)
+#endif
+	A1 = isKnucklesBoss ? 0x0691a2 : 0x06919c
+	copyMemory(0xfffffa82, A1, 6)
+
+	fn0691c8()
+}
 
 
 
