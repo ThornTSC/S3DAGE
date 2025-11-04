@@ -93,7 +93,7 @@ function void fn02d47e()
 				{
 					// Slot machine (Original Mode), Chrome Gadget bonus stage (Revisited Mode)
 					D1.u16 = 0x1500
-					if (!original_mode && !u8[0xffffe654] && !Mods.isModActive("Extra Character Slots"))
+					if (!original_mode && !u8[0xffffe654] && use_new_bonus)	//   && !Mods.isModActive("Extra Character Slots")	// taking a risk by allowing Chrome Gadget again with Extra Slots mod on. Ee've seen at least one report of the framework alone breaking things.
 					{
 						D1.u16 = 0x0200
 						unlock_act = s3_CGZ

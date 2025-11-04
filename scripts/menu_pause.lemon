@@ -182,7 +182,7 @@ function void UpdateGamePause()
 
 					countTotalStars()
 					if (!stars.timer)				// this is handled separately if the timer for the counter is active
-						customMenu.countMedals()
+						customMenu.displayStarCounter()
 				}
 				else if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
 				{
@@ -260,7 +260,7 @@ function void UpdateGamePause()
 
 					countTotalStars()
 					if (!stars.timer)				// this is handled separately if the timer for the counter is active
-						customMenu.countMedals()
+						customMenu.displayStarCounter()
 				}
 
 				if (bluespheres.minigame_mode == 1 || time_attack == 1)		// call to time_attack is new with special stage time attack
@@ -388,13 +388,14 @@ function void PauseMenu_ChangeLayout()
 		else
 			hud.layout -= 1
 
-		if (time_attack != 1 && time_attack != 2)
+		// Modded characters' themes no longer get saved, as they force the base characters back to using theme.s3k without easy alternatives beyond another persistent data key just for them.
+		if (time_attack != 1 && time_attack != 2 && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
 			theme.hud += (hud.layout << 6)		// combine theme and layout values…
 			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
 			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
 		}
-		else
+		else if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
 			time_attack_hud.layout = hud.layout
 			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)
@@ -415,13 +416,13 @@ function void PauseMenu_ChangeLayout()
 		else
 			hud.layout += 1
 
-		if (time_attack != 1 && time_attack != 2)
+		if (time_attack != 1 && time_attack != 2 && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
 			theme.hud += (hud.layout << 6)		// combine theme and layout values…
 			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
 			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
 		}
-		else
+		else if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
 			time_attack_hud.layout = hud.layout
 			System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)

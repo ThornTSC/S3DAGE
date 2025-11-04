@@ -6,7 +6,8 @@
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version = "D.A. Garden Edition v1.12.4.0"
+global u64 DAGE_version_string = "D.A. Garden Edition v1.12.4.0"
+global u16 DAGE_version = 0x1c40
 #define DAGE_running = 0x1c40
 
 // Define variables for in-game settings
@@ -32,6 +33,7 @@ global bool original_mode
 global bool menu_initialized
 global bool fast_forward
 global bool originsDropDash
+global u8 use_new_bonus
 
 // Define variables and number of frames per rev for L button spindash charge
 global u8 L_TailsAssist	// settings variable. 0 = Up+A only, 1 = L only, 2 = both
@@ -86,6 +88,9 @@ define u16 unlock_flags = u16[0x8402fc]
 
 // Define memory location to store star count
 define u16 total_stars = u16[0x8402fe]
+
+// Define memory location to store 
+define u32 DAGE_version_address = 0x8405f6
 
 // Define memory location to store Green/Speed Sphere progress
 constant u32 greenSphereProgressAddress = 0x8405f8
@@ -146,6 +151,7 @@ global u8 hud.layout
 // Flag for unlockable levels
 global u16 unlock_act
 global u8 layout.part
+global u8 bonus_stage.exiting
 
 // Flags and timers for on-screen announcements
 global bool unlock.show
@@ -257,7 +263,7 @@ function void endOfFrame()
 	if (unlock.show)
 		Unlock.showUnlock()
 	if (stars.timer)
-		customMenu.countMedals()
+		customMenu.displayStarCounter()
 
 //	if (time_attack >= 3 && draw_HUD)
 //		RenderMarathonTimer()
@@ -765,8 +771,19 @@ function void TitleCard.Init()
 
 function void InitHUDTheme()
 {
+	bool resetTheme = false
+
+	// Check and update saved version number. If one doesn't exist, Extra Slots may have influenced player theme choice behaviors, so do a one-time reset.
+	if (!System.loadPersistentData(DAGE_version_address, "DAGE_Version", 2))
+		resetTheme = true
+	if (u16[DAGE_version_address] != DAGE_version)
+	{
+		u16[DAGE_version_address] = DAGE_version
+		System.savePersistentData(DAGE_version_address, "DAGE_Version", 2)
+	}
+
 	bool hudLoaded = true
-	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1) || resetTheme)	// load save theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
 		hud.layout = 3											// with the classic layout
@@ -794,7 +811,7 @@ function void InitHUDTheme()
 //# address-hook(0x006a76) end(0x006bd6)
 function void InitializeGameCharacters()
 {
-	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_CGZ)
+	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600)|| unlock_act == s3_CGZ)	//    The CHZ case is *also* handled in fn0067ee() so mods with their own InitializeGameCharacters() don't break things.
 	// One of the bonus stages?
 	if (isBonusStage)
 	{
@@ -818,7 +835,7 @@ function void InitializeGameCharacters()
 			u8[0xffffee30] = 0xff
 			return
 		}
-		else if (unlock_act == s3_CGZ)		// CGZ bonus stage
+		else if (unlock_act == s3_CGZ)		// CGZ bonus stage exiting, now handled in fn0067ee()
 		{
 			ring_counter = checkpoint.rings
 			extra_lives_granted = checkpoint.lives_granted
@@ -9969,6 +9986,14 @@ function void fn0067ee()
 	
 	u32[0xffffb094] = 0x006c2c
 	InitializeGameCharacters()
+	if (bonus_stage.exiting)		// CGZ bonus stage
+	{
+		ring_counter = checkpoint.rings
+		extra_lives_granted = checkpoint.lives_granted
+		hud.dirty.rings = 1
+		hud.dirty.timer = 1
+		bonus_stage.exiting = 0
+	}
 	RestoreShield()
 	if (checkpoint.number != 0 || global.stage_type != 0)
 		return
@@ -28540,7 +28565,7 @@ function void RedStarRing_Collect()
 		{
 			u16 total_stars_old = total_stars
 			countTotalStars()	// forces the counter to update
-			stars.timer = 1		// display the counter on screen -- see customMenu.countMedals()
+			stars.timer = 1		// display the counter on screen -- see customMenu.displayStarCounter()
 			Unlock.checkForNewUnlock(total_stars_old, total_stars)
 			Input.setControllerRumble(-1, 0.25f, 0x6000, 200)	// identical to rumble from fire shield dash sound
 		}

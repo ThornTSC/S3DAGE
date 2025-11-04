@@ -44,7 +44,7 @@ function void loadupCustomMenu()
 //	FadeOutScreenBlocking()
 
 	// Load Challenge and Red Star Ring data
-	loadBestActTimes()
+	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
 	loadEndlessProgress()
@@ -117,6 +117,13 @@ function void customMenu.setup()
 		global.zone_act = 0x0000
 	}
 
+	if (Mods.isModActive("Extra Character Slots"))		// clear out Extra Slots menu selections as we set up DAGE menus
+	{
+		u8[0xffffe654] = 0
+		System.setGlobalVariableValueByName("actselect.menu.selected", 0)
+		System.setGlobalVariableValueByName("actselect.character.backup", 0)
+	}
+
 	// We avoid messing with the VDP, as it screws with saving. We only reset level.framecounter.
 //	VDP.Config.setActiveDisplay(false)
 //	fn0011ca()
@@ -174,7 +181,7 @@ function void customMenu.update()
 
 		// To keep the code clean, I'm putting all logic in here. Do however you want though!
 
-		customMenu.mainLogicLoop()
+		customMenu.mainControlLoop()
 		
 	//	customMenu.discordRPC()
 	}
@@ -213,7 +220,7 @@ function void customMenu.update.main()
 
 		// To keep the code clean, I'm putting all logic in here. Do however you want though!
 
-		customMenu.mainLogicLoop()
+		customMenu.mainControlLoop()
 	}
 
 	// GameMode.MainGame()

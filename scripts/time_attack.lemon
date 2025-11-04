@@ -824,7 +824,7 @@ function void LevelSelect()
 		Renderer.setScreenSize(400, 224)
 
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
-	loadBestActTimes()
+	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
@@ -2315,7 +2315,8 @@ function void RenderHUD_Challenges()
 				++renderQueue
 			}
 			// Medal Times in Challenges
-			RenderHUD_MedalTimes()
+			if (global.game_mode != 0x9c)	// Extra Slot Characters character selct, which actually renders on top of normal level rendering
+				RenderHUD_MedalTimes()
 		}
 
 		// Rings
@@ -2363,8 +2364,8 @@ function void RenderHUD_Challenges()
 			HUD.drawSmallDigit(u16(lives_counter % 10), px + 0x28, py + 8, renderQueue)
 		}
 
-		// Best time display
-		else if (best_time != 0x00ffffff && (time_attack == 1 || time_attack == 2))	// the leading two zeroes on best_time come from it being anded with 0x00ffffff when set
+		// Best time display (not rendered for Extra Slot Characters at this time)
+		else if (best_time != 0x00ffffff && (time_attack == 1 || time_attack == 2) && !u8[0xffffe654])	// the leading two zeroes on best_time come from it being anded with 0x00ffffff when set
 		{
 			u16 px = time_attack_hud ? (baseX + (getScreenWidth() / 2 - 64)) : baseX
 			u16 py = 200 + 4	// there is a 4-pixel height difference between the life counter and HUD text. We choose to bottom-align.
@@ -2894,6 +2895,9 @@ function void UpdateTimeAndHud()
 // Functions taken from maingame\hud\hud.lemon
 function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
+	if (global.game_mode == 0x9c)		// not in Extra Slots character select, which renders in front of the normal level
+		return
+
 	if (hud.layout == 2 && (key == "hud_text_score" || key == "hud_text_time" || key == "hud_text_time_red"))
 		return
 
@@ -2927,26 +2931,38 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			theme_key = stringformat("%s%s", "flicky_", key)
-			Flicky.HUD.drawSprite(theme_key, px, py, renderQueue)
-			return
+			if (Renderer.hasCustomSprite(theme_key))
+			{
+				Flicky.HUD.drawSprite(theme_key, px, py, renderQueue)
+				return
+			}
 		}
 		else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			theme_key = stringformat("%s%s", "saturn_", key)
-			Saturn.HUD.drawSprite(theme_key, px, py, renderQueue)
-			return
+			if (Renderer.hasCustomSprite(theme_key))
+			{
+				Saturn.HUD.drawSprite(theme_key, px, py, renderQueue)
+				return
+			}
 		}
 		else if (theme.hud == theme.south && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			theme_key = stringformat("%s%s", "south_", key)
-			South.HUD.drawSprite(theme_key, px, py, renderQueue)
-			return
+			if (Renderer.hasCustomSprite(theme_key))
+			{
+				South.HUD.drawSprite(theme_key, px, py, renderQueue)
+				return
+			}
 		}
 		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 		{
 			theme_key = stringformat("%s%s", "westside_", key)
-			Westside.HUD.drawSprite(theme_key, px, py, renderQueue)
-			return
+			if (Renderer.hasCustomSprite(theme_key))
+			{
+				Westside.HUD.drawSprite(theme_key, px, py, renderQueue)
+				return
+			}
 		}
 	}
 
@@ -3568,7 +3584,7 @@ function void Standalone.onLevelStart()
 	Game.setAchievementValue(ACHIEVEMENT_ELECTROCUTE, 0)
 
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
-	loadBestActTimes()
+	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
 	countTotalStars()
@@ -3743,7 +3759,7 @@ function void Standalone.onRestartAtCheckpoint()
 
 
 
-function void loadBestActTimes()
+function void loadChallengeRecords()
 {
 	medalCount = 0
 
@@ -3801,12 +3817,12 @@ function void loadBestActTimes()
 
 	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 	{
-		loadBestActTimes3D2DGlitches()
+		loadChallengeRecords3D2DGlitches()
 		return
 	}
 	if (System.getGlobalVariableValueByName("DAGE_characterName"))
 	{
-		loadBestActTimesModded()
+		loadChallengeRecordsModded()
 		return
 	}
 
@@ -3825,7 +3841,7 @@ function void loadBestActTimes()
 	}
 }
 
-function void loadBestActTimes3D2DGlitches()
+function void loadChallengeRecords3D2DGlitches()
 {
 	if (!System.loadPersistentData(0x840000, "DAGE_AshuraTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
@@ -3866,7 +3882,7 @@ function void loadBestActTimes3D2DGlitches()
 			u32[0x8404e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 }
 
-function void loadBestActTimesModded()
+function void loadChallengeRecordsModded()
 {
 	u64 moddedCharacterBaseKey = System.getGlobalVariableValueByName("DAGE_characterName")
 	u64 moddedCharacterTAKey = stringformat("DAGEmod_%sTA",moddedCharacterBaseKey)
@@ -7633,7 +7649,7 @@ function void Challenge.saveMedalsAndRecords()
 {
 	// Check if the achieved time achieved a medal, and render it and put its value in shared memory if so
 	u8 medalType = 0
-	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654] > 0x00)	// modded characters get no medals
+	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// modded characters get no medals
 		medalType = 0
 	else if (timer.alldata <= u32[0x840240 + (0x10 * (setting.levelselect.characters - 1)) + 0x04])	// gold medal?
 		medalType = 3
@@ -7656,7 +7672,7 @@ function void Challenge.saveMedalsAndRecords()
 				stars.timer = 16		// reset its in-place duration.
 		}
 		else
-			stars.timer = 1		// begin to display the counter on screen -- see customMenu.countMedals()
+			stars.timer = 1		// begin to display the counter on screen -- see customMenu.displayStarCounter()
 		Unlock.checkForNewUnlock(total_stars_old, total_stars)
 	}
 
@@ -7668,12 +7684,15 @@ function void Challenge.saveMedalsAndRecords()
 	}
 
 	// Allow other mods to make custom data when completing the level.
-	saveCustomThings()
+	// Extra Slots isn't compatible with DAGE after so many updates, so we need to cut that mod off
+	// and write our own function if we want compatibility.
+	if (!Mods.isModActive("Extra Character Slots"))
+		saveCustomThings()
 
-	// Check if the achieved time is the best one
-	if (timer.alldata < (u32[best_time_address] & 0x00ffffff))	// the and here equals best_time without affecting best_time for NEW RECORD text.
+	// Check if the achieved time is the best one. At the moment, no records are kept for Extra Slot Characters.
+	if (timer.alldata < (u32[best_time_address] & 0x00ffffff) && !u8[0xffffe654])	// the & 0x00ffffff here equals best_time without affecting best_time for NEW RECORD text.
 	{
-		saveBestActTime()
+		saveChallengeRecord()
 	}
 }
 
@@ -7682,8 +7701,8 @@ function void Challenge.saveMedalsAndRecords()
 
 function void Challenge.showEndInterface()
 {
-	// Show NEW RECORD text
-	if (timer.alldata < best_time)
+	// Show NEW RECORD text. At the moment, no records are kept for Extra Slot Characters.
+	if (timer.alldata < best_time && !u8[0xffffe654])
 	{
 		if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			Flicky.NewRecordText()
@@ -7872,16 +7891,16 @@ function void saveCustomThings()
 
 
 
-function void saveBestActTime()
+function void saveChallengeRecord()
 {
 	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 	{
-		saveBestActTime3D2DGlitches()
+		saveChallengeRecord3D2DGlitches()
 		return
 	}
 	if (System.getGlobalVariableValueByName("DAGE_characterName"))
 	{
-		saveBestActTimeModded()
+		saveChallengeRecordModded()
 		return
 	}
 
@@ -7963,7 +7982,7 @@ function void saveBestActTime()
 	System.savePersistentData(save_data_address, datakey, 0x60)
 }
 
-function void saveBestActTime3D2DGlitches()
+function void saveChallengeRecord3D2DGlitches()
 {
 	u64 datakey
 	u32 save_data_address = 0x840000
@@ -8043,7 +8062,7 @@ function void saveBestActTime3D2DGlitches()
 	System.savePersistentData(save_data_address, datakey, 0x60)
 }
 
-function void saveBestActTimeModded()
+function void saveChallengeRecordModded()
 {
 	u64 datakey
 	string moddedCharacterBaseKey = System.getGlobalVariableValueByName("DAGE_characterName")

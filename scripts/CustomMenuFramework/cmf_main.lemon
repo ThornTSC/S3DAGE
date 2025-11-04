@@ -203,14 +203,20 @@ function bool customMenu.scrollRight()
 }
 
 
+// Dummy function needed for a base call in Extra Character Slots
 function void customMenu.mainLogicLoop()
+{
+	customMenu.mainControlLoop()
+}
+
+function void customMenu.mainControlLoop()
 {
 	time_attack_end = 0
 	global.shields_backup_1 = 0
 	global.shields_backup_2 = 0
 	if (global.game_mode == 0x58)
 	{
-		customMenu.mainLogicLoop.main()
+		customMenu.mainControlLoop.main()
 		return
 	}
 
@@ -265,9 +271,9 @@ function void customMenu.mainLogicLoop()
 //		exit_threshold = customMenu.selectRetryAndExit(exit_threshold)
 	
 	customMenu.matchActToSelection()
-	customMenu.displayTimes()
+	customMenu.displayRecords()
 	countTotalStars()
-	customMenu.countMedals()
+	customMenu.displayStarCounter()
 
 //	else if (selectedMenuOption == 6)
 //		customMenu.selectCharacter()
@@ -317,7 +323,7 @@ function void customMenu.mainLogicLoop()
 		//	bool menuReady = false
 			pause_menu_selection = 0
 
-			while ((!setting.original_mode || setting.unlock_act) && !time_attack && selectedZoneAct < 0xff00 && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !Mods.isModActive("Extra Character Slots"))	// Knux, not Original Mode, not SSZ or DEZ, not a special stage selection
+			while ((!setting.original_mode || setting.unlock_act) && !time_attack && selectedZoneAct < 0xff00 && (setting.levelselect.characters == 3 || setting.levelselect.characters == 4) && global.zone_act != 0x0a00 && global.zone != 0x0b && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))	// Knux, not Original Mode, not SSZ or DEZ, not a special stage selection
 			{
 				global.frame_state = 0	// 0x10 in older versions, but this caused errors when moving from losing at Green Sphere to this menu
 				waitForNextFrame()
@@ -331,13 +337,15 @@ function void customMenu.mainLogicLoop()
 				updateGameObjectLoopRenderPaused()
 				RenderSprites()
 				DataSelect.drawCustomPlanes()
-				customMenu.displayTimes()
+				customMenu.displayRecords()
 				countTotalStars()
-				customMenu.countMedals()
+				customMenu.displayStarCounter()
 				A0 = backupA0
 
 				Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xc0)	// dim background
 				Renderer.drawCustomSprite("select_difficulty", getScreenWidth()/2, 56, 0x00, SPRITE_FLAG_PRIO, 0xfff1)			// SELECT DIFFICULTY text
+				if (Mods.isModActive("Extra Character Slots"))
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, 68, "(Knuckles only. Will not affect Extra Slot Characters.)", 0xe8d494ff, 2, 0, 0xfff1, 0, 1)	// note that this doesn't affect Extra Slot Characters
 				Renderer.drawCustomSprite("2_option_dim", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xfff1, 0, 204)		// menu border rectangle (80% opacity)
 				Renderer.drawCustomSprite("difficulty_normal", getScreenWidth()/2, getScreenHeight()/2 - 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 0) ? selectionTint : nonSelectionTint, 0x10000)
 				Renderer.drawCustomSprite("difficulty_hard", getScreenWidth()/2, getScreenHeight()/2 + 8, 0, SPRITE_FLAG_PRIO, 0xfff2, 0, (pause_menu_selection == 2) ? selectionTint : nonSelectionTint, 0x10000)
@@ -490,6 +498,15 @@ function void customMenu.mainLogicLoop()
 			u8[0x818080] = 0			// Clear the flag for the extended vertical scroll buffer.
 			
 			menuScreen = 0
+
+			// Move to Extra Slots character select if appropriate
+			if (Mods.isModActive("Extra Character Slots") && !original_mode && selectedZoneAct < 0xff00)
+			{
+				global.game_mode = 0x9c
+				levelselect.characters = setting.levelselect.characters
+				// EntryFunctions.actSelectMenu()
+				System.callFunctionByName("ExtraChar.Menu.actselect.setup()")
+			}
 		}
 		else
 		{
@@ -1047,14 +1064,14 @@ function u8 customMenu.selectRetryAndExit(u8 shortcut_threshold)
 	return shortcut_threshold
 }
 
-// This function does nothing right now, as pressing up and down is handled in customMenu.mainLogicLoop().
+// This function does nothing right now, as pressing up and down is handled in customMenu.mainControlLoop().
 /*
 function void customMenu.selectCharacter()
 {
 }
 */
 
-function void customMenu.displayTimes()
+function void customMenu.displayRecords()
 {
 	if (selectedZoneAct >= 0xff00)
 	{
@@ -1713,7 +1730,7 @@ function void customMenu.displayEndlessProgress(u32 levelNumberAddress, s16 py)
 }
 
 
-// We separate this from customMenu.countMedals() to give ESCU a way to count stars.
+// We separate this from customMenu.displayStarCounter() to give ESCU a way to count stars.
 function void countTotalStars()
 {
 	// Set initial star count to medal count
@@ -1760,7 +1777,7 @@ function void countTotalStars()
 
 
 // total_stars is set in the function before this
-function void customMenu.countMedals()
+function void customMenu.displayStarCounter()
 {
 	u16 x_offset = 0
 	u16 y_offset = 0
@@ -1788,7 +1805,7 @@ function void customMenu.countMedals()
 	else
 		stars.timer = 0
 
-	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])	// no medals for modded characters
+	if ((System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]) && (global.game_mode & 0x7f) != 0x54)	// no medals for modded characters
 	{
 		string character_name = System.getGlobalVariableValueByName("DAGE_characterName")
 		if (character_name == 0)	// using 3D2D Glitches or ESCU
@@ -2274,7 +2291,7 @@ function void GameModeControlLoop()
 	}
 }
 
-function void customMenu.mainLogicLoop.main()
+function void customMenu.mainControlLoop.main()
 {
 	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xffff80a0, 0x10000)					// background
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)

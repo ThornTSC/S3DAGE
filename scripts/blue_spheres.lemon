@@ -215,7 +215,7 @@ function void fn04c97e()
 		u32[0xffffffa6] = 0
 		
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
-	loadBestActTimes()
+	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
 	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,

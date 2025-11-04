@@ -186,6 +186,7 @@ function void BonusStage.UpdateTimeRemaining()
 
 	if (timer.alldata > 1 && !BS_remainingTime)
 	{
+		bonus_stage.exiting = 1
 		global.zone_act = checkpoint.zone_act
 		global.zone_act.apparent = checkpoint.zone_act.apparent
 		checkpoint.number = checkpoint.number.backup
@@ -194,7 +195,8 @@ function void BonusStage.UpdateTimeRemaining()
 		checkpoint.rings = ring_counter
 		checkpoint.lives_granted = extra_lives_granted
 		global.shields_backup_1 = u8[0xffffb000 + 0x2b] & char.bonus.ALL_SHIELDS	
-	//	unlock_act = 0	
+		if (u8[0xffffe654])			// with some extra slot characters, though, we don't have the luxury of using initializeMainGame(), so these characters just have to deal with the art oddity
+			unlock_act = 0	
 	}
 }
 

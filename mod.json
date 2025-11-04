@@ -18,15 +18,76 @@
 		"List":
   		[
 			{
+				"InternalName": "BonusStage",
+				"DisplayName": "Bonus Stage",
+				"Variable": "use_new_bonus",
+				"DefaultValue": "1",
+			 	"Category": "Gameplay Settings",
+				"Options":
+				{
+					"0": "Slot Machine",
+					"1": "New Stage (default)"
+				}
+			},
+			{
 				"InternalName": "PauseMenu",
 				"DisplayName": "Pause Menu",
 				"Variable": "pause_menu",
 				"DefaultValue": "0",
-			 	"Category": "Pause Menu",
+			 	"Category": "Gameplay Settings",
 				"Options":
 				{
 					"0": "D.A. Garden (default)",
 					"1": "A.I.R."
+				}
+			},
+			{
+				"InternalName": "SonicMoves",
+				"DisplayName": "Sonic Peelout & Drop Dash",
+				"Variable": "sonic_moves",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
+				"InternalName": "TailsAssist",
+				"DisplayName": "Tails Assist Input",
+				"Variable": "L_TailsAssist",
+				"DefaultValue": "2",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Up+Jump",
+					"1": "L Button",
+					"2": "Up+Jump or L (default)"
+				}
+			},
+			{
+				"InternalName": "EasySpindash",
+				"DisplayName": "L Button Spindash",
+				"Variable": "L_Spindash",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Off",
+					"1": "On (default)"
+				}
+			},
+			{
+				"InternalName": "RollUncurlBehavior",
+				"DisplayName": "Roll Uncurl Behavior",
+				"Variable": "roll_maintain",
+				"DefaultValue": "1",
+			  	"Category": "Control Settings",
+				"Options":
+				{
+					"0": "Classic",
+					"1": "Lenient (default)"
 				}
 			},
 			{
@@ -114,55 +175,6 @@
 				{
 					"0": "Off",
 					"1": "On (default)"
-				}
-			},
-			{
-				"InternalName": "SonicMoves",
-				"DisplayName": "Sonic Peelout & Drop Dash",
-				"Variable": "sonic_moves",
-				"DefaultValue": "1",
-			  	"Category": "Control Settings",
-				"Options":
-				{
-					"0": "Off",
-					"1": "On (default)"
-				}
-			},
-			{
-				"InternalName": "TailsAssist",
-				"DisplayName": "Tails Assist Input",
-				"Variable": "L_TailsAssist",
-				"DefaultValue": "2",
-			  	"Category": "Control Settings",
-				"Options":
-				{
-					"0": "Up+Jump",
-					"1": "L Button",
-					"2": "Up+Jump or L (default)"
-				}
-			},
-			{
-				"InternalName": "EasySpindash",
-				"DisplayName": "L Button Spindash",
-				"Variable": "L_Spindash",
-				"DefaultValue": "1",
-			  	"Category": "Control Settings",
-				"Options":
-				{
-					"0": "Off",
-					"1": "On (default)"
-				}
-			},
-			{
-				"InternalName": "RollUncurlBehavior",
-				"DisplayName": "Roll Uncurl Behavior",
-				"Variable": "roll_maintain",
-				"DefaultValue": "1",
-			  	"Category": "Control Settings",
-				"Options":
-				{
-					"0": "Classic",
-					"1": "Lenient (default)"
 				}
 			},
 			{
