@@ -79,8 +79,6 @@ function void loadupCustomMenu()
 		maxNormalGameSettingsOption = 2
 	}
 
-	loadTASettings()
-
 	customMenu.update()
 }
 
@@ -109,6 +107,7 @@ function void customMenu.setup()
 	unlock_act = 0				// ensure this flag isn't left over from elsewhere
 	musicDelay = false
 
+	loadTASettings()
 	InitHUDTheme()
 
 	if (global.pause_disabled)
