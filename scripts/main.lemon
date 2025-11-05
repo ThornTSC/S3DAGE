@@ -17521,6 +17521,60 @@ function void fn08a3b6()
 
 
 
+// Address a base S3&K bug in collapsing cliff platforms in which this function calls fn0205b6(), which calls DrawOrUnloadObject(),
+// and can unload an object and then *continue to modify values in the zeroed-out object*.
+// The next object to take the same object slot would then contain some garbage data.
+// This bug was most notable in ICZ: objA0.flags38 receives garbage data 0 - 1 = 0xff, and then a trampoline in the same object slot
+// reads the data to decide how it should move, sending it upward without any character touching it.
+// Function taken from objects\level\collapsingcliff.lemon
+//# address-hook(0x0205de) end(0x02061e)
+function void fn0205de()
+{
+	fn0205b6()
+	if (objA0.update_address == 0 && !original_mode)
+		return
+
+	--objA0.flags38
+	if (objA0.flags38 == 0)
+	{
+		objA0.update_address = 0x020620
+
+		for (u8 i = 0; i < 2; ++i)
+		{
+			A1 = 0xffffb000 + i * 0x4a
+			u8 bit = 1 << (3 + i)
+
+			if (objA0.flags2a & bit)
+			{
+				objA0.flags2a &= ~bit
+				objA1.flags2a &= ~(char.flag.ON_OBJECT | char.flag.PUSHING)
+				objA1.flags2a |= char.flag.IN_AIR
+				u8[A1 + 0x21] = char.state.RUNNING2
+			}
+		}
+	}
+}
+
+
+
+// Remove A.I.R.'s spin dash cancelation from ICZ trampolines in Original Mode.
+// Function taken from objects\05_icz\icz_trampoline.lemon
+//# address-hook(0x08b9fa)
+function void fn08b9fa()
+{
+	u8[A1 + 0x05] = 0x02
+	objA1.velocity.y = D2.u16
+	objA1.state = char.state.STRAIGHTJUMP
+	objA1.flags2a |= char.flag.IN_AIR
+	objA1.flags2a &= ~char.flag.ON_OBJECT
+	u8[A1 + 0x40] = 0
+#if STANDALONE
+	if (!original_mode)
+		u8[A1 + 0x3d] = 0	// Stop spindash
+#endif
+}
+
+
 
 
 // Load chunks, blocks, and tiles as the character moves from ICZ1 to ICZ2
