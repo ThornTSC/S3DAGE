@@ -930,14 +930,6 @@ function void fn04d6b8()
 	if ((global.game_mode & 0x7f) == 0x58)
 		return
 
-	if (green_spheres.active)
-	{
-		if (speedSpheres)
-			Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
-		else
-			Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 80)
-	}
-
 	#if STANDALONE
 	// Do the following only once in total, i.e. only for the right object
 	if (objA0.render_flags & 0x01)
@@ -952,7 +944,15 @@ function void fn04d6b8()
 	//	u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
 	//	Renderer.drawCustomSprite(sklogo, getScreenWidth()/2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
 
-		// Render game-specific logo atop a rectangle that hides the Sonic & Knuckles logo
+		// Render game-specific logo atop a rectangle that hides the Sonic & Knuckles logo, and tint the screen the appropriate color
+		if (green_spheres.active)
+		{
+			if (speedSpheres)
+				Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
+			else
+				Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 80)
+		}
+
 		Renderer.drawRect(getScreenWidth()/2 - 48, 40 - scrolloffset.y.planeB - 32, 96, 64, 0x000000ff, 0x16ff, 0, 1)		// color format is RRGGBBAA here
 		if (speedSpheres)
 			Renderer.drawCustomSprite("rtwilogo_blue", getScreenWidth()/2 - 60, 40 - scrolloffset.y.planeB - 25, 0x00, 0, 0x1700, 0, 180)
@@ -1206,26 +1206,18 @@ function void RenderSKLogoFullBG()
 
 
 
-// Insert calls to RenderSKLogoFullBG in functions that draw text on relevant screens.
-// Functions taken from general\bluesphere\bluespheregame.lemon
-// This function draws LEVEL, and we add a check to only use the results screen.
-// However, using this function also causes the original logos to show during the fadeout.
+// Insert call to RenderSKLogoFullBG in function that draws text on relevant screens.
+// Function taken from general\bluesphere\bluespheregame.lemon
+// This function draws LEVEL, and we add a check to only use the results screens.
 //# address-hook(0x04d09e) end(0x04d0f0)
 function void fn04d09e()
 {
-	if (global.game_mode == 0x30)	// Perfect results screen
+	if (u32[0xffffb000] != 0x04cf82)	// Scrolling text, which means this is the main menu and not the Perfect screen that shares this game mode
 		RenderSKLogoFullBG()
 	base.fn04d09e()
 }
 
-// This function draws DIFFICULTY. While the Perfect results also uses LEVEL, the game mode
-// for this screen is the same as the blue sphere game menu screen, which also uses LEVEL.
-//# address-hook(0x04e116) end(0x04e15a)
-function void fn04e116()
-{
-	RenderSKLogoFullBG()
-	base.fn04e116()
-}
+
 
 // Use an image for the PERFECT text on the results screen, as plane mappings wrap improperly in ultrawide resolutions.
 // Functions taken from general\blueshpere\bluespheregame.lemon
