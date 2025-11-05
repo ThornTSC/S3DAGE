@@ -3,7 +3,9 @@
 	"bg_main": { "File": "mainmenu_background.png" },
 
 	"dagelogo": { "File": "dagelogo.png" },
+	"dagelogo_green": { "File": "dagelogo_green.png" },
 	"rtwilogo": { "File": "rtwilogo.png" },
+	"rtwilogo_blue": { "File": "rtwilogo_blue.png" },
 
 	"text_option_revisitedmode":  { "File": "text_option_revisitedmode.png" },
 	"text_option_classicmode":  { "File": "text_option_classicmode.png"},

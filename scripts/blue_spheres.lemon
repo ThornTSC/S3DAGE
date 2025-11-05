@@ -935,7 +935,7 @@ function void fn04d6b8()
 		if (speedSpheres)
 			Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
 		else
-			Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+			Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 80)
 	}
 
 	#if STANDALONE
@@ -949,8 +949,18 @@ function void fn04d6b8()
 		}
 
 		// Render the BG logo in the right colors again
-		u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
-		Renderer.drawCustomSprite(sklogo, getScreenWidth() / 2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
+	//	u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
+	//	Renderer.drawCustomSprite(sklogo, getScreenWidth()/2, 40 - scrolloffset.y.planeB, 0x00, 0, 0x1700)
+
+		// Render game-specific logo atop a rectangle that hides the Sonic & Knuckles logo
+		Renderer.drawRect(getScreenWidth()/2 - 48, 40 - scrolloffset.y.planeB - 32, 96, 64, 0x000000ff, 0x16ff, 0, 1)		// color format is RRGGBBAA here
+		if (speedSpheres)
+			Renderer.drawCustomSprite("rtwilogo_blue", getScreenWidth()/2 - 60, 40 - scrolloffset.y.planeB - 25, 0x00, 0, 0x1700, 0, 180)
+		else
+			Renderer.drawCustomSprite("dagelogo_green", getScreenWidth()/2 - 51 + 6, 40 - scrolloffset.y.planeB - 21, 0x00, 0, 0x1700)	// + 6 here is to compensate for the TM taking up much of the right side when centering image
+		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x1702, 0, 120)	// dim scene
+
+
 	}
 #endif
 
@@ -1116,9 +1126,9 @@ function void RenderSKLogoFullBG()
 	if (speedSpheres)
 		Renderer.drawCustomSprite("whitescreen", 0, 0, 0x00, 0, 0x1701, 0, 0x30a02020, 0x10000)
 	else
-		Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 40)
+		Renderer.drawCustomSprite("hcz_watertint", 0, 0, 0x00, 0, 0x1701, 0, 80)
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x16ff)	// hide areas on far right in widescreen using a black cover-up
-
+/*
 	u64 sklogo = (speedSpheres) ? "sklogo_blue" : "sklogo_green"
 
 	Renderer.drawCustomSprite(sklogo, -80, 32, 0x00, 0, 0x1700)		// Render our custom S&K logo
@@ -1144,6 +1154,50 @@ function void RenderSKLogoFullBG()
 	Renderer.drawCustomSprite(sklogo, 240, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite(sklogo, 368, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
 	Renderer.drawCustomSprite(sklogo, 496, 224, 0x00, 0, 0x1700)	// Render our custom S&K logo
+*/
+
+		// Render game-specific logo atop a rectangle that hides the Sonic & Knuckles logo
+//		Renderer.drawRect(getScreenWidth()/2 - 48, 40 - scrolloffset.y.planeB - 32, 96, 64, 0x000000ff, 0x16ff, 0, 1)		// color format is RRGGBBAA here
+
+	u64 key = (speedSpheres) ? "rtwilogo_blue" : "dagelogo_green"
+	level.framecounter = (level.framecounter + 1) % 120
+	u16 offset = (speedSpheres) ? 120 - level.framecounter : level.framecounter
+	Renderer.drawCustomSprite(key, -130 + offset, -10, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, -10 + offset, -10, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 110 + offset, -10, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 230 + offset, -10, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 350 + offset, -10, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 470 + offset, -10, 0x00, 0, 0x1700)
+
+	Renderer.drawCustomSprite(key, -70 - offset, 40, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key,  50 - offset, 40, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 170 - offset, 40, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 290 - offset, 40, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 410 - offset, 40, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 530 - offset, 40, 0x00, 0, 0x1700)
+
+	Renderer.drawCustomSprite(key, -130 + offset, 90, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, -10 + offset, 90, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 110 + offset, 90, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 230 + offset, 90, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 350 + offset, 90, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 470 + offset, 90, 0x00, 0, 0x1700)
+
+	Renderer.drawCustomSprite(key, -70 - offset, 140, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key,  50 - offset, 140, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 170 - offset, 140, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 290 - offset, 140, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 410 - offset, 140, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 530 - offset, 140, 0x00, 0, 0x1700)
+
+	Renderer.drawCustomSprite(key, -130 + offset, 190, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, -10 + offset, 190, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 110 + offset, 190, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 230 + offset, 190, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 350 + offset, 190, 0x00, 0, 0x1700)
+	Renderer.drawCustomSprite(key, 470 + offset, 190, 0x00, 0, 0x1700)
+
+	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x1702, 0, 120)	// dim scene
 }
 
 
