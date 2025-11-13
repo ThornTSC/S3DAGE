@@ -1,11 +1,18 @@
 {
 	// Main menu options, background, and text
 	"bg_main": { "File": "mainmenu_background.png" },
+	"bg_jam": { "File": "sonicjam_background.png", "Center": "320, 224" },
+	"bg_jam_400": { "File": "sonicjam_background_400.png" },
+	"bg_jam_400_ta": { "File": "sonicjam_background_400_ta.png" },
 
 	"dagelogo": { "File": "dagelogo.png" },
 	"dagelogo_green": { "File": "dagelogo_green.png" },
 	"rtwilogo": { "File": "rtwilogo.png" },
 	"rtwilogo_blue": { "File": "rtwilogo_blue.png" },
+	
+	"sonicjam_divider": { "File": "sonicjam_divider.png" },
+	"sonicjam_divider_half": { "File": "sonicjam_divider_half.png" },
+	"sonicjam_divider_half_short": { "File": "sonicjam_divider_half.png", "Rect": "0,0,12,150" },
 
 	"text_option_revisitedmode":  { "File": "text_option_revisitedmode.png" },
 	"text_option_classicmode":  { "File": "text_option_classicmode.png"},

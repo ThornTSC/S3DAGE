@@ -2315,7 +2315,7 @@ function void RenderHUD_Challenges()
 				++renderQueue
 			}
 			// Medal Times in Challenges
-			if (global.game_mode != 0x9c)	// Extra Slot Characters character selct, which actually renders on top of normal level rendering
+			if (global.game_mode != 0x9c)	// Extra Slot Characters character select, which actually renders on top of normal level rendering
 				RenderHUD_MedalTimes()
 		}
 
@@ -3762,7 +3762,9 @@ function void Standalone.onRestartAtCheckpoint()
 function void loadChallengeRecords()
 {
 	medalCount = 0
+	specialMedalCount = 0
 
+	// Load DAGE act records
 	if (!System.loadPersistentData(0x840000, "DAGE_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x840000 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
@@ -3782,6 +3784,7 @@ function void loadChallengeRecords()
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x8401e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 
+	// Count DAGE act medals
 	u32 medalAddress = 0x840000
 	u32 medalArrayEnd = medalAddress + 0x240
 	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
@@ -3789,6 +3792,7 @@ function void loadChallengeRecords()
 		medalCount += u8[medalAddress]
 	}
 
+	// Load RtWI act records
 	if (!System.loadPersistentData(0x840300, "RtWI_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x840300 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
@@ -3808,6 +3812,7 @@ function void loadChallengeRecords()
 		for (u8 i = 0; i < 0x60; i += 4)
 			u32[0x8404e0 + i] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 
+	// Add RtWI medals to medal count
 	medalAddress = 0x840300
 	medalArrayEnd = medalAddress + 0x240
 	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
@@ -3815,6 +3820,22 @@ function void loadChallengeRecords()
 		medalCount += u8[medalAddress]
 	}
 
+
+	// Load Special Stage act records
+//	if (!System.loadPersistentData(0x840600, "DAGE_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+		for (u16 j = 0; j < 0x0200; j += 4)
+			u32[0x840600 + j] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+
+	// Add Special Stage medals to medal count
+	medalAddress = 0x840600
+	medalArrayEnd = medalAddress + 0x200
+	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
+	{
+		specialMedalCount += u8[medalAddress]
+	}
+	medalCount += specialMedalCount
+
+	// Replace existing records with modded records after all medals are counted.
 	if (Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 	{
 		loadChallengeRecords3D2DGlitches()
@@ -3913,6 +3934,13 @@ function void loadMedalTimes()
 		loadMedalTimes_RtWI()
 		return
 	}
+
+	if (selectedZoneAct >= 0xff00)
+	{
+		loadMedalTimes_Special()
+		return
+	}
+
 	// Load dev and medal times
 	u32 medalTimeOffset = (0x20 * global.zone) + (0x10 * global.act) + (0x0480 * (time_attack - 1))
 	if (global.zone_act == 0x1601)
@@ -3931,7 +3959,12 @@ function void loadMedalTimes_RtWI()
 	System.loadExternalRawData("MedalTimes_RtWI", 0x840260, medalTimeOffset + 0x0300, 0x10, 1, 1)	// load Knuckles times
 }
 
-
+function void loadMedalTimes_Special()
+{
+	// Load dev and medal times
+	u32 medalTimeOffset = ((selectedZoneAct - 0xff00) * 0x20)
+	System.loadExternalRawData("MedalTimes", 0x840240, medalTimeOffset, 0x20, 1, 1)			// load medal times
+}
 
 
 

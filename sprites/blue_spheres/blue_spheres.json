@@ -6,6 +6,9 @@
 	// Perfect text on Green Sphere results, as an image instead of a plane for ultrawide support
 	"results_perfect": { "File": "results_perfect.png", "Rect": "0,0,109,14", "Center": "55,7" },
 
+	// GET RINGS! text for Speed Sphere menu
+	"speedsphere_getrings": { "File": "speedsphere_getrings.png"},
+
 	// Yellow Spheres, renderhooked to allow green spheres to use palette entries
 	"YellowSphere0": { "File": "YellowSphere.png", "Rect": " 0, 0,32,32", "Center": "16,16" },
 	"YellowSphere1": { "File": "YellowSphere.png", "Rect": "32, 0,32,32", "Center": "16,16" },
@@ -78,6 +81,7 @@
 	"BlueSphere_ringicon_small": { "File": "BlueSphere_ringicon_small.png" },
 	"BlueSphere_bluesphereicon_small": { "File": "BlueSphere_bluesphereicon_small.png" },
 	"BlueSphere_greensphereicon_small": { "File": "BlueSphere_greensphereicon_small.png" },
+	"BlueSphere_pasticon_small": { "File": "BlueSphere_pasticon_small.png" },
 
 	// Sonic 2 special stage background
 	"sonic2_background": { "File": "Sonic2_background.bmp", "Center": "128,128"},

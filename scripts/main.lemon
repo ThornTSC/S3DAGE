@@ -57,6 +57,7 @@ global u8 air_time_p2
 
 // Define variables for time attack modes
 global u16 medalCount
+global u8 specialMedalCount
 global u8 time_attack	// Use 0 for a normal game. Use 1 for standard time attack and 2 for Time Stone Trial mode. Use 3 for Marathon and 4 for No Emeralds Marathon mode.
 define u8 time_attack_hud = u8[0x840270]	// Use 0 for left-aligned and 1 for center-aligned
 global u8 time_attack_end	// 1 or more when a time attack or Time Stone Trial has ended. Resets to 0 when a level loads in either of the two modes via Standalone.onLevelStart(). Values above 1 are used for Flicky theme background fading.
@@ -68,15 +69,19 @@ global u8 time_attack_instructions
 global u32 freeze_time
 global u32 freeze_time_bonus
 global u32 timer.alldata_copy
-// global u32 best_time_address
 global u32 best_time
 global u8 best_time_minutes
 global u8 best_time_seconds
 global u8 best_time_frames
+global u32 best_time_perfect
+global u8 best_time_minutes_perfect
+global u8 best_time_seconds_perfect
+global u8 best_time_frames_perfect
 global s8 TA_menu_selection			// signed to catch underflow from going under option 0
 global s8 pause_menu_selection		// signed to catch underflow from going under option 0
-define best_time_address = u32[0x840274]	
-define redstarring_address = u32[0x840278]
+define best_time_address = u32[0x840274]
+define best_time_address_perfect = u32[0x840278]
+define redstarring_address = u32[0x84027c]
 global bool soz2_initial_ghosts
 global u64 marathon_timer
 global bool sidekick
@@ -28859,7 +28864,7 @@ function void Unlock.showUnlock()
 	else if (total_stars < unlock.level.cpz)
 	{
 		unlockTypeString = "Zone & Theme Unlocked:"
-		unlockString = "Emerald Hill Zone & West Side Island"
+		unlockString = "Emerald Hill Zone & Westside Island"
 	}
 	else
 	{
@@ -28873,7 +28878,7 @@ function void Unlock.showUnlock()
 	u8 flags = ((global.game_mode & 0x7f) == 0x34) ? SPRITE_FLAG_PRIO : (SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT)		// allow rectangle to handle fade to white on special stage entrance properly
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py, unlockTypeString, 0x80b0ffff, 2, 0, 0xffff, 0)
 	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, py + 13, unlockString, 0xffffffff, 2, 0, 0xffff, 0)
-	if (unlockString == "Emerald Hill Zone & West Side Island")
+	if (unlockString == "Emerald Hill Zone & Westside Island")
 		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenWidth()/2, py + 24, 0x00, flags, 0xfffe, 0, 180)
 	else
 		Renderer.drawCustomSprite("blackscreen_besttimesdim_rect", getScreenWidth()/2, py + 24, 0x00, flags, 0xfffe, 0, 180)

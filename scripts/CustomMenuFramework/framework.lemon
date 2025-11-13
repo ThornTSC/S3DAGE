@@ -57,7 +57,9 @@ function void loadupCustomMenu()
 	}
 
 	// Challenges menu starts here.
-	playMusic(0x2d)		// play Competition Mode menu music
+//	playMusic(0x2d)		// play Competition Mode menu music
+	Audio.playAudio("challengesmenu", AudioContext.CONTEXT_MUSIC)
+
 
 //	if (time_attack != 1 && time_attack != 2)	// If the time_attack variable is set for standard/Marathon modes, alter it now.
 //	{

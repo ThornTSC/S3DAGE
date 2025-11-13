@@ -47,8 +47,14 @@
 	"sfx_s3life": { "File": "SFX_S3Life.ogg", "Type": "Sound"},
 	"sfx_sklife": { "File": "SFX_SKLife.ogg", "Type": "Sound"},
 
+	// Sonic Jam main menu music
+	"mainmenu": { "File": "Jam_Main.ogg",  "LoopStart": 845998, "Type": "Music"},
+
 	// Sonic 3D Blast main menu music
-	"mainmenu": { "File": "MainMenu.ogg",  "LoopStart": 17070, "Type": "Music"},
+	"mainmenu_old": { "File": "MainMenu.ogg",  "LoopStart": 17070, "Type": "Music"},
+
+	// Sonic Jam Time Attack menu music
+	"challengesmenu": { "File": "Jam_TA.ogg",  "LoopStart": 783980, "Type": "Music"},
 	
 	// Sonic 2 title screen star twinkle, used for Mini Time Stone collection
 	"DD": { "File": "TwinkleRight.ogg", "Type": "Sound"},
