@@ -399,6 +399,8 @@ function void customMenu.mainControlLoop()
 			//		menuReady = true
 			}
 
+			time_attack = setting.time_attack
+
 			// Start level.
 			global.game_mode = 0x8c
 			// Dev cheat for testing new levels without a menu option
@@ -417,7 +419,7 @@ function void customMenu.mainControlLoop()
 			if (selectedZoneAct >= 0xff00)
 			{
 				global.game_mode = 0x34		// in special stage
-				if (setting.time_attack)	// Setup special stage time attack
+				if (selectedZoneAct != 0xffff)	// Setup special stage time attack
 				{
 					global.game_mode = 0x34		// in special stage
 					bluespheres.minigame_mode = 0
@@ -438,6 +440,7 @@ function void customMenu.mainControlLoop()
 						specialstages_knuckles = 0
 						challenge_greenspheres &= 0x000f
 					}
+					time_attack = 1
 				}
 				else						// Setup endless modes
 				{
@@ -448,6 +451,7 @@ function void customMenu.mainControlLoop()
 //					bluespheregame.current_stage = selectedSpecialStageType ? speedSphereProgress : greenSphereProgress
 //					BlueSphere.setGeneratedStage(bluespheregame.current_stage)
 					green_spheres.active = 0x01
+					time_attack = 0
 				}
 			}
 			else
@@ -468,15 +472,14 @@ function void customMenu.mainControlLoop()
 //				u8[0xffffe654] = System.getGlobalVariableValueByName("DAGE_XtraChar")	// unnecessary; this is handled in the framework
 			}
 
-			if (setting.levelselect.characters == 1 && sidekick && !setting.time_attack)
+			if (setting.levelselect.characters == 1 && sidekick && !setting.time_attack && selectedZoneAct < 0xff00)
 				setting.levelselect.characters = 0
-			else if (setting.levelselect.characters == 3 && sidekick && (!setting.original_mode || setting.unlock_act) && !setting.time_attack)
+			else if (setting.levelselect.characters == 3 && sidekick && (!setting.original_mode || setting.unlock_act) && !setting.time_attack && selectedZoneAct < 0xff00)
 				setting.levelselect.characters = 4
 
 			original_mode = (setting.time_attack || unlock_act) ? 0 : setting.original_mode
-			if (setting.time_attack == 1 && selectedZoneAct >= 0xff18)
+			if (selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
 				original_mode = 1
-			time_attack = setting.time_attack
 			if (original_mode)
 				Renderer.setScreenSize(320, 224)
 			else
@@ -559,7 +562,7 @@ function void customMenu.mainControlLoop()
 	}
 	else if (customMenu.scrollUp())
 	{
-		if (selectedMenuOption == 4 && selectedZoneAct >= 0xff00 && time_attack == 1)
+		if (selectedMenuOption == 4 && selectedZoneAct >= 0xff00)
 		{
 			selectedMenuOption -= 1
 			playSound(0x5b)			
@@ -574,9 +577,9 @@ function void customMenu.mainControlLoop()
 			selectedMenuOption = 2
 			playSound(0x5b)
 		}
-		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff08 && setting.time_attack)
+		else if (selectedMenuOption == 3 && selectedZoneAct >= 0xff00)
 		{
-			selectedZoneAct -= 8
+			selectedMenuOption = 1
 			playSound(0x5b)
 		}
 		else if (selectedMenuOption > 0 && selectedMenuOption <= maxSettingsOption)		// used to be 5 when retry and exit were separate
@@ -598,7 +601,7 @@ function void customMenu.mainControlLoop()
 					setting.levelselect.characters = 3
 				playSound(0x5b)
 			}
-			else if (setting.time_attack == 0 && (unlock_flags & 0x0001) || (setting.time_attack == 1 && selectedZoneAct < 0xff18))
+			else if ((selectedZoneAct == 0xffff && (unlock_flags & 0x0001)) || (selectedZoneAct < 0xff18))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
 				playSound(0x5b)
@@ -632,9 +635,9 @@ function void customMenu.mainControlLoop()
 			selectedMenuOption = 4
 			playSound(0x5b)
 		}
-		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff00 && selectedZoneAct < 0xff18 && setting.time_attack)
+		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff00)
 		{
-			selectedZoneAct += 8
+			selectedMenuOption = 3
 			playSound(0x5b)
 		}
 		else if (selectedMenuOption < maxSettingsOption)			// used to be 5 when retry and exit were separate
@@ -651,12 +654,12 @@ function void customMenu.mainControlLoop()
 		{
 			if (selectedZoneAct < 0xff00)
 			{
-				setting.levelselect.characters += 1
-				if (setting.levelselect.characters >= 4)
+				++setting.levelselect.characters
+				if (setting.levelselect.characters > 3)
 					setting.levelselect.characters = 1
 				playSound(0x5b)
 			}
-			else if (setting.time_attack == 0 && (unlock_flags & 0x0001) || (setting.time_attack == 1 && selectedZoneAct < 0xff18))
+			else if ((selectedZoneAct == 0xffff && (unlock_flags & 0x0001)) || (selectedZoneAct < 0xff18))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
 				playSound(0x5b)
@@ -729,10 +732,7 @@ function void customMenu.selectZone()
 			if (setting.unlock_act > 2 || total_stars < unlock.level.cpz)		// Pressed right on final unlocked act?
 			{
 				setting.unlock_act = 0
-				selectedZoneAct = 0xff00	// Make selection become Special Stage
-				setting.original_mode = 0	// disallow Original Mode
-				if (setting.time_attack == 2)
-					setting.time_attack = 1	// disallow Time Stone Trial
+				customMenu.selectNextSpecialStage()	// Make selection become Special Stage or AIZ1 as appropriate
 			}
 		}
 		else if (selectedZoneAct >= 0x0b00 && selectedZoneAct < 0xff00)	// Pressed right on DEZ?
@@ -745,10 +745,7 @@ function void customMenu.selectZone()
 			}
 			else
 			{
-				selectedZoneAct = 0xff00	// Make selection become Special Stage
-				setting.original_mode = 0	// disallow Original Mode
-				if (setting.time_attack == 2)
-					setting.time_attack = 1	// disallow Time Stone Trial
+				customMenu.selectNextSpecialStage()
 			}
 		}
 		else if (selectedZoneAct >= 0xff00)	// Pressed Right on Special Stage?
@@ -784,10 +781,8 @@ function void customMenu.selectZone()
 		}
 		else if (selectedZoneAct <= 0x0001)	// Pressed left on AIZ?
 		{
-			selectedZoneAct = 0xff00		// Make selection become Special Stage
-			setting.original_mode = 0		// disallow Original Mode
-			if (setting.time_attack == 2)
-				setting.time_attack = 1		// disallow Time Stone Trial
+			selectedZoneAct = 0xfeff			// Access this as if selecting the first available special stage
+			customMenu.selectNextSpecialStage()	// Make selection become Special Stage, highest unlockable act, or DEZ2 as appropriate
 		}
 		else if (selectedZoneAct >= 0xff00)	// Pressed left on Special Stage?
 		{
@@ -798,7 +793,7 @@ function void customMenu.selectZone()
 				setting.original_mode = 0	// disallow Original Mode
 			}
 			else
-				selectedZoneAct = 0x0b00	// Make selection become DEZ
+				selectedZoneAct = 0x0b01	// Make selection become DEZ2
 		}
 		else if (selectedZoneAct == 0x0a01)	// Pressed right on SSZ?
 		{
@@ -831,10 +826,9 @@ function void customMenu.selectAct()
 			if (setting.unlock_act > 2 || total_stars < unlock.level.cpz)		// Pressed right on final unlocked act?
 			{
 				setting.unlock_act = 0
-				selectedZoneAct = 0xff00	// Make selection become Special Stage
-				setting.original_mode = 0	// disallow Original Mode
-				if (setting.time_attack == 2)
-					setting.time_attack = 1	// disallow Time Stone Trial
+				customMenu.selectNextSpecialStage()	// Make selection become Special Stage or AIZ1 as appropriate
+				if (selectedZoneAct < 0xff00 && setting.unlock_act != s2_EHZ && selectedMenuOption == 3)	// if we're no longer in special stage selections,
+					selectedMenuOption == 2																// move the cursor if not in EHZ
 			}
 		}
 		else if (selectedZoneAct == 0x0b01)	// Pressed right on DEZ2?
@@ -847,27 +841,16 @@ function void customMenu.selectAct()
 			}
 			else
 			{
-				selectedZoneAct = 0xff00	// Make selection become Special Stage
-				setting.original_mode = 0	// disallow Original Mode
-				if (setting.time_attack == 2)
-					setting.time_attack = 1	// disallow Time Stone Trial
+				customMenu.selectNextSpecialStage()	// Make selection become Special Stage or AIZ1 as appropriate
+				if (selectedZoneAct < 0xff00 && setting.unlock_act != s2_EHZ && selectedMenuOption == 3)	// if we're no longer in special stage selections,
+					selectedMenuOption == 2																// move the cursor if not in EHZ
 			}
 		}
 		else if (selectedZoneAct >= 0xff00)	// Pressed Right on Special Stage?
 		{
-			if (Input.buttonPressed(BUTTON_R))
-			{
-				if (selectedZoneAct >= 0xff18)
-					selectedZoneAct = 0x0000	// Make selection become AIZ1
-				else
-					selectedZoneAct += 8
-			}
-			else if (setting.time_attack && ((selectedZoneAct & 0x0007) != 7))
-			{
-				++selectedZoneAct
-			}
-			else
-				selectedZoneAct = 0x0000		// Make selection become AIZ1
+			customMenu.selectNextSpecialStage()	// Make selection become Special Stage or AIZ1 as appropriate
+			if (selectedZoneAct < 0xff00 && setting.unlock_act != s2_EHZ && selectedMenuOption == 3)	// if we're no longer in special stage selections,
+				selectedMenuOption == 2																// move the cursor if not in EHZ
 		}
 		else
 		{
@@ -891,7 +874,7 @@ function void customMenu.selectAct()
 	else if (customMenu.scrollLeft() || Input.buttonPressed(BUTTON_L))
 	{
 		if (setting.unlock_act == s2_EHZ && selectedMenuOption == 3)		// On EHZ with music option selected?
-			selectedMenuOption = 4									// This option doesn't exist on other levels, so move the cursor.
+			selectedMenuOption = 4											// This option doesn't exist on other levels, so move the cursor.
 
 		if (setting.unlock_act)				// Pressed left on unlockable act?
 		{
@@ -901,42 +884,15 @@ function void customMenu.selectAct()
 		}
 		else if (selectedZoneAct == 0x0000)	// Pressed left on AIZ1?
 		{
-			selectedZoneAct = (setting.time_attack) ? 0xff07 : 0xff00		// Make selection become Special Stage
-			setting.original_mode = 0		// disallow Original Mode		
-			if (setting.time_attack == 2)
-				setting.time_attack = 1		// disallow Time Stone Trial	
+			customMenu.selectPreviousSpecialStage()	// Make selection become Special Stage, highest unlockable act, or DEZ2 as appropriate
+			if (selectedZoneAct < 0xff00 && setting.unlock_act != s2_EHZ && selectedMenuOption == 3)	// if we're no longer in special stage selections,
+				selectedMenuOption == 2																// move the cursor if not in EHZ
 		}
 		else if (selectedZoneAct >= 0xff00)	// Pressed left on Special Stage?
 		{
-			if (Input.buttonPressed(BUTTON_L))
-			{
-				if (selectedZoneAct < 0xff08)
-				{
-					// This code is duplicated below. The two must align. Could make this a separate function in the future to make this cleaner.
-					if (total_stars >= unlock.level.ehz)
-					{
-						setting.unlock_act = (total_stars >= unlock.level.cpz) ? 2 : 1	// Make selection become EHZ or CPZ depending on total stars
-						selectedZoneAct = 0x0200
-						setting.original_mode = 0	// disallow Original Mode
-					}
-					else
-						selectedZoneAct = 0x0b01	// Make selection become DEZ2
-				}
-				else
-					selectedZoneAct -= 8
-			}
-			else if (setting.time_attack && ((selectedZoneAct & 0x0007) != 0))
-			{
-				--selectedZoneAct
-			}			
-			else if (total_stars >= unlock.level.ehz)
-			{
-				setting.unlock_act = (total_stars >= unlock.level.cpz) ? 2 : 1	// Make selection become EHZ or CPZ depending on total stars
-				selectedZoneAct = 0x0200
-				setting.original_mode = 0	// disallow Original Mode
-			}
-			else
-				selectedZoneAct = 0x0b01	// Make selection become DEZ2
+			customMenu.selectPreviousSpecialStage()	// Make selection become Special Stage, highest unlockable act, or DEZ2 as appropriate
+			if (selectedZoneAct < 0xff00 && setting.unlock_act != s2_EHZ && selectedMenuOption == 3)	// if we're no longer in special stage selections,
+				selectedMenuOption == 2																// move the cursor if not in EHZ
 		}
 		else
 		{
@@ -944,10 +900,10 @@ function void customMenu.selectAct()
 			if (selectedZoneAct & 0x00f0)	// Act value has underflowed to 0xff?
 				selectedZoneAct -= 0xfe		// Make selection become previous zone's Act 2
 		}
-		if (selectedZoneAct >= 0xff00)	// on Special Stage after selection has occurred
+		if (selectedZoneAct >= 0xff00)		// on Special Stage after selection has occurred
 		{
-			if (selectedMenuOption == 3)	// music option selected?
-				selectedMenuOption = 4		// move to character select option
+			if (selectedMenuOption == 2)	// game mode option selected?
+				selectedMenuOption = 3		// move to character select option
 //			else if (selectedMenuOption == 6)	// We've navigated here while in the character select from a level
 //				if (setting.levelselect.characters == 3)	// Knuckles is the bottom option, where HARD is for time attack and SPEED is for endless
 //					selectedSpecialStageType = 1
@@ -959,6 +915,58 @@ function void customMenu.selectAct()
 	}
 }
 
+function void customMenu.selectNextSpecialStage()
+{
+	while (true)
+	{
+		if (selectedZoneAct < 0xff00)
+			selectedZoneAct = 0xff00
+		else
+			++selectedZoneAct	// this can roll over from 0xffff to 0x0000, which is desirable
+
+		if (selectedZoneAct == 0x0000)
+			break
+		if (selectedZoneAct >= 0xff20)
+		{
+			selectedZoneAct = 0xffff
+			break
+		}
+		if ((normalSpecialStagesAccessed & (1 << u32(selectedZoneAct & 0x00ff))) || (hardSpecialStagesAccessed & (1 << u32(selectedZoneAct & 0x00ff))))
+			break
+	}
+}
+
+function void customMenu.selectPreviousSpecialStage()
+{
+	while (true)
+	{
+		if (selectedZoneAct == 0xffff)
+			selectedZoneAct = 0xff1f
+		else
+		{
+			--selectedZoneAct	// this can roll over from 0x0000 to 0xffff, which is desirable
+			if (selectedZoneAct == 0xffff)
+				break
+		}
+
+		if (selectedZoneAct < 0xff00)
+		{
+			if (total_stars >= unlock.level.ehz)
+			{
+				setting.unlock_act = (total_stars >= unlock.level.cpz) ? 2 : 1	// Make selection become EHZ or CPZ depending on total stars
+				selectedZoneAct = 0x0200
+				setting.original_mode = 0	// disallow Original Mode
+			}
+			else
+				selectedZoneAct = 0x0b01	// Make selection become DEZ2
+
+			break
+		}
+
+		if ((normalSpecialStagesAccessed & (1 << u32(selectedZoneAct & 0x00ff))) || (hardSpecialStagesAccessed & (1 << u32(selectedZoneAct & 0x00ff))))
+			break
+	}
+}
 
 function void customMenu.matchActToSelection()
 {
@@ -974,11 +982,11 @@ function void customMenu.matchActToSelection()
 		global.zone_act = 0x0a00							// switch menu ID for in-game ID
 	else if (selectedZoneAct >= 0xff00)						// Special Stage was selected
 	{
+		setting.unlock_act = 0
 		global.zone_act = 0x0000								// set actual zone ID to AIZ
 		global.next_bluespheres = (selectedZoneAct && 0x0007)	// set special stage ID
 		global.sk_bluespheres = (selectedZoneAct >= 0xff08 && selectedZoneAct < 0xff10) ? 1 : 0	// set S&K stage flag if needed
 		challenge_greenspheres = (selectedZoneAct >= 0xff10 && selectedZoneAct < 0xff17) ? global.next_bluespheres + 1 : 0	// partially set challenge_greenspheres flag. The +0x10 for Hard stages comes as the stage is loaded.
-		// Need a line here for prototype stages when implemented
 	}
 }
 
@@ -1092,7 +1100,7 @@ function void customMenu.displayRecords()
 {
 	if (selectedZoneAct >= 0xff00)
 	{
-		if (setting.time_attack)
+		if (selectedZoneAct < 0xffff)
 			customMenu.displayRecordsSpecial()
 		else
 		{
@@ -1613,71 +1621,68 @@ function void customMenu.displayRecordsSpecial()
 		best_time_frames_perfect = u8[best_time_address + 7]
 		u16 best_time_centiseconds_perfect = (best_time_frames_perfect * 99 + 30) / 59
 
-		if (setting.time_attack)
+		// Draw basic clear best time
+		if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
 		{
-			// Draw basic clear best time
-			if (best_time > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
-			{
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
-			else if (best_time <= u32[((selectedZoneAct - 0xff00) * 0x10) + (0x10 * i) + 0x840240])  
-			{
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
-			else
-			{
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+		}
+		else if (best_time <= u32[((selectedZoneAct - 0xff00) * 0x10) + (0x10 * i) + 0x840240])  
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+		}
+		else
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_minutes % 10), getScreenExtend() - 40 + px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds / 10), getScreenExtend() - 40 + px + 0x10, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds % 10), getScreenExtend() - 40 + px + 0x18, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds / 10), getScreenExtend() - 40 + px + 0x28, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds % 10), getScreenExtend() - 40 + px + 0x30, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+		}
 
-			// Draw perfect clear best time
-			if (best_time_perfect > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
-			{
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
-			else if (best_time_perfect <= u32[((selectedZoneAct - 0xff00) * 0x10) + (0x10 * i) + 8 + 0x840240])
-			{
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_minutes_perfect % 10), getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds_perfect / 10), getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds_perfect % 10), getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds_perfect / 10), getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds_perfect % 10), getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
-			else
-			{
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_minutes_perfect % 10), getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds_perfect / 10), getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds_perfect % 10), getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds_perfect / 10), getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds_perfect % 10), getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
-			}
+		// Draw perfect clear best time
+		if (best_time_perfect > 0x93b3b)	// saved best time is greater than 9'59"99, likely initialized to 0x00ffffff
+		{
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_dash", getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+		}
+		else if (best_time_perfect <= u32[((selectedZoneAct - 0xff00) * 0x10) + (0x10 * i) + 8 + 0x840240])
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_minutes_perfect % 10), getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes_rainbow", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds_perfect / 10), getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_seconds_perfect % 10), getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds_rainbow", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds_perfect / 10), getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d_rainbow", best_time_centiseconds_perfect % 10), getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+		}
+		else
+		{
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_minutes_perfect % 10), getScreenExtend() - 40 + px, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_minutes", getScreenExtend() - 40 + px + 0x08, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds_perfect / 10), getScreenExtend() - 40 + px + 0x10, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_seconds_perfect % 10), getScreenExtend() - 40 + px + 0x18, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("S3D_char_seconds", getScreenExtend() - 40 + px + 0x20, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds_perfect / 10), getScreenExtend() - 40 + px + 0x28, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite(stringformat("S3D_digit_%d", best_time_centiseconds_perfect % 10), getScreenExtend() - 40 + px + 0x30, py + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
 		}
 
 		// Draw appropriate medals if relevant
@@ -1685,7 +1690,7 @@ function void customMenu.displayRecordsSpecial()
 		{
 			Renderer.drawCustomSprite("medal_03_00", px - 16, py + 8, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
 		}
-		// Draw appropriate medals if relevant
+		// Draw appropriate perfect medals if relevant
 		if (setting.time_attack && u8[best_time_address_perfect] == 1)	// PERFECT medal earned
 		{
 			Renderer.drawCustomSprite("medal_03_00", px - 16, py + 8 + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
@@ -1709,7 +1714,7 @@ function void customMenu.displayRecordsSpecial()
 			u16 medal_time_centiseconds_perfect = (medal_time_frames_perfect * 99 + 30) / 59
 
 			// Draw dev time if appropriate
-	//		if (setting.time_attack && u8[best_time_address] == 1)	// if we aren't about to draw dev times without a medal earned
+			if (setting.time_attack && u8[best_time_address] == 1)	// if we aren't about to draw dev times without a medal earned
 			{
 				Renderer.drawCustomSprite("text_dev_menucolor", getScreenExtend() - 40 + medal_px - 28, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)	// draw "DEV TIME" text
 				Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", medal_time_minutes % 10), getScreenExtend() - 40 + medal_px, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == i) ? noDim : dim, 0x10000)
@@ -1927,23 +1932,53 @@ function void DataSelect.drawCustomPlanes()
 		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xe002, 0, 95)							// background dimming (37.5% opacity)
 
 		// Render the border rectangles around the options and best times
-		Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
+		if (selectedZoneAct >= 0xff00)
+			Renderer.drawCustomSprite("blackscreen_specialoptionsdim", getScreenExtend() - 40 + 8 + 114, 159 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// special stage options border rectangle (66% opacity)
+		else
+			Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
 		if (selectedZoneAct >= 0xff00)
 		{
-			if ((setting.time_attack == 1 && selectedZoneAct < 0xff18) || setting.time_attack == 0 && (unlock_flags & 0x0001))
+			if ((selectedZoneAct < 0xff18) || (selectedZoneAct == 0xffff && (unlock_flags & 0x0001)))
 			{
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Normal best times border rectangle (80% opacity)
-				Renderer.drawCustomSprite("text_option_normalspecial", getScreenExtend() - 40 + 240, 16, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? selectionTint : nonSelectionTint, 0x10000)		// Normal text
+				if (!(selectedZoneAct == 0xffff && !(unlock_flags & 0x0001)))
+					Renderer.drawCustomSprite("text_option_normalspecial", getScreenExtend() - 40 + 240, 16, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? selectionTint : nonSelectionTint, 0x10000)		// Normal text
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Hard best times border rectangle (80% opacity)
-				if (setting.time_attack)
+				if (selectedZoneAct < 0xffff)
 					Renderer.drawCustomSprite("text_option_hardspecial", getScreenExtend() - 40 + 240, 16 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? selectionTint : nonSelectionTint, 0x10000)		// Hard text
-				else
-					Renderer.drawCustomSprite("text_option_speedspecial", getScreenExtend() - 40 + 240, 16 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? selectionTint : nonSelectionTint, 0x10000)		// Hard text
+				else if (unlock_flags & 0x0001)
+					Renderer.drawCustomSprite("text_option_speedspecial", getScreenExtend() - 40 + 240, 16 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? selectionTint : nonSelectionTint, 0x10000)	// Speed text
+				
+				if (selectedZoneAct < 0xff10)
+				{
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon",getScreenExtend() - 40 + 268, 27, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon",getScreenExtend() - 40 + 268, 27 + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("hud_ring",getScreenExtend() - 40 + 280, 38 + 44, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon",getScreenExtend() - 40 + 268, 27 + 102, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon",getScreenExtend() - 40 + 268, 27 + 44 + 102, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("hud_ring",getScreenExtend() - 40 + 280, 38 + 44 + 102, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+				}
+
+				else if (selectedZoneAct < 0xff18)
+				{
+					Renderer.drawCustomSprite("hud_ring_s2", getScreenExtend() - 40 + 272, 31, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("hud_ring_s2", getScreenExtend() - 40 + 272, 31 + 44, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon_small", getScreenExtend() - 40 + 280, 39 + 44, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? noDim : dim, 0x10000)
+
+					Renderer.drawCustomSprite("hud_ring_s2", getScreenExtend() - 40 + 272, 31 + 102, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("hud_ring_s2", getScreenExtend() - 40 + 272, 31 + 44 + 102, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon_small", getScreenExtend() - 40 + 280, 39 + 44 + 102, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? noDim : dim, 0x10000)
+				}
 			}
 			else
 			{
 				Renderer.drawCustomSprite("text_option_pastspecial", getScreenExtend() - 40 + 240, 16 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Prototype best times border rectangle (80% opacity)
+
+				Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("hud_ring", getScreenExtend() - 40 + 280, 38 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
 			}
 		}
 		else
@@ -1981,41 +2016,116 @@ function void DataSelect.drawCustomPlanes()
 				actKey = "titlecard_act1"
 			Renderer.drawCustomSprite(actKey, getScreenExtend() - 40 + 84 + 22, 88 - 64, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 1) ? noDim : dim, 0x10000)	// ACT X image, shifted due to Center in key
 		}
-		else if (setting.time_attack)
+		else if (selectedZoneAct >= 0xff00)
 		{
 			u32 emeraldDim = 0x60e0e0e0
+			s8 px_emeralds_offset = 0
+			u8 py_emeralds = 108
+			normalSpecialStagesAccessed = 0xffffffff
+			hardSpecialStagesAccessed = 0xfffffff
 
-			// Draw Sonic 3 Chaos Emeralds
-			u8 py_emeralds = 78
-			for (u8 i = 0; i < 7; ++i)
+			// Draw Sonic 3 Chaos Emeralds and text
+			if (selectedZoneAct < 0xff08)
 			{
-				Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i) ? noDim : emeraldDim, 0x10000)
-			}
-			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7) ? noDim : emeraldDim, 0x10000)
+				// Draw text
+				Renderer.drawCustomSprite("titlecard_angelislandi", getScreenExtend() - 40 + 122, py_emeralds - 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)
 
-			// Draw Sonic & Knuckles Super Emeralds
-			py_emeralds += 17
-			for (u8 i = 0; i < 7; ++i)
-			{
-				Renderer.drawCustomSprite(stringformat("hud_super_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 8) ? noDim : emeraldDim, 0x10000)
+				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
+				if ((normalSpecialStagesAccessed & (1 << 7)) || (hardSpecialStagesAccessed & (1 << 7)))
+					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7) ? noDim : emeraldDim, 0x10000)
+				else
+					px_emeralds_offset = 8
+				
+				// Draw the Chaos Emeralds
+				for (u8 i = 0; i < 7; ++i)
+				{
+					if ((normalSpecialStagesAccessed & (1 << i)) || (hardSpecialStagesAccessed & (1 << i)))
+						Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i) ? noDim : emeraldDim, 0x10000)
+					else
+						Renderer.drawCustomSprite("hud_chaos_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
+				}
 			}
-			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7 + 8) ? noDim : emeraldDim, 0x10000)
 
-			// Draw Sonic 2 Chaos Emeralds
-			py_emeralds += 17
-			for (u8 i = 0; i < 7; ++i)
+			// Draw Sonic & Knuckles Super Emeralds and text
+			else if (selectedZoneAct < 0xff10)
 			{
-				Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x10) ? noDim : emeraldDim, 0x10000)
-			}
-			Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7 + 0x10) ? noDim : emeraldDim, 0x10000)
+				// Draw text
+				Renderer.drawCustomSprite("titlecard_angelislandii", getScreenExtend() - 40 + 122, py_emeralds - 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)
 
-			// Draw Prototype stage blue spheres
-			py_emeralds += 17
-			for (u8 i = 0; i < 7; ++i)
-			{
-				Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 58 + (16 * i), py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
+				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
+				if ((normalSpecialStagesAccessed & (1 << 15)) || (hardSpecialStagesAccessed & (1 << 15)))
+					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x0f) ? noDim : emeraldDim, 0x10000)
+				else
+					px_emeralds_offset = 8
+				
+				// Draw the Super Emeralds
+				for (u16 i = 0; i < 7; ++i)
+				{
+					if ((normalSpecialStagesAccessed & (1 << u16(i+8))) || (hardSpecialStagesAccessed & (1 << u16(i+8))))
+						Renderer.drawCustomSprite(stringformat("hud_super_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 8) ? noDim : emeraldDim, 0x10000)
+					else
+						Renderer.drawCustomSprite("hud_super_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
+				}
 			}
-			Renderer.drawCustomSprite("BlueSphere_pasticon_small", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7 + 0x18) ? noDim : emeraldDim, 0x10000)
+
+			// Draw Sonic 2 Chaos Emeralds and text
+			else if (selectedZoneAct < 0xff18)
+			{
+				// Draw text
+				Renderer.drawCustomSprite("titlecard_westsideisland", getScreenExtend() - 40 + 122, py_emeralds - 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+
+				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
+				if ((normalSpecialStagesAccessed & (1 << 23)) || (hardSpecialStagesAccessed & (1 << 23)))
+					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x17) ? noDim : emeraldDim, 0x10000)
+				else
+					px_emeralds_offset = 8
+				
+				// Draw the Chaos Emeralds
+				for (u32 i = 0; i < 7; ++i)
+				{
+					if ((normalSpecialStagesAccessed & (1 << u32(i+0x10))) || (hardSpecialStagesAccessed & (1 << u32(i+0x10))))
+						Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x10) ? noDim : emeraldDim, 0x10000)
+					else
+						Renderer.drawCustomSprite("hud_s2chaos_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
+				}
+			}
+
+			// Draw Prototype stage Chaos Emeralds and text
+			else if (selectedZoneAct < 0xff20)
+			{
+				// Draw text
+				Renderer.drawCustomSprite("titlecard_prototype", getScreenExtend() - 40 + 122, py_emeralds - 8, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+
+				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
+				if ((normalSpecialStagesAccessed & (1 << 31)) || (hardSpecialStagesAccessed & (1 << 31)))
+				{
+					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x1f) ? noDim : emeraldDim, 0x10000)
+					Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf004, 0, ((selectedZoneAct & 0x00ff) == 0x1f) ? noDim : emeraldDim, 0x10000)
+				}
+				else
+					px_emeralds_offset = 8
+				
+				// Draw the Chaos Emeralds
+				for (u32 i = 0; i < 7; ++i)
+				{
+					if ((normalSpecialStagesAccessed & (1 << u32(i+0x18))) || (hardSpecialStagesAccessed & (1 << u32(i+0x18))))
+					{
+						Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
+						Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf004, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
+					}
+					else
+					{
+						Renderer.drawCustomSprite("hud_chaos_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
+						Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf004, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : 0x60202020, 0x10000)
+					}
+				}
+			}
+			// Draw Endless Mode text
+			else
+			{
+				// Draw text
+				Renderer.drawCustomSprite("titlecard_endlessmode", getScreenExtend() - 40 + 122, py_emeralds + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)
+			}
 		}
 
 		if (selectedMenuOption == 1)
@@ -2027,8 +2137,8 @@ function void DataSelect.drawCustomPlanes()
 			}
 			else
 			{
-				Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 36 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
-				Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 194 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
+				Renderer.drawCustomSprite("leftarrow_large", getScreenExtend() - 40 + 30 + 7 - arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)			// ACT left arrow
+				Renderer.drawCustomSprite("rightarrow_large", getScreenExtend() - 40 + 200 + 7 + arrowShift, 98 + 14, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// ACT right arrow
 			}
 		}
 		if (total_stars < unlock.level.ehz)
@@ -2048,28 +2158,62 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 156, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
 		}
 
-		if (setting.time_attack == 0)
-			if (selectedZoneAct >= 0xff00)
-				Renderer.drawCustomSprite("text_option_endless", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// ENDLESS MODE text
-			else if (!setting.original_mode)
-				Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + 70, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// REVISITED MODE text
-			else
-				Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + 76, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// CLASSIC MODE text
-		else if (setting.time_attack == 1)
-			Renderer.drawCustomSprite("text_option_TA", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME ATTACK text
-		else if (setting.time_attack == 2)
-			Renderer.drawCustomSprite("text_option_TST", getScreenExtend() - 40 + 62 + 60, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME STONE TRIAL text
-		if (selectedMenuOption == 2)
+		if (selectedZoneAct < 0xff00)
 		{
-			Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + 45 + 4 - arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)			// Game type left arrow
-			Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + 190 + 4 + arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// Game type right arrow
+			if (setting.time_attack == 0)
+			{
+			//	if (selectedZoneAct >= 0xff00)
+			//		Renderer.drawCustomSprite("text_option_endless", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// ENDLESS MODE text
+					if (!setting.original_mode)
+						Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + 70, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// REVISITED MODE text
+					else
+						Renderer.drawCustomSprite("text_option_classicmode", getScreenExtend() - 40 + 76, 156, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// CLASSIC MODE text
+			}
+			else if (setting.time_attack == 1)
+				Renderer.drawCustomSprite("text_option_TA", getScreenExtend() - 40 + 80 + 42, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME ATTACK text
+			else if (setting.time_attack == 2)
+				Renderer.drawCustomSprite("text_option_TST", getScreenExtend() - 40 + 62 + 60, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 2) ? modeSelectionTint : nonSelectionTint, 0x10000)			// TIME STONE TRIAL text
+			if (selectedMenuOption == 2)
+			{
+				Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + 45 + 4 - arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)			// Game type left arrow
+				Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + 190 + 4 + arrowShift, 156 + 8, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// Game type right arrow
+			}
 		}
 
 		u16 moddedTailsCharacterBackup = moddedTailsCharacter
 		if (setting.unlock_act && (setting.time_attack == 1 || setting.time_attack == 2))
 			moddedTailsCharacter = 0	// ignore this flag when drawing text in unlockable act challenge menus
 
-		if (setting.time_attack)
+		if (selectedZoneAct >= 0xff00)
+		{
+			Renderer.drawCustomSprite("text_character", getScreenExtend() - 40 + 43 + 39 + 16, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 3) ? selectionTint : nonSelectionTint, 0x10000)		// CHARACTER text
+			if (setting.levelselect.characters == 1)
+				Renderer.drawCustomSprite("continue_icon_sonic", getScreenExtend() - 40 + 182, 194, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 3) ? noDim : dim, 0x10000)	// Tails icon
+			else if (setting.levelselect.characters == 2)
+				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 182, 194, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 3) ? noDim : dim, 0x10000)	// Tails icon
+			else
+				Renderer.drawCustomSprite("continue_icon_knuckles", getScreenExtend() - 40 + 182, 194, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 3) ? noDim : dim, 0x10000)	// Knuckles icon
+			if (selectedMenuOption == 3)
+			{
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, 180 + 4 + moddedTailsCharacter, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// GAME TYPE right arrow
+			}
+
+		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			if (exit_threshold == 1)
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
+			else
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
+			if (selectedMenuOption == 4)
+			{
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
+			}			
+		}
+		else if (setting.time_attack)
 		{
 			if (setting.unlock_act == s2_EHZ)
 			{
@@ -2086,17 +2230,17 @@ function void DataSelect.drawCustomPlanes()
 			}
 
 		//	Renderer.drawCustomSprite("text_superbuttonretry", getScreenExtend() - 40 + 14 + 74, 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003)	// SUPER BUTTON RETRY text
-			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
-			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("text_retryexit", getScreenExtend() - 40 + 20 + 64 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
+			Renderer.drawCustomSprite("@input_icon_button_Y", getScreenExtend() - 40 + 41 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+			Renderer.drawCustomSprite("@input_icon_button_back", getScreenExtend() - 40 + 105 - 12, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 			if (exit_threshold == 1)
-				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
+				Renderer.drawCustomSprite("text_option_press", getScreenExtend() - 40 + 166 + 19 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)	// PRESS text
 			else
-				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
+				Renderer.drawCustomSprite("text_option_hold", getScreenExtend() - 40 + 169 + 16 - 3, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// HOLD text
 			if (selectedMenuOption == 4)
 			{
-				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
-				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00 && time_attack == 1)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
+				Renderer.drawCustomSprite("leftarrow_small", getScreenExtend() - 40 + 126 + 2 + 16 - arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)		// RETRY EXIT left arrow
+				Renderer.drawCustomSprite("rightarrow_small", getScreenExtend() - 40 + 201 + 2 + 16 + arrowShift, (setting.unlock_act == s2_EHZ || (selectedZoneAct >= 0xff00)) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, modeSelectionTint, 0x10000)	// RETRY EXIT right arrow
 			}
 		}
 		else
@@ -2118,7 +2262,7 @@ function void DataSelect.drawCustomPlanes()
 			if (System.getGlobalVariableValueByName("DAGE_characterID") != 2)
 			{
 				Renderer.drawCustomSprite("text_sidekick", getScreenExtend() - 40 + 45 + 38, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? selectionTint : nonSelectionTint, 0x10000)		// RETRY/EXIT text
-				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, (setting.unlock_act == s2_EHZ) ? 209 : 201 , 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
+				Renderer.drawCustomSprite("continue_icon_tails", getScreenExtend() - 40 + 48, (setting.unlock_act == s2_EHZ) ? 209 : 201, 0x00, SPRITE_FLAG_PRIO + 0x08, 0xf003, 0, (selectedMenuOption == 4) ? noDim : dim, 0x10000)
 				if (sidekick == 1)
 					Renderer.drawCustomSprite("text_option_yes", getScreenExtend() - 40 + 155 + 11, (setting.unlock_act == s2_EHZ) ? 196 + 4 : 188 + 4, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 4) ? modeSelectionTint : nonSelectionTint, 0x10000)		// PRESS text
 				else
@@ -2158,7 +2302,7 @@ function void DataSelect.drawCustomPlanes()
 			else
 			{
 				rectKey = (level.framecounter.low & 0x08) ? "rect_specialoption_yellow" : "rect_specialoption_red"			// change rectangle color every 8 frames
-				rectYPos = ((setting.time_attack == 1 && selectedZoneAct >= 0xff18) || !(unlock_flags & 0x0001)) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
+				rectYPos = ((selectedZoneAct >= 0xff18 && selectedZoneAct != 0xffff) || !(unlock_flags & 0x0001)) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
 				Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 257, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection			
 			}
 		}

@@ -95,12 +95,16 @@ define u16 unlock_flags = u16[0x8402fc]
 define u16 total_stars = u16[0x8402fe]
 
 // Define memory location to store 
-define u32 DAGE_version_address = 0x8405f6
+define u32 DAGE_version_address = 0x8405ee
 
-// Define memory location to store Green/Speed Sphere progress
+// Define memory locations to store accessed special stages and Green/Speed Sphere progress
+constant u32 normalSpecialStagesAccessedAddress = 0x8405f0
+define u32 normalSpecialStagesAccessed = u32[normalSpecialStagesAccessedAddress]
+constant u32 hardSpecialStagesAccessedAddress = 0x8405f4
+define u32 hardSpecialStagesAccessed = u32[hardSpecialStagesAccessedAddress]
 constant u32 greenSphereProgressAddress = 0x8405f8
-constant u32 speedSphereProgressAddress = 0x8405fc
 define u32 greenSphereProgress = u32[greenSphereProgressAddress]
+constant u32 speedSphereProgressAddress = 0x8405fc
 define u32 speedSphereProgress = u32[speedSphereProgressAddress]
 
 // Dev cheat for gaining stars

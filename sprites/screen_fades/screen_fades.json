@@ -4,6 +4,7 @@
 
 	// Menu border rectangles
 	"blackscreen_optionsdim":  { "File": "blackscreen.png", "Rect": "0,0,229,60", "Center": "114,30" },
+	"blackscreen_specialoptionsdim":  { "File": "blackscreen.png", "Rect": "0,0,229,42", "Center": "114,21" },
 	"blackscreen_besttimesdim_rect":  { "File": "blackscreen.png", "Rect": "0,0,148,60", "Center": "74,30" },
 	"blackscreen_specialbesttimesdim_rect":  { "File": "blackscreen.png", "Rect": "0,0,132,94", "Center": "66,47" },
 

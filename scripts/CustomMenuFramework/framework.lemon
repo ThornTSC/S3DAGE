@@ -91,6 +91,9 @@ function void customMenu.setup()
 	global.active_saveslot = 0			// do not allow a save slot to be active
 	debug_mode.enabled.u8 = Game.getSetting(SETTING_DEBUG_MODE)		// The debug flag may not have been set if we didn't go to the AIR menu first
 	marathon_timer = 0
+	restart_timer = 0
+	restartSpecialStage = 0
+	level.restart = 0
 	draw_HUD = false					// Do not draw HUD in menus. initializeMainGame() will activate the HUD.
 	water.fullscreen = 0				// Set in case we quit the game while totally underwater.
 	original_mode = 0					// Remove original mode in main menu

@@ -1400,6 +1400,8 @@ function void SpecialStage()
 		}
 		*/
 	}
+	
+	restart_timer = 0
 
 	Enigma.decompress(0x0aef54, 0xffff5500, 0x0000)
 	copyRectToVRAM(0xffff5500, 0xc000, 0x28, 0x1c)
@@ -3139,7 +3141,7 @@ function void BlueSpheres.OnBlueSphereCollected()
 		if (!speedSpheres)
 			++continues_counter
 		// Uncomment to reintroduce Perfect sound if conditions for continue and perfect are not the same
-		if (speedSpheres)	//		if (bluespheres.blue_remaining == 0)
+		if (speedSpheres || time_attack == 1)	//		if (bluespheres.blue_remaining == 0)
 			Standalone.playAudio(0x68)	// Perfect sound // Should not use playMusic(ID) for this, as it affects D0 and that must be preserved for sphere-to-ring conversions. playMusic simply calls Standalone.playAudio(ID) anyway.
 		else
 			Standalone.playAudio(0xac)	// Continue sound // Same as above.
@@ -4357,7 +4359,7 @@ function void BlueSpheres.renderCustomGround()
 	BlueSpheres.replacePlaneRendering()
 
 	// Render glow effect for background
-	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && selectedZoneAct < 0xff18)
+	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !(selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20))
 	{
 		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000, 0, tint, 0x10000)
 	}

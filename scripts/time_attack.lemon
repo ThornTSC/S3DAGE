@@ -7202,11 +7202,11 @@ function void Standalone.checkTimeAttackFinish()
 
 function void Challenge.checkRestartShortcut()
 {
-	if (Input.buttonPressed(BUTTON_Y) && (global.zone < 0x0c || global.zone == 0x16) && !time_attack_end && !global.game.paused)
+	if (Input.buttonPressed(BUTTON_Y) && (global.zone < 0x0c || global.zone == 0x16) && !time_attack_end && !global.game.paused && !((global.game_mode & 0x7c) == 0x34 && bluespheres.stage_exit_state))
 	{
 		restart_timer = 1
 	}
-	else if (Input.buttonDown(BUTTON_Y) && restart_timer >= 1 && (global.zone < 0x0c || global.zone == 0x16) && !time_attack_end && !global.game.paused)
+	else if (Input.buttonDown(BUTTON_Y) && restart_timer >= 1 && (global.zone < 0x0c || global.zone == 0x16) && !time_attack_end && !global.game.paused && !((global.game_mode & 0x7c) == 0x34 && bluespheres.stage_exit_state))
 	{
 		++restart_timer
 	}

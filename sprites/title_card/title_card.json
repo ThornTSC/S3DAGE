@@ -13,6 +13,11 @@
     "titlecard_act1":  { "File": "Title_Act1.png", "Rect": "0,0,77,48", "Center": "22,-64" }, 
     "titlecard_act2":  { "File": "Title_Act2.png", "Rect": "0,0,77,48", "Center": "22,-64" },
     "titlecard_singleact":  { "File": "Title_Act.png", "Rect": "0,0,77,48", "Center": "22,-64" },
+    "titlecard_angelislandi":  { "File": "Title_AngelIslandI.png", "Center": "70, 6" },
+    "titlecard_angelislandii":  { "File": "Title_AngelIslandII.png", "Center": "70, 6" },
+    "titlecard_westsideisland":  { "File": "Title_WestsideIsland.png", "Center": "70, 6" },
+    "titlecard_prototype":  { "File": "Title_Prototype.png", "Center": "48, 6" },
+    "titlecard_endlessmode":  { "File": "Title_EndlessMode.png", "Center": "69, 6" },
     "titlecard_whitebars":  { "File": "Title_WhiteBars.png", "Rect": "0,0,47,21", "Center": "38,-64" },
   
     "titlecard_zone0":  { "File": "Title_AIZ.png", "Rect": "0,0,171,66", "Center": "19,-16" },  // Center1 = Rect3 - 152 for all entries

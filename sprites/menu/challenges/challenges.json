@@ -29,6 +29,7 @@
 	"text_option_1player":  { "File": "text_option_1player.png", "Center": "30,4" },	// off center to align with selection arrows
 	"text_option_2player":  { "File": "text_option_2player.png", "Center": "32,4" },
 	"text_sidekick":  { "File": "text_sidekick.png", "Center": "38,4" },
+	"text_character":  { "File": "text_character.png", "Center": "38,4" },
 	"text_option_yes":  { "File": "text_option_yes.png", "Center": "11,4" },	
 	"text_option_no":  { "File": "text_option_no.png", "Center": "7,4" },
 	"text_devtime":  { "File": "text_devtime.png"},		// left for compatibility with ECSU
