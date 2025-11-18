@@ -1889,12 +1889,13 @@ function void fn04ceb6()
 // Function taken from level\special\bluespheres.lemon
 function bool BlueSpheres.useGeneratedStages()
 {
+	if (time_attack || original_mode)
+		return false
+
 #if STANDALONE
 	if ((Game.getSetting(SETTING_RANDOM_SPECIALSTAGES) || (challenge_greenspheres > 0x08 && challenge_greenspheres <= 0x10) || (challenge_greenspheres > 0x18 && challenge_greenspheres <= 0x20) || speedSpheres) && !original_mode)
 		return true
 #endif
-	if (original_mode)
-		return false
 	
 	return (bluespheres.minigame_mode != 0)
 }
@@ -3626,11 +3627,8 @@ function void BlueSpheres.FadeIn()
 
 			if (!original_mode)		// track player-object collision responses during fade in,
 			{
-				fn009dde()			// as the usual call to this doesn't run during the fade in
-			}
-			if (challenge_greenspheres || speedSpheres)		// track player position updates for use in scrolling Sonic 2 background during fade in,
-			{
-				fn009d5e()									// as the usual call to this doesn't run during the fade in
+				fn009dde()			// as the usual call to this doesn't run during the fade in.
+				fn009d5e()			// Add this call so the background (original or Sonic 2) scrolls properly if you move during the fade in
 			}
 		}
 	#elif STANDALONE
