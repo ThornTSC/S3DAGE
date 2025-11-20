@@ -477,7 +477,7 @@ function void customMenu.mainControlLoop()
 			else if (setting.levelselect.characters == 3 && sidekick && (!setting.original_mode || setting.unlock_act) && !setting.time_attack && selectedZoneAct < 0xff00)
 				setting.levelselect.characters = 4
 
-			original_mode = (setting.time_attack || unlock_act) ? 0 : setting.original_mode
+			original_mode = (setting.time_attack || unlock_act || selectedZoneAct >= 0xff00) ? 0 : setting.original_mode
 			if (selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
 				original_mode = 1
 			if (original_mode)
@@ -2032,7 +2032,11 @@ function void DataSelect.drawCustomPlanes()
 
 				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
 				if ((normalSpecialStagesAccessed & (1 << 7)) || (hardSpecialStagesAccessed & (1 << 7)))
+				{
 					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 7) ? noDim : emeraldDim, 0x10000)
+					if ((selectedZoneAct & 0x00ff) == 7)
+						Renderer.drawCustomSprite("S3D_smalldigit_8", getScreenExtend() - 40 + 170 + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+				}
 				else
 					px_emeralds_offset = 8
 				
@@ -2040,7 +2044,11 @@ function void DataSelect.drawCustomPlanes()
 				for (u8 i = 0; i < 7; ++i)
 				{
 					if ((normalSpecialStagesAccessed & (1 << i)) || (hardSpecialStagesAccessed & (1 << i)))
+					{
 						Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i) ? noDim : emeraldDim, 0x10000)
+						if ((selectedZoneAct & 0x00ff) == i)
+							Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+					}
 					else
 						Renderer.drawCustomSprite("hud_chaos_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
 				}
@@ -2054,7 +2062,11 @@ function void DataSelect.drawCustomPlanes()
 
 				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
 				if ((normalSpecialStagesAccessed & (1 << 15)) || (hardSpecialStagesAccessed & (1 << 15)))
+				{
 					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x0f) ? noDim : emeraldDim, 0x10000)
+					if ((selectedZoneAct & 0x00ff) == 0x0f)
+						Renderer.drawCustomSprite("S3D_smalldigit_8", getScreenExtend() - 40 + 170 + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+				}
 				else
 					px_emeralds_offset = 8
 				
@@ -2062,7 +2074,11 @@ function void DataSelect.drawCustomPlanes()
 				for (u16 i = 0; i < 7; ++i)
 				{
 					if ((normalSpecialStagesAccessed & (1 << u16(i+8))) || (hardSpecialStagesAccessed & (1 << u16(i+8))))
+					{
 						Renderer.drawCustomSprite(stringformat("hud_super_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 8) ? noDim : emeraldDim, 0x10000)
+						if ((selectedZoneAct & 0x00ff) == i + 8)
+							Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+					}
 					else
 						Renderer.drawCustomSprite("hud_super_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
 				}
@@ -2076,7 +2092,11 @@ function void DataSelect.drawCustomPlanes()
 
 				// Draw the blue sphere for the extra stage if unlocked, else shift all emeralds eight pixels to the right and don't draw the sphere
 				if ((normalSpecialStagesAccessed & (1 << 23)) || (hardSpecialStagesAccessed & (1 << 23)))
+				{
 					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x17) ? noDim : emeraldDim, 0x10000)
+					if ((selectedZoneAct & 0x00ff) == 0x17)
+						Renderer.drawCustomSprite("S3D_smalldigit_8", getScreenExtend() - 40 + 170 + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+				}
 				else
 					px_emeralds_offset = 8
 				
@@ -2084,7 +2104,11 @@ function void DataSelect.drawCustomPlanes()
 				for (u32 i = 0; i < 7; ++i)
 				{
 					if ((normalSpecialStagesAccessed & (1 << u32(i+0x10))) || (hardSpecialStagesAccessed & (1 << u32(i+0x10))))
+					{
 						Renderer.drawCustomSprite(stringformat("hud_s2chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x10) ? noDim : emeraldDim, 0x10000)
+						if ((selectedZoneAct & 0x00ff) == i + 0x10)
+							Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf004)
+					}
 					else
 						Renderer.drawCustomSprite("hud_s2chaos_empty", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, emeraldDim, 0x10000)
 				}
@@ -2101,6 +2125,8 @@ function void DataSelect.drawCustomPlanes()
 				{
 					Renderer.drawCustomSprite("hud_bluesphere", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == 0x1f) ? noDim : emeraldDim, 0x10000)
 					Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 170, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf004, 0, ((selectedZoneAct & 0x00ff) == 0x1f) ? noDim : emeraldDim, 0x10000)
+					if ((selectedZoneAct & 0x00ff) == 0x1f)
+						Renderer.drawCustomSprite("S3D_smalldigit_8", getScreenExtend() - 40 + 170 + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf005)
 				}
 				else
 					px_emeralds_offset = 8
@@ -2112,6 +2138,8 @@ function void DataSelect.drawCustomPlanes()
 					{
 						Renderer.drawCustomSprite(stringformat("hud_chaos_%x", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
 						Renderer.drawCustomSprite("hud_pasticon_small", getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset, py_emeralds, 0x00, SPRITE_FLAG_PRIO, 0xf004, 0, ((selectedZoneAct & 0x00ff) == i + 0x18) ? noDim : emeraldDim, 0x10000)
+						if ((selectedZoneAct & 0x00ff) == i + 0x18)
+							Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", i + 1), getScreenExtend() - 40 + 58 + (16 * i) + px_emeralds_offset + 8, py_emeralds + 8, 0x00, SPRITE_FLAG_PRIO, 0xf005)
 					}
 					else
 					{
@@ -2596,12 +2624,12 @@ function void customMenu.mainControlLoop.main()
 
 	if (selectedMenuOption.main == 2)
 	{
-		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 116 - arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
-		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 176 + arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
+		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 112 - arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
+		Renderer.drawCustomSprite("rightarrow_medium", getScreenExtend() - 40 + option_x + 172 + arrowShift, 112, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type right arrow
 		if (selectedGameType == 0)
-			Renderer.drawCustomSprite("text_option_100", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
+			Renderer.drawCustomSprite("text_option_100", getScreenExtend() - 40 + option_x + 126, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// 100%
 		else
-			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 130, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
+			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 126, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
 	else if (selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{

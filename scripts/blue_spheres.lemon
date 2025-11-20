@@ -1979,6 +1979,14 @@ function void fn0085b0()
 			u16[0xffffe436] = u16[A2+4]
 		}
 
+		// Special check for Original Mode Sonic 3 Special Stage 3
+		if (original_mode && time_attack != 1 && !useSKLayouts && global.next_bluespheres == 2)
+		{
+			System.loadExternalRawData("S3SS3_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("S3SS3_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("S3SS3_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("S3SS3_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
 		// Special check for Original Mode Sonic 3 Special Stage 6
 		if (original_mode && time_attack != 1 && !useSKLayouts && global.next_bluespheres == 5)
 		{
@@ -1995,6 +2003,22 @@ function void fn0085b0()
 			System.loadExternalRawData("S3SS8_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
 			System.loadExternalRawData("S3SS8_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
+		// Special check for Original Mode Sonic & Knuckles Special Stage 1
+		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 0)
+		{
+			System.loadExternalRawData("SKSS1_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("SKSS1_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("SKSS1_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("SKSS1_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
+		// Special check for Original Mode Sonic & Knuckles Special Stage 4
+		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 3)
+		{
+			System.loadExternalRawData("SKSS4_Orig", 0xfffff100, 0, 0x400, 0, 1)	// stage layout
+			System.loadExternalRawData("SKSS4_Orig", 0xffffe426, 0x400, 2, 0, 1)
+			System.loadExternalRawData("SKSS4_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
+			System.loadExternalRawData("SKSS4_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
+		}
 		// Special check for Original Mode Sonic & Knuckles Special Stage 5
 		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 4)
 		{
@@ -2003,7 +2027,6 @@ function void fn0085b0()
 			System.loadExternalRawData("SKSS5_Orig", 0xffffe422, 0x402, 4, 0, 1)	// bluespheres.position.x and bluespheres.position.y
 			System.loadExternalRawData("SKSS5_Orig", 0xffffe442, 0x406, 2, 0, 1)	// bluespheres.rings_remaining
 		}
-
 		// Special check for Original Mode Sonic & Knuckles Special Stage 7
 		else if (original_mode && time_attack != 1 && useSKLayouts && global.next_bluespheres == 6)
 		{

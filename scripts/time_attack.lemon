@@ -7773,6 +7773,9 @@ function void Challenge.showEndInterface()
 
 function void Challenge.manageEndMenu()
 {
+	if ((global.game_mode & 0x7f) > 0x50)	// we've returned to the main menu or Challenges menu
+		return
+
 	if (customMenu.scrollUp())
 	{
 		TA_menu_selection -= 1
