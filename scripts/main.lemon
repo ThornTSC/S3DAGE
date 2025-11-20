@@ -5376,9 +5376,14 @@ function void Character.updateBonusEffects()
 // Function taken form maingame\character\character.lemon
 function bool Character.performSuperTransformation()
 {
+	// In a new bonus stage?
+	if (unlock_act == s3_CGZ)
+		return false
+
 	// Already super?
 	if (super.active)
 		return false
+
 	if (!original_mode && !Input.buttonPressed(BUTTON_Y))	// safety check at this point, as recent updates have put this check just before any call to this function as well.
 		return false
 
