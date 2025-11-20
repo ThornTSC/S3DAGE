@@ -526,6 +526,7 @@ function void customMenu.mainControlLoop()
 			playSound(0x63)
 		}
 
+		levelselect.characters = setting.levelselect.characters
 		global.characters = setting.levelselect.characters	// global.character is needed early in order to have controller LEDs read properly when Standalone.onLevelStart() runs
 		// Handle Knuckles & Tails
 		useKnucklesAndTails = (global.characters == 4 && setting.time_attack != 1 && setting.time_attack != 2)
@@ -1922,8 +1923,10 @@ function void DataSelect.drawCustomPlanes()
 			arrowShift == -1
 		
 		// Render the background and dim it
-		if (selectedZoneAct >= 0xff00)
-			Renderer.drawCustomSprite("bg_special", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
+		if (selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
+			Renderer.drawCustomSprite(stringformat("bg_special%02x", selectedZoneAct & 0x00ff), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
+		else if (selectedZoneAct >= 0xff00)
+			Renderer.drawCustomSprite(stringformat("bg_special%02x_%s", selectedZoneAct & 0x00ff, selectedSpecialStageType ? "hard" : "normal"), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
 		else if (setting.unlock_act)
 			Renderer.drawCustomSprite(stringformat("bg_unlock%04x", setting.unlock_act), getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xe000)		// level background
 		else
