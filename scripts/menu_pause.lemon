@@ -5,14 +5,14 @@
 
 function void UpdateGamePause()
 {
+	if (time_attack_end || (bluespheres.stage_exit_state && time_attack == 1))	// do not allow pausing when time attacks are finished
+		return
+
 	if (pause_menu && !original_mode)
 	{
 		base.UpdateGamePause()
 		return
 	}
-
-	if (time_attack_end)
-		return
 
 #if !GAMEAPP
 	// This is only used in outro; and there's no actual need to prevent game pause there
@@ -26,7 +26,7 @@ function void UpdateGamePause()
 		return
 	}
 
-	// AIR pausing: the whole script execution is paused. Used for Comeptition Mode.
+	// AIR pausing: the whole script execution is paused. Used for Competition Mode.
 	if ((pause_menu || (global.zone >= 0x0e && global.zone <= 0x12)) && (control.pad1.pressed & CONTROL_START))
 	{
 		global.game.paused = true
@@ -263,7 +263,7 @@ function void UpdateGamePause()
 						customMenu.displayStarCounter()
 				}
 
-				if (bluespheres.minigame_mode == 1 || time_attack == 1)		// call to time_attack is new with special stage time attack
+				if ((bluespheres.minigame_mode == 1 || time_attack == 1))		// call to time_attack is new with special stage time attack
 				{
 					if (PauseMenu_Challenges())		// formerly PauseMenu_BlueSphere()
 						break
