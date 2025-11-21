@@ -2445,7 +2445,7 @@ function void RenderHUD_Challenges()
 function void RenderHUD_MedalTimes()
 {
 	u8 flags = SPRITE_FLAG_PRIO
-	if (u32[0xffffb250] == 0x2d690 && theme.hud == theme.westside)	// title card is active in Westside theme
+	if (u32[0xffffb250] == 0x2d690 && (theme.hud == theme.westside || theme.hud == theme.saturn))	// title card is active in Westside theme
 		flags |= SPRITE_FLAG_NO_GLOBAL_TINT	// do not tint the medal icons while that title card is up
 
 	if ((time_attack == 1 || time_attack == 2) && !time_attack_end && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !u8[0xffffe654])
