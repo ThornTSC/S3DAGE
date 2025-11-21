@@ -1608,7 +1608,6 @@ function void customMenu.displayRecordsSpecial()
 	best_time_address += 0x840600
 	best_time_address_perfect = best_time_address + 4
 
-
 	for (u8 i = 0; i <= showTwoStages; i++)
 	{
 		best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
@@ -1864,7 +1863,7 @@ function void customMenu.displayStarCounter()
 
 	u8 spriteFlags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 
-	u16 starCount = (cheatStars) ? (total_stars - cheatStars) : total_stars
+	u16 starCount = total_stars - cheatStars
 
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
 		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)

@@ -3963,7 +3963,7 @@ function void loadMedalTimes_Special()
 {
 	// Load dev and medal times
 	u32 medalTimeOffset = ((selectedZoneAct - 0xff00) * 0x20)
-	System.loadExternalRawData("MedalTimes", 0x840240, medalTimeOffset, 0x20, 1, 1)			// load medal times
+	System.loadExternalRawData("MedalTimes_Special", 0x840240, medalTimeOffset, 0x20, 1, 1)			// load medal times
 }
 
 

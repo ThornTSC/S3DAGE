@@ -108,5 +108,6 @@
 
   // Medal and Dev times
   "MedalTimes":  { "File": "MedalTimes.bin" },
-  "MedalTimes_RtWI":  { "File": "MedalTimes_RtWI.bin" }
+  "MedalTimes_RtWI":  { "File": "MedalTimes_RtWI.bin" },
+  "MedalTimes_Special":  { "File": "MedalTimes_Special.bin" }
 }
