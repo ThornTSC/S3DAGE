@@ -2071,13 +2071,13 @@ function void RenderHUD_Marathon()
 //# address-hook(0x00db44) end(0x00dbb2)
 function void RenderHUD()
 {
-	if (unlock_act != s3_CGZ)
-	{
-		base.RenderHUD()
-		return
-	}
-
 // We only use this for the CGZ bonus stage.
+//	if (unlock_act != s3_CGZ)
+//	{
+//		base.RenderHUD()
+//		return
+//	}
+
 #if STANDALONE
 	if (DEBUG_DISABLE_HUD)
 		return
@@ -2127,7 +2127,7 @@ function void RenderHUD()
 				u16 centiseconds = (frames * 99 + 30) / 59
 
 				u16 px = (minutes >= 10) ? (baseX + 8) : baseX
-				if (Game.getSetting(SETTING_EXTENDED_HUD))
+			//	if (Game.getSetting(SETTING_EXTENDED_HUD))
 				{
 					if (minutes >= 10)
 						HUD.drawDigit(minutes / 10, px + 0x20, baseY + 0x10, renderQueue)
@@ -2140,6 +2140,7 @@ function void RenderHUD()
 					if (minutes < 10)
 						HUD.drawDigit(centiseconds % 10, px + 0x58, baseY + 0x10, renderQueue)
 				}
+			/*
 				else
 				{
 					if (minutes >= 10)
@@ -2149,6 +2150,7 @@ function void RenderHUD()
 					HUD.drawDigit(seconds / 10, px + 0x38, baseY + 0x10, renderQueue)
 					HUD.drawDigit(seconds % 10, px + 0x40, baseY + 0x10, renderQueue)
 				}
+			*/
 				++renderQueue
 			}
 		}
@@ -2160,7 +2162,7 @@ function void RenderHUD()
 			HUD.drawSprite(show ? "hud_text_rings" : "hud_text_rings_red", baseX, py, renderQueue)
 			++renderQueue
 
-			u16 px = baseX + (!isBonusStage && Game.getSetting(SETTING_EXTENDED_HUD) ? 0x58 : 0x40)
+			u16 px = baseX + (!isBonusStage ? 0x58 : 0x40) // && Game.getSetting(SETTING_EXTENDED_HUD)
 			for (u32 value = ring_counter;;)
 			{
 				HUD.drawDigit(value % 10, px, py, renderQueue)
