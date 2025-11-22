@@ -17573,6 +17573,34 @@ function void fn0205de()
 	}
 }
 
+// To cover similar bugs to the above, we'll zero memory in object slots that should be empty before we place new objects in them.
+function bool allocDynamicObject(u32 startAddress, s8 remaining)
+{
+	A1 = startAddress
+	D0.s16 = remaining
+	while (D0.s16 >= 0)
+	{
+		A1 += 0x4a
+		if (u32[A1] == 0)
+		{
+			// Found a free place
+			_setZeroFlagByValue(0)
+			if (!original_mode)
+			{
+				// Let's be *extra* sure this object was unloaded properly.
+				// Some objects in S3&K can "unload" and then write values for one more frame.
+				// This is a potential cause of the SOZ2 crash, which may also be related to collapsing ledges.
+				zeroMemory(A1, 0x4a)
+			}
+			return true
+		}
+		--D0.s16
+	}
+
+	// Failed
+	_setZeroFlagByValue(1)
+	return false
+}
 
 
 // Remove A.I.R.'s spin dash cancelation from ICZ trampolines in Original Mode.
