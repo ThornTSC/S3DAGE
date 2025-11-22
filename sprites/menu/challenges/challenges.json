@@ -50,6 +50,7 @@
 	"star_silver":  { "File": "star_silver.png"},
 	"star_bronze":  { "File": "star_bronze.png"},
 	"star_red":  { "File": "star_red.png"},
+	"star_special":  { "File": "star_special.png"},
 
 	// Digits, dash, and minutes/seconds symbols (Sonic 3D tall)
 	"S3D_digit_0": { "File": "Sonic3D_digits_tall.png", "Rect":  "0,0,8,16" },

@@ -262,7 +262,12 @@ function void UpdateGamePause()
 					if (!stars.timer)				// this is handled separately if the timer for the counter is active
 						customMenu.displayStarCounter()
 				}
-
+				else if (original_mode && time_attack == 1)	// prototype special stage time attack
+				{
+					countTotalStars()
+					if (!stars.timer)				// this is handled separately if the timer for the counter is active
+						customMenu.displayStarCounter()					
+				}
 				if ((bluespheres.minigame_mode == 1 || time_attack == 1))		// call to time_attack is new with special stage time attack
 				{
 					if (PauseMenu_Challenges())		// formerly PauseMenu_BlueSphere()

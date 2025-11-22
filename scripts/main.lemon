@@ -73,10 +73,12 @@ global u32 best_time
 global u8 best_time_minutes
 global u8 best_time_seconds
 global u8 best_time_frames
+global u16 best_time_centiseconds
 global u32 best_time_perfect
 global u8 best_time_minutes_perfect
 global u8 best_time_seconds_perfect
 global u8 best_time_frames_perfect
+global u16 best_time_centiseconds_perfect
 global s8 TA_menu_selection			// signed to catch underflow from going under option 0
 global s8 pause_menu_selection		// signed to catch underflow from going under option 0
 define best_time_address = u32[0x840274]

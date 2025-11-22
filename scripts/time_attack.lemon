@@ -43,8 +43,11 @@ function void PrintVersionNumber()
 		px += 8
 		py += 2
 	}
-	if ((time_attack_end && !time_attack_hud) || global.game_mode == 0x58)	// time attack left-aligned HUD
+	if (((time_attack_end && !time_attack_hud) || global.game_mode == 0x58) && global.game_mode != 0x34)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
+
+	if (global.game_mode == 0x34)
+		py += 3
 
 	#if GAMEAPP == 0x24020200	// use for latest stable version
 		Renderer.drawText("version", px, py, "DAGE  v1.12.4.0\nA.I.R. v24.02.02.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
@@ -3820,14 +3823,13 @@ function void loadChallengeRecords()
 		medalCount += u8[medalAddress]
 	}
 
-
 	// Load Special Stage act records
-//	if (!System.loadPersistentData(0x840600, "DAGE_SonicTA", 0x60))	// load best times for this character and mode, with a 0 returned if they don't exist
+	if (!System.loadPersistentData(0x830000, "DAGE_SpecialTA", 0x0200))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u16 j = 0; j < 0x0200; j += 4)
-			u32[0x840600 + j] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+			u32[0x830000 + j] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
 
 	// Add Special Stage medals to medal count
-	medalAddress = 0x840600
+	medalAddress = 0x830000
 	medalArrayEnd = medalAddress + 0x200
 	for (medalAddress; medalAddress < medalArrayEnd; medalAddress += 4)
 	{
@@ -7729,6 +7731,82 @@ function void Challenge.saveMedalsAndRecords()
 	}
 }
 
+function void Challenge.saveMedalsAndRecords_Special()
+{
+	// This function may still be called during a loop while the special stage restarts. Ensure the stage has progressed and that we aren't otherwise cheating.
+	if (BS_displayedTime < 60 || CHEAT_ONE_BLUE_SPHERE)
+		return
+
+	u16 total_stars_old = total_stars
+	bool newStar = false
+	bool newPerfectStar = false
+	u8 medalType = 0
+	u8 perfectMedalType = 0
+	u16 animFrame = (level.framecounter.low / 4) % 8
+	u64 medalKey = stringformat("medal_special_0%d", animFrame)
+
+	// Find appropriate data to consider for timer
+	u32 minutes = BS_displayedTime / 3600
+	u32 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u32 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+	u32 currentTime = (minutes << 16) + (seconds << 8) + frames
+
+	u8 medalOffset = (selectedZoneAct < 0xff18) ? 0x10 * selectedSpecialStageType : 0
+	u32 medalTime = u32[medalOffset + 0x840240 + 0x04]
+
+	// Check if the achieved time achieved a non-perfect medal, and render it and put its value in shared memory if so
+	if (currentTime <= medalTime)	// gold medal?
+		medalType = 1
+
+	if (medalType > u8[best_time_address])		// If this medal is better than the previous one,
+	{
+		medalCount += (medalType - u8[best_time_address])	// update the medal count and then
+		u8[best_time_address] = medalType					// put the value in shared memory.
+		newStar = true
+	}
+	if (medalType)			// if we earned a non-perfect medal at all this run
+	{
+		Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 - 48 - ((challenge_greenspheres) ? 26 : 0), 20, 0x00, 0x40, 0xe800)
+	}
+	// Check if the achieved time is the best one.
+	if (currentTime < (u32[best_time_address] & 0x00ffffff))	// the & 0x00ffffff here equals best_time without affecting best_time for NEW RECORD text.
+	{
+		saveChallengeRecord_Special()
+	}
+
+	u8 perfectMedalOffset = (selectedZoneAct < 0xff18) ? 0x10 * selectedSpecialStageType + 8 : 8
+	u32 perfectMedalTime = u32[perfectMedalOffset + 0x840240 + 0x04]
+
+	// Check if the achieved time achieved a perfect medal, and render it and put its value in shared memory if so
+	if ((!challenge_greenspheres && bluespheres.rings_remaining == 0) || (challenge_greenspheres && bluespheres.blue_remaining == 0))
+	{
+		if (currentTime <= perfectMedalTime)	// gold medal?
+			perfectMedalType = 1
+
+		if (perfectMedalType > u8[best_time_address_perfect])					// If this medal is better than the previous one,
+		{
+			medalCount += (perfectMedalType - u8[best_time_address_perfect])	// update the medal count and then
+			u8[best_time_address_perfect] = perfectMedalType					// put the value in shared memory.
+			newPerfectStar = true
+		}
+		if (perfectMedalType)	// if we earned a perfect medal at all this run
+		{
+			Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 + 48 + ((challenge_greenspheres) ? 26 : 0), 20, 0x00, 0x40, 0xe800)
+		}
+		// Check if the achieved time is the best one.
+		if (currentTime < (u32[best_time_address_perfect] & 0x00ffffff))	// the & 0x00ffffff here equals best_time without affecting best_time for NEW RECORD text.
+		{
+			saveChallengeRecord_SpecialPerfect()
+		}
+	}
+
+	if (newStar || newPerfectStar)
+	{
+		countTotalStars()	// forces the counter to update
+		stars.timer = 1		// begin to display the counter on screen -- see customMenu.displayStarCounter(). Assumes there's no way a different star can be collected and then a special stage completed within five seconds
+		Unlock.checkForNewUnlock(total_stars_old, total_stars)
+	}
+}
 
 
 
@@ -8016,6 +8094,42 @@ function void saveChallengeRecord()
 
 	// Save best time
 	System.savePersistentData(save_data_address, datakey, 0x60)
+}
+
+function void saveChallengeRecord_Special()
+{
+	u64 datakey = "DAGE_SpecialTA"
+	u32 save_data_address = 0x830000
+
+	// Place the new best time into shared memory
+	u16 minutes = BS_displayedTime / 3600
+	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+
+	u8[best_time_address + 1] = minutes
+	u8[best_time_address + 2] = seconds
+	u8[best_time_address + 3] = frames
+
+	// Save best time
+	System.savePersistentData(save_data_address, datakey, 0x0200)
+}
+
+function void saveChallengeRecord_SpecialPerfect()
+{
+	u64 datakey = "DAGE_SpecialTA"
+	u32 save_data_address = 0x830000
+
+	// Place the new best time into shared memory
+	u16 minutes = BS_displayedTime / 3600
+	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+
+	u8[best_time_address_perfect + 1] = minutes
+	u8[best_time_address_perfect + 2] = seconds
+	u8[best_time_address_perfect + 3] = frames
+
+	// Save best time
+	System.savePersistentData(save_data_address, datakey, 0x0200)
 }
 
 function void saveChallengeRecord3D2DGlitches()

@@ -38,5 +38,14 @@
 	"medal_01_04": { "File": "medals.png", "Rect":  "96,48,24,24", "Center": "12,12" },
 	"medal_01_05": { "File": "medals.png", "Rect": "120,48,24,24", "Center": "12,12" },
 	"medal_01_06": { "File": "medals.png", "Rect": "144,48,24,24", "Center": "12,12" },
-	"medal_01_07": { "File": "medals.png", "Rect": "168,48,24,24", "Center": "12,12" }
+	"medal_01_07": { "File": "medals.png", "Rect": "168,48,24,24", "Center": "12,12" },
+
+	"medal_special_00": { "File": "medals.png", "Rect":   "0,72,24,24", "Center": "12,12" },	// Emerald medal
+	"medal_special_01": { "File": "medals.png", "Rect":  "24,72,24,24", "Center": "12,12" },
+	"medal_special_02": { "File": "medals.png", "Rect":  "48,72,24,24", "Center": "12,12" },
+	"medal_special_03": { "File": "medals.png", "Rect":  "72,72,24,24", "Center": "12,12" },
+	"medal_special_04": { "File": "medals.png", "Rect":  "96,72,24,24", "Center": "12,12" },
+	"medal_special_05": { "File": "medals.png", "Rect": "120,72,24,24", "Center": "12,12" },
+	"medal_special_06": { "File": "medals.png", "Rect": "144,72,24,24", "Center": "12,12" },
+	"medal_special_07": { "File": "medals.png", "Rect": "168,72,24,24", "Center": "12,12" }
 }

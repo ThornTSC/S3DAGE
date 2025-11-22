@@ -799,6 +799,8 @@ function void fn009b62()
 		}
 		if (time_attack_end)
 		{
+			Challenge.saveMedalsAndRecords_Special()
+			PrintVersionNumber()
 			Challenge.manageEndMenu()
 			return								// do not load the emerald
 		}
@@ -4161,24 +4163,29 @@ function void BlueSpheres.renderCustomSpheres()
 function void BlueSpheres.displayTotalTime()
 {
 	// Find appropriate data to render for timer
-	u16 minutes = BS_displayedTime / 3600
-	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
-	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
-	u16 centiseconds = (frames * 99 + 30) / 59
+	u32 minutes = BS_displayedTime / 3600
+	u32 seconds = (BS_displayedTime - (minutes * 3600)) / 60
+	u32 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
+	u32 centiseconds = (frames * 99 + 30) / 59
 
-	// Find appropriate data to render for best time
-	best_time_address = ((selectedZoneAct - 0xff00) * 0x10) + ((selectedSpecialStageType) * 8)
-	best_time_address += 0x840600
-	best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
-	best_time_minutes = u8[best_time_address + 1]
-	best_time_seconds = u8[best_time_address + 2]
-	best_time_frames = u8[best_time_address + 3]
-	u16 best_time_centiseconds = (best_time_frames * 99 + 30) / 59
-	best_time_perfect = u32[best_time_address + 4] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
-	best_time_minutes_perfect = u8[best_time_address + 5]
-	best_time_seconds_perfect = u8[best_time_address + 6]
-	best_time_frames_perfect = u8[best_time_address + 7]
-	u16 best_time_centiseconds_perfect = (best_time_frames_perfect * 99 + 30) / 59
+	u32 currentTime = (minutes << 16) + (seconds << 8) + frames
+
+	// Find appropriate data to render for best time. Only load this once so that a saved record at the end of the stage doesn't update a best time displayed at that moment.
+	if (currentTime == 1)
+	{
+		best_time_address = ((selectedZoneAct - 0xff00) * 0x10) + (selectedZoneAct  < 0xff18 ? (selectedSpecialStageType * 8) : 0)
+		best_time_address += 0x830000
+		best_time = u32[best_time_address] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+		best_time_minutes = u8[best_time_address + 1]
+		best_time_seconds = u8[best_time_address + 2]
+		best_time_frames = u8[best_time_address + 3]
+		best_time_centiseconds = (best_time_frames * 99 + 30) / 59
+		best_time_perfect = u32[best_time_address + 4] & 0x00ffffff	// remove leading byte, which is used for other info regarding saved times
+		best_time_minutes_perfect = u8[best_time_address + 5]
+		best_time_seconds_perfect = u8[best_time_address + 6]
+		best_time_frames_perfect = u8[best_time_address + 7]
+		best_time_centiseconds_perfect = (best_time_frames_perfect * 99 + 30) / 59
+	}
 
 	// Render times and text
 	u16 px_hud = max(getScreenWidth()/2 - 100, 72) - 24 - 32
@@ -4198,7 +4205,7 @@ function void BlueSpheres.displayTotalTime()
 		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 		Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
-		// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+		// BEST and best time
 		if (best_time <= 0x93b3b)
 		{
 			px_hud = getScreenWidth() - px_hud - 112 + 14
@@ -4211,24 +4218,23 @@ function void BlueSpheres.displayTotalTime()
 			Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+			if (best_time_perfect <= 0x93b3b)
+			{
+				py_hud += 11
+				// Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("BlueSphere_ringicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_minutes_perfect % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_seconds_perfect / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_seconds_perfect % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds_perfect / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds_perfect % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			}
 		}
-		else
-			return	// Do not try to render an existing best perfect time if no base time exists, as it will be misaligned. That should never be possible anyway under normal circumstances; this return is just for safety.
 		
-		if (best_time_perfect <= 0x93b3b)
-		{
-			py_hud += 11
-			// Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("BlueSphere_ringicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_minutes_perfect % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_seconds_perfect / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_seconds_perfect % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds_perfect / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", best_time_centiseconds_perfect % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-		}
 	}
 	else	// Sonic 2 HUD
 	{
@@ -4244,7 +4250,7 @@ function void BlueSpheres.displayTotalTime()
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 		Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 
-		// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
+		// BEST and best time
 		if (best_time <= 0x93b3b)
 		{
 			px_hud = getScreenWidth() - px_hud - 112 + 14
@@ -4257,61 +4263,103 @@ function void BlueSpheres.displayTotalTime()
 			Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-		}
-		else
-			return	// Do not try to render an existing best perfect time if no base time exists, as it will be misaligned. That should never be possible anyway under normal circumstances; this return is just for safety.
-		
-		if (best_time_perfect <= 0x93b3b)
-		{
-			py_hud += 11
-			// Renderer.drawCustomSprite("sonic2_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite((challenge_greenspheres >= 0x10) ? "BlueSphere_greensphereicon_small" : "BlueSphere_bluesphereicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_minutes_perfect % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_seconds_perfect / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_seconds_perfect % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds_perfect / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-			Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds_perfect % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+
+			if (best_time_perfect <= 0x93b3b)
+			{
+				py_hud += 11
+				// Renderer.drawCustomSprite("sonic2_best", px_hud, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite((challenge_greenspheres >= 0x10) ? "BlueSphere_greensphereicon_small" : "BlueSphere_bluesphereicon_small", px_hud + 20, py_hud + 1, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_minutes_perfect % 10), px_hud + 44, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 52, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_seconds_perfect / 10), px_hud + 58, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_seconds_perfect % 10), px_hud + 66, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 74, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite("sonic2_specialdigit_seconds_mini", px_hud + 77, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds_perfect / 10), px_hud + 82, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_mini", best_time_centiseconds_perfect % 10), px_hud + 90, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+			}
 		}
 	}
 
-	// Old setup
-/*
-	u16 px_hud = getScreenWidth() / 2 - 14	// subtract 49 instead for non-small digits without TIME/BEST
-	u16 py_hud = 14	// place the BEST time at getScreenHeight() - 14 - 16. Show either Normal or Perfect best time based on a menu option. Use 12 for non-small digits.
-	u16 renderQueue_hud = 0xe800
+	// Render non-perfect target times
+	s16 medal_px = (challenge_greenspheres) ? 0x17 : 0x38
+	s16 medal_py = (challenge_greenspheres) ? 4 : 2
 
-	u16 minutes = BS_displayedTime / 3600
-	u16 seconds = (BS_displayedTime - (minutes * 3600)) / 60
-	u16 frames = BS_displayedTime - (minutes * 3600) - (seconds * 60)
-	u16 centiseconds = (frames * 99 + 30) / 59
+	u8 medalOffset = (selectedZoneAct < 0xff18) ? 0x10 * selectedSpecialStageType : 0
+	u32 devTime = u32[medalOffset + 0x840240]
+	u32 medalTime = u32[medalOffset + 0x840240 + 0x04]
 
-	// TIME and timer
-	Renderer.drawCustomSprite("BlueSphere_smalltext_time", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
+	if (currentTime <= devTime && u8[best_time_address] && !time_attack_end)				// dev time? (only show if medal already earned)
+		Renderer.drawCustomSprite("angel_text_dev", getScreenExtend() - 40 + medal_px, medal_py, 0, 0, 0xf003)
+	else if (currentTime <= medalTime && !time_attack_end)	// gold medal?
+	{
+		medalOffset += 4
+		Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + medal_px + 3, medal_py - 1, 0, 0, 0xe008)
+	}
+	else
+		medalOffset = 0xff	// null value that avoids drawing any target times
 
-	// BEST and best time. Right now this just shows the timer again, as best time saving/loading isn't implemented yet.
-	py_hud = getScreenHeight() - 14 - 16
+	u32 medal_time_address = 0x840240 + medalOffset
+	u16 medal_time_minutes = u8[medal_time_address + 1]
+	u16 medal_time_seconds = u8[medal_time_address + 2]
+	u16 medal_time_frames = u8[medal_time_address + 3]
+	u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
 
-	Renderer.drawCustomSprite("BlueSphere_smalltext_best", px_hud - 48, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", minutes % 10), px_hud + 5, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x11, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds / 10), px_hud + 0x16, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", seconds % 10), px_hud + 0x21, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x2d, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite("BlueSphere_smallchar_seconds", px_hud + 0x31, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds / 10), px_hud + 0x35, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-	Renderer.drawCustomSprite(stringformat("BlueSphere_smalldigit_%d", centiseconds % 10), px_hud + 0x40, py_hud, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
-*/
+	u16 baseXPosition = getScreenExtend() - 40 + medal_px
+
+	if (medalOffset != 0xff)
+	{
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_minutes % 10), baseXPosition + 0x1c, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("angel_smallchar_minutes", baseXPosition + 0x22, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds / 10), baseXPosition + 0x28, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds % 10), baseXPosition + 0x30, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("angel_smallchar_seconds", baseXPosition + 0x38, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds / 10), baseXPosition + 0x40, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds % 10), baseXPosition + 0x48, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	}
+
+	// Render perfect target times
+	medal_px = (challenge_greenspheres) ? 0x11f : 0x105
+
+	medalOffset = (selectedZoneAct < 0xff18) ? (0x10 * selectedSpecialStageType) + 8 : 8
+	devTime = u32[medalOffset + 0x840240]
+	medalTime = u32[medalOffset + 0x840240 + 0x04]
+
+	if (currentTime <= devTime && u8[best_time_address_perfect] && !time_attack_end)				// dev time? (only show if medal already earned)
+		Renderer.drawCustomSprite("angel_text_dev", getScreenExtend() - 40 + medal_px, medal_py, 0, 0, 0xf003)
+	else if (currentTime <= medalTime && !time_attack_end)	// gold medal?
+	{
+		medalOffset += 4
+		Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + medal_px + 3, medal_py - 1, 0, 0, 0xe008)
+	}
+	else
+		medalOffset = 0xff	// null value that avoids drawing any target times
+
+	medal_time_address = 0x840240 + medalOffset
+	medal_time_minutes = u8[medal_time_address + 1]
+	medal_time_seconds = u8[medal_time_address + 2]
+	medal_time_frames = u8[medal_time_address + 3]
+	medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
+
+	baseXPosition = getScreenExtend() - 40 + medal_px
+
+	if (medalOffset != 0xff)
+	{
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_minutes % 10), baseXPosition + 0x1c, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("angel_smallchar_minutes", baseXPosition + 0x22, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds / 10), baseXPosition + 0x28, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_seconds % 10), baseXPosition + 0x30, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite("angel_smallchar_seconds", baseXPosition + 0x38, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds / 10), baseXPosition + 0x40, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", medal_time_centiseconds % 10), baseXPosition + 0x48, medal_py, 0, SPRITE_FLAG_PRIO, 0xf003)
+	}
+
+	// Render NEW RECORD text if necessary
+	if (time_attack_end && ((currentTime < best_time) || (currentTime < (best_time_perfect & 0x00ffffff)) && ((!challenge_greenspheres && bluespheres.rings_remaining == 0) || (challenge_greenspheres && bluespheres.blue_remaining == 0))))
+	{
+		u64 newRecordKey = (challenge_greenspheres) ? "westside_new_record" : "new_record"
+		Renderer.drawCustomSprite(newRecordKey, getScreenWidth() / 2, 0x2e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+	}
 }
 
 
