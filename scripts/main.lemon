@@ -15225,8 +15225,74 @@ function void fn02b928()
 }
 
 
+// Remove AIR horizontal solid platforms adjustments for MGZ, FBZ, and LRZ in Original Mode.
+// Functions taken from objects\level\barrier.lemon
+//# address-hook(0x0208a6) end(0x0208f6)
+function void fn0208a6()
+{
+	if (global.zone == 0x04)
+	{
+		objA0.mapping_offset = 0x02108e
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0001)
+		objA0.flags38 = ((objA0.subtype2c & 0x0f) << 4) + 8
+		D1.u16 = (objA0.subtype2c & 0x70) >> 2
 
+		A1 = 0x0208f8 + D1.u16
+		objA0.box_size.x = u8[A1]
+		objA0.box_size.y = u8[A1+1]
+		objA0.animation.sprite = u8[A1+2]
+		objA0.subtype2c = u8[A1+3]
 
+		A1 = 0x0208fc + D1.u16 * 2
+		u32[A0 + 0x30] = u32[A1]
+		objA0.countdown_callback = u32[A1+4]
+
+	#if STANDALONE
+		if (D1.u16 == 0 && !original_mode)
+		{
+			// Avoid early clipping
+			objA0.box_size.y = 0x40
+		}
+	#endif
+	}
+
+	fn020904()
+}
+
+//# address-hook(0x020904) end(0x020950)
+function void fn020904()
+{
+	if (global.zone == 0x08)
+	{
+		objA0.mapping_offset = 0x02127a
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0001)
+		objA0.flags38 = ((objA0.subtype2c & 0x0f) << 4) + 8
+		D1.u16 = (objA0.subtype2c & 0x70) >> 2
+
+		A1 = 0x020952 + D1.u16
+		objA0.box_size.x = u8[A1]
+		objA0.box_size.y = u8[A1+1]
+		objA0.animation.sprite = u8[A1+2]
+
+		A1 = 0x020956 + D1.u16 * 2
+		u32[A0 + 0x30] = u32[A1]
+		objA0.countdown_callback = u32[A1+4]
+	}
+
+#if STANDALONE
+	// Make certain variants (MGZ, LRZ) a bit higher to prevent early clipping
+	if (global.zone == 0x02 && !original_mode)
+	{
+		objA0.box_size.y += 12
+	}
+	if (global.zone == 0x09 && !original_mode)
+	{
+		objA0.box_size.y += 8
+	}
+#endif
+
+	fn02095e()
+}
 
 
 
