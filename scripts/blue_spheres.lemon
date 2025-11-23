@@ -887,7 +887,7 @@ function void BlueSphereGame()
 
 	u8[0xffffffa1] = 0
 	global.game_mode = 0x54		// 0x2c
-	selectedZoneAct = 0xff00
+	selectedZoneAct = 0xffff
 	challenge_greenspheres = 0	// ensure this flag isn't left over from elsewhere
 	unlock_act = 0				// ensure this flag isn't left over from elsewhere
 
@@ -1354,6 +1354,60 @@ function void SpecialStage()
 
 	u16[0xfffffb00] = 0
 	u32[0xfffffbfc] = 0xfffffb00
+
+	// Handle flags for visited special stages. We even allow this in Original Mode.
+	// Prototype special stage unlocking is handled in the game's menus so the unlock notification handled here shows properly.
+	if (!BlueSpheres.useGeneratedStages() && time_attack != 1)
+	{
+		u32 specialStagesVisitedIndex = (8 * global.sk_bluespheres) + global.next_bluespheres + ((challenge_greenspheres) ? 0x10 : 0)
+		if (!isMainCharacter(CHARACTER_KNUCKLES) || specialstages_knuckles == 0 || original_mode || u8[0xffffe654])
+		{
+			if (!(normalSpecialStagesAccessed & (1 << specialStagesVisitedIndex)))
+			{
+				// Set the stage as seen.
+				normalSpecialStagesAccessed |= (1 << specialStagesVisitedIndex)
+
+				// If all stages of that category and difficulty combination have been seen, unlock the extra stage.
+				if (normalSpecialStagesAccessed & 0x000000ff) == 0x7f
+					normalSpecialStagesAccessed |= 0x80
+				else if (normalSpecialStagesAccessed & 0x0000ff00) == 0x7f00
+					normalSpecialStagesAccessed |= 0x8000
+				else if (normalSpecialStagesAccessed & 0x00ff0000) == 0x7f0000
+					normalSpecialStagesAccessed |= 0x800000
+
+				// If all special stages in the main game have been found, tell players prototype special stages are unlocked.
+				if ((normalSpecialStagesAccessed | hardSpecialStagesAccessed) == 0x00ffffff)
+					unlock.show = true
+
+				// Save data here. Data starts at the normal stages' flags and extends through the hard stages' flags.
+				System.savePersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08)
+				debugLog("Saved!")
+			}	
+		}
+		else
+		{
+			if (!(hardSpecialStagesAccessed & (1 << specialStagesVisitedIndex)))
+			{
+				// Set the stage as seen.
+				hardSpecialStagesAccessed |= (1 << specialStagesVisitedIndex)
+
+				// If all stages of that category and difficulty combination have been seen, unlock the extra stage.
+				if (hardSpecialStagesAccessed & 0x000000ff) == 0x7f
+					hardSpecialStagesAccessed |= 0x80
+				else if (hardSpecialStagesAccessed & 0x0000ff00) == 0x7f00
+					hardSpecialStagesAccessed |= 0x8000
+				else if (hardSpecialStagesAccessed & 0x00ff0000) == 0x7f0000
+					hardSpecialStagesAccessed |= 0x800000
+
+				// If all special stages in the main game have been found, tell players prototype special stages are unlocked.
+				if ((normalSpecialStagesAccessed | hardSpecialStagesAccessed) == 0x00ffffff)
+					unlock.show = true
+
+				// Save data here. Data starts at the normal stages' flags and extends through the hard stages' flags.
+				System.savePersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08)
+			}	
+		}
+	}
 
 	// Load special stage palette
 	//  -> Character colors is the 8 colors from 0xfffffc90 (for Sonic/Knuckles) and 0xfffffcb0 (for Tails)

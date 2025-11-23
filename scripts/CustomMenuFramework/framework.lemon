@@ -128,6 +128,14 @@ function void customMenu.setup()
 		System.setGlobalVariableValueByName("actselect.character.backup", 0)
 	}
 
+	// Unlock the prototype special stages if relevant. We don't do this at the moment the condition is met so the in-stage unlock notification works.
+	if ((normalSpecialStagesAccessed | hardSpecialStagesAccessed) == 0x00ffffff)	// if we should have prototype special stage access,
+	{
+		normalSpecialStagesAccessed |= 0xff000000								// mark this permanently.
+		// Save data here. Data starts at the normal stages' flags and extends through the hard stages' flags.
+		System.savePersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08)
+	}
+
 	// We avoid messing with the VDP, as it screws with saving. We only reset level.framecounter.
 //	VDP.Config.setActiveDisplay(false)
 //	fn0011ca()

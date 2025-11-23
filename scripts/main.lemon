@@ -28943,23 +28943,28 @@ function void Unlock.checkForNewUnlock(u16 total_stars_old, u16 total_stars)
 function void Unlock.showUnlock()
 {
 	bool validGameMode = (((global.game_mode & 0x7f) == 0x0c) || ((global.game_mode & 0x7f) == 0x34))
-	if (!validGameMode || level.restart || !timer.alldata)	// Rendering this currently slows menus, title cards, and game mode changes, so check we're fully in a level. Will need updating if special stages allow star collection.
+	if (!validGameMode || level.restart || (!timer.alldata && global.game_mode != 0x34))	// Rendering this currently slows menus, title cards, and game mode changes, so check we're fully in a level. Will need updating if special stages allow star collection.
 	{
 		unlock.show = false
 		unlock.timer = 0
 		return
 	}
-
 	if (!unlock.timer)	// this is the first frame of the unlock announcement
 		playSound(0x68)	// sound from text saying you can now be super/hyper or go to Hidden Palace
 
 	u64 unlockTypeString
 	u64 unlockString
 
-	if (challenge_greenspheres && unlock_act)	// check we're in an unlockable act in case Special Stage Time Attack awards a star medal
+	if (challenge_greenspheres && unlock_act && bluespheres.stage_exit_state)	// check we're in an unlockable act in case Special Stage Time Attack awards a star medal
 	{
 		unlockTypeString = "Mode Unlocked:"
 		unlockString = "Speed Sphere"
+	}
+
+	else if ((normalSpecialStagesAccessed | hardSpecialStagesAccessed) == 0x00ffffff)	// saw at least one stage for every emerald in the game
+	{
+		unlockTypeString = "Stages Unlocked:"
+		unlockString = "Prototype Special Stages"
 	}
 
 	// We compare to the *next* unlockable, as multiple stars can be earned at once via Challenges.

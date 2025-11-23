@@ -3825,6 +3825,13 @@ function void loadChallengeRecords()
 		medalCount += u8[medalAddress]
 	}
 
+	// Load Special Stages visited for Challenge access
+	if (!System.loadPersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08))
+	{
+		normalSpecialStagesAccessed = 0
+		hardSpecialStagesAccessed = 0
+	}
+
 	// Load Special Stage act records
 	if (!System.loadPersistentData(0x830000, "DAGE_SpecialTA", 0x0200))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u16 j = 0; j < 0x0200; j += 4)
@@ -7279,7 +7286,7 @@ function void Challenge.checkExitShortcut()
 
 	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects
-		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
+		global.game_mode = 0x54
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
 		time_attack_end = 0			// This isn't needed in theory, but better safe than sorry!
@@ -7928,7 +7935,7 @@ function void Challenge.manageEndMenu()
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
 		camera.background.y = 0		// fix for the AIZ1 background issue
 
-		global.game_mode = 0xd4		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
+		global.game_mode = 0x54
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
 		if (global.game_mode == 0x34)
@@ -8258,7 +8265,7 @@ function void loadupDataSelect()
 {
 	if (time_attack == 1 || time_attack == 2)
  	{
- 		global.game_mode = 0xd4
+ 		global.game_mode = 0x54
 	//	EntryFunctions.levelSelect()
 	//	EntryFunctions.dataSelect()
 	//	loadupCustomMenu()
