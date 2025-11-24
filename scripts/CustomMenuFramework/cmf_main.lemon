@@ -1965,9 +1965,10 @@ function void customMenu.displayStarCounter()
 	u16 renderQueue = 0xf003
 	constant u16 stars.timer.max = 300
 
-	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34)
+	if ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34 || (global.game_mode & 0x7f) == 0x2c)
 	{
-		x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
+		if ((global.game_mode & 0x7f) != 0x2c)
+			x_offset = getScreenWidth()/2 - 100		// equal to 100 if screen width is 400.
 		if (stars.timer && stars.timer < 16)	// counter is active and ascending
 			y_offset = 10 - (stars.timer / 2)
 		else if (stars.timer >= 16 && stars.timer < stars.timer.max - 16)				// counter is active and in place

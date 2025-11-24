@@ -28942,8 +28942,8 @@ function void Unlock.checkForNewUnlock(u16 total_stars_old, u16 total_stars)
 
 function void Unlock.showUnlock()
 {
-	bool validGameMode = (((global.game_mode & 0x7f) == 0x0c) || ((global.game_mode & 0x7f) == 0x34))
-	if (!validGameMode || level.restart || (!timer.alldata && global.game_mode != 0x34))	// Rendering this currently slows menus, title cards, and game mode changes, so check we're fully in a level. Will need updating if special stages allow star collection.
+	bool validGameMode = (((global.game_mode & 0x7f) == 0x0c) || ((global.game_mode & 0x7f) == 0x34) || ((global.game_mode & 0x7f) == 0x2c))
+	if (!validGameMode || level.restart || (!timer.alldata && (global.game_mode != 0x34 && global.game_mode != 0x2c)))	// Rendering this currently slows menus, title cards, and game mode changes, so check we're fully in a level. Will need updating if special stages allow star collection.
 	{
 		unlock.show = false
 		unlock.timer = 0

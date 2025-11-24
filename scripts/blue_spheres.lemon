@@ -214,13 +214,19 @@ function void fn04c97e()
 	else if (!System.loadPersistentData(0xffffffa6, "SRAM_BlueSphereProgress", 4))
 		u32[0xffffffa6] = 0
 		
-	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
+	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here and to track medals earned in this mode
+	u16 total_stars_old = total_stars	// saving the value before we recalculate it based on the current level reached
 	loadTASettings()
 	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
 	InitHUDTheme()
 	countTotalStars()
+	if (total_stars > total_stars_old)
+	{
+		stars.timer = 1
+		Unlock.checkForNewUnlock(total_stars_old, total_stars)
+	}
 //	else if (theme.hud > 0x3f)	// classic RINGS HUD digits position
 //	{
 		hud.layout = (theme.hud >> 6)
@@ -361,10 +367,8 @@ function void fn04d488()
 		bluespheregame.current_stage = D1
 		BlueSphere.setGeneratedStage(bluespheregame.current_stage)
 
-	if (speedSpheres)
-		System.savePersistentData(0xffffffa6, "DAGE_SpeedSphereGame", 4)
-	else if (green_spheres.active)
-		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
+	if (speedSpheres || green_spheres.active)
+		saveEndlessModeData()
 	else
 	{
 	#if STANDALONE
@@ -383,7 +387,19 @@ function void fn04d488()
 	bluespheregame.menu_selection = 1
 }
 
-
+function void saveEndlessModeData()
+{
+	if (speedSpheres)
+	{
+		speedSphereProgress = u32[0xffffffa6]
+		System.savePersistentData(0xffffffa6, "DAGE_SpeedSphereGame", 4)
+	}
+	else if (green_spheres.active)
+	{
+		greenSphereProgress = u32[0xffffffa6]
+		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
+	}
+}
 
 // Upon getting a PERFECT, make stage advancement bonus based on difficulty instead of a static 10.
 //# address-hook(0x04da7e) end(0x04dde6)
@@ -464,6 +480,7 @@ function void fn04da7e()
 		{
 			// Next stage
 			BlueSphereGame.advanceStages(1)
+			saveEndlessModeData()
 		}
 		return
 	}
@@ -529,6 +546,7 @@ function void fn04da7e()
 	{
 		// Advance 10 stages
 		BlueSphereGame.advanceStages(bluespheregame.difficulty_level + 1 + 1)	// first +1 is to align difficulty in RAM with displayed difficulty, second is to account for the expected one-stage advancement for any clear at all
+		saveEndlessModeData()
 	}
 }
 
