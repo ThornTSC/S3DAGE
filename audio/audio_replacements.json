@@ -55,6 +55,9 @@
 
 	// Sonic Jam Time Attack menu music
 	"challengesmenu": { "File": "Jam_TA.ogg",  "LoopStart": 783980, "Type": "Music"},
+
+	// Sonic Jam credits music
+	"credits": { "File": "Jam_Credits.ogg", "Type": "Music"},	// no loop point needed
 	
 	// Sonic 2 title screen star twinkle, used for Mini Time Stone collection
 	"DD": { "File": "TwinkleRight.ogg", "Type": "Sound"},

@@ -55,6 +55,12 @@ function void loadupCustomMenu()
 		customMenu.update.main()
 		return
 	}
+	if (global.game_mode == 0x5c)	// credits, not Challenges menu
+	{
+		Audio.playAudio("credits", AudioContext.CONTEXT_MUSIC)
+		customMenu.update.credits()
+		return
+	}
 
 	// Challenges menu starts here.
 //	playMusic(0x2d)		// play Competition Mode menu music
@@ -233,6 +239,43 @@ function void customMenu.update.main()
 		// To keep the code clean, I'm putting all logic in here. Do however you want though!
 
 		customMenu.mainControlLoop()
+	}
+
+	// GameMode.MainGame()
+	// System.setupCallFrame("GameModeControlLoop", "@EntryPoint")
+}
+
+// Where most of the magic happens. Dreams do indeed come true!
+function void customMenu.update.credits()
+{	
+	// Because setting up a new frame_state causes fading in to break, we have to setup our own fade in.
+	FadeOutScreenBlocking()
+
+	// Main loop
+	while (true && ((global.game_mode & 0x7f) == 0x5c) && !exitGame)
+	{
+		FadeInFromWhite()
+
+		// Basic stuff you'll pretty much always want, do not delete.
+		waitForNextFrame()
+	@EntryPoint:
+
+		// Reset sprites so they go away and refresh every frame, this needs to be kept as well
+		Renderer.resetSprites()
+
+		// Render background.
+//		DataSelect.drawCustomPlanes()		// Do NOT uncomment this! This may have been useful in the original framework, but here it can cause a crash
+											// if the player enters Challenges, enters a level, uses Back or Select Act to return, and backs out to main menu.
+											// This crash is in OpenGL Software only. It's not necessary here due to how the main menu is rendered.
+
+		++level.framecounter
+		// ---------------
+		// Recommended to leave the above code alone unless you have a good reason to do so.
+		// ---------------
+
+		// To keep the code clean, I'm putting all logic in here. Do however you want though!
+
+		customMenu.mainControlLoop.credits()
 	}
 
 	// GameMode.MainGame()

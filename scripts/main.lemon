@@ -300,7 +300,7 @@ function void discordRPC.main()
 		return
 
 	// The A.I.R. menu is handled by the engine, but everything else must be scripted.
-	if (gameMode == 0x58)
+	if (gameMode == 0x58 || gameMode == 0x5c)
 		discordRPC.mainMenu()
 	else if (gameMode == 0x54 || time_attack == 1 || time_attack == 2)
 		discordRPC.challenges()

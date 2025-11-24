@@ -2614,12 +2614,19 @@ function void GameModeControlLoop()
 			loadupCustomMenu()
 			Game.endSkippableCutscene()
 		}
+		else if ((global.game_mode & 0x7f) == 0x5c)
+		{
+			Game.setUnderwaterAudioEffect(0)
+			// EntryFunctions.dataSelect()
+			loadupCustomMenu()
+			Game.endSkippableCutscene()
+		}
 		else
 		{
 
 		#if STANDALONE
 			// Restart on invalid game mode
-			if (global.game_mode & 0x03 || (global.game_mode & 0x7f) > 0x58)
+			if (global.game_mode & 0x03 || (global.game_mode & 0x7f) > 0x5c)
 			{
 				assert(false, stringformat("Invalid game mode: 0x%02x", global.game_mode))
 				global.game_mode = 0
@@ -2787,6 +2794,8 @@ function void customMenu.mainControlLoop.main()
 		else
 			Renderer.drawCustomSprite("text_option_any", getScreenExtend() - 40 + option_x + 126, 104, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Any%
 	}
+/*
+	// NORMAL and SPEED options for Green Sphere
 	else if (selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{
 		Renderer.drawCustomSprite("leftarrow_medium", getScreenExtend() - 40 + option_x + 108 - arrowShift, 168, 0, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)	// Game type left arrow
@@ -2796,10 +2805,10 @@ function void customMenu.mainControlLoop.main()
 		else
 			Renderer.drawCustomSprite("text_option_speed", getScreenExtend() - 40 + option_x + 126, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, modeSelectionTint, 0x10000)		// Speed
 	}
-	
+*/	
 	Renderer.drawCustomSprite("text_option_actselectchallenges", getScreenExtend() - 40 + option_x - 1, 132, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 3) ? selectionTint : nonSelectionTint, 0x10000)
 	
-	Renderer.drawCustomSprite("text_option_greensphere", getScreenExtend() - 40 + option_x, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 4) ? selectionTint : nonSelectionTint, 0x10000)
+	Renderer.drawCustomSprite("text_option_credits", getScreenExtend() - 40 + option_x, 160, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 4) ? selectionTint : nonSelectionTint, 0x10000)
 	
 	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + option_x, 192, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 5) ? selectionTint : nonSelectionTint, 0x10000)
 
@@ -2847,8 +2856,10 @@ function void customMenu.mainControlLoop.main()
 	}
 	else if (selectedMenuOption.main == 4)
 	{
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Tackle the classic\nBlue Sphere game with\na tricky twist.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 4) - 6, "Touch green spheres to\nturn them into blue\nspheres. Plan your moves\ncarefully to create rings\nand avoid red spheres!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Tackle the classic\nBlue Sphere game with\na tricky twist.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 4) - 6, "Touch green spheres to\nturn them into blue\nspheres. Plan your moves\ncarefully to create rings\nand avoid red spheres!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+
+		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "View the credits for\nSonic 3: D.A. Garden Edition\nand all other ROM hacks\nand official games that\nmade this game possible.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 
 	}
 	else if (selectedMenuOption.main == 5)
@@ -2885,6 +2896,9 @@ function void customMenu.mainControlLoop.main()
 		else if (selectedMenuOption.main == 4)	// Green Sphere was selected
 		{
 			playSound(0xaf)
+			global.game_mode = 0x5c
+			return
+
 			u8[0xffffffa1] = 0
 			global.game_mode = 0x2c		// Blue Sphere
 			time_attack = 0
@@ -4063,4 +4077,18 @@ function void fn00d7a4()
 		setVRAM(0x71b0, 0xaa1a)
 	}
 #endif
+}
+
+
+
+
+
+function void customMenu.mainControlLoop.credits()
+{
+	Renderer.drawCustomSprite("bg_main", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffd, 0, 0xffff2020, 0x10000)	// background
+	Renderer.drawCustomSprite("bg_jam_400_ta", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xa0ffffff, 0x10000)				// background
+	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)
+	Credits.DAGE()
+	if ((control.pad1.pressed & DataSelect.CONTROLS_CANCEL || Input.buttonPressed(BUTTON_BACK) || control.pad1.pressed & CONTROL_START) || level.framecounter >= 0x3700)
+		global.game_mode = 0x58
 }

@@ -391,6 +391,11 @@ function void Credits.DAGE()
 	u16 credits.start_frame =     (global.zone_act == 0x0a01) ? ((outro.ending_type == -2) ? 0x005c : 0x002f) : (global.characters == 2) ? ((outro.ending_type == -2) ? 0x0325 : (outro.ending_type == 0x00) ? 0x0325 : 0x02dd) : (outro.ending_type == -2) ? 0x033f : (outro.ending_type == 0x00) ? 0x02d7 : 0x02d7
 	u16 credits.screen.duration = 558 - (outro.scroll_speed * 3 / 640)						// how long each screen lasts. Formula derived via linear regression of scroll speed vs. max possible frames per screen (via trial and error) for Knux and Sonic bad endings.
 	u16 credits.fade.duration = 60															// how long each screen spends fading in and out
+	if (global.game_mode == 0x5c)
+	{
+		credits.start_frame = 0
+		credits.screen.duration = 360
+	}
 
 	u16 credits.screen.current = (level.framecounter - credits.start_frame) / credits.screen.duration
 	u16 credits.screen.time_on_screen = level.framecounter - (credits.start_frame + (credits.screen.current * credits.screen.duration))
@@ -399,7 +404,7 @@ function void Credits.DAGE()
 	u32 alpha.text = (credits.screen.time_on_screen >= credits.fade.duration) ? ((credits.screen.time_until_fade_out < credits.fade.duration) ? (credits.screen.time_until_fade_out * 255 / credits.fade.duration) : 255) : (credits.screen.time_on_screen * 255 / credits.fade.duration)
 	u32 alpha.logo
 
-	u16 credits.text.center.x = (global.zone_act == 0x0a01) ? getScreenWidth()/2 : getScreenWidth() - 80 		// getScreenWidth()/2 if centering credits
+	u16 credits.text.center.x = (global.zone_act == 0x0a01 || global.game_mode == 0x5c) ? getScreenWidth()/2 : getScreenWidth() - 80 		// getScreenWidth()/2 if centering credits
 	u16 credits.text.center.y = (getScreenHeight() - 40) / 2 + 40		// 40s here compensate for space occupied by game logos and extra spacing
 	u16 line = 14														// distance between top of consecutive text lines
 
