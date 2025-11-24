@@ -2130,12 +2130,14 @@ function void DataSelect.drawCustomPlanes()
 			}
 			else
 			{
-				Renderer.drawCustomSprite("text_option_pastspecial", getScreenExtend() - 40 + 240, 16 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Prototype best times border rectangle (80% opacity)
-
-				Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
-				Renderer.drawCustomSprite("hud_ring", getScreenExtend() - 40 + 280, 38 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+				if (selectedZoneAct != 0xffff)
+				{
+					Renderer.drawCustomSprite("text_option_pastspecial", getScreenExtend() - 40 + 240, 16 + 51, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("BlueSphere_bluesphereicon", getScreenExtend() - 40 + 268, 27 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+					Renderer.drawCustomSprite("hud_ring", getScreenExtend() - 40 + 280, 38 + 44 + 51, 0, SPRITE_FLAG_PRIO, 0xf004, 0, (selectedMenuOption == 6) ? noDim : dim, 0x10000)
+				}
 			}
 		}
 		else
