@@ -341,7 +341,7 @@ function void discordRPC.dataSelect()	// A.I.R. sometimes forces its "In the Men
 
 function void discordRPC.challenges()
 {
-	Game.setDiscordState(stringformat("Challenges (%d/858 Stars)", total_stars))
+	Game.setDiscordState(stringformat("Challenges (%d/980 Stars)", total_stars))
 	if ((global.game_mode & 0x7f) != 0x54)
 	{
 		discordRPC.setCharacterImage()

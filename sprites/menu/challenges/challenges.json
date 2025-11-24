@@ -35,7 +35,7 @@
 	"text_devtime":  { "File": "text_devtime.png"},		// left for compatibility with ECSU
 	"text_dev_menucolor":  { "File": "text_devtime.png", "Rect": "0,0,23,8" },
 	"text_devtime_centered":  { "File": "text_devtime.png", "Center": "30,4" },
-	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "74,4" },
+	"text_totalmedals":  { "File": "text_totalmedals.png", "Center": "78,4" },
 	"rect_charoption_yellow":  { "File": "rect_charoption_yellow.png"},
 	"rect_charoption_red":  { "File": "rect_charoption_red.png"},
 	"rect_specialoption_yellow":  { "File": "rect_specialoption_yellow.png"},
@@ -44,6 +44,8 @@
 	"text_option_hardspecial":  { "File": "text_options_specialstage.png", "Rect": "0,40,16,32" },
 	"text_option_speedspecial":  { "File": "text_options_specialstage.png", "Rect": "0,0,16,39" },
 	"text_option_pastspecial":  { "File": "text_past_specialstage.png" },
+	"text_level":  { "File": "text_level.png" },
+	"text_milestones":  { "File": "text_milestones.png", "Center": "40,4" },
 	
 	// Stars
 	"star_gold":  { "File": "star_gold.png"},

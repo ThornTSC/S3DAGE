@@ -249,11 +249,12 @@ function void Westside.PauseMenu_Challenges()
 
 function void Westside.TotalStars(u16 starCount, u16 x_offset, u16 y_offset, u16 spriteFlags, u16 renderQueue)	// same font as Angel theme
 {
-	Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 178 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
-	Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 188 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
-	Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 198 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
-	Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 208 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
-	Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 170 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 180 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 190 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 200 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + 210 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)
+	Renderer.drawCustomSprite("angel_text_totalmedals", getScreenExtend() - 40 + 123 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
 	if (starCount / 100 != 0)
 	{
 		Renderer.drawCustomSprite(stringformat("angel_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset + 1, 0, spriteFlags, renderQueue)	// non-zero hundreds

@@ -1838,19 +1838,76 @@ function void customMenu.displayRecordsSpecial()
 
 function void customMenu.displayEndlessProgress(u32 levelNumberAddress, s16 py)
 {
-	u32 levelNumber = u32[levelNumberAddress]
-	s16 px = getScreenWidth() - 20	// horizontal position of all times
+	u32 levelNumber =  u32[levelNumberAddress]
+	u8 length = 0
 
-	for (u32 value = levelNumber + 1;;)
+	for (u32 lengthCheck = levelNumber + 1;;)
 	{
-		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", value % 10), px, py + 8, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType) ? noDim : dim, 0x10000)
-		px -= 8
-		value /= 10
-		if (value == 0)
+		++length
+		lengthCheck /= 10
+		if (lengthCheck == 0)
 			break
 	}
 
-	// Draw appropriate medal if relevant. We award a single medal when each mode clears Level 100.
+	s16 px = getScreenWidth() - 58 + (4 * length)	// horizontal position of all times
+
+	u32 selected = (selectedMenuOption == 6 && ((levelNumberAddress == greenSphereProgressAddress && selectedSpecialStageType == 0) || (levelNumberAddress == speedSphereProgressAddress && selectedSpecialStageType == 1)))
+
+	for (u32 value = levelNumber + 1;;)
+	{
+		Renderer.drawCustomSprite(stringformat("S3D_digit_%d", value % 10), px, py + 8, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+		px -= 8
+		value /= 10
+		if (value == 0)
+		{
+			Renderer.drawCustomSprite("text_level", px - 40, py + 8, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+			break
+		}
+	}
+
+	px = getScreenWidth() - 74	// horizontal position of all times
+	py += 60
+
+	Renderer.drawCustomSprite("text_milestones", px, py - 19, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+
+	u32 uncollected = 0x80c0c0c0
+	u32 uncollectedDim = 0x80909090
+
+	if (levelNumber >= 10)
+		Renderer.drawCustomSprite("medal_special_00", px - 48, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+	else
+		Renderer.drawCustomSprite("medal_02_00", px - 48, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? uncollected : uncollectedDim, 0x10000)	// (12, 12) is center of medal
+	Renderer.drawCustomSprite("S3D_smalldigit_1", px - 56, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_0", px - 48, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+
+	if (levelNumber >= 25)
+		Renderer.drawCustomSprite("medal_special_00", px - 24, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+	else
+		Renderer.drawCustomSprite("medal_02_00", px - 24, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? uncollected : uncollectedDim, 0x10000)	// (12, 12) is center of medal
+	Renderer.drawCustomSprite("S3D_smalldigit_2", px - 32, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_5", px - 24, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+
+	if (levelNumber >= 50)
+		Renderer.drawCustomSprite("medal_special_00", px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+	else
+		Renderer.drawCustomSprite("medal_02_00", px, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? uncollected : uncollectedDim, 0x10000)	// (12, 12) is center of medal
+	Renderer.drawCustomSprite("S3D_smalldigit_5", px - 8, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_0", px, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+
+	if (levelNumber >= 75)
+		Renderer.drawCustomSprite("medal_special_00", px + 24, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+	else
+		Renderer.drawCustomSprite("medal_02_00", px + 24, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? uncollected : uncollectedDim, 0x10000)	// (12, 12) is center of medal
+	Renderer.drawCustomSprite("S3D_smalldigit_7", px + 16, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_5", px + 24, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+
+	if (levelNumber >= 100)
+		Renderer.drawCustomSprite("medal_special_00", px + 48, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)	// (12, 12) is center of medal
+	else
+		Renderer.drawCustomSprite("medal_02_00", px + 48, py, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? uncollected : uncollectedDim, 0x10000)	// (12, 12) is center of medal
+	Renderer.drawCustomSprite("S3D_smalldigit_1", px + 36, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_0", px + 44, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
+	Renderer.drawCustomSprite("S3D_smalldigit_0", px + 52, py + 14, 0, SPRITE_FLAG_PRIO, 0xf003, 0, (selected) ? noDim : dim, 0x10000)
 }
 
 
@@ -1957,16 +2014,17 @@ function void customMenu.displayStarCounter()
 		Westside.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)		// Angel theme and Westside theme have identical star counters
 	else	// Saturn theme, also used in menus
 	{
-		s16 x_offset_inlevel = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 10 : 0
+		s16 x_offset_inlevel = ((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34) ? 6 : 0
 //		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 8, 213, "TOTALS:                  * 100)", 0xe8d494ff, 1, 0, renderQueue, 0, 1)
-		Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 168 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 178 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 188 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
-		Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 198 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_red", getScreenExtend() - 40 + 164 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_gold", getScreenExtend() - 40 + 174 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_silver", getScreenExtend() - 40 + 184 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_bronze", getScreenExtend() - 40 + 194 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
+		Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + 204 + x_offset + x_offset_inlevel, 213 + y_offset, 0, spriteFlags, renderQueue)
 
 		if (!((global.game_mode & 0x7f) == 0x0c || (global.game_mode & 0x7f) == 0x34))
-			x_offset -= 10
-		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 127 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
+			x_offset -= 6
+		Renderer.drawCustomSprite("text_totalmedals", getScreenExtend() - 40 + 123 + 82 + x_offset, 213 + 4 + y_offset, 0, spriteFlags, renderQueue)
 		if (starCount / 100 != 0)
 		{
 			Renderer.drawCustomSprite(stringformat("S3D_smalldigit_%d", starCount / 100), getScreenExtend() - 40 + 229 + x_offset, 213 + y_offset, 0, spriteFlags, renderQueue)	// non-zero hundreds

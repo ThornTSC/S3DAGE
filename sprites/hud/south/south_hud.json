@@ -112,7 +112,7 @@
 	"south_time_stop_bonus": { "File": "south_hud.png", "Rect": "0,132,125,12", "Center": "62,8" },
 	"south_new_record": { "File": "south_hud.png", "Rect": "0,144,86,12", "Center": "43,8" },
 	"south_text_dev":  { "File": "south_text_dev.png", "Center": "0,1" },	// small star medal pictures are stored with challenges menu pictures
-	"south_text_totalmedals":  { "File": "south_text_totalmedals.png", "Center": "75,3" },
+	"south_text_totalmedals":  { "File": "south_text_totalmedals.png", "Center": "79,3" },
 
 	"south_smalldigit_0": { "File": "south_hud.png", "Rect":  "75,64,8,8", "Center": "0,1" },
 	"south_smalldigit_1": { "File": "south_hud.png", "Rect":  "83,64,8,8", "Center": "0,1" },

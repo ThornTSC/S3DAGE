@@ -3844,6 +3844,27 @@ function void loadChallengeRecords()
 	{
 		specialMedalCount += u8[medalAddress]
 	}
+	if (greenSphereProgress >= 10)
+		++specialMedalCount
+	if (greenSphereProgress >= 25)
+		++specialMedalCount
+	if (greenSphereProgress >= 50)
+		++specialMedalCount
+	if (greenSphereProgress >= 75)
+		++specialMedalCount
+	if (greenSphereProgress >= 100)
+		++specialMedalCount
+	if (speedSphereProgress >= 10)
+		++specialMedalCount
+	if (speedSphereProgress >= 25)
+		++specialMedalCount
+	if (speedSphereProgress >= 50)
+		++specialMedalCount
+	if (speedSphereProgress >= 75)
+		++specialMedalCount
+	if (speedSphereProgress >= 100)
+		++specialMedalCount
+
 	medalCount += specialMedalCount
 
 	// Replace existing records with modded records after all medals are counted.

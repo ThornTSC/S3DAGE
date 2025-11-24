@@ -109,7 +109,7 @@
 	"flicky_new_record": { "File": "flicky_hud.png", "Rect": "0,155,85,16", "Center": "43,8" },
 */
 	"angel_text_dev":  { "File": "angel_text_dev.png"},	// small star medal pictures are stored with challenges menu pictures
-	"angel_text_totalmedals":  { "File": "angel_text_totalmedals.png", "Center": "74,3" },
+	"angel_text_totalmedals":  { "File": "angel_text_totalmedals.png", "Center": "78,3" },
 
 	"angel_smalldigit_0": { "File": "angel_smallfont.png", "Rect":  "238,0,8,8" },
 	"angel_smalldigit_1": { "File": "angel_smallfont.png", "Rect":  "246,0,8,8" },
