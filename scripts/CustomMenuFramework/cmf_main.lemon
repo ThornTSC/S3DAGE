@@ -2491,7 +2491,7 @@ function void DataSelect.drawCustomPlanes()
 			else
 			{
 				rectKey = (level.framecounter.low & 0x08) ? "rect_specialoption_yellow" : "rect_specialoption_red"			// change rectangle color every 8 frames
-				rectYPos = ((selectedZoneAct >= 0xff18 && selectedZoneAct != 0xffff) || !(unlock_flags & 0x0001)) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
+				rectYPos = ((selectedZoneAct >= 0xff18 && selectedZoneAct != 0xffff) || (selectedZoneAct == 0xffff && !(unlock_flags & 0x0001))) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
 				Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 257, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection			
 			}
 		}
