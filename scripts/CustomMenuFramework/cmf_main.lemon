@@ -2330,19 +2330,21 @@ function void DataSelect.drawCustomPlanes()
 		}
 		if (total_stars < unlock.level.ehz)
 		{
-			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 123, 138, "(Next zone:                  * 50)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
-			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 122, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 134, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 146, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 158, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 123, 138, "(Next zone:                     * 50)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
+			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 115, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 127, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 139, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 151, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_special_00", getScreenExtend() - 40 + 163, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
 		}
 		else if (total_stars < unlock.level.cpz)
 		{
-			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 124, 138, "(Next zone:                  * 100)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
-			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 120, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 132, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 144, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
-			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 156, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 124, 138, "(Next zone:                     * 100)", 0xe8d494ff, 2, 0, 0xffef, 0, 1)
+			Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 114, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 126, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 138, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 150, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
+			Renderer.drawCustomSprite("medal_special_00", getScreenExtend() - 40 + 162, 138 + 5, 0, SPRITE_FLAG_PRIO, 0xffef, 0, 0xffffffff, 0x8000)
 		}
 
 		if (selectedZoneAct < 0xff00)

@@ -165,19 +165,21 @@ function void UpdateGamePause()
 					}
 					if (total_stars < unlock.theme.south)
 					{
-						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 25)", 0xffff80ff, 3, 0, 0xfff1, 0)
-						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:                  * 25)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 91, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+						Renderer.drawCustomSprite("star_special", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
 					}
 					else if (total_stars < unlock.theme.westside)
 					{
-						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:              * 50)", 0xffff80ff, 3, 0, 0xfff1, 0)
-						Renderer.drawCustomSprite("star_red", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
-						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+						Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth() - 16, 44, "(Next:                  * 50)", 0xffff80ff, 3, 0, 0xfff1, 0)
+						Renderer.drawCustomSprite("star_red", getScreenWidth() - 91, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_gold", getScreenWidth() - 81, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_silver", getScreenWidth() - 71, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff1)
+						Renderer.drawCustomSprite("star_bronze", getScreenWidth() - 61, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
+						Renderer.drawCustomSprite("star_special", getScreenWidth() - 51, 45, 0, SPRITE_FLAG_PRIO + SPRITE_FLAG_NO_GLOBAL_TINT, 0xfff2)
 					}
 
 					countTotalStars()
