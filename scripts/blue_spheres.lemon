@@ -1399,7 +1399,6 @@ function void SpecialStage()
 
 				// Save data here. Data starts at the normal stages' flags and extends through the hard stages' flags.
 				System.savePersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08)
-				debugLog("Saved!")
 			}	
 		}
 		else
