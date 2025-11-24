@@ -8584,7 +8584,7 @@ function void Titlescreen.EnterCheat()
 			++cheatEntry
 			cheatStars = 100
 			normalSpecialStagesAccessed = 0xffffffff
-			hardSpecialStagesAccessed = 0xfffffff
+			hardSpecialStagesAccessed = 0x00ffffff
 			playSound(0x46)
 		}
 		else if (control.pad1.pressed)

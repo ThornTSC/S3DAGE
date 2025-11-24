@@ -3825,11 +3825,14 @@ function void loadChallengeRecords()
 		medalCount += u8[medalAddress]
 	}
 
-	// Load Special Stages visited for Challenge access
-	if (!System.loadPersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08))
+	// Load Special Stages visited for Challenge access. Uses two separate if statements to be extra sure data isn't loaded that overwrites cheat code use.
+	if (!cheatStars)
 	{
-		normalSpecialStagesAccessed = 0
-		hardSpecialStagesAccessed = 0
+		if (!System.loadPersistentData(normalSpecialStagesAccessedAddress, "DAGE_SpecialStagesUnlocked", 0x08))
+		{
+			normalSpecialStagesAccessed = 0
+			hardSpecialStagesAccessed = 0
+		}
 	}
 
 	// Load Special Stage act records
