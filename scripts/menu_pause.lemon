@@ -727,6 +727,7 @@ function u8 PauseMenu_ExitGame()
 			// bluespheres.movement_speed = 0
 			restartSpecialStage = 1
 			bluespheres.stage_exit_animation = 1
+			playMusic(MUSIC_CTRL_STOP)
 		}
 
 		camera.background.x = 0		// From function void restartLevel(), which Euka uses as the
@@ -1073,6 +1074,7 @@ function u8 PauseMenu_Challenges()
 		if (global.game_mode == 0x34)
 		{
 			restartSpecialStage = 1
+			playMusic(MUSIC_CTRL_STOP)
 			#if GAMEAPP >= 0x25021500
 			Audio.stopContext(AudioContext.CONTEXT_MUSIC)
 			Audio.stopContext(AudioContext.CONTEXT_SOUND)
