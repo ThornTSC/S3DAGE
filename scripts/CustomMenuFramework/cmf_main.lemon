@@ -452,6 +452,11 @@ function void customMenu.mainControlLoop()
 //					BlueSphere.setGeneratedStage(bluespheregame.current_stage)
 					green_spheres.active = 0x01
 					time_attack = 0
+
+					if (!Mods.isModActive("Blue Sphere Time Attack"))	// if Blue Spheres Time Attack is not active,
+						fn04ceb6()	// call the function that bypasses the initial "NO WAY" and movement of sprites, as animation breaks without running this early
+					else
+						global.game_mode = 0x89
 				}
 			}
 			else
@@ -2902,29 +2907,6 @@ function void customMenu.mainControlLoop.main()
 		{
 			playSound(0xaf)
 			global.game_mode = 0x5c
-			return
-
-			u8[0xffffffa1] = 0
-			global.game_mode = 0x2c		// Blue Sphere
-			time_attack = 0
-			green_spheres.active = 0x01		// set flag if entering the Blue Sphere game mode (Green Spheres for DAGE)
-			if (selectedSpecialStageType)
-				speedSpheres = 1
-			else
-				speedSpheres = 0
-			specialstages_knuckles.shared = specialstages_knuckles
-
-			if (setting.levelselect.characters == 0)
-				setting.levelselect.characters = CHARS_SONIC_ALONE
-			else if (setting.levelselect.characters == 4)
-				setting.levelselect.characters = CHARS_KNUCKLES_ALONE
-
-			if (!Mods.isModActive("Blue Sphere Time Attack"))	// if Blue Spheres Time Attack is not active,
-				fn04ceb6()	// call the function that bypasses the initial "NO WAY" and movement of sprites, as animation breaks without running this early
-			else
-				global.game_mode = 0x89
-
-			// EntryFunctions.blueSphereGame()
 			return
 		}
 		else if (selectedMenuOption.main == 5)	// A.I.R. Menu was selected
