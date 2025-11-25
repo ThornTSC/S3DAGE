@@ -1801,8 +1801,8 @@ function void customMenu.displayRecordsSpecial()
 				}
 				else
 				{
-					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 48, py + 21, "To unlock:", 0xffffffff, 1, 0, 0xffef, 0, 1)
-					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 48, py + 34, "Play this stage in\nan unlockable act.", 0xe8d494ff, 1, 0, 0xffef, 0, 1)					
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 48, py + 8, "To unlock:", 0xffffffff, 1, 0, 0xffef, 0, 1)
+					Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", px - 48, py + 21, "Play this stage in\nan unlockable act\non Normal\ndifficulty.", 0xe8d494ff, 1, 0, 0xffef, 0, 1)					
 				}
 			}
 			else
