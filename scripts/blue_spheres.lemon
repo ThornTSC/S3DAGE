@@ -724,7 +724,7 @@ function void fn009b62()
 			if ((global.chaos_emeralds == 6 && chaosStage) || (global.super_emeralds == 6 && superStage))
 				sonic2BackgroundPaletteRotation = 1
 			
-			if (challenge_greenspheres && !(unlock_flags & 0x0001))
+			if (challenge_greenspheres && !(unlock_flags & 0x0001) && !time_attack)		// restrict time attack unlock so the toast notification doesn't conflict with an unlock from stars
 			{
 				unlock_flags |= 0x0001	// u16[0x8402fc]
 				System.savePersistentData(0x8402fc, "DAGE_UnlockFlags", 2)
