@@ -1155,6 +1155,65 @@ function void fn01a7e8()
 
 
 
+// Allow horizontal wraps in Original Mode.
+// Function taken from maingame\character\character.lemon
+//# address-hook(0x0116de) end(0x011748)
+//# address-hook(0x014f08) end(0x014f72)
+function void Character.CheckAgainstMoveBorders()
+{
+	// Get x-position (upper 16 bits = full pixel coordinate) after movement update
+	u16 px = (char.position.x + (s32(char.velocity.x) << 8)) >> 16
+
+	// Note: It might be tempting, but please do not use "getScreenWidth" to calculate rightBorder
+	//  -> Instead where move_area.right is set, modify it and possibly move_area.left as well
+	u16 leftBorder = move_area.left + 16
+	u16 rightBorder = move_area.right + 320 - 24
+
+	if (px < leftBorder)
+	{
+		char.position.x = u32(leftBorder) << 16
+		char.velocity.x = 0
+		char.groundspeed = 0
+	}
+#if STANDALONE
+	// Prevention of horizontal wrap
+	else if ((Game.getSetting(SETTING_FIX_GLITCHES) && leftBorder <= 0x20 && s16(px) < s16(leftBorder) && s16(px) >= s16(leftBorder) - 0x80) && !original_mode)
+	{
+		char.position.x = u32(leftBorder) << 16
+		char.velocity.x = 0
+		char.groundspeed = 0
+	}
+#endif
+	else if (px > rightBorder)
+	{
+		char.position.x = u32(rightBorder) << 16
+		char.velocity.x = 0
+		char.groundspeed = 0
+	}
+
+	// Check y-position as well
+	if (!global.passing_floor)
+	{
+		bool hitBottom = 0
+		if (global.inv_gravity)
+		{
+			D0.s16 = level.vertical_wrap
+			hitBottom = (s16(char.position.y.u16) <= D0.s16)
+		}
+		else
+		{
+			D0.s16 = move_area.bottom.current + getScreenHeight()
+			hitBottom = (s16(char.position.y.u16) > D0.s16)
+		}
+
+		if (hitBottom)
+		{
+			// Bottomless pit kills Sonic
+			Character.Die()
+		}
+	}
+}
+
 
 
 
@@ -15367,7 +15426,7 @@ function void fn021568()
 		fn02165a()
 
 	#if STANDALONE
-		if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2)
+		if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2 && !original_mode)
 		{
 			// Prevent slope glitch here for player 1
 			if ((u8[0xffffb000 + 0x2a] & char.flag.ON_OBJECT) && u16[0xffffb000 + 0x42] == A0.u16)
@@ -16444,6 +16503,76 @@ function void fn033ade()
 }
 
 
+
+// Revert AIR glitch fixes for CNZ wheels in Original Mode
+// Function taken from objects\04_cnz\cnz_wheel.lemon
+//# address-hook(0x0328e8) end(0x03298e)
+function void fn0328e8()
+{
+	u16 radius = u8[A0 + 0x32]
+	s16 dx = s16(objA1.position.x.u16 - objA0.position.x.u16)
+	s16 dy = s16(objA1.position.y.u16 - objA0.position.y.u16)
+	D0.u16 = dx + radius
+	D1.u16 = dy + radius
+	D3.u16 = radius * 2
+
+	bool inside = (D0.u16 < D3.u16 && D1.u16 < D3.u16)
+#if STANDALONE
+	// We need a more precise check, otherwise this object can't safely be added e.g. in CNZ 1 at (0x1380, 0x0538)
+	//  -> Also slightly reduce the radius, so that Sonic standing on the monitors below the first CNZ 1 wheel won't get affected
+	if (inside && Game.getSetting(SETTING_FIX_GLITCHES) && !original_mode)
+	{
+		radius = radius * 7/8
+		inside = (dx * dx + dy * dy < radius * radius)
+	}
+#endif
+
+	if (inside)
+	{
+		if (u8[A1 + 0x2a] & char.flag.IN_AIR)
+		{
+		#if STANDALONE
+			if (Game.getSetting(SETTING_FIX_GLITCHES) && !original_mode)
+			{
+				u8[A1 + 0x3c] = 0	// Clear the "char.on_convex_surface" flag, in this case as well
+			}
+		#endif
+			u8[A2] = 0
+			return
+		}
+	}
+	else
+	{
+		if (u8[A2] != 0)
+		{
+			u8[A1 + 0x3c] = 0	// Clear the "char.on_convex_surface" flag
+			u8[A2] = 0
+		}
+		return
+	}
+
+	if (u8[A2] == 0)
+	{
+		u8[A2] = 1
+		if ((u8[A1 + 0x2a] & char.flag.ROLLING) == 0)
+		{
+			u8[A1 + 0x20] = 0
+		}
+		u8[A1 + 0x21] = char.state.RUNNING2
+		objA1.flags2a &= ~char.flag.PUSHING
+		u8[A1 + 0x3c] = 1		// Set the "char.on_convex_surface" flag
+	}
+
+	// Keep ground speed inside certain bounds
+	if (objA0.flags2a & 0x01)
+	{
+		objA1.groundspeed = clamp(objA1.groundspeed, -0xf00, -0x400)
+	}
+	else
+	{
+		objA1.groundspeed = clamp(objA1.groundspeed, 0x400, 0xf00)
+	}
+}
 
 
 
@@ -23850,6 +23979,45 @@ function void InitLevelScrolling.LRZ1()
 
 
 
+// Remove LRZ1 glitch fix from Original Mode. In theory this glitch isn't in DAGE anyway, but we do this to be safe.
+// Function taken from level\10_lrz\level_lrz.lemon
+//# address-hook(0x056dca) end(0x056dfa)
+function void fn056dca()
+{
+	// This function changes the level.scrolling_routine depending on the player's position
+	A1 = 0x056f88
+	D0.u16 = u16[0xffffb000 + 0x10]
+	D1.u16 = u16[0xffffb000 + 0x14]
+	D2 = 0
+	for (u8 i = 0; i < 3; ++i)
+	{
+		u16 minX = u16[A1]
+		u16 maxX = u16[A1+2]
+		u16 minY = u16[A1+4]
+		u16 maxY = u16[A1+6]
+		A5 = A1 + 8
+		if (D0.u16 >= minX && D0.u16 <= maxX && D1.u16 >= minY && D1.u16 < maxY)
+		{
+			call 0x056dfe + D2.u16
+			return
+		}
+
+		A1 += 10
+		D2.u16 += 4
+	}
+
+#if STANDALONE
+	if (Game.getSetting(SETTING_FIX_GLITCHES) >= 2 && !original_mode)
+	{
+		// Additional hard-coded check to make sure that level.display_routine is 0 when reaching the boss area
+		//  -> This prevents the glitch that act 2 won't properly load after the boss fight
+		if (level.display_routine != 0 && D0.u16 >= 0x2680)
+		{
+			fn056e66()
+		}
+	}
+#endif
+}
 
 
 // Display controls inputs when the character is on a dash elevator
