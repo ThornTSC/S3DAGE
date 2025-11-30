@@ -827,6 +827,7 @@ function void LevelSelect()
 		Renderer.setScreenSize(400, 224)
 
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
+	loadEndlessProgress()
 	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
@@ -3589,6 +3590,7 @@ function void Standalone.onLevelStart()
 	Game.setAchievementValue(ACHIEVEMENT_ELECTROCUTE, 0)
 
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
+	loadEndlessProgress()
 	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()

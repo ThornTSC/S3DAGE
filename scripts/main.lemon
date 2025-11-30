@@ -29070,9 +29070,9 @@ function void loadRSR()
 
 function void loadEndlessProgress()
 {
-	if (!System.loadPersistentData(0x8405f8, "DAGE_GreenSphereGame", 4))
+	if (!System.loadPersistentData(greenSphereProgressAddress, "DAGE_GreenSphereGame", 4))
 		greenSphereProgress = 0
-	if (!System.loadPersistentData(0x8405fc, "DAGE_SpeedSphereGame", 4))
+	if (!System.loadPersistentData(speedSphereProgressAddress, "DAGE_SpeedSphereGame", 4))
 		speedSphereProgress = 0
 }
 

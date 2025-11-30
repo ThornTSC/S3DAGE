@@ -217,6 +217,7 @@ function void fn04c97e()
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here and to track medals earned in this mode
 	u16 total_stars_old = total_stars	// saving the value before we recalculate it based on the current level reached
 	loadTASettings()
+	loadEndlessProgress()
 	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
