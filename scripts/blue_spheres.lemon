@@ -1341,7 +1341,7 @@ function void SpecialStage()
 
 #if STANDALONE
 	// Add a small artificial delay here. 112 frames matches ROM hack / S3&K. 12 frames is pre-2025 A.I.R. 24 frames is current A.I.R.
-	u8 delayFrames = ((original_mode || unlock_act) && !restartSpecialStage) ? 112 : (time_attack >= 3) ? 12 : 24
+	u8 delayFrames = ((original_mode || unlock_act) && !restartSpecialStage && !time_attack) ? 112 : (time_attack >= 3) ? 12 : 24
 	for (u8 i = 0; i < delayFrames; ++i)
 		yieldInWhiteScreen()
 #else
