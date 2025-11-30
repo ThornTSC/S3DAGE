@@ -1127,7 +1127,8 @@ function u8 PauseMenu_Challenges()
 		if (System.getGlobalVariableValueByName("DAGE_characterName") == "Chaos")	// Chaos the Imposter is active
 			System.setGlobalVariableValueByName("ChaosForm", 0)
 
-		bluespheres.stage_exit_animation = 1
+		if (global.game_mode == 0x34)
+			bluespheres.stage_exit_animation = 1
 		global.game_mode = 0x54		// Formerly 0x1c for standard level select, now 0xd4 for custom menu + 0x80 (the trigger to load new mode next frame)
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.

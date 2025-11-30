@@ -7314,6 +7314,9 @@ function void Challenge.checkExitShortcut()
 
 	//	global.zone_act = global.zone_act.apparent	// this prevents the endings of AIZ1 and ICZ1 from exhibiting undesirable behavior
 	//	zeroMemory(0xffffeec0, 0x10)	// clear out special screen scrolling and plane effects
+	
+		if (global.game_mode == 0x34)
+			bluespheres.stage_exit_animation = 1
 		global.game_mode = 0x54
 		hud.dirty.timer = 0			// hud.dirty.timer = 1 is a condition to play time attack clear music and save best times.
 									// This prevents menu use at high x positions (such as in ICZ1) to be past another act's pole before the start position is loaded.
