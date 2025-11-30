@@ -21,7 +21,7 @@ function u64 Standalone.getModdedSoundKey(u64 soundKey, u8 sfxId, u8 soundRegTyp
 	{
         soundKey = "s2_results"
 	}
-    else if (sfxId == MUSIC_LEVELCLEAR && speedSpheres)				// 0x29
+    else if (sfxId == MUSIC_LEVELCLEAR && (speedSpheres || challenge_greenspheres))				// 0x29
 	{
         soundKey = "s2_actcomplete"
 	}

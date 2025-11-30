@@ -807,6 +807,7 @@ function void fn009b62()
 				{
 					time_attack_end = 1
 					TA_menu_selection = 0
+					playMusic(MUSIC_LEVELCLEAR)
 				}
 				else
 				{
