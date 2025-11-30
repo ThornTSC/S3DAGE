@@ -54,7 +54,7 @@
 	"mainmenu_old": { "File": "MainMenu.ogg",  "LoopStart": 17070, "Type": "Music"},
 
 	// Sonic Jam Time Attack menu music
-	"challengesmenu": { "File": "Jam_TA.ogg",  "LoopStart": 783980, "Type": "Music"},
+	"challengesmenu": { "File": "Jam_TA.ogg",  "LoopStart": 784439, "Type": "Music"},
 
 	// Sonic Jam credits music
 	"credits": { "File": "Jam_Credits.ogg", "Type": "Music"},	// no loop point needed
