@@ -1826,12 +1826,12 @@ function void customMenu.displayRecordsSpecial()
 		}
 
 		py += 102							// vertical distance between NORMAL and HARD data displays in menu
-		if (i == 0)
+		if (i == 0 && selectedZoneAct < 0xff18)
 		{
 			best_time_address += 0x08				// iterate to HARD data, but not if all data has already been considered
 			best_time_address_perfect += 0x08		// iterate to HARD data, but not if all data has already been considered
 		}
-		else if (selectedSpecialStageType == 0)		// we end all the record display code on the HARD option, so return values to those of the NORMAL option if needed
+		else if (selectedSpecialStageType == 0 && selectedZoneAct < 0xff18)		// we end all the record display code on the HARD option, so return values to those of the NORMAL option if needed
 		{
 			best_time_address -= 0x08				// revert to NORMAL data
 			best_time_address_perfect -= 0x08		// iterate to HARD data, but not if all data has already been considered

@@ -3841,6 +3841,17 @@ function void loadChallengeRecords()
 	if (!System.loadPersistentData(0x830000, "DAGE_SpecialTA", 0x0200))	// load best times for this character and mode, with a 0 returned if they don't exist
 		for (u16 j = 0; j < 0x0200; j += 4)
 			u32[0x830000 + j] = 0x00ffffff	// initialize saved records to 0x00ffffff if a 0 was returned
+	else	// code to fix a bug in v1.13.0.0/1 that could save prototype perfect times/medals to Hard memory, allowing two medals per perfect and hiding records from display
+	{
+		for (u32 prototypePerfectRecordAddress = 0x830184; prototypePerfectRecordAddress <= 0x8301f4; prototypePerfectRecordAddress += 0x10)	// for each prototype perfect record,
+		{
+			if (u32[prototypePerfectRecordAddress + 8] != 0x00ffffff && (u32[prototypePerfectRecordAddress + 8] & 0x00ffffff) < (u32[prototypePerfectRecordAddress] & 0x00ffffff))	// if a time is saved in Hard memory that is better than the Normal memory time,
+			{
+				u32[prototypePerfectRecordAddress] = u32[prototypePerfectRecordAddress + 8]		// copy that time and its medal (if earned) to the Normal layout memory
+			}
+			u32[prototypePerfectRecordAddress + 8] = 0x00ffffff									// reinitialize the Hard layout memory
+		}
+	}
 
 	// Add Special Stage medals to medal count
 	medalAddress = 0x830000
@@ -7894,6 +7905,8 @@ function void Challenge.showEndInterface()
 
 function void Challenge.manageEndMenu()
 {
+	
+	u32[0x8301ec] = 0x00020000
 	if ((global.game_mode & 0x7f) > 0x50)	// we've returned to the main menu or Challenges menu
 		return
 
