@@ -109,6 +109,7 @@ function void Character.LandingOnGroundStandUp()
 // Function taken from maingame\character\character.lemon
 function void Character.updateUprightOnGroundInner()
 {
+	u8 Character.look_up_or_down_delay = (original_mode) ? 120 : 75
 	u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
 	bool isSuperActive = (char.character == CHARACTER_TAILS) ? super.active.tails  : super.active
 
@@ -161,10 +162,10 @@ function void Character.updateUprightOnGroundInner()
 
 						// Start camera movement after countdown
 						++char.look_up_down_timer
-						if (char.look_up_down_timer >= Character.look_up_down_delay)
+						if (char.look_up_down_timer >= Character.look_up_or_down_delay)
 						{
 							cameraMoveState = 2
-							char.look_up_down_timer = Character.look_up_down_delay
+							char.look_up_down_timer = Character.look_up_or_down_delay
 
 							if (char.state == char.state.COWERING)
 							{
