@@ -7673,21 +7673,17 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 		if (original_mode)
 			return false
 		
-		// SSZ clouds effect
-		if (objA0.update_address == 0x057bf6)
-		{
-			Renderer.drawVdpSpriteWithAlpha(px,   py, size, index, 0xd000, 140)
-			Renderer.drawVdpSpriteWithAlpha(px+1, py, size, index, 0xd000, 144)
+		Renderer.drawVdpSpriteWithAlpha(px,   py, size, index, 0xd000, 140)
+		Renderer.drawVdpSpriteWithAlpha(px+1, py, size, index, 0xd000, 144)
 
-			if (getScreenWidth() > 400)
-			{
-				// Draw an additional copy of the cloud one loop further to the right
-				Renderer.drawVdpSpriteWithAlpha(px+512, py, size, index, 0xd000, 140)
-				Renderer.drawVdpSpriteWithAlpha(px+513, py, size, index, 0xd000, 144)
-			}
+		if (getScreenWidth() > 400)
+		{
+			// Draw an additional copy of the cloud one loop further to the right
+			Renderer.drawVdpSpriteWithAlpha(px+512, py, size, index, 0xd000, 140)
+			Renderer.drawVdpSpriteWithAlpha(px+513, py, size, index, 0xd000, 144)
+		}
 
 		return true
-		}
 	}
 
 	return base.Standalone.onDrawVdpSpriteCompound(px, py, size, index, renderQueue, spriteCounter)
