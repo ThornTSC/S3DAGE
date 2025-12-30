@@ -3,14 +3,14 @@
     "saturn_titlecard_yellowbar":  { "File": "saturn_titlecard_yellowbar.png"},
     "saturn_titlecard_redbar":  { "File": "saturn_titlecard_redbar.png"},
 
-    "saturn_titlecard_bluebg_light":  { "File": "saturn_titlecard_bluebg_light.png", "Center": "456,112" },
-    "saturn_titlecard_bluebg_dark":  { "File": "saturn_titlecard_bluebg_dark.png", "Center": "456,112" },
-    "saturn_titlecard_orangebg_light":  { "File": "saturn_titlecard_orangebg_light.png", "Center": "456,112" },
-    "saturn_titlecard_orangebg_dark":  { "File": "saturn_titlecard_orangebg_dark.png", "Center": "456,112" },
-    "saturn_titlecard_greenbg_light":  { "File": "saturn_titlecard_greenbg_light.png", "Center": "456,112" },
-    "saturn_titlecard_greenbg_dark":  { "File": "saturn_titlecard_greenbg_dark.png", "Center": "456,112" },
-    "saturn_titlecard_yellowbg_light":  { "File": "saturn_titlecard_yellowbg_light.png", "Center": "456,112" },
-    "saturn_titlecard_yellowbg_dark":  { "File": "saturn_titlecard_yellowbg_dark.png", "Center": "456,112" },
+    "saturn_titlecard_bluebg_light":  { "File": "saturn_titlecard_bluebg_light.png", "Center": "456,120" },
+    "saturn_titlecard_bluebg_dark":  { "File": "saturn_titlecard_bluebg_dark.png", "Center": "456,120" },
+    "saturn_titlecard_orangebg_light":  { "File": "saturn_titlecard_orangebg_light.png", "Center": "456,120" },
+    "saturn_titlecard_orangebg_dark":  { "File": "saturn_titlecard_orangebg_dark.png", "Center": "456,120" },
+    "saturn_titlecard_greenbg_light":  { "File": "saturn_titlecard_greenbg_light.png", "Center": "456,120" },
+    "saturn_titlecard_greenbg_dark":  { "File": "saturn_titlecard_greenbg_dark.png", "Center": "456,120" },
+    "saturn_titlecard_yellowbg_light":  { "File": "saturn_titlecard_yellowbg_light.png", "Center": "456,120" },
+    "saturn_titlecard_yellowbg_dark":  { "File": "saturn_titlecard_yellowbg_dark.png", "Center": "456,120" },
 
     "saturn_titlecard_zone_text":  { "File": "saturn_zonenames.png", "Rect": "0,240,64,16", "Center": "4,0" },
   

@@ -274,13 +274,24 @@ function bool Saturn.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 		s16 backdropYDark = getScreenHeight()/2 - ((objA0.value32 < 14) ? s16[A0 + 0x32] * getScreenHeight()/14 - getScreenHeight() : 0)
 		s16 backdropXLight = backdropYLight + (getScreenWidth() - 224)/2
 		s16 backdropXDark = backdropYDark + (getScreenWidth() - 224)/2
+		if (getScreenHeight() == 224)
+		{
+			backdropYLight -= 8
+			backdropYDark += 8
+			backdropXLight -= 8
+			backdropXDark += 8
+		}
 		s16 horizontalBarPosition = 9 + getScreenExtend()/2 + ((objA0.value32 < 28) ? getScreenWidth() - (getScreenWidth()/20 * (objA0.value32 - 8)) : 0)
 		s16 verticalBarPosition = ((objA0.value32 < 22) ? 120/7 * (objA0.value32 - 7) - 240 : 0)
+		if (getScreenHeight() == 224)
+			verticalBarPosition -= 16
 		if (global.zone == 0x0c)
 		{
 			// Doomsday loads so fast that the bars can't even make it all the way to their locked positions! We need to speed the bars up a bit.
 			horizontalBarPosition = 9 + getScreenExtend()/2 + ((objA0.value32 < 24) ? getScreenWidth() - (getScreenWidth()/20 * (objA0.value32 - 4)) : 0)
-			verticalBarPosition = ((objA0.value32 < 18) ? 120/7 * (objA0.value32 - 3) - 240 : 0)			
+			verticalBarPosition = ((objA0.value32 < 18) ? 120/7 * (objA0.value32 - 3) - 240 : 0)
+			if (getScreenHeight() == 224)
+				verticalBarPosition -= 16		
 		}
 		s16 animationTimer = objA0.value3e
 		u8 alpha = 255
@@ -293,6 +304,8 @@ function bool Saturn.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 			backdropXDark = backdropYDark + (getScreenWidth() - 224)/2
 			horizontalBarPosition = 9 + getScreenExtend()/2 + (getScreenWidth()/8 * max (0, animationTimer - 60))/4
 			verticalBarPosition = -(300/7 * animationTimer)/4
+			if (getScreenHeight() == 224)
+				verticalBarPosition -= 16
 		}
 		if (S2TitleCard.full)
 		{

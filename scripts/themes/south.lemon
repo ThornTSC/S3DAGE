@@ -324,7 +324,7 @@ function bool South.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 	s16 resolution_tweak = getScreenWidth()/2 - 200
 
 	// px and py are rearranged here to create a fly-in from the right instead of the top
-	Renderer.drawCustomSprite(barKey, 400 + resolution_tweak - py - 0x24 - center_offset[index], px - 0x24 - 0x20 - resolution_tweak, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
+	Renderer.drawCustomSprite(barKey, 400 + resolution_tweak - py - 0x24 - center_offset[index], px - 0x24 - 0x20 - resolution_tweak + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
 	if (removalTimer)
 	{
 		u64 actKey = stringformat("south_titlecard_act%d", global.act.apparent + 1)

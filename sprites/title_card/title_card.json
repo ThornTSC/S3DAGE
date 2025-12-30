@@ -3,7 +3,7 @@
     "titlecard_bluebar":  { "File": "TitleCard_BlueBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_orangebar":  { "File": "TitleCard_OrangeBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_redbar_new":  { "File": "TitleCard_RedBar.png", "Rect": "0,48,64,176", "Center": "0,0" },
-    "titlecard_redbar_dage":  { "File": "TitleCard_DAGEname.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_dage":  { "File": "TitleCard_DAGEname.png", "Rect": "0,0,64,240", "Center": "0,64" },
     "titlecard_redbar_dage_orig":  { "File": "TitleCard_DAGEname_Orig.bmp", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_bluebar_rtwi":  { "File": "TitleCard_BlueBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_orangebar_rtwi":  { "File": "TitleCard_OrangeBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },

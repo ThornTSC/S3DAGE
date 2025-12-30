@@ -378,23 +378,27 @@ function bool Flicky.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x03)
 		{
 			u16 movementScaleBase = px - 252 - getScreenExtend()
-			Renderer.drawCustomSprite("flicky_titlecard_zone_text", px/4 - 15 + 4*movementScaleBase, 98, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// px for being in position is 252 + getScreenExtend()
+
+			Renderer.drawCustomSprite("flicky_titlecard_zone_text", px/4 - 15 + 4*movementScaleBase, 98 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// px for being in position is 252 + getScreenExtend()
 
 			if (unlock_act)
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_unlock%04d", unlock_act), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// getScreenWidth() - px - 128
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_unlock%04d", unlock_act), px/4 - 15 - 4*movementScaleBase, 80 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)	// getScreenWidth() - px - 128
 			else if (global.zone_act == 0x1600)
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone9", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone9", global.zone), px/4 - 15 - 4*movementScaleBase, 80 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
 			else if (global.zone_act == 0x1601)
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone13", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone13", global.zone), px/4 - 15 - 4*movementScaleBase, 80 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
 			else if (global.zone_act == 0x1700)
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone11", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone11", global.zone), px/4 - 15 - 4*movementScaleBase, 80 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
 			else
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone%d", global.zone), px/4 - 15 - 4*movementScaleBase, 80, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_zone%d", global.zone), px/4 - 15 - 4*movementScaleBase, 80 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000) // getScreenWidth() - px - 128
 			
+			if (useRSDKheight())
+				movementScaleBase = movementScaleBase * 8/7	// the act number moves vertically and needs an adjustment for the extended screen height
+
 			if (global.zone_act == 0x1600 || global.zone_act == 0x1700)		// LRZ2 boss, DEZ2 final boss
-				Renderer.drawCustomSprite("flicky_titlecard_act2", 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
+				Renderer.drawCustomSprite("flicky_titlecard_act2", 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
 			else if (!unlock_act && global.zone_act != 0x1601 && global.zone != 0x0a && global.zone != 0x0c)	// don't draw anything in an unlockable act, HPZ, SSZ, or DDZ, but prevent the original graphic from showing
-				Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.act.apparent + 1), 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
+				Renderer.drawCustomSprite(stringformat("flicky_titlecard_act%d", global.act.apparent + 1), 91 + getScreenExtend()/4, 104 + 6*movementScaleBase/5 + getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO, renderQueue + 0x4000)
 
 			return true
 		}

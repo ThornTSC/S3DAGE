@@ -294,11 +294,15 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 //				objA0.value32++		// run a timer
 			if (S2TitleCard.full)
 			{
+				if (!useRSDKheight())
+				{
+					backdropHeight -= 16
+				}
 				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
 				if (objA0.value32 >= 7)		// yellow rectangle moves for 20 frames before locking in place
 				{
-					Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
-					Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+					Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64 - getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
+					Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7 - getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 				}
 			}
 			else
@@ -315,13 +319,17 @@ function bool Westside.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 //				objA0.value3e++		// run a timer
 			s16 animationTimer = objA0.value3e // (S2TitleCard.full) ? objA0.value3e : max(s16[objA0.value3e] - 0x0114,0)	// u16[0xfffffe24] is timer minutes and frames
 			backdropHeight = (animationTimer > 8) ? -((animationTimer - 8) * getScreenHeight()/14) : 0
+			if (!useRSDKheight())
+			{
+				backdropHeight -= 16
+			}
 			yellowPosition = (animationTimer > 4) ? getScreenWidth()/20 * (animationTimer - 4) : 0
 			redPosition = -(120/7 * (animationTimer))
 			if (S2TitleCard.full)
 			{
 				Renderer.drawCustomSprite(backdropKey, 0, backdropHeight, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe009)
-				Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
-				Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+				Renderer.drawCustomSprite("westside_titleyellow", yellowPosition, getScreenHeight() - 64 - getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00a)
+				Renderer.drawCustomSprite((unlock_act) ? "westside_rtwi" : "westside_dage", yellowPosition + (getScreenWidth() + 120)/2, getScreenHeight() - 64 + 7 - getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			}
 			else
 			{
@@ -356,12 +364,12 @@ function bool Westside.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite >= 0x04 && objA0.animation.sprite <= 0x11)
 		{
 			if (unlock_act)
-				Renderer.drawCustomSprite(stringformat("westside_titlecard_unlock%04d", unlock_act), px + getScreenExtend() - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+				Renderer.drawCustomSprite(stringformat("westside_titlecard_unlock%04d", unlock_act), px + getScreenExtend()/2 - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 			else
-				Renderer.drawCustomSprite(stringformat("westside_titlecard_zone%d", objA0.animation.sprite - 4), px + getScreenExtend() - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
+				Renderer.drawCustomSprite(stringformat("westside_titlecard_zone%d", objA0.animation.sprite - 4), px + getScreenExtend()/2 - 40, py - 48, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 
 			// Sonic 2 title cards lock the act name, word ZONE, and act number in place simultaneously
-			u16 px_zone = (getScreenWidth() - px) + (getScreenExtend() - 40) + 84 - ((px - getScreenWidth()/2)/2)		// (reverse movement) + (accommodate for screen resolutions) - (extra movement to ensure act number starts off-screen)
+			u16 px_zone = (getScreenWidth() - px) + (getScreenExtend()/2 - 40) + 84 - ((px - getScreenWidth()/2)/2)		// (reverse movement) + (accommodate for screen resolutions) - (extra movement to ensure act number starts off-screen)
 			Renderer.drawCustomSprite("westside_titlecard_zone_text", px_zone, py - 16, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, 0xe00b)
 
 			if (unlock_act || global.zone_act == 0x1601 || global.zone == 0x0a || global.zone == 0x0c)	// unlockable levels, HPZ, SSZ, or DDZ
