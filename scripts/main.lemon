@@ -3122,8 +3122,8 @@ function void UpdateKnucklesGlideCollision()
 function void Character.CheckForStartRolling()
 {
 	u8 input_state = (char.character == CHARACTER_TAILS) ? control.tails.state : control.player1.state
-	bool L_pressed = (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
-	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
+	bool L_pressed = (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override)
+	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override)
 
 	if ((char.bonus_effect & char.bonus.INFINITE_INERTIA) == 0)
 	{
@@ -4499,7 +4499,7 @@ function bool onCharacterPressedJumpInMidAir(u8 input_state, u8 input_pressed)
 function bool checkStartTailsAssist(u8 input_state)
 {
 	// Start Tails Assist flight?
-	if (Game.getSetting(SETTING_TAILS_ASSIST_MODE) != 0 && ((input_state & CONTROL_UP) || Input.buttonPressed(BUTTON_L)) && !original_mode)
+	if (Game.getSetting(SETTING_TAILS_ASSIST_MODE) != 0 && ((input_state & CONTROL_UP) || Input.buttonPressed(BUTTON_L) && !(player1.control_override || player2.control_override)) && !original_mode)
 	{
 		// Tails must be AI controlled and not too far away
 		s16 dx = s16[0xffffb04a + 0x10] - s16[0xffffb000 + 0x10]
@@ -4536,7 +4536,7 @@ function bool checkStartTailsAssist(u8 input_state)
 				tails.catch_timeout = 0
 				A0 = 0xffffb000
 
-				if (Input.buttonPressed(BUTTON_L))
+				if (Input.buttonPressed(BUTTON_L) && !(player1.control_override || player2.control_override))
 					return false	// no need to prevent jump button action if L was used
 				// No further reaction to jump button if:
 				//  - it would activate the fire or bubble shield
@@ -8218,7 +8218,7 @@ function void Character.WriteToPositionBackup()
 		return
 
 	// u16[A1] = control.player1 is run in the base function, leaving A1 to point to the pressed and held controller state backups.
-	if (Input.buttonDown(BUTTON_L))
+	if (Input.buttonDown(BUTTON_L) && !player1.control_override)
 	{
 		u8[A1] |= CONTROL_DOWN
 		u8[A1+1] |= CONTROL_DOWN

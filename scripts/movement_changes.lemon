@@ -155,10 +155,10 @@ function void Character.updateUprightOnGroundInner()
 				// Can only look up/down when state was not changed to balancing
 				if (char.state == char.state.STANDING)
 				{
-					if ((input_state & (CONTROL_UP | CONTROL_DOWN)) || (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a))
+					if ((input_state & (CONTROL_UP | CONTROL_DOWN)) || (Input.buttonPressed(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonPressed(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override))
 					{
 						cameraMoveState = 1
-						char.state = ((input_state & CONTROL_DOWN) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)) ? char.state.COWERING : char.state.LOOKING_UP
+						char.state = ((input_state & CONTROL_DOWN) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override)) ? char.state.COWERING : char.state.LOOKING_UP
 
 						// Start camera movement after countdown
 						++char.look_up_down_timer
@@ -254,11 +254,11 @@ function bool Character.UpdateSpindash()
 
 	u8 input_state   = (char.character == CHARACTER_TAILS) ? control.tails.state   : control.player1.state
 	u8 input_pressed = (char.character == CHARACTER_TAILS) ? control.tails.pressed : control.player1.pressed
-	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a)
+	bool L_held = (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override)
 
 	if (char.spindash == 0)
 	{
-		bool canStartSpindash = (char.state == char.state.COWERING) && ((input_pressed & CONTROL_ABC) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a))
+		bool canStartSpindash = (char.state == char.state.COWERING) && ((input_pressed & CONTROL_ABC) || (Input.buttonDown(BUTTON_L) && L_Spindash && !original_mode && A0 == 0xffffb000 && !player1.control_override) || (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && L_Spindash && !original_mode && A0 == 0xffffb04a && !player2.control_override))
 		if (!canStartSpindash)
 		{
 			// Nothing to see here
@@ -295,7 +295,7 @@ function bool Character.UpdateSpindash()
 					char.spindash_charge = 0
 			}
 
-			if (Input.buttonDown(BUTTON_L) && A0 == 0xffffb000 && !original_mode)
+			if (Input.buttonDown(BUTTON_L) && A0 == 0xffffb000 && !original_mode && !player1.control_override)
 			{
 				++L_Spindash_Charge	// this increments based on player 1, but the charge timer is shared with sidekick Tails as well
 				if (char.spindash_charge == 0 && L_Spindash_Charge == 1)
@@ -311,16 +311,16 @@ function bool Character.UpdateSpindash()
 				}
 			}
 
-			if (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && A0 == 0xffffb04a && !original_mode)
+			if (Input.buttonDown(BUTTON_L + BUTTON_PAD2) && A0 == 0xffffb04a && !original_mode && !player2.control_override)
 			{
 				++L_Spindash_Charge_P2	// this increments based on player 1, but the charge timer is shared with sidekick Tails as well
 				if (char.spindash_charge == 0 && L_Spindash_Charge_P2 == 1)
 					++L_Spindash_Charge_P2		// this extra charge for one frame makes the max spindash and peelout charge both occur at the same time
 			}
 
-			if (!Input.buttonDown(BUTTON_L))
+			if (!Input.buttonDown(BUTTON_L) || player1.control_override)
 				L_Spindash_Charge = 0
-			if (!Input.buttonDown(BUTTON_L + BUTTON_PAD2))
+			if (!Input.buttonDown(BUTTON_L + BUTTON_PAD2) || player2.control_override)
 				L_Spindash_Charge_P2 = 0
 
 			if ((input_pressed & CONTROL_ABC) || (L_Spindash_Charge == L_Spindash_ChargeInterval && A0 == 0xffffb000) || (L_Spindash_Charge_P2 == L_Spindash_ChargeInterval && A0 == 0xffffb04a))
@@ -617,7 +617,7 @@ function void Character.updateJumpMoves()
 				#endif
 
 				// Check if triggered Tails Assist via L button
-				if (Input.buttonPressed(BUTTON_L) && A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS) && L_TailsAssist && !original_mode)
+				if (Input.buttonPressed(BUTTON_L) && A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS) && L_TailsAssist && !original_mode && !(player1.control_override || player2.control_override))
 					checkStartTailsAssist(input_state)
 
 				// Check if pressed jump again in mid-air
