@@ -3,7 +3,7 @@
 // For this mod, we only care to have the RSDK height, so it always returns true.
 function bool useRSDKheight()
 {
-    return (RSDK_width && !original_mode)
+    return ((RSDK_width && !original_mode) || (time_attack >= 2) || (time_attack == 1 && selectedZoneAct < 0xff18))
 }
 
 function s16 getScreenHeightExtend()

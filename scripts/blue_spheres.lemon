@@ -1355,9 +1355,11 @@ function void SpecialStage()
 	// Set screen resolution
 	if (original_mode)
 		Renderer.setScreenSize(320, 224)
+	else if (time_attack)
+		Renderer.setScreenSize(426, 240)
 	else if (RSDK_width)
 		Renderer.setScreenSize(RSDK_width, 240)
-	else if (screen_width && !time_attack)
+	else if (screen_width)
 		Renderer.setScreenSize(screen_width, 224)
 	else
 		Renderer.setScreenSize(400, 224)

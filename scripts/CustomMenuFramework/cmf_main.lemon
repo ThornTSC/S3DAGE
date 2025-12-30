@@ -483,12 +483,14 @@ function void customMenu.mainControlLoop()
 				setting.levelselect.characters = 4
 
 			original_mode = (setting.time_attack || unlock_act || selectedZoneAct >= 0xff00) ? 0 : setting.original_mode
-			if (selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
+			if (selectedZoneAct >= 0xff18 && selectedZoneAct <= 0xff1f)
 				original_mode = 1
-			if (original_mode)
-				Renderer.setScreenSize(320, 224)
-			else
-				Renderer.setScreenSize(400, 224)
+//			if (selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
+//				original_mode = 1
+//			if (original_mode)
+//				Renderer.setScreenSize(320, 224)
+//			else
+//				Renderer.setScreenSize(400, 224)
 			ApplyROMManipulations()
 			
 			if (!setting.time_attack)
