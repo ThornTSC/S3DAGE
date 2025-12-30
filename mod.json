@@ -6,7 +6,7 @@
 		"Author": "D.A. Garden (game), Thorn (port + features)",
 		"Description": "A port of Sonic 3: D.A. Garden Edition v1.02 to Sonic 3 A.I.R. with new features and widescreen adaptations.",
 		"URL": "https://github.com/ThornTSC/S3DAGE/releases",
-		"ModVersion": "1.13.0.2",
+		"ModVersion": "1.13.1.0",
 		"GameVersion": "24.02.02.0"
 	},
 	"UsesFeatures":
@@ -98,8 +98,8 @@
 			 	"Category": "Appearance",
 				"Options":
 				{
-					"0": "Sonic 3 & Knuckles",
-					"1": "Classic",
+					"0": "Official Releases",
+					"1": "Classic D.A. Garden",
 					"2": "Revisited (default)"
 				}
 			},
@@ -178,11 +178,24 @@
 				}
 			},
 			{
+				"InternalName": "RSDKWidth",
+				"DisplayName": "Screen Height",
+				"Variable": "RSDK_width",
+				"DefaultValue": "426",
+			 	"Category": "Resolution",
+				"Options":
+				{
+					"0": "224px (Classic)",
+					"424": "240px (Origins)",
+					"426": "240px (Forever)"
+				}
+			},
+			{
 				"InternalName": "ScreenWidth",
-				"DisplayName": "Revisited Mode Resolution",
+				"DisplayName": "Classic Height Resolution",
 				"Variable": "screen_width",
 				"DefaultValue": "400",
-			 	"Category": "Unsupported Options",
+			 	"Category": "Resolution",
 				"Options":
 				{
 					"320": "320x224",

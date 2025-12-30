@@ -67,7 +67,7 @@ function void InitStaticRings()
 		}
 		rings.around.first = A1
 		rings.around.first.state = A2.u16
-		D4.u16 += 0xf0
+		D4.u16 += getScreenHeight() + 16		// formerly 0xf0 = 240 = screen height + 16
 
 		while (D4.u16 > u16[A1 + 2])
 		{
@@ -202,7 +202,7 @@ function void RenderStaticRings()
 		if (global.zone == 0x14)
 			A4 = 0xffff0000 + rings.around.first.state
 		A1 = 0x00ebee
-		D5.u16 = 0xf0
+		D5.u16 = getScreenHeight() + 16		// formerly 0xf0 = 240 = screen height + 16
 		u16 camera_x = u16[A3]		// Usually camera.foreground.x
 		u16 camera_y = u16[A3+4]	// Usually camera.foreground.y
 

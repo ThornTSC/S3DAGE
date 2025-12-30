@@ -1,0 +1,187 @@
+//# address-hook(0x04ed90) end(0x04edb0)
+function void LoadTileContentDefault()
+{
+	A6 = addressof(camera.foreground.x)			// Address: 0xffffee80
+	A5 = addressof(camera.foreground.x.old)		// Address: 0xffffee88
+	D1.u16 = camera.foreground.y.u16
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	LoadTileContentInDirX()
+
+	A6 = addressof(camera.foreground.y)			// Address: 0xffffee84
+	A5 = addressof(camera.foreground.y.old)		// Address: 0xffffee8a
+	D1.u16 = camera.foreground.x.u16
+	D6 = (getScreenWidth() + 31) / 16
+	LoadTileContentInDirY()
+}
+
+//# address-hook(0x04edb4) end(0x04edd4)
+function void UpdateBackgroundTiles.General()
+{
+	A6 = addressof(camera.background.x)			// Address: 0xffffee8c
+	A5 = addressof(camera.background.x.old)		// Address: 0xffffee94
+	D1.u16 = camera.background.y.u16
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	LoadTileContentInDirX()
+
+	A6 = addressof(camera.background.y)			// Address: 0xffffee90
+	A5 = addressof(camera.background.y.old)		// Address: 0xffffee96
+	D1.u16 = camera.background.x.u16
+	D6 = (getScreenWidth() + 31) / 16
+	LoadTileContentInDirY()
+}
+
+//# address-hook(0x04ead8) end(0x04eb20)
+function void LoadTileContentInDirY()
+{
+	u16 oldOffset = u16[A5]
+	u16 newOffset = u16[A6] & level.height.tilemask
+	u16[A5] = newOffset
+
+	// Anything to do?
+	s16 diff = oldOffset - newOffset
+	if (diff == 0)
+		return
+
+	// Note that there are cases where s8(diff) is actually zero here, though diff is not (e.g. LBZ1 cutscene before boss)
+	if (s8(diff) >= 0)
+	{
+		// Screen moved up
+		D0.u16 = newOffset
+	}
+	else
+	{
+		// Screen moved down
+		diff = -diff
+		D0.u16 = (oldOffset + getScreenHeight() + 16) & level.height.tilemask		// formerly 0xf0 = 240 = screen height + 16
+	}
+	u8[0xffffeea4] = ((diff & 0x30) != 0x10) ? 0xff : 0x00
+
+	//debugLog(stringformat("LoadTileContentInDirY (%d lines): posX=0x%04x, posY=0x%04x, rows=0x%02x", u8[0xffffeea4] ? 2 : 1, D0, D1, D6.u16))
+
+	u32 backupD1 = D1
+	u32 backupD6 = D6
+	LoadTileContentSingleLine()
+	D1 = backupD1
+	D6 = backupD6
+
+	if (u8[0xffffeea4] != 0)
+	{
+		D0.u16 = (D0.u16 + 0x10) & level.height.tilemask
+		LoadTileContentSingleLine()
+	}
+}
+
+//# address-hook(0x04eb22) end(0x04eb68)
+function void fn04eb22()
+{
+	// Updates background sprite patterns in some zones (e.g. AIZ 1 and MHZ)
+	u16 oldOffset = u16[A5]
+	u16 newOffset = u16[A6] & level.height.tilemask
+	u16[A5] = newOffset
+
+	// Anything to do?
+	s16 diff = oldOffset - newOffset
+	if (diff == 0)
+		return
+
+	// Note that there are cases where s8(diff) is actually zero here, though diff is not
+	if (s8(diff) >= 0)
+	{
+		// Screen moved up
+		D0.u16 = newOffset
+	}
+	else
+	{
+		// Screen moved down
+		diff = -diff
+		D0.u16 = (oldOffset + getScreenHeight() + 16) & level.height.tilemask		// formerly 0xf0 = 240 = screen height + 16
+		D1 = (D1 << 16) + (D1 >> 16)
+	}
+	u8[0xffffeea4] = ((diff & 0x30) != 0x10) ? 0xff : 0x00
+
+	u16 backupD1 = D1.u16
+	u16 backupD6 = D6.u16
+	LoadTileContentSingleLine()
+	D1.u16 = backupD1
+	D6.u16 = backupD6
+
+	if (u8[0xffffeea4] != 0)
+	{
+		D0.u16 = (D0.u16 + 0x10) & level.height.tilemask
+		LoadTileContentSingleLine()
+	}
+}
+
+//# address-hook(0x04ee20) end(0x04ee82)
+function void fn04ee20()
+{
+	D1.u16 = D6.u16
+	while (true)
+	{
+		D6.u16 -= u16[A4]
+		A4 += 2
+		if (D6.s16 < 0)
+			break
+
+		D0.u16 = u16[A6] & 0xfff0
+		u16[A6 + 2] = D0.u16
+		A6 += 4
+		--D5.u16
+	}
+
+	D6.s16 = -D6.s16
+	D6.u16 >>= 4
+	D4 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	D4.u16 -= D6.u16
+	if (D4.s16 < 0)
+	{
+		D4 = 0
+		D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	}
+
+	while (true)
+	{
+		u16 backupD1 = D1.u16
+		u16 backupD4 = D4.u16
+		u16 backupD5 = D5.u16
+		u16 backupD6 = D6.u16
+		u32 backupA4 = A4
+		u32 backupA6 = A6
+
+		A5 = A6 + 2
+		LoadTileContentInDirX()
+
+		A4 = backupA4
+		A6 = backupA6
+		D1.u16 = backupD1
+		D4.u16 = backupD4
+		D5.u16 = backupD5
+		D6.u16 = backupD6
+
+		A6 += 4
+		if (D4.u16 == 0)
+			break
+
+		D6.u16 <<= 4
+		D1.u16 += D6.u16
+		--D5.u16
+		D6.u16 = u16[(A4+=2)-2] >> 4
+		D0.u16 = D4.u16
+		D4.u16 -= D6.u16
+		if (D4.s16 < 0)
+		{
+			D6.u16 = D0.u16
+			D4 = 0
+		}
+	}
+
+	while (true)
+	{
+		--D5.u16
+		if (D5.u16 == 0)
+			break
+
+		D0.u16 = u16[(A6+=2)-2] & 0xfff0
+		u16[(A6+=2)-2] = D0.u16
+	}
+}

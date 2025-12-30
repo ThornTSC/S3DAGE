@@ -1,0 +1,532 @@
+// Ensure the call to 16x16 block drawing function fn04ee9e() receives the appropriate number of rows of blocks for the screen height
+//# address-hook(0x05734e)
+function void fn05734e()
+{
+	A4 = 0x0577b2
+	A5 = 0xffffa880
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	D5 = 0x0a
+	fn04ee9e()
+}
+
+// Replace a hardcoded modulus of 256 (224 + 32) for decorative cloud vertical wrapping with one that adapts to screen height.
+// However, 256 works well with vertical wrapping adjusting the camera by a multiple of 256.
+// Therefore, we must track when the camera wraps and adjust cloud positions accordingly.
+// Going up: 0xff00 changes to 0x0eff.
+// Going down: 0xffff changes to 0x0000.
+//# address-hook(0x05758a) end(0x0575e8)
+function void fn05758a()
+{
+	if (getScreenHeightExtend() <= 0)
+	{
+		base.fn05758a()
+		return
+	}
+
+	D0.u16 = camera.foreground.y.u16
+	D3.u16 = camera.screenshake.offset
+	D0.u16 -= D3.u16
+	D1.u16 = D0.u16
+	D1.s16 >>= 2
+	D0.u16 += D1.u16
+	D1.u16 = u16[0xffffee9c]
+	D2.s16 = D1.s16 >> 2
+	D1.u16 += D2.u16
+	D1.s16 >>= 1
+	D0.u16 += D1.u16 + D3.u16
+	D1.u16 = camera.foreground.x.u16
+	D2.s16 = D1.s16 >> 2
+	D1.u16 += D2.u16
+
+	A5 = 0xffffa9f6
+	D2 = 0x04
+	while (D2.s16 >= 0)
+	{
+		D3.u16 = u16[(A5+=2)-2]
+		if (D3.u16 != 0)
+		{
+			A6 = 0xffff0000 + D3.u16
+
+			// Track the previous frame's camera y position at all times via unused.player2.item_count.
+			// When the camera moves from 0xff01 to 0x0f00 or from 0x0fff to 0x0000, we need to adjust cloudYShift.
+			// Store the state of adjusting or not adjusting cloudYShift in unused.player2.total_rings.
+			// In initializeMainGame, we ensure starting from the final SSZ star post keeps unused.player2.total_rings at 2 instead of resetting to 0.
+			if (camera.position.y.u16 > 0x0800 && camera.position.y.u16 <= 0x0f00 && unused.player2.item_count >= 0xff00)	// moving upward
+				unused.player2.total_rings = 2
+			else if (camera.position.y.u16 <= 0x0800 &&  unused.player2.item_count >= 0x0f00 && unused.player2.total_rings)	// moving downward
+				unused.player2.total_rings = 0
+			s16 cloudYShift = s16(unused.player2.total_rings) * getScreenHeightExtend()
+			unused.player2.item_count = camera.position.y.u16
+
+			D3.u16 = (u16[A6 + 0x38] - D0.u16) % (getScreenHeight() + 32)	// formerly & 0xff, which was effectively % 256 or % (224 + 32)
+			D3.u16 += 0x70 - cloudYShift
+			if (D3.u16 < 0x70 && cloudYShift)
+				D3.u16 += 0x0100 + getScreenHeightExtend()
+			u16[A6 + 0x14] = D3.u16
+			D3.u16 = (u16[A6 + 0x3a] - D1.u16) & 0x01ff
+			D3.u16 += 0x50
+			u16[A6 + 0x10] = D3.u16
+		}
+		--D2.s16
+	}
+}
+
+// Adjust camera at SSZ start. Origins often uses only half a row of
+// screen height adjustment in SSZ, which does look quite nice.
+//# address-hook(0x0571f6) end(0x057298)
+function void InitLevelTiles.SSZ()
+{
+	if (checkpoint.number == 0)
+	{
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = 0x057c1e
+			objA1.position.x.u16 = 0x0100
+			u8[A1 + 0x2d] = 0x6c
+			u8[0xffffeed7] = 0xff
+			move_area.right = 0x0200
+			move_area.bottom.current = 0x0bc0 - getScreenHeightExtend()/2
+			move_area.bottom.target  = 0x0bc0 - getScreenHeightExtend()/2
+			camera.foreground.x.u16  = 0x60 - getScreenExtend()
+			camera.position.x.u16    = 0x60 - getScreenExtend()
+			camera.foreground.y.u16  = 0x0f49
+			camera.position.y.u16    = 0x0f49
+			player1.camera_lock = 0xff
+		}
+	}
+
+	u16[0xffffee98] = 0
+	u16[0xffffee9c] = 0
+
+	zeroMemory(0xffffa9f6, 0x0a)
+	A1 = 0xffffaa00
+	A5 = 0xffffa9f6
+
+	A6 = 0x058758
+	D1 = 4
+	if (allocDynamicObjectStd())
+	{
+		while (D1.s16 >= 0)
+		{
+			u16[(A5+=2)-2] = A1.u16
+			objA1.update_address = 0x057bb2
+			u16[A1 + 0x38] = u16[(A6+=2)-2]
+			u16[A1 + 0x3a] = u16[(A6+=2)-2]
+			u16[A1 + 0x40] = u16[(A6+=2)-2]
+			D2.u16 = u16[(A6+=2)-2]
+			u8[A1 + 0x22] = D2.u8
+
+			if (!allocDynamicObjectAfterA1())
+				break
+
+			--D1.s16
+		}
+	}
+
+	fn05758a()
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+// Adjust the various screen locks for midbosses and bottomless pits throughout SSZ Sonic/Tails version.
+//# address-hook(0x0575ea) end(0x057788)
+function void fn0575ea()
+{
+	if (u8[0xffffeed8] != 0)
+		return
+
+	if (camera.position.x.u16 >= 0x19a0 - getScreenExtend() && u16[0xffffb000 + 0x14] < 0x0680)
+	{
+		move_area.left = 0x19a0 - getScreenExtend()
+		D0.u16 = 0x05c0 - getScreenHeightExtend()/2
+		level.vertical_wrap = D0.u16
+		move_area.bottom.target = D0.u16
+		u8[0xffffeed8] = 0xff
+		return
+	}
+
+	if (u8[0xffffeed7] == 0)
+	{
+		D0.u8 = u8[0xffffeed3] | u8[0xffffeed5]
+		if (D0.u8 == 0)
+		{
+			D0.u16 = camera.position.y.u16
+			if (D0.u16 >= 0x0100 && D0.u16 < 0x0e00)
+			{
+				A1 = 0x05778a
+				D1.u16 = u16[0xffffb000 + 0x10]
+				while (D1.u16 >= u16[(A1+=2)-2])
+				{
+					A1 += 2
+				}
+
+				D2.u16 = u16[A1] - getScreenHeightExtend()/2
+				if (D2.u16 <= D0.u16)
+				{
+					level.vertical_wrap = D2.u16
+				}
+
+				A1 = 0x05779a
+				while (D1.u16 >= u16[(A1+=2)-2])
+				{
+					A1 += 2
+				}
+
+				D2.u16 = u16[A1] - getScreenHeightExtend()/2
+				if (D2.u16 >= D0.u16)
+				{
+					move_area.bottom.current = D2.u16
+					move_area.bottom.target = D2.u16
+				}
+			}
+			else
+			{
+				level.vertical_wrap = 0xff00
+				D0.u16 = 0x1000
+				move_area.bottom.current = D0.u16
+				move_area.bottom.target = D0.u16
+			}
+		}
+
+		D0.u16 = u16[0xffffb000 + 0x14]
+		if (D0.u16 >= 0x0440)
+		{
+			if (D0.u16 >= 0x0880 || s8[0xffffeed2] < 0)
+			{
+				move_area.left = 0
+				move_area.right = 0x19a0 + getScreenExtend()
+				return
+			}
+
+			if (u8[0xffffeed2] != 0)
+				return
+
+			if (u8[0xffffeed3] == 0)
+			{
+				move_area.left = 0x0160 - getScreenExtend()
+				move_area.right = 0x19a0 + getScreenExtend()
+				if (D0.u16 < 0x07c0 - getScreenHeightExtend()/2 || camera.position.x.u16 != move_area.left || u8[0xffffb000 + 0x2a] & char.flag.IN_AIR)
+					return
+
+				move_area.right = 0x0160 + getScreenExtend()
+				D0.u16 = 0x07c0 - getScreenHeightExtend()/2
+				level.vertical_wrap = D0.u16
+				move_area.bottom.target = D0.u16
+				u8[0xffffeed3] = 0xff
+			}
+
+			if (camera.position.y.u16 != 0x07c0 - getScreenHeightExtend()/2)
+				return
+
+			if (allocDynamicObjectStd())
+			{
+				objA1.update_address = 0x07a20e
+				u8[0xffffeed7] = 0xff
+				level.display_routine = 0x7f00
+			}
+		}
+		else
+		{
+			if (s8[0xffffeed4] < 0)
+			{
+				move_area.left = 0
+				move_area.right = 0x19a0 + getScreenExtend()
+				return
+			}
+
+			if (u8[0xffffeed4] != 0)
+				return
+
+			if (u8[0xffffeed5] == 0)
+			{
+				move_area.right = 0x1660 + getScreenExtend()
+				D1 = (level.display_routine == 0) ? 0x0160 : 0
+
+				move_area.left = D1.u16
+				if (D0.u16 < 0x0420 - getScreenHeightExtend()/2 || camera.position.x.u16 != 0x1660 - getScreenExtend() || u8[0xffffb000 + 0x2a] & char.flag.IN_AIR)
+					return
+
+				move_area.left = 0x1660 - getScreenExtend()
+				D0.u16 = 0x0380 - getScreenHeightExtend()/2
+				level.vertical_wrap = D0.u16
+				move_area.bottom.target = D0.u16
+				u8[0xffffeed5] = 0xff
+			}
+
+			if (camera.position.y.u16 != 0x0380 - getScreenHeightExtend()/2)
+				return
+
+			if (allocDynamicObjectStd())
+			{
+				objA1.update_address = 0x07a6a6
+				u8[0xffffeed7] = 0xff
+				u16[0xffffeed4] = 0x7f00
+			}
+		}
+	}
+}
+
+function void BossMecha1.setBossArea()
+{
+	level.bossarea.left  = camera.position.x.u16 + 0x20
+	level.bossarea.right = camera.position.x.u16 + getScreenWidth() - 0x20
+	level.bossarea.top   = camera.position.y.u16 + 0x30 + getScreenHeightExtend()/2
+
+	#if STANDALONE
+		if (getScreenWidth() >= 400)
+		{
+			// Reduce move area of the boss, so he does not stand too close to the edge
+			level.bossarea.left += 0x0f
+			level.bossarea.right -= 0x0f
+		}
+	#endif
+}
+
+// Adjust vertical position of Mecha Sonic when he sweeps the floor and destroys the teleporter to consider screen height
+//# address-hook(0x07b2dc) end(0x07b3a6)
+function void fn07b2dc()
+{
+#if STANDALONE
+	// For Knuckles fighting the Sonic/Tails version of the boss, we have to make the following change to avoid graphics glitches
+	//  -> Usually u16[0xfffffa9a] is 0 for S/T and 1 for Knuckles
+	if (isMainCharacter(CHARACTER_KNUCKLES) && global.act == 0)
+	{
+		u16[0xfffffa9a] = 0
+	}
+#endif
+
+	if (SetupObjectAttributesSlotted(0x07d3ea))
+		return
+
+	boss.remaining_hits = 8
+	global.random.seed = global.framecounter
+
+	if (global.act != 0)
+	{
+		// Boss fight for Knuckles
+		objA0.position.x.u16 = 0x0220 + getScreenExtend() * 3
+		objA0.position.y.u16 = 0x04a0 // we do NOT use the + getScreenHeightExtend()/2 used in the Sonic/Tails fight
+	}
+	else
+	{
+		// Boss fight for Sonic / Tails
+		objA0.base_state = 0x04
+		objA0.animation.sprite = 0x02
+		objA0.velocity.x = -0x800
+		objA0.flags38 |= 0x04
+
+		// "spawnSimpleChildObjects(0x07d47a)" replaced by:
+		spawnSimpleChildObjects(0x07c902, 2)		// Dash dust
+
+		BossMecha1.setBossArea()
+
+		objA0.position.x.u16 = camera.position.x.u16 + getScreenWidth() + 0x20
+		objA0.position.y.u16 = camera.position.y.u16 + 0xa0 + getScreenHeightExtend()/2
+	}
+
+	Kosinski.addToDMAQueue(0x17f738, 0x8380)		// Mecha Sonic effects sprites
+
+	addPatternLoadingCue(0x083d64)		// Boss explosion sprites
+
+	loadPaletteLine1(0x07d850)
+
+	if (global.act == 0)
+	{
+		if (allocDynamicObjectStd())
+		{
+			// Create the object that fades out level music and starts the boss theme afterwards
+			objA1.update_address = 0x085b30
+			u8[A1 + 0x2c] = MUSIC_MAINBOSS
+		}
+	}
+
+	// "spawnSimpleChildObjects(0x07d474)" replaced by:
+	spawnSimpleChildObjects(0x07c9ba, 1)		// Damaging spike hitbox
+
+	AllocDynamicObjectStd()
+}
+
+// Adjust vertical position of Mecha Sonic when he reappears after the floor sweep to consider screen height
+//# address-hook(0x07b41c) end(0x07b448)
+function void fn07b41c()
+{
+	objA0.base_state = 0x08
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.position.y.u16 = camera.position.y.u16 + 0x40 + getScreenHeightExtend()/2
+	objA0.velocity.x = 0x400
+	objA0.animation.sprite = 3
+	u32[A0 + 0x30] = 0x07d523
+}
+
+// Ensure Mecha Sonic falls when the end of Sonic's/Tails's act collapses regardless of screen *WIDTH*.
+//# address-hook(0x05750c) end(0x057584)
+function void fn05750c()
+{
+	A5 = 0xffffa880
+	A6 = 0xffffa8e0
+	D0.u16 = camera.foreground.y.u16
+	D1 = 0x0a
+	D2 = 0x09
+	while (D2.s16 >= 0)
+	{
+		if (u16[A6] != 0)
+		{
+			if (s16[A6] >= 0)
+			{
+				--u16[A6]
+			}
+		}
+		else
+		{
+			D3 = u32[A5 + 0x80]
+			u32[A5 + 0x80] += 0x0800
+			u32[A5 + 0xc0] -= D3
+		}
+
+		D3.u16 = u16[A5 + 0xc0] + D0.u16
+		if (D3.u16 < 0x0580)
+		{
+			u32[A5 + 0x80] = 0
+			D3.u16 = 0x0580
+			--D1.u16
+		}
+		u16[A5] = D3.u16
+		u16[A6 - 0x20] = D3.u16
+
+		A5 += 4
+		A6 += 2
+		--D2.s16
+	}
+
+	A1 = 0xffff0000 + u16[0xfffffaa4]
+	D0.s16 = clamp((s16(objA1.position.x.u16 - 0x19a0) >> 3) & 0xfffc, 0, 0x24)	// Changed to s16. This can become negative in wide screen resolutions and *must* be between 0 and 0x24 for a valid falling terrain offset for Mecha Sonic to follow.
+	A5 = 0xffffa940
+	D2.u16 = 0x0660 - u16[A5 + D0.s16]
+	objA1.position.y.u16 = (u16[A5 + D0.s16] >= 0xff00 && u16[A5 + D0.s16] <= 0xff3d && getScreenHeightExtend() > 0) ? objA1.position.y.u16 + 4 : D2.u16		// 0xff3d is the highest value for a section of falling terrain that is off the bottom of a 224px-height screen. Keep Mecha Sonic falling so he doesn't show in larger heights.
+	if (D1.u16 == 0)
+	{
+		u8[0xffffeec5] = 0xff
+		objA1.update_address = addressof(UnloadObject)
+	}
+
+	fn05758a()
+}
+
+// In Knuckles's act, check screen height to align the Master Emerald and pedestal with the ground.
+//# address-hook(0x07c818) end(0x07c854)
+function void fn07c818()
+{
+	setupObjectAttributesFull(0x07d450)
+
+	objA0.position.x.u16 = move_area.right + 0x0100
+	objA0.position.y.u16 = camera.position.y.u16 + 0xa8 + getScreenHeightExtend()/2
+
+	objA0.update_address = 0x07c864
+	A1 = 0xffffffb2		// Start of emerald collection states
+	D0 = 0x03			// Super Emerald collected state
+	D1 = 6				// Number of emeralds
+	while (true)
+	{
+		if (D0.u8 != u8[(A1+=1)-1])
+			break
+
+		--D1.s16
+		if (D1.s16 < 0)
+		{
+			objA0.update_address = 0x07c856
+			break
+		}
+	}
+}
+
+// When the final boss music starts in Knuckles's SSZ2, edit the level layout for wider screen resolutions.
+// The level wrap causes the chunks to load one row too high past the normal right edge of the level.
+// We edit a few chunks from the level's left edge since they're no longer accessible to remove this issue.
+// (A.I.R. versions beyond the v24.02.02.1 have a diffferent fix in place, but this fix does not interfere.)
+// Function taken from bosses\boss_ssz_supermecha.lemon
+//# address-hook(0x07b996) end(0x07b9cc)
+function void fn07b996()
+{
+	u8[0xffff80d9] = 0x07
+	u8[0xffff80da] = 0x04
+	u16[0xffff80e2] = 0x0605
+
+	base.fn07b996()
+}
+
+// When spawning the Tornado, its pilot, Knuckles, and (with all Emeralds) the Master Emerald,
+// adjust based on scren height to prevent a held Master Emerald from being visible early.
+// Also swap the target palette after a fade to white in SSZ2 and set the transparency color to
+// the sky color to hide an issue as Angel Island rises upward.
+//# address-hook(0x05e70e) end(0x05e804)
+function void fn05e70e()
+{
+	setupObjectAttributesFull(0x0600c2)
+	objA0.countdown_value = 299
+
+	A1 = 0xffffb000
+	u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+	u8[A1 + 0x22] = 0
+
+	player1.camera_lock = 0xff
+	u8[0xfffffab8] = 0
+	global.level_started = 0
+	camera.screenshake.state = 0
+	timer.alldata = 0
+
+	objA0.position.x.u16 = camera.position.x.u16 + 0xc0
+	objA0.position.y.u16 = camera.position.y.u16 + 0x0110 + getScreenHeightExtend()
+
+	// "spawnChildObjects(0x0601ba)" replaced by:
+	spawnChildObject(0x05ea52, 0x00, -32, 43)
+
+	u32[A0 + 0x30] = 0x060236
+
+	fn05fe82()
+
+	if (outro.ending_type >= 0)
+	{
+		objA0.animation.sprite = 0x04
+		u32[A0 + 0x30] = 0x06023f
+
+		// "spawnChildObjects(0x0601b2)" replaced by:
+		spawnChildObject(0x05ebc6, 0x00, 4, -16)	// The Master Emerald
+
+		Kosinski.addToDMAQueue(0x17fcba, 0xa5c0)	// Master Emerald sprite
+
+		if (outro.ending_type != 0)
+		{
+			hud.dirty.timer = 0x01
+			super.palettefx.state = 0xff
+			super.palettefx.timer = 0x0f
+			super.active = 1
+			super.ring_dec.frames = 0x7fff
+		}
+	}
+
+	copyMemory(0xfffffca0, 0x0a8a3c, 0x20)
+	if (!original_mode)
+	{
+		copyMemory(0xfffffcc0, 0x0a97bc, 0x40)	// move standard SSZ2 colors into target palette RAM lines 3 and 4
+		if (getScreenHeightExtend() > 0)
+			u16[0xfffffcc0] = u16[0xfffffcec]	// set the transparency target color to the color of the sky as done earlier
+	}
+	u32[0xfffffcaa] = 0xee0088
+
+#if STANDALONE
+	loadCharacterPalette(CHARACTER_SONIC,    0x802180, 0)
+	loadCharacterPalette(CHARACTER_TAILS,    0x8021c0, 0)
+	loadCharacterPalette(CHARACTER_KNUCKLES, 0x802200, 0)
+#endif
+
+	Kosinski.addToDMAQueue(0x163b9a, 0x6200)	// Knuckles end pose sprites
+	Kosinski.addToDMAQueue(0x163418, 0x3c60)	// Tornado
+	Kosinski.addToDMAQueue(0x162914, 0x4dc0)	// Smaller ending sprites + Sonic pilot head + chain
+
+#if STANDALONE
+	Game.startSkippableCutscene()
+
+	if (Game.isNormalGame())
+		Game.setAchievementComplete(ACHIEVEMENT_LONGPLAY)
+#endif
+}

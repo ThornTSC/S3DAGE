@@ -153,8 +153,8 @@ function void UpdateBackgroundScrolling.EHZ()
 	u16[0xfffffc5e]= 0x00e8
 
 	// Sky
-	s64 parallaxShift = -(camera.position.x.u16 * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
-	s16 yShift = camera.position.y.u16 / 50 - 8							// 50 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point.
+	s64 parallaxShift = -(camera.position.x.u16 * 120 / 0x1ff0) % 512			// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s16 yShift = (camera.position.y.u16 - getScreenHeightExtend()) / 50 - 8		// 50 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point.
 	if (palette_set < 2)
 		yShift = 0
 	Renderer.drawCustomSprite("ehz_background_sky_extra", parallaxShift, -16 - yShift, 0, 0, 0x1100)
@@ -289,8 +289,7 @@ function void UpdateBackgroundScrolling.EHZ()
 	parallaxShift = -(camera.position.x.u16 * 64 / 0x50) % 512
 	Renderer.drawCustomSprite("ehz_background_field_line233", parallaxShift, 233 - yShift, 0, 0, 0x1100)
 
-	// The current background y shifting formula will not show these lines.
-/*
+	// The current background y shifting formula will only show these lines if the screen height is extended.
 	parallaxShift = -(camera.position.x.u16 * 64 / 0x4e) % 512
 	Renderer.drawCustomSprite("ehz_background_field_line237", parallaxShift, 237 - yShift, 0, 0, 0x1100)
 	parallaxShift = -(camera.position.x.u16 * 64 / 0x4c) % 512
@@ -301,5 +300,4 @@ function void UpdateBackgroundScrolling.EHZ()
 	Renderer.drawCustomSprite("ehz_background_field_line249", parallaxShift, 249 - yShift, 0, 0, 0x1100)
 	parallaxShift = -(camera.position.x.u16 * 64 / 0x4b) % 512
 	Renderer.drawCustomSprite("ehz_background_field_line253", parallaxShift, 253 - yShift, 0, 0, 0x1100)
-*/
 }

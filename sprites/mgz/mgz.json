@@ -1,3 +1,15 @@
 {
-	"mgz_pillar_knuxshading":  { "File": "mgz_pillar_knuxshading.png", "Rect": "0,64,0,80", "Center": "32,40" }
+	"mgz_pillar_knuxshading":  { "File": "mgz_pillar_knuxshading.png", "Rect": "0,64,0,80", "Center": "32,40" },
+
+    "mgz2_bossarea": { "File": "mgz2_bossarea.bmp", "Center": "224,120" },
+    "mgz2_bossarea_3c90": { "File": "mgz2_bossarea.bmp", "Rect": "0,0,96,584", "Center": "80,120" },
+    "mgz2_bossarea_3cb0": { "File": "mgz2_bossarea.bmp", "Rect": "96,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3cd0": { "File": "mgz2_bossarea.bmp", "Rect": "128,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3cf0": { "File": "mgz2_bossarea.bmp", "Rect": "160,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3d10": { "File": "mgz2_bossarea.bmp", "Rect": "192,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3d30": { "File": "mgz2_bossarea.bmp", "Rect": "224,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3d50": { "File": "mgz2_bossarea.bmp", "Rect": "256,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3d70": { "File": "mgz2_bossarea.bmp", "Rect": "288,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3d90": { "File": "mgz2_bossarea.bmp", "Rect": "320,0,32,584", "Center": "16,120" },
+    "mgz2_bossarea_3db0": { "File": "mgz2_bossarea.bmp", "Rect": "352,0,96,584", "Center": "16,120" }
 }

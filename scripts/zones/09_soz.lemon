@@ -1,0 +1,188 @@
+// Adjust SOZ1 foreground heat haze effect to span entirety of screen.
+//# address-hook(0x055df2) end(0x055e48)
+function void fn055df2()
+{
+	// Heat haze effect in foreground
+	A1 = 0xffffa810
+	A6 = 0x05077e
+	D0.u16 = camera.foreground.y.u16
+	D1.u16 = getScreenHeight() - 1 // formerly a static 223
+	D2.u16 = level.framecounter >> 1
+	D2.u16 += D0.u16 * 2
+	D2.u16 &= 0x3e
+	A6 += D2.u16
+	D6.s16 = -camera.foreground.x.u16
+	fn04f0b6()
+
+	// Heat haze effect in background
+	A1 = 0xffffe000		// Location of linewise scroll offsets
+	A2 = 0xffffa810
+	A4 = 0x0560dc
+	A5 = 0xffffa800
+	A6 = 0x05077e
+	D0.u16 = camera.background.y.u16
+	D1.u16 = getScreenHeight() - 1
+	D2.u16 = ((level.framecounter >> 1) + D0.u16 * 2) & 0x3e
+	A6 += D2.u16
+	fn04f1f0()
+}
+
+// The heat haze effect data is only 0x200 bytes long and repeats every 0x40 bytes.
+// If the desired offset within the data exceeds the data size, subtract 0x200 from the offset.
+//# address-hook(0x04f0b6) end(0x04f0cc)
+function void fn04f0b6()
+{
+	D0.u16 = D1.u16
+	while (D0.s16 >= 0)
+	{
+        if (A6 - 0x05077e >= 0x0200 && !original_mode)
+            A6 -= 0x0200
+		u16[A1] = u16[A6] + D6.u16
+		A1 += 2
+		A6 += 2
+		--D0.s16
+	}
+}
+
+// When setting screen boundaries from the SOZ1 pyramid rising and boss, adjust for screen height.
+// In Original Mode, raise the SOZ1 pyramid at the original speed.
+// In Marathon Modes, raise the pyramid extremely fast.
+// Only standard Revisited Mode should allow the cutscene to be sped up.
+// Functions taken from level\09_soz\level_soz.lemon
+//# address-hook(0x055a9a) end(0x055b00)
+function void fn055a9a()
+{
+	if (u16[0xffffeec6] != 0)
+	{
+		// Start pyramid rising
+		u16[0xffffeec6] = 0
+		u16[0xffffee9c] = -8
+		camera.screenshake.state.hi = 0xff
+
+		fn055db6()
+		fn04f2f6()
+
+		u16[0xffffeec8] = (D0.u16 + getScreenHeight()) & level.height.tilemask
+		u16[0xffffeeca] = 0x0f
+		level.scrolling_routine += 4
+		fn055b08()
+
+		if (!original_mode && !time_attack)
+			Game.startSkippableCutscene()
+	}
+	else
+	{
+		D0.u16 = (u16[0xffffb000 + 0x10] >= 0x4000) ? 0x0960 : 0x0b20
+		move_area.bottom.current = D0.u16 - getScreenHeightExtend()
+		move_area.bottom.target = D0.u16 - getScreenHeightExtend()
+		fn055e96()
+		fn055d56()
+
+		A6 = addressof(camera.background.y)			// Address: 0xffffee90
+		A5 = addressof(camera.background.y.old)		// Address: 0xffffee96
+		D1 = 0
+		D6 = 0x20
+		LoadTileContentInDirY()
+		fn055df2()
+	}
+}
+
+//# address-hook(0x055d94) end(0x055db0)
+function void fn055d94()
+{
+	// Pyramid rising
+	if (camera.screenshake.state & 0x8000)
+	{
+		if (time_attack >= 3)
+		{
+			// Pyramid rising should be faster than fast forwarding the cutscene
+			u16[0xffffee9c] += 6
+			if (s16[0xffffee9c] >= 0x0280)
+			{
+				camera.screenshake.state = 0x08
+				s16[0xffffee9c] = 0x0280
+
+			#if STANDALONE
+				Game.endSkippableCutscene()
+			#endif
+			}
+		}
+		else if (Game.getSetting(SETTING_SOZ_PYRAMID) && !original_mode)
+		{
+			// Let pyramid rise faster
+			u16[0xffffee9c] += min(level.framecounter & 0x03, 2)
+			if (s16[0xffffee9c] >= 0x0280)
+			{
+				camera.screenshake.state = 0x08
+				s16[0xffffee9c] = 0x0280
+
+			#if STANDALONE
+				if (!time_attack)
+					Game.endSkippableCutscene()
+			#endif
+			}
+		}
+		else
+		{
+			D0.u16 = level.framecounter & 0x03
+			if (D0.u16 != 0)
+			{
+				++u16[0xffffee9c]
+				if (s16[0xffffee9c] >= 0x0280)
+				{
+					camera.screenshake.state = 0x08
+				}
+			}
+		}
+	}
+
+	fn055db6()
+}
+
+//# address-hook(0x055e96) end(0x055ebc)
+function void fn055e96()
+{
+	D0.u16 = move_area.bottom.current
+	if (D0.u16 == 0x0960 - getScreenHeightExtend() && D0.u16 <= camera.position.y.u16)
+	{
+		level.vertical_wrap = D0.u16
+		if (camera.position.x.u16 >= 0x4310 - (getScreenWidth() - 320))
+		{
+			// Trigger pyramid rising
+			move_area.left = 0x4180
+			u8[0xffffeec6] = 0xff
+		}
+	}
+}
+
+// Draw additional line of 16x16 blocks in the SOZ1 pyramid/boss area
+//# address-hook(0x055e4c) end(0x055e94)
+function void fn055e4c()
+{
+	A1 = 0xffffe000		// Location of linewise scroll offsets
+	A6 = 0x05077e
+	D0.u16 = camera.foreground.y.u16
+	D1.s16 = s16(level.framecounter) >> 1
+	D1.u16 += D0.u16 * 2
+	D1.u16 &= 0x3e
+	A6 += D1.u16
+	D0.s16 = -camera.foreground.x.u16
+	D1.s16 = -camera.background.x.u16
+	D2.u16 = 0x6f + getScreenHeightExtend()
+
+	while (D2.s16 >= 0)
+	{
+		D3.u16 = u16[(A6+=2)-2]
+		D4.u16 = D3.u16
+		D3.u16 += D0.u16
+		D4.u16 += D1.u16
+		u16[(A1+=2)-2] = D3.u16
+		u16[(A1+=2)-2] = D4.u16
+		D3.u16 = u16[(A6+=2)-2]
+		D4.u16 = D3.u16 + D1.u16
+		D3.u16 += D0.u16
+		u16[(A1+=2)-2] = D3.u16
+		u16[(A1+=2)-2] = D4.u16
+		--D2.s16
+	}
+}

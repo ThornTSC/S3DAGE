@@ -1,0 +1,113 @@
+// Adjust initial lower screen boundary and player character spawn position
+// to account for altered screen heights
+//# address-hook(0x081554) end(0x0815fc)
+function void fn081554()
+{
+	objA0.base_state = 0x02
+	u16[0xfffffa8e] = A0.u16
+	objA0.countdown_value = 0x17
+	objA0.velocity.x = 0x0400
+	player1.camera_lock = 0xff
+	level.boss_encounter = 1
+	u32[0xfffffa82] = 0x010000
+	u32[0xfffffa8a] = 0x0800
+
+	A1 = 0xffffb000
+	u8[A1 + 0x0a] |= 0x80
+	objA1.state = char.state.ROLLING
+	u8[A1 + 0x2a] = 0
+	u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+	objA0.position.x.u16 = camera.position.x.u16 - 0x20
+	objA0.position.y.u16 = camera.position.y.u16 + 0x20 + getScreenHeightExtend()/2
+
+	copyMemory(0xfffffab0, 0x081602, 0x08)
+	level.vertical_wrap = 0
+	move_area.bottom.current = 0x0120 - getScreenHeightExtend()
+	move_area.bottom.target = 0x0120 - getScreenHeightExtend()
+
+	A1 = 0xffffb04a
+	zeroMemory(0xffffb04a, 0x48)
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x082722
+	}
+
+	Kosinski.addToDMAQueue(0x18322a, 0x5b60)		// Boss sprites, missiles and rocks, etc.
+
+	if (!original_mode)
+	{
+		// Start with 50 rings now already, that looks better and prevents an unnecessary music tempo change
+		ring_counter = 50
+	}
+}
+
+// Adjust a tile loading function to account for altered screen heights
+//# address-hook(0x05961e) end(0x059640)
+function void fn05961e()
+{
+	A6 = 0xffffee98
+	A5 = 0xffffeea0
+	D1.u16 = u16[0xffffee9c]
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	LoadTileContentInDirX()
+
+	A6 = 0xffffee9c
+	A5 = 0xffffeea2
+	D1.u16 = u16[0xffffee98]
+	D6 = (getScreenWidth() + 31) / 16
+	LoadTileContentInDirY()
+}
+
+// Adjust escaping Eggman robot screen boundary to account for altered screen heights
+//# address-hook(0x081a74) end(0x081b24)
+function void fn081a74()
+{
+	UpdateMovementStraightSimple()
+	D0.u16 = camera.position.y.u16 + 0x20
+	if (objA0.position.y.u16 <= D0.u16 && (objA0.flags38 & 0x80) == 0)
+	{
+		objA0.flags38 |= 0x80
+		playSound(0x48)
+		objA0.velocity.y = 0
+	}
+	objA0.velocity.x += 0x10
+
+	if (objA0.position.x.u16 >= camera.position.x.u16 + 0x01c0)
+	{
+		objA0.base_state = 0x0e
+		objA0.flags38 &= ~0x10
+		u32[0xfffffa8a] = 0x0800
+		u8[0xfffffab8] |= 0x01
+		boss.remaining_hits = 7
+		objA0.countdown_value = 0
+		objA0.velocity.x = 0
+		fn0685e2()
+
+		screenmover_target.top = 0
+		objA0.position.y.u16 = 0xc0
+
+		if (allocDynamicObjectStd())
+		{
+			// Spawn screen mover for the upper border
+			objA1.update_address = 0x084aa4
+		}
+
+		D0.u16 = 0x0120 - getScreenHeightExtend()
+		screenmover_target.bottom = D0.u16
+		move_area.bottom.target = D0.u16
+
+		if (allocDynamicObjectStd())
+		{
+			// Spawn screen mover for the lower border
+			objA1.update_address = 0x084ad2
+		}
+
+		D0.u16 = u16[0xfffffa8e]
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			u8[A1 + 0x38] |= 0x04
+		}
+	}
+}

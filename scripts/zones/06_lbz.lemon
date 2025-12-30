@@ -1,0 +1,1360 @@
+// Ensure the call to 16x16 block drawing function fn04ee9e() receives the appropriate number of rows of blocks for the screen height
+//# address-hook(0x053fe2) end(0x053ff4)
+function void fn053fe2()
+{
+	fn053ff8()
+
+	A4 = 0x23e598
+	A5 = 0xffffa900
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	D5 = 0x0c
+	fn04ee9e()
+}
+
+// Ensure the player cannot see the blackness at the bottom of the LBZ1 background due to increased screen height.
+// Unlike the MGZ2 background bottom correction, we aren't looking into transparency here: we actually need to draw over the background.
+//# address-hook(0x23e756) end(0x23e7c2)
+function void fn23e756()
+{
+    base.fn23e756()
+    if (getScreenHeightExtend() > 0 && camera.background.y.u16 > 0x90)
+    {
+        u16 paletteEntry = u16[0xfffffc74]
+        u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff
+        Renderer.drawRect(0, 224 - 16, getScreenWidth(), getScreenHeightExtend() + 16, color, 0x1001, 0, 1)
+    }
+}
+
+// When setting screen boundaries from the Knuckles bomb cutscene, adjust for screen height.
+// Without moving the boundary up, rotating cylinder tiles in the ground
+// under the boss area show the wrong palette.
+// Don't have Knuckles jump away from the bomb cutscene in Original Mode.
+// Function taken from level\06_lbz\lbz1_pre_boss_cutscene.lemon
+//# address-hook(0x062778) end(0x0627c0)
+function void fn062778()
+{
+	if (objA0.render_flags & render_flag.VISIBLE)
+	{
+		objA0.position.x.u16 += 2
+
+	#if STANDALONE
+		// Make Knuckles jump here, as the platforms ends inside the visible screen
+		if (objA0.position.x.u16 >= 0x3c28 && !original_mode)
+		{
+			u16 step = (objA0.position.x.u16 - 0x3c28) / 2
+			if (step == 0)
+			{
+				// Start jumping
+				objA0.velocity.y = -0x500
+			}
+
+			objA0.position.y.u16 += objA0.velocity.y >> 8
+			objA0.velocity.y += 0x38
+			objA0.animation.sprite = (step & 0x02) ? 0x08 : (0x04 + (step / 4) % 4)
+		}
+		else
+	#endif
+		{
+			Object.AnimationProgressByLocalA1()
+		}
+		return
+	}
+
+	// Knuckles despawns
+	u8[0xfffffaa9] = 0
+	u8[0xffffb000 + 0x2e] = 0		// Reset control_flags
+	u8[0xffffb04a + 0x2e] = 0
+	screenmover_target.right = 0x3b60 + getScreenExtend() * 2
+
+	// "spawnSimpleChildObjects(0x084b00)" replaced by:
+	spawnSimpleChildObjects(0x084a48, 1)		// Screen mover for the right border
+
+	move_area.bottom.target = 0x0148 - getScreenHeightExtend()
+	fn0851e4()
+
+	loadPaletteLine1(0x0a929c)
+	Object.TriggerUnloading()
+
+#if STANDALONE
+	Game.endSkippableCutscene()
+#endif
+}
+
+//# address-hook(0x08cc5a) end(0x08cc82)
+function void fn08cc5a()
+{
+	A1 = 0xffffb000
+	if (camera.position.x.u16 + (getScreenWidth() - 320) >= 0x3b40 && objA1.position.y.u16 >= 0x01c0)
+	{
+		if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+			objA0.base_state = 0x08
+			u8[0xffffeec4] = 0xff
+
+		#if STANDALONE
+			// Prevent the screen from going up here again (when player looks up and/or jumps)
+			level.vertical_wrap = 0x0148 - getScreenHeightExtend()
+
+			Game.startSkippableCutscene()
+		#endif
+		}
+	}
+}
+
+// Force collapsing platforms to collapse or unload when the building is destroyed.
+//# address-hook(0x02095e) end(0x0209cc)
+function void fn02095e()
+{
+	base.fn02095e()
+
+	if (global.zone_act == 0x0600 && u16[0xffffb010] > 0x3c00 && gfx.plane_update_routine > 0)
+	{
+		objA0.flags38 = 0
+		objA0.update_address = 0x020c12
+	}
+
+	if (global.zone_act == 0x0600 && u16[0xffffb010] > 0x3c00 && u8[0xffff82df] == 0)
+	{
+		UnloadObject()
+	}
+}
+
+// Force cup elevator poles to unload when the building is destroyed.
+//# address-hook(0x027100) end(0x027100)
+function void fn027100()
+{
+	base.fn027100()
+
+	if (global.zone_act == 0x0600 && u16[0xffffb010] > 0x3c00 && u8[0xffff82df] == 0)
+	{
+		UnloadObject()
+	}
+}
+
+// Use a function that is called every frame in LBZ1 to force the camera to cooperate
+// if Sonic or Tails enters a bonus stage at the last star post.
+// We also add a time attack check to remove the tube from Knuckles' boss area.
+//# address-hook(0x053f22) end(0x053fa2)
+function void UpdateLevelTiles.LBZ1()
+{
+	if (original_mode)
+	{
+		base.UpdateLevelTiles.LBZ1()
+		return
+	}
+
+	if ((time_attack == 1 || time_attack == 2) && u16[0xffffb010] > 0x3a00 &&  u16[0xffffb014] > 0x0740)	// in time attack and in the Knuckles boss area
+	{
+		A1 = 0xffff0078 + u16[A3 + 0x4c]
+		D0.u8 = u8[A1]
+		A1 = 0xffff0078 + u16[A3 + 0x50]
+		u8[(A1+=1)-1] = D0.u8
+		u8[(A1+=1)-1] = D0.u8
+		u8[(A1+=1)-1] = D0.u8
+		D0.u16 = 0x0a40 - getScreenHeightExtend()		// changed from 0x0a80
+		move_area.bottom.current = D0.u16
+		move_area.bottom.target = D0.u16
+	}
+	else if ((time_attack == 1 || time_attack == 2) && u16[0xffffb010] > 0x3c00 &&  u16[0xffffb014] < 0x0300)	// in time attack and in the Sonic boss area
+	{
+		u8[0xffff89df] = 0xad	// set layout swap location of boss "container" object to have a chunk showing one
+	}
+	
+	if (u16[0xffffb010] > 0x3c00 && !isMainCharacter(CHARACTER_KNUCKLES))	// if past the building collapse
+	{																		// limit the maximum camera y position
+		move_area.bottom.target = 0x0148 - getScreenHeightExtend()
+		move_area.bottom.current = move_area.bottom.target
+	}
+
+	camera.foreground.y.u16 += camera.screenshake.offset
+
+	fn05410c()
+
+	if (u16[0xffffeec4] == 0x55)
+	{
+		u16[0xffffeec4] = 0
+		if (global.characters != CHARS_KNUCKLES_ALONE)
+		{
+			A1 = 0xffff007d + u16[A3 + 0x08]
+			u8[A1] = 0xda
+		}
+		else
+		{
+			// This gets reached when the floor explodes after Knuckles' LBZ 1 boss
+			A1 = 0xffff0078 + u16[A3 + 0x4c]
+			D0.u8 = u8[A1]
+			A1 = 0xffff0078 + u16[A3 + 0x50]
+			u8[(A1+=1)-1] = D0.u8
+			u8[(A1+=1)-1] = D0.u8
+			u8[(A1+=1)-1] = D0.u8
+
+		#if STANDALONE
+			// Change characters to the falling animations. Original Mode is already set to the base function, so no check is needed here.
+			if (u8[0xffffb020] == char.state.RUNNING || u8[0xffffb020] == char.state.STANDING)
+			{
+				u8[0xffffb020] = char.state.KNUX_FALLING
+				u8[0xffffb021] = char.state.KNUX_FALLING
+				u8[0xffffb022] = 0xcb
+				u8[0xffffb023] = 1
+				u8[0xffffb02a] |= char.flag.IN_AIR
+			}
+			if (u8[0xffffb06a] == char.state.RUNNING || u8[0xffffb06a] == char.state.STANDING)
+			{
+				u8[0xffffb06a] = char.state.FALLING_PANIC
+				u8[0xffffb074] |= char.flag.IN_AIR
+			}
+		#endif
+		}
+
+		fn04ed62()
+		return
+	}
+
+	D0.u16 = u16[0xffffb010]
+	D1.u16 = u16[0xffffb014]
+	D2.u16 = level.display_routine
+	if (D2.u16 == 0)
+	{
+		fn23e458()
+		if (D3.s16 < 0)
+		{
+			fn053fe2()
+		}
+		else
+		{
+			fn04ed62()
+		}
+		return
+	}
+
+	A1 = 0x23e5cc + D2.u16
+	u16 minimum = u16[(A1+=2)-2]
+	u16 maximum = u16[(A1+=2)-2]
+	if (D0.u16 >= minimum && D0.u16 <= maximum)
+	{
+		fn053fe2()
+		return
+	}
+
+	level.display_routine = 0
+	call 0x053fa4 + (D2.u16 >> 1)
+	fn04ed62()
+}
+
+// If the Eggman object doesn't control the LBZ1 boss spawning for Sonic or Tails
+// (e.g., marathon mode or after a checkpoint restart), don't let the camera jump forward.
+// Function taken from level\06_lbz\lbz1_pre_boss_cutscene.lemon
+//# address-hook(0x08cdf2) end(0x08ce30)
+function void fn08cdf2()
+{
+	A1 = 0xffffb000
+	CheckDistanceToObjectA1()
+	if (D2.u16 < 0x70 && (original_mode || camera.position.x.u16 >= 0x3da0))
+	{
+		objA0.update_address = 0x08488a		// Address of "Object.CountdownAndTrigger"
+		move_area.left = 0x3da0
+		objA0.countdown_value = 0x1f
+		objA0.countdown_callback = 0x08cd9c
+	}
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > 0x0280)
+	{
+		Enemy.UnloadDelayed()
+	}
+}
+
+
+// Adjust the vertical boundaries of the LBZ1 boss area for Knuckles.
+// Do not load in time attack modes.
+// Function taken from bosses\boss_lbz1.lemon
+//# address-hook(0x08cf80) end(0x08cfac)
+function void fn08cf80()
+{
+	if (time_attack == 1 || time_attack == 2)
+		return
+		
+	A1 = 0x08cf70
+	if (InitBoss(0x08cf8a))
+		return
+
+	level.vertical_wrap = u16[(A1+=2)-2]
+	move_area.bottom.current = u16[A1] - getScreenHeightExtend()
+	move_area.bottom.target = u16[(A1+=2)-2] - getScreenHeightExtend()
+	move_area.left = u16[(A1+=2)-2]
+	move_area.right = u16[(A1+=2)-2]
+	fn08d0ea()
+
+	// "spawnChildObjects(0x08d26c)" replaced by:
+	spawnChildObject(0x08d046, 0x00, -32, 0)
+	spawnChildObject(0x08d046, 0x02, 32, 0)
+
+	objA0.update_address = 0x08cfb2
+	fn08cfb2()
+}
+
+// Make sure the trigger to start the LBZ1 boss for Knuckles
+// respects the change in the previous function.
+//# address-hook(0x08cfb2) end(0x08cfc6)
+function void fn08cfb2()
+{
+	if (camera.position.y.u16 >= 0x0932 - getScreenHeightExtend())
+	{
+		objA0.update_address = 0x08cfc8
+		objA0.flags38 |= 0x02
+	}
+}
+
+// Adjust the lowest camera position for the
+// fall after Knuckles's LBZ1 boss.
+// Functions taken from bosses\boss_lbz1.lemon
+//# address-hook(0x08cfc8) end(0x08d012)
+function void fn08cfc8()
+{
+	if (original_mode)
+	{
+		base.fn08cfc8()
+		return
+	}
+
+	D0.u8 = objA0.flags38 & 0x05
+	if (D0.u8 != 0x05)
+		return
+
+	objA0.update_address = 0x08d018
+	objA0.countdown_value = 0x1f
+	D0.u16 = 0x0a40 - getScreenHeightExtend()
+	screenmover_target.bottom = D0.u16
+	move_area.bottom.target = D0.u16
+
+#if !STANDALONE
+	// Do not create this object, it leads to the level music starting twice
+	if (allocDynamicObjectStd())
+	{
+		// Create the object that fades out the boss theme and starts the level music afterwards
+		objA1.update_address = 0x085b0a
+	}
+#endif
+	hud.dirty.timer = 0
+
+	// "spawnSimpleChildObjects(0x084b12)" replaced by:
+	spawnSimpleChildObjects(0x084ad2, 1)		// Screen mover for the lower border
+
+	// "spawnSimpleChildObjects(0x08d27a)" replaced by:
+	spawnSimpleChildObjects(0x08d0ae, 5)
+}
+
+// Adjust the camera position at which the signpost
+// spawns after Knuckles's LBZ1 boss.
+//# address-hook(0x08d02e) end(0x08d044)
+function void fn08d02e()
+{
+	if (camera.position.y.u16 >= 0x0a3c - getScreenHeightExtend())
+	{
+		if (!original_mode)
+		{
+			// Move object a bit left, so the signpost gets spawned in a better location
+			objA0.position.x.u16 -= 0x10
+		}
+
+		objA0.update_address = 0x085668
+		objA0.countdown_callback = 0x085ba8
+	}
+}
+
+// Adjust how the water surface art is rendered at increased screen heights.
+// Disable wave effect in Original Mode.
+// # address-hook(0x054608) end(0x05480a)
+function void UpdateBackground.LBZ2()
+{
+	D3.u16 = camera.screenshake.offset
+	D0.u32 = camera.foreground.y.u16 * 0x0580/(0x0580 - getScreenHeightExtend()) - D3.u16 - 0x05f0
+	D1.u16 = D0.u16
+	D0 = (D0 << 16)
+	D0.s32 >>= 1
+	D2 = D0
+	D2.s32 >>= 3
+	D0 -= D2
+	D2.s32 >>= 2
+	D0 -= D2
+	D0 >>= 16
+	D2.u16 = D0.u16
+
+	D0.u16 -= getScreenHeightExtend()
+	camera.background.y.u16 = D0.u16 + 0x02c0 + D3.u16
+
+	if (getScreenHeightExtend() > 0)
+	{
+		if (camera.foreground.y.u16 > 0x0650 && camera.foreground.y.u16 < 0x0660)
+			camera.background.y.u16 += (camera.foreground.y.u16 - 0x064f) * 5/8
+		else if (camera.foreground.y.u16 >= 0x0660)
+			camera.background.y.u16 += 10
+	}
+
+	D2.u16 -= D1.u16
+	u16[0xffffeee2] = D2.u16
+	D0 = u32(camera.foreground.x.u16) << 16
+	if (D2.u16 != 0)
+	{
+		D1 = D0
+		D3 = D0
+		D3.s32 >>= 6
+		D4 = D3
+		D4.s32 >>= 3
+		D3 -= D4
+		if (D2.s16 <= -0x40)
+		{
+			A1 = 0xffffa81e
+			for (u8 i = 0; i < 0x40; ++i)
+			{
+				u16[A1] = D1 >> 16
+				#if STANDALONE
+				if (!original_mode)
+				{
+					// Add a nice moving waves effect
+					s16 distance = (0x1200 / (0x80 - i))
+					u16[A1] += (lookupSin(distance * 10 - level.framecounter) / s32(distance))
+				}
+				#endif
+				A1 += 2
+				D1 -= D3
+			}
+		}
+		else
+		{
+			A1 = 0xffffa91e
+			for (u8 i = 0; i < 0x40; ++i)
+			{
+				A1 -= 2
+				u16[A1] = D1 >> 16
+				#if STANDALONE
+				if (!original_mode)
+				{
+					// Add a nice moving waves effect; except if underwater, there is another waves effect already
+					s16 distance = (0x1200 / (0x80 - i))
+					u16[A1] += (lookupSin(distance * 10 - level.framecounter) / s32(distance))
+				}
+				#endif
+				D1 -= D3
+			}
+
+			if (D2.s16 < 0x40)
+			{
+				A1 = 0xffffa89e
+				A5 = A1
+				A6 = 0x26f460
+				D1.u16 = D2.u16
+				if (D1.s16 >= 0)
+				{
+					D3.u16 = 0x40 - D1.s16
+					D3.u16 <<= 6
+					A6 += D3.s16
+					D3 = 0
+					while (D1.s16 > 0)
+					{
+						D3.u8 = u8[A6]
+						u16[A1] = u16[A5 + D3.s16 * 2]
+						A1 += 2
+						++A6
+						--D1.s16
+					}
+				}
+				else
+				{
+					D1.s16 = -D1.s16
+
+					D3.u16 = 0x40 - D1.s16
+					D3.u16 <<= 6
+					A6 += D3.s16
+					D3 = 0
+					while (D1.s16 > 0)
+					{
+						A1 -= 2
+						D3.u8 = u8[A6]
+						u16[A1] = u16[A5 + D3.s16 * 2]
+						++A6
+						--D1.s16
+					}
+				}
+			}
+		}
+	}
+
+	A1 = 0xffffa9e2
+	D1 = D0.s32 >> 1
+	D3 = D0.s32 >> 4
+	camera.background.x.u16 = D1 >> 16
+	u16[A1-=2] = D1 >> 16
+	D1 -= D3
+	u16[0xffffeee4] = D1 >> 16
+	u16[A1-=2] = D1 >> 16
+	A5 = 0x23ef4e
+	D1 -= D3
+	D4 = 4
+
+	while (D4.s16 >= 0)
+	{
+		D1 -= D3
+		u16 value = D1 >> 16
+		D5.u16 = u16[(A5+=2)-2]
+		while (D5.s16 >= 0)
+		{
+			u16[A1-=2] = value
+			u16[A1-=2] = value
+			u16[A1-=2] = value
+			u16[A1-=2] = value
+			--D5.s16
+		}
+		--D4.s16
+	}
+
+	D3 = 0x3f
+	if (D2.s16 >= 0)
+	{
+		D3.u16 -= D2.u16
+	}
+
+	D1 = (D1 << 16) + (D1 >> 16)
+	while (D3.s16 >= 0)
+	{
+		u16[A1-=2] = D1.u16
+		--D3.s16
+	}
+
+	A1 = 0xffffa800
+	A5 = 0x23ef34
+	D1 = D0
+	D1.s32 >>= 6
+	D3 = D1
+	D4 = u32[0xffffa9e2]
+	u32[0xffffa9e2] += 0x0e00
+	D5 = 0x0c
+
+	while (D5.s16 >= 0)
+	{
+		D6.u16 = u16[(A5+=2)-2]
+		D1 += D4
+		u16[A1 + D6.s16] = D1 >> 16
+		D1 += D3
+		--D5.s16
+	}
+
+	D1 = D0
+	D1.s32 >>= 4
+	D3 = D1
+	D3.s32 >>= 1
+	A1 = 0xffffa81a
+	u16[(A1+=2)-2] = D1 >> 16
+	D1 += D3
+	D1 = (D1 << 16) + (D1 >> 16)
+	u16[(A1+=2)-2] = D1.u16
+
+	bool goto0547b6 = true
+	if (D2.s16 < 0)
+	{
+		D4 = 0x3f
+		D4.u16 += D2.u16
+
+		if (D4.s16 >= 0x30)
+		{
+			D4.u16 -= 0x30
+		}
+		else
+		{
+			while (D4.s16 >= 0)
+			{
+				u16[(A1+=2)-2] = D1.u16
+				--D4.s16
+			}
+			goto0547b6 = false
+		}
+	}
+	else
+	{
+		D4 = 0x0f
+	}
+
+	if (goto0547b6)
+	{
+		D5 = 0x17
+		while (D5.s16 >= 0)
+		{
+			u16[(A1+=2)-2] = D1.u16
+			u16[(A1+=2)-2] = D1.u16
+			--D5.s16
+		}
+
+		D1 = (D1 << 16) + (D1 >> 16)
+		D1 += D3
+		D1 = (D1 << 16) + (D1 >> 16)
+
+		while (D4.s16 >= 0)
+		{
+			u16[(A1+=2)-2] = D1.u16
+			--D4.s16
+		}
+	}
+
+	D0 = 0x3f
+	D0.u16 -= D2.u16
+	if (D0.s16 >= 0)
+	{
+		D0.u16 = min(D0.u16 + 0x60, 0xdf)	// getScreenHeight() - 1 seems unnecessary here
+
+		A1 = 0xffffa9de
+		A5 = 0x04f878
+		D1.u16 = (level.framecounter >> 1) & 0x7e
+		A5.u16 += D1.u16
+
+		while (D0.s16 >= 0)
+		{
+			D3.u16 = u16[A5-=2]
+			A1 -= 2
+			u16[A1] += D3.u16
+			--D0.s16
+		}
+	}
+}
+
+// Adjust horizontal screen boundary for LBZ2 ball shooter boss.
+// The default 0x39b8 value causes a slight camera jump at wide resolutions, including 426x240.
+//# address-hook(0x07397a) end(0x07399c)
+function void fn07397a()
+{
+	if ((objA0.flags38 & 0x80) == 0)
+		return
+
+	objA0.base_state = 0x06
+	player1.camera_lock = 1
+
+	if (getScreenWidth() > 320)
+	{
+		move_area.left = 0x3a20 - getScreenExtend() * 2
+		move_area.right = 0x3a20 - getScreenExtend() * 2 + 0x50
+	}
+	else
+	{
+		move_area.left = 0x39f0
+		move_area.right = 0x39f0
+	}
+}
+
+//# address-hook(0x07399e) end(0x0739e0)
+function void fn07399e()
+{
+	D0.u16 = (getScreenWidth() > 320) ? 0x3a20 - getScreenExtend() * 2 : 0x39f0
+	D1.u16 = camera.position.x.u16 - 2
+	if (D1.u16 > D0.u16)
+	{
+		camera.position.x.u16 = D1.u16
+		return
+	}
+
+	camera.position.x.u16 = D0.u16
+	objA0.base_state = 0x08
+	player1.camera_lock = 0
+
+	playSound(0xd0)
+
+	objA0.velocity.y = -0x40
+	objA0.countdown_value = 0xdf
+	objA0.countdown_callback = 0x0739f2
+
+	// "spawnChildObjects(0x074162)" replaced by:
+	spawnChildObject(0x073c0a, 0x00, -24, 56)
+	spawnChildObject(0x073c0a, 0x02, 24, 56)
+	spawnChildObject(0x073c0a, 0x04, 0, 56)
+}
+
+// Adjust vertical screen boundaries for LBZ2 ball shooter boss to account for screen height.
+//# address-hook(0x073906) end(0x073954)
+function void fn073906()
+{
+	setupObjectAttributesFull(0x0740ec)
+
+	boss.remaining_hits = 8
+	objA0.countdown_callback = 0x073960
+	A1 = 0x0738ce
+	objA0.value26 = MUSIC_MAINBOSS
+	StartBossFight()
+
+#if STANDALONE
+	if (getScreenWidth() > 320)
+	{
+		// Both are 0x3a20 originally
+		level.bossarea.left = 0x3a20 - getScreenExtend() * 2
+		level.bossarea.right = 0x3a20
+	}
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
+#endif
+
+	// "spawnChildObjects(0x07414c)" replaced by:
+	spawnChildObject(0x073e0e, 0x00, 0, -8)		// Robotnik head, Egg Mobile empty seat
+	spawnChildObject(0x073ea2, 0x02, -24, -112)
+
+	requestLoadingPatterns(0x77)		// Robotnik running + ship and boss explosion sprites
+
+	Kosinski.addToDMAQueue(0x376542, 0x84a0)		// Boss sprites
+
+	loadPaletteLine1(0x0741fe)
+
+#if STANDALONE
+	// If you made it here and stayed dry, you've earned this achievement
+	if (Game.getAchievementValue(ACHIEVEMENT_LBZ_STAY_DRY) == 1)
+	{
+		Game.setAchievementComplete(ACHIEVEMENT_LBZ_STAY_DRY)
+	}
+#endif
+}
+
+// Adjust background scrolling when Death Egg begins to launch
+//# address-hook(0x05480c) end(0x0549c4)
+function void fn05480c()
+{
+	D3.u16 = camera.screenshake.offset
+	D0.u32 = camera.foreground.y.u16 * 0x0580/(0x0580 - getScreenHeightExtend()) - camera.screenshake.offset - 0x05f0 - u16[0xffffeed4] - u16[0xffffeed8]
+	D1.u16 = D0.u16
+	D0 = (D0 << 16)
+	D0.s32 >>= 1
+	D2 = D0
+	D2.s32 >>= 3
+	D0 -= D2
+	D2.s32 >>= 2
+	D0 -= D2
+	D0 = (D0 << 16) + (D0 >> 16)
+	D2.u16 = D0.u16
+	D0.u16 = D0.u16 + 0x02c0 - u16[0xffffeebe] + D3.u16
+	if (D0.s16 < 0)
+	{
+		D3 = 0
+		D4.s16 = D0.s16
+		while (D4.s16 < 0)
+		{
+			D3.u16 += 0x100
+			D4.u16 += 0x100
+		}
+
+		u16[0xffffeea0] = max(u16[0xffffeea0], D3.u16)
+	}
+
+	if (u16[0xffffeebe] == 0 && D0.u16 == 0x100)
+	{
+		u16[0xffffeebe] = 0x100
+	}
+
+	D0.u16 += u16[0xffffeea0] - getScreenHeightExtend()
+	camera.background.y.u16 = D0.u16
+	if ((D0.u16 & 0xf000) && getScreenHeightExtend() > 0)	// As the camera background becomes negative due to getSCreenHeightExtend(), we create a drawing issue.
+		camera.background.y.u16 = (D0.u16 & 0x00ff)			// The background vertically wraps every 0x0100 pixels after we get into the clouds, so this will conceal the issue.
+	if (u16[0xffffeea0] != 0)
+	{
+		while (D0.u16 >= 0x100)
+		{
+			D0.u16 -= 0x100
+		}
+		camera.background.y.u16 = D0.u16
+	}
+
+	if (s16[0xffffee9c] >= 0)
+	{
+		D2.u16 -= D1.u16
+		if (D2.s16 < 0)
+		{
+			D2.u16 = 0x7fff
+		}
+	}
+	else
+	{
+		D2.u16 = 0x7fff
+	}
+
+	u16[0xffffeee2] = D2.u16
+	D0.u16 = camera.foreground.x.u16
+	D0 = (D0 << 16)
+	D1 = D0
+	D3 = D0
+	D3.s32 >>= 6
+	D4 = D3
+	D4.s32 >>= 3
+	D3 -= D4
+	D4 = 0x1f
+	A1 = 0xffffa8ac
+
+	while (D4.s16 >= 0)
+	{
+		u16[A1-=2] = D1 >> 16
+		D1 -= D3
+		u16[A1-=2] = D1 >> 16
+		D1 -= D3
+		--D4.s16
+	}
+
+	if (D2.s16 < 0x40)
+	{
+		A1 = 0xffffa82c
+		A5 = 0xffffa82c
+		D3.u16 = (0x40 - D2.s16) << 6
+		A6 = 0x26f460 + D3.u16
+		D1.u16 = D2.u16 - 1
+		D3 = 0
+		while (D1.s16 >= 0)
+		{
+			D3.u8 = u8[(A6+=1)-1]
+			u16[(A1+=2)-2] = u16[A5 + D3.s16 * 2]
+			--D1.s16
+		}
+	}
+
+	A1 = 0xffffa8ec
+	D1 = D0.s32 >> 1
+	D3 = D1.s32 >> 3
+	D4 = 6
+	while (D4.s16 >= 0)
+	{
+		D1 -= D3
+		--D4.s16
+	}
+
+	D3 = 0x5f - D2.u16
+	if (D3.s16 >= 0)
+	{
+		D1 = (D1 << 16) + (D1 >> 16)
+		while (D3.s16 >= 0)
+		{
+			u16[A1-=2] = D1.u16
+			--D3.s16
+		}
+	}
+
+	A1 = 0xffffa80c
+	A5 = 0x23ef34
+	D1 = D0.s32 >> 6
+	D3 = D1
+	D4 = u32[0xffffa9e2]
+	u32[0xffffa9e2] += 0x0e00
+	D5 = 0x0c
+	while (D5.s16 >= 0)
+	{
+		D6.u16 = u16[(A5+=2)-2]
+		D1 += D4
+		u16[A1 + D6.s16] = D1 >> 16
+		D1 += D3
+		--D5.s16
+	}
+
+	A1 = 0xffffa810
+	A5 = 0xffffa800
+	D1 = 0x03
+	while (D1.s16 >= 0)
+	{
+		u32[(A5+=4)-4] = u32[(A1+=4)-4]
+		--D1.s16
+	}
+
+	D1 = D0.s32 >> 4
+	D3 = D1.s32 >> 1
+	A1 = 0xffffa826
+	u16[(A1+=2)-2] = D1 >> 16
+	D1 += D3
+	u16[(A1+=2)-2] = D1 >> 16
+	D1 += D3
+	u16[(A1+=2)-2] = D1 >> 16
+
+	D0 = 0x5f - D2.u16
+	if (D0.u16 >= 0x60)
+	{
+		D0.u16 = 0x5f
+	}
+
+	A1 = 0xffffa8ec
+	A5 = 0x04f778
+	D1.u16 = (level.framecounter >> 1) & 0x7e
+	A5 += D1.u16
+	while (D0.s16 >= 0)
+	{
+		A1 -= 2
+		A5 -= 2
+		u16[A1] += u16[A5]
+		--D0.s16
+	}
+}
+
+// Adjust vertical screen boundaries for LBZ2 Knuckles punch cutscene through bosses to account for screen height.
+// We also initialize unused.lives_counter.player2 here as a timer for shifting the Death Egg image at the end of the level.
+//# address-hook(0x05449a) end(0x054504)
+function void fn05449a()
+{
+	if (u16[0xffffeec6] == 0)
+	{
+		UpdateBackground.LBZ2()
+		fn0544a4()
+		return
+	}
+
+	unused.lives_counter.player2 = 0	// new; this unused byte in ROM is repurposed as a timer for shifting the Death Egg image in the act ending cutscene
+
+	u16[0xffffeec6] = 0
+	u16[A3] = u16[A3 + 0x08]
+	u16[A3 + 0x04] = u16[A3 + 0x0c]
+	move_area.right = 0x4390 + getScreenExtend()
+	move_area.bottom.current = 0x0668 - getScreenHeightExtend()
+	move_area.bottom.target = 0x0668 - getScreenHeightExtend()
+	u16[0xffffeee0] = 0x3c
+	u16[0xffffeea2] = 0x1e00
+	u32[0xffffee9c] = 0x6200
+	player1.camera_lock = 0xff
+	u8[0xffffef40] = 0xff
+	level.scrolling_routine += 4
+
+	fn054508()
+}
+
+// Ensure screen lock for fights on the Death Egg platform considers altered screen heights
+//# address-hook(0x0549c6) end(0x054a92)
+function void fn0549c6()
+{
+	if (u8[0xffffb000 + 0x05] >= 0x06)
+		return
+
+	if (player1.camera_lock)
+	{
+		D0.u16 = u16[0xffffb000 + 0x10] - camera.position.x.u16 - getScreenWidth() / 2
+		if (D0.s16 >= 0)
+		{
+			camera.position.x.u16 += D0.u16
+		}
+
+		// Camera reached boss fight area?
+		if (camera.position.x.u16 >= 0x4390 - getScreenExtend() || camera.position.y.u16 >= 0x0668 - getScreenHeightExtend())
+		{
+			player1.camera_lock = 0
+		}
+	}
+
+	if (u16[0xffffeee0] != 0)
+	{
+		--u16[0xffffeee0]
+	}
+	else
+	{
+		if (camera.position.x.u16 >= 0x4390 - getScreenExtend())
+		{
+			#if STANDALONE
+			{
+				// TODO: It would be nice to limit the character move area independently from the camera
+				move_area.left = 0x4390 - getScreenExtend()
+				move_area.right = 0x4390 + getScreenExtend()
+			}
+			#else
+			{
+				move_area.left = move_area.right
+			}
+			#endif
+		}
+
+		if (camera.position.y.u16 >= 0x0668 - getScreenHeightExtend())
+		{
+			level.vertical_wrap = move_area.bottom.current
+		}
+
+		A1 = 0xffffeed4
+		D1 = u16[0xffffeea2]
+		u32[A1] += D1
+		D0.u16 = u16[A1] - u16[A1 + 0x08]
+		u16[A1 + 0x08] = u16[A1]
+
+		D1.u16 = 0x2200
+		if (player1.camera_lock == 0)
+		{
+			D1 = u32[0xffffee9c]
+		}
+		u32[A1 + 0x04] += D1
+
+		D1.u16 = u16[A1 + 0x04] - u16[A1 + 0x0a]
+		u16[A1 + 0x0a] = u16[A1 + 0x04]
+		if (player1.camera_lock != 0)
+		{
+			A5 = 0xffff0000 + level.display_routine
+			u16[A5 + 0x14] += D0.u16
+			camera.position.y.u16 += D0.u16
+		}
+
+		D2.u16 = water.height.target + D0.u16 + D1.u16
+		if (D2.u16 >= 0x0f00)
+		{
+			D2.u16 = 0x0f80
+		}
+		water.height.target = D2.u16
+		u16[0xffffeee6] = D0.u16
+		u16[0xffffeee6] += D1.u16
+	}
+}
+
+// Adjust camera boundaries for LBZ2 Knux boss area based on screen height
+//# address-hook(0x072ffa) end(0x073028)
+function void fn072ffa()
+{
+	A1 = 0x072fea
+	if (InitBoss(0x073004))
+		return
+
+	objA0.value26 = MUSIC_MAINBOSS
+	StartBossFight()
+
+	level.bossarea.left -= getScreenExtend()
+	level.bossarea.right += getScreenExtend()
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
+
+	objA0.update_address = 0x073046
+	objA0.countdown_callback = 0x07304c
+	u8[0xfffffaa2] = 0
+	u8[0xfffffaa3] = 0
+
+	requestLoadingPatterns(0x71)		// Boss sprites
+	fn07302e()
+}
+
+// Adjust vertical position at which LBZ2 boss 2 is consider off the bottom of the screen based on screen height
+//# address-hook(0x072a70) end(0x072ae6)
+function void fn072a70()
+{
+	D0.u16 = objA0.position.y.u16
+	D1.u16 = camera.position.y.u16
+	if (objA0.velocity.y >= 0)
+	{
+		D1.u16 += 0x0118 + getScreenHeightExtend()
+		if (D0.u16 < D1.u16)
+		{
+			UpdateMovementStraightSimple()
+			return
+		}
+	}
+	else
+	{
+		D1.u16 -= 0xb0
+		if (D0.u16 > D1.u16)
+		{
+			UpdateMovementStraightSimple()
+			return
+		}
+	}
+
+	if (boss.remaining_hits > 0x02 && (objA0.flags38 & 0x08) == 0)
+		return
+
+	GetRandomNumber()
+	D0 = (D0 << 16) + (D0 >> 16)
+	D1 = 0
+	objA0.render_flags &= ~render_flag.FLIP_X
+	if (D0 & 0x01)
+	{
+		D1 = 2
+		objA0.render_flags |= render_flag.FLIP_X
+	}
+
+	D1.u16 = u16[0x072ae8 + D1.u16]
+	D2.u16 = camera.position.x.u16 + D1.u16 + getScreenExtend()
+	objA0.position.x.u16 = D2.u16
+	D0.u16 = 0x0100
+	if (objA0.velocity.y >= 0)
+		D0.s16 = -D0.s16
+	objA0.velocity.y = D0.u16
+}
+
+// Adjust a camera y position check to correct set Eggman's appearance regardless of screen height
+//# address-hook(0x067cba) end(0x067ccc)
+function void fn067cba()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	if ((u8[A1 + 0x2a] & 0x80) == 0)
+	{
+		Object.animationProgress(0x0681cc)
+	}
+
+#if STANDALONE
+	if (!original_mode)
+	{
+		// Check if parent object's priority flag changes (triggered in "fn073056")
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		if ((u8[A0 + 0x0a] & 0x80) != (u8[A1 + 0x0a] & 0x80))
+		{
+			u8[A0 + 0x0a] = (u8[A0 + 0x0a] & ~0x80) | (u8[A1 + 0x0a] & 0x80)
+			if (global.zone_act == 0x0601 && camera.position.y.u16 == 0x0668 - getScreenHeightExtend())
+			{
+				// Switch sprite again for Robotnik when he goes up to get Big Arms
+				objA0.animation.sprite = 1
+			}
+		}
+	}
+#endif
+}
+
+// Adjust where Eggman spawns to fly up to start Big Arms based on screen height.
+//# address-hook(0x073056)
+function void fn073056()
+{
+	// Wait for (exploding) Robotnik to leave the screen to the bottom
+	D0.u16 = objA0.position.y.u16 + 1
+	D1.u16 = camera.position.y.u16 + 0x140 + getScreenHeightExtend()
+	if (D0.u16 <= D1.u16)
+	{
+		objA0.position.y.u16 = D0.u16
+		DrawObject()
+	}
+	else
+	{
+		objA0.position.y.u16 = D1.u16
+		objA0.flags38 |= 0x20				// Stop the explosions
+		objA0.sprite_attributes &= ~sprite_attribute.PRIORITY	// Draw him in background
+		objA0.update_address = 0x073058
+	}
+}
+
+// Adjust distance Big Arms descends in background when first appearing based on screen height
+//# address-hook(0x07432a) end(0x07435a)
+function void fn07432a()
+{
+	MoveWithGravity20()
+	D0.u16 = camera.position.y.u16 + 0x0120 + getScreenHeightExtend()
+	if (D0.u16 >= objA0.position.y.u16)
+		return
+
+	u8[A0 + 0x0a] |= 0x80
+	objA0.velocity.y = 0
+	objA0.collision_attributes = collision.size.24x24
+	objA0.render_flags ^= render_flag.FLIP_X
+
+	// "spawnChildObjects(0x07513c)" replaced by:
+	spawnChildObject(0x074c00, 0x00, 4, -52)
+
+	fn074360()
+}
+
+// Adjust y position Big Arms comes in from the screen sides at based on screen height
+//# address-hook(0x074f24) end(0x074f70)
+function void fn074f24()
+{
+	GetRandomNumber()
+	D0.u16 &= 0x06
+	u16[A0 + 0x3a] = D0.u16
+	D2.s16 = (objA0.render_flags & render_flag.FLIP_X) ? -0x68 : getScreenWidth() + 0x68
+
+	objA0.position.x.u16 = camera.position.x.u16 + D2.s16
+	objA0.position.y.u16 = camera.position.y.u16 + u16[0x074f72 + D0.u16] + getScreenHeightExtend()
+	objA0.velocity.x = (objA0.render_flags & render_flag.FLIP_X) ? 0x300 : -0x300
+	objA0.velocity.y = u16[0x074f7a + D0.u16]
+	u16[A0 + 0x3c] = 0x08
+}
+
+// Adjust distance Big Arms descends after moving along top of screen based on screen height
+//# address-hook(0x074456) end(0x074478)
+function void fn074456()
+{
+	MoveWithGravity20()
+	D0.u16 = camera.foreground.y.u16 + 0xc0 + getScreenHeightExtend()
+	if (D0.u16 < objA0.position.y.u16)
+	{
+		objA0.base_state = 0x12
+		objA0.flags38 |= 0x04
+	}
+}
+
+// Adjust y position Big Arms uses to sweep the floor based on screen height
+//# address-hook(0x0744a4) end(0x0744e2)
+function void fn0744a4()
+{
+	objA0.velocity.y += 0x40
+	UpdateMovementStraightSimple()
+	if (objA0.velocity.y >= 0)
+	{
+		D0.u16 = camera.foreground.y.u16 + 0xd0 + getScreenHeightExtend()
+		if (D0.u16 <= objA0.position.y.u16)
+		{
+			objA0.base_state = 0x16
+			objA0.position.y.u16 = D0.u16
+			objA0.velocity.y = 0
+			objA0.countdown_value = 0x1f
+			objA0.countdown_callback = 0x0744ea
+		}
+	}
+}
+
+// Ensure a plane-based screen split respects altered screen heights
+//# address-hook(0x04e8a4) end(0x04e8ca)
+function void fn04e8a4()
+{
+	// This is used in post-boss cutscene in LBZ 2 (S/T)
+	VDP.setupVRAMWrite(0xc900)
+	VDP.zeroVRAM(0x300)
+
+	VDP.Config.setNameTableBasePlaneW(0x8000)
+	VDP.Config.setupWindowPlane(true, 40 + getScreenHeightExtend())
+	gfx.plane_update_routine = 0
+
+#if STANDALONE
+	VDP.Config.setPlaneWScrollOffset(-getScreenExtend(), 0 - getScreenHeightExtend())
+#endif
+}
+
+// Initialize a timer we'll use in the next function.
+//# address-hook(0x072d24) end(0x072d52)
+function void fn072d24()
+{
+	base.fn072d24()
+
+	if (getScreenHeightExtend() > 0)
+	{
+		VDP.setupVRAMWrite(0x0960)
+		VDP.zeroVRAM(0x95c0 - 0x0960)		
+		zeroMemory(0xffff5000, 0x0200)		// clear out blocks from chunks 0xa0, 0xa1, 0xa2, and 0xa3, which show the Death Egg above the platform
+		zeroMemory(0xffff4a84, 4)			// clear out the connectors between the Death Egg and the supports (right)
+		zeroMemory(0xffff4b84, 4)			// clear out the connectors between the Death Egg and the supports (right)
+		fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())
+	}
+}
+
+// Draw the Death Egg's underside as images. This handles a widescreen extension of the chunks
+// and later allows for handling the Death Egg rising (the platform falling).
+//# address-hook(0x054444) end(0x054448)
+function void UpdateLevelScrolling.LBZ2()
+{
+	if (camera.position.x.u16 > 0x4000 && getScreenHeightExtend() > 0)
+	{
+		if (unused.lives_counter.player2 == 0)
+		{
+			Renderer.drawCustomSprite("lbz2_death_egg", 0x4430 - 256, 0x660 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+		}
+		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
+		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 - 152, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 + 112, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+	}
+
+	base.UpdateLevelScrolling.LBZ2()
+}
+
+// Draw the Death Egg's underside as an image as the suspended platform falls.
+//# address-hook(0x0545da) end(0x0545da)
+function void fn0545da()
+{
+	if (getScreenHeightExtend() > 0 && unused.lives_counter.player2 < 0x60)
+	{
+		if ((level.framecounter & 0x03) == 0)
+			++unused.lives_counter.player2
+
+		s8 y_offset = max(s8(unused.lives_counter.player2) - 8, 0)
+		Renderer.drawCustomSprite("lbz2_death_egg", getScreenWidth()/2 - 256, -8 - y_offset, 0, 0, 0x4001)
+	}
+
+	base.fn0545da()
+}
+
+// In Original Mode, do not try to fade back to normal sky in the Sonic/Tails LBZ2 ending cutscene, as no Big Arms means it was never changed.
+// Also adjust spawn position of falling Death Egg and debris in background based on screen height.
+// Function taken from level\06_lbz\lbz2_post_boss_cutscene.lemon
+//# address-hook(0x072e2e)
+function void fn072e2e()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	u8[0xfffffa88] |= 0x01
+	objA0.value39 = 0
+	objA0.countdown_value = 0
+
+	// "spawnChildObjects(0x07380c)" replaced by:
+	spawnChildObject(0x072e9e, 0x00, 0, 0 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x02, -16, 40 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x04, -112, 0 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x06, -72, 40 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x08, 24, 16 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x0a, -36, -8 - getScreenHeightExtend())
+	spawnChildObject(0x072e9e, 0x0c, -80, 28 - getScreenHeightExtend())
+
+#if STANDALONE
+	if ((Game.getSetting(SETTING_LBZ_BIGARMS) && !original_mode) || time_attack >= 3)
+	{
+		// Go into another state before unloading, to lighten up the sky again
+		u16[A0 + 0x48] = 0
+		objA0.update_address = 0x072e30
+	}
+	else
+#endif
+	{
+		Object.TriggerUnloading()
+	}
+}
+
+// Change timing of when falling platform cutscene ends and player moves to Mushroom Hill Zone based on screen height
+//# address-hook(0x072cda) end(0x072cf4)
+function void fn072cda()
+{
+	if (u16[0xffffb000 + 0x14] >= camera.position.y.u16 + 0x0120 + getScreenHeightExtend())
+	{
+		// Go on with Mushroom Hill Zone
+		TriggerNextZone(0x0700)
+		UnloadObject()
+	}
+}
+
+// If Tails has finished Knuckles's LBZ2 boss, make sure the correct falling sprites show in the next cutscene.
+// Functions taken from bosses\boss_lbz2_3.lemon
+//# address-hook(0x07490a) end(0x074950)
+function void fn07490a()
+{
+	if (u16[0xffffb000 + 0x10] >= 0x4510)
+	{
+		objA0.update_address = 0x074952
+
+		A1 = 0xffffb000
+		objA0.position.x.u16 = objA1.position.x.u16
+		objA0.position.y.u16 = objA1.position.y.u16
+		u8[A1 + 0x2e] = (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_ANIMATION | control_flag.DISABLE_UPDATE)
+		objA1.animation.sprite = 0x8c		// Set Sonic's grabbed sprite
+		if (isMainCharacter(CHARACTER_TAILS) && !original_mode)
+			objA1.animation.sprite -= 3		// Tails' falling animation is located in different sprite IDs
+	#if STANDALONE
+		if (!original_mode)
+		{
+			// This makes AI Tails jump
+			control.player1 = 0x1010		// CONTROL_B, CONTROL_B
+		}
+	#endif
+		UpdatePlayer1SpritePatterns()
+
+		objA0.animation.frame = 0
+		objA0.animation.timer = 0x0a
+		objA0.velocity.x = 0x200
+		objA0.velocity.y = -0x400
+	}
+}
+
+// If Tails has finished Knuckles's LBZ2 boss, make sure the correct falling sprites show in the next cutscene.
+// Change timing of when Knuckles escaping a bomb cutscene ends and player moves to Mushroom Hill Zone based on screen height.
+//# address-hook(0x074952) end(0x0749a8)
+function void fn074952()
+{
+	MoveWithGravity20()
+	A1 = 0xffffb000
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+
+	--objA0.animation.timer
+	if (s8(objA0.animation.timer) < 0)
+	{
+		objA0.animation.timer = 0x0a
+		++objA0.animation.frame
+		objA1.animation.sprite = (objA0.animation.frame & 0x01) ? 0x8c : 0x8d		// Set Knuckles' falling sprites
+		if (isMainCharacter(CHARACTER_TAILS) && !original_mode)
+			objA1.animation.sprite -= 3		// Tails' falling animation is located in different sprite IDs
+		UpdatePlayer1SpritePatterns()
+	}
+
+	if (u16[0xffffb000 + 0x14] < level.bossarea.top + 0x0200 + getScreenHeightExtend())
+		return
+
+	TriggerNextZone(0x0700)		// Mushroom Hill Zone
+	UnloadObject()
+}

@@ -1,0 +1,19 @@
+// With "GTGT" removed from VRAM, do not show this in debug mode.
+function void BlockerElement.checkForUnloadAndDebugRender(u32 color)
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > 0x0280)
+	{
+		Object.DespawnAndUnload()
+	}
+	else if (debug_mode.state)
+	{
+		if (getScreenHeightExtend() <= 0)
+			DrawObject()
+
+	#if STANDALONE
+		debugDrawOutlineRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, color)
+		debugDrawRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, (color & 0xffffff) + (((color >> 24) / 2) << 24))
+	#endif
+	}
+}

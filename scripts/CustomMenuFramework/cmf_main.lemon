@@ -2012,6 +2012,8 @@ function void customMenu.displayStarCounter()
 
 	u16 starCount = total_stars - cheatStars
 
+	y_offset += getScreenHeightExtend()
+
 	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
 		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)

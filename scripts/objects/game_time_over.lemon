@@ -1,0 +1,24 @@
+// Vertically center GAME/TIME OVER texts and point them to
+// the VRAM location defined in their rom manipulation.
+//# address-hook(0x02d5c6) end(0x02d60c)
+function void fn02d5c6()
+{
+	if (u32[0xfffff680] != 0)
+		return
+
+	if (objA0.animation.sprite == 0)
+	{
+		sram.block_interrupts.u8 = 0xff
+		UpdateLivesContinuesInSaveGame()
+	}
+
+	bool isLeft = ((objA0.animation.sprite & 0x01) == 0)
+	objA0.position.x.u16 = isLeft ? 0x50 : 0x1f0 + getScreenExtend() * 2
+	objA0.position.y.u16 = 0xf0 + (getScreenHeightExtend()/2)
+	objA0.mapping_offset = 0x02edd0
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5))
+	objA0.sprite_priority = 0
+
+	objA0.update_address = 0x02d612
+	fn02d612()
+}

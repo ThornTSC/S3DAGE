@@ -1,0 +1,426 @@
+function void ICZ1_CustomSprites()
+{
+	#if STANDALONE
+	if (rain_intensity && camera.position.x.u16 < 0x3940 && palette_set >= 2 && !original_mode)	// only if this isn't set to None in the mod settings and in the opening area
+	{
+		D0.u8 = ((level.framecounter.low + (camera.position.x.u16/4)) & 0x3F) // * 2	// snow is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
+		D1.u8 = ((level.framecounter.low - (camera.position.y.u16/8)) & 0x7F) // * 2	// snow is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
+		{
+		if (rain_intensity == 1)
+			Renderer.drawCustomSprite("snow0_light", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		else if (rain_intensity == 2)
+			Renderer.drawCustomSprite("snow0", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		else
+			Renderer.drawCustomSprite("snow0_heavy", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		}																								// Different values for the first nybble make the snow render above low plane foreground and above sprites,
+	}																									// as stated in the Oxygen handbook.
+	#endif
+}
+
+// Adjust the camera position check for the avalanche at the start of ICZ1 to consider screen height
+//# address-hook(0x01c9e0) end(0x01c9f8)
+function void fn01c9e0()
+{
+	if (camera.position.x.u16 >= 0x3700 && camera.position.y.u16 >= 0x068c - (getScreenHeightExtend()/2))
+	{
+		u8[0xffffeec6] = 0xff
+		camera.update_routine += 2
+	}
+}
+
+// Adjust the camera boundaries for the ICZ1 boss in accordance with screen height
+//# address-hook(0x07117e) end(0x0711aa)
+function void fn07117e()
+{
+	objA0.value26 = MUSIC_MINIBOSS_2
+	StartBossFight()
+
+	#if STANDALONE
+	{
+		// Manipulate target values for camera boundaries
+		level.bossarea.left -= getScreenExtend() * 2
+        level.bossarea.top -= getScreenHeightExtend()
+        level.bossarea.bottom -= getScreenHeightExtend()
+	}
+	#endif
+
+	objA0.update_address = 0x0711b0
+	objA0.countdown_callback = addressof(Boss.ICZ1.Init)
+
+	requestLoadingPatterns(0x5f)		// Boss sprites
+	loadPaletteLine1(0x0719da)
+}
+
+// When the ICZ1 boss snowballs spawn or snap to positions, adjust those positions for the screen height
+//# address-hook(0x0716f4) end(0x0716fc)
+function void fn0716f4()
+{
+	objA0.position.y.u16 = level.bossarea.top + 0xd8 + getScreenHeightExtend()
+	fn071700()
+}
+
+//# address-hook(0x0718ca) end(0x0718d6)
+function void fn0718ca()
+{
+	objA0.position.y.u16 = level.bossarea.top - 0x40 + getScreenHeightExtend()
+	fn071700()
+}
+
+// For aesthetics (and to align with Origins), align the ICZ2 outdoor background down
+// when the screen height increases and draw a rectangle of extra sky.
+//# address-hook(0x23e0c2) end(0x23e138)
+function void UpdateBackgroundScrolling.ICZ2.Outdoors()
+{    
+	camera.background.y.u16 = 0 - getScreenHeightExtend()
+
+	// Parallax effect of moving ice
+	D0.u16 = camera.foreground.x.u16 + (level.framecounter >> 1)
+	D0 = (D0 & 0xff) << 15
+	D1 = D0 >> 6
+	D2 = 0
+
+#if STANDALONE
+	if (getScreenWidth() > 320)
+	{
+		while (D2 < 80)
+		{
+			u16 offset = D0 >> 16
+
+			// Making this effect work in widescreen requires usage of some special renderer effects
+			u16 lineNumber = 175 - D2 / 2 + getScreenHeightExtend()
+			u16 patternWidth = 128 - D2		// Between 50 and 128
+			offset = (offset - getScreenExtend() + patternWidth * 2) % patternWidth
+
+			// "offset" will contain scroll offset for left side, while right side scroll offset is passed directly to renderer
+			u16 rightSideOffset = offset - patternWidth * (320 / patternWidth)
+			Renderer.setScrollOffsetH(2, lineNumber, rightSideOffset)
+
+			u16[0xffffa862 - D2] = offset
+			D0 -= D1
+			D2 += 2
+		}
+
+		Renderer.enableDefaultPlane(0, false)
+		Renderer.setupPlane(0, 0, 320, getScreenHeight(), 0x00, 0, 0x1000)
+		Renderer.setupPlane(320, 0, getScreenWidth() - 320, getScreenHeight(), 0x00, 2, 0x1000)
+	}
+	else
+#endif
+	{
+		while (D2 < 80)
+		{
+			u16[0xffffa862 - D2] = (D0 >> 16)
+			D0 -= D1
+			D2 += 2
+		}
+	}
+
+	// Water sparkle a bit further away
+	A1 = 0xffffa800
+	D0 = u32(camera.foreground.x.u16) << 16
+	D0.s32 >>= 1
+	D1 = D0
+	D0.s32 >>= 1
+	D1 += D0
+	u32[A1 + 0x64] = D1
+	D0.s32 >>= 2
+	D1 = D0
+	u16[(A1+=2)-2] = D0 >> 16
+	D0 += D1
+	D0 = (D0 << 16) + (D0 >> 16)
+	u16[(A1+=2)-2] = D0.u16
+	D1.u16 = (level.framecounter >> 2) & 0x3e
+	A5 = 0x23be5a + D1.u16
+	D1 = 8
+	while (D1 > 0)
+	{
+		D2.u16 = u16[(A5+=2)-2]
+		D2.u16 += D0.u16
+		u16[(A1+=2)-2] = D2.u16
+		--D1
+	}
+}
+
+// Unlike the MGZ2 background bottom correction, we aren't viewing transparency here:
+// we actually need to draw over the background wrapping vertically.
+function void ICZ2_CustomSprites()
+{
+	bool indoors = (u16[0xffffeee8] != 0)
+	if (getScreenHeightExtend() > 0 && !indoors)
+    {
+        u16 paletteEntry = u16[0xfffffc70]
+        u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff
+        Renderer.drawRect(0, 0, getScreenWidth(), getScreenHeightExtend(), color, 0x1001, 0, 1)
+    }
+
+	#if STANDALONE
+	if (rain_intensity && camera.position.y.u16 < 0x06c0 && isMainCharacter(CHARACTER_KNUCKLES) && palette_set >= 2 && !original_mode)	// only if this isn't set to None in the mod settings and in the outdoor area with Knux
+	{
+		D0.u8 = ((level.framecounter.low + (camera.position.x.u16/4)) & 0x3F) // * 2	// snow is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
+		D1.u8 = ((level.framecounter.low - (camera.position.y.u16/8)) & 0x7F) // * 2	// snow is 64 by 64 (0x3F by 0x3F), position is moved by 1/2 pixel down and 2 left each frame
+		{
+		if (rain_intensity == 1)
+			Renderer.drawCustomSprite("snow0_light", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		else if (rain_intensity == 2)
+			Renderer.drawCustomSprite("snow0", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		else
+			Renderer.drawCustomSprite("snow0_heavy", getScreenExtend() - 80 - (2 * D0.u8), D1.u8 / 2, 0x00, 0, 0x1100)
+		}																								// Different values for the first nybble make the rain render above low plane foreground and above sprites,
+	}																									// as stated in the Oxygen handbook.
+	#endif
+
+	if (!original_mode)
+	{
+		Renderer.drawCustomSprite("icz2_backgroundpillar", 0x11a4 - camera.foreground.x.u16, 0x0290 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
+		Renderer.drawCustomSprite("icz2_backgroundpillar", 0x2824 - camera.foreground.x.u16, 0x01b0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
+		Renderer.drawCustomSprite("icz_cavefill", 0x3d80 - camera.foreground.x.u16, 0x0700 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
+	}
+}
+
+// Adjust ICZ2 indoor background position for screen height
+//# address-hook(0x23e13a) end(0x23e1a8)
+function void UpdateBackgroundScrolling.ICZ2.Indoors()
+{
+	D0.s16 = s16(camera.foreground.y.u16 - 0x0700) >> 2
+	camera.background.y.u16 = 0x0118 + D0.s16 - getScreenHeightExtend()
+
+	A1 = 0xffffa800
+	D0.u16 = camera.foreground.x.u16
+	D0 = (D0 << 16)
+	D0.s32 >>= 1
+	D1 = D0.s32 >> 3
+	u16[A1] = D0 >> 16
+	objA1.position.x.u16 = D0 >> 16
+	D0 -= D1
+	u16[A1 + 0x02] = D0 >> 16
+	u16[A1 + 0x0e] = D0 >> 16
+	D0 -= D1
+	u16[A1 + 0x04] = D0 >> 16
+	u16[A1 + 0x0c] = D0 >> 16
+	D0 -= D1
+	u16[A1 + 0x06] = D0 >> 16
+	u16[A1 + 0x0a] = D0 >> 16
+	D0 -= D1
+	camera.background.x.u16 = D0 >> 16
+	u16[A1 + 0x08] = D0 >> 16
+	D0 -= D1
+	D0 = (D0 << 16) + (D0 >> 16)
+	u16[0xffffeee2] = D0.u16
+}
+
+// Use this otherwise empty ICZ2 camera bounds routine to adjust the bounds in accordance with screen height
+//# address-hook(0x01ca3c) end(0x01ca3c)
+function void fn01ca3c()
+{
+    if (getScreenHeightExtend() && move_area.bottom.target == 0x0b20)
+    {
+        move_area.bottom.target -= getScreenHeightExtend()
+        move_area.bottom.current -= getScreenHeightExtend()
+    }
+}
+
+// Adjust the x-coordinates for which background loading can occur to accommodate for the final Sonic/Tails ICZ2 giant ring
+// and reintroduce flying over the ICZ1 boss in Original Mode.
+//# address-hook(0x053cd0) end(0x053d50)
+function void InitLevelScrolling.ICZ2()
+{
+	bool indoors = false
+
+	level.scrolling_routine = 0x04
+	u16 xMax = (original_mode) ? 0x3600 : 0x4000
+	if (camera.position.x.u16 < xMax)	// originally 0x3600, but changed for new layout post-cutscene
+	{
+		if (camera.position.y.u16 >= 0x0700)	// usually 0x0720, but DAGE has one background switch with slightly less cover
+		{
+			indoors = true
+		}
+		else if (camera.position.y.u16 >= 0x0580 && camera.position.x.u16 < 0x1000)
+		{
+			indoors = true
+		}
+	}
+
+	u16[0xffffeee8] = indoors * 0xff
+	if (!indoors)
+	{
+		if (camera.position.x.u16 < 0x0720)
+		{
+			fn23e20e()
+		}
+		else
+		{
+			fn23e1aa()
+		}
+		UpdateBackgroundScrolling.ICZ2.Outdoors()
+		D0 = 0
+	}
+	else
+	{
+		fn23e1da()
+		UpdateBackgroundScrolling.ICZ2.Indoors()
+		fn04f2f6()
+	}
+
+	D1 = 0
+	Level.InitialTilesFill()
+
+	A4 = indoors ? 0x23e246 : 0x23e23e
+	A5 = 0xffffa800
+	fn04f0ce()
+}
+
+// Addendum to above, and checks for screen height extensions when switching ICZ2 backgrounds.
+//# address-hook(0x053d60)
+//# address-hook(0x053d78) end(0x053e58)
+function void fn053d78()
+{
+	u16 xMax = (original_mode) ? 0x3600 : 0x4000
+
+	// This function updates both foreground and background x-scrolling
+
+	// Switch between indoors and outdoors if necessary
+	bool indoors = (u16[0xffffeee8] != 0)
+	if (!indoors)
+	{
+		D0.u16 = camera.position.x.u16
+		if (D0.u16 >= 0x1000 && D0.u16 < xMax) // originally 0x3600, but changed for new layout post-cutscene
+		{
+			if (u16[0xffffb010] > 0x3980 && u16[0xffffb010] < 0x3a00)
+			{
+				if (u16[0xffffb014] > 0x06a0 && move_area.left > 0x0740)
+				{
+					// Move the minimum x position for the camera back slowly. A direct jump to the default can make the camera lurch in a way that renders the cave background incorrectly.
+					move_area.left -= 2
+				}
+				if (camera.position.y.u16 >= 0x0780 - getScreenHeightExtend())
+				{
+					// Switch to indoors
+					move_area.left = 0x0740	// normal start-of-act camera x minimum, which is now reset after Knux cutscene
+					fn053d96()
+					return
+				}
+			}
+			else if (camera.position.y.u16 >= 0x0700 - getScreenHeightExtend())	// usually 0x0720, but DAGE has one background switch with slightly less cover
+			{
+				// Switch to indoors
+				fn053d96()
+				return
+			}
+		}
+
+		UpdateBackgroundScrolling.ICZ2.Outdoors()
+	}
+	else
+	{
+		D0.u16 = camera.position.x.u16
+		if (D0.u16 >= 0x1000 && D0.u16 < xMax) // originally 0x3600, but changed for new layout post-cutscene
+		{
+			if (u16[0xffffb010] > 0x3980 && u16[0xffffb010] < 0x3a00)
+			{
+				if (camera.position.y.u16 < 0x0780 - getScreenHeightExtend())
+				{
+					// Switch to outdoors
+					fn053dfc()
+					return
+				}
+			}
+			else if (D0.u16 < 0x1900 || D0.u16 >= 0x1b80)
+			{
+				if (camera.position.y.u16 < 0x0700 - getScreenHeightExtend())	// usually 0x0720, but DAGE has one background switch with slightly less cover
+				{
+					// Switch to outdoors
+					fn053dfc()
+					return
+				}
+			}
+		}
+
+		UpdateBackgroundScrolling.ICZ2.Indoors()
+
+		A6 = 0xffffee90		// Address of camera.background.y
+		A5 = 0xffffee96		// Address of camera.background.y.old
+		D1 = 0
+		D6 = 0x20
+		LoadTileContentInDirY()
+	}
+
+	A4 = indoors ? 0x23e246 : 0x23e23e
+	A5 = 0xffffa800
+	fn04f0ce()
+
+#if STANDALONE
+	// Limit movement to where the boss area ends, to prevent Knuckles from gliding over the upper boss and into Act 2
+	//  -> This can safely applied for the lower boss as well, as it's using the same x-positions
+	if (global.zone_act == 0x0501 && global.zone_act.apparent == 0x0500 && move_area.right == 0x7000 && !original_mode)	// exception made for Original Mode
+	{
+		move_area.right = 0x06f0
+	}
+#endif
+}
+
+// This function for loading the outdoor ICZ2 background when leaving indoors needs our outdoor background y height adjustment undone to function properly.
+//# address-hook(0x053e68)
+function void fn053e68()
+{
+	D1 = 0
+	D2.u16 = camera.background.y.u16 + getScreenHeightExtend()
+	fn04ef56()
+	if (_negative())
+	{
+		level.scrolling_routine -= 4
+	}
+	fn053dca()
+}
+
+// Add to a function that runs every frame in ICZ2 to check for when
+// a character should enter the falling animation after the Knux scene.
+// Also adjust the camera to make obstacles and bottomless pits more visible when crossing platforms on the water.
+//# address-hook(0x053ccc) end(0x053ccc)
+function void UpdateLevelTiles.ICZ2()
+{
+	// Falling animation checks for Knux cutscene
+	if (u16[0xffffb010] > 0x3980 && u16[0xffffb010] < 0x3a00 && u16[0xffffb014] > 0x0680 && u16[0xffffb014] < 0x0688 && !original_mode)
+	{
+		if (u8[0xffffb020] == char.state.RUNNING || u8[0xffffb020] == char.state.STANDING)	// Check Sonic
+		{
+			u8[0xffffb020] = char.state.FALLING_PANIC
+			u8[0xffffb02a] |= char.flag.IN_AIR
+			u8[0xffffb03d] = 0		// Spindash flag is only active during standing/running if a peelout is charging
+			u16[0xffffb03e] = 0		// Clear charge
+		}
+		if (u8[0xffffb06a] == char.state.RUNNING || u8[0xffffb06a] == char.state.STANDING)	// Check Tails
+		{
+			u8[0xffffb06a] = char.state.FALLING_PANIC
+			u8[0xffffb074] |= char.flag.IN_AIR
+		}
+	}
+
+	// Camera adjustment for crossing platforms on the water
+	if (!original_mode)
+	{
+		if ((u16[0xffffb010] >= 0x22b0 && u16[0xffffb010] < 0x2800) || (u16[0xffffb010] >= 0x3800 && u16[0xffffb010] <= 0x3e00))
+		{
+			if (move_area.bottom.target != 0x0a10 || move_area.bottom.target != 0x0a30)
+			{
+				if (u16[0xffffb010] < 0x2800 && u16[0xffffb014] > 0x700)	// Knux water crossing area
+				{
+					move_area.bottom.current = max(0x0a10, (camera.position.y.u16 - 4) & 0xfffc) - getScreenHeightExtend()	// set to next lowest multiple of 4 in case of camera scroll glitches
+					move_area.bottom.target = 0x0a10 - getScreenHeightExtend()
+				}
+				else	// Sonic/Tails water crossing area
+				{
+					move_area.bottom.current = 0x0a30 - getScreenHeightExtend()	// must be set right away, as the usual routing to match current match target is slower than the fall from the cutscene
+					move_area.bottom.target = move_area.bottom.current
+				}
+			}
+		}
+		else if ((u16[0xffffb010] >= 0x0bc0 && u16[0xffffb010] < 0x22b0) || (u16[0xffffb010] >= 0x2800 && u16[0xffffb010] < 0x3800) || (u16[0xffffb010] > 0x3e00  && u16[0xffffb010] < 0x4000))	// last one is a window that does NOT stretch to the boss area
+		{
+			move_area.bottom.target = 0x0b20 - getScreenHeightExtend()
+			move_area.bottom.current = 0x0b20 - getScreenHeightExtend()
+		}
+	}
+
+	// Base function
+	base.UpdateLevelTiles.ICZ2()
+}

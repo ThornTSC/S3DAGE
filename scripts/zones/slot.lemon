@@ -1,0 +1,220 @@
+// Ensure the call to 16x16 block drawing function fn239d1e() receives the appropriate number of rows of blocks for the screen height
+//# address-hook(0x0597e4) end(0x05982c)
+function void fn0597e4()
+{
+	D1 = 0x20
+	D0.u16 = 0x0400 - level.display_routine + camera.foreground.x.u16
+	A1 = 0xffffee98
+	fn059832()
+
+	D0.u16 = 0x0400 - u16[0xffffeed4] + camera.foreground.y.u16
+	A1 = 0xffffee9c
+	fn059832()
+
+	A6 = 0xffffee98
+	A5 = 0xffffeea0
+	D1.u16 = u16[0xffffee9c]
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	LoadTileContentInDirX()
+
+	A6 = 0xffffee9c
+	A5 = 0xffffeea2
+	D1.u16 = u16[0xffffee98]
+	D6 = (getScreenWidth() + 31) / 16
+	LoadTileContentInDirY()
+}
+
+// Ensure slot machine block rendering considers additional screen height.
+// In Original Mode, don't let Slot Machine bonus stage rings use smooth rotation
+// and use the original rotation methods for blocks and other objects.
+// This is done by replacing slotmachine.rotation.rounded with a call based on game mode.
+// Function taken from level\bonus_sm\level_slotmachine.lemon
+//# address-hook(0x04b356) end(0x04b48e)
+function void BonusSM.RenderRotatingMaze()
+{
+#if STANDALONE
+	// We need to draw objects further away as well, so a larger lookup table is needed
+	//  -> We need a square of 20x20 blocks instead of only 16x16 blocks
+	//  -> Use shared memory for this, namely the start (that is also used by Blue Spheres, temporarily as well)
+	u32 lookupTableAddress = 0x800000
+	u16 lookupTableSize = 0x14
+#else
+	u32 lookupTableAddress = 0xffff7800
+	u16 lookupTableSize = 0x10
+#endif
+
+	s16 cameraX = camera.position.x.u16 + getScreenExtend()		// This is a bit ugly, but it works
+	s16 cameraY = camera.position.y.u16 + (getScreenHeightExtend()/2)
+
+	fn04b4c4()
+	fn04b592()
+
+	// The following code updates the positions of blocks around, depending on current rotation
+	A1 = lookupTableAddress
+	u8 angle = (original_mode) ? (u8[0xffffe400] & 0xfc) : (u8[0xffffe400] & 0xff)
+	s32 sine   = lookupSin(angle)
+	s32 cosine = lookupCos(angle)
+	s32 stepX = cosine * 0x18
+	s32 stepY = sine   * 0x18
+	D2.s16 = -(cameraX % 0x18) - (0x0c * (lookupTableSize - 1))
+	D3.s16 = -(cameraY % 0x18) - (0x0c * (lookupTableSize - 1))
+
+	for (u8 row = 0; row < lookupTableSize; ++row)
+	{
+		s32 px = cosine * D2.s16 - sine * D3.s16
+		s32 py = cosine * D3.s16 + sine * D2.s16
+
+		for (u8 col = 0; col < lookupTableSize; ++col)
+		{
+			s16[A1]   = px >> 8
+			s16[A1+2] = py >> 8
+			px += stepX
+			py += stepY
+			A1 += 4
+			//debugDrawRect(camera.foreground.x.u16 + s16[A1] - 4 + getScreenWidth() / 2, camera.foreground.y.u16 + s16[A1+2] - 4 + getScreenHeight() / 2, 9, 9, 0xe000ff00)
+		}
+
+		D3.u16 += 0x18
+	}
+
+	// The following code draws the blocks (as sprites)
+	A0 = 0xffff3000
+	A0 += ((cameraX / 0x18) + (0x10 - lookupTableSize) / 2)
+	A0 += ((cameraY / 0x18) + (0x10 - lookupTableSize) / 2) * 0x80
+
+	A4 = lookupTableAddress
+	D5 = u8[0xfffff62c]
+	A2 = 0xfffff800 + D5.u16 * 8
+
+	for (u8 row = 0; row < lookupTableSize; ++row)
+	{
+		for (u8 col = 0; col < lookupTableSize; ++col)
+		{
+			// Get the block type
+			u8 blockType = u8[A0]
+			++A0
+			if (blockType != 0 && blockType <= 0x13)
+			{
+				// The explicit cast to s16 is needed due to a bug in lemonscript, sorry...
+				s16 px = s16(u16[A4]   + getScreenWidth() / 2)
+				s16 py = s16(u16[A4+2] + getScreenHeight() / 2)
+				if (px >= -0x10 && px < getScreenWidth() + 0x10 && py >= -0x10 && py < getScreenHeight() + 0x10)
+				{
+					A5 = 0xffff7000 + blockType * 8
+					A1 = tableLookupAddress(u32[A5], u16[A5+4] * 2)
+					A3 = 0xffff0000 + u16[A5+6]
+					D1 = u8[A1] - 1
+					++A1
+					D3.u16 = px + 0x80
+					D2.u16 = py + 0x80
+
+					if (blockType == 0x08)
+					{
+						// Custom smoother ring animations
+						u8 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
+						if (original_mode)
+							animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
+						u64 key = stringformat("ring_0%d", animFrame)
+						Renderer.drawCustomSprite(key, px, py, 0x00, 0, 0x9000)
+					}
+					else
+					{
+						fn04b490()
+					}
+				}
+			}
+			A4 += 4
+		}
+		A0 += 0x80 - lookupTableSize
+	}
+
+	u8[0xfffff62c] = D5.u8
+}
+
+// Again replace slotmachine.rotation.rounded with a call based on game mode.
+//# address-hook(0x04bf9a) end(0x04c012)
+function void fn04bf9a()
+{
+	D0.u8 = (original_mode) ? (u8[0xffffe400] & 0xfc) : (u8[0xffffe400] & 0xff)
+	LookupSinCos()
+	A1 = 0xffffb000
+	s32 px = 0x0460 - objA1.position.x.u16
+	s32 py = 0x0430 - objA1.position.y.u16
+	D2.s32 = (px * D1.s16 - py * D0.s16) >> 8
+	D3.s32 = (px * D0.s16 + py * D1.s16) >> 8
+	D2.u16 += objA1.position.x.u16
+	D3.u16 += objA1.position.y.u16
+	objA0.position.x.u16 = D2.u16
+	objA0.position.y.u16 = D3.u16
+	level.display_routine = D2.u16
+	u16[0xffffeed4] = D3.u16
+
+	A2 = A0 + 0x34
+	A1 = 0xffffb000
+	fn04c014()
+
+	--objA0.animation.timer
+	if (s8(objA0.animation.timer) < 0)
+	{
+		objA0.animation.timer = 0x01
+		++objA0.animation.sprite
+		if (objA0.animation.sprite >= 0x06)
+		{
+			objA0.animation.sprite = 0
+		}
+	}
+}
+
+// Ensure slot machine blocks do not continue to animate while the game is paused.
+// Also adds a check for Classic Mode to Goal block rendering.
+// Function taken from level\bonus_sm\level_slotmachine.lemon
+//# address-hook(0x04b4c4) end(0x04b54e)
+function void fn04b4c4()
+{
+	if (global.game.paused)
+		return
+
+	D0 = (slotmachine.rotation.u8 >> 2) & 0x0f
+	A1 = 0xffff700c
+	for (u8 i = 0; i < 3; ++i)
+	{
+		u16[A1] = D0.u16
+		A1 += 8
+	}
+	A1 = 0xffff706c
+	for (u8 i = 0; i < 3; ++i)
+	{
+		u16[A1] = D0.u16
+		A1 += 8
+	}
+
+	// This updates animations of the blocks
+	A1 = 0xffff7005
+	--slotmachine.goalblock.animtimer
+	if (s8(slotmachine.goalblock.animtimer) < 0)
+	{
+		slotmachine.goalblock.animtimer = 1
+	#if STANDALONE
+		// Slow down animation of "Goal" blocks on highest anti-flicker setting
+		if (Game.getSetting(SETTING_GFX_ANTIFLICKER) == 2 && !original_mode)
+			slotmachine.goalblock.animtimer = 0x0f
+	#endif
+
+		++u8[A1 + 0x20]
+		if (u8[A1 + 0x20] >= 3)
+			u8[A1 + 0x20] = 0
+		++slotmachine.goalblock.animframe
+		if (slotmachine.goalblock.animframe >= 6)
+			slotmachine.goalblock.animframe = 0
+	}
+
+	u8[A1 + 0x48] = slotmachine.goalblock.animframe
+	u8[A1 + 0x40] = static_rings.animframe
+	--slotmachine.peppermintblock.animtimer
+	if (s8(slotmachine.peppermintblock.animtimer) < 0)
+	{
+		slotmachine.peppermintblock.animtimer = 3
+		slotmachine.peppermintblock.animframe = (slotmachine.peppermintblock.animframe + 1) & 0x03
+	}
+	u8[A1 + 0x38] = slotmachine.peppermintblock.animframe
+}

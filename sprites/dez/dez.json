@@ -14,5 +14,10 @@
 	
 	"dez2_finalboss_floor_old" : { "File": "dez2_finalboss_floor_old.png" },
 	"dez2_finalboss_floor_new" : { "File": "dez2_finalboss_floor_new.png" },
-	"dez2_finalboss_static" : { "File": "dez2_finalboss_static.png" }
+	"dez2_finalboss_static" : { "File": "dez2_finalboss_static.png" },
+
+	"dez2boss_front": { "File": "dez2boss_front.bmp", "Center": "176, 120" },
+	"dez2boss_side": { "File": "dez2boss_side.bmp", "Center": "144, 144" },
+	"dez2boss_masteremeraldhatchcover": { "File": "dez2boss_masteremeraldhatchcover.bmp", "Center": "60, 60" },
+	"dez2boss_cockpitdoor": { "File": "dez2boss_cockpitdoor.bmp", "Center": "0, 0" }
 }

@@ -5,7 +5,7 @@
 
 function void UpdateGamePause()
 {
-	if (time_attack_end || (bluespheres.stage_exit_state && time_attack == 1))	// do not allow pausing when time attacks are finished
+	if (time_attack_end || (bluespheres.stage_exit_state && global.game_mode == 0x34 && time_attack == 1))	// do not allow pausing when time attacks are finished
 		return
 
 	if (pause_menu && !original_mode)
@@ -1271,6 +1271,8 @@ function void PauseMenu_DrawCustomSprites()
 		CGZ_CustomSprites()
 	else if (global.zone_act == 0x0000)
 		AIZ1_CustomSprites()
+	else if (global.zone_act == 0x0001)
+		AIZ2_CustomSprites()
 	else if (global.zone_act == 0x0100)
 		HCZ1_CustomSprites()
 	else if (global.zone_act == 0x0101)

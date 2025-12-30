@@ -1,0 +1,104 @@
+// Keep level results centered when screen height is changed.
+// In Sonic 2 acts, do not set the flag to load act 2 data as level results start.
+// Function taken from maingame\hud\levelresults.lemon
+//# address-hook(0x02dbca) end(0x02dc34)
+function void fn02dbca()
+{
+	if (kosinski.waiting_modules != 0)
+		return
+
+	// Create the HUD elements
+	if (allocDynamicObjectAfterA0())
+	{
+		A2 = 0x02deba
+		D1 = 11
+
+		while (D1.s16 >= 0)
+		{
+			objA1.update_address = u32[A2]
+			objA1.render_flags = render_flag.COMPOUND
+			u16[A1 + 0x46] = u16[A2+4]
+			objA1.position.x.u16 = u16[A2+6]
+			objA1.position.y.u16 = u16[A2+8]
+			u8[A1 + 0x05] = (s16[A1 + 0x10] >= 0) ? 0xff : 0x00
+			u8[A1 + 0x22] = u8[A2+10]
+			objA1.box_size.x = u8[A2+11]
+			u8[A1 + 0x28] = u16[A2+12]
+			objA1.mapping_offset = 0x02f26a
+			u16[A1 + 0x48] = A0.u16
+			A2 += 14
+
+			#if STANDALONE
+			{
+				// Move elements towards screen center
+				u16 offsetX = getScreenExtend()
+				objA1.position.x.u16 += offsetX
+                u16 offsetY = getScreenHeightExtend()/2
+				objA1.position.y.u16 += offsetY
+				if (objA1.update_address != addressof(TitleCard.RedBarElement.Update))
+					u16[A1 + 0x46] += offsetX
+                else
+                    u16[A1 + 0x46] += offsetY
+			}
+			#endif
+
+			--D1.s16
+			if (!allocDynamicObjectAfterA1())
+				break
+		}
+
+		objA0.base_state += 2
+		if (global.act.apparent == 0)
+		{
+			// AIZ and ICZ have some special handling of apparent vs. current act 1
+			if (global.zone.apparent != 0x00 && global.zone.apparent != 0x05)
+			{
+				u8[0xffffeec6] = 0xff
+			}
+		}
+	}
+
+	if (unlock_act)
+		u8[0xffffeec6] = 0
+}
+
+// Keep special stage results centered when screen height is changed
+// and adjust texts for earning Hyper form to consider screen height.
+//# address-hook(0x02e802) end(0x02e832)
+function void fn02e802()
+{
+	// Create objects for the result screen
+	while (D1.s16 >= 0)
+	{
+		objA1.update_address = u32[A2]
+		objA1.render_flags = render_flag.COMPOUND
+		objA1.box_size.x = u8[A2+11]
+		objA1.mapping_offset = 0x02f26a
+		objA1.position.x.u16 = u16[A2+6] + getScreenExtend()
+		objA1.position.y.u16 = u16[A2+8] + (getScreenHeightExtend()/2)
+		if (objA1.position.y.u16 == 0x012c || objA1.position.y.u16 == 0x0144)
+			objA1.position.y.u16 += getScreenHeightExtend()
+		objA1.animation.sprite = u8[A2+10]
+		u16[A1 + 0x46] = u16[A2+4] + getScreenExtend()
+		u16[A1 + 0x48] = A0.u16
+
+		A1 += 0x4a
+		A2 += 12
+		--D1.s16
+	}
+}
+
+// Keep continue icon from Perfect in line with rest of special stage results when screen height is changed
+//# address-hook(0x02ebe8) end(0x02ec1c)
+function void fn02ebe8()
+{
+	objA0.mapping_offset = 0x02f26a
+	objA0.position.x.u16 = 0x017c + getScreenExtend()
+	objA0.position.y.u16 = 0x014c + (getScreenHeightExtend()/2)
+	objA0.animation.sprite = 0x29 + min(getMainCharacter(), 2)	// 0x29 for Sonic (with or without Tails), 0x2a for Tails, 0x2b for Knuckles
+
+	if (level.framecounter.low & 0x08)
+	{
+		DrawObject()
+	}
+}

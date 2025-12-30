@@ -1,0 +1,194 @@
+// Alter move_area.bottom and level.vertical_wrap values in MHZ1 in accordance with the new screen height
+//# address-hook(0x054b20) end(0x054b7c)
+function void UpdateLevelTiles.MHZ1()
+{
+	if (u8[0xffffeed2] == 0 && u16[0xffffeee8] == 0)
+	{
+		fn054b80()
+
+		D0.u16 = (u16[0xffffb000 + 0x10] >= 0x4100) ? 0x0710 - getScreenHeightExtend() : 0x0aa0 - getScreenHeightExtend()
+		if (D0.u16 != move_area.bottom.current)
+		{
+			move_area.bottom.current = D0.u16
+			move_area.bottom.target = D0.u16
+		}
+
+		if (camera.position.x.u16 >= 0x4298 - (getScreenWidth() - 320) && camera.position.y.u16 >= 0x0710 - getScreenHeightExtend())
+		{
+			level.vertical_wrap = (0x0710 - getScreenHeightExtend())
+			level.special_scrolling = 0x08
+			u8[0xffffeed2] = 0xff
+
+		#if STANDALONE
+			if (Game.isTimeAttack())
+			{
+				// Nothing special to do here
+			}
+			else
+		#endif
+			{
+				// Spawn boss
+				if (allocDynamicObjectStd())
+				{
+					objA1.update_address = 0x0751ca
+				}
+			}
+		}
+	}
+
+	LoadTileContentDefault()
+}
+
+// Alter value derived from camera.foreground.y.u16 in accordance with the new screen height when calculating MHZ background height
+//# address-hook(0x054c68) end(0x054cae)
+function void fn054c68()
+{
+    // At screen height = 224, the background y position reaches 0x021f. At screen height = 240, it should only reach 0x0210.
+    // So the approximate backgroundY:extraScreenHeight ratio is 15:16.
+    u32 derivedCameraYPos = camera.foreground.y.u16 * (0x21f - (getScreenHeightExtend() * 15 / 16))/0x21f
+
+    D0.u16 = u16(derivedCameraYPos)
+	D0 = (D0 << 16) + (D0 >> 16)
+	D0.u16 = 0
+	D0.s32 >>= 3
+	D1 = D0
+	D1.s32 >>= 2
+	D0 += D1
+	D0 = (D0 << 16) + (D0 >> 16)
+	D0.u16 += 0x76
+	camera.background.y.u16 = D0.u16
+	D0.u16 = u16[0xffffeeb6]
+	D0 = (D0 << 16) + (D0 >> 16)
+	D0.u16 = 0
+	D0.s32 >>= 1
+	D1 = D0
+	D1.s32 >>= 2
+	D0 -= D1
+	D1.s32 >>= 1
+	camera.background.x.u16 = D0 >> 16
+	D0 -= D1
+	u16[0xffffeee2] = D0 >> 16
+	D0 -= D1
+	D0 = (D0 << 16) + (D0 >> 16)
+	u16[0xffffeee4] = D0.u16
+}
+
+// Adjust MHZ1 boss spawn position in accordance with the new screen height
+//# address-hook(0x075220) end(0x0752ce)
+function void fn075220()
+{
+	setupObjectAttributesFull(0x075e52)
+
+	objA0.position.x.u16 = camera.position.x.u16 + getScreenWidth() - 0x30
+	objA0.position.y.u16 = camera.position.y.u16 - 0x78 + getScreenHeightExtend()
+	boss.remaining_hits = 6
+	u16[0xfffffaa4] = A0.u16
+	u8[A0 + 0x42] = 0x05
+	global.random.seed = global.framecounter
+	level.boss_encounter = 1
+	objA0.velocity.y = 0x0100
+	objA0.countdown_value = 0x97
+	objA0.countdown_callback = 0x0752e6
+	u32[A0 + 0x30] = 0x075eae
+	objA0.hitbox_extends.y = 0x18
+
+	// "spawnChildObjects(0x075e84)" replaced by:
+	spawnChildObject(0x0757c0, 0x00, 0, 0)			// Exhaust flame
+	spawnChildObject(0x0757c0, 0x02, 0, 0)			// Exhaust flame
+
+	if (allocDynamicObjectStd())
+	{
+		// Create the object that fades out level music and starts the boss theme afterwards
+		objA1.update_address = 0x085b30
+		u8[A1 + 0x2c] = MUSIC_MINIBOSS_2
+	}
+
+	Kosinski.addToDMAQueue(0x1680ca, 0x75a0)		// Boss sprites
+	Kosinski.addToDMAQueue(0x16908c, 0x93e0)		// Rolling chopped tree log sprites
+
+	addPatternLoadingCue(0x075f48)		// Boss explosion sprites
+
+	loadPaletteLine1(0x075f28)
+}
+
+// MHZ2: don't adjust the camera maximum near the boss (as this inhibits Knuckles' gliding) in time attack modes.
+// Alter move_area.bottom and level.vertical_wrap values in MHZ2 in accordance with the new screen height.
+// Function taken from level\07_mhz\level_mhz.lemon
+//# address-hook(0x054dbe) end(0x054e82)
+function void fn054dbe()
+{
+	if (u16[0xffffeec4] != 0)
+	{
+		u16[0xffffeec4] = 0
+		u16[0xffffeec8] = 0x0320
+		u16[0xffffeeca] = 0x0a
+		u16[0xffffeec0] += 8
+		fn054e9c()
+		return
+	}
+
+	u16 bossStartCamX = 0x3c90 - getScreenExtend() * 2
+	if (camera.position.x.u16 >= bossStartCamX && time_attack != 1 && time_attack != 2)
+	{
+	#if STANDALONE
+		{
+			// This solves a possible glitch, but can lead to a sudden camera jump when trying to fly over everything with Tails
+			move_area.left = max(bossStartCamX, move_area.left)
+			level.vertical_wrap = 0x0280
+			if (camera.position.x.u16 >= bossStartCamX + 0x200)
+			{
+				camera.position.y.u16 = 0x0280
+			}
+
+			// Refresh parts of the screen to avoid visual glitches
+			fillPlaneA_Default(0x3c40, 0x0280, 512, 512)
+		}
+	#else
+		if (camera.position.x.u16 == bossStartCamX)
+		{
+			move_area.left = bossStartCamX
+			if (camera.position.y.u16 >= 0x0280)
+			{
+				level.vertical_wrap = 0x0280
+			}
+		}
+	#endif
+	}
+	else
+	{
+		if (camera.position.x.u16 < 0x0380)
+		{
+			level.vertical_wrap = 0x0620 - getScreenHeightExtend()
+		}
+		else
+		{
+			level.vertical_wrap = (camera.position.x.u16 >= 0x3600) ? 0x01a8  - getScreenHeightExtend() : 0
+		}
+
+		if (camera.position.x.u16 < 0x3600 && u16[0xffffeee8] == 0)
+		{
+			move_area.left = (u16[0xffffb000 + 0x14] >= 0x05c0) ? max(s16(0x98 - getScreenExtend() * 2), 0) : 0x0380
+		}
+
+		if (u16[0xffffb000 + 0x10] < 0x3a97)
+		{
+			D0.u16 = 0x09a0 - getScreenHeightExtend()
+		}
+		else if (u16[0xffffb000 + 0x10] < 0x3ac0 && u16[0xffffb000 + 0x14] >= 0x0300)
+		{
+			D0.u16 = 0x09a0 - getScreenHeightExtend()
+		}
+		else
+		{
+			D0.u16 = 0x0280
+		}
+		if (D0.u16 != move_area.bottom.current)
+		{
+			move_area.bottom.current = D0.u16
+			move_area.bottom.target = D0.u16
+		}
+	}
+
+	fn055008()
+	LoadTileContentDefault()
+}

@@ -1,0 +1,613 @@
+// Load tiles as rawdata into shared memory and then decompress instead of using a ROM injection.
+// Also ensure Sonic 2 tiles and PLCs are loaded properly.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x007812) end(0x007890)
+function void fn007812()
+{
+	A4 = MainGame.getLevelDataPointer()
+	A1 = u32[A4] & 0x00ffffff
+//	u32 backupA1 = A1
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
+		else if (unlock_act == s2_CPZ)
+			System.loadExternalRawData("cpz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
+		else if (unlock_act == s3_CGZ)
+			System.loadExternalRawData("cgz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
+		A1 = s2_decompression_buffer
+	}
+	else if (global.zone == 0x04)
+	{
+		u64 key  = (original_mode) ? "fbz_tiles_p_orig" : "fbz_tiles_p"
+		System.loadExternalRawData(key, s2_decompression_buffer)		// copy Primary tiles to shared memory
+		A1 = s2_decompression_buffer
+	}
+//	A1 = backupA1
+	u32 firstSource = A1
+	D4.u16 = u16[A1]
+
+	Kosinski.addToDMAQueue(A1, 0x0000)
+
+	A1 = u32[A4+4] & 0x00ffffff
+	if (A1 != firstSource && global.zone != 0x04 && !unlock_act)	// FBZ loads all tiles at once in the above setup
+	{
+		Kosinski.addToDMAQueue(A1, D4.u16)
+	}
+
+	while (true)
+	{
+		global.frame_state = 0x0c
+		Kosinski.ProcessDecompressionQueue()
+		waitForNextFrame()
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+		if (kosinski.waiting_modules == 0)
+			break
+	}
+}
+
+
+// Load chunks as rawdata into shared memory and then decompress instead of using a ROM injection.
+// This allows for using data bigger than what fits into the usual spots in ROM.
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x01c2b0) end(0x01c360)
+function void fn01c2b0()
+{
+	if (!global.stage_type)
+		S2TitleCard.disappear = true	// once the chunks are loaded, the level is about to start
+
+	// This is not the only location that level data gets loaded!
+	// Act 2 chunks, blocks, and tiles are loaded in act transition functions.
+	// function void fn04fc46(): main.lemon, AIZ1 to AIZ2 transition behind fire wall
+	// function void fn050bce(): main.lemon, HCZ1 to HCZ2 transition at Act 1 end
+	// function void fn051160(): main.lemon, MGZ1 to MGZ2 transition at Act 1 end
+	// functions void fn0517d6() and fn0517ea(): not in DAGE yet (level_mgz.lemon), loads MGZ Quake chunks
+	// Nothing for CNZ (chunks do not differ between acts)
+	// function void fn05382c(): main.lemon, ICZ1 to ICZ2 transition within tunnel
+	// function void fn054200(): main.lemon, LBZ1 to LBZ2 transition at Act 1 end
+	// Nothing for MHZ act transition (chunks do not differ between acts), but...
+	// function void fn055250(): main.lemon, MHZ2 boss area chunks (still using rominjection)
+	// Nothing for FBZ (chunks do not differ between acts)
+	// Nothing for SOZ (chunks do not differ between acts)
+	// function void fn056bd2(): main.lemon, LRZ1 to LRZ2 transition at Act 1 end
+	// function void fn02df64(): blue_spheres.lemon, Hidden Palace after Super Emerald stage results
+	// function void fn05adc0(): main.lemon, outro use of SSZ2 data
+	// Nothing for DEZ (chunks do not differ between acts)
+	// Nothing for DDZ/DEZ2 boss (no hidden transitions that reload chunks)
+	// These other functions MUST be adjusted for any changes to external level data!
+
+	A2 = MainGame.getLevelDataPointer()
+	// A2 now points to the level's position in the LevelLoadBlock, and D0 will hold addresses from the block.
+	// Address pointers starting from A2:
+	// A2+ 0:	Address of Primary tiles (8x8s) plus a byte to first PLC at the start of the address
+	// A2+ 4:	Address of Secondary tiles (8x8s) plus a byte to second PLC at the start of the address
+	// A2+ 8:	Address of Primary blocks (16x16s) plus a byte to palette at the start of the address
+	// A2+12:	Address of Secondary blocks (16x16s) plus a byte to (unused) palette at the start of the address
+	// A2+16:	Address of Primary chunks (128x128s)
+	// A2+20:	Address of Secondary chunks (128x128s)
+	// All addresses point to Kosinski-compressed data. The leading bytes are removed here by AND logic.
+
+	u64 key
+
+	// Load Primary blocks
+	D0 = u32[A2+8] & 0x00ffffff
+	D7 = D0
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		else if (unlock_act == s2_CPZ)
+			System.loadExternalRawData("cpz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		else if (unlock_act == s3_CGZ)
+			System.loadExternalRawData("cgz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)					// decompress them to their proper RAM
+	}
+	else if (global.zone_act == 0x1700 && getScreenHeightExtend() >= 0x10)	    // get new blocks from ROM injection location for DEZ final boss with raised screen height
+	{
+		System.loadExternalRawData("DEZFinalBoss_blocks", KosinskiRawdataBuffer)
+        Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)								// decompress them to their proper RAM
+    }
+	else
+	{
+		Kosinski.decompress(D0, 0xffff9000)
+	}
+
+	// Load Secondary blocks
+	if (!unlock_act)
+	{
+		D0 = u32[A2+12] & 0x00ffffff
+		if (D7 != D0)
+		{
+			Kosinski.decompress(D0, A1)
+		}
+	}
+
+	// Load Primary chunks
+	D0 = u32[A2+16] & 0x00ffffff
+	D7 = D0
+	A1 = 0xffff0000
+	key = stringformat("%s_chunks_p", getZoneInitials(global.zone))
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		else if (unlock_act == s2_CPZ)
+			System.loadExternalRawData("cpz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		else if (unlock_act == s3_CGZ)
+			System.loadExternalRawData("cgz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM
+	}
+	else if (global.zone_act == 0x0a00 && System.hasExternalRawData("ssz1_chunks_p"))					// SSZ uses Primary and Secondary in Act 1 and unique Primary only in Act 2
+	{
+		System.loadExternalRawData("ssz1_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)							// decompress them to their proper RAM
+//		debugLog(stringformat("Primary chunks: ssz%d_chunks_p", global.act + 1))
+	}
+//	else if (global.zone_act == 0x1700 && getScreenHeightExtend() >= 0x10)		// get new chunks from ROM injection location for DEZ final boss with raised screen height
+//	{
+//		System.loadExternalRawData("DEZFinalBoss_chunks", KosinskiRawdataBuffer)	// copy Primary chunks to shared memory
+//		Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM
+//	}
+	else if (System.hasExternalRawData(key))				// only try to load Primary chunks if they exist for the act
+	{
+		System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Primary chunks to shared memory
+		Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
+//		debugLog(stringformat("Primary chunks: %s", key))
+	}
+	else if (global.zone_act == 0x0a01 || global.zone >= 0x0c)	// load from ROM for SSZ2 or Doomsday + later zone IDs (LRZ3 and HPZ are already covered above)
+	{
+		Kosinski.decompress(D0, 0xffff0000)
+//		debugLog("Primary chunks: ROM")	
+	}
+
+	// Load Secondary chunks
+	// A1 = address where the Primary chunk decompression ended (if there were no Primary chunks, then A1 = 0xffff0000)
+	// D7 = address where the Primary chunks were stored compressed in ROM
+	if (!unlock_act)
+	{
+		D0 = u32[A2+20] & 0x00ffffff
+		key = stringformat("%s_chunks_s", getZoneActInitials(global.zone_act))
+		if (global.zone_act == 0x0100 && original_mode && System.hasExternalRawData("hcz1_chunks_s_orig"))	// undo HCZ1 background chunk fixes in Original Mode
+		{
+			System.loadExternalRawData("hcz1_chunks_s_orig", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM		
+		}
+		else if (System.hasExternalRawData(key))		// only try to load Secondary chunks if they exist for the act
+		{
+			System.loadExternalRawData(key, KosinskiRawdataBuffer)			// copy Secondary chunks to shared memory
+			Kosinski.decompress(KosinskiRawdataBuffer, A1)					// decompress them to their proper RAM
+	//		debugLog(stringformat("Secondary chunks: %s", key))
+		}
+		else	// load from ROM
+		{
+			if (D7 != D0)
+			{
+				Kosinski.decompress(D0, A1)
+	//			debugLog("Secondary chunks: ROM")	
+			}
+		}
+	
+		// Rewrite the Gumball Machine's chunks to remove the machine (replaced with an image)
+		if (global.zone == 0x13 && getScreenHeightExtend() >= 0x10 && !original_mode)
+		{
+			// Remove upper-left of gumball machine
+			for (u32 address = 0xffff00d0; address < 0xffff0100; address += 0x10)
+			{
+				u32[address + 0x08] = 0
+				u32[address + 0x0c] = 0
+			}
+
+			// Remove upper-right of gumball machine
+			for (u32 address = 0xffff0150; address < 0xffff0180; address += 0x10)
+			{
+				u32[address] = 0
+				u32[address + 0x04] = 0
+			}
+
+			// Remove left and lower-left of gumball machine
+			for (u32 address = 0xffff0180; address < 0xffff0200; address += 0x10)
+			{
+				u32[address + 0x08] = 0
+				u32[address + 0x0c] = 0
+			}
+
+			// Remove right and lower-right of gumball machine
+			for (u32 address = 0xffff0200; address < 0xffff0280; address += 0x10)
+			{
+				u32[address] = 0
+				u32[address + 0x04] = 0
+			}
+		}
+	}
+
+	// Load level layout
+	fn01c362()
+
+	// Load tiles
+	D1.u8 = u8[A2]
+	D0 = u8[A2+4]
+	if (D0.u8 != 0 && D1.u8 != D0.u8)
+	{
+		requestLoadingPatterns(D0.u8)
+	}
+
+	// Load level palette
+	Level.loadNonfadingPaletteData(u8[A2+8])
+
+#if STANDALONE
+	//// Copy 16 palette entries from 0x10 to 0x90, primarily for the rings
+	//// TODO: Here is not a good place to do this, as
+	////  - 1.) the primary palette has to be updated when fully underwater
+	////  - 2.) fading effects won't work this way
+	//for (u8 i = 0; i < 0x10; ++i)
+	//{
+	//	Renderer.setPaletteEntryPacked(0x90 + i, u16[0xfffffca0 + i * 2])
+	//	Renderer.setSecondaryPaletteEntryPacked(0x90 + i, u16[0xfffff020 + i * 2])
+	//}
+#endif
+}
+
+
+// Support a second set of custom level layouts for Original Mode
+// Function taken from maingame\maingame.lemon
+//# address-hook(0x01c362) end(0x01c388)
+function void fn01c362()
+{
+	// Load content of level chunks
+	//  -> This includes both foreground and background chunks
+	u8 offset = global.zone * 8 + global.act * 4
+	A0 = u32[0x09d5c0 + offset]
+	copyMemory(0xffff8000, A0, 0x1000)
+
+//	if (global.zone_act == 0x1700 && getScreenHeightExtend() >= 0x10)
+//		System.loadExternalRawData("DEZFinalBoss_layout", 0xffff8000)
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			Standalone.loadRawLevelData("ehz_layout", global.zone_act, 0xffff8000)
+		else if (unlock_act == s2_CPZ)
+		{
+			bool KnuxHard = (layout.part == 2)
+			if (layout.part == 0)
+				Standalone.loadRawLevelData("cpz_layout_1", global.zone_act, 0xffff8000)
+			else if (KnuxHard)
+				Standalone.loadRawLevelData("cpz_layout_2_knux", global.zone_act, 0xffff8000)				
+			else 
+				Standalone.loadRawLevelData("cpz_layout_2", global.zone_act, 0xffff8000)
+		}
+		else if (unlock_act == s3_CGZ)
+			Standalone.loadRawLevelData("cgz_layout", global.zone_act, 0xffff8000)
+	}
+	else if (!original_mode)
+		Standalone.loadRawLevelData("%s_layout", global.zone_act, 0xffff8000)
+	else
+	{
+//		if (global.zone_act == 0x1701)	// HPZ emerald cave, which (like normal HPZ) is loading the base S3&K layout
+//		{
+//			u8[0xffff821d] = 0x7c		// make a correction to match the original ROM hack when seeing results after winning the far-left Super Emerald
+//		}
+		Standalone.loadRawLevelData("%s_origlayout", global.zone_act, 0xffff8000)
+	}
+}
+
+
+
+// Support a second set of custom object positions for Original Mode
+// Function taken from standalone\resources\level_objects\level_objects.lemon
+function void LevelObjectTableBuilder.buildObjects()
+{
+	u32 originalA0 = A0
+	A0 = 0x810000
+
+	// Load objects from a custom binary file
+	u32 bytes
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			bytes = Standalone.loadRawLevelData("ehz_objects", global.zone_act, A0)
+		else if (unlock_act == s2_CPZ)
+		{
+			bool KnuxHard = (layout.part == 2)
+			if (layout.part == 0)
+				bytes = Standalone.loadRawLevelData("cpz_objects_1", global.zone_act, A0)
+			else if (KnuxHard)
+				bytes = Standalone.loadRawLevelData("cpz_objects_2_knux", global.zone_act, A0)
+			else
+				bytes = Standalone.loadRawLevelData("cpz_objects_2", global.zone_act, A0)
+		}
+		else if (unlock_act == s3_CGZ)
+			bytes = Standalone.loadRawLevelData("cgz_objects", global.zone_act, A0)
+	}
+	else if (!original_mode)
+		bytes = Standalone.loadRawLevelData("%s_objects", global.zone_act, A0)
+	else
+		bytes = Standalone.loadRawLevelData("%s_origobjects", global.zone_act, A0)
+	bool loadedCustomData = (bytes != 0)
+
+	if (!loadedCustomData)
+	{
+		// Load objects from hard-coded scripts
+		if (global.zone_act == 0x0000)
+		{
+			LevelObjectTableBuilder.buildObjects_AIZ1()
+		}
+		else if (global.zone_act == 0x0001)
+		{
+			LevelObjectTableBuilder.buildObjects_AIZ2()
+		}
+		else if (global.zone_act == 0x0100)
+		{
+			LevelObjectTableBuilder.buildObjects_HCZ1()
+		}
+		else if (global.zone_act == 0x0101)
+		{
+			LevelObjectTableBuilder.buildObjects_HCZ2()
+		}
+		else if (global.zone_act == 0x0200)
+		{
+			LevelObjectTableBuilder.buildObjects_MGZ1()
+		}
+		else if (global.zone_act == 0x0201)
+		{
+			LevelObjectTableBuilder.buildObjects_MGZ2()
+		}
+		else if (global.zone_act == 0x0300)
+		{
+			LevelObjectTableBuilder.buildObjects_CNZ1()
+		}
+		else if (global.zone_act == 0x0301)
+		{
+			LevelObjectTableBuilder.buildObjects_CNZ2()
+		}
+		else if (global.zone_act == 0x0400)
+		{
+			LevelObjectTableBuilder.buildObjects_FBZ1()
+		}
+		else if (global.zone_act == 0x0401)
+		{
+			LevelObjectTableBuilder.buildObjects_FBZ2()
+		}
+		else if (global.zone_act == 0x0500)
+		{
+			LevelObjectTableBuilder.buildObjects_ICZ1()
+		}
+		else if (global.zone_act == 0x0501)
+		{
+			LevelObjectTableBuilder.buildObjects_ICZ2()
+		}
+		else if (global.zone_act == 0x0600)
+		{
+			LevelObjectTableBuilder.buildObjects_LBZ1()
+		}
+		else if (global.zone_act == 0x0601)
+		{
+			LevelObjectTableBuilder.buildObjects_LBZ2()
+		}
+		else if (global.zone_act == 0x0700)
+		{
+			LevelObjectTableBuilder.buildObjects_MHZ1()
+		}
+		else if (global.zone_act == 0x0701)
+		{
+			LevelObjectTableBuilder.buildObjects_MHZ2()
+		}
+		else if (global.zone_act == 0x0800)
+		{
+			LevelObjectTableBuilder.buildObjects_SOZ1()
+		}
+		else if (global.zone_act == 0x0801)
+		{
+			LevelObjectTableBuilder.buildObjects_SOZ2()
+		}
+		else if (global.zone_act == 0x0900)
+		{
+			LevelObjectTableBuilder.buildObjects_LRZ1()
+		}
+		else if (global.zone_act == 0x0901)
+		{
+			LevelObjectTableBuilder.buildObjects_LRZ2()
+		}
+		else if (global.zone_act == 0x0a00)
+		{
+			LevelObjectTableBuilder.buildObjects_SSZ1()
+		}
+		else if (global.zone_act == 0x0a01)
+		{
+			LevelObjectTableBuilder.buildObjects_SSZ2()
+		}
+		else if (global.zone_act == 0x0b00)
+		{
+			LevelObjectTableBuilder.buildObjects_DEZ1()
+		}
+		else if (global.zone_act == 0x0b01)
+		{
+			LevelObjectTableBuilder.buildObjects_DEZ2()
+		}
+		else if (global.zone_act == 0x0c01)
+		{
+			LevelObjectTableBuilder.buildObjects_DDZ()
+		}
+		else if (global.zone_act == 0x1600)
+		{
+			LevelObjectTableBuilder.buildObjects_LRZ3()
+		}
+		else if (global.zone_act == 0x1601)
+		{
+			LevelObjectTableBuilder.buildObjects_HPZ1()
+		}
+
+	#if 0
+		// Debug output
+		if (A0 != 0x810000 && Game.getSetting(SETTING_LEVELLAYOUTS) == 2)
+		{
+			u32[A0] = 0
+			A0 += 4
+			debugDumpToFile(stringformat("level_objects_%04x.bin", global.zone_act), 0x810000, A0 - 0x810000)
+		}
+	#endif
+
+		loadedCustomData = (A0 != 0x810000)
+		A0 = 0x810000
+	}
+
+	if (!loadedCustomData)
+	{
+		// Use original objects in ROM
+		A0 = originalA0
+	}
+}
+
+
+
+// Support a second set of custom ring positions for Original Mode
+// Function taken from standalone\resources\level_rings\level_rings.lemon
+function void LevelRingsTableBuilder.buildRings()
+{
+	u32 originalA1 = A1
+	A1 = 0x814000
+
+	// Load rings from a custom binary file
+	u32 bytes
+	if (unlock_act)
+	{
+		if (unlock_act == s2_EHZ)
+			bytes = Standalone.loadRawLevelData("ehz_rings", global.zone_act, A1)
+		else if (unlock_act == s2_CPZ)
+		{
+			bool KnuxHard = (layout.part == 2)
+			if (layout.part == 0)
+				bytes = Standalone.loadRawLevelData("cpz_rings_1", global.zone_act, A1)
+			else if (KnuxHard)
+				bytes = Standalone.loadRawLevelData("cpz_rings_2_knux", global.zone_act, A1)
+			else
+				bytes = Standalone.loadRawLevelData("cpz_rings_2", global.zone_act, A1)
+		}
+		else if (unlock_act == s3_CGZ)
+			bytes = Standalone.loadRawLevelData("cgz_rings", global.zone_act, A1)
+	}
+	else if (!original_mode)
+		bytes = Standalone.loadRawLevelData("%s_rings", global.zone_act, A1)
+	else
+		bytes = Standalone.loadRawLevelData("%s_origrings", global.zone_act, A1)
+	bool loadedCustomData = (bytes != 0)
+
+	if (!loadedCustomData)
+	{
+		// Load rings from hard-coded scripts
+		if (global.zone_act == 0x0000)
+		{
+			LevelRingsTableBuilder.buildRings_AIZ1()
+		}
+		else if (global.zone_act == 0x0001)
+		{
+			LevelRingsTableBuilder.buildRings_AIZ2()
+		}
+		else if (global.zone_act == 0x0100)
+		{
+			LevelRingsTableBuilder.buildRings_HCZ1()
+		}
+		else if (global.zone_act == 0x0101)
+		{
+			LevelRingsTableBuilder.buildRings_HCZ2()
+		}
+		else if (global.zone_act == 0x0200)
+		{
+			LevelRingsTableBuilder.buildRings_MGZ1()
+		}
+		else if (global.zone_act == 0x0201)
+		{
+			LevelRingsTableBuilder.buildRings_MGZ2()
+		}
+		else if (global.zone_act == 0x0300)
+		{
+			LevelRingsTableBuilder.buildRings_CNZ1()
+		}
+		else if (global.zone_act == 0x0301)
+		{
+			LevelRingsTableBuilder.buildRings_CNZ2()
+		}
+		else if (global.zone_act == 0x0400)
+		{
+			LevelRingsTableBuilder.buildRings_FBZ1()
+		}
+		else if (global.zone_act == 0x0401)
+		{
+			LevelRingsTableBuilder.buildRings_FBZ2()
+		}
+		else if (global.zone_act == 0x0500)
+		{
+			LevelRingsTableBuilder.buildRings_ICZ1()
+		}
+		else if (global.zone_act == 0x0501)
+		{
+			LevelRingsTableBuilder.buildRings_ICZ2()
+		}
+		else if (global.zone_act == 0x0600)
+		{
+			LevelRingsTableBuilder.buildRings_LBZ1()
+		}
+		else if (global.zone_act == 0x0601)
+		{
+			LevelRingsTableBuilder.buildRings_LBZ2()
+		}
+		else if (global.zone_act == 0x0700)
+		{
+			LevelRingsTableBuilder.buildRings_MHZ1()
+		}
+		else if (global.zone_act == 0x0701)
+		{
+			LevelRingsTableBuilder.buildRings_MHZ2()
+		}
+		else if (global.zone_act == 0x0800)
+		{
+			LevelRingsTableBuilder.buildRings_SOZ1()
+		}
+		else if (global.zone_act == 0x0801)
+		{
+			LevelRingsTableBuilder.buildRings_SOZ2()
+		}
+		else if (global.zone_act == 0x0900)
+		{
+			LevelRingsTableBuilder.buildRings_LRZ1()
+		}
+		else if (global.zone_act == 0x0901)
+		{
+			LevelRingsTableBuilder.buildRings_LRZ2()
+		}
+		else if (global.zone_act == 0x0a00)
+		{
+			LevelRingsTableBuilder.buildRings_SSZ1()
+		}
+		else if (global.zone_act == 0x0a01)
+		{
+			LevelRingsTableBuilder.buildRings_SSZ2()
+		}
+		else if (global.zone_act == 0x0b00)
+		{
+			LevelRingsTableBuilder.buildRings_DEZ1()
+		}
+		else if (global.zone_act == 0x0b01)
+		{
+			LevelRingsTableBuilder.buildRings_DEZ2()
+		}
+		else if (global.zone_act == 0x1600)
+		{
+			LevelRingsTableBuilder.buildRings_LRZ3()
+		}
+		else if (global.zone_act == 0x1601)
+		{
+			LevelRingsTableBuilder.buildRings_HPZ1()
+		}
+
+		loadedCustomData = (A1 != 0x814000)
+		A1 = 0x814000
+	}
+
+	if (!loadedCustomData)
+	{
+		// Use original rings in ROM
+		A1 = originalA1
+	}
+}

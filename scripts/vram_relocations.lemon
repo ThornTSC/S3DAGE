@@ -1,0 +1,331 @@
+// We change the VRAM location for shields and other similar objects to be
+// in place of SCORE/TIME/RINGS text, which A.I.R. renderhooks anyway.
+// This prevents their graphics from being overwritten by the extra VRAM
+// space used to extend the screen vertically.
+function u16 getShield.targetInVRAM()
+{
+	if (getScreenHeightExtend() > 0)
+		return 0xd940
+	else
+		return 0xf380
+}
+
+// However, for functions referencing this constant to use our version and
+// not the base A.I.R. version, those functions must be copied into this mod.
+
+// Get uncompressed art for Sonic 2 elemental shields when relevant
+// Function taken from objects\basics\shields.lemon
+function void Shield.sharedInit()
+{
+	if (unlock_act && (unlock_act != s3_CGZ))
+		objA0.shield.art_offset += 0x1beb1e	// shift form S&K data location to S3 alone data location, where versions for Sonic 2's palette are injected
+
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x18
+	objA0.box_size.y = 0x18
+	objA0.sprite_attributes = (getShield.targetInVRAM() >> 5)
+	objA0.shield.targetInVRAM = getShield.targetInVRAM()
+	u8[A0 + 0x0a] |= (u8[0xffffb000 + 0x0a] & 0x80)
+	objA0.state.both = 0x01
+	objA0.shield.animation.sprite.backup = 0xff
+}
+
+// Get mappings and uncompressed art for Sonic 2 invincibility stars when relevant
+// Function taken from objects\basics\shields.lemon
+//# address-hook(0x0187f0) end(0x018862)
+//# alias(fn0187f0) deprecated
+function void Invincibility.Init()
+{
+	u32 invinStarsArtLoc = (unlock_act && (unlock_act != s3_CGZ)) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
+	u16 invinStartArtLength = (unlock_act && (unlock_act != s3_CGZ)) ? 0x240 : 0x200
+	updateSpritePattern(invinStarsArtLoc, getShield.targetInVRAM(), invinStartArtLength)
+
+	D2 = 0
+	A2 = 0x0187d8
+	A1 = A0
+	for (u8 i = 0; i < 4; ++i)
+	{
+		objA1.update_address = addressof(Invincibility.Trail.Update)
+		objA1.render_flags = (render_flag.COMPOUND | render_flag.WORLD)
+		objA1.box_size.x = 0x10
+		objA1.sprite_priority = 0x80
+		objA1.sprite_attributes = (getShield.targetInVRAM() >> 5)
+		objA1.mapping_offset = 0x018aea
+		objA1.compound.count = 2
+		objA1.shield.character_address = objA0.shield.character_address
+		u8[A1 + 0x36] = D2.u8
+		u32[A1 + 0x30] = u32[(A2+=4)-4]
+		u16[A1 + 0x34] = u16[(A2+=2)-2]
+		A1 += 0x4a
+		++D2.u16
+	}
+
+	objA0.update_address = addressof(Invincibility.Update)
+	u8[A0 + 0x34] = 4
+	Invincibility.Update()
+}
+
+//# address-hook(0x0196c2) end(0x01972c)
+function void LightningShield.Init()
+{
+#if STANDALONE
+	//if (!DIRECT_OBJECT_RENDERING)
+#endif
+	{
+		u32 sparksArtAddress = (unlock_act && (unlock_act != s3_CGZ)) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
+		// Load sprite patterns for the sparks
+		if (!unlock_act || unlock_act == s3_CGZ || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
+			updateSpritePattern(sparksArtAddress, getShield.targetInVRAM() + 0x3e0, 0x50)
+	}
+
+	objA0.mapping_offset = 0x019dc8
+	objA0.shield.art_offset = 0x18e8a4
+	objA0.shield.pattern_offset = 0x019efa
+	Shield.sharedInit()
+
+	objA0.update_address = addressof(LightningShield.Update)
+	LightningShield.Update()
+}
+
+// Reloading of lightning shield sparks if needed after Super/Hyper transformation
+function void Character.cancelSuperTransformation()
+{
+	// Stop being super already
+	super.active = 0
+	super.active.tails = 0
+	super.palettefx.state = 2
+	super.palettefx.frame = 30
+	char.animation.sprite.backup = 0xff
+
+	if (char.character == CHARACTER_SONIC)
+	{
+		char.mapping_offset = 0x146620
+	}
+
+	char.state.former = char.state.RUNNING2
+	char.invinc.countdown = 1
+
+	// Reset physics
+	setSpeedCapProperties(A4)
+
+#if STANDALONE
+	// Remove invincibility right away (otherwise it would be done in 2 frames because of "char.invinc.countdown", see above)
+	//  -> This is done so that "chooseFittingMusic" does the right thing afterwards
+	char.bonus_effect &= ~char.bonus.INVINCIBLE
+	char.invinc.countdown = 0
+
+	// Remove control flags set during super transformation
+	//  -> Otherwise the game can get soft-locked when e.g. the game timer stops when just transforming
+	if (char.state == char.state.TRANSFORMING && (char.control_flags & (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)) == (control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE))
+		char.control_flags &= ~(control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
+
+	// If lightning shield is active, reload sprite patterns for the sparks
+	if (u32[0xffffcce8] == 0x019732)
+	{
+		updateSpritePattern(0x18f8e4, getShield.targetInVRAM() + 0x3e0, 0x50)
+	}
+
+	// Special handling for Knuckles while climbing - without this, he would change to a falling animation
+	if (char.character == CHARACTER_KNUCKLES && char.state == char.state.KNUX_FLYCLIMB)
+	{
+		char.state.former = char.state.KNUX_FLYCLIMB
+	}
+
+	Standalone.setFastMusicFlag(FastMusicFlag.SUPER_THEME, false)   // Disable fast music by Super Theme (if this was active)
+#endif
+}
+
+// Hyper Sonic stars in DDZ
+//# address-hook(0x08242a) end(0x08244c)
+function void fn08242a()
+{
+	setupObjectAttributesFull(0x08321a)
+
+	objA0.update_address = 0x082452
+	objA0.animation.sprite = 6
+
+	updateSpritePattern(0x18bd44, getShield.targetInVRAM(), 0x1a0)
+
+	objA0.sprite_attributes = sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5)
+}
+
+// Hyper Sonic stars
+//# address-hook(0x019348) end(0x019378)
+function void fn019348()
+{
+#if STANDALONE
+	// Do not create these stars in outro
+	if (global.zone_act == 0x0d01)
+	{
+		UnloadObject()
+		return
+	}
+#endif
+
+	Kosinski.addToDMAQueue(0x14c652, getShield.targetInVRAM())
+
+	A1 = A0
+	for (u8 i = 0; i < 4; ++i)
+	{
+		objA1.update_address = 0x01937c
+		u8[A1 + 0x26] = i * 0x40
+		u8[A1 + 0x24] = i + 1
+		A1 += 0x4a
+	}
+
+	fn01937c()
+}
+
+// Hyper Sonic stars
+//# address-hook(0x01937c) end(0x0193c4)
+function void fn01937c()
+{
+	if (kosinski.waiting_modules != 0)
+		return
+
+	--objA0.animation.timer
+	if (objA0.animation.timer != 0)
+		return
+
+	objA0.mapping_offset = 0x01948c
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x18
+	objA0.box_size.y = 0x18
+	objA0.sprite_attributes = (getShield.targetInVRAM() >> 5)
+	objA0.animation.sprite = 0x06
+
+	if (A0 == 0xffffcd7c)
+	{
+		objA0.update_address = 0x0193ca
+		HyperSonicStars.CreateSparks()
+	}
+	else
+	{
+		objA0.update_address = 0x0193ec
+		fn0193ec()
+	}
+}
+
+// Super Sonic stars
+//# address-hook(0x019156) end(0x01919e)
+function void fn019156()
+{
+	u32 superStarsArtLoc = (unlock_act && (unlock_act != s3_CGZ)) ? 0x34a862 : 0x18bd44
+	updateSpritePattern(superStarsArtLoc, getShield.targetInVRAM(), 0x01a0)
+
+	objA0.mapping_offset = 0x0192de
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x18
+	objA0.box_size.y = 0x18
+	objA0.sprite_attributes = (getShield.targetInVRAM() >> 5)
+	u8[A0 + 0x0a] |= (u8[0xffffb000 + 0x0a] & 0x80)
+
+	objA0.update_address = 0x0191a4
+	fn0191a4()
+}
+
+//# address-hook(0x019236) end(0x0192be)
+//# alias(fn019236) deprecated
+function void SuperSonicStars.CreateSparks()
+{
+#if STANDALONE
+
+	// Scatter sparks when dashing, bypassing original broken behavior
+	objA0.state = 0
+	objA0.mapping_offset = 0x0192ea
+	objA0.position.x.u16 = u16[0xffffb000 + 0x10]
+	objA0.position.y.u16 = u16[0xffffb000 + 0x14]
+
+	D2 = 2
+	Effects.CreateSparks()
+
+	objA0.mapping_offset = 0x0192de
+
+#else
+
+	// This is all technically unused
+	objA0.state = 0
+	A2 = 0xffffb000
+	D5 = 0x0f
+	D4.u16 = 0x0488
+
+	while (D5.s16 >= 0)
+	{
+		// Spawn super sparks
+		if (!allocDynamicObjectStd())
+			return
+
+		objA1.update_address = 0x0192c0
+		objA1.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
+		objA1.box_size.y = 0x08
+		objA1.box_size.x = 0x08
+		objA1.sprite_priority = 0x0380
+		objA1.sprite_attributes = (sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5))
+		objA1.mapping_offset = 0x0192ea
+		objA1.position.x.u16 = u16[A2 + 0x10]
+		objA1.position.y.u16 = u16[A2 + 0x14]
+
+		if (D4.s16 >= 0)
+		{
+			D0.u16 = D4.u16
+			LookupSinCos()
+			D2.u16 = D4.u16 >> 8
+			D0.s16 <<= D2
+			D1.s16 <<= D2
+			D2.u16 = D0.u16
+			D3.u16 = D1.u16
+			D4.u8 += 0x10
+			if (D4.u8 < 0x10)
+			{
+				D4.u16 -= 0x80
+				if (D4.s16 < 0)
+				{
+					D4.u16 = 0x0488
+				}
+			}
+		}
+
+		objA1.velocity.x = D2.u16
+		objA1.velocity.y = D3.u16
+		D2.s16 = -D2.s16
+		D4.s16 = -D4.s16
+		--D5.s16
+	}
+#endif
+}
+
+// Blue Spheres results Super/Master Emerald sparkles.
+// Another function for these is handled in blue_spheres.lemon.
+//# address-hook(0x02ecd0) end(0x02ed26)
+function void fn02ecd0()
+{
+	objA0.update_address = 0x02ed2a
+	objA0.render_flags = (render_flag.COMPOUND | render_flag.WORLD)
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5))
+	objA0.mapping_offset = 0x018aea
+
+	objA0.compound.count = 2
+	if (u16[A0 + 0x36] != 0)
+	{
+		objA0.position.x.u16 = 0x1640
+		objA0.position.y.u16 = 0x0340
+		objA0.value32 = 0
+	}
+	else
+	{
+		A1 = 0x02e398
+		D0 = u8[0xffffef6e] * 2
+		objA0.position.x.u16 = u16[A1 + D0.u16] + 160	// Do not add screen extend here
+		objA0.position.y.u16 = u16[A1 + D0.u16 + 0x10]
+		objA0.value32 = 0xe000
+	}
+
+	fn02ed2a()
+}
+
+// GAME/TIME OVER texts are also moved from the old location to the new one, but those
+// get their own file because they also get vertically repositioned with screen height changes.
+// They also have a ROM manipulation applied to alter their pattern load queue.

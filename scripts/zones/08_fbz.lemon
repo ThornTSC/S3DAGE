@@ -1,0 +1,196 @@
+// Shift FBZ outdoor background in accordance with the new screen height
+//# address-hook(0x052a2a) end(0x052ab0)
+function void fn052a2a()
+{
+	// Background animation?
+
+	if (u16[0xffffeed6] == 0)
+	{
+		D0.s16 = (s16(camera.foreground.y.u16) >> 1)
+		D1.s16 = D0.u16 >> 5
+		D0.u16 -= D1.u16
+		camera.background.y.u16 = D0.u16
+
+		D0.u16 = camera.foreground.x.u16
+		D0 = (D0 << 16)
+		D0.s32 >>= 4
+		D1 = D0
+		A1 = 0xffffa800
+		A5 = 0x052d80
+		D2 = 0
+		while (true)
+		{
+			D3.u8 = u8[(A5+=1)-1]
+			if (D3.s8 < 0)
+				break
+
+			D3.s16 = D3.s8
+			D0 = (D0 << 16) + (D0 >> 16)
+			while (D3.s16 >= 0)
+			{
+				D2.u8 = u8[(A5+=1)-1]
+				u16[A1 + D2.s16] = D0.u16
+				--D3.s16
+			}
+
+			D0 = (D0 << 16) + (D0 >> 16)
+			D0 += D1
+		}
+	}
+	else
+	{
+		D0 = u16[0xffffeeda] + 0x16 - (getScreenHeightExtend() * 3/4)
+		camera.background.y.u16 = D0.u16
+
+		A1 = 0xffffa800
+		A5 = 0x052dae
+		D0.u16 = camera.foreground.x.u16
+		D0 = (D0 << 16)
+		D0.s32 >>= 4
+		D1 = D0
+		D1.s32 >>= 1
+		D2 = u32[0xffffa9fc]
+		u32[0xffffa9fc] += 0x0e00
+		D3 = 8
+		while (D3.s16 >= 0)
+		{
+			D4.u16 = u16[(A5+=2)-2]
+			D0 += D2
+			u16[A1 + D4.s16] = D0 >> 16
+			D0 += D1
+			--D3.s16
+		}
+	}
+}
+
+// Align screen boundaries properly for FBZ1 boss based on screen height
+//# address-hook(0x06eea8) end(0x06ef08)
+function void fn06eea8()
+{
+	setupObjectAttributesFull(0x06fa34)
+
+	boss.remaining_hits = 6
+	level.boss_encounter = 1
+	screenmover_target.right = move_area.right
+	screenmover_target.bottom = move_area.bottom.current
+	move_area.bottom.target = 0x0540 - getScreenHeightExtend()
+#if STANDALONE
+	move_area.right = 0x2e20 + getScreenExtend() * 2
+#endif
+	u16[A0 + 0x3a] = 0x2e20		// Needed minimum camera-x position
+	objA0.countdown_callback = 0x06ef14
+
+	addPatternLoadingCue(0x083d64)		// Boss explosion sprites
+
+	Kosinski.addToDMAQueue(0x1652b4, 0xa5c0)		// Boss sprites
+
+	loadPaletteLine1(0x06fac0)
+
+	// "spawnChildObjects(0x06fa76)" replaced by:
+	spawnChildObject(0x06f10e, 0x00, -16, -8)		// Window hiding the eyes
+	spawnChildObject(0x06f10e, 0x02, 16, -8)		// Window hiding the eyes
+	spawnChildObject(0x06f10e, 0x04, 0, -8)			// Window hiding the eyes
+	spawnChildObject(0x06efda, 0x06, 0, -36)		// Capsule button
+	spawnChildObject(0x06f060, 0x08, 0, -8)			// Eyes
+	spawnChildObject(0x06f178, 0x0a, 0, 0)			// Left arm
+	spawnChildObject(0x06f178, 0x0c, 0, 0)			// Right arm
+}
+
+// Minor screen width extensions can place the pillar/gate at the start of the
+// FBZ2 rising floor into the boss area boundaries. At these minor extensions,
+// it is safe to increase move_area.right (used to determine when the boss area
+// has been reached) to hide the pillar but not reveal the Egg Prison.
+// This requires adding chunks to the right to fill in some revealed space.
+//# address-hook(0x0532b6) end(0x0532dc)
+function void fn0532b6()
+{
+	objA0.update_address = 0x0532e0
+	objA0.box_size.y = 0x11
+	objA0.flags2a |= 0x80
+	move_area.right = 0x32b8
+	if (getScreenWidth() > 400)
+	{
+		move_area.right += getScreenWidth() - 400
+		u8[0xffff8269] = 0x10
+		u8[0xffff826a] = 0x0f
+		u8[0xffff82e7] = 0xa1
+		u8[0xffff82e8] = 0x6b
+		u8[0xffff8365] = 0xa1
+		u8[0xffff8366] = 0x6b
+		u8[0xffff83e3] = 0xa1
+		u8[0xffff83e4] = 0x6b
+		u8[0xffff8461] = 0x18
+		u8[0xffff8462] = 0x17
+	}
+	level.vertical_wrap = isMainCharacter(CHARACTER_TAILS) ? 0x40 : 0x3c
+
+	fn0532e0()
+}
+
+// Draw a rectangle of sky color right after the laser boss, as the
+// background in the dual plane section may not draw properly in time.
+//# address-hook(0x05303c) end(0x05305a)
+function void fn0530ec()
+{
+	base.fn0530ec()
+
+    u16 paletteEntry = u16[0xfffffc6e]
+    u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff	
+    Renderer.drawRect(0x2c80 - camera.position.x.u16, 0x05f0 - camera.position.y.u16, 16, 144, color, 0x1001, 0, 1)
+}
+
+// Adjust parts of the FBZ2 boss to align with the slightly different floor height
+// when the screen height is altered.
+// fn0706ac() would adjust the spawn location, but moving this lower may create pop-in.
+
+// Height for main body to fall to before arms latch on.
+//# address-hook(0x068044) end(0x06805e)
+function void fn068044()
+{
+	D0.u16 = camera.position.y.u16 + 0xc0 + getScreenHeightExtend()/2
+	if (D0.u16 < objA0.position.y.u16)
+	{
+		--objA0.position.y.u16
+		return
+	}
+
+	objA0.base_state = 0x0a
+	fn067f1e()
+}
+
+// Spiked arm latch position.
+// The "objA0.position.y.u16" line is entirely new, as moving with parent
+// can take it past its intended location.
+//# address-hook(0x070990) end(0x0709a2)
+function void fn070990()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	if ((u8[A1 + 0x38] & 0x80) == 0)
+	{
+		MoveWithParent()
+	}
+	else
+	{
+		objA0.base_state = 0x04
+		objA0.position.y.u16 = 0x0685 + getScreenHeightExtend()/2
+		fn0709a8()
+	}
+}
+
+// Adjust the timing of moving to Sandopolis Zone based on screen height
+//# address-hook(0x07092a) end(0x070942)
+function void fn07092a()
+{
+	if (camera.position.y.u16 < 0x0720 - getScreenHeightExtend())
+	{
+		fn086334()
+		return
+	}
+
+	TriggerNextZone(0x0800)		// Sandopolis Zone
+	UnloadObject()
+
+#if STANDALONE
+	Game.endSkippableCutscene()
+#endif
+}

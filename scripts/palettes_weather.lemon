@@ -742,140 +742,10 @@ function void fn04fa4c()
 
 
 
-
-
-// fn01c550() in main.lemon sets AIZ1 colors of some foreground flowers and the sky
+// fn01c550() in 01_aiz.lemon sets AIZ1 colors of some foreground flowers and the sky
 // near the palm tree at the miniboss cutscene. It also handles Knuckles' camera boundaries.
 // Also of note is fn0634ca() in main.lemon, which has a line that takes the AIZ1 object
 // palette directly from a ROM address. Alter this if needed.
-
-
-
-
-// Changes AIZ1 cutscene fire wall palette to include one more increment of blue
-// Functions taken from level\01_aiz\level_aiz.lemon
-//# address-hook(0x04fbea) end(0x04fc42)
-function void fn04fbea()
-{
-	if (palette_set < 2 || original_mode)
-	{
-		base.fn04fbea()
-		return
-	}
-	// Check if fire wall got triggered
-	if (u16[0xffffeec6] == 0)
-	{
-		UpdateBackgroundScrolling.AIZ1()
-		fn04fbf6()
-	}
-	else
-	{
-		u16[0xffffeec6] = 0
-
-		// Set fire wall palette
-		A1 = 0xfffffc62
-		u32[A1]   = 0x024e026e
-		u32[A1+4] = 0x02ae02ce
-		u32[A1+8] = 0x04ee0cee
-
-		camera.background.y = 0x0200000
-		camera.background.y.old = 0x0010
-		level.display_routine = 0x0068
-		gfx.plane_update_routine = 0x04		// Enter vertical scroll mode
-	#if STANDALONE
-		verticalScrollOffsetBias = 0
-	#endif
-		level.scrolling_routine += 4
-
-		fn04fc46()
-	}
-}
-
-//# address-hook(0x04fd62)
-function void fn04fd62()
-{
-	if (palette_set < 2 || original_mode)
-	{
-		base.fn04fd62()
-		return
-	}
-	if (kosinski.waiting_modules == 0)
-	{
-		// Go to second part of act 1
-		//  -> Technically, this is part of act 2 already
-		global.zone_act = 0x0001
-		camera.update_routine = 0
-		dynobjects.routine = 0
-		rings.update_routine = 0
-		level.boss_encounter = 0
-		global.in_extra_stage = 0
-		fn04f8f8()
-
-		push(A3)
-		push(A2)
-		push(A0)
-		push(D7)
-
-		fn01c362()
-		fn0076a6()
-		Level.InitializeWater()
-		Level.loadPaletteData(0x0b)
-
-		D7 = pop()
-		A0 = pop()
-		A2 = pop()
-		A3 = pop()
-
-		AIZ2.LevelInitSpecialty()
-
-		// Set fire wall palette
-		A1 = 0xfffffc62
-		u32[A1]   = 0x024e026e
-		u32[A1+4] = 0x02ae02ce
-		u32[A1+8] = 0x04ee0cee
-
-		D0.u16 = 0x2f00
-		D1.u16 = 0x80
-		u16[0xffffb010] -= D0.u16
-		u16[0xffffb014] -= D1.u16
-		u16[0xffffb05a] -= D0.u16
-		u16[0xffffb05e] -= D1.u16
-		fn04f3a0()
-
-		camera.position.x.u16 -= D0.u16
-		camera.position.y.u16 -= D1.u16
-		camera.foreground.x.u16 -= D0.u16
-		camera.foreground.y.u16 -= D1.u16
-		move_area.left = 0x10
-		move_area.right = 0x10 + getScreenExtend() * 2
-		u32[0xffffee18] = 0x0260
-		move_area.bottom.target = 0x0260
-		u16[0xffffeeb4] = camera.foreground.x.u16
-		u16[0xffffeeb6] = camera.foreground.x.u16
-		Level.GetCameraPosition()
-
-		u16[0xffffeec8] = (D0.u16 + getScreenHeight()) & level.height.tilemask
-		u16[0xffffeeca] = 0x0f
-		level.scrolling_routine = 0
-
-	#if STANDALONE
-		// There's a glitch here that is both hard to reproduce and tricky to solve.
-		// You have to jump at the start of the fire wall moving and land right when the chunks gets exchanged.
-		// There are a few frames between the change of chunk contents and the loading of the chunk layouts (the latter happens right above).
-		// If you're falling down fast enough, you can basically glitch through the tempororily messed up collision.
-		// As a workaround, just check if the main character glitched through, and reposition him.
-		if (u16[0xffffb014] > 0x02fc)
-		{
-			u16[0xffffb014] = 0x02fc
-			u16[0xffffb01a] = 0
-		}
-	#endif
-	}
-
-	fn23b17a()
-	WriteScrollOffsets()
-}
-
 
 
 
@@ -1054,24 +924,7 @@ function void fn01c6f6()
 
 
 
-// Add a murky tint to HCZ water when the option is enabled and repair a missing ceiling shadow in the HCZ1 boss area.
-// Functions taken from level\02_hcz\level_hcz.lemon
-//# address-hook(0x050b8a) end(0x050b8a)
-function void UpdateLevelTiles.HCZ1()
-{
-	LoadTileContentDefault()
 
-	HCZ1_CustomSprites()
-}
-
-//# address-hook(0x050e90) end(0x050e98)
-function void UpdateLevelTiles.HCZ2()
-{
-	camera.foreground.y.u16 += camera.screenshake.offset
-	LoadTileContentDefault()
-
-	HCZ2_CustomSprites()
-}
 
 
 

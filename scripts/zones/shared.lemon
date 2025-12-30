@@ -1,0 +1,30 @@
+// When moving from "inside" to "outside" in LBZ and FBZ, ensure the counter for
+// the number of 16x16 blocks to redraw uses screen height instead of a static value
+//# address-hook(0x04ed6c) end(0x04ed8e)
+function void fn04ed6c()
+{
+#if !STANDALONE
+	set_status_register(0x2700)
+#endif
+	u32 backupD1 = D1
+	u32 backupD6 = D6
+	u32 backupA0 = A0
+
+	u8 counter = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	while (counter > 0)
+	{
+		u32 backupD0 = D0
+
+		LoadTileContentSingleLine()
+		UpdatePlanePatterns()
+
+		D0 = backupD0 + 0x10
+		D1 = backupD1
+		D6 = backupD6
+		A0 = backupA0
+		--counter
+	}
+#if !STANDALONE
+	set_status_register(0x2300)
+#endif
+}

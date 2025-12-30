@@ -57,6 +57,14 @@
   "PaletteDEZ2Boss":  { "File": "palettes/PaletteDEZ2Boss.bin" },
   "PaletteFinalBoss":  { "File": "palettes/PaletteFinalBoss.bin" },
 
+  // DEZ final boss files for extended screen height
+  "DEZFinalBoss_blocks":  { "File": "DEZFinalBossBlocks.bin" },
+  "DEZFinalBoss_chunks":  { "File": "DEZFinalBossChunks.bin" },
+  "DEZFinalBoss_layout":  { "File": "DEZFinalBossLayout.bin" },
+
+  // Ring Nemesis-compressed art file without HUD text baked in
+  "RingArtNoHUDText":  { "File": "RingArtNoHUDText.bin" },
+
   // Hard Mode Super Emerald special stage layouts
   "HardSuperEmeralds":  { "File": "SKSS1K.bin" },
 

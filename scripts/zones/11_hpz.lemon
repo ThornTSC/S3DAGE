@@ -1,0 +1,154 @@
+// function void fn045b94() allows us to shift the threshold where player Knuckles moves to SSZ,
+// but there is a ceiling at that boundary that becomes visible and looks incorrect if shown.
+// We leave the threshold as is.
+
+// Alter camera boundaries based on screen height for Knuckles fight
+//# address-hook(0x063d1a) end(0x063dd2)
+function void fn063d1a()
+{
+	if (isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1 || time_attack == 2)
+	{
+		UnloadObject()
+		if (time_attack)
+		{
+			move_area.left = camera.position.x.u16
+		//	level.vertical_wrap = 0x0380
+			move_area.bottom.target = 0x0380
+		}
+		return
+	}
+
+	A1 = 0x063cec
+	if (InitBoss(0x063d2e))
+		return
+
+	StartBossFight()
+#if STANDALONE
+	level.boss_encounter = 3	// Usually only 0 or 1, but we're using a value of 3 here for "chooseFittingMusic"
+#endif
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = addressof(CheckForBossStart)
+		objA1.countdown_callback = 0x063dd4
+		u16[A1 + 0x2e] = 0x78
+		u8[A1 + 0x27] = u8[A0 + 0x27]
+
+		objA1.value26 = MUSIC_KNUCKLES
+	#if STANDALONE
+		objA1.value26 = BossHPZKnuckles.chooseMusicTrack()
+	#endif
+	}
+
+	objA0.update_address = 0x063de0
+	objA0.mapping_offset = 0x14a8d6
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE1 | 0x04da)
+	objA0.sprite_priority = 0x0100
+	objA0.box_size.x = 0x18
+	objA0.box_size.y = 0x18
+	objA0.hitbox_extends.x = char.hitbox.x.UPRIGHT
+	objA0.hitbox_extends.y = char.hitbox.y.UPRIGHT
+	objA0.render_flags = (render_flag.WORLD | render_flag.FLIP_X)
+	objA0.animation.sprite = 0xd8
+	boss.remaining_hits = 8
+	u32[A0 + 0x30] = 0x066771		// Boss Knuckles fighting pose animation data
+	u16[A0 + 0x44] = 0
+
+	// Copies palette colors 0x10 .. 0x1f from primary to secondary (underwater) palette
+	copyMemory(0xfffffca0, 0xfffffc20, 0x20)
+
+	CutsceneKnuckles.loadPalette()
+
+#if STANDALONE
+	// Change palette to fit
+	//u16[0xfffffc24] = 0x064e
+	//u16[0xfffffc26] = 0x020c
+	//u16[0xfffffc28] = 0x0206
+	//u16[0xfffffc2a] = 0x0080
+	//u16[0xfffffc2c] = 0x000e
+	//u16[0xfffffc2e] = 0x0008
+#endif
+
+	u16[0xfffffc2c] = 0x88
+
+	level.bossarea.left -= getScreenExtend()
+	level.bossarea.right += getScreenExtend()
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
+}
+
+// Alter camera boundaries based on screen height for HPZ final cutscene.
+// This function handles the camera on initial approach.
+// Unlike in Origins, we raise the camera here, as we need to hide a palette change
+// in the orbs within the floor.
+//# address-hook(0x064c70) end(0x064ca4)
+function void fn064c70()
+{
+	A1 = 0xffffb000
+	if (objA1.position.x.u16 < 0x14d0)
+		return
+
+#if STANDALONE
+	Game.startSkippableCutscene()
+#endif
+
+	objA0.update_address = 0x064ca6
+	StopObjectA1()
+	player1.control_override = 0xff
+	control.player1 = 0
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x0863c0
+	}
+	move_area.bottom.target = 0x0300 - getScreenHeightExtend()
+}
+
+// This function handles the fall.
+// We only change by half the screen height extension here to prevent
+// the camera later panning above the teleporter structure's ceiling at 240px.
+//# address-hook(0x0648fa) end(0x064950)
+function void fn0648fa()
+{
+	objA0.base_state = 0x44
+	objA0.countdown_value = 0x10
+	player1.camera_lock = 0
+	D0.u16 = 0x05c0 - getScreenHeightExtend()/2
+	move_area.bottom.target = D0.u16
+	screenmover_target.bottom = D0.u16
+
+	playSound(0xcc)
+
+	if (allocDynamicObjectStd())
+	{
+		// Spawn screen mover for the lower border
+		objA1.update_address = 0x084ad2
+	}
+
+	for (u8 i = 0; i < 2; ++i)
+	{
+		// "spawnSimpleChildObjects(0x083fee)" replaced by:
+		spawnSimpleChildObjects(0x083d84, 1)		// Boss explosion generator
+		if (_equal())
+		{
+			u8[A1 + 0x2c] = 0x14
+			objA1.position.x.u16 = 0x1880
+			objA1.position.y.u16 = 0x03d0
+		}
+	}
+}
+
+// This function handles landing from the fall.
+// Again, we only change by half the screen height extension here to prevent
+// the camera later panning above the teleporter structure's ceiling at 240px.
+//# address-hook(0x064e46) end(0x064e6a)
+function void fn064e46()
+{
+	A1 = 0xffffb000
+	if (objA1.position.y.u16 >= 0x0580 && (u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+	{
+		objA0.update_address = 0x064e6c
+		player1.control_override = 0
+		level.vertical_wrap = 0x05c0 - getScreenHeightExtend()/2
+	}
+}

@@ -146,7 +146,6 @@ function void fn00881a()
 //# address-hook(0x04c97e) end(0x04cb18)
 function void fn04c97e()
 {
-	Renderer.setScreenSize(screen_width, 224)
 	original_mode = 0					// Remove original mode in Green Sphere menu
 	ApplyROMManipulations()
 
@@ -193,6 +192,9 @@ function void fn04c97e()
 
 	playMusic(MUSIC_CTRL_FADEOUT)
 	FadeOutScreenBlocking()
+
+	// Enforce AIR normal screen height after the screen is fully white or black.
+	Renderer.setScreenSize(screen_width, 224)
 
 	fn04c8e4()
 	fn04cca6()
@@ -1350,6 +1352,16 @@ function void SpecialStage()
 	set_status_register(0x2700)
 #endif
 
+	// Set screen resolution
+	if (original_mode)
+		Renderer.setScreenSize(320, 224)
+	else if (RSDK_width)
+		Renderer.setScreenSize(RSDK_width, 240)
+	else if (screen_width && !time_attack)
+		Renderer.setScreenSize(screen_width, 224)
+	else
+		Renderer.setScreenSize(400, 224)
+
 	VDP.Config.enableHInt(false)
 	VDP.Config.setNameTableBasePlaneA(0xc000)
 	VDP.Config.setNameTableBasePlaneB(0xe000)
@@ -1695,7 +1707,22 @@ function void fn008df8()
 		base.fn008df8()
 }
 
+// Shift GET BLUE SPHERES and PERFECT text to match screen height changes
+//# address-hook(0x008e5c) end(0x008e8e)
+function void fn008e5c()
+{
+	objA0.box_size.x = 0x80
+	objA0.box_size.y = 0x80
+	objA0.sprite_priority = 0
+	objA0.mapping_offset = 0x008f5e
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE1 | (SpecialStage.TextPromps.targetInVRAM >> 5))
+	objA0.position.x.u16 = 0x120 + getScreenExtend()
+	objA0.position.y.u16 = 0xe8 + getScreenHeightExtend()
+	objA0.value32 = 0xb4
 
+	objA0.update_address = 0x008e94
+	fn008e94()
+}
 
 
 // This function runs many ongoing parts of Blue Sphere, such as letting characters jump and controlling when the stage speeds up.
@@ -1984,11 +2011,6 @@ function bool BlueSpheres.useGeneratedStages()
 function void fn0085b0()
 {
 	u16 reverseStart = 0
-
-	if (time_attack && !original_mode)
-		Renderer.setScreenSize(400, 224)
-	else if (!original_mode)
-		Renderer.setScreenSize(screen_width, 224)
 
 	bool useSKLayouts = (global.lock_on_state != 0 || global.sk_bluespheres)
 	if (challenge_greenspheres || speedSpheres)
@@ -4215,16 +4237,16 @@ function void BlueSpheres.renderCustomSpheres()
 		{
 			if (sphereType == 0x05 && !original_mode)
 			{
-				Renderer.drawCustomSprite(stringformat("YellowSphere%x", min(form, 0x0c)), px, py, 0x00, 0, renderQueue)
+				Renderer.drawCustomSprite(stringformat("YellowSphere%x", min(form, 0x0c)), px, py + getScreenHeightExtend(), 0x00, 0, renderQueue)
 				u8[0xffffef7c] = form
 			}
 			else if (Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02 && !original_mode)
 			{
-				Renderer.drawVdpSpriteWithTint(px + u16[A3+4], py + s8[A3], u8[A3+1], u16[A3+2] + D6.u16, renderQueue, (0xffffff - fog) + (u32(alpha) << 24), fog)
+				Renderer.drawVdpSpriteWithTint(px + u16[A3+4], py + s8[A3] + getScreenHeightExtend(), u8[A3+1], u16[A3+2] + D6.u16, renderQueue, (0xffffff - fog) + (u32(alpha) << 24), fog)
 			}
 			else
 			{
-				Renderer.drawVdpSprite(px + u16[A3+4], py + s8[A3], u8[A3+1], u16[A3+2] + D6.u16, renderQueue)
+				Renderer.drawVdpSprite(px + u16[A3+4], py + s8[A3] + getScreenHeightExtend(), u8[A3+1], u16[A3+2] + D6.u16, renderQueue)
 			}
 			A3 += 6
 			--D1.s16
@@ -4503,7 +4525,7 @@ function void BlueSpheres.renderCustomGround()
 	// Render glow effect for background
 	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !(selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20))
 	{
-		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20, 0x00, 0, 0x2000, 0, tint, 0x10000)
+		Renderer.drawCustomSprite("bluespheres_glow_background", getScreenWidth() / 2, 20 + getScreenHeightExtend(), 0x00, 0, 0x2000, 0, tint, 0x10000)
 	}
 
 	// Render our own version of the ground
@@ -4549,7 +4571,7 @@ function void BlueSpheres.renderCustomGround()
 	// Render glow effect on top
 	if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && selectedZoneAct < 0xff18)
 	{
-		Renderer.drawCustomSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30, 0x00, 0, 0x3100, 0, tint, 0x10000)
+		Renderer.drawCustomSprite("bluespheres_glow_foreground", getScreenWidth() / 2, 30 + getScreenHeightExtend(), 0x00, 0, 0x3100, 0, tint, 0x10000)
 	}
 }
 
@@ -4573,15 +4595,15 @@ function void BlueSpheres.renderCustomCharacterShadows()
 {
 	if (!(Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && System.getGlobalVariableValueByName("MFT_BS_DitherShadow"))
 	{
-		Renderer.drawSprite(getNumPlayers() < 2 ? "bluespheres_shadow_1P_dither" : "bluespheres_shadow_2P_dither", 144 + getScreenExtend(), 150, 0x00, 0, 0x3100)
+		Renderer.drawSprite(getNumPlayers() < 2 ? "bluespheres_shadow_1P_dither" : "bluespheres_shadow_2P_dither", 144 + getScreenExtend(), 150 + getScreenHeightExtend(), 0x00, 0, 0x3100)
 	}
 	else if ((Game.getSetting(SETTING_BS_VISUAL_STYLE) & 0x02) && !original_mode)
 	{
-		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 143 + getScreenExtend(), 149, 0x00, 0, 0x3100)
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_smooth" : "bluespheres_shadow_2P_smooth", 143 + getScreenExtend(), 149 + getScreenHeightExtend(), 0x00, 0, 0x3100)
 	}
 	else
 	{	// renderQueue value here changed from 0x3100 to 0x4001 since S3&K ground rendering is Plane 1 Prio at 0x4000
-		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 143 + getScreenExtend(), 149, 0x00, 0x40, 0x4001)
+		Renderer.drawSprite((getNumPlayers() < 2 || bluespheres.minigame_mode) ? "bluespheres_shadow_1P_pixel" : "bluespheres_shadow_2P_pixel", 143 + getScreenExtend(), 149 + getScreenHeightExtend(), 0x00, 0x40, 0x4001)
 	}
 }
 
@@ -4697,6 +4719,9 @@ function void fn02e4d6()
 	fn02e512()
 }
 
+// Along with Sonic 2 special stage checks, alter the VRAM location for the
+// sparkles just before a Super Emerald activates or after getting all Super Emeralds.
+// We also control the post-Super Emerald results vertical scroll here for altered screen heights.
 //# address-hook(0x02e616) end(0x02e744)
 function void fn02e616()
 {
@@ -4711,11 +4736,11 @@ function void fn02e616()
 	}
 
 	D0.u16 = camera.position.y.u16
-	if (D0.u16 < 0x0320)
+	if (D0.u16 < 0x0320 - getScreenHeightExtend())
 	{
 		++D0.u16
 		camera.position.y.u16 = D0.u16
-		if (D0.u16 != 0x02a0)
+		if (D0.u16 != 0x02a0 - getScreenHeightExtend())
 			return
 
 		D0 = 4
@@ -4775,7 +4800,7 @@ function void fn02e616()
 	}
 	else
 	{
-		updateSpritePattern(0x18a204, 0xf380, 0x0200)
+		updateSpritePattern(0x18a204, getShield.targetInVRAM(), 0x0200)
 
 		if (allocDynamicObjectStd())
 		{
@@ -4867,6 +4892,7 @@ function void fn0618ac()	// Here, it's already been determined that we're going 
 
 
 // In Original Mode, ignore the setting to not advance the special stage on failure and enforce Super/Hyper Tails classic behavior.
+// Also set camera y position for Hidden Palace during Super Emerald stage results to match screen height changes.
 // Function taken from level\special\bluespheres.lemon
 //# address-hook(0x02df64) end(0x02e2be)
 function void fn02df64()
@@ -5052,9 +5078,9 @@ function void fn02df64()
 
 		requestLoadingPatterns(0x48)	// HPZ object sprites
 
-		global.zone_act = 0x1701
+		global.zone_act = 0x1701		// Hidden Palace emerald cave
 		camera.position.x.u16 = 0x15a0 - getScreenExtend()
-		camera.position.y.u16 = 0x0240
+		camera.position.y.u16 = 0x0240 - getScreenHeightExtend()
 		dynobjects.routine = 0
 
 		DynamicObjectsLoading()

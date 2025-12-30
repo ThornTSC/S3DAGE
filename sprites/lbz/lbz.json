@@ -1,0 +1,6 @@
+{
+    "lbz2_death_egg": { "File": "lbz2_death_egg.bmp" },
+    "lbz2_death_egg_platform": { "File": "lbz2_death_egg_platform.bmp" },
+    "lbz2_death_egg_platformsupport": { "File": "lbz2_death_egg_platformsupport.bmp" },
+    "lbz2_girder": { "File": "lbz2_girder.bmp", "Center": "16, 128" }
+}

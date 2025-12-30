@@ -4,7 +4,7 @@ global bool clean_screenshot = 0
 function void PrintVersionNumber()
 {
 	u16 renderQueue = 0xe001
-	s32 length = Renderer.getTextWidth("version", "DAGE  v1.13.0.2")
+	s32 length = Renderer.getTextWidth("version", "DAGE  v1.13.1.0")
 	#if GAMEAPP == 0x24020200	// use for latest stable version
 		length = Renderer.getTextWidth("version", "A.I.R. v24.02.02.0")
 	#endif
@@ -36,7 +36,7 @@ function void PrintVersionNumber()
 	u16 px = 16
 	if ((time_attack_end && !time_attack_hud) || (global.game_mode & 0x7f) >= 0x54)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
-	u16 py = 209 // (global.game_mode == 0x04 || global.game_mode == 0x58 || (global.zone_act == 0x0d01 && camera.foreground.x.u16 >= 0x0296)) ? 190 : 193	// the final check here is for the A.I.R. menu, which is the outro at a specific coordinate not in normal gameplay
+	u16 py = getScreenHeight() - 15 // (global.game_mode == 0x04 || global.game_mode == 0x58 || (global.zone_act == 0x0d01 && camera.foreground.x.u16 >= 0x0296)) ? 190 : 193	// the final check here is for the A.I.R. menu, which is the outro at a specific coordinate not in normal gameplay
 	if ((global.game_mode & 0x7f) == 0x54)
 	{
 		renderQueue += 0x1000
@@ -50,42 +50,42 @@ function void PrintVersionNumber()
 		py += 3
 
 	#if GAMEAPP == 0x24020200	// use for latest stable version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.02.02.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.02.02.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24020201	// use for latest stable version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.02.02.1", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.02.02.1", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24061800	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.06.18.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.06.18.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24062100	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.06.21.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.06.21.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24070400	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.07.04.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.07.04.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24071000	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.07.10.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.07.10.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x24120500	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v24.12.05.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v24.12.05.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x25011200	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v25.01.12.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v25.01.12.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 	#if GAMEAPP == 0x25021500	// use for test version
-		Renderer.drawText("version", px, py, "DAGE  v1.13.0.2\nA.I.R. v25.02.15.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.0\nA.I.R. v25.02.15.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#else
-		Renderer.drawText("version", px, py, "\nDAGE  v1.13.0.2", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		Renderer.drawText("version", px, py, "\nDAGE  v1.13.1.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
 }
@@ -160,13 +160,6 @@ function void initializeMainGame()
 		restartSpecialStage = 0
 		challenges_normalmode = 0
 	}
-
-	if (original_mode)
-		Renderer.setScreenSize(320, 224)
-	else if (screen_width && !time_attack)
-		Renderer.setScreenSize(screen_width, 224)
-	else
-		Renderer.setScreenSize(400, 224)
 
 	global.game_mode |= 0x80
 	if (s16(global.rolling_demo) >= 0)
@@ -256,6 +249,16 @@ function void initializeMainGame()
 	#if !STANDALONE
 		set_status_register(0x2300)
 	#endif
+
+		// Set screen resolution
+		if (original_mode)
+			Renderer.setScreenSize(320, 224)
+		else if (RSDK_width)
+			Renderer.setScreenSize(RSDK_width, 240)
+		else if (screen_width && !time_attack)
+			Renderer.setScreenSize(screen_width, 224)
+		else
+			Renderer.setScreenSize(400, 224)
 
 		level.framecounter = 0
 		if (checkpoint.number != 0)	// this may need to be adjusted for other game modes and for menus
@@ -548,8 +551,8 @@ function void initializeMainGame()
 		ring_counter = 0
 		timer.alldata = 0
 		extra_lives_granted = 0
-		u16[0xfffffed0] = 0
-		u32[0xfffffed2] = 0
+		ring_counter.player2 = 0
+		timer.alldata.player2 = 0
 	#if STANDALONE
 		bool marathon_shield_keep = (global.zone_act.apparent == 0x0101 || global.zone_act.apparent == 0x0801 || global.zone_act.apparent == 0x0901 || global.zone_act.apparent == 0x0b01)
 		if ((!Game.getSetting(SETTING_MAINTAIN_SHIELDS) && !marathon_shield_keep) || original_mode)
@@ -580,10 +583,10 @@ function void initializeMainGame()
 	unused.teleport_timer = 0
 	unused.teleport_active = 0
 #endif
-	u16[0xfffffec8] = 0
-	u16[0xfffffeca] = 0
-	u16[0xfffffecc] = 0
-	u16[0xfffffece] = 0
+	player.total_rings = 0
+	unused.player2.total_rings = (getScreenHeightExtend() > 0 && global.zone_act == 0x0a00 && checkpoint.number == 4) ? 2 : 0	// We use this flag in SSZ to scroll clouds correctly
+	player.item_count = 0
+	unused.player2.item_count = 0
 	u16[0xfffffede] = 0
 	u8[0xfffffe65] = 0
 	super.active = 0
@@ -2072,13 +2075,6 @@ function void RenderHUD_Marathon()
 //# address-hook(0x00db44) end(0x00dbb2)
 function void RenderHUD()
 {
-// We only use this for the CGZ bonus stage.
-//	if (unlock_act != s3_CGZ)
-//	{
-//		base.RenderHUD()
-//		return
-//	}
-
 #if STANDALONE
 	if (DEBUG_DISABLE_HUD)
 		return
@@ -2096,7 +2092,7 @@ function void RenderHUD()
 
 	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 #if STANDALONE
-	if (!debug_mode.state)
+	if (!(original_mode && debug_mode.state))
 	{
 		if (!isBonusStage)
 		{
@@ -2180,7 +2176,7 @@ function void RenderHUD()
 		{
 			bool useMobilePosition = HUD.useMobileLivesDisplay()
 			u16 px = useMobilePosition ? (getScreenWidth() - baseX - 0x30) : baseX
-			u16 py = useMobilePosition ? baseY : 200
+			u16 py = useMobilePosition ? baseY : getScreenHeight() - 24 // formerly 200
 
 			HUD.drawSprite(getCharacterLivesIcon(getMainCharacter()), px, py, renderQueue)
 			++renderQueue
@@ -2228,6 +2224,122 @@ function void RenderHUD()
 	}
 }
 
+// Do not update HUD elements in VRAM. We are using that VRAM for shields,
+// super sparks, and GAME/TIME OVER while AIR draws the HUD as images.
+function void refreshHudDisplayShared(u8 numDigits, bool showAllDigits)
+{
+	if (!original_mode)
+		return
+
+	u32 decimal = pow(10, numDigits - 1)
+
+	while (decimal > 0)
+	{
+		u8 digit = D1 / decimal
+		D1 %= decimal
+
+		if (digit != 0)
+		{
+			// From now on, show all digits (don't skip leading zeroes any more)
+			showAllDigits = true
+		}
+
+		if (showAllDigits)
+		{
+			// Location of sprite for this digit
+			A3 = 0x00e18a + digit * 0x40
+
+			u32 vramAddress = VDPHelper.getVRAMAddressFromWriteCode(D0)
+			VDP.setupVRAMWrite(vramAddress)
+			VDP.copyToVRAM(A3, 0x40)
+		}
+
+		D0 += 0x400000
+		decimal /= 10
+	}
+}
+
+//# address-hook(0x00e11e) end(0x00e188)
+function void UpdateHudLivesDisplay()
+{
+	if (!original_mode)
+		return
+
+	u16 vramAddress = 0xfba0
+	u16 number = lives_counter
+	u8 digit = 10
+
+	while (digit > 0)
+	{
+		u8 counter = 0
+		while (number >= digit)
+		{
+			number -= digit
+			++counter
+		}
+
+		VDP.setupVRAMWrite(vramAddress)
+		if (counter > 0 || digit == 1)
+		{
+			A3 = 0x00e48a + counter * 0x20
+			VDP.copyToVRAM(A3, 0x20)
+		}
+		else
+		{
+			VDP.zeroVRAM(0x20)
+		}
+
+		vramAddress += 0x40
+		digit /= 10
+	}
+}
+
+//# address-hook(0x00defc) end(0x00df52)
+function void DebugModePositionDisplay()
+{
+	if (!original_mode)
+		return
+
+	// Initialize direct VRAM write
+	VDP.setupVRAMWrite(0xdc40)
+
+	D1 = (u32(camera.position.x.u16) << 16) + u16[0xffffb000 + 0x10]
+	fn00df1c()
+
+	D1 = (u32(camera.position.y.u16) << 16) + u16[0xffffb000 + 0x14]
+	fn00df1c()
+}
+
+//# address-hook(0x00de88) end(0x00de9a)
+function void ResetRingsDisplay()
+{
+	if (!original_mode)
+		return
+
+	// Initialize direct VRAM write
+	VDP.setupVRAMWrite(0xdf40)
+	A2 = 0x00def8
+	D2.u16 = 2
+	fn00debe()
+}
+
+//# address-hook(0x00de9c) end(0x00deba)
+function void ResetScoreDisplay()
+{
+	if (!original_mode)
+		return
+
+	UpdateHudLivesDisplay()
+	if (competition_mode.active)
+		return
+
+	// Initialize direct VRAM write
+	VDP.setupVRAMWrite(0xdc40)
+	A2 = 0x00deec
+	D2.u16 = 14
+	fn00debe()
+}
+
 
 
 // Don't draw the life counter or score counter in time attack modes.
@@ -2261,7 +2373,7 @@ function void RenderHUD_Challenges()
 
 	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 #if STANDALONE
-	if (!debug_mode.state)
+	if (!original_mode)
 	{
 		if (!isBonusStage)
 		{
@@ -2374,7 +2486,7 @@ function void RenderHUD_Challenges()
 		else if (best_time != 0x00ffffff && (time_attack == 1 || time_attack == 2) && !u8[0xffffe654])	// the leading two zeroes on best_time come from it being anded with 0x00ffffff when set
 		{
 			u16 px = time_attack_hud ? (baseX + (getScreenWidth() / 2 - 64)) : baseX
-			u16 py = 200 + 4	// there is a 4-pixel height difference between the life counter and HUD text. We choose to bottom-align.
+			u16 py = getScreenHeight() - 20	// there is a 4-pixel height difference between the life counter and HUD text. We choose to bottom-align.
 
 			if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			{
@@ -2561,7 +2673,7 @@ function void RenderHUD_Orig()
 
 	bool isBonusStage = (global.zone >= 0x13 && global.zone <= 0x15)
 #if STANDALONE
-	if (!debug_mode.state && !original_mode)
+	if (!original_mode)
 	{
 		if (!isBonusStage)
 		{
@@ -2650,7 +2762,7 @@ function void RenderHUD_Orig()
 		{
 			bool useMobilePosition = HUD.useMobileLivesDisplay()
 			u16 px = useMobilePosition ? (getScreenWidth() - baseX - 0x30) : baseX
-			u16 py = useMobilePosition ? baseY : 200
+			u16 py = useMobilePosition ? baseY : getScreenHeight() - 24 // formerly 200
 
 			HUD.drawSprite(getCharacterLivesIcon(getMainCharacter()), px, py, renderQueue)
 			++renderQueue
@@ -4053,7 +4165,8 @@ function void CheckForBossStart()
 		bool fulfilled = false
 		if (u8[A0 + 0x27] & 0x80)
 		{
-			fulfilled = (camera.position.y.u16 <= level.bossarea.bottom + 0x60)
+			u16 y_offset = 0x60 + getScreenHeightExtend()
+			fulfilled = (camera.position.y.u16 <= level.bossarea.bottom + y_offset)
 		}
 		else
 		{
@@ -4265,75 +4378,7 @@ function void fn06852c()
 
 
 
-// AIZ1 boss (actual, not cutscene): direct time attack check from base game to use DAGE time attack flag.
-// Also make boss position character dependent in Original Mode -- yes, this reintroduces the original game's softlock.
-// Function taken from level\01_aiz\level_aiz.lemon
-#if STANDALONE
-function void AIZ1a.checkPreBossArea()
-{
-	// Skip check for boss
-//	if (time_attack)
-//		return
 
-	// Using the upper or the lower path?
-	bool isOnUpperPath = (camera.position.y.u16 < 0x400)
-	if (original_mode)
-		isOnUpperPath = !isMainCharacter(CHARACTER_KNUCKLES)
-
-	if (isOnUpperPath)
-	{
-		D0.u16 = (camera.position.x.u16 >= 0x0f00) ? 0x02b8 : 0x0590	// camera x usually checked against 0x0ed0
-	}
-	else
-	{
-		D0.u16 = (camera.position.x.u16 >= 0x0f00) ? 0x0450 : 0x0590	// camera x usually checked against 0x0e80
-	}
-	move_area.bottom.current = D0.u16
-	move_area.bottom.target = D0.u16
-
-	if (isOnUpperPath)
-	{
-		if (camera.position.x.u16 >= 0x0f50)
-		{
-			move_area.left = 0x0f50
-			// Choose boss area depending on which route has been taken, not the character selection
-			//  -> Search for this same comment to find another place with similar code
-			move_area.right = ((camera.position.y.u16 >= 0x03a0) ? 0x10c0 : 0x10e0) + getScreenExtend()
-
-			if (debug_mode.state == 0 && time_attack != 1 && time_attack != 2)	// make time attack check later than base game to set camera y value nicely
-			{
-				if (allocDynamicObjectStd())
-				{
-					// Trigger boss
-					objA1.update_address = 0x068a24
-					objA1.position.x.u16 = 0x11f0
-					objA1.position.y.u16 = 0x0289
-				}
-			}
-			camera.update_routine = 0x06
-		}
-	}
-	else
-	{
-		if (camera.position.x.u16 >= 0x1040)
-		{
-			move_area.left = 0x1040
-			if (debug_mode.state == 0)
-			{
-				if (allocDynamicObjectStd() && time_attack != 1 && time_attack != 2)	// make time attack check later than base game to set camera y value nicely
-				{
-					// Trigger boss
-					objA1.update_address = 0x068a24
-					objA1.position.x.u16 = 0x11d0
-					objA1.position.y.u16 = 0x0420
-				}
-			}
-			water.height.target = 0x0f80
-			camera.update_routine = 0x16
-		}
-	}
-}
-#endif
 
 
 
@@ -4387,30 +4432,7 @@ function void fn0502c6()
 }
 
 
-// AIZ2: disable blimp in time attack modes.
-// Function taken from level_01_aiz\level_aiz.lemon
-//# address-hook(0x04ff3a) end(0x04ff70)
-function void fn04ff3a()
-{
-	if (u16[0xffffeec4] == 0 || time_attack == 1 || time_attack == 2)
-	{
-		LoadTileContentDefault()
-		return
-	}
 
-	// This code is only reached in the blimp sequence before AIZ 2 boss
-
-	u16[0xffffeec4] = 0
-	u16[0xffffeec8] = 0x0180
-	u16[0xffffeeca] = 0x05
-	u32[0xffffa9f8] = 0
-	u16[0xffffa9fe] = (camera.foreground.x.u16 & 0xfff0) - 0x10
-	player1.camera_lock = 0xff
-	level.special_scrolling = 0x04
-	u16[0xffffeec0] += 4
-
-	fn04ff74()
-}
 
 
 
@@ -4522,16 +4544,7 @@ function void fn088568()
 
 
 
-// MGZ2: unload Eggman cutscenes in time attack modes
-// Functions taken from level\03_mgz\mgz_robotnikencounters.lemon
-//# address-hook(0x051504) end(0x05155e)
-function void fn051504()
-{
-	if (!original_mode && u16[0xffffb010] < 0x1000)	// do not try to set the camera locks for the unused encounter
-		return
-	
-	base.fn051504()
-}
+
 
 // fn051560() normally loads the first encounter that is unused in DAGE.
 //# address-hook(0x051560) end(0x0515a2)
@@ -4744,41 +4757,6 @@ function void fn051d2e()
 
 
 
-
-// CNZ1 boss: do not load in time attack mode
-// Function taken from bosses\boss_cnz1.lemon
-//# address-hook(0x06d99c) end(0x06d9fa)
-function void fn06d99c()
-{
-	if (time_attack == 1 || time_attack == 2)
-		return
-
-	u16 leftScreenBorder = 0x31e0
-#if STANDALONE
-	// Properly center the area in ultrawide resolutions
-	if (getScreenWidth() > 448)
-		leftScreenBorder -= (getScreenWidth() - 448) / 2
-#endif
-
-	if (camera.position.x.u16 < leftScreenBorder)
-		return
-
-	screenmover_target.right = move_area.right
-	level.vertical_wrap = 0x01c0
-	move_area.left = leftScreenBorder
-	move_area.right = leftScreenBorder + 0x80
-	move_area.bottom.current = 0x02b8
-	move_area.bottom.target = 0x02b8
-	objA0.update_address = 0x08488a		// Address of "Object.CountdownAndTrigger"
-	objA0.countdown_value = 120
-	objA0.countdown_callback = 0x06da00
-
-	playMusic(MUSIC_CTRL_FADEOUT)
-	level.boss_encounter = 1
-
-	requestLoadingPatterns(0x5d)
-	loadPaletteLine1(0x06e370)
-}
 
 
 
@@ -5081,31 +5059,6 @@ function void fn062640()	// Cutscene Knuckles throwing a bomb
 
 
 
-// LBZ1 boss: do not load in time attack modes
-// Function taken from bosses\boss_lbz1.lemon
-//# address-hook(0x08cf80) end(0x08cfac)
-function void fn08cf80()	// Knuckles boss
-{
-	if (time_attack == 1 || time_attack == 2)
-		return
-
-	A1 = 0x08cf70
-	if (InitBoss(0x08cf8a))
-		return
-
-	level.vertical_wrap = u16[(A1+=2)-2]
-	move_area.bottom.current = u16[A1]
-	move_area.bottom.target = u16[(A1+=2)-2]
-	move_area.left = u16[(A1+=2)-2]
-	move_area.right = u16[(A1+=2)-2]
-	fn08d0ea()
-
-	spawnChildObjects(0x08d26c)
-
-	objA0.update_address = 0x08cfb2
-	fn08cfb2()
-}
-
 // Function taken from level\06_lbz\lbz1_pre_boss_cutscene.lemon
 //# address-hook(0x08cdb8) end(0x08cdf0)
 function void fn08cdb8()	// Sonic/Tails boss
@@ -5288,89 +5241,6 @@ function void fn062e28()
 }
 
 
-
-
-
-// MHZ2: don't adjust the camera maximum near the boss (as this inhibits Knuckles' gliding) in time attack modes
-// Function taken from level\07_mhz\level_mhz.lemon
-//# address-hook(0x054dbe) end(0x054e82)
-function void fn054dbe()
-{
-	if (u16[0xffffeec4] != 0)
-	{
-		u16[0xffffeec4] = 0
-		u16[0xffffeec8] = 0x0320
-		u16[0xffffeeca] = 0x0a
-		u16[0xffffeec0] += 8
-		fn054e9c()
-		return
-	}
-
-	u16 bossStartCamX = 0x3c90 - getScreenExtend() * 2
-	if (camera.position.x.u16 >= bossStartCamX && time_attack != 1 && time_attack != 2)
-	{
-	#if STANDALONE
-		{
-			// This solves a possible glitch, but can lead to a sudden camera jump when trying to fly over everything with Tails
-			move_area.left = max(bossStartCamX, move_area.left)
-			level.vertical_wrap = 0x0280
-			if (camera.position.x.u16 >= bossStartCamX + 0x200)
-			{
-				camera.position.y.u16 = 0x0280
-			}
-
-			// Refresh parts of the screen to avoid visual glitches
-			fillPlaneA_Default(camera.position.x.u16, camera.position.y.u16, getScreenWidth(), getScreenHeight())
-		}
-	#else
-		if (camera.position.x.u16 == bossStartCamX)
-		{
-			move_area.left = bossStartCamX
-			if (camera.position.y.u16 >= 0x0280)
-			{
-				level.vertical_wrap = 0x0280
-			}
-		}
-	#endif
-	}
-	else
-	{
-		if (camera.position.x.u16 < 0x0380)
-		{
-			level.vertical_wrap = 0x0620
-		}
-		else
-		{
-			level.vertical_wrap = (camera.position.x.u16 >= 0x3600) ? 0x01a8 : 0
-		}
-
-		if (camera.position.x.u16 < 0x3600 && u16[0xffffeee8] == 0)
-		{
-			move_area.left = (u16[0xffffb014] >= 0x05c0) ? max(s16(0x98 - getScreenExtend() * 2), 0) : 0x0380
-		}
-
-		if (u16[0xffffb010] < 0x3a97)
-		{
-			D0.u16 = 0x09a0
-		}
-		else if (u16[0xffffb010] < 0x3ac0 && u16[0xffffb014] >= 0x0300)
-		{
-			D0.u16 = 0x09a0
-		}
-		else
-		{
-			D0.u16 = 0x0280
-		}
-		if (D0.u16 != move_area.bottom.current)
-		{
-			move_area.bottom.current = D0.u16
-			move_area.bottom.target = D0.u16
-		}
-	}
-
-	fn055008()
-	LoadTileContentDefault()
-}
 
 
 
@@ -5760,82 +5630,6 @@ function void fn043c2c()
 
 
 
-// HPZ boss: Unload the boss in time attack modes
-// Function taken from bosses\boss_hpz_knuckles.lemon
-//# address-hook(0x063d1a) end(0x063dd2)
-function void fn063d1a()
-{
-	if (isMainCharacter(CHARACTER_KNUCKLES) || time_attack == 1 || time_attack == 2)
-	{
-		UnloadObject()
-		if (time_attack)
-		{
-			move_area.left = camera.position.x.u16
-		//	level.vertical_wrap = 0x0380
-			move_area.bottom.target = 0x0380
-		}
-		return
-	}
-
-	A1 = 0x063cec
-	if (InitBoss(0x063d2e))
-		return
-
-	StartBossFight()
-#if STANDALONE
-	level.boss_encounter = 3	// Usually only 0 or 1, but we're using a value of 3 here for "chooseFittingMusic"
-#endif
-
-	if (allocDynamicObjectStd())
-	{
-		objA1.update_address = 0x085ca4
-		u32[A1 + 0x34] = 0x063dd4
-		u16[A1 + 0x2e] = 0x78
-		u8[A1 + 0x27] = u8[A0 + 0x27]
-
-		u8[A1 + 0x26] = 0x1f
-	#if STANDALONE
-		u8[A1 + 0x26] = BossHPZKnuckles.chooseMusicTrack()
-	#endif
-	}
-
-	objA0.update_address = 0x063de0
-	objA0.mapping_offset = 0x14a8d6
-	objA0.sprite_attributes = 0x24da
-	objA0.sprite_priority = 0x0100
-	objA0.box_size.x = 0x18
-	objA0.box_size.y = 0x18
-	objA0.hitbox_extends.x = 0x09
-	objA0.hitbox_extends.y = 0x13
-	objA0.render_flags = render_flag.WORLD | render_flag.FLIP_X
-	objA0.animation.sprite = 0xd8
-	boss.remaining_hits = 8
-	u32[A0 + 0x30] = 0x066771
-	u16[A0 + 0x44] = 0
-
-	copyMemory(0xfffffca0, 0xfffffc20, 0x20)
-
-	CutsceneKnuckles.loadPalette()
-
-#if STANDALONE
-	// Change palette to fit
-	//u16[0xfffffc24] = 0x064e
-	//u16[0xfffffc26] = 0x020c
-	//u16[0xfffffc28] = 0x0206
-	//u16[0xfffffc2a] = 0x0080
-	//u16[0xfffffc2c] = 0x000e
-	//u16[0xfffffc2e] = 0x0008
-#endif
-
-	u16[0xfffffc2c] = 0x88
-
-	level.bossarea.left -= getScreenExtend()
-	level.bossarea.right += getScreenExtend()
-}
-
-
-
-
 
 
 
@@ -6200,68 +5994,8 @@ function void fn07a6a6()
 
 
 
-// DEZ1 boss: add time attack check to unload boss
-// Function taken from bosses\boss_dez1.lemon
-//# address-hook(0x07ddb4) end(0x07de24)
-function void fn07ddb4()
-{
-//	#if STANDALONE
-//		if (time_attack)
-//		{
-//			UnloadObject()
-//			loadPaletteLine1(0x07effc)
-//			move_area.left = 0x3500 // - getScreenWidth() / 2
-//			level.vertical_wrap = 0x028c
-//			move_area.bottom.current = level.vertical_wrap
-//			move_area.bottom.target = move_area.bottom.current
-//			return
-//		}
-//	#endif
-
-	A1 = 0x07dda4
-	if (InitBoss(0x07ddbe))
-		return
-
-	objA0.value26 =  0x2e
-	StartBossFight()
-
-#if STANDALONE
-	if (getScreenWidth() >= 400)
-	{
-		level.bossarea.left = 0x3740 - getScreenWidth() / 2
-		level.bossarea.right = level.bossarea.left + getScreenExtend() * 2
-
-		if (isMainCharacter(CHARACTER_KNUCKLES))
-		{
-			level.bossarea.right += 0x0a
-			u8[0xffff82e0] = 0x8f
-			u8[0xffff835a] = 0x8f
-			u8[0xffff83d4] = 0x8f
-		}
-	}
-#endif
-
-	objA0.update_address = 0x07de28
-	objA0.countdown_callback = 0x07de2c
-
-	setupObjectAttributesFull(0x07ef46)
-
-	objA0.base_state = 0
-	boss.remaining_hits = 0
-	u8[A0 + 0x42] = 0
-	u16[A0 + 0x3a] = 0x4000
-	u16[A0 + 0x3c] = 0x8000
-
-	spawnChildObjects(0x07ef8e)
-	spawnSimpleChildObjects(0x07ef96)
-
-	requestLoadingPatterns(0x7b)
-	Kosinski.addToDMAQueue(0x1805a0, 0x8000)
-
-	loadPaletteLine1(0x07effc)
-}
-
-
+// DEZ1 boss: add time attack checks to not start boss
+// Functions taken from bosses\boss_dez1.lemon
 //# address-hook(0x07e79c) end(0x07e7ae)
 function void fn07e79c()
 {
@@ -6314,38 +6048,6 @@ function void fn07de6e()
 
 
 
-
-
-// DEZ2 boss: disable the boss in time attack modes and point the elevator exit to the right
-// Function taken from bosses\boss_dez2.lemon
-//# address-hook(0x07f06c) end(0x07f0ba)
-function void fn07f06c()
-{
-	if (time_attack == 1 || time_attack == 2)
-	{
-		UnloadObject()
-		u8[0xffff8393] = 0x89	// have the elevator entrance that eventually gets destroyed face the boss area exit
-		move_area.right = 0x4900
-		return
-	}
-
-	A1 = 0x07f0be
-	if (InitBoss(0x07f076))
-		return
-
-	objA0.update_address = 0x07f0ce
-	objA0.countdown_callback = 0x07f0d2
-
-	A1 = 0x07f0c6
-	objA0.value26 = 0x19
-	StartBossFight()
-	u8[0xfffffab8] = 0
-
-	requestLoadingPatterns(0x76)
-	Kosinski.addToDMAQueue(0x181002, 0x7140)
-	loadPaletteLine1(0x07fd08)
-	spawnChildObjects(0x07fc8c)
-}
 
 
 

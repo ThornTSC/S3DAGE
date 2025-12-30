@@ -1,0 +1,110 @@
+// Allow seeing higher in the HCZ1 boss area at larger screen heights.
+// The boss functions fine without this change, but it lets players see the character more
+// when bouncing on the boss or spin dashing up the walls.
+// The boss itself does not need code changes for 240px screen height.
+//# address-hook(0x069eda) end(0x069f5e)
+function void fn069eda()
+{
+	if ((objA0.flags38 & 0x01) == 0)
+	{
+		D0.u16 = 0x0638 - getScreenHeightExtend()
+		if (D0.u16 <= camera.position.y.u16)
+		{
+			objA0.flags38 |= 0x01
+			level.vertical_wrap = D0.u16
+			move_area.bottom.current = D0.u16
+			move_area.bottom.target = D0.u16
+		}
+	}
+
+	move_area.left = camera.position.x.u16
+	D0.u16 = 0x3680 - getScreenExtend()
+	if (camera.position.x.u16 >= D0.u16)
+	{
+		objA0.flags38 |= 0x02
+		move_area.left = D0.u16
+		move_area.right = 0x3680 + getScreenExtend()
+	}
+	if (objA0.flags38 != 0x03)
+		return
+
+	screenmover_target.right = move_area.right
+	u16[A0 + 0x44] = objA0.position.y.u16
+	objA0.update_address = addressof(Object.CountdownAndTrigger)
+	objA0.countdown_value = 120
+	objA0.countdown_callback = 0x069f64
+	playMusic(MUSIC_CTRL_FADEOUT)
+
+	objA0.flags38 |= 0x08
+	loadPaletteLine1(0x06ae56)
+}
+
+// Add a murky tint to HCZ water when the option is enabled and repair a missing ceiling shadow in the HCZ1 boss area.
+// Functions taken from level\02_hcz\level_hcz.lemon
+//# address-hook(0x050b8a) end(0x050b8a)
+function void UpdateLevelTiles.HCZ1()
+{
+	LoadTileContentDefault()
+
+	HCZ1_CustomSprites()
+}
+
+//# address-hook(0x050e90) end(0x050e98)
+function void UpdateLevelTiles.HCZ2()
+{
+	camera.foreground.y.u16 += camera.screenshake.offset
+	LoadTileContentDefault()
+
+	HCZ2_CustomSprites()
+}
+
+// Adjust the HCZ2 boss area boundary to account for screen height.
+// This doesn't affect the boss working, but does keep the player character more visible.
+// We also choose which boss to load based on camera location, not character.
+//# address-hook(0x06aeb6) end(0x06aef8)
+function void fn06aeb6()
+{
+#if STANDALONE
+	// Skip boss in Time Attack
+	if (time_attack == 1 || time_attack == 2)
+	{
+		UnloadObject()
+		return
+	}
+#endif
+
+	if (original_mode)
+		A1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x06aea6 : 0x06ae96
+	else if (u16[0xffffb014] > 0x0480)
+	{
+		A1 = 0x06ae96
+	}
+	else
+	{
+		A1 = 0x06aea6
+	}
+
+	if (InitBoss(0x06aecc))
+		return
+
+	objA0.value26 = MUSIC_MAINBOSS
+	StartBossFight()
+
+#if STANDALONE
+	// Expand the boss area to the right if needed
+	level.bossarea.right = max(level.bossarea.right, level.bossarea.left + getScreenExtend() * 2)
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
+#endif
+
+	objA0.update_address = 0x06aefe
+	objA0.countdown_callback = 0x06af04
+
+	requestLoadingPatterns(0x6c)		// Boss sprites
+
+	// Base S3&K sets this color to black, but Origins sets it to dark grey (as does Misc. Fixes and Tweaks)
+	if (original_mode || (Mods.isModActive("Misc. Fixes and Tweaks") && System.getGlobalVariableValueByName("Config_HCZ2boss_grey") == 0))
+		u16[0xfffffc1e] = 0
+
+	loadPaletteLine1(0x06bf0a)
+}

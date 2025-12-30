@@ -1,0 +1,106 @@
+// This function is unchanged from recent AIR test builds, but is necesary to include
+// for AIR v24.02.02.0 when run in screen widths wider than 400px.
+//# address-hook(0x23ef58) end(0x23ef9e)
+function void InitLevelTiles.BonusGM()
+{
+	level.height.bitmask = 0x03ff
+	level.height.tilemask = 0x03f0
+	level.chunksize.bitmask = 0x1c
+	gfx.plane_update_routine = 0x04		// Enter vertical scroll mode
+
+#if STANDALONE
+	verticalScrollOffsetBias = getScreenExtend() & 0x0f
+	u8[0x818080] = 0	// Do not use the custom vertical scroll offsets buffer
+
+	// Fill up originally unused parts of foreground chunks on the screen edges for widescreen
+	for (u32 y = 0; y < 8; ++y)
+	{
+		copyMemory(0xffff0408 + y * 0x10, 0xffff0388 + y * 0x10, 8)
+		copyMemory(0xffff0380 + y * 0x10, 0xffff0400 + y * 0x10, 8)
+	}
+#endif
+
+	D0.u16 = 0xc0
+	D1.u16 = D0.u16
+	fn23efca()
+
+	fn23a002()
+
+	D2.u16 = 0xffff		// Hacked in... I can't find where this gets actually set in original execution
+	u16[0xffffa802] = D2.u16
+	u16[0xffffa80a] = D2.u16
+	u16[0xffffa806] = u16[0xffffa80e] & level.height.tilemask
+
+	A4 = 0x23efe6
+	A5 = 0xffffa800
+	D0.u16 = camera.foreground.x.old
+	fn239baa()
+}
+
+// Ensure the call to 16x16 block drawing function fn239d1e() receives the appropriate number of rows of blocks for the screen height
+// and comment out old code from AIR v24.02.02.0 that should not be run with the previous function updated.
+//# address-hook(0x23efa2) end(0x23efb2)
+function void UpdateLevelTiles.BonusGM()
+{
+	camera.foreground.x.u16 = 0x60 - getScreenExtend()
+
+	fn23efb6()
+
+	A4 = 0x23efe6
+	A5 = 0xffffa800
+	D6 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	D5 = 3
+	fn239d1e()
+
+// #if STANDALONE
+	// Copy some foreground tiles to fill in the outer columns
+	// TODO: This is quite hacked in, better do this in the right way
+//	for (u16 base = 0xc000; base < 0xd000; base += 0x80)
+//	{
+//		setVRAM(base + 0x0c, getVRAM(base + 0x5c))
+//		setVRAM(base + 0x0e, getVRAM(base + 0x5e))
+//		setVRAM(base + 0x70, getVRAM(base + 0x20))
+//		setVRAM(base + 0x72, getVRAM(base + 0x22))
+//	}
+// #endif
+}
+
+// Replace a hardcoded screen height with a flexible one
+//# address-hook(0x239b60) end(0x239b7c)
+function void fn239b60()
+{
+	D2 = getScreenHeight()/16 + 1	// formerly 0x0f, which is for getScreenHeight() = 224
+	while (D2.s16 >= 0)
+	{
+		push(A0)
+		push(D2)
+		push(D1)
+		push(D0)
+
+		D6 = 0x20
+		fn239a22()
+		fn239618()
+
+		D0 = pop()
+		D1 = pop()
+		D2 = pop()
+		A0 = pop()
+
+		D0.u16 += 0x10
+		--D2.s16
+	}
+}
+
+// Use an image instead of chunks to draw the gumball machine
+// when not in Original Mode.
+//# address-hook(0x0610c6) end(0x0610da)
+function void fn0610c6()
+{
+	u8[0xffffef3a] = 0xff
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	objA0.position.x.u16 = objA1.position.x.u16
+	objA0.position.y.u16 = objA1.position.y.u16
+	if (original_mode)
+		DrawObject()
+    Renderer.drawCustomSprite("gumballmachine", objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x9e7f)
+}

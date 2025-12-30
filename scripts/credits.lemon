@@ -1029,3 +1029,194 @@ function void Credits.DAGE()
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line/2, "SEGA", 0x40a0ff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 	}
 }
+
+// Move Hyper Sonic end game cutscene, force original AIZ1 palette, and load external chunk data
+// Functions taken from level\outro\level_outro.lemon
+//# address-hook(0x05abc0) end(0x05ac6c)
+function void fn05abc0()
+{
+	u32 backupA0 = A0
+	FadeOutPalette()
+	A0 = backupA0
+
+	--u16[0xffffeeda]
+	if (s16[0xffffeeda] >= 0)
+	{
+		LoadTileContentDefault()
+		return
+	}
+
+	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb04a, 0x1fb4)
+
+	if (global.super_emeralds < 7)
+	{
+		u16[0xffffeec0] = 0x24
+		fn05adc0()
+		return
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x05dfee
+	}
+
+	push(A3)
+	push(A2)
+	push(A0)
+	push(D7)
+
+	// Kosinski.addToDecompressionQueue(0x3abc40, 0xffff0000)	// load chunks
+	System.loadExternalRawData("aiz1_chunks_s", KosinskiRawdataBuffer)		// copy chunks to shared memory
+	Kosinski.addToDecompressionQueue(KosinskiRawdataBuffer, 0xffff0000)		// queue to decompress them to their proper RAM
+	Kosinski.addToDecompressionQueue(0x3a374a, 0xffff9000)
+	Kosinski.addToDecompressionQueue(0x3a458a, 0xffff9268)
+
+	Kosinski.addToDMAQueue(0x3a566a, 0x0000)
+	Kosinski.addToDMAQueue(0x3a944e, 0x17c0)
+
+	D7 = pop()
+	A0 = pop()
+	A2 = pop()
+	A3 = pop()
+
+	u16[0xffffeec0] += 4
+	fn05ac70()
+}
+
+//# address-hook(0x05ac70) end(0x05acf8)
+function void fn05ac70()
+{
+	if (kosinski.waiting_modules != 0)
+	{
+		LoadTileContentDefault()
+		return
+	}
+
+	push(A3)
+	push(A2)
+	push(A0)
+	push(D7)
+
+	global.zone_act = 0
+	checkpoint.number = 0x01
+	fn01c362()		// loads AIZ1 (Load_Level)
+	fn0076a6()		// loads AIZ1 (LoadSolids)
+	global.zone_act = 0x0d01
+	checkpoint.number = 0
+
+	Level.loadNonfadingPaletteData(0x03)
+	Level.loadNonfadingPaletteData(0x2a)
+	copyMemory(0xfffffca0, 0x0a97bc, 0x20)	// get Master Emerald palette from SSZ2 palette and put in fade-in palette RAM
+
+	fn04fa4c()		// This loads Knuckles' AIZ background and applies the palette patch.
+
+	// These lines were necessary when new palettes were ROM injections instead of external rawdata.
+//	copyMemory(0xfffffcc0, 0x28c374 + 0x20, 0x40)	// new lines: get AIZ1 original palette from the Sonic 3 cartridge and put last two lines in fade-in palette RAM
+//	u32[0xfffffcf0] = 0x0ee40ea6					// load Knuckles' sky palette values as in the original ROM
+//	u32[0xfffffcf4] = 0x0e620e40					// load Knuckles' sky palette values as in the original ROM
+
+	D7 = pop()
+	A0 = pop()
+	A2 = pop()
+	A3 = pop()
+
+	D0.u16 = 0x2630 - getScreenExtend()			// changed x position to 0x2630 to match ROM hack. Normal is 0x1eb8.
+	camera.position.x.u16 = D0.u16				// Any further to the left will make Knuckles float in midair as he walks off an edge. Normal is 0x1eb8.
+	camera.foreground.x.u16 = D0.u16			
+	D0.u16 = 0x00fc								// changed y position to 0x00fc to match ROM hack. Normal is 0x01e0.
+	camera.position.y.u16 = D0.u16
+	camera.foreground.y.u16 = D0.u16			
+
+	Level.GetCameraPosition()
+	D0.u16 = (D0.u16 + 0xe0) & level.height.tilemask
+	u16[0xffffeec8] = D0.u16
+	u16[0xffffeeca] = 0x0f
+	u16[0xffffeec0] += 4
+
+	fn05acfc()
+}
+
+//# address-hook(0x05e0f8) end(0x05e140)
+function void fn05e0f8()
+{
+	objA0.base_state = 0x02
+	objA0.mapping_offset = 0x14a8d6
+	objA0.sprite_attributes = (original_mode) ? (sprite_attribute.PRIORITY | 0x04da) : 0x04da
+	objA0.sprite_priority = 0x0180
+	objA0.animation.sprite = 0x07
+	objA0.position.x.u16 = 0x01e0 + getScreenExtend() * 2
+	objA0.position.y.u16 = 0xe0
+	objA0.velocity.x = -0x200
+	objA0.velocity.y = 0
+
+	copyMemory(0xfffffc00, 0x05cc2a, 0x20)
+}
+
+
+
+// Correct some garbage graphics that appears beside credits in best ending for Sonic/Tails
+//# address-hook(0x05b1a2) end(0x05b1e6)
+function void fn05b1a2()
+{
+	u16[0xfffffa86] += 0x02
+	u8[0xfffffacc] = 0
+#if STANDALONE
+	camera.position.x.u16 = -getScreenExtend()		// Center the credits
+#endif
+	camera.position.y = 0
+	scrolloffset.y.both = 0
+	u16[0xfffffaae] = 0
+
+	if (global.characters == CHARS_KNUCKLES_ALONE)
+	{
+		// Create the object that fades out music and starts the credits medley afterwards
+		if (allocDynamicObjectStd())
+		{
+			objA1.update_address = 0x085b30
+			u8[A1 + 0x2c] = 0xdc
+		}
+	}
+
+	fn05b514()
+
+	u16[0xfffffc02] = 0x0eee
+	u16[0xfffffc22] = 0x00ee
+
+	addPatternLoadingCue(0x05b1ec)
+
+	if (!isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		VDP.setupVRAMWrite(0x1260)
+		VDP.zeroVRAM(0x2c80 - 0x1260)
+	}
+}
+
+
+
+
+// Add DAGE's name to the end logos
+//# address-hook(0x05b29e) end(0x05b2d2)
+function void fn05b29e()
+{
+	u16[0xfffffa86] += 2
+	timer.alldata = 0
+	u8[0xffffeec4] = 0xff
+	u8[0xfffffacc] = 0xff
+
+	if (global.characters == CHARS_KNUCKLES_ALONE)
+	{
+		if (outro.ending_type >= 0)
+		{
+			if (allocDynamicObjectStd())
+			{
+				objA1.update_address = 0x05ef68
+			}
+		}
+		else
+		{
+			u8[0xfffffab9] = 0
+		}
+	}
+	Nemesis.loadDataToVRAM(0x2d1920, 0x7de0)	// overwrite old art with the DAGE name
+}

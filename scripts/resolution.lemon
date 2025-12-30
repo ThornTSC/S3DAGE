@@ -1,0 +1,167 @@
+// This function would control the height toggle if needed,
+// or could be renamed and configured to accommodate other heights.
+// For this mod, we only care to have the RSDK height, so it always returns true.
+function bool useRSDKheight()
+{
+    return (RSDK_width && !original_mode)
+}
+
+function s16 getScreenHeightExtend()
+{
+	return getScreenHeight() - 224
+}
+
+// 0x00111a is Init_VDP in the original game.
+// This is accessed via a call to machine code in S3AIR, not via a scripted function.
+// Therefore, we must rewrite the relevant parts in script to insert our new code for V30 mode.
+// The Lemonizer handles this for us.
+// It's unclear if this is actually necessary in S3AIR, but we do it to be safe and for accuracy.
+//# address-hook(0x00111a) end(0x0011a2)
+function void fn00111a()
+{
+	A0 = 0xc00004
+	A1 = 0xc00000
+	A2 = 0x11a4
+	D7 = 0x12
+	while (true)
+	{
+		u16[A0] = u16[(A2+=2)-2]
+		--D7.s16
+		if (D7.s16 < 0)
+			break
+	}
+	D0.u16 = u16[0x0011a6]
+    
+    // New code here for this if statement and D0.u8 setting.
+    // 0|DISP|VINT|DMA|V30|1|0|0 is the flag structure for VDP register mode 2.
+    // We set V30 mode active.
+    if (useRSDKheight())
+        D0 |= 0x08 
+
+	u16[0xfffff60e] = D0.u16
+	u16[0xfffff624] = 0x8adf
+	D0 = 0
+	u32[0xc00004] = 0x40000010
+	u16[A1] = D0.u16
+	u16[A1] = D0.u16
+	u32[0xc00004] = 0xc0000000
+	D7.u16 = 0x3f
+	while (true)
+	{
+		u16[A1] = D0.u16
+		--D7.s16
+		if (D7.s16 < 0)
+			break
+	}
+	u32[0xfffff616] = 0
+	u32[0xfffff61a] = 0
+	u32[A7-=4] = D1
+	A5 = 0xc00004
+	u16[A5] = 0x8f01
+	u32[A5] = 0x94ff93ff
+	u16[A5] = 0x9780
+	u32[A5] = 0x40000080
+	u16[0xc00000] = 0
+	while (true)
+	{
+		D1.u16 = u16[A5]
+		if ((D1 & 0x00000002) == 0)
+			break
+	}
+	u16[A5] = 0x8f02
+	D1 = u32[(A7+=4)-4]
+	return
+}
+
+//# address-hook(0x085180) end(0x0851ae)
+function void fn085180()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x100
+	if (dx <= 0x0280 && dy <= 0x0200 + getScreenHeightExtend())
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		Object.TriggerUnloading()
+	}
+}
+
+// Ensure small sprites from compound objects render when at the bottom of the screen
+function void writeToSpriteTableCompound(u16 renderQueue)
+{
+	u16 baseX = D0.u16
+	u16 baseY = D1.u16
+
+	bool flipX = (D6.u8 & render_flag.FLIP_X)
+	bool flipY = (D6.u8 & render_flag.FLIP_Y)
+
+	u8 spriteCounter = 0
+#if STANDALONE
+	if (D4.s16 >= 0x100)
+	{
+		assert(false, stringformat("Passed a very high value of sprites (namely 0x%04x) to writeToSpriteTableCompound", D4.s16))
+		return
+	}
+	while (D4.s16 >= 0)
+#else
+	while (D4.s16 >= 0 && D7.s16 >= 0)
+#endif
+	{
+		u8 size = u8[A1+1]
+		u8 width = ((size / 4 + 1) * 8)
+		u8 height = ((size % 4 + 1) * 8)
+
+		u16 py = baseY
+		if (flipY)
+			py -= s8[A1] + height
+		else
+			py += s8[A1]
+
+		if (py > 0x60 && py < 0x160 + getScreenHeightExtend())	// Add additional y height to the valid window for rendering when screen height increases
+		{
+			s16 px = baseX
+			if (flipX)
+				px -= s16[A1+4] + width
+			else
+				px += u16[A1+4]
+
+			u16 index = u16[A1+2] + D5.u16
+			if (flipX)
+				index ^= sprite_attribute.FLIP_X
+			if (flipY)
+				index ^= sprite_attribute.FLIP_Y
+
+		#if STANDALONE
+			// Note that clipping in x-direction is ignored for standalone rendering
+			u32 backupA0 = A0
+			A0 = u32(0xffff0000) + u16[A4-2]
+			if (!Standalone.onDrawVdpSpriteCompound(px - 0x80, py - 0x80, size, index, renderQueue, spriteCounter))
+			{
+				Renderer.drawVdpSprite(px - 0x80, py - 0x80, size, index, renderQueue)
+			}
+			A0 = backupA0
+		#endif
+
+			if (D7.s16 >= 0)
+			{
+				u16[A6+0] = py
+				 u8[A6+2] = size
+				u16[A6+4] = index
+
+				if (px > 0x60 && px < 0x80 + getScreenWidth())
+				{
+					u16[A6+6] = px
+					A6 += 8
+					--D7.s16
+				}
+			}
+		}
+
+		A1 += 6
+		--D4.s16
+		++spriteCounter
+	}
+}

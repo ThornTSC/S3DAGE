@@ -1,5 +1,17 @@
 {
 	"knuckles_intro_rocks":  { "File": "knuckles_intro_rocks.png", "Center": "23,23" },
 	"knuckles_intro_rocks_orig":  { "File": "knuckles_intro_rocks_orig.png", "Center": "23,23" },
-	"tree_base_cover":  { "File": "tree_base_cover.bmp"}
+	"tree_base_cover":  { "File": "tree_base_cover.bmp"},
+
+    "aiz_firewall_0": { "File": "aiz_firewall.bmp", "Rect": "0,0,16,512" },
+    "aiz_firewall_1": { "File": "aiz_firewall.bmp", "Rect": "16,0,16,512" },
+    "aiz_firewall_2": { "File": "aiz_firewall.bmp", "Rect": "32,0,16,512" },
+    "aiz_firewall_3": { "File": "aiz_firewall.bmp", "Rect": "48,0,16,512" },
+    "aiz_firewall_4": { "File": "aiz_firewall.bmp", "Rect": "64,0,16,512" },
+    "aiz_firewall_5": { "File": "aiz_firewall.bmp", "Rect": "80,0,16,512" },
+    "aiz_firewall_6": { "File": "aiz_firewall.bmp", "Rect": "96,0,16,512" },
+    "aiz_firewall_7": { "File": "aiz_firewall.bmp", "Rect": "112,0,16,512" },
+
+    "aiz2_bomber": { "File": "aiz2_bomber.png" },
+    "aiz2_autoscrollterrainpatch": { "File": "aiz2_autoscrollterrainpatch.bmp" }
 }

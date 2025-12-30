@@ -1,0 +1,188 @@
+// Alter value derived from camera.foreground.y.u16 in accordance with the new screen height when calculating CNZ background height
+//# address-hook(0x051f34) end(0x051fa2)
+function void UpdateBackground.CNZ1()
+{
+	// Updates both tiles and scrolling for background
+
+    // At screen height = 224, the background y position reaches 0x0121. We adjust the ratio to align the
+    // bottom of the background for new screen heights: 15/16 with move_area.bottom adjusted, 17/16 without.
+    u32 derivedCameraYPos = camera.foreground.y.u16 * (0x121 - (getScreenHeightExtend() * 15 / 16))/0x121
+
+    D0.u16 = u16(derivedCameraYPos) - camera.screenshake.offset
+	D0 = (D0 << 16)
+	D0.s32 >>= 4
+	D1 = D0.s32 >> 1
+	D0 += D1
+	D1.s32 >>= 2
+	D0 += D1
+	D0 >>= 16
+	D0.u16 += camera.screenshake.offset
+	camera.background.y.u16 = D0.u16
+	D0 = u32(camera.foreground.x.u16) << 16
+	D0.s32 >>= 1
+	D1.s32 = D0.s32 >> 3
+
+	A1 = 0xffffa80a
+	u16[A1-=2] = D0 >> 16
+	D0 -= D1
+	camera.background.x.u16 = D0 >> 16
+	u16[A1-=2] = D0 >> 16
+	D0 -= D1 * 2
+	u16[0xffffeee2] = D0 >> 16
+	D0 -= D1
+	u16[A1-=2] = D0 >> 16
+	D0 -= D1 * 2
+	u16[A1-=2] = D0 >> 16
+	D0 -= D1
+	D1.s32 >>= 1
+	D0 -= D1
+	D0 >>= 16
+	u16[A1-=2] = D0.u16
+}
+
+// Adjust the lower screen boundary during the CNZ1 boss to match screen height changes.
+// Do not load the boss in time attack modes.
+//# address-hook(0x06d99c) end(0x06d9fa)
+function void fn06d99c()
+{
+	if (time_attack == 1 || time_attack == 2)
+		return
+
+	u16 leftScreenBorder = 0x31e0
+#if STANDALONE
+	// Properly center the area in ultrawide resolutions
+	if (getScreenWidth() > 448)
+		leftScreenBorder -= (getScreenWidth() - 448) / 2
+#endif
+
+	if (camera.position.x.u16 < leftScreenBorder)
+		return
+
+	D0.u16 = leftScreenBorder
+	screenmover_target.right = move_area.right
+	level.vertical_wrap = 0x01c0
+	move_area.left = D0.u16
+	D0.u16 += 0x80
+	move_area.right = D0.u16
+	move_area.bottom.current = 0x02b8 - getScreenHeightExtend()
+	move_area.bottom.target = 0x02b8 - getScreenHeightExtend()
+	objA0.update_address = addressof(Object.CountdownAndTrigger)
+	objA0.countdown_value = 120
+	objA0.countdown_callback = 0x06da00
+
+	playMusic(MUSIC_CTRL_FADEOUT)
+	level.boss_encounter = 1
+
+	requestLoadingPatterns(0x5d)		// Boss sprites
+	loadPaletteLine1(0x06e370)
+}
+
+// Adjust the lower screen boundary after the CNZ1 boss to match screen height changes.
+// Remove the AIR-added boundary altogether in Original Mode.
+//# address-hook(0x051d82) end(0x051e0e)
+function void fn051d82()
+{
+	D0.u16 = 0x01c0
+	fn0520e8()
+	D7.u16 = 0xc000
+	D1 = 0
+	D2.u16 = 0x0200
+	fn04ef64()
+	if (!_negative())
+	{
+		D7.u16 = 0xe000
+		fn051fb0()
+		UpdateBackgroundTiles.General()
+		WriteScrollOffsets()
+		fn04f386()
+		return
+	}
+
+	A1 = 0xffff0004 + u16[A3 + 0x0c]
+	A5 = 0xffff0063 + u16[A3 + 0x12]
+	D0.u16 = u16[A3 - 0x08]
+	D1.u16 = u16[A3 - 0x0a]
+	D2 = 5
+	while (D2.s16 >= 0)
+	{
+		copyMemory(A5, A1, 5)
+		A1 += D0.u16
+		A5 += D1.u16
+		--D2.s16
+	}
+
+	level.dualplanecollision = 0
+	u16[0xffffeeda] = 0
+	D0.u16 = 0x01c0
+	u16[0xffffb000 + 0x14] += D0.u16
+	u16[0xffffb04a + 0x14] += D0.u16
+	camera.position.y.u16 += D0.u16
+	camera.foreground.y.u16 += D0.u16
+	Level.GetCameraPosition()
+
+#if STANDALONE
+	if (!original_mode)
+		move_area.bottom.target = 0x0420 - getScreenHeightExtend()
+#endif
+
+	u16[0xffffeec8] = (D0.u16 + 0xe0) & level.height.tilemask
+	u16[0xffffeeca] = 0x0f
+	level.scrolling_routine += 4
+	fn051e12()
+}
+
+// Redraw more of the vacuum tube Knuckles switches around if the screen height is extended
+//# address-hook(0x065cac) end(0x065d14)
+function void fn065cac()
+{
+	camera.screenshake.state = 0x14
+
+	// Manipulate chunks
+	A1 = 0xffff008e + u16[0xffff8048]
+	u16 stride = u16[0xffff8000]
+	u8[A1]              = 0x14
+	u8[A1 + stride]     = 0x0f
+	u8[A1 + stride * 2] = 0x0f
+	u8[A1 + stride * 3] = 0x88
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x031f30
+		objA1.position.x.u16 = 0x4740
+		objA1.position.y.u16 = 0x0828
+		u8[A1 + 0x2c] = 0x4c
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x031f30
+		objA1.position.x.u16 = 0x4740
+		objA1.position.y.u16 = 0x0a28
+		u8[A1 + 0x2c] = 0x20
+	}
+
+#if STANDALONE
+	// Refresh on-screen part of the tube
+	//  -> We can't do this earlier, e.g. on button press already, because this conflicts with Knuckles' palette
+	if (!original_mode)
+		fillPlaneA_Default(0x4720, 0x09d0 - getScreenHeightExtend(), 0x40, 0x20 + getScreenHeightExtend())
+#endif
+}
+
+// Adjust screen boundaries for CNZ2 boss to accommodate for extra screen height.
+//# address-hook(0x06e488) end(0x06e4b2)
+function void fn06e488()
+{
+	objA0.update_address = 0x06e4b8
+	objA0.countdown_callback = 0x06e4be
+
+	A1 = 0x06e476
+	objA0.value26 = MUSIC_MAINBOSS
+	StartBossFight()
+
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
+
+	requestLoadingPatterns(0x6e)		// Boss sprites
+	loadPaletteLine1(0x06ee48)
+}

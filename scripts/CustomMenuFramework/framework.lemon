@@ -107,7 +107,6 @@ function void customMenu.setup()
 	eggrobos_knuckles = 1				// Default to Hard Mode in case we are in Challenges
 	specialstages_knuckles = 1			// Default to Hard Mode in case we are in Challenges
 	restartSpecialStage = 0
-	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
 	unlock_act = 0
 	challenges_normalmode = 0
 	held_time.up = 0
@@ -175,6 +174,7 @@ function void customMenu.update()
 {
 	// Because setting up a new frame_state causes fading in to break, we have to setup our own fade in.
 	FadeOutScreenBlocking()
+	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
 
 	// Main loop
 	while (true && ((global.game_mode & 0x7f) == 0x54))
@@ -213,6 +213,7 @@ function void customMenu.update.main()
 {	
 	// Because setting up a new frame_state causes fading in to break, we have to setup our own fade in.
 	FadeOutScreenBlocking()
+	Renderer.setScreenSize(400, 224)	// Menus run at the default resolution. This also undoes Original Mode's screen size change.
 
 	// Main loop
 	while (true && ((global.game_mode & 0x7f) == 0x58) && !exitGame)

@@ -6,7 +6,130 @@
 	or https://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
+// Add ROM manipulations to support correct AIZ1 Knuckles intro animals
+// These will be provided in future AIR versions but are needed for compatibility with older versions
+// Functions taken from standalone\rom_manipulations.lemon
+function void ApplyROMManipulations()
+{
+	if (original_mode)
+	{
+		ApplyROMManipulations_Original()
+		return
+	}
+	
+	ROMManipulation.RepairSpriteMappings()
+	#if GAMEAPP <= 0x22091000
+	// Fix checkpoint stars loading incorrect tiles. Covered in ROMManipulation.RepairSpriteMappings() in later A.I.R. builds.
+	u16[0x187b8a] = 0xc0
+	u16[0x187bec] = 0xc0
+	u16[0x187c4e] = 0xc0
+	#endif
 
+	#if GAMEAPP <= 0x24020200
+	// Fix for offset in Sonic's first ending pose sprite (after credits roll), #contributed by mrgrassman14. Covered in ROMManipulation.RepairSpriteMappings() in later A.I.R. builds.
+	u16[0x0607f2] = 0xdc0f
+	u16[0x0607f6] = 0xfff0
+	u16[0x0607f8] = 0xe401
+	u16[0x0607fc] = 0x0010
+	u16[0x0607fe] = 0xe402
+	u16[0x060802] = 0xffe8
+	u16[0x060804] = 0xfc0e
+	u16[0x060808] = 0xffe8
+	u16[0x06080a] = 0xfc01
+	u16[0x06080e] = 0x0008
+	u16[0x060810] = 0x1405
+	u16[0x060814] = 0xfff0
+
+	// Apply changes to Super Sonic's idle and balancing animations to make the hair flow as it did in Sonic 2, #contributed by Veenee (idle animation) and mrgrassman14 (balancing animation).
+	// Covered in ROMManipulation.RepairAnimations() in later A.I.R. builds.
+//	u8[0x012c45] = 0x5a			// Shift the idle animation pointer back a bit to an otherwise empty area
+//	u8[0x012c47] = 0x60			// Shift the balance animation pointer back to our newly created space
+//	u32[0x012c94] = 0x07babbbc	// Add additional frames (idle speed + first three idle frames)
+//	u32[0x012c98] = 0xbbff07a1  // Add additional frames (4th idle frame + balance speed + first balance frame)
+//	u32[0x012c9c] = 0xa2a3a2ff  // Add additional frames (last 3 balance frames)
+	#endif
+
+	ROMManipulation.RepairAnimations()
+	ROMManipulation.CutsceneKnucklesPalette()	// Euka claims this is no longer needed in AIR, but its changes would still alter Classic Mode
+
+	#if GAMEAPP <= 0x25021500
+	// Fix for bugged PSG data in the AIZ 1 and 2 emulated music data, #contributed by Legobouwer
+	//  -> The issue is caused by the music using smpsFMAlterVol (E5, E6) instead of smpsPSGAlterVol (EC); this code corrects this for both acts
+	// Covered in ROMManipulation.AIZ.MusicFix() in later A.I.R. builds.
+	u8[0x2c9a0b] = 0xec
+	u8[0x2c9a35] = 0xec
+	u8[0x2cadba] = 0xec
+	u8[0x2cadd3] = 0xec
+	u8[0x2cafc3] = 0xec
+	u8[0x2cafdc] = 0xec
+	#endif
+
+	ROMManipulation.AIZ1.KnucklesIntroCritters()
+	ROMManipulation.AIZ2.StartPosition()
+	ROMManipulation.AIZ2.BlimpSequenceBombs()
+
+		// Fix two broken lines in Sonic / Tails outro, and also in S3AIR main menu background. Covered in ROMManipulation.OutroST.BackgroundScrolling() for GAMEAPP >= 0x25021500.
+		u16[0x05b15a + 0x06] = 0x14 - 1
+		u16[0x05b15a + 0x08] = 0x04 + 1
+		u16[0x05b15a + 0x0a] = 0x1c - 1
+		u16[0x05b15a + 0x0c] = 0x04 + 1
+		
+	ROMManipulation.BonusSM.Probabilities()
+	ROMManipulation.ALZ.MusicFix()
+	ROMManipulation.DPZ.LoopBugFix()
+	ROMManipulation.RollingDemoFix()
+	
+	ROMManipulation.ScreenHeight()
+	ROMManipulation.relocateGameTimeOverVRAMLoc()
+	ROMManipulation.removeHUDText()
+}
+
+function void ROMManipulation.AIZ1.KnucklesIntroCritters()
+{
+	// Use AIZ critters and not the MHZ critters in Knuckles' intro, #contributed by iCloudius
+	//  -> Also requires some additional initialization code, search for the comment above to find that one
+	s16[0x06370f] = 0x5000
+	s16[0x063713] = -0x45fb
+}
+
+// In five Sonic & Knuckles locations and six Sonic 3 locations, S&K game writes two VDP registers in one command:
+// move.l    #$940193C0,(a5)
+// The 0x01 and 0xc0 bytes, combining to 0x01c0, is decimal 448, or 2 x 224 lines (foreground + background).
+// We change the final byte to E0 for an extra 16 lines in each plane.
+
+function void ROMManipulation.ScreenHeight()
+{
+    u8[0x000897] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x0009ed] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x000b09] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x000bc5] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x000ce5] = (useRSDKheight()) ? 0xe0 : 0xc0
+
+    u8[0x200a21] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x200b29] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x200c83] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x200da5] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x200e65] = (useRSDKheight()) ? 0xe0 : 0xc0
+    u8[0x200f73] = (useRSDKheight()) ? 0xe0 : 0xc0
+}
+
+// Alter VRAM location for GAME/TIME OVER text graphics
+function void ROMManipulation.relocateGameTimeOverVRAMLoc()
+{
+	u16[0x0924d2] = (useRSDKheight()) ? 0xd940 : 0xf380
+}
+
+function void ROMManipulation.removeHUDText()
+{
+	if (useRSDKheight() && !original_mode)
+	{
+		System.loadExternalRawData("RingArtNoHUDText", 0x192aee)	// load ring art that does not contain HUD text in same file
+	}
+	else
+	{
+		copyMemory(0x192aee, 0x35f2ec, 0x023b)	// duplicate Sonic 3 data into S&K area to remove prior ROM manipulation
+	}
+}
 
 // Yes, we do ROM writes here indeed!
 
@@ -27,6 +150,10 @@ function void ApplyROMManipulations_Original()
 	// ROMManipulation.ALZ.MusicFix_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.DPZ.LoopBugFix_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.RollingDemoFix_Original()	// irrelevant in original ROM hack
+
+	ROMManipulation.ScreenHeight()
+	ROMManipulation.relocateGameTimeOverVRAMLoc()
+	ROMManipulation.removeHUDText()
 }
 
 

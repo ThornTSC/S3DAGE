@@ -1,0 +1,670 @@
+// Adjust screen boundaries for DEZ1 boss based on screen height.
+// There are no issues with running this fight without the screen adjustment, but it gives players
+// a bit more sight of their character when the rotating platforms take them up high.
+//# address-hook(0x07ddb4) end(0x07de24)
+function void fn07ddb4()
+{
+	A1 = 0x07dda4
+	if (InitBoss(0x07ddbe))
+		return
+
+	objA0.value26 = MUSIC_MINIBOSS_2
+	StartBossFight()
+
+#if STANDALONE
+	if (getScreenWidth() >= 400)
+	{
+		level.bossarea.left = 0x3740 - getScreenWidth() / 2
+		level.bossarea.right = level.bossarea.left + getScreenExtend() * 2
+		level.bossarea.top -= getScreenHeightExtend()
+        level.bossarea.bottom -= getScreenHeightExtend()
+
+		if (isMainCharacter(CHARACTER_KNUCKLES))
+		{
+			level.bossarea.right += 0x0a
+			u8[0xffff82e0] = 0x8f
+			u8[0xffff835a] = 0x8f
+			u8[0xffff83d4] = 0x8f
+		}
+	}
+#endif
+
+	objA0.update_address = 0x07de28
+	objA0.countdown_callback = 0x07de2c
+
+	setupObjectAttributesFull(0x07ef46)
+
+	objA0.base_state = 0
+	boss.remaining_hits = 0
+	u8[A0 + 0x42] = 0
+	u16[A0 + 0x3a] = 0x4000
+	u16[A0 + 0x3c] = 0x8000
+
+	// "spawnChildObjects(0x07ef8e)" replaced by:
+	spawnChildObject(0x07e768, 0x00, 0, -4)			// The eye
+
+	// "spawnSimpleChildObjects(0x07ef96)" replaced by:
+	spawnSimpleChildObjects(0x07e80e, 8)			// Ominous black orbs
+
+	requestLoadingPatterns(0x7b)		// Robotnik's ship and boss explosion sprites
+	Kosinski.addToDMAQueue(0x1805a0, 0x8000)		// Boss sprites
+
+	loadPaletteLine1(0x07effc)
+}
+
+// When the DEZ1 boss's laser strikes the ground, show the impact graphic
+// at the ground by checking for screen height.
+//# address-hook(0x07ea6c) end(0x07ea96)
+function void fn07ea6c()
+{
+	setupObjectAttributesBasic(0x07ef82)
+
+	objA0.update_address = 0x07ea9a
+	D0.u16 = level.bossarea.top + 0xb0 + getScreenHeightExtend()
+	objA0.position.y.u16 = D0.u16
+
+	D0 = -0x10
+	if (objA0.subtype2c != 0)
+	{
+		D0.s16 = -D0.s16
+		objA0.render_flags |= render_flag.FLIP_X
+	}
+	u16[A0 + 0x3a] = D0.u16
+	fn07ea9a()
+}
+
+// Adjust screen boundaries for DEZ2 boss based on screen height.
+// Disable the boss in time attack modes and point the elevator exit to the right.
+// Function taken from bosses\boss_dez2.lemon
+//# address-hook(0x07f06c) end(0x07f0ba)
+function void fn07f06c()
+{
+	if (time_attack == 1 || time_attack == 2)
+	{
+		UnloadObject()
+		u8[0xffff8393] = 0x89	// have the elevator entrance that eventually gets destroyed face the boss area exit
+		move_area.right = 0x4900
+		return
+	}
+
+	A1 = 0x07f0be
+	if (InitBoss(0x07f076))
+		return
+
+	objA0.update_address = 0x07f0ce
+	objA0.countdown_callback = 0x07f0d2
+
+	A1 = 0x07f0c6
+	objA0.value26 = MUSIC_MAINBOSS
+	StartBossFight()
+	u8[0xfffffab8] = 0
+
+	level.bossarea.bottom -= getScreenHeightExtend()
+
+	requestLoadingPatterns(0x76)		// Robotnik running and standing sprites
+	Kosinski.addToDMAQueue(0x181002, 0x7140)		// Boss sprites
+	loadPaletteLine1(0x07fd08)
+
+	// "spawnChildObjects(0x07fc8c)" replaced by:
+	spawnChildObject(0x07f71c, 0x00, 0, 0)
+	spawnChildObject(0x07f782, 0x02, 0, 0)
+}
+
+// Adjust some final boss act initialization based on screen height
+//# address-hook(0x05a57c) end(0x05a5ac)
+function void fn05a57c()
+{
+	hud.dirty.lives = 0x01
+	if (u16[0xffffeec6] == 0)
+	{
+		fn05a72e()
+		return
+	}
+
+	u16[0xffffeec6] = 0
+	A1 = 0xffff0000 + u16[A3 + 0x08]
+	u8[A1 + 0x0d] = 0x1a
+
+	D0.u16 = camera.background.y.u16
+	D1.u16 = camera.background.x.u16
+	D6 = 0x15 + getScreenHeightExtend()/16
+	fn04ed6c()
+
+	level.scrolling_routine += 4
+	fn05a734()
+}
+
+// Adjust character height for running into final boss level to match screen height changes.
+// Also give the robot a bounding box so large that it will always be drawn via DrawObject().
+//# address-hook(0x07fd9e) end(0x07fe00)
+function void fn07fd9e()
+{
+	if (getScreenHeightExtend() >= 0x10)
+	{
+		objA0.box_size.x = 0xff
+		objA0.box_size.y = 0xff
+	}
+
+	objA0.base_state = 0x02
+	objA0.render_flags |= render_flag.WORLD
+	u16[0xfffffaa4] = A0.u16
+	u32[0xfffffa84] = 0
+
+	Kosinski.addToDMAQueue(0x181d44, 0x71e0)		// Boss sprites
+
+	if (allocDynamicObjectStd())
+	{
+		// Spawn running Robotnik
+		objA1.update_address = 0x080de0
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		// Spawn door to the large Egg Robo
+		objA1.update_address = 0x080d72
+		u16[A1 + 0x46] = A0.u16
+	}
+
+	A1 = 0xffffb000
+	objA1.position.x.u16 = 0x30
+	objA1.position.y.u16 = 0xcd + getScreenHeightExtend()
+	fn07fe06()
+
+	A1 = 0xffffb04a
+	objA1.position.x.u16 = 0x10
+	objA1.position.y.u16 = 0xcd + getScreenHeightExtend()
+	fn07fe06()
+
+#if STANDALONE
+	// Prevent bugs that occur when spindashing into the boss act
+	camera.locktime.player1 = 0
+#endif
+}
+
+// Adjust Eggman height for running into level to match screen height changes
+//# address-hook(0x080de0) end(0x080dfc)
+function void fn080de0()
+{
+	setupObjectAttributesFull(0x0812e0)
+	objA0.update_address = 0x080e02
+
+	objA0.position.x.u16 = 0x70
+	objA0.position.y.u16 = 0xc0 + getScreenHeightExtend()
+	objA0.render_flags |= render_flag.FLIP_X
+	fn080e02()
+}
+
+// DEZ boss floor collision. The actual art of the floor is baked directly into the background chunks.
+// Functions taken from level\13_dez\level_dez_boss.lemon
+//# address-hook(0x05a7c8) end(0x05a7e6)
+function void fn05a7c8()
+{
+	u16 extraWidth = 0x20
+	if (getScreenWidth() >= 464)
+		extraWidth = 0x60
+	else if (getScreenWidth() > 400)
+		extraWidth = 0x40
+
+	objA0.update_address = 0x05a7ec
+	objA0.box_size.y = 0x10
+	objA0.position.x.u16 = 0x130 + extraWidth
+	objA0.position.y.u16 = 0xf0 + getScreenHeightExtend()
+	objA0.flags2a |= 0x80
+	objA0.countdown_value = 0x80
+	fn05a7ec()
+}
+
+//# address-hook(0x05a7ec) end(0x05a86c)
+function void fn05a7ec()
+{
+	if (global.zone != 0x17)
+	{
+		UnloadObject()
+		return
+	}
+
+	u16 extraWidth = 0x20
+	if (getScreenWidth() >= 464)
+		extraWidth = 0x60
+	else if (getScreenWidth() > 400)
+		extraWidth = 0x40
+
+	// u16[0xffffeeda] = Position of floor block to fall next (if != 0)
+	// u16[0xffffeee8] = Left screen border
+
+	if (u16[0xffffeeda] != 0)
+	{
+		D1.u16 = u16[0xffffeeda]
+		u16[0xffffeeda] = 0
+		if (D1.u16 >= u16[0xffffeee8])
+		{
+			if (allocDynamicObjectAfterA0())
+			{
+				objA1.update_address = 0x05a872
+				objA1.position.x.u16 = D1.u16
+				D2.u16 = objA0.countdown_value - 0x20
+				if (D2.u16 <= D1.u16)
+				{
+					u16[0xffffeed8] = D1.u16
+				}
+			}
+
+			u16[0xffffeee8] += 0x20
+			if (D1.u16 >= objA0.countdown_value)
+			{
+				objA0.position.x.u16 += 0x20
+			}
+		}
+	}
+
+	D0.u16 = camera.foreground.x.u16 & 0xffe0
+	D2.u16 = objA0.countdown_value
+	if (D0.u16 != D2.u16)
+	{
+		if (D0.u16 >= D2.u16)
+		{
+			if (D2.u16 >= u16[0xffffeee8])
+			{
+				objA0.position.x.u16 += 0x20
+			}
+		}
+		else
+		{
+			objA0.position.x.u16 -= 0x20
+		}
+		objA0.countdown_value = D0.u16
+	}
+
+	D1.u16 = 0xb0 + extraWidth
+	D2 = 0x10
+	D3 = 0x10
+	D4.u16 = objA0.position.x.u16
+	PlatformCheckClimbOn()
+}
+
+// Spawn DEZ boss floor collapsing 16x16 pieces at the correct height for the chosen screen height
+//# address-hook(0x05a872) end(0x05a8ae)
+function void fn05a872()
+{
+	objA0.update_address = 0x05a8b2
+	objA0.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
+	objA0.box_size.y = 0x10
+	objA0.box_size.x = 0x0c
+	objA0.sprite_priority = 0x80
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE2 | 0x0001)
+	objA0.mapping_offset = 0x05a9ac
+	objA0.position.y.u16 = 0xf0 + getScreenHeightExtend()
+	objA0.animation.sprite = (objA0.position.x.u16 & 0x60) >> 5
+
+	fn05a8b2()
+}
+
+// Replace some hardcoded screen height checks with more flexible values
+//# address-hook(0x05a734) end(0x05a766)
+function void fn05a734()
+{
+	A1 = 0xffffe000		// Location of linewise scroll offsets
+	A4 = 0x05a524
+	A5 = 0xffffa808
+	D0.u16 = camera.foreground.y.u16
+	D1.u16 = getScreenHeight() - 1
+	D3.u16 = (u16[0xffffeede] == 0) ? camera.background.x.u16 : u16[0xffffeede]
+	fn04f0de()
+
+	scrolloffset.y.planeA = camera.background.y.u16 - getScreenHeightExtend()
+	scrolloffset.y.planeB = camera.foreground.y.u16 - getScreenHeightExtend()
+
+	signalMultiReturn()
+	UpdateScreenShake()
+}
+
+// Shift several parts of the DEZ final boss to match screen height
+//# address-hook(0x05a3b4) end(0x05a47c)
+function void InitLevelTiles.DEZBossAct()
+{
+	u16[0xffffeee2] = 0
+	u8[0xffffeee4] = 0xff
+	fn05a79e()
+
+	D0.u16 = u16[A3]
+	u16[A3 + 0x10] = D0.u16
+	u16[A3 + 0x12] = D0.u16
+	u16[A3 + 0x7c] = D0.u16
+	u16[A3 + 0x7e] = D0.u16
+
+	A3 = 0xffff800a
+	D7.u16 = 0xe000
+	A1 = 0xffff8000
+	D0 = u32(u16[A1])   * u16[A1 + 4]
+	D1 = u32(u16[A1+2]) * u16[A1 + 6]
+	D0.u16 += D1.u16 + 0x88
+	A1 += D0.u16
+	zeroMemory(A1, 0x1000 - D0.u16)
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x05a7c8
+		if (allocDynamicObjectAfterA1())
+		{
+			objA1.update_address = 0x05a8e6
+			if (allocDynamicObjectAfterA1())
+			{
+				objA1.update_address = 0x07fd68
+				D0.u16 = 0x03c0
+				D1.u16 = 0xf8
+				objA1.position.x.u16 = D0.u16
+				objA1.position.y.u16 = D1.u16 + getScreenHeightExtend()
+				u16[0xffffeed4] = D0.u16
+				u16[0xffffeed6] = D1.u16
+			}
+		}
+	}
+
+	level.display_routine = 0x06c0
+	player1.camera_lock = 0xff
+	D0.u16 = 0x80
+	camera.position.x.u16 = D0.u16
+	camera.foreground.x.u16 = D0.u16
+	u16[0xffffeee8] = D0.u16
+
+	fn05a508()
+	Level.GetCameraPosition()
+
+	A1 = 0xffffa800
+	u32[(A1+=4)-4] = 0
+	u16[A1] = u16[(A1+=2)-2]
+	u16[(A1+=2)-2] &= 0xfff0
+	u16[A1] = 0
+
+	A4 = 0x05a524
+	A5 = 0xffffa800
+	fn04ecec()
+}
+
+// Position DEZ final boss fingers to match screen height adjustments
+//# address-hook(0x080b66) end(0x080b8a)
+function void fn080b66()
+{
+	objA0.base_state = 0x02
+	objA0.value39 = 0x03
+
+	// "spawnChildObjects(0x081316)" replaced by:
+	spawnChildObject(0x080ce2, 0x00, 0, -16)
+	spawnChildObject(0x080ce2, 0x02, -32, -16)
+	spawnChildObject(0x080ce2, 0x04, 32, -16)
+
+	objA0.value42 = (objA0.subtype2c == 0) ? -0x80 : 0x80
+
+	// Prevent fingers from floating 1 pixel above the platform when attacking, #contributed by mrgrassman14
+	objA0.position.y.u16 = (original_mode) ? 0xe3 : 0xe4 + getScreenHeightExtend()
+	fn080b90()
+}
+
+//# address-hook(0x080cca) end(0x080ce0)
+function void fn080cca()
+{
+	objA0.base_state = 0x02
+	// Prevent fingers from floating 1 pixel above the platform when attacking, #contributed by mrgrassman14
+	objA0.position.y.u16 = (original_mode) ? 0xe3 : 0xe4 + getScreenHeightExtend()
+
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	u8[A1 + 0x38] &= ~0x02
+}
+
+// Draw the final boss robot as an image that can be shifted to align at altered screen heights.
+// Adding a call to DrawObject() allows renderhooks to run. Trying to draw images here causes
+// them to disappear on death, as object code is no longer run.
+//# address-hook(0x07fd68) end(0x07fd82)
+function void fn07fd68()
+{
+	base.fn07fd68()
+
+	if (getScreenHeightExtend() >= 0x10)
+		DrawObject()
+}
+
+// As the cockpit door object is deleted, draw it for the one frame before the door becomes part of the robot graphics.
+//# address-hook(0x080dbe) end(0x080dda)
+function void fn080dbe()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+	{
+		UpdateMovementStraightSimple()
+		DrawObject()
+	}
+	else
+	{
+		u8[0xfffffab8] |= 0x02
+		u8[0xffffeec6] = 0xff
+		if (getScreenHeightExtend() >= 0x10)
+			Renderer.drawCustomSprite("dez2boss_cockpitdoor", objA0.position.x.u16 - 0x10, objA0.position.y.u16 - 0x1a - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
+		UnloadObject()
+	}
+}
+
+// Move the Master Emerald to match the screen height extension
+//# address-hook(0x0806da) end(0x08072e)
+function void fn0806da()
+{
+	base.fn0806da()
+
+	if (getScreenHeightExtend() >= 0x10)
+		objA0.position.y.u16 += getScreenHeightExtend()
+}
+
+// Move objects that are dependent on the the boss's position to
+// align properly when the screen height is altered.
+//# address-hook(0x081024) end(0x081044)
+function void fn081024()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	objA0.position.x.u16 = objA1.position.x.u16 + objA0.value42
+	objA0.position.y.u16 = objA1.position.y.u16 + u16[A0 + 0x44] + getScreenHeightExtend()
+}
+
+// Adjust some hardcoded object position checks (such as flames hitting the floor)
+// to accommodate varying screen heights.
+//# address-hook(0x080980) end(0x0809ec)
+function void fn080980()
+{
+	--objA0.countdown_value
+	if (objA0.countdown_value >= 0)
+		return
+
+	if (objA0.position.y.u16 < 0xc7 + getScreenHeightExtend())
+	{
+		objA0.countdown_value = 0x01
+		D1.u16 = (objA0.animation.frame & 0x03) * 2
+		D0.u8 = objA0.animation.frame + 1
+		if (D0.u8 >= 3)
+			D0 = 0
+		objA0.animation.frame = D0.u8
+
+		A1 = 0x0809ee + D0.u8
+		objA0.value42 += s8[(A1+=1)-1]
+		u16[A0 + 0x44] += s8[(A1+=1)-1]
+
+		D2 = 0
+		fn08106e()
+	}
+	else
+	{
+		objA0.update_address = 0x0809f4
+		objA0.position.y.u16 = 0xcf + getScreenHeightExtend()
+		objA0.animation.frame = 0
+		objA0.countdown_value = 0x02
+		fn080a26()
+
+		D2 = 2
+		fn08106e()
+
+		signalMultiReturn()
+	}
+}
+
+// Draw the hatch door while it is sliding upwards after the laser is fired
+//# address-hook(0x08067a) end(0x0806a0)
+function void fn08067a()
+{
+	base.fn08067a()
+
+	if (getScreenHeightExtend() >= 0x10)
+		DrawObject()
+}
+
+// Draw the giant robot as it is defeated and falls offscreen
+//# address-hook(0x080102) end(0x08015a)
+function void fn080102()
+{
+	base.fn080102()
+
+	if (getScreenHeightExtend() >= 0x10)
+		DrawObject()
+}
+
+// Adjust the height at which Eggman flying spawns based on the screen height
+//# address-hook(0x080184) end(0x0801d4)
+function void fn080184()
+{
+	// The Egg Mobile is initialized here as the main object, other parts are spawned after this
+	setupObjectAttributesFull(0x0812ec)
+
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.collision_attributes = collision.size.24x24
+	boss.remaining_hits = 8
+
+	objA0.position.x.u16 = camera.foreground.x.u16 + 0x60 + getScreenExtend()
+	objA0.position.y.u16 = camera.foreground.y.u16 + 0x140 + getScreenHeightExtend()
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x08642e
+	}
+
+	// "spawnChildObjects(0x06817c)" replaced by:
+	spawnChildObject(0x067c38, 0x00, 0, -28)		// Robotnik head
+
+	// "spawnChildObjects(0x081330)" replaced by:
+	spawnChildObject(0x0804b0, 0x00, 0, 35)			// Egg Mobile crane hook
+	spawnChildObject(0x0806da, 0x02, 0, 59)			// The Master emerald
+}
+
+// Adjust the height at which Eggman flies based on the screen height
+//# address-hook(0x0801d8) end(0x080202)
+function void fn0801d8()
+{
+	--objA0.position.y.u16
+#if STANDALONE
+	if ((objA0.position.y.u16 % 3) == 0 && !original_mode)
+		--objA0.position.y.u16	// Rise a bit faster
+#endif
+	if (objA0.position.y.u16 > camera.position.y.u16 + 0x50 + getScreenHeightExtend())
+		return
+
+	objA0.base_state = 0x04
+	objA0.velocity.x = 0x500
+
+	// "spawnChildObjects(0x0681b4)" replaced by:
+	spawnChildObject(0x068062, 0x00, 30, 0)		// Egg Mobile exhaust flame
+
+	fn0685e2()
+}
+
+// Adjust the position at which the Master Emerald lands on the floor
+// when Eggman is defeated based on the screen height
+//# address-hook(0x080782) end(0x0807a6)
+function void fn080782()
+{
+	if (objA0.value3a != 0)
+	{
+		fn08598a()
+	}
+	UpdateMovementSimple()
+	if (objA0.position.y.u16 >= 0xcf + getScreenHeightExtend())
+	{
+		objA0.update_address = 0x0807ac
+		objA0.position.y.u16 = 0xcf + getScreenHeightExtend()
+	}
+	DrawObject()
+}
+
+// When AIR adds an invisible wall as fleeing Eggman is defeated,
+// position it based on screen height.
+// Also ignore AIR's boss flashing fix in Original Mode.
+//# address-hook(0x080e2c) end(0x080ede)
+function void fn080e2c()
+{
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	D0.u8 = boss.remaining_hits
+	if (D0.u8 == 0)
+	{
+		// Defeated
+		objA0.update_address = 0x08565e
+		objA0.countdown_value = 0x2f
+		objA0.countdown_callback = 0x08029c
+
+		// "spawnSimpleChildObjects(0x083fee)" replaced by:
+		spawnSimpleChildObjects(0x083d84, 1)
+		if (_equal())
+		{
+			u8[A1 + 0x2c] = 0x04
+		}
+
+		addScore(100)
+
+		if (!original_mode)
+		{
+			// Search for the floor object
+			for (u32 address = 0xffffb094; address < 0xffffcfcb; address += 0x4a)
+			{
+				if (u32[address] == 0x05a7ec)
+				{
+					// Create blocker element
+					if (allocDynamicObjectStd())
+					{
+						objA1.update_address = 0x01ec18
+						objA1.position.x.u16 = u16[address + 0x2e] + 0xb8
+						objA1.position.y.u16 = 0x0080 + getScreenHeightExtend()
+						objA1.subtype2c = 0x3f
+					}
+					break
+				}
+			}
+		}
+		return
+	}
+
+	if (objA0.state == 0)
+	{
+		objA0.state = 0x20
+		playSound(0x6e)
+		objA0.flags2a |= 0x40
+		if (objA0.flags38 & 0x80)
+		{
+			A1 = (u8[A0 + 0x1c] == 0) ? 0xffffb000 : 0xffffb04a
+			objA1.velocity.x = 0
+			u16[A1 + 0x1c] = 0
+		}
+	}
+
+	// Fix for boss palette damage flash, #contributed by mrgrassman14
+	if (!original_mode)
+		Boss.updateHitFlashing(3, 0x080ee2, 0x080ee8, 0x080eee)
+	else
+		Boss.updateHitFlashing(3, 0x080ee2, 0x080ee8, 0x080eec)
+
+	--objA0.state
+	if (objA0.state == 0)
+	{
+		objA0.flags2a &= ~0x40
+		u8[A0 + 0x28] = u8[A0 + 0x25]
+		if (objA0.base_state >= 0x08)
+		{
+			// Accelerate after hit
+			objA0.velocity.x = 0x800 + getScreenExtend() * 3
+		}
+	}
+}

@@ -1,0 +1,651 @@
+// Add more leniency to the camera check for ICZ1's first sliding ice platform.
+// Also allow vertical wrapping in Original Mode.
+// Center the player character based on the screen height.
+// Function taken from general\camera.lemon
+//# address-hook(0x01c11e) end(0x01c236)
+function void UpdateCameraPositionY()
+{
+	D0.s16 = char.position.y.u16 - u16[A1] - (getScreenHeightExtend()/2)
+	if (level.vertical_wrap == 0xff00)
+	{
+		D0.s16 &= level.height.bitmask
+	}
+	if (char.flags & char.flag.ROLLING)
+	{
+	#if STANDALONE
+		// Accounting for Tails` smaller rolling box. see: https://s3unlocked.blogspot.com/2017/12/roll-height-bugs-part-1.html
+		D0.s16 -= (char.character == CHARACTER_TAILS && !original_mode) ? 1 : 5
+	#else
+		D0.s16 -= 5
+	#endif
+	}
+
+	#if STANDALONE
+		// Prevent the infamous level wrap glitch
+		if (Game.getSetting(SETTING_FIX_GLITCHES) && !original_mode && level.vertical_wrap == 0xff00)
+		{
+			if (D0.s16 > level.height.bitmask / 2)
+			{
+				D0.s16 -= level.height.bitmask
+			}
+		}
+	#endif
+
+	D1 = D3.u16
+	if (competition_mode.active)
+		D1.u16 >>= 1
+
+	if (char.flags & char.flag.IN_AIR)
+	{
+		D0.s16 += 0x20 - D1.u16
+		if (D0.s16 < 0)
+		{
+			D1.u16 = 0x1800
+		}
+		else
+		{
+			D0.u16 -= 0x40
+			if (D0.s16 >= 0)
+			{
+				D1.u16 = 0x1800
+			}
+			else if (u8[0xffffee32] != 0)
+			{
+				u8[0xffffee32] = 0
+				D0 = 0
+			}
+			else
+			{
+				u16[A4] = 0
+				return
+			}
+		}
+	}
+	else
+	{
+		D0.s16 -= D1.u16
+		if (D0.s16 == 0)
+		{
+			if (u8[0xffffee32] != 0)
+			{
+				u8[0xffffee32] = 0
+				D0 = 0
+			}
+			else
+			{
+				u16[A4] = 0
+				return
+			}
+		}
+		else
+		{
+		#if !STANDALONE
+			// This check leads to strange camera behavior when looking up/down on (fast) vertically moving object
+			//  -> For example, on the moving ice platform in ICZ 1; this can lead to a vertical wrap glitch
+			//  -> I don't know yet what this check is even for...
+			if (D3.u16 != 0x60)
+			{
+				D1.u16 = 0x200
+			}
+			else
+		#endif
+			if (u8[0xffffee39] != 0 || (global.zone_act == 0x0500 && object.flag.P1_ON_OBJECT && u16[0xffffb010] > 0x3f80 && u16[0xffffb010] <= 0x4300))
+			{	// The player may be on the first sliding ice platform and falling fast. The first flag *is* set, but if a second platform spawns, that one may un-set it.
+				D1.u16 = 0x1800		// should be 0x1800
+			}
+			else if (abs(s16[A0 + 0x1c]) >= 0x800)
+			{
+				D1.u16 = 0x1800		// should be 0x1800
+			}
+			else
+			{
+				D1.u16 = 0x600		// should be 0x0600
+			}
+		}
+	}
+
+	s16 threshold = (D1.u16 >> 8)
+	if (D0.s16 > threshold)
+	{
+		D1.s32 = D1.s16 << 8
+		D1 += u32[A1]
+		D1 = (D1 << 16) + (D1 >> 16)
+	}
+	else if (D0.s16 < -threshold)
+	{
+		D1.s32 = (-D1.s16) << 8
+		D1 += u32[A1]
+		D1 = (D1 << 16) + (D1 >> 16)
+	}
+	else
+	{
+		D1 = D0.u16
+		D1.u16 += u16[A1]
+	}
+
+	if (D0.s16 < 0)
+	{
+		if (D1.s16 <= s16[A2 + 4])
+		{
+			if (D1.s16 <= -0x100)
+			{
+				D1.u16 &= level.height.bitmask
+			}
+			else
+			{
+				D1.u16 = u16[A2 + 4]
+			}
+		}
+	}
+	else
+	{
+		if (D1.s16 >= s16[A2 + 6])
+		{
+			u16 levelHeight = level.height.bitmask + 1
+			D1.u16 -= levelHeight
+			if (D1.s16 >= 0)
+			{
+				u16[A1] -= levelHeight
+			}
+			else
+			{
+				D1.u16 = u16[A2 + 6]
+			}
+		}
+	}
+
+	D4.u16 = u16[A1]
+	D1 = (D1 << 16) + (D1 >> 16)
+	D3 = D1 - u32[A1]
+	D3 = (D3 >> 8) + (D3 << 24)
+	u16[A4] = D3.u16
+	u32[A1] = D1
+
+	if (competition_mode.active)
+	{
+		D1 = (D1 << 16) + (D1 >> 16)
+		D1.u16 &= level.height.bitmask
+		u16[A1] = D1.u16
+	}
+}
+
+constant array<u16> UnlockAct_StartPositionsSonicTails =
+{
+	0x0060, 0x0294,		// EHZ
+	0x0060, 0x01ec,		// CPZ
+	0x067c, 0x028c		// CGZ
+}
+constant array<u16> UnlockAct_StartPositionsKnuckles =
+{
+	0x0060, 0x0534,		// EHZ
+	0x0060, 0x01ec,		// CPZ
+	0x067c, 0x028c		// CGZ
+}
+
+
+
+// Start location checks
+// Force Knuckles to use Tails' start in ICZ1,
+// move AIZ1 Knux intro, and adjust CNZ1 starts.
+//# address-hook(0x01be46) end(0x01bfae)
+function void SetupCharacterAtStartPosition()
+{
+	if (original_mode && global.zone_act == 0x0300 && checkpoint.number == 0)		// Don't use CNZ's rearranged intros in Original Mode
+	{
+		base.SetupCharacterAtStartPosition()
+		if isMainCharacter(CHARACTER_KNUCKLES)	// base S3&K start Knuckles too low for the original ROM Hack, so adjust here.
+		{
+			D0 = 0x09ac
+			u16[0xffffb014] = D0.u16
+			D0.s16 = clamp(D0.s16 - 96, 0, s16(move_area.bottom.current))
+			camera.position.y.u16 = D0.u16
+			u16[0xffffee64] = D0.u16
+		}
+		return
+	}
+
+	if (checkpoint.number != 0)
+	{
+		SetupCharacterAtLastCheckpoint()
+		D1.u16 = u16[0xffffb010]
+		D0.u16 = u16[0xffffb014]
+	}
+	else
+	{
+		A1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x1e3cd8 : 0x1e3c18
+		if (global.zone_act == 0x0700 || global.zone_act.apparent == 0x0001)
+		{
+			if (level.start_location == 2)
+				A1 = 0x1e3cd8
+			else if (level.start_location == 1)
+				A1 = 0x1e3c18
+		}
+		A1 += global.zone * 8 + global.act * 4
+		D1 = u16[A1]
+		D0 = u16[A1+2]
+		if (global.zone_act == 0x0300)		// hardcode CNZ1 start locations so Original Mode can access the ROM hack locations
+		{
+			D1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x0020 : 0x0010
+			D0 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x0920 : 0x06ac
+		}
+		if (unlock_act)
+		{
+			D1 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2]
+			D0 = UnlockAct_StartPositionsSonicTails[(unlock_act - 1) * 2 + 1]
+			if (isMainCharacter(CHARACTER_KNUCKLES) && eggrobos_knuckles)	// in Sonic 2 acts, the Eggrobos flag instead sets harder Knuckles paths
+			{
+				D1 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2]
+				D0 = UnlockAct_StartPositionsKnuckles[(unlock_act - 1) * 2 + 1]
+			}
+		}
+		u16[0xffffb010] = D1.u16
+		u16[0xffffb014] = D0.u16
+
+		if (unlock_act)
+		{
+			layout.part = 0		// if we needed to look up start positions, then we are starting an act fresh
+			SetupCharacterAtStartPosition.unlockAct()
+		}
+
+		else if (global.zone_act == 0x0000)
+		{
+			if (isSonicIntro())
+			{
+				D1.u16 = 0
+				D0.u16 = 0x420
+				u16[0xffffb010] = 0x0040
+				u16[0xffffb014] = 0x0420
+				move_area.left = 0
+				u16[0xffffee0c] = 0
+				u16[0xffffee1c] = 0
+			}
+		#if STANDALONE
+			// else if (isMainCharacter(CHARACTER_KNUCKLES) || (global.characters == CHARS_TAILS_ALONE && (u16[0xffffef7c] == 0xDA00 || u16[0xffffef7c] == 0xDA02)))
+			else if (isMainCharacter(CHARACTER_KNUCKLES) && (Game.getSetting(SETTING_AIZ_INTRO_KNUCKLES) != 0) && !original_mode) // && !time_attack
+			{ //  altered else if check to remove check for location of Knux intro and to look for Chaos the Imposter mod on Chaos or Knux path
+				// First set the desired camera position, then character position gets calculated after the if-else-blocks
+				//  -> Camera positions here should be the same as in "fn0634ca"
+		//		if (Game.getSetting(SETTING_LEVELLAYOUTS) == 2)	// AIR layouts set
+		//		{
+					u16[0xffffb010] = 0x03b0	// usually 0x1830
+					u16[0xffffb014] = 0x0219	// usually 0x0119
+					D1.u16 = 0x02e8	// usually 0x1768
+					D0.u16 = 0x0190 - getScreenHeightExtend() // usually 0x0090	// New lines to prepare the camera for the new layout section.
+					move_area.left = 0x0200	// new line added for Chaos mod.
+					move_area.bottom.current = D0.u16
+					move_area.bottom.target = D0.u16
+					if (global.characters == CHARS_TAILS_ALONE && (u16[0xffffef7c] == 0xDA00 || u16[0xffffef7c] == 0xDA02))	// Chaos the Imposter checks
+					{
+						checkpoint.number = 1
+						checkpoint.x = 0x03b0	// usually 0x1830
+						checkpoint.y = 0x0219	// usually 0x0119
+					}
+		//		}
+		//		else	// S3 or S3&K layouts set
+		//		{
+		//			D1.u16 = 0x1390
+		//			D0.u16 = 0x0380
+		//		}
+				D1.u16 += getScreenWidth() / 2
+				D0.u16 += 96
+			}
+		#endif
+		}
+
+		else if (global.zone_act == 0x0001)
+		{
+			if (original_mode && camera.position.y.u16 < 0x0400)	// upper AIZ2 start in Original Mode
+			{
+				// Move back just a bit to line up with the original ROM hack
+				u16[0xffffb010] -= 0xb8
+				u16[0xffffb05a] -= 0xb8
+				camera.position.x.u16 -= 0xb8
+				u16[0xffffee0c] -= 0xb8
+				u16[0xffffee1c] -= 0xb8
+				D1.u16 = u16[0xffffb010]
+				D0.u16 = u16[0xffffb014]
+			}
+		}
+
+		else if (global.zone_act == 0x0100)
+		{
+			if (level.start_location == 1 && isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				// Use Sonic's start 0x0980 to the right
+				u16[0xffffb010] += 0x0980
+				u16[0xffffb05a] += 0x0980
+				camera.position.x.u16 += 0x0980
+				u16[0xffffee0c] += 0x0980
+				u16[0xffffee1c] += 0x0980
+				D1.u16 = u16[0xffffb010]
+				D0.u16 = u16[0xffffb014]
+			}
+			else if (level.start_location == 2 && !isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				// Use Knuckles' start 0x0980 to the left
+				u16[0xffffb010] -= 0x0980
+				u16[0xffffb05a] -= 0x0980
+				camera.position.x.u16 -= 0x0980
+				u16[0xffffee0c] -= 0x0980
+				u16[0xffffee1c] -= 0x0980
+				D1.u16 = u16[0xffffb010]
+				D0.u16 = u16[0xffffb014]
+			}
+		}
+
+		else if (global.zone_act == 0x0200)
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				if (level.start_location == 1)
+				{
+					u16[0xffffb010] -= 0x47
+					u16[0xffffb014] += 0x06fc
+					if (u32[A2] != 0)
+					{
+						u16[0xffffb05a] -= 0x47
+						u16[0xffffb05e] += 0x06fc
+					}
+					D1.u16 = u16[0xffffb010]
+					D0.u16 = u16[0xffffb014]
+				}
+			}
+			else if (level.start_location == 2)
+			{
+				u16[0xffffb010] += 0x47
+				u16[0xffffb014] -= 0x06fc
+				if (u32[A2] != 0)
+				{
+					u16[0xffffb05a] += 0x47
+					u16[0xffffb05e] -= 0x06fc
+				}
+				D1.u16 = u16[0xffffb010]
+				D0.u16 = u16[0xffffb014]
+			}
+		}
+
+		else if (global.zone_act == 0x0300)
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+			#if STANDALONE
+				if (level.start_location == 0)
+				{
+					level.start_location = 1
+				}
+			#endif
+			}
+			else if (level.start_location == 0)	// not Knuckles in this check
+			{
+			#if STANDALONE
+				{
+					level.start_location = 2
+				}
+			#endif
+			}
+			if (level.start_location == 1)
+			{
+					u16[0xffffb010] = 0x0018
+					u16[0xffffb014] = 0x0900
+					D1.u16 = 0x0018
+					D0.u16 = 0x0900
+			}
+			else
+			{
+					if (isMainCharacter(CHARACTER_KNUCKLES)) // Knux's start if coming from
+					{										 // MGZ2's not-flying boss
+						D0.u16 = 0x06ac						 // needs a correction
+						u16[0xffffb014] = 0x6ac
+					}
+					D1.u16 += 0xb0
+			}
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0301)
+		{
+			// Carnival Night Act 2
+			move_area.bottom.current = 0x0b70 - getScreenHeightExtend()
+			move_area.bottom.target = 0x0b70 - getScreenHeightExtend()
+		}
+		else if (global.zone == 0x04)
+		{
+			// Flying Battery Zone (both acts)
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0500)
+		{
+			if (isMainCharacter(CHARACTER_TAILS) || (isMainCharacter(CHARACTER_SONIC) && time_attack))	// last check originally (time_attack == 1 || time_attack == 2)
+			{
+				u16[0xffffb010] = 0x3780
+				u16[0xffffb014] = 0x01e0
+				camera.position.x.u16 = 0x36f0
+				camera.position.y.u16 = 0x0200
+				move_area.left  = 0x35a0
+				u16[0xffffee0c] = 0x35a0
+				u16[0xffffee1c] = 0x35a0
+				level.vertical_wrap = 0x0200
+				u16[0xffffee10] = 0x0200
+				u16[0xffffee20] = 0x0200
+				u16[0xffffee60] = 0x36f0
+				u16[0xffffee64] = 0x0200
+				return
+			}
+		#if STANDALONE
+			else if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				if (!original_mode)		// (level.start_location == 1)
+				{
+					// Use Tails' start
+					level.start_location = 1
+					u16[0xffffb010] = 0x3780
+					u16[0xffffb014] = 0x01e0
+					camera.position.x.u16 = 0x36f0
+					camera.position.y.u16 = 0x0200
+					move_area.left  = 0x35a0
+					u16[0xffffee0c] = 0x35a0
+					u16[0xffffee1c] = 0x35a0
+					level.vertical_wrap = 0x0200
+					u16[0xffffee10] = 0x0200
+					u16[0xffffee20] = 0x0200
+					u16[0xffffee60] = 0x36f0
+					u16[0xffffee64] = 0x0200
+					return
+				}
+			}
+		#endif
+		}
+		else if (global.zone_act == 0x0501)
+		{
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0600)
+		{
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0601)
+		{
+			// Launch Base Act 2
+//			if (isMainCharacter(CHARACTER_KNUCKLES) && getNumPlayers() == 2)
+//			{
+//				// Move Knuckles (and camera) a bit to the right to make space for Tails
+//				u16[0xffffb000 + 0x10] += 0x10
+//				D1.u16 += 0x10
+//			}
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0700)
+		{
+			if ((level.start_location == 1 || (!isMainCharacter(CHARACTER_KNUCKLES) && original_mode)) && global.lock_on_state == 0 || (level.start_location == 0 && !isMainCharacter(CHARACTER_KNUCKLES)))	// !isMainCharacter(CHARACTER_KNUCKLES) instead of level.start_location in base game
+			{
+				move_area.left  = 0x00c0
+				u16[0xffffee0c] = 0x00c0
+				u16[0xffffee1c] = 0x00c0
+				D1.u16 = 0x0160
+			}
+		}
+		else if (global.zone_act == 0x0800)
+		{
+			// Sandopolis Act 1
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0900)
+		{
+			if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				D1.u16 += 0xb0
+			}
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0901)
+		{
+			// Lava Reef Act 2
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x0a01)
+		{
+			// Sky Sanctuary Zone, Knuckles final bosses
+			move_area.bottom.current -= getScreenHeightExtend()/2
+			move_area.bottom.target -= getScreenHeightExtend()/2
+		}
+		else if (global.zone_act == 0x0b00 || global.zone_act == 0x1601)
+		{
+			D1.u16 += 0xb0 + getScreenExtend()
+			if (global.zone_act == 0x1601 && level.start_location == 3)
+			{
+				u16 startPositionYShift = isMainCharacter(CHARACTER_KNUCKLES) ? 0x0180 : 0x0980
+				D0.u16 -= startPositionYShift
+				u16[0xffffb014] -= startPositionYShift
+				if (u32[A2] != 0)
+				{
+					u16[0xffffb05e] -= startPositionYShift
+				}
+			}
+			else if (global.zone_act == 0x1601 && level.start_location == 2 && !isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				D0.u16 -= 0x0800
+				u16[0xffffb014] -= 0x0800
+				if (u32[A2] != 0)
+				{
+					u16[0xffffb05e] -= 0x0800
+				}
+			}
+			else if (global.zone_act == 0x1601 && level.start_location == 1 && isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				D0.u16 += 0x0800
+				u16[0xffffb014] += 0x0800
+				if (u32[A2] != 0)
+				{
+					u16[0xffffb05e] += 0x0800
+				}
+			}
+			if (global.zone_act == 0x1601)
+			{
+				move_area.bottom.current -= getScreenHeightExtend()
+				move_area.bottom.target -= getScreenHeightExtend()
+			}
+		}
+		else if (global.zone_act == 0x0b01)
+		{
+			// Death Egg Act 2
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone_act == 0x1701)
+		{
+			// Hidden Palace Zone via giant ring
+			level.vertical_wrap -= getScreenHeightExtend()
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+	#if STANDALONE
+		else if (global.zone == 0x13 && !original_mode)
+		{
+			// Gumball Machine:
+			// Do not allow for jumping in first frame
+			u8[0xffffb000 + 0x20] = char.state.STANDING
+			u8[0xffffb000 + 0x2a] |= char.flag.IN_AIR
+			u8[0xffffb04a + 0x20] = char.state.STANDING
+			u8[0xffffb04a + 0x2a] |= char.flag.IN_AIR
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+		else if (global.zone == 0x15)		// okay to leave in Original Mode, as getScreenExtend() returns 0 at screen width 320
+		{
+			// Slot Machine
+			D1.u16 -= getScreenExtend()
+		}
+		else if (global.zone_act == 0x1600)
+		{
+			// Lava Reef Act 2 boss area
+			move_area.bottom.current -= getScreenHeightExtend()
+			move_area.bottom.target -= getScreenHeightExtend()
+		}
+	#endif
+	}
+
+	D1.s16 = max(D1.s16 - getScreenWidth() / 2, 0)
+	if (competition_mode.active == 0)
+	{
+	#if STANDALONE
+		// Avoid exact tile edges
+		//  -> This was particularly added in to avoid glitches in first pixel row after exiting first Giant Ring in AIZ 2
+		//     (There's probably a better solution, that generally solves this type of glitches when going left in AIZ 2)
+		if ((D1.u16 & 0x0f) == 0 && !original_mode)
+			++D1.u16
+	#endif
+		D1.u16 = min(D1.u16, move_area.right)
+	}
+
+	camera.position.x.u16 = D1.u16
+	u16[0xffffee60] = D1.u16
+
+	D0.s16 = clamp(D0.s16 - 96 - (getScreenHeightExtend()/2), 0, s16(move_area.bottom.current))
+	camera.position.y.u16 = D0.u16
+	u16[0xffffee64] = D0.u16
+}
+
+
+function void SetupCharacterAtStartPosition.unlockAct()
+{
+	// This function does return to the last five lines of the prior function.
+	// For now, it is a completely empty function to prevent any special level starts.
+}
+
+// When finishing an Act 1 boss and setting new Act 2 camera boundaries,
+// adjust the lower boundary for altered screen heights.
+//# address-hook(0x085da8) end(0x085de4)
+function void fn085da8()
+{
+	if (global.zone == 0x08)
+		return
+
+	A1 = 0x01bcce + (global.zone * 16)
+	screenmover_target.left = u16[(A1+=2)-2]
+	screenmover_target.right = u16[(A1+=2)-2]
+	screenmover_target.top = u16[(A1+=2)-2]
+	D1.u16 = u16[(A1+=2)-2]
+	if (global.zone == 0x03)
+	{
+		D1.u16 = 0x0b70 - getScreenHeightExtend()
+	}
+	else if (D1.u16 != 0x1000 && D1.u16 != 0x0800)	// exclude values for no lower boundary or vertical looping
+	{
+		D1.u16 -= getScreenHeightExtend()
+	}
+	screenmover_target.bottom = D1.u16
+	move_area.bottom.target = D1.u16
+
+	// Don't call for Hydrocity, it's explicitly called there
+	if (global.zone != 0x01)
+	{
+		fn085de0()
+	}
+}
