@@ -146,7 +146,7 @@
   "ddz1_objects": { "File": "../level/DDZ/Object Pos/1.bin" },
   "ddz1_rings": { "File": "../level/DDZ/Ring Pos/1.bin" },
 
-  "gumball_chunks_p":  { "File": "../level/gumball/Chunks/Primary.bin" },
+//  "gumball_chunks_p":  { "File": "../level/gumball/Chunks/Primary.bin" },
 
 // Original Mode
   "aiz1_origlayout": { "File": "../level/AIZ/Layout/1_Orig.bin" },
