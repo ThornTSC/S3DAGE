@@ -604,6 +604,12 @@ function void SetupCharacterAtStartPosition()
 		D1.u16 = min(D1.u16, move_area.right)
 	}
 
+	// The code in initializeMainGame() that sets the player position for MHZ2 Time Attack does not set the camera position.
+	// Without setting the x position, the camera snaps into place without drawing all chunks properly, so we set it here.
+	if ((global.zone_act == 0x0701 && !isMainCharacter(CHARACTER_KNUCKLES)) && (time_attack == 1 || time_attack == 2))
+	{
+		D1.u16 = 0x0380	// camera.position.x.u16
+	}
 	camera.position.x.u16 = D1.u16
 	u16[0xffffee60] = D1.u16
 

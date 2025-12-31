@@ -7172,7 +7172,7 @@ function u16 Challenge.checkAndRenderFinish()
 	}
 	else if (global.zone_act.apparent == 0x0701)
 	{
-		pole.x = 0x3d38	// 0x41e0	// 0x3b90
+		pole.x = 0x3d28	// 0x41e0	// 0x3b90
 		pole.y = 0x0340	// 0x0300
 	}
 
