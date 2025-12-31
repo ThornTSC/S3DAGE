@@ -22000,8 +22000,9 @@ function void DEZ2_CustomSprites()
 		// Post-boss floor adjustments for time attack modes are here.
 		if (u16[0xffffb010] > 0x3400 && u16[0xffffb014] < 0x0350 && (time_attack == 1 || time_attack == 2))
 		{
-			level.vertical_wrap = 0x0280
-			move_area.bottom.target = 0x0280
+			level.vertical_wrap = 0x0280 - getScreenHeightExtend()
+			move_area.bottom.target = 0x0280 - getScreenHeightExtend()
+			zeroMemory(0xffff82b8, 0x10)
 			zeroMemory(0xffff8328, 0x10)
 			u16[0xffff8398] = 0x0b00	// remove the floor after the boss to replace it with the final boss floor
 			zeroMemory(0xffff839a, 0x0e)
