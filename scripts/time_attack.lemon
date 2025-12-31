@@ -7392,7 +7392,7 @@ function void Challenge.setEndCameraPosition()
 	else if (global.zone_act.apparent == 0x1601 && pole.x == 0x0ac0)	// HPZ needs a screen lock for Knux since it doesn't end in the boss area
 		move_area.bottom.target = pole.y - getScreenHeight() + 0x20
 	else if (global.zone_act.apparent == 0x0a00)					// SSZ1 needs a screen lock since it doesn't end in the boss area
-		move_area.bottom.target = pole.y - getScreenHeight() + 0x20
+		move_area.bottom.target = pole.y - getScreenHeight() + 0x20 + getScreenHeightExtend()/2
 /*
 	// Shift the camera to make more room on the left side of the screen.
 	move_area.right.target = u16[0xffffb010] - getScreenWidth()/2
