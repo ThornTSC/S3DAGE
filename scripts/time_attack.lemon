@@ -7148,7 +7148,7 @@ function u16 Challenge.checkAndRenderFinish()
 	{
 		if (u8[0xffff869d] == 0xb9 && u16[0xffffb014] > 0x0840)	// if a layout chunk from the Knuckles act ending is in use and we didn't just see the building collapse
 		{
-			pole.x = 0x3d38 // top of building: 0x3ae0
+			pole.x = 0x3d28 // top of building: 0x3ae0
 			pole.y = 0x0b00 // top of building: 0x0480
 		}
 		else

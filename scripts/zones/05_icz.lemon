@@ -28,6 +28,55 @@ function void fn01c9e0()
 	}
 }
 
+// While it's hard to hide some of the ICZ1 background reloading with the screen slightly wider,
+// we can at least set the proper palette earlier to make it less obvious.
+//# address-hook(0x053a4c) end(0x053ad2)
+function void fn053a4c()
+{
+	// Part of the avalanche controller after the snowboarding section
+	if (level.scrolling_routine >= 0x08)
+	{
+		UnloadObject()
+		return
+	}
+
+	D0.u16 = 0x05e0 - level.display_routine
+	objA0.position.y.u16 = D0.u16
+	D1.u16 = 0x94
+	A2 = 0x053c1a
+	D4.u16 = objA0.position.x.u16
+	fn01e2fe()
+
+	if (objA0.position.y.u16 == 0x070e && player1.control_override != 0)
+	{
+		A1 = 0xffffb000
+		if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+		#if STANDALONE
+			Game.endSkippableCutscene()
+		#endif
+			if (control.pad1.pressed & CONTROL_ABC)
+			{
+				// Player jumped out of the snow
+				player1.control_override = 0
+				objA1.velocity.y = -0x600
+				u8[A1 + 0x40] = 0x01
+				objA1.hitbox_extends.y = char.hitbox.y.ROLLING
+				objA1.hitbox_extends.x = char.hitbox.x.ROLLING
+				objA1.state = char.state.ROLLING
+				objA1.flags2a |= (char.flag.IN_AIR | char.flag.ROLLING)
+
+				playSound(SFX_JUMP)
+
+				if (!original_mode)
+				{
+					fn23dec6()		// set the palette for the "indoor" background earlier than the base game would
+				}
+			}
+		}
+	}
+}
+
 // Adjust the camera boundaries for the ICZ1 boss in accordance with screen height
 //# address-hook(0x07117e) end(0x0711aa)
 function void fn07117e()
@@ -148,10 +197,8 @@ function void ICZ2_CustomSprites()
 	bool indoors = (u16[0xffffeee8] != 0)
 	if (getScreenHeightExtend() > 0 && !indoors)
     {
-        u16 paletteEntry = u16[0xfffffc70]
-        u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff
-        Renderer.drawRect(0, 0, getScreenWidth(), getScreenHeightExtend(), color, 0x1001, 0, 1)
-    }
+    	Renderer.drawCustomSprite("atex_rectangle", 0, -512 + getScreenHeightExtend(), 0x38, SPRITE_FLAG_PRIO, 0x1001)
+	}
 
 	#if STANDALONE
 	if (rain_intensity && camera.position.y.u16 < 0x06c0 && isMainCharacter(CHARACTER_KNUCKLES) && palette_set >= 2 && !original_mode)	// only if this isn't set to None in the mod settings and in the outdoor area with Knux

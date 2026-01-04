@@ -13,17 +13,22 @@ function void fn053fe2()
 
 // Ensure the player cannot see the blackness at the bottom of the LBZ1 background due to increased screen height.
 // Unlike the MGZ2 background bottom correction, we aren't looking into transparency here: we actually need to draw over the background.
+function void LBZ1_CustomSprites()
+{
+	if (!original_mode)
+    {
+		Renderer.drawCustomSprite("atex_rectangle", 0, 0, 0x3a, SPRITE_FLAG_PRIO, 0x0fff)
+    }
+}
+
 //# address-hook(0x23e756) end(0x23e7c2)
 function void fn23e756()
 {
     base.fn23e756()
-    if (getScreenHeightExtend() > 0 && camera.background.y.u16 > 0x90)
-    {
-        u16 paletteEntry = u16[0xfffffc74]
-        u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff
-        Renderer.drawRect(0, 224 - 16, getScreenWidth(), getScreenHeightExtend() + 16, color, 0x1001, 0, 1)
-    }
+
+	LBZ1_CustomSprites()
 }
+
 
 // When setting screen boundaries from the Knuckles bomb cutscene, adjust for screen height.
 // Without moving the boundary up, rotating cylinder tiles in the ground

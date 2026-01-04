@@ -127,17 +127,7 @@ function void fn0532b6()
 	fn0532e0()
 }
 
-// Draw a rectangle of sky color right after the laser boss, as the
-// background in the dual plane section may not draw properly in time.
-//# address-hook(0x05303c) end(0x05305a)
-function void fn0530ec()
-{
-	base.fn0530ec()
 
-    u16 paletteEntry = u16[0xfffffc6e]
-    u64 color = (((paletteEntry & 0x000e) * 18) << 24) + (((paletteEntry & 0x00e0) * 18) << 12) + (((paletteEntry & 0x0e00) * 18)) + 0x000000ff	
-    Renderer.drawRect(0x2c80 - camera.position.x.u16, 0x05f0 - camera.position.y.u16, 16, 144, color, 0x1001, 0, 1)
-}
 
 // Adjust parts of the FBZ2 boss to align with the slightly different floor height
 // when the screen height is altered.

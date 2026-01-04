@@ -18006,27 +18006,26 @@ function void FBZ2_CustomSprites()
 	// Add floor end tapering where chunks meet walls without it
 	if (!original_mode && (u8[0xffff8af8] != 0xb2))		// layout check to make sure we're not drawing indoor floor art while outside
 	{
-		Renderer.drawCustomSprite("fbz_floorend", 0x0980 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x0a00 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x0ae0 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x0d00 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x05e0 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1460 - camera.foreground.x.u16, 0x0a00 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x16e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1760 - camera.foreground.x.u16, 0x0900 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1840 - camera.foreground.x.u16, 0x0780 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1b60 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1c80 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x1e60 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x2300 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
-		Renderer.drawCustomSprite("fbz_floorend", 0x2700 - camera.foreground.x.u16, 0x04c0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x0980 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x0a00 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x0ae0 - camera.foreground.x.u16, 0x0800 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x0d00 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x05e0 - camera.foreground.x.u16, 0x0280 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1460 - camera.foreground.x.u16, 0x0a00 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x16e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1760 - camera.foreground.x.u16, 0x0900 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1840 - camera.foreground.x.u16, 0x0780 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1b60 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1c80 - camera.foreground.x.u16, 0x0580 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x1e60 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x2300 - camera.foreground.x.u16, 0x0a80 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.drawCustomSprite("fbz_floorend", 0x2700 - camera.foreground.x.u16, 0x04c0 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0xa001)
 
-		// These floor end taper images are within the screen shake area. They're not *quite* accurately positioned when paused, but the offset is barely noticeable.
+		// These floor end taper images are within the screen shake area.
 		if (level.vertical_wrap < 0x0600)	// if not in the boss area
 		{
-			s8 shakeOffset = (global.game.paused) ? min(camera.screenshake.offset, camera.screenshake.prev_offset) - 2 : camera.screenshake.offset
-			Renderer.drawCustomSprite("fbz_floorend", 0x2f00 - camera.foreground.x.u16, 0x0640 - camera.foreground.y.u16 - shakeOffset, 0, SPRITE_FLAG_PRIO, 0x3fff)
-			Renderer.drawCustomSprite("fbz_floorend", 0x3000 - camera.foreground.x.u16, 0x05c0 - camera.foreground.y.u16 - shakeOffset, 0, SPRITE_FLAG_PRIO, 0x3fff)
+			Renderer.drawCustomSprite("fbz_floorend", 0x2f00 - camera.foreground.x.u16, 0x0640 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0x3fff)
+			Renderer.drawCustomSprite("fbz_floorend", 0x3000 - camera.foreground.x.u16, 0x05c0 - camera.foreground.y.u16 - ((global.game.paused) ? 0 : camera.screenshake.offset), 0, SPRITE_FLAG_PRIO, 0x3fff)
 		}
 	}
 
@@ -18059,6 +18058,10 @@ function void FBZ2_CustomSprites()
 
 	if (global.game.paused)		// a sprite mask for the laser miniboss is hidden when the game is paused
 		Renderer.addSpriteMaskWorld(0x2aa0, 0x05e0, 0x2be0 - 0x2aa0, 0x0600 - 0x05e0, 0x9f80, 1)
+
+	// Draw a rectangle to cover an area after the laser miniboss that may not be covered with sky if the camera moves there too quickly
+	if (!original_mode)
+		Renderer.drawCustomSprite("atex_rectangle", 0x2c90 - 512, 0x0480 - (global.game.paused) ? 0 : camera.screenshake.offset, 0x37, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x1001)
 }
 
 
