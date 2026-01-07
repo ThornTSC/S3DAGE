@@ -1224,5 +1224,13 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 		return true
 	}
 
+	// CPZ background pillar
+	if (objA0.update_address == 0x020fd2 && getScreenHeightExtend() > 0)
+	{		
+		Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+		Renderer.drawVdpSprite(px, py + 255, size, index, renderQueue)
+		return true
+	}
+
 	return base.Standalone.onDrawVdpSprite(px, py, size, index, renderQueue)
 }
