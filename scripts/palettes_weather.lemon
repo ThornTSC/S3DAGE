@@ -219,7 +219,7 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		if (palette_set >= 2)	// add prototype blues to CGZ background
 		{
 			u32[dest + 0x3a] += 0x02000200
-			u16[dest + 0x40] += 0x0200
+	//		u16[dest + 0x40] += 0x0200
 		}
 	}
 

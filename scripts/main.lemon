@@ -244,7 +244,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-	debugWatch(0xffffb250 + 0x14, 2)
+//	debugWatch(0xfffffc40, 2)
 }
 
 // This function is the final one of any frame.
