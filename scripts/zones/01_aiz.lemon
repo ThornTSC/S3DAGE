@@ -683,10 +683,11 @@ function void AIZ2_CustomSprites()
 	{
 		AIZ.DrawFireWallImage()
 	}
-	if (getScreenHeightExtend() > 0 && unused.teleport_timer > 0)
+	if (getScreenHeightExtend() > 0)	// && unused.teleport_timer > 0)
 	{
-		Renderer.drawCustomSprite("aiz2_autoscrollterrainpatch", 0x4120, 0x0230, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2000)
-		if (!global.game.paused)
+		if (camera.position.x.u16 > 0x3f00 && camera.position.x.u16 < 0x4600)
+			Renderer.drawCustomSprite("aiz2_autoscrollterrainpatch", 0x4120, 0x0230, 0x00, SPRITE_FLAG_WORLDSPACE, 0x1fff)
+		if (!global.game.paused && unused.teleport_timer > 0)
 		{
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())
 			++unused.teleport_timer
