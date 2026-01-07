@@ -1101,6 +1101,19 @@ function void fn05ac70()
 	global.zone_act = 0
 	checkpoint.number = 0x01
 	fn01c362()		// loads AIZ1 (Load_Level)
+	if (getScreenHeightExtend() > 0)
+	{
+		// Recreate the usual DAGE ending area at the default S3&K coordinates
+		u8[0xffff81ef] = 0x53
+		u16[0xffff81f0] = 0x5353
+		u8[0xffff81f2] = 0x53
+
+		u32[0xffff8252] = 0x000b2371
+		
+		u8[0xffff82b5] = 0x10
+		u16[0xffff82b6] = 0x21bc
+		u8[0xffff82b8] = 0x30
+	}
 	fn0076a6()		// loads AIZ1 (LoadSolids)
 	global.zone_act = 0x0d01
 	checkpoint.number = 0
@@ -1121,10 +1134,10 @@ function void fn05ac70()
 	A2 = pop()
 	A3 = pop()
 
-	D0.u16 = 0x2630 - getScreenExtend()			// changed x position to 0x2630 to match ROM hack. Normal is 0x1eb8.
+	D0.u16 = (getScreenHeightExtend() > 0) ? 0x1f00 : 0x2630 - getScreenExtend()			// changed x position to 0x2630 to match ROM hack if not using recreated area. Normal is 0x1eb8.
 	camera.position.x.u16 = D0.u16				// Any further to the left will make Knuckles float in midair as he walks off an edge. Normal is 0x1eb8.
 	camera.foreground.x.u16 = D0.u16			
-	D0.u16 = 0x00fc								// changed y position to 0x00fc to match ROM hack. Normal is 0x01e0.
+	D0.u16 = (getScreenHeightExtend() > 0) ? 0x01e0 : 0x00fc								// changed y position to 0x00fc to match ROM hack. Normal is 0x01e0.
 	camera.position.y.u16 = D0.u16
 	camera.foreground.y.u16 = D0.u16			
 
@@ -1137,6 +1150,7 @@ function void fn05ac70()
 	fn05acfc()
 }
 
+// Set Knuckles's height and sprite priority in the ending Angel Island scene
 //# address-hook(0x05e0f8) end(0x05e140)
 function void fn05e0f8()
 {
@@ -1146,7 +1160,7 @@ function void fn05e0f8()
 	objA0.sprite_priority = 0x0180
 	objA0.animation.sprite = 0x07
 	objA0.position.x.u16 = 0x01e0 + getScreenExtend() * 2
-	objA0.position.y.u16 = 0xe0
+	objA0.position.y.u16 = (getScreenHeightExtend() > 0) ? 0xfc : 0xe0
 	objA0.velocity.x = -0x200
 	objA0.velocity.y = 0
 

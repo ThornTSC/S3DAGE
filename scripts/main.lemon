@@ -244,7 +244,7 @@ function void showDebugText()
 
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
-//	debugWatch(0xffffb014, 2)
+	debugWatch(0xffffb250 + 0x14, 2)
 }
 
 // This function is the final one of any frame.
@@ -23033,7 +23033,7 @@ function void fn05adc0()
 
 
 
-// Undo Outro fixes in Original Mode
+// Undo Outro fixes in Original Mode and position Master Emerald in AIZ scene properly
 // Functions taken from maingame\outro\outro_sonic_tails.lemon
 //# address-hook(0x05ded4) end(0x05dfea)
 function void fn05ded4()
@@ -23126,7 +23126,7 @@ function void fn05dfee()
 		objA1.update_address = 0x05de60
 		u16[A1 + 0x46] = A0.u16
 		objA1.position.x.u16 = 0x0190 + getScreenExtend()
-		objA1.position.y.u16 = 0xdc
+		objA1.position.y.u16 = (getScreenHeightExtend() > 0) ? 0xfc : 0xdc
 		u8[A1 + 0x2c] = 0xff
 	}
 
