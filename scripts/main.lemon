@@ -701,6 +701,8 @@ function void FadePaletteToWhite()
 //# address-hook(0x02d6a6) end(0x02d768)
 function void TitleCard.Init()
 {
+	stars.timer = 0
+	
 	competition_mode.current_lap.player1 = 0	// reset lap counter in circuit levels
 	competition_mode.current_lap.player2 = 0	// reset lap bonuses in circuit levels
 	u8[0xfffffff1] = 0							// reset LAP BONUS display timer
