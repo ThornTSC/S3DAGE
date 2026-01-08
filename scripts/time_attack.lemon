@@ -5283,7 +5283,7 @@ function void fn075f50()
 	// Wait until a certain camera position was reached, where you can't go back
 	// to the checkpoint any more and potentially enter the Gumball Machine stage
 	//  -> The stage needs the spring graphics that will get overwritten in this function
-	if (camera.position.x.u16 < 0x3b20)
+	if (camera.position.x.u16 < 0x3b20 && !original_mode)
 		return
 #endif
 
