@@ -1211,6 +1211,7 @@ function void fn062480()
 
 
 // Ignore palette cycles while the lights are off in CNZ.
+// Fix a palette cycle only outside of Original Mode.
 //# address-hook(0x002384) end(0x00243e)
 function void LevelPaletteUpdate.CNZ()
 {
@@ -1262,14 +1263,18 @@ function void LevelPaletteUpdate.CNZ()
 	{
 		u16[0xfffff658] = 2
 
-		A0 = 0x002e42
 		D0.u16 = u16[0xfffff654]
 		u16[0xfffff654] += 4
 		if (u16[0xfffff654] >= 0x40)
 			u16[0xfffff654] = 0
 
-		u32[0xfffffc4e] = u32[A0 + D0.s16]
 		A0 = 0x002e42
+		u32[0xfffffc4e] = u32[A0 + D0.s16]
+
+		if (!original_mode)
+			A0 = 0x002f96	// Use proper underwater version of this palette cycle, #contributed by mrgrassman14
+		else
+			A0 = 0x002e42
 		u32[0xfffff0ce] = u32[A0 + D0.s16]
 	}
 }

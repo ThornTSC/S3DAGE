@@ -282,6 +282,56 @@ function void BossMecha1.setBossArea()
 	#endif
 }
 
+// Implement a visual fix for the GHZ boss only outside of Original Mode.
+//# address-hook(0x07a5a0) end(0x07a61c)
+function void fn07a5a0()
+{
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	D0.u8 = boss.remaining_hits
+	if (D0.u8 == 0)
+	{
+		// Boss beaten
+		objA0.update_address = 0x085668
+		objA0.countdown_callback = 0x07a3ce
+
+		// "spawnChildObjects(0x083fee)" replaced by:
+		spawnChildObject(0x083d84, 0x00, 0, 0)		// Boss explosion generator
+		if (_equal())
+		{
+			u8[A1 + 0x2c] = 0x04
+		}
+
+		AddScoreForBossEnemy_NoHudDirty()
+		return
+	}
+
+	if (objA0.state == 0)
+	{
+		objA0.state = 0x20
+		playSound(0x6e)
+		objA0.flags2a |= 0x40
+	}
+
+	if (!original_mode)
+	{
+		// Fix for boss palette damage flash, #contributed by mrgrassman14
+		Boss.updateHitFlashing(3, 0x07a622, 0x07a628, 0x07a62e) 
+	}
+	else
+	{
+		Boss.updateHitFlashing(3, 0x07a622, 0x07a628, 0x07a62c)
+	}
+
+	--objA0.state
+	if (objA0.state == 0)
+	{
+		objA0.flags2a &= ~0x40
+		u8[A0 + 0x28] = u8[A0 + 0x25]
+	}
+}
+
 // Adjust vertical position of Mecha Sonic when he sweeps the floor and destroys the teleporter to consider screen height
 //# address-hook(0x07b2dc) end(0x07b3a6)
 function void fn07b2dc()
@@ -412,6 +462,22 @@ function void fn05750c()
 	fn05758a()
 }
 
+// In Knuckles's act, only implement a visual fix outside of Original Mode.
+//# address-hook(0x07ce6c) end(0x07ce8a)
+function void fn07ce6c()
+{
+	setupObjectAttributesFull(0x07d45c)
+#if STANDALONE
+	if (!original_mode)
+		MoveAndFlipWithParent()		// Fix for Egg Mobile debris facing left despite Egg Robo facing right #contributed by mrgrassman14
+#endif
+	objA0.update_address = 0x085102
+	objA0.animation.sprite = objA0.subtype2c >> 1
+
+	D0 = 0x08
+	fn0852d0()
+}
+
 // In Knuckles's act, check screen height to align the Master Emerald and pedestal with the ground.
 //# address-hook(0x07c818) end(0x07c854)
 function void fn07c818()
@@ -452,6 +518,37 @@ function void fn07b996()
 	u16[0xffff80e2] = 0x0605
 
 	base.fn07b996()
+}
+
+// Implement a visual fix post-SSZ2 super boss only outside of Original Mode.
+//# address-hook(0x07ce90) end(0x07cee0)
+function void fn07ce90()
+{
+	setupObjectAttributesFull(0x07d468)
+	objA0.update_address = 0x07cf02
+
+	D0 = objA0.subtype2c
+	A1 = 0x07cee2 + D0.u16
+	D1.s16 = s8[(A1+=1)-1]
+	A2 = 0xffff0000 + u16[A0 + 0x46]
+	if (u8[A2 + 0x04] & 0x01)
+	{
+		if (!original_mode)
+			D1.s16 = -D1.s16	// Fix for incorrectly positioned debris if Mecha Sonic is facing right, #contributed by mrgrassman14
+		else
+			D2.s16 = -D2.s16
+		objA0.render_flags |= render_flag.FLIP_X
+	}
+
+	objA0.position.x.u16 += D1.u16
+	D2.s16 = s8[(A1+=1)-1]
+	objA0.position.y.u16 += D2.s16
+	D1.s16 <<= 5
+	objA0.velocity.x = D1.u16
+	D2.s16 <<= 4
+	objA0.velocity.y = D2.s16
+	D0.u16 >>= 1
+	objA0.animation.sprite = D0.u8
 }
 
 // When spawning the Tornado, its pilot, Knuckles, and (with all Emeralds) the Master Emerald,

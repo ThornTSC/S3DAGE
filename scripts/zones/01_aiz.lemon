@@ -1200,6 +1200,25 @@ function void fn01c6dc()
 	}
 }
 
+
+// Implement AIZ1 miniboss debris x flip fix only outside of Original Mode.
+// FUnction taken from bosses\boss_aiz1.lemon
+//# address-hook(0x068e98) end(0x068eba)
+function void fn068e98()
+{
+	setupObjectAttributesBasic(0x069056)
+#if STANDALONE
+	if (!original_mode)
+		MoveAndFlipWithParent() // Fix for boss debris facing left even if the boss is facing right, #contributed by mrgrassman14
+#endif
+
+	objA0.update_address = 0x085102
+	objA0.animation.sprite = 14 + (objA0.subtype2c >> 1)
+	D0 = 8
+	fn0852d0()
+}
+
+
 // Adjust the lower camera boundary on Knuckles's route based on screen height.
 // We'll actually comment this out so grass terrain isn't touching the screen's lower boundary
 // when the screen height is extended.

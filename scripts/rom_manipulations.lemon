@@ -73,7 +73,8 @@ function void ApplyROMManipulations()
 		u16[0x05b15a + 0x08] = 0x04 + 1
 		u16[0x05b15a + 0x0a] = 0x1c - 1
 		u16[0x05b15a + 0x0c] = 0x04 + 1
-		
+
+	ROMManipulation.MGZ1.BossExplosionFix()	
 	ROMManipulation.BonusSM.Probabilities()
 	ROMManipulation.ALZ.MusicFix()
 	ROMManipulation.DPZ.LoopBugFix()
@@ -90,6 +91,13 @@ function void ROMManipulation.AIZ1.KnucklesIntroCritters()
 	//  -> Also requires some additional initialization code, search for the comment above to find that one
 	s16[0x06370f] = 0x5000
 	s16[0x063713] = -0x45fb
+}
+
+function void ROMManipulation.MGZ1.BossExplosionFix()	// exists in AIR v25.12.31.0 and later. Copied here for now.
+{
+	// Fix for incorrect explosion graphics #contributed by mrgrassman14
+	u16[0x088b94] = 0xa5c0	// Change target VRAM address for pointy rock graphics
+	u16[0x088b12] = 0x452e	// Make pointy rock object use new VRAM address
 }
 
 // In five Sonic & Knuckles locations and six Sonic 3 locations, S&K game writes two VDP registers in one command:
@@ -143,6 +151,7 @@ function void ApplyROMManipulations_Original()
 	// ROMManipulation.AIZ2.StartPosition_Original()	// handled elsewhere and not the same as base S3&K
 	ROMManipulation.AIZ2.BlimpSequenceBombs_Original()
 	ROMManipulation.HCZ.SetBottomHeight_Original()
+	ROMManipulation.MGZ1.BossExplosionFix_Original()
 	// ROMManipulation.CNZ2.KnucklesPreBossCutscene_Original()	// irrelevant in original ROM hack
 	// ROMManipulation.HPZ.SecondMuralChunks_Original()	// handled elsewhere
 	ROMManipulation.OutroST.BackgroundScrolling_Original()
@@ -300,6 +309,12 @@ function void ROMManipulation.AIZ2.BlimpSequenceBombs_Original()
 function void ROMManipulation.HCZ.SetBottomHeight_Original()
 {
 	u16[0x01bce4] = 0x1000
+}
+
+function void ROMManipulation.MGZ1.BossExplosionFix_Original()
+{
+	u16[0x088b94] = 0xa000	// Change target VRAM address for pointy rock graphics
+	u16[0x088b12] = 0x4500	// Make pointy rock object use new VRAM address
 }
 
 function void ROMManipulation.OutroST.BackgroundScrolling_Original()

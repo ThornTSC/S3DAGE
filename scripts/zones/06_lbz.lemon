@@ -29,6 +29,45 @@ function void fn23e756()
 	LBZ1_CustomSprites()
 }
 
+// Only allow the bug that skips the tube elevator wind-down in Original and Speedrun/Challenge Modes
+//# address-hook(0x029e42) end(0x029eb0)
+function void fn029e42()
+{
+	if (u16[A0 + 0x38] != 0x0200 && u16[A0 + 0x38] != 0x0202)
+	{
+		u8[A4 + 1] += 2
+		D0.u8 = u8[A4 + 1]
+		if (D0.u8 >= 0xb0 && D0.u8 < 0xd0)
+		{
+			D0.u8 += 0x20
+		}
+		u8[A4 + 1] = D0.u8
+		LookupSinCos()
+
+		if (D0.u16 == 0x0100)
+			--D0.u16
+		D0.s16 >>= 6
+		D2.u16 = u16[A0 + 0x46] - D0.u16
+		objA0.position.y.u16 = D2.u16
+
+		D1 = objA0.box_size.x + 11
+		D2.u16 = 0x08
+		D3.u16 = 0x20
+		D4.u16 = objA0.position.x.u16
+
+		fn01de20()
+	}
+	else
+	{
+	#if STANDALONE
+		if (!original_mode && !time_attack)
+			u8[A0 + 0x2a] = 0x08	// Fix for rare bug that would skip the spinning down animation, #contributed by mrgrassman14
+	#endif
+		u8[A4] += 2
+		playSound(SFX_ROLL)
+		fn029eb2()
+	}
+}
 
 // When setting screen boundaries from the Knuckles bomb cutscene, adjust for screen height.
 // Without moving the boundary up, rotating cylinder tiles in the ground
@@ -621,6 +660,184 @@ function void UpdateBackground.LBZ2()
 	}
 }
 
+// Only implement some water height fixes outside of Original Mode
+//# address-hook(0x006ee8) end(0x006f10)
+function void UpdateWaterSurfaceLevel.LBZ2()
+{
+	if (isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		if (global.level_flag02 == 0)
+		{
+		#if STANDALONE
+			// Special handling for Knuckles on Sonic's route (only before the cutscene starts)
+			if (checkpoint.number == 5 && camera.position.x.u16 < 0x3c00 && !original_mode)
+			{
+				// Adjust water height to match Sonic's, as it normally rises a bit too low #contributed by mrgrassman14
+				water.height.current = 0x065e
+				water.height.next = 0x065e
+				return
+			}
+		#endif
+
+			A1 = 0x006f12
+			fn006f2c()
+		}
+		else
+		{
+		#if STANDALONE
+			if (water.height.next > 0x065e && !original_mode)
+			{
+				// Revised handling of rising water:
+				//  -> Do not set the water level to the target level (at 0x065e) too early, as this makes things a bit unfair for slower players
+				//  -> But when you're fast, make sure the water can keep up -- this is needed to prevent the water from rising too slow and leaving abroken background at the exit for really fast players
+				if (camera.position.y.u16 >= water.height.next && camera.position.y.u16 < 0x08e0)
+				{
+					water.height.next = 0x065e
+				}
+				else if (camera.position.y.u16 + getScreenHeight() < water.height.next)
+				{
+					water.height.next = camera.position.y.u16 + getScreenHeight()
+				}
+			}
+		#else
+			if (camera.position.y.u16 >= water.height.next)
+			{
+				water.height.next = 0x0660
+			}
+		#endif
+		}
+	}
+}
+
+// More of the above, this time for the water level trigger from Knuckles breaking the pipe
+//# address-hook(0x027424) end(0x027590)
+function void fn027424()
+{
+	u16[A0 + 0x30] = u16[0xffffb000 + 0x18]
+	objA0.value32 = u16[0xffffb04a + 0x18]
+
+	D1.u16 = 0x1b
+	D2.u16 = 0x20
+	D3.u16 = 0x21
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	D0.u8 = objA0.flags2a & (object.flag.P1_PUSHING | object.flag.P2_PUSHING)
+	if (D0.u8 == 0)
+	{
+		DrawOrUnloadObject()
+		return
+	}
+
+	A1 = 0xffffb000
+	D1.u16 = u16[A0 + 0x30]
+	if (objA0.flags2a & object.flag.P1_PUSHING && objA1.state == char.state.ROLLING && abs(D1.s16) >= 0x0480)
+	{
+		if (objA0.flags2a & object.flag.P2_PUSHING)
+		{
+			objA0.flags2a &= ~object.flag.P2_PUSHING
+
+			A2 = 0xffffb04a
+			u8[A2 + 0x2a] &= ~char.flag.PUSHING
+			if (u8[A2 + 0x20] == char.state.ROLLING)
+			{
+				u16[A2 + 0x18] = objA0.value32
+				u16[A2 + 0x1c] = u16[A2 + 0x18]
+			}
+		}
+	}
+	else
+	{
+		A1 = 0xffffb04a
+		D1.u16 = objA0.value32
+		if ((objA0.flags2a & object.flag.P2_PUSHING) == 0 || u8[A1 + 0x20] != char.state.ROLLING || abs(D1.s16) < 0x0480)
+		{
+			DrawOrUnloadObject()
+			return
+		}
+
+		if (objA0.flags2a & object.flag.P2_PUSHING)	// Isn't this always true here?
+		{
+			objA0.flags2a &= ~object.flag.P2_PUSHING
+			u8[0xffffb04a + 0x2a] &= ~char.flag.PUSHING
+		}
+	}
+
+	if (objA0.flags2a & object.flag.P1_PUSHING)
+	{
+		objA0.flags2a &= ~object.flag.P1_PUSHING
+		u8[0xffffb000 + 0x2a] &= ~char.flag.PUSHING
+	}
+	objA1.velocity.x = D1.u16
+
+	D0.u16 = objA0.position.x.u16
+	if (D0.u16 >= objA1.position.x.u16)
+	{
+		A4 = 0x027718
+		objA1.position.x.u16 -= 4
+	}
+	else
+	{
+		A4 = 0x0276d8
+		objA1.position.x.u16 += 4
+	}
+
+	objA1.groundspeed = objA1.velocity.x
+	D1.u8 = objA0.subtype2c
+	if (objA0.subtype2c != 0)
+	{
+		bool createWaterStream = true
+
+		if (objA0.subtype2c == 0x1f)
+		{
+			// Let the water rise (in Knuckles' area)
+			global.level_flag02 = 1
+			if (!original_mode)
+				water.height.target = 0x065e	// Adjust water height to match Sonic's, #contributed by mrgrassman14
+			else
+				water.height.target = 0x0660
+
+			if (super.active)
+			{
+				water.height.changerate = 2
+			}
+		}
+		else
+		{
+			// Create the water flow logic (visual effect is separate)
+			if (allocDynamicObjectAfterA0())
+			{
+				objA1.update_address = 0x0295c2
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 + 2
+				u8[A1 + 0x24] = 0x07
+				u8[A1 + 0x2c] = D1.u8
+			}
+			else
+			{
+				createWaterStream = false
+			}
+		}
+
+		if (createWaterStream)
+		{
+			// Create water stream visual effect
+			if (allocDynamicObjectAfterA0())
+			{
+				objA1.update_address = 0x029896
+				objA1.position.x.u16 = objA0.position.x.u16
+				objA1.position.y.u16 = objA0.position.y.u16 - 0x20
+				objA1.velocity.y = 1
+				u8[A1 + 0x2c] = D1.u8
+			}
+		}
+	}
+
+	objA0.update_address = 0x027592
+	fn0275f2()
+	fn027592()
+}
+
 // Adjust horizontal screen boundary for LBZ2 ball shooter boss.
 // The default 0x39b8 value causes a slight camera jump at wide resolutions, including 426x240.
 //# address-hook(0x07397a) end(0x07399c)
@@ -750,7 +967,7 @@ function void fn05480c()
 
 	D0.u16 += u16[0xffffeea0] - getScreenHeightExtend()
 	camera.background.y.u16 = D0.u16
-	if ((D0.u16 & 0xf000) && getScreenHeightExtend() > 0)	// As the camera background becomes negative due to getSCreenHeightExtend(), we create a drawing issue.
+	if ((D0.u16 & 0xf000) && getScreenHeightExtend() > 0)	// As the camera background becomes negative due to getScreenHeightExtend(), we create a drawing issue.
 		camera.background.y.u16 = (D0.u16 & 0x00ff)			// The background vertically wraps every 0x0100 pixels after we get into the clouds, so this will conceal the issue.
 	if (u16[0xffffeea0] != 0)
 	{
@@ -1069,13 +1286,18 @@ function void fn072a70()
 }
 
 // Adjust a camera y position check to correct set Eggman's appearance regardless of screen height
+// and only implement an animation fix outside of Original Mode.
 //# address-hook(0x067cba) end(0x067ccc)
 function void fn067cba()
 {
 	A1 = 0xffff0000 + u16[A0 + 0x46]
 	if ((u8[A1 + 0x2a] & 0x80) == 0)
 	{
-		Object.animationProgress(0x0681cc)
+		// Use correct animation speed for Egg Robo, #contributed by mrgrassman14
+		if (isMainCharacter(CHARACTER_KNUCKLES) && !original_mode)
+			Object.animationProgress(0x0681d0)
+		else
+			Object.animationProgress(0x0681cc)
 	}
 
 #if STANDALONE
@@ -1115,6 +1337,56 @@ function void fn073056()
 		objA0.sprite_attributes &= ~sprite_attribute.PRIORITY	// Draw him in background
 		objA0.update_address = 0x073058
 	}
+}
+
+// Only allow some visual fixes outside of Original Mode.
+//# address-hook(0x073058)
+function void fn073058()
+{
+	// Wait for Robotnik to leave the screen to the top
+	D0.u16 = objA0.position.y.u16 - 1
+	D1.u16 = camera.position.y.u16 - 0x50
+	if (D0.u16 >= D1.u16)
+	{
+		objA0.position.y.u16 = D0.u16
+		DrawObject()
+		if (original_mode)
+			u16[A0 + 0x48] = 0
+		else
+			objA0.flags2a &= ~0x80	// Fix for Robotnik head animation, #contributed by mrgrassman14. Different flag than one used for Original Mode.
+	}
+	else
+	{
+		objA0.position.y.u16 = D1.u16
+		objA0.update_address = 0x07305a
+	}
+}
+
+//# address-hook(0x0747d6) end(0x074816)
+function void fn0747d6()
+{
+	control.player1 = 0x0101		// CONTROL_UP, CONTROL_UP
+
+	D0.u16 = objA0.position.y.u16 + 1
+	D1.u16 = camera.position.y.u16 + 0x40
+	if (D0.u16 < D1.u16)
+	{
+		objA0.position.y.u16 = D0.u16
+		DrawObject()
+		return
+	}
+#if STANDALONE
+	if (!original_mode)
+		objA0.flags38 &= ~0x10	// Restore missing exhaust flame, #contributed by mrgrassman14
+#endif
+	objA0.update_address = 0x07481c
+	objA0.velocity.x = 0x200
+	fn0685e2()
+
+	// "spawnChildObjects(0x0681b4)" replaced by:
+	spawnChildObject(0x068062, 0x00, 30, 0)		// Egg Mobile exhaust flame
+
+	DrawObject()
 }
 
 // Adjust distance Big Arms descends in background when first appearing based on screen height

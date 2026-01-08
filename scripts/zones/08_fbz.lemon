@@ -162,9 +162,22 @@ function void fn070990()
 	else
 	{
 		objA0.base_state = 0x04
-		objA0.position.y.u16 = 0x0685 + getScreenHeightExtend()/2
+		if (!original_mode)
+			objA0.position.y.u16 = 0x690 // + getScreenHeightExtend()/2
 		fn0709a8()
 	}
+}
+
+// Only apply a post-FBZ2 boss fix outside of Original Mode
+//# address-hook(0x070b80) end(0x070b86)
+function void fn070b80()
+{
+#if STANDALONE
+	if (!original_mode)
+		fn085a5a()	// Prevent flamethrower from overlaying dome and explosions when defeated, #contributed by mrgrassman14
+#endif
+	MoveWithParent()
+	fn08498c()
 }
 
 // Adjust the timing of moving to Sandopolis Zone based on screen height

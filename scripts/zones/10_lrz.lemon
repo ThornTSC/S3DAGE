@@ -183,6 +183,47 @@ function void fn078bee()
 	}
 }
 
+// Only implement a palette fix for the LRZ1 boss outside of Original Mode.
+//# address-hook(0x078c14) end(0x078c5e)
+//# translated(0x078c98) end(0x078ca0)
+function void fn078c14()
+{
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	D0.u8 = boss.remaining_hits
+	if (D0.u8 == 0)
+	{
+		// Boss beaten
+		fn078c60()
+		return
+	}
+
+	if (objA0.state == 0)
+	{
+		objA0.state = 0x20
+		playSound(0x6e)
+		objA0.flags2a |= 0x40
+	}
+
+	if (!original_mode)
+	{
+		// Fix for boss damage palette flash, #contributed by mrgrassman14
+		Boss.updateHitFlashing(6, 0x078ca6, 0x078cb2, 0x078cbe)
+	}
+	else
+	{
+		Boss.updateHitFlashing(6, 0x078ca6, 0x078cb2, 0x078cb6)
+	}
+
+	--objA0.state
+	if (objA0.state == 0)
+	{
+		objA0.flags2a &= ~0x40
+		u8[A0 + 0x28] = u8[A0 + 0x25]
+	}
+}
+
 // Ensure the call to 16x16 block drawing function fn059d24() receives the appropriate number of rows of blocks for the screen height
 //# address-hook(0x059d24) end(0x059d7e)
 function void fn059d24()

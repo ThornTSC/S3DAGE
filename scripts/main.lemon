@@ -16200,14 +16200,32 @@ function void CutsceneKnuckles.loadPalette()
 
 
 // Implement a fix for versions v24.06.18.0 through v24.12.05.0 to make the MHZ2 Knuckles cutscene switch animate properly
+// as well as only implementing a later fix for despawning if not in Original Mode.
 // Function taken from level\07_mhz\mhz2_knuckles_cutscene.lemon
 //# address-hook(0x063308) end(0x06331e)
 function void fn063308()
 {
+	if (original_mode)
+	{
+		fn063308_Orig()
+		return
+	}
+
 	A1 = 0xffff0000 + u16[A0 + 0x46]
 	bool leverDown = (u8[A1 + 0x22] == 2)
 	objA0.animation.sprite = leverDown ? 1 : 0
-	fn084920()		// Child.DrawSprite() in newest A.I.R. versions, but not in stable versions v24.02.02.0 or .1
+	DrawOrUnloadObject()	// Fix for lever despawning when Knuckles leaves and returns to the area, #contributed by mrgrassman14
+}
+
+function void fn063308_Orig()
+{
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	objA0.animation.sprite = 0
+	if (u8[A1 + 0x22] == 2)
+	{
+		objA0.animation.sprite = 1
+	}
+	fn084920()
 }
 
 
