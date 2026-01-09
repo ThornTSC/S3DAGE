@@ -228,17 +228,15 @@ function void showDebugText()
 	if (Input.buttonPressed(BUTTON_Y))
 	{
 		theme.hud += 1
-		if (theme.hud == 3)
+		if (theme.hud > 4)
 			theme.hud = 0
-
 	}
 	else if (Input.buttonPressed(BUTTON_BACK))
 	{
 		if (theme.hud == 0)
-			theme.hud = 2
+			theme.hud = 4
 		else
 			theme.hud -= 1
-
 	}
 */
 
