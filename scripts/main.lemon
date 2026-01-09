@@ -7205,7 +7205,7 @@ function void TriggerNextZone()
 	else if (D0.u16 == 0x0700 && !original_mode)
 	{
 		// LBZ -> MHZ
-		level.start_location = (level.vertical_wrap == 0x0668) ? 1 : 2		// level.vertical_wrap = 0x0668 in Sonic/Tails boss area
+		level.start_location = (level.vertical_wrap == 0x0668 - getScreenHeightExtend()) ? 1 : 2		// level.vertical_wrap = 0x0668 - getScreenHeightExtend() in Sonic/Tails boss area
 	}
 	else if (D0.u16 == 0x1601 && !original_mode)
 	{
