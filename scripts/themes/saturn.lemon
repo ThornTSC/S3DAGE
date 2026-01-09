@@ -575,11 +575,11 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x13)
 		{
 			x_offset = -3
-			if (py == 0x0030 || py == 0x00bc)	// SONIC in BE SUPER/HYPER SONIC
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// SONIC in BE SUPER/HYPER SONIC
 				x_offset = 17
-			else if (px == 0x0060)	// SONIC in SONIC CAN GO TO
+			else if (px == 0x0060 + getScreenExtend() - 40)	// SONIC in SONIC CAN GO TO
 				x_offset = -7
-			else if (px == 0x00a8)	// SONIC in NOW SONIC CAN
+			else if (px == 0x00a8 + getScreenExtend() - 40)	// SONIC in NOW SONIC CAN
 				x_offset = 1
 			
 			Renderer.drawCustomSprite("saturn_sonic_text", px + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
@@ -588,11 +588,11 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x14)
 		{
 			x_offset = -3
-			if (py == 0x0030 || py == 0x00bc)	// MILES in BE SUPER/HYPER MILES
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// MILES in BE SUPER/HYPER MILES
 				x_offset = 17
-			else if (px == 0x0060)	// MILES in MILES CAN GO TO
+			else if (px == 0x0060 + getScreenExtend() - 40)	// MILES in MILES CAN GO TO
 				x_offset = -7
-			else if (px == 0x00a8)	// MILES in NOW MILES CAN
+			else if (px == 0x00a8 + getScreenExtend() - 40)	// MILES in NOW MILES CAN
 				x_offset = 1
 			
 			Renderer.drawCustomSprite("saturn_miles_text", px + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
@@ -601,11 +601,11 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x15)
 		{
 			x_offset = -7
-			if (py == 0x0030 || py == 0x00bc)	// TAILS in BE SUPER/HYPER TAILS
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// TAILS in BE SUPER/HYPER TAILS
 				x_offset = 13
-			else if (px == 0x0064)	// TAILS in TAILS CAN GO TO
+			else if (px == 0x0064 + getScreenExtend() - 40)	// TAILS in TAILS CAN GO TO
 				x_offset = -11
-			else if (px == 0x00ac)	// TAILS in NOW TAILS CAN
+			else if (px == 0x00ac + getScreenExtend() - 40)	// TAILS in NOW TAILS CAN
 				x_offset = -3
 			
 			Renderer.drawCustomSprite("saturn_tails_text", px + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
@@ -614,11 +614,11 @@ function bool Saturn.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x16)
 		{
 			x_offset = -3
-			if (py == 0x0030 || py == 0x00bc)	// KNUCKLES in BE SUPER/HYPER KNUCKLES
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// KNUCKLES in BE SUPER/HYPER KNUCKLES
 				x_offset = 17
-			else if (px == 0x0048)	// KNUCKLES in KNUCKLES CAN GO TO	// likely needs a new value!
+			else if (px == 0x0048 + getScreenExtend() - 40)	// KNUCKLES in KNUCKLES CAN GO TO	// likely needs a new value!
 				x_offset = -7
-			else if (px == 0x0090)	// KNUCKLES in NOW KNUCKLES CAN		// likely needs a new value!
+			else if (px == 0x0090 + getScreenExtend() - 40)	// KNUCKLES in NOW KNUCKLES CAN		// likely needs a new value!
 				x_offset = 1
 			
 			Renderer.drawCustomSprite("saturn_knuckles_text", px + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
