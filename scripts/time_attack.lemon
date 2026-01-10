@@ -2059,7 +2059,7 @@ function void RenderHUD_Marathon()
 			px = getScreenWidth() - emeraldDistFromBottomRight[2 * (emeraldIndex - 1)]
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
 			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
-			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails))
+			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c)	// before introduction of sidekick-allowed red star rings, included  || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails)
 				py += 14
 
 			// Draw the emerald
