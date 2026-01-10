@@ -243,6 +243,14 @@ function void showDebugText()
 //	debugLog(stringformat("A0 = %x", A0))
 //	debugLog(stringformat("time_attack = %d, setting.time_attack = %d", time_attack, setting.time_attack))
 //	debugWatch(0xfffffc40, 2)
+
+	// Debug settings to have six super emeralds.
+	// For the emerald array, 1 is a chaos emerald, 2 is an emerald waiting to be super, and 3 is a super emerald
+//	global.chaos_emeralds = 7
+//	global.super_emeralds = 7
+//	u32[0xffffffb2] = 0x02030303
+//	u32[0xffffffb6] = 0x03030300
+//	global.traded_emeralds = 0xff
 }
 
 // This function is the final one of any frame.
@@ -20944,6 +20952,10 @@ function void SSZ_CustomSprites()
 	}
 
 	Renderer.drawCustomSprite("ssz_pillar_front", 0x0800 - camera.foreground.x.u16, 0x0b20 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xce00)
+
+	if (original_mode)
+		return
+	
 	if (u16[0xffffb010] < 0x1380 && u16[0xffffb014] > 0x06c0 && u16[0xffffb014] <= 0x0b00)
 	{
 		SSZ.drawBackgroundWall(0x1380, 0x0580, 3 * 0x80)
