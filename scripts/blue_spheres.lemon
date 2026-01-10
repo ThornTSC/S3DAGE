@@ -5060,6 +5060,12 @@ function void fn02df64()
 		copyMemory(0xffff8000, 0x0a7924, 0x1000)	// load S3&K HPZ layout
 		if (original_mode)
 			u8[0xffff821d] = 0x7c		// match the original ROM hack's layout just to the left of the leftmost super emerald
+		else
+		{
+			// Remove some chunks that appear strange at high screen resolutions
+			u32[0xffff8180] = 0
+			u8[0xffff81b4] = 0
+		}
 
 		// Load Hidden Palace level blocks and chunks from ROM
 	//	Kosinski.decompress(0x1bfbea, 0xffff0000)	// After this (Primary chunk loading), A1 points to where uncompressed data ends

@@ -576,7 +576,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		{
 			x_offset = 1
 			y_offset = 0
-			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// SONIC in BE SUPER/HYPER SONIC
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()*3/2)	// SONIC in BE SUPER/HYPER SONIC
 			{
 				y_offset = -6
 			}
@@ -591,7 +591,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x14)
 		{
 			x_offset = 1
-			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// MILES in BE SUPER/HYPER MILES
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()*3/2)	// MILES in BE SUPER/HYPER MILES
 			{
 				y_offset = -6
 			}
@@ -606,7 +606,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x15)
 		{
 			x_offset = -3
-			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// TAILS in BE SUPER/HYPER TAILS
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()*3/2)	// TAILS in BE SUPER/HYPER TAILS
 			{
 				y_offset = -6
 			}
@@ -621,7 +621,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 		else if (objA0.animation.sprite == 0x16)
 		{
 			x_offset = -4
-			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()/2)	// KNUCKLES in BE SUPER/HYPER KNUCKLES
+			if (py == 0x0030 + getScreenHeightExtend()/2 || py == 0x00bc + getScreenHeightExtend()*3/2)	// KNUCKLES in BE SUPER/HYPER KNUCKLES
 			{
 				x_offset = 4
 				y_offset = -6
