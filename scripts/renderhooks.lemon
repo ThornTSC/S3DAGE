@@ -849,7 +849,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
     {
         if (objA0.update_address == 0x08067a)
             py -= 4
-        Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", px, py - camera.screenshake.offset, 0x00, 0, 0x2002)
+        Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", px, py - camera.screenshake.offset, 0x00, 0, 0x9e00)
         return true
     }
 
