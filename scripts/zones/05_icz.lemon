@@ -221,6 +221,7 @@ function void ICZ2_CustomSprites()
 		Renderer.drawCustomSprite("icz2_backgroundpillar", 0x11a4 - camera.foreground.x.u16, 0x0290 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 		Renderer.drawCustomSprite("icz2_backgroundpillar", 0x2824 - camera.foreground.x.u16, 0x01b0 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
 		Renderer.drawCustomSprite("icz_cavefill", 0x3d80 - camera.foreground.x.u16, 0x0700 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0x2001)
+		Renderer.addSpriteMaskWorld(0x0610, 0x09a0, 0x08f0 - 0x0610, 0x09c8 - 0x09a0, 0x9dff, 1)
 	}
 }
 
