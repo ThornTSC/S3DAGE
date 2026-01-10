@@ -1541,7 +1541,7 @@ function void fn062242()
 		return
 
 	// Reload the palette post-cutscene. We should only do this in HCZ2. In ICZ2, moving into the underground cave takes care of this.
-	if (global.zone_act == 0x0101)
+	if (global.zone_act == 0x0101 || original_mode)
 	{
 		if (palette_set < 2 || original_mode)
 			loadPaletteLine1(0x0a8dfc)
