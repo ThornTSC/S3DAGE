@@ -1270,7 +1270,7 @@ function void UpdateWaterSurfaceLevel.AIZ2()
 
 		if (water.height.target != 0x0618)
 		{
-			if (camera.position.x.u16 < 0x2900)
+			if (camera.position.x.u16 < 0x2900 && u16[0xffffb014] < 0x0600)
 			{
 				camera.screenshake.state = 0xffff
 				if (allocDynamicObjectStd())
