@@ -83,6 +83,61 @@ function void fn05b514()
 	}
 }
 
+// Revert timing for moving view to space in Knuckles's good ending credits in Classic Mode
+//# address-hook(0x058b9e) end(0x058c3e)
+function void fn058b9e()
+{
+	push(A3)
+	push(A2)
+	push(A0)
+	push(D7)
+
+	fn05b18e()
+
+	D7 = pop()
+	A0 = pop()
+	A2 = pop()
+	A3 = pop()
+
+	if (global.chaos_emeralds < 7 && global.super_emeralds < 7)
+	{
+		if (u16[0xffffeec4] != 0)
+		{
+			copyMemory(0xfffffc20, 0x0a97fc, 0x60)
+
+			u16[0xffffeec8] = 0x07f0
+			u16[0xffffeeca] = 0x0f
+			u16[0xffffeec0] += 4
+			fn058c42()
+		}
+	}
+	else
+	{
+		fn0592ee()
+
+		if (u16[0xfffffaae] == 0)
+			return
+
+		// Determine start position for camera moving up to space
+		if (!original_mode)
+			D0.u16 = 0x1b00
+		else
+			D0.u16 = (global.lock_on_state == 0) ? 0x1660 : 0x14c0
+
+		if (D0.u16 == camera.position.y.u16 && level.scrolling_routine == 0)
+		{
+			u8[0xfffffab9] = 0
+			D0.u16 = camera.background.y.u16 + 0x0100
+			camera.background.y.u16 = D0.u16
+			camera.background.y.frac = 0
+			camera.background.y.old = D0.u16 & level.height.tilemask
+
+			copyMemory(0xfffffc20, 0x0a985c, 0x60)
+			level.scrolling_routine += 4
+		}
+	}
+}
+
 // Do not include A.I.R. credits in Original Mode.
 // Function taken from standalone\resources\credits\credits_datagen.lemon
 function u32 CreditsDataGenerator.build(u8 creditsIndex)
