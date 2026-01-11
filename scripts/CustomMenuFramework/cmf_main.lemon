@@ -2826,59 +2826,74 @@ function void customMenu.mainControlLoop.main()
 	
 	Renderer.drawCustomSprite("text_option_airmenu", getScreenExtend() - 40 + option_x, 192, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 5) ? selectionTint : nonSelectionTint, 0x10000)
 
+	// Green background to render when turning new text into images
+//	Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xfff0, 0, 0xff00ff00, 0xf000)
+
 	if (selectedMenuOption.main == 0)
 	{
+		Renderer.drawCustomSprite("description_revisitedmode", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
+
 		// Here, addition in py is lineheight * line number
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play Sonic 3 & Knuckles with\nnew level layouts, special\nstage layouts, and visuals\nfor a fresh take on a classic.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Take on an army of Eggrobos\nand trickier special stages\nin Knuckles's Hard difficulty!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Keep your eyes peeled for\n                              to unlock\nnew themes and levels!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + (13 * 10) - 7, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play Sonic 3 & Knuckles with\nnew level layouts, special\nstage layouts, and visuals\nfor a fresh take on a classic.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Take on an army of Eggrobos\nand trickier special stages\nin Knuckles's Hard difficulty!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Keep your eyes peeled for\n                              to unlock\nnew themes and levels!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + (13 * 10) - 7, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
 	}
 	else if (selectedMenuOption.main == 1)
 	{
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Experience the original\nSonic 3: D.A. Garden Edition\nROM hack (v1.02) as\nreleased in October 2015.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("description_classicmode", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
+
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Experience the original\nSonic 3: D.A. Garden Edition\nROM hack (v1.02) as\nreleased in October 2015.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 	}
 	else if (selectedMenuOption.main == 2)
 	{
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Race through Revisited Mode in\na streamlined game with fewer\ncutscenes and no level results.\nChoose a 100% (14-emerald) run\nor an Any% (no emerald) run\nand go! It's nonstop gameplay\nfrom start to finish!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("description_speedrunmode", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
+
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Race through Revisited Mode in\na streamlined game with fewer\ncutscenes and no level results.\nChoose a 100% (14-emerald) run\nor an Any% (no emerald) run\nand go! It's nonstop gameplay\nfrom start to finish!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 		
 		// Here, addition in py is lineheight * line number
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 8) - 6, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 6, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 6, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 8) - 6, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 6, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 6, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 
 	}
 	else if (selectedMenuOption.main == 3)
 	{
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play any act! Search for\n                              or win\n                                       in\ntwo challenging modes!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + 13, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + 13 + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 2), "Star Medals", 0xffff60ff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 283, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
-		Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 295, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
-		Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 307, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
-		Renderer.drawCustomSprite("medal_special_00", getScreenExtend() - 40 + 319, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+		Renderer.drawCustomSprite("description_actselectchallenges", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack: Race to the goal!\nTime Stone Trial: Grab Mini\nTime Stones to stop the clock!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 6) - 6, "Time Stone Trial:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Play any act! Search for\n                              or win\n                                       in\ntwo challenging modes!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + 13, "Red Star Rings", 0xff6060ff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawCustomSprite("redstarring_00", getScreenExtend() - 40 + 293, 64 + 13 + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 2), "Star Medals", 0xffff60ff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawCustomSprite("medal_03_00", getScreenExtend() - 40 + 283, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+	//	Renderer.drawCustomSprite("medal_02_00", getScreenExtend() - 40 + 295, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+	//	Renderer.drawCustomSprite("medal_01_00", getScreenExtend() - 40 + 307, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
+	//	Renderer.drawCustomSprite("medal_special_00", getScreenExtend() - 40 + 319, 64 + (13 * 2) + 5, 0, SPRITE_FLAG_PRIO, 0xfff1, 0, 0xffffffff, 0x8000)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 11) - 12, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack: Race to the goal!\nTime Stone Trial: Grab Mini\nTime Stones to stop the clock!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 5) - 6, "Time Attack:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 6) - 6, "Time Stone Trial:", 0x60ff60ff, 1, 0, 0xfff2, 0, 1)
+
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 9) - 12, "Record your play and visit", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 10) - 12, "www.speedrun.com/s3airdag", 0x40a0ffff, 1, 0, 0xfff1, 0, 1)
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 11) - 12, "to compete with others!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 	}
 	else if (selectedMenuOption.main == 4)
 	{
 	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Tackle the classic\nBlue Sphere game with\na tricky twist.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64 + (13 * 4) - 6, "Touch green spheres to\nturn them into blue\nspheres. Plan your moves\ncarefully to create rings\nand avoid red spheres!", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "View the credits for\nSonic 3: D.A. Garden Edition\nand all other ROM hacks\nand official games that\nmade this game possible.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("description_credits", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
+
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "View the credits for\nSonic 3: D.A. Garden Edition\nand all other ROM hacks\nand official games that\nmade this game possible.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 
 	}
 	else if (selectedMenuOption.main == 5)
 	{
-		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Return to the A.I.R. menu\nto change options or\nexit the game.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
+		Renderer.drawCustomSprite("description_airmenu", getScreenExtend() - 40 + 212, 64, 0, SPRITE_FLAG_PRIO, 0xfff1)
+
+	//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 212, 64, "Return to the A.I.R. menu\nto change options or\nexit the game.", 0xffffffff, 1, 0, 0xfff1, 0, 1)
 	}
 
 	if ((control.pad1.pressed & CONTROL_START) || (control.pad1.pressed & CONTROL_A) || (control.pad1.pressed & CONTROL_C))

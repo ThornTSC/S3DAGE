@@ -5,6 +5,13 @@
 	"bg_jam_400": { "File": "sonicjam_background_400.png" },
 	"bg_jam_400_ta": { "File": "sonicjam_background_400_ta.png" },
 
+	"description_revisitedmode": { "File": "description_revisitedmode.png" },
+	"description_classicmode": { "File": "description_classicmode.png" },
+	"description_speedrunmode": { "File": "description_speedrunmode.png" },
+	"description_actselectchallenges": { "File": "description_actselectchallenges.png" },
+	"description_credits": { "File": "description_credits.png" },
+	"description_airmenu": { "File": "description_airmenu.png" },
+
 	"dagelogo": { "File": "dagelogo.png" },
 	"dagelogo_green": { "File": "dagelogo_green.png" },
 	"rtwilogo": { "File": "rtwilogo.png" },
