@@ -572,7 +572,7 @@ function void fn05e70e()
 	timer.alldata = 0
 
 	objA0.position.x.u16 = camera.position.x.u16 + 0xc0
-	objA0.position.y.u16 = camera.position.y.u16 + 0x0110 + getScreenHeightExtend()
+	objA0.position.y.u16 = camera.position.y.u16 + 0x0110 + getScreenHeightExtend()*2
 
 	// "spawnChildObjects(0x0601ba)" replaced by:
 	spawnChildObject(0x05ea52, 0x00, -32, 43)
@@ -606,7 +606,13 @@ function void fn05e70e()
 	{
 		copyMemory(0xfffffcc0, 0x0a97bc, 0x40)	// move standard SSZ2 colors into target palette RAM lines 3 and 4
 		if (getScreenHeightExtend() > 0)
+		{
 			u16[0xfffffcc0] = u16[0xfffffcec]	// set the transparency target color to the color of the sky as done earlier
+			camera.position.y.u16 += getScreenHeightExtend()
+			level.vertical_wrap += getScreenHeightExtend()
+			move_area.bottom.current += getScreenHeightExtend()
+			move_area.bottom.target += getScreenHeightExtend()
+		}
 	}
 	u32[0xfffffcaa] = 0xee0088
 
