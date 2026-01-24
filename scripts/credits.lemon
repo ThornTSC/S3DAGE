@@ -500,6 +500,7 @@ function void Credits.DAGE()
 		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line, "Fadeinside", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 
 		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line, "Font Rips", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+
 		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x - 4, credits.text.center.y + 3*line, "Sonic 3D: Flickies' Island", 0xe8d49400 + alpha.text, 3, 0, renderQueue, 0, 1)
 		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x + 4, credits.text.center.y + 3*line, "BCat", 0xffffff00 + alpha.text, 1, 0, renderQueue, 0, 1)
 		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x - 4, credits.text.center.y + 4*line, "Sonic R", 0xe8d49400 + alpha.text, 3, 0, renderQueue, 0, 1)
@@ -513,13 +514,16 @@ function void Credits.DAGE()
 		else
 			Renderer.drawCustomSprite("title_screen_air", credits.text.center.x, 20 + 20, 0x00, SPRITE_FLAG_PRIO, renderQueue)
 
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 3*line, "Green Spheres adapted", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 2*line, "from code by", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line, "Liliam", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 4*line - line/2, "Resolution Code Refactoring", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - 3*line - line/2, "Soren Lily", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line, "Playtesting and Feedback", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line, "Clov_CGSR", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line, "RPG_HiddenWizard", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line - line/2, "Green Spheres adapted", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y - line/2, "from code by", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + line/2, "Liliam", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 2*line + line/2, "Playtesting and Feedback", 0xffff8000 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 3*line + line/2, "Clov_CGSR", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", credits.text.center.x, credits.text.center.y + 4*line + line/2, "RPG_HiddenWizard", 0xffffff00 + alpha.text, 2, 0, renderQueue, 0, 1)
 	}
 	else if (credits.screen.current == 3)
 	{
