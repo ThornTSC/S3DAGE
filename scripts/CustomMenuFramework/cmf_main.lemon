@@ -2691,7 +2691,6 @@ function void customMenu.mainControlLoop.main()
 //	Renderer.drawCustomSprite("bg_jam", getScreenWidth()/2, getScreenHeight()/2, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xc0ffffff, 0x10000)					// background
 	Renderer.drawCustomSprite("bg_jam_400", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdffe, 0, 0xa0ffffff, 0x10000)					// background
 	Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, SPRITE_FLAG_PRIO, 0xdfff, 0, 95)		// background dimming (37.5% opacity)
-	Renderer.drawCustomSprite("sonicjam_divider_half_short", 0xc0, 0x3e, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
 	// Check if the length of a text string with a custom font outputs 0. If so, the user is experiencing the text loading failure in A.I.R. v24.02.02.0/1 and must unzip the mod.
 	if (!Renderer.getTextWidth("sonic_r_credits_small", "Test"))
@@ -2793,6 +2792,8 @@ function void customMenu.mainControlLoop.main()
 	PrintVersionNumber()
 
 	Renderer.drawCustomSprite("dagelogo", getScreenWidth()/2 - 44, 8, 0x00, SPRITE_FLAG_PRIO, 0xe000)
+	
+	Renderer.drawCustomSprite("sonicjam_divider_half_short", 0xc0, 0x3e, 0x00, SPRITE_FLAG_PRIO, 0xe000)
 
 	Renderer.drawCustomSprite("text_option_revisitedmode", getScreenExtend() - 40 + option_x, 64, 0x00, SPRITE_FLAG_PRIO, 0xe000, 0, (selectedMenuOption.main == 0) ? selectionTint : nonSelectionTint, 0x10000)
 	if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
