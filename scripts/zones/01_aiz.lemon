@@ -1242,7 +1242,7 @@ function void UpdateWaterSurfaceLevel.AIZ2()
 {
 	if (camera.position.y.u16 < 0x0f80) // (isMainCharacter(CHARACTER_KNUCKLES))
 	{
-		if (move_area.bottom.target == 0x0820 - getScreenHeightExtend() || camera.position.x.u16 >= 0x3b60)
+		if (move_area.bottom.target == 0x0820 || camera.position.x.u16 >= 0x3b60)	// removed - getScreenHeightExtend() from the 0x0820, to align with fn01c80a()'s camera boundary change being commented out
 			return
 	}
 
