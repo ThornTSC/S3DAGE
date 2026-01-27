@@ -1,14 +1,13 @@
 // Edited scripts for Sonic 3: D.A. Garden Edition.
-// These are likely inefficient, but they work!
 
 // constant bool CHEAT_ONE_BLUE_SPHERE = true
 // constant u8 DEBUG_DYNAMIC_COLLISIONS		= 0		// 1 enables character and normal object hitboxes, 2 adds shield projectile deflection hitboxes, 3 adds rings and ring attraction boxes
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version_string = "D.A. Garden Edition v1.13.1.0"
-global u16 DAGE_version = 0x1d10
-#define DAGE_running = 0x1d10
+global u64 DAGE_version_string = "D.A. Garden Edition v1.13.1.1"
+global u16 DAGE_version = 0x1d11
+#define DAGE_running = 0x1d11
 
 // Define variables for in-game settings
 global u8 palette_set
