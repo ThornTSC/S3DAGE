@@ -843,6 +843,29 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
     }
 
+    // MHZ2 scattered leaves, which are rendered differently in the Summer palette
+    if ((objA0.update_address == 0x03dbe0 || objA0.update_address == 0x03dbb8 || objA0.update_address == 0x03dc18) && (u16[0xfffffc5c] == 0x040a || u16[0xfffffc4e] == 0x0eec) && !original_mode)	// scattered leaves object and looking at a palette entry (mushroom color) only in the Revisited summer or winter palette
+    {
+        if (objA0.mapping_offset == 0x03dc5c)		// small leaf
+		{
+			if (u16[0xfffffc5c] == 0x040a)
+				Renderer.drawCustomSprite("mhz_smallleaf", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			else
+				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			return true
+		}
+		else if (objA0.mapping_offset == 0x03dc74)	// large leaf
+		{
+			if (u16[0xfffffc5c] == 0x040a)
+				Renderer.drawCustomSprite(stringformat("mhz_largeleaf%d", objA0.animation.sprite & 0x01), px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			else
+				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			return true
+		}
+		else
+			return false
+    }
+
     // DEZ2 final boss hatch cover for Master Emerald (when not covering it). The first three addresses here are for sliding down, staying down, and sliding up, respectively.
     // The final address is that of UnloadObject, which the hatch cover controller uses in its final frame. We use unique data in the object to identify it.
     if ((objA0.update_address == 0x080634 || objA0.update_address == 0x08067a || objA0.update_address == 0x0806a6 || (global.zone_act == 0x1700 && objA0.update_address == 0x01abb6 && u32[A0 + 0x42] == 0x007c0028)) && !original_mode)

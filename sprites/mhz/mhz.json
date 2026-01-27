@@ -1,0 +1,6 @@
+{
+    "mhz_largeleaf0": { "File": "mhz_leaves_snow.bmp", "Rect": "0,0,15,8", "Center": "7,4" },
+    "mhz_largeleaf1": { "File": "mhz_leaves_snow.bmp", "Rect": "15,0,16,8", "Center": "8,4" },
+    "mhz_smallleaf": { "File": "mhz_leaves_snow.bmp", "Rect": "31,0,8,8", "Center": "4,5" },
+    "mhz_snow": { "File": "mhz_leaves_snow.bmp", "Rect": "39,2,4,4", "Center": "2,2" }
+}

@@ -268,3 +268,55 @@ function void fn054dbe()
 	fn055008()
 	LoadTileContentDefault()
 }
+
+// MHZ2: when using Revisited visuals, replace leaves in the winter section with "snow" (pollen).
+// A renderhook handles most of this, but when the boss is triggered, we want snow to change to
+// pollen rather than becoming leaves.
+// Here, A2 contains the address of the main or sidekick character that triggered the pollen/leaves.
+//# address-hook(0x03db68) end(0x03dbae)
+function void fn03db68()
+{
+	if (u8[0xfffff7c1] == 0 || (global.act == 1 && u16[A2 + 0x10] > 0x3900 && palette_set >= 2 && !original_mode))
+	{
+		objA1.mapping_offset = 0x03dc5c
+		objA1.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | 0x0368)
+		return
+	}
+
+	D0.u16 = u8[A0 + 0x32] & 0x07
+	++u8[A0 + 0x32]
+	D0.u8 = u8[0x03dbb0 + D0.u16]
+	if (D0.u8 == 0)
+	{
+		objA1.mapping_offset = 0x03dc74
+		objA1.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | 0x0363)
+	}
+	else
+	{
+		objA1.mapping_offset = 0x03dc5c
+		objA1.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | 0x0363)
+	}
+}
+
+// MHZ: ensure pollen/leaf counter, which prevents too many objects from spawning, does not underflow if it is
+// somehow decremented multiple times as objects are deleted.
+// Also reintroduce a glitch in Original Mode.
+//# address-hook(0x03da00) end(0x03da22)
+function void MHZLeavesEffect.Update()
+{
+	u16 debug_mode.state.backup
+
+	if (!original_mode && s8[0xfffff7c0] < 0)
+		u8[0xfffff7c0] = 0
+	else if (original_mode)
+	{
+		// Avoid a STANDALONE check that stops leaf creation when in debug mode state.
+		debug_mode.state.backup = debug_mode.state
+		debug_mode.state = 0
+	}
+
+	base.MHZLeavesEffect.Update()
+
+	if (original_mode)
+		debug_mode.state = debug_mode.state.backup
+}
