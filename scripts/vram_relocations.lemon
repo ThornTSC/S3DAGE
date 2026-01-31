@@ -121,9 +121,10 @@ function void Character.cancelSuperTransformation()
 		char.control_flags &= ~(control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
 
 	// If lightning shield is active, reload sprite patterns for the sparks
+	u32 sparksArtAddress = (unlock_act && (unlock_act != s3_CGZ)) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
 	if (u32[0xffffcce8] == 0x019732)
 	{
-		updateSpritePattern(0x18f8e4, getShield.targetInVRAM() + 0x3e0, 0x50)
+		updateSpritePattern(sparksArtAddress, getShield.targetInVRAM() + 0x3e0, 0x50)
 	}
 
 	// Special handling for Knuckles while climbing - without this, he would change to a falling animation
@@ -156,7 +157,7 @@ function void fn019348()
 {
 #if STANDALONE
 	// Do not create these stars in outro
-	if (global.zone_act == 0x0d01)
+	if (global.zone_act == 0x0d01 && !original_mode)
 	{
 		UnloadObject()
 		return
@@ -231,70 +232,71 @@ function void fn019156()
 //# alias(fn019236) deprecated
 function void SuperSonicStars.CreateSparks()
 {
-#if STANDALONE
-
-	// Scatter sparks when dashing, bypassing original broken behavior
-	objA0.state = 0
-	objA0.mapping_offset = 0x0192ea
-	objA0.position.x.u16 = u16[0xffffb000 + 0x10]
-	objA0.position.y.u16 = u16[0xffffb000 + 0x14]
-
-	D2 = 2
-	Effects.CreateSparks()
-
-	objA0.mapping_offset = 0x0192de
-
-#else
-
-	// This is all technically unused
-	objA0.state = 0
-	A2 = 0xffffb000
-	D5 = 0x0f
-	D4.u16 = 0x0488
-
-	while (D5.s16 >= 0)
+	if (!original_mode)
 	{
-		// Spawn super sparks
-		if (!allocDynamicObjectStd())
-			return
+		// Scatter sparks when dashing, bypassing original broken behavior
+		objA0.state = 0
+		objA0.mapping_offset = 0x0192ea
+		objA0.position.x.u16 = u16[0xffffb000 + 0x10]
+		objA0.position.y.u16 = u16[0xffffb000 + 0x14]
 
-		objA1.update_address = 0x0192c0
-		objA1.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
-		objA1.box_size.y = 0x08
-		objA1.box_size.x = 0x08
-		objA1.sprite_priority = 0x0380
-		objA1.sprite_attributes = (sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5))
-		objA1.mapping_offset = 0x0192ea
-		objA1.position.x.u16 = u16[A2 + 0x10]
-		objA1.position.y.u16 = u16[A2 + 0x14]
+		D2 = 2
+		Effects.CreateSparks()
 
-		if (D4.s16 >= 0)
+		objA0.mapping_offset = 0x0192de
+	}
+
+	else
+	{
+		// This is all technically unused in base Sonic 3 A.I.R.
+		objA0.state = 0
+		A2 = 0xffffb000
+		D5 = 0x0f
+		D4.u16 = 0x0488
+
+		while (D5.s16 >= 0)
 		{
-			D0.u16 = D4.u16
-			LookupSinCos()
-			D2.u16 = D4.u16 >> 8
-			D0.s16 <<= D2
-			D1.s16 <<= D2
-			D2.u16 = D0.u16
-			D3.u16 = D1.u16
-			D4.u8 += 0x10
-			if (D4.u8 < 0x10)
+			// Spawn super sparks
+			if (!allocDynamicObjectStd())
+				return
+
+			objA1.update_address = 0x0192c0
+			objA1.render_flags = (render_flag.WORLD | render_flag.VISIBLE)
+			objA1.box_size.y = 0x08
+			objA1.box_size.x = 0x08
+			objA1.sprite_priority = 0x0380
+			objA1.sprite_attributes = (sprite_attribute.PRIORITY | (getShield.targetInVRAM() >> 5))
+			objA1.mapping_offset = 0x0192ea
+			objA1.position.x.u16 = u16[A2 + 0x10]
+			objA1.position.y.u16 = u16[A2 + 0x14]
+
+			if (D4.s16 >= 0)
 			{
-				D4.u16 -= 0x80
-				if (D4.s16 < 0)
+				D0.u16 = D4.u16
+				LookupSinCos()
+				D2.u16 = D4.u16 >> 8
+				D0.s16 <<= D2
+				D1.s16 <<= D2
+				D2.u16 = D0.u16
+				D3.u16 = D1.u16
+				D4.u8 += 0x10
+				if (D4.u8 < 0x10)
 				{
-					D4.u16 = 0x0488
+					D4.u16 -= 0x80
+					if (D4.s16 < 0)
+					{
+						D4.u16 = 0x0488
+					}
 				}
 			}
-		}
 
-		objA1.velocity.x = D2.u16
-		objA1.velocity.y = D3.u16
-		D2.s16 = -D2.s16
-		D4.s16 = -D4.s16
-		--D5.s16
+			objA1.velocity.x = D2.u16
+			objA1.velocity.y = D3.u16
+			D2.s16 = -D2.s16
+			D4.s16 = -D4.s16
+			--D5.s16
+		}
 	}
-#endif
 }
 
 // Blue Spheres results Super/Master Emerald sparkles.

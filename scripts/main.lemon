@@ -4767,7 +4767,7 @@ function void Character.updateBonusEffects()
 				// If lightning shield is active in a Sonic 2 act, reload sprite patterns for the sparks. The above function handles this for S3&K acts.
 				if (u32[0xffffcce8] == 0x019732 && unlock_act)
 				{
-					updateSpritePattern(0x34e402, 0xf760, 0x50)
+					updateSpritePattern(0x34e402, getShield.targetInVRAM() + 0x03e0, 0x50)
 				}
 				chooseFittingMusic()
 				char.jumping = 0		// Do not allow another transformation until hit the ground
@@ -4809,7 +4809,7 @@ function void Character.updateBonusEffects()
 				// If lightning shield is active in a Sonic 2 act, reload sprite patterns for the sparks. This is a non-issue in S3&K due to different VRAM locations.
 				if (u32[0xffffcce8] == 0x019732 && unlock_act)
 				{
-					updateSpritePattern(0x34e402, 0xf760, 0x50)
+					updateSpritePattern(0x34e402, getShield.targetInVRAM() + 0x03e0, 0x50)
 				}
 			}
 		}
