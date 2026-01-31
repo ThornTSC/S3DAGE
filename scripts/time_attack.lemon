@@ -35,6 +35,9 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x25123100	// use for test version
 		length = Renderer.getTextWidth("version", "A.I.R. v25.12.31.0")
 	#endif
+	#if GAMEAPP == 0x26013100	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v26.01.31.0")
+	#endif
 
 	u16 px = 16
 	if ((time_attack_end && !time_attack_hud) || (global.game_mode & 0x7f) >= 0x54)	// time attack left-aligned HUD
@@ -90,6 +93,10 @@ function void PrintVersionNumber()
 	#endif
 	#if GAMEAPP == 0x25123100	// use for test version
 		Renderer.drawText("version", px, py, "DAGE  v1.13.1.1\nA.I.R. v25.12.31.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		return
+	#endif
+	#if GAMEAPP == 0x26013100	// use for test version
+		Renderer.drawText("version", px, py, "DAGE  v1.13.1.1\nA.I.R. v26.01.31.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#else
 		Renderer.drawText("version", px, py, "\nDAGE  v1.13.1.1", 0xffffffff, 1, 0, renderQueue, 0, 1)
