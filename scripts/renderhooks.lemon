@@ -844,22 +844,26 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
     }
 
     // MHZ2 scattered leaves, which are rendered differently in the Summer palette
-    if ((objA0.update_address == 0x03dbe0 || objA0.update_address == 0x03dbb8 || objA0.update_address == 0x03dc18) && (u16[0xfffffc5c] == 0x040a || u16[0xfffffc4e] == 0x0eec) && !original_mode)	// scattered leaves object and looking at a palette entry (mushroom color) only in the Revisited summer or winter palette
+    if ((objA0.update_address == 0x03dbe0 || objA0.update_address == 0x03dbb8 || objA0.update_address == 0x03dc18 || objA0.update_address == 0x08e250) && (u16[0xfffffc5c] == 0x040a || u16[0xfffffc4e] == 0x0eec) && !original_mode)	// scattered leaves object (including from Cluckoid) and looking at a palette entry (mushroom color) only in the Revisited summer or winter palette
     {
+		bool xFlip = (objA0.animation.sprite & 0x02)
+		if (objA0.update_address == 0x08e250)		// leaves blown by Cluckoids face the opposite direction by default
+			xFlip = !xFlip
+
         if (objA0.mapping_offset == 0x03dc5c)		// small leaf
 		{
 			if (u16[0xfffffc5c] == 0x040a)
-				Renderer.drawCustomSprite("mhz_smallleaf", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+				Renderer.drawCustomSprite("mhz_smallleaf", px, py , 0x00, (xFlip ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 			else
-				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, (xFlip ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 			return true
 		}
 		else if (objA0.mapping_offset == 0x03dc74)	// large leaf
 		{
 			if (u16[0xfffffc5c] == 0x040a)
-				Renderer.drawCustomSprite(stringformat("mhz_largeleaf%d", objA0.animation.sprite & 0x01), px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+				Renderer.drawCustomSprite(stringformat("mhz_largeleaf%d", objA0.animation.sprite & 0x01), px, py , 0x00, (xFlip ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 			else
-				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, ((objA0.animation.sprite & 0x02) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+				Renderer.drawCustomSprite("mhz_snow", px, py , 0x00, (xFlip ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 			return true
 		}
 		else
