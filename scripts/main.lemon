@@ -19606,7 +19606,7 @@ function void UpdateLevelScrolling.LRZ1()
 function void LRZ1_CustomSprites()
 {
 	Renderer.drawCustomSprite("lrz1_wallpathcover", 0x1340 , 0x08a0, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
-	if (global.game.paused)	// somehow these sprite masks from fn055b70() are missed in Original Mode
+	if (global.game.paused && camera.position.x.u16 >= 0x2c00)	// somehow these sprite masks from fn055b70() are missed in Original Mode
 	{
 		Renderer.addSpriteMaskWorld(camera.position.x.u16, 0x0710 + 176, getScreenWidth(), getScreenHeight() - 176, 0x9e00, 1)	
 	}
