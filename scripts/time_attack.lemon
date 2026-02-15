@@ -3173,10 +3173,9 @@ function void HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue
 {
 	if (hud.layout == 2 && py == 0x18)
 		px += (time_attack_hud) ? -20 : 8
-
 	else if (hud.layout == 2 && py == 0x28)
 	{
-		px -= (time_attack_hud) ? 200 : 40
+		px -= (time_attack_hud) ? getScreenWidth()/2 : 40
 		py -= 8
 	}
 	
