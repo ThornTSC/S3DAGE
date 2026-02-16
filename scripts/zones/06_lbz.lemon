@@ -855,7 +855,7 @@ function void fn07397a()
 	if (getScreenWidth() > 320)
 	{
 		move_area.left = 0x3a20 - getScreenExtend() * 2
-		move_area.right = 0x3a20 - getScreenExtend() * 2 + 0x50
+		move_area.right = 0x39b8
 	}
 	else
 	{
