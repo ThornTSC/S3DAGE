@@ -1,3 +1,6 @@
+global s16 deathEggX
+global s16 deathEggY
+
 // Ensure the call to 16x16 block drawing function fn04ee9e() receives the appropriate number of rows of blocks for the screen height
 //# address-hook(0x053fe2) end(0x053ff4)
 function void fn053fe2()
@@ -1501,11 +1504,15 @@ function void UpdateLevelScrolling.LBZ2()
 	{
 		if (unused.lives_counter.player2 == 0)
 		{
-			Renderer.drawCustomSprite("lbz2_death_egg", 0x4430 - 256, 0x660 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+			deathEggX = 0x4430 - 256 - camera.position.x.u16
+			deathEggY = 0x660 - camera.screenshake.offset - getScreenHeightExtend() - camera.position.y.u16
+//			Renderer.drawCustomSprite("lbz2_death_egg", 0x4430 - 256, 0x660 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 		}
-		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
-		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 - 152, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
-		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 + 112, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+
+		LBZ2_CustomSprites()
+//		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
+//		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 - 152, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+//		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 + 112, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
 	}
 
 	base.UpdateLevelScrolling.LBZ2()
@@ -1520,11 +1527,23 @@ function void fn0545da()
 		if ((level.framecounter & 0x03) == 0)
 			++unused.lives_counter.player2
 
-		s8 y_offset = max(s8(unused.lives_counter.player2) - 8, 0)
-		Renderer.drawCustomSprite("lbz2_death_egg", getScreenWidth()/2 - 256, -8 - y_offset, 0, 0, 0x4001)
+		deathEggX = getScreenWidth()/2 - 256
+		deathEggY = -8 - max(s8(unused.lives_counter.player2) - 8, 0)
+//		Renderer.drawCustomSprite("lbz2_death_egg", getScreenWidth()/2 - 256, -8 - y_offset, 0, 0, 0x4001)
 	}
 
 	base.fn0545da()
+}
+
+function void LBZ2_CustomSprites()
+{
+	if (camera.position.x.u16 > 0x4000 && getScreenHeightExtend() > 0)
+	{
+		Renderer.drawCustomSprite("lbz2_death_egg", deathEggX, deathEggY, 0, 0, 0x4001)
+		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
+		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 - 152, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 + 112, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+	}
 }
 
 // In Original Mode, do not try to fade back to normal sky in the Sonic/Tails LBZ2 ending cutscene, as no Big Arms means it was never changed.

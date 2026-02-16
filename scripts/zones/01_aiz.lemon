@@ -1,3 +1,6 @@
+global u16 bomberX
+global u16 bomberY
+
 // Adjust some timings for Original Mode and add Origins sound effects outside of Original Mode
 // Functions taken from level\01_aiz\intro_sonic.lemon
 //# address-hook(0x067572) end(0x067592)
@@ -694,6 +697,8 @@ function void AIZ2_CustomSprites()
 			if (unused.teleport_timer >= 5)
 				unused.teleport_timer = 0
 		}
+		if (camera.update_routine == 0x10 && bomberX != 0x8000)	// 0x8000 is used as a "do not render" value
+			Renderer.drawCustomSprite("aiz2_bomber", bomberX, bomberY, 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
 	}
 }
 
@@ -1309,12 +1314,14 @@ function void fn01c746()
 		base.fn01c746()
 		return
 	}
+
 	if (u16[0xffffb010] >= 0x3fce && u16[0xffffb014] < 0x01c0)
 	{
 		D0.u16 = 0x015a - getScreenHeightExtend()
 		level.vertical_wrap = D0.u16
 		move_area.top.target = D0.u16
 		camera.update_routine += 2
+		bomberX = 0x8000		// ensure the bomber does not render early by setting a special "do not render" value
 	}
 }
 
@@ -1555,7 +1562,9 @@ function void fn050390()
 	}
 
 	u16 bomberOffset = Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) ? 0 : 20
-	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - u16[0xffffee98] - bomberOffset, 0x0a00 - u16[0xffffee9c], 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
+	bomberX = 0x3d80 - u16[0xffffee98] - bomberOffset
+	bomberY = 0x0a00 - u16[0xffffee9c]
+//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - u16[0xffffee98] - bomberOffset, 0x0a00 - u16[0xffffee9c], 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
 	if (bomberEnded)
 	{
 		// Leverage some scratch RAM to track the bomber as it goes offscreen
@@ -1709,7 +1718,9 @@ function void fn050700()
 	if (level.framecounter.low % 4 == 0)
 		unused.player2.item_count += 1
 	u16 bomberOffset = Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) ? 0 : 20
-	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - (unused.player2.total_rings) - bomberOffset, 0x0a00 - (unused.player2.item_count), 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
+	bomberX = 0x3d80 - unused.player2.total_rings - bomberOffset
+	bomberY = 0x0a00 - unused.player2.item_count
+//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - unused.player2.total_rings - bomberOffset, 0x0a00 - unused.player2.item_count, 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
 
 	base.fn050700()
 }

@@ -1,3 +1,6 @@
+global u16 machineX
+global u16 machineY
+
 // This function is unchanged from recent AIR test builds, but is necesary to include
 // for AIR v24.02.02.0 when run in screen widths wider than 400px.
 //# address-hook(0x23ef58) end(0x23ef9e)
@@ -103,5 +106,14 @@ function void fn0610c6()
 	if (original_mode)
 		DrawObject()
 	else
-    	Renderer.drawCustomSprite("gumballmachine", objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x9e7f)
+	{
+		machineX = objA0.position.x.u16
+		machineY = objA0.position.y.u16
+		Gumball_CustomSprites()
+	}
+}
+
+function void Gumball_CustomSprites()
+{
+	Renderer.drawCustomSprite("gumballmachine", machineX, machineY, 0x00, SPRITE_FLAG_WORLDSPACE, 0x9e7f)
 }

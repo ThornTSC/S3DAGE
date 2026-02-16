@@ -818,7 +818,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         {
             Renderer.drawCustomSprite("dez2boss_side", objA0.position.x.u16, objA0.position.y.u16 - camera.screenshake.offset + 3*getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_WORLDSPACE, objA0.base_state < 0x08 ? 0xa002 : 0x2002)
             Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", objA0.position.x.u16 + 0x7c, objA0.position.y.u16 + 0x34 - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, objA0.base_state < 0x08 ? 0xa003 : 0x2003)
-            if (objA0.base_state > 0x06)
+            if (drawCockpitDoor == true)
                 Renderer.drawCustomSprite("dez2boss_cockpitdoor", objA0.position.x.u16 - 0x30, objA0.position.y.u16 - 0x56 - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
         }
         else if (objA0.base_state >= 0x0c && objA0.base_state <= 0x12)
@@ -827,12 +827,19 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         }
         else // if (objA0.base_state >= 0x14)
         {
-            Renderer.drawCustomSprite("dez2boss_side", objA0.position.x.u16, objA0.position.y.u16 - camera.screenshake.offset + 5*getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
+            Renderer.drawCustomSprite("dez2boss_side", objA0.position.x.u16, objA0.position.y.u16 - camera.screenshake.prev_offset + 5*getScreenHeightExtend()/2, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
             if (u8[0xfffffaa9] == 0)
-                Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", objA0.position.x.u16 + 0x7c, objA0.position.y.u16 + 0x34 - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2002)
+                Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", objA0.position.x.u16 + 0x7c, objA0.position.y.u16 + 0x34 - camera.screenshake.prev_offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2002)
         }
 		return true
     }
+
+	// DEZ2 final boss robot cockpit door while closing
+	if (objA0.update_address == 0x80dbe && !original_mode && getScreenHeightExtend() > 0)
+	{
+		Renderer.drawCustomSprite("dez2boss_cockpitdoor", objA0.position.x.u16 - 0x10, objA0.position.y.u16 - 0x1a - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
+		return true
+	}
 
     // DEZ2 final boss robot while it is defeated and falling
     if (objA0.update_address == 0x080102 && !original_mode)
@@ -876,7 +883,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
     {
         if (objA0.update_address == 0x08067a)
             py -= 4
-        Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", px, py - camera.screenshake.offset, 0x00, 0, 0x9e00)
+        Renderer.drawCustomSprite("dez2boss_masteremeraldhatchcover", px, py, 0x00, 0, 0x9e00)
         return true
     }
 

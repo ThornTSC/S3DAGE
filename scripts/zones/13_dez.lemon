@@ -1,3 +1,5 @@
+global bool drawCockpitDoor
+
 // Adjust screen boundaries for DEZ1 boss based on screen height.
 // There are no issues with running this fight without the screen adjustment, but it gives players
 // a bit more sight of their character when the rotating platforms take them up high.
@@ -322,6 +324,7 @@ function void fn05a734()
 //# address-hook(0x05a3b4) end(0x05a47c)
 function void InitLevelTiles.DEZBossAct()
 {
+	drawCockpitDoor = false
 	u16[0xffffeee2] = 0
 	u8[0xffffeee4] = 0xff
 	fn05a79e()
@@ -438,7 +441,7 @@ function void fn080dbe()
 		u8[0xfffffab8] |= 0x02
 		u8[0xffffeec6] = 0xff
 		if (getScreenHeightExtend() >= 0x10)
-			Renderer.drawCustomSprite("dez2boss_cockpitdoor", objA0.position.x.u16 - 0x10, objA0.position.y.u16 - 0x1a - camera.screenshake.offset, 0x00, SPRITE_FLAG_WORLDSPACE, 0x2001)
+			drawCockpitDoor = true
 		UnloadObject()
 	}
 }
