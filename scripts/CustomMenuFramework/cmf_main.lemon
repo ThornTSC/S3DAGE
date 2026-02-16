@@ -3859,7 +3859,7 @@ function bool fn00d458()
 			{
 				playSound(SFX_CLICK)
 				--D1.u16
-				if (D1.s16 < 0)
+				if (D1.s16 < 0 || (D1.s16 > D6.u16 && !original_mode)) // D1.s16 > D6.u16 fixes that you could select zones that aren't selectable for the character (like DDZ for Knuckles); #contributed by AtomicRey
 				{
 					D1.u16 = D6.u16
 				}
