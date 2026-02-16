@@ -275,6 +275,20 @@ function void fn059d24()
 #endif
 }
 
+// Reposition Death Egg eye flashing effect to light LRZ2 boss area on fire based on screen height
+//# address-hook(0x0793e2) end(0x0793fe)
+function void fn0793e2()
+{
+	setupObjectAttributesFull(0x079602)
+
+	objA0.update_address = 0x079406
+	objA0.position.x.u16 = 0xb0
+	objA0.position.y.u16 = 0x0449 - getScreenHeightExtend() + getScreenHeightExtend()/16
+	objA0.countdown_callback = 0x079416
+
+	fn079406()
+}
+
 // Alter the camera when at the actual boss when using an altered screen height.
 // This is commented out at the moment due to causing more visual issues than
 // when it is left alone. The address hook would need to be uncommented as well
