@@ -1,5 +1,6 @@
 {
     "hcz_brick": { "File": "hcz_brick.bmp" },
+    "hcz_waterjet_base": { "File": "hcz_waterjet_base.bmp", "Center": "32, 16" },
     "hcz_backgroundballpillarsection": { "File": "hcz_backgroundballpillarsection.png" },   // sourced from object palette, which is the same in all palette sets
     "hcz1_turbine": { "File": "hcz1_turbine.png" },
 	"hcz_ceilingshadow":  { "File": "hcz_ceilingshadow.bmp"},
