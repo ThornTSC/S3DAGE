@@ -1,10 +1,10 @@
 {
-	"bg_dez1": { "File": "dez1_background_new.bmp", "Center": "216, 0" },
+	"bg_dez1_origins": { "File": "dez1_background_new.bmp", "Center": "216, 0" },
 	"bg_dez1_464": { "File": "dez1_background_new_464.bmp", "Center": "232, 0" },
 	"bg_dez1_496": { "File": "dez1_background_new_496.bmp", "Center": "248, 0" },
 
 	"bg_dez2_classic": { "File": "dez2_background_classic.png" },
-	"bg_dez2": { "File": "dez2_background.png", "Center": "248, 0" },
+	"bg_dez2_full": { "File": "dez2_background.bmp", "Center": "248, 0" },
 
 	"bg_dez2_new": { "File": "dez2_background_new.png", "Center": "248, 0" },
 
