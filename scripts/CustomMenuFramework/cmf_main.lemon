@@ -261,7 +261,7 @@ function void customMenu.mainControlLoop()
 		customMenu.selectSpecialStageChar()
 	else if (selectedMenuOption == 3)	// not time attack
 		customMenu.selectMusicOption()
-	else if (selectedMenuOption == 4 && setting.time_attack)
+	else if (selectedMenuOption == 4 && (setting.time_attack || selectedZoneAct >= 0xff00))
 	{
 		exit_threshold = customMenu.selectRetryAndExit(exit_threshold)
 	}
