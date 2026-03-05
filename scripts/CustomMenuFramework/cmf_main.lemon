@@ -2578,11 +2578,11 @@ function void DataSelect.drawRevisitedSprites()
 //	Renderer.drawCustomSprite("blackscreen", getScreenExtend() - 40, 0, 0x00, SPRITE_FLAG_PRIO, 0x2002, 0, 30)		// background dimming (37.5% opacity)
 	VDP.setupVRAMWrite(0x5c20)		// VRAM address at start of DATA SELECT text along bottom of screen
 	VDP.zeroVRAM(0x0540)			// length of DATA SELECT art
-	s16 y_offset = (setting.time_attack) ? -21 : -18
+	s16 y_offset = (time_attack) ? -21 : -18
 	Renderer.drawCustomSprite("text_dataselect", getScreenWidth()/2, getScreenHeight() + y_offset, 0x00, SPRITE_FLAG_PRIO, 0x2010, 0, 0xffffff00, 0x10000)	// DATA SELECT text	// 0xff40ffff yellow
-	if (setting.time_attack == 4)
+	if (time_attack == 4)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "Any% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
-	else if (setting.time_attack == 3)
+	else if (time_attack == 3)
 		Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenWidth()/2, getScreenHeight() - 7, "100% Speedrun", 0xe8d494ff, 5, 0, 0xe000, 0, 1)
 }
 
