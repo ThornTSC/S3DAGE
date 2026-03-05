@@ -1500,7 +1500,7 @@ function void fn072d24()
 //# address-hook(0x054444) end(0x054448)
 function void UpdateLevelScrolling.LBZ2()
 {
-	if (camera.position.x.u16 > 0x4000 && getScreenHeightExtend() > 0)
+	if (camera.position.x.u16 > 0x4000 && camera.position.y.u16 > 0x04c0 && getScreenHeightExtend() > 0)
 	{
 		if (unused.lives_counter.player2 == 0)
 		{
@@ -1537,7 +1537,7 @@ function void fn0545da()
 
 function void LBZ2_CustomSprites()
 {
-	if (camera.position.x.u16 > 0x4000 && getScreenHeightExtend() > 0)
+	if (camera.position.x.u16 > 0x4000 && camera.position.y.u16 > 0x04c0 && getScreenHeightExtend() > 0)
 	{
 		Renderer.drawCustomSprite("lbz2_death_egg", deathEggX, deathEggY, 0, 0, 0x4001)
 		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
