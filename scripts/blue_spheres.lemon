@@ -1324,7 +1324,7 @@ function void fn04df52()
 
 	// With the plane mappings gone, we use an image in the text's place that shows if the first byte of the horizontal scroll values is appropriate.
 	if (u8[0xffffe120] == 0 && bluespheres.rings_remaining == 0)
-		Renderer.drawCustomSprite("results_perfect", getScreenWidth()/2, 81, 0, 0, 0x4001)
+		Renderer.drawCustomSprite("results_perfect", getScreenWidth()/2, 81, 0, 0, 0xa001)
 }
 
 // Green sphere palette setup and a new line to reset the displayed time at the start of a special stage
