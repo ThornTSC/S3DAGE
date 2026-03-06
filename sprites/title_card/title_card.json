@@ -8,7 +8,7 @@
     "titlecard_bluebar_rtwi":  { "File": "TitleCard_BlueBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_orangebar_rtwi":  { "File": "TitleCard_OrangeBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
     "titlecard_redbar_new_rtwi":  { "File": "TitleCard_RedBar_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
-    "titlecard_redbar_dage_rtwi":  { "File": "TitleCard_DAGEname_rtwi.png", "Rect": "0,48,64,176", "Center": "0,0" },
+    "titlecard_redbar_dage_rtwi":  { "File": "TitleCard_DAGEname_rtwi.png", "Rect": "0,0,64,240", "Center": "0,64" },
     // To move text right, subtract from x center. To move down, subtract from y center.
     "titlecard_act1":  { "File": "Title_Act1.png", "Rect": "0,0,77,48", "Center": "22,-64" }, 
     "titlecard_act2":  { "File": "Title_Act2.png", "Rect": "0,0,77,48", "Center": "22,-64" },
