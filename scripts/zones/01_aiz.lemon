@@ -700,6 +700,8 @@ function void AIZ2_CustomSprites()
 		if (camera.update_routine == 0x10 && bomberX != 0x8000)	// 0x8000 is used as a "do not render" value
 			Renderer.drawCustomSprite("aiz2_bomber", bomberX, bomberY, 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
 	}
+	else if (camera.update_routine == 0x10 && global.game.paused)	// this is needed to render the bomber section properly while paused at 224px screen height
+		fn04fff0()
 }
 
 
@@ -1453,13 +1455,18 @@ function void fn04ff74()
 // Do not call a drawing function for AIZ2 blimp plane rendering if the screen height is extended
 function void fn04fff0()
 {
+	if (getScreenHeightExtend() <= 0)
+	{
+		base.fn04fff0()
+		return
+	}
+
 	A4 = 0x050072
 	A6 = 0xffffa9f8
 	u16[A6 + 4] = camera.foreground.x.u16
 	D5 = 2
 	D6.u16 = camera.foreground.y.old
-	if (getScreenHeightExtend() <= 0)
-		fn04ee20()
+//	fn04ee20()		// not to be used when screen height is extended
 }
 
 // Adjust how the pre-boss looping area is handled at screen heights above 224.
