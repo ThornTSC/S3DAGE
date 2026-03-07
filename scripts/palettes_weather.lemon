@@ -1295,6 +1295,8 @@ function void fn051e60()
 		u64[0xfffffc50] = foregroundLightPaletteBackupB
 		u64[0xfffffc72] = backgroundLightPaletteBackup
 	}
+	if (!original_mode)
+		fillPlaneA_Default(camera.position.x.u16, camera.position.y.u16, getScreenWidth(), getScreenHeight())
 }
 
 
