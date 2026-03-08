@@ -179,7 +179,8 @@ function void fn07fd9e()
 
 #if STANDALONE
 	// Prevent bugs that occur when spindashing into the boss act
-	camera.locktime.player1 = 0
+	if (!original_mode)
+		camera.locktime.player1 = 0
 #endif
 }
 
