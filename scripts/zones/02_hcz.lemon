@@ -100,6 +100,9 @@ function void fn06aeb6()
 	objA0.update_address = 0x06aefe
 	objA0.countdown_callback = 0x06af04
 
+	if (getScreenWidth() > 400 && !original_mode)
+		objA0.position.x.u16 = level.bossarea.left + getScreenWidth()/2
+
 	requestLoadingPatterns(0x6c)		// Boss sprites
 
 	// Base S3&K sets this color to black, but Origins sets it to dark grey (as does Misc. Fixes and Tweaks)
