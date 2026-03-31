@@ -262,7 +262,7 @@ function void fn06364e()
 	{
 		// Three new lines to prepare the camera for the new layout section.
 		move_area.left = 0x0200	// normally 0x1680. Going further left loads some art from the intro.
-		move_area.bottom.target = 0x0190
+		move_area.bottom.target = 0x0190 - getScreenHeightExtend()
 		move_area.bottom.current = move_area.bottom.target
 
 		u32 backupA0 = A0
