@@ -329,6 +329,36 @@ function void fn06364e()
 	}
 }
 
+// For the animals not deleted in the previous function, delete them when they are far enough offscreen and unseen
+//# address-hook(0x063750) end(0x06378a)
+function void fn063750()
+{
+	UpdateMovementStraightSimple()
+	objA0.velocity.y += 0x18
+	if (objA0.velocity.y >= 0)
+	{
+		CheckGroundCollision()
+		if (D1.s16 < 0)
+		{
+			objA0.position.y.u16 += D1.u16
+			fn065e02()
+		}
+	}
+
+	--objA0.animation.timer
+	if (s8(objA0.animation.timer) < 0)
+	{
+		objA0.animation.timer = 0x01
+		++objA0.animation.sprite
+		objA0.animation.sprite &= 0x01
+	}
+	
+	if (objA0.position.x.u16 < (camera.position.x.u16 - 0x20) && getScreenWidth() > 400)
+		UnloadObject()
+	else
+		DrawObject()
+}
+
 
 // Adjust the AIZ1 camera boundaries for Knuckles.
 // The AIZ1 Knux palette patch and the level palette for Sonic as his intro ends are also loaded here.
