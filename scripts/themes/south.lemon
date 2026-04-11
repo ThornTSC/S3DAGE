@@ -275,23 +275,27 @@ function void South.TitleCard.TextElement.Update()
 	DrawObject()
 }
 
-// Used for title card bar and text functions
+// Used for title card bar and text functions.
+// AIZ zone name is 183px long and maps to 60.
+// For every two pixels shorter/longer a zone name is, add/subtract 1 from 60 to find value.
 constant array<s16> center_offset =
 {
-	60, // AIZ
+	60, // AIZ	0x00
 	84, // HCZ
 	48, // MGZ
 	48, // CNZ
-	44, // FBZ
+	44, // FBZ	0x04
 	108, // ICZ
 	64, // LBZ
 	52, // MHZ
-	76, // SOZ
+	76, // SOZ	0x08
 	80, // LRZ
 	48, // SSZ
 	80, // DEZ
-	56, // DDZ
-	52  // HPZ
+	56, // DDZ	0x0c
+	52, // HPZ
+
+	66  // ARZ
 }
 
 function bool South.TitleCardBar(s16 px, s16 py, s16 renderQueue)
@@ -312,6 +316,8 @@ function bool South.TitleCardBar(s16 px, s16 py, s16 renderQueue)
 		index = 0x00	// EHZ name length matches that of AIZ
 	else if (unlock_act == s2_CPZ)
 		index = 0x04	// CPZ name length is only shorter than FBZ by one pixel due to kerning
+	else if (unlock_act == s2_ARZ)
+		index = 0x0e	// CPZ name length is only shorter than FBZ by one pixel due to kerning
 	else if (global.zone_act == 0x1601 || global.zone_act == 0x1701)
 		index = 0x0d	// HPZ
 	else if (global.zone_act == 0x1700)
@@ -347,6 +353,8 @@ function bool South.TitleCardText(s16 px, s16 py, s16 renderQueue)
 		index = 0x00	// EHZ name length matches that of AIZ
 	else if (unlock_act == s2_CPZ)
 		index = 0x04	// CPZ name length is only shorter than FBZ by one pixel due to kerning
+	else if (unlock_act == s2_ARZ)
+		index = 0x0e	// CPZ name length is only shorter than FBZ by one pixel due to kerning
 	else if (global.zone_act == 0x1601 || global.zone_act == 0x1701)
 		index = 0x0d	// HPZ
 	else if (global.zone_act == 0x1700)
