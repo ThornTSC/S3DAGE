@@ -13,6 +13,8 @@ function void fn007812()
 			System.loadExternalRawData("ehz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
 		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
+		else if (unlock_act == s2_ARZ)
+			System.loadExternalRawData("arz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
 		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_tiles", s2_decompression_buffer)		// copy Primary tiles to shared memory
 		A1 = s2_decompression_buffer
@@ -100,6 +102,8 @@ function void fn01c2b0()
 			System.loadExternalRawData("ehz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
 		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
+		else if (unlock_act == s2_ARZ)
+			System.loadExternalRawData("arz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
 		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_blocks", KosinskiRawdataBuffer)		// copy Primary blocks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, 0xffff9000)					// decompress them to their proper RAM
@@ -135,6 +139,8 @@ function void fn01c2b0()
 			System.loadExternalRawData("ehz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
+		else if (unlock_act == s2_ARZ)
+			System.loadExternalRawData("arz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_chunks_p", KosinskiRawdataBuffer)		// copy Primary chunks to shared memory
 		Kosinski.decompress(KosinskiRawdataBuffer, A1)								// decompress them to their proper RAM
@@ -277,6 +283,8 @@ function void fn01c362()
 			else 
 				Standalone.loadRawLevelData("cpz_layout_2", global.zone_act, 0xffff8000)
 		}
+		else if (unlock_act == s2_ARZ)
+			Standalone.loadRawLevelData("arz_layout", global.zone_act, 0xffff8000)
 		else if (unlock_act == s3_CGZ)
 			Standalone.loadRawLevelData("cgz_layout", global.zone_act, 0xffff8000)
 	}
@@ -317,6 +325,8 @@ function void LevelObjectTableBuilder.buildObjects()
 			else
 				bytes = Standalone.loadRawLevelData("cpz_objects_2", global.zone_act, A0)
 		}
+		else if (unlock_act == s2_ARZ)
+			bytes = Standalone.loadRawLevelData("arz_objects", global.zone_act, A0)
 		else if (unlock_act == s3_CGZ)
 			bytes = Standalone.loadRawLevelData("cgz_objects", global.zone_act, A0)
 	}
@@ -484,6 +494,8 @@ function void LevelRingsTableBuilder.buildRings()
 			else
 				bytes = Standalone.loadRawLevelData("cpz_rings_2", global.zone_act, A1)
 		}
+		else if (unlock_act == s2_ARZ)
+			bytes = Standalone.loadRawLevelData("arz_rings", global.zone_act, A1)
 		else if (unlock_act == s3_CGZ)
 			bytes = Standalone.loadRawLevelData("cgz_rings", global.zone_act, A1)
 	}

@@ -994,15 +994,21 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
-	// EHZ Platforms
+	// EHZ/ARZ Platforms
 	if (unlock_act && objA0.update_address == 0x0255f4)
 	{
-		Renderer.drawCustomSprite(stringformat("ehz_platform_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		if (unlock_act == s2_ARZ)
+			Renderer.drawCustomSprite(stringformat("arz_platform_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		else
+			Renderer.drawCustomSprite(stringformat("ehz_platform_%02x", objA0.animation.sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}
 	if (unlock_act && (objA0.update_address == 0x024ef2 || objA0.update_address == 0x0251ae))
 	{
-		Renderer.drawCustomSprite("ehz_platform_fall", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		if (unlock_act == s2_ARZ)
+			Renderer.drawCustomSprite("arz_platform_fall", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		else
+			Renderer.drawCustomSprite("ehz_platform_fall", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}
 
@@ -1152,9 +1158,43 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 		return true
 	}
 
-	// CPZ water waves effect
+	// CPZ/ARZ water waves effect
 	if (objA0.update_address == 0x0208dc)
 	{
+		// ARZ
+		if (unlock_act == s2_ARZ)
+		{
+			if (palette_set >= 2)
+			{
+				px += (s8[0xfffffe98] >> 1) - 32
+				Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, 208)
+				Renderer.drawVdpSpriteWithAlpha(px + 192, py, size, index, renderQueue, 208)
+				Renderer.drawVdpSpriteWithAlpha(px + (2*192), py, size, index, renderQueue, 208)
+				return true
+			}
+			else
+			{
+				s16 x_shift = (level.framecounter.low & 0x01) ? -0x10 : 0x10
+				Renderer.clearSpriteTag()
+				px = (camera.position.x.u16 & 0xffc0) - camera.position.x.u16 + x_shift	// Extend a bit more to the left just for sprite interpolation
+				for (; px < s16(getScreenWidth()); px += 0x40)
+				{
+					renderQueue = 0xdfe1
+					for (u8 i = 0; i <= 0x6d; i++)
+					{
+						if (u32[0xffffb000 + (i * 0x4a)] == 0x02d8e2)
+						{
+							renderQueue = 0x9fe1	// when in act transition area, do not cover Angel theme zone name, act number, or red bar
+							break
+						}
+					}
+					Renderer.drawVdpSpriteWithAlpha(px, py, size, index, renderQueue, 255)
+				}				
+			}
+			return true
+		}
+
+		// CPZ
 		s16 x_shift = (level.framecounter.low & 0x10) ? -0x10 : 0x10
 		if (A0 == 0xffffcf82 && D4.u16 == 0)		// Only for one sprite of the main object
 		{

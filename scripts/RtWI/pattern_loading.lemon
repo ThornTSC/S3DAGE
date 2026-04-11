@@ -194,6 +194,71 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("grabber_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12)	// 0x06 bytes
 		System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// 0x18 bytes
 	}
+	else if (unlock_act == s2_ARZ)	// ARZ
+	{
+		// Primary
+		System.loadExternalRawData("arz_arrowshooter_mappings", s2_mappings_address) // length 0x50
+		System.loadExternalRawData("arz_arrowshooter_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x82e0)
+
+		System.loadExternalRawData("arz_specialplatform_mappings", s2_mappings_address + 0x50)	// length 0x4a
+
+		System.loadExternalRawData("arz_risingpillar_mappings", s2_mappings_address + 0x1100)	// length 0x035c
+		System.loadExternalRawData("arz_crushingpillar_mappings", s2_mappings_address + 0x50 + 0x4a)	// length 0x5a
+
+		System.loadExternalRawData("s2_bubbles_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa9a0)	// not the original art or location from Sonic 2! Using S3&K additional bubbles with Sonic 2 colors.
+
+		System.loadExternalRawData("arz_watersurface_mappings", s2_mappings_address + 0x1000)	// 0xba bytes
+		System.loadExternalRawData("arz_watersurface_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8000)
+
+		// Secondary
+		System.loadExternalRawData("s2_spikes_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8680)
+
+		System.loadExternalRawData("whisp_mappings", s2_mappings_address + 0x50 + 0x4a + 0x5a) // 0x20 bytes
+		System.loadExternalRawData("whisp_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa000)
+
+		System.loadExternalRawData("chopchop_mappings", s2_mappings_address + 0x50 + 0x4a + 0x5a + 0x20) // 0x14 bytes
+		System.loadExternalRawData("chopchop_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xa760)
+
+		System.loadExternalRawData("springboard_mappings", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c)	// 0x20 bytes, starting offset = 0x01ac
+		System.loadExternalRawData("springboard_slopedata", s2_mappings_address + 0x24 + 0x0a + 0x4c + 0x64 + 0x50 + 0x10 + 0x18 + 0x0a + 0x4c + 0x20)	// 0x50 bytes
+		System.loadExternalRawData("springboard_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8800)
+
+		System.loadExternalRawData("s2_spring_mappings", 0x221dea)		// formerly s2_mappings_address + 0x0040
+	//	System.loadExternalRawData("s2_diagonalspring_art_nem", s2_decompression_buffer_2)	// not used in CPZ
+	//	Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8780)							// not used in CPZ
+
+		System.loadExternalRawData("s2_upwardspring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8b80)
+
+		System.loadExternalRawData("s2_sidespring_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8e00)
+
+		// Other
+		System.loadExternalRawData("s2_invin_stars_mappings", s2_mappings_address + 0x041a)
+
+		System.loadExternalRawData("s2_starpost_mappings", s2_mappings_address + 0x04c6)	// we'll use the Sonic 3 dust recolored for now, as the characters are from Sonic 3
+		System.loadExternalRawData("s2_starpost_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0x8f80)
+
+		System.loadExternalRawData("s2_badnikpoints_mappings", s2_mappings_address + 0x046e)
+		System.loadExternalRawData("s2_badnikpoints_art_nem", s2_decompression_buffer_2)
+		Nemesis.loadDataToVRAM(s2_decompression_buffer_2, 0xbc80)
+
+		System.loadExternalRawData("arz_risingpillar_objdata", 0x880e88)
+
+		// Animation scripts for objects. These must be handled after all other art if we intend to use the same address as above.
+		System.loadExternalRawData("whisp_animation", s2_decompression_buffer_2)	// 0x06 bytes
+		System.loadExternalRawData("chopchop_animation", s2_decompression_buffer_2 + 0x06)	// 0x06 bytes
+		System.loadExternalRawData("springboard_animation", s2_decompression_buffer_2 + 0x14)	// 0x0c bytes
+		System.loadExternalRawData("arz_arrowshooter_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)	// 0x16 bytes
+	}
 	else if (unlock_act == s3_CGZ)
 	{
 		// Button

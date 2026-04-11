@@ -406,5 +406,44 @@
     "cgz_chunks_p":  { "File": "../level/CGZ/Chunks/Primary.bin" },
 
     // Collision
-    "cgz_collision":  { "File": "../level/CGZ/Collision/IndexesSK.bin" }
+    "cgz_collision":  { "File": "../level/CGZ/Collision/IndexesSK.bin" },
+
+  // ARZ
+    // Layout
+    "arz_layout": { "File": "../level/ARZ/Layout/Full.bin" },
+    "arz_objects": { "File": "../level/ARZ/Object Pos/Full.bin" },
+    "arz_rings": { "File": "../level/ARZ/Ring Pos/Full.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "arz_tiles":  { "File": "../level/ARZ/Tiles/Tiles.bin" },
+    "arz_animscripts":  { "File": "../level/ARZ/Tiles/Animation Scripts.bin" },
+    "arz_animtiles":  { "File": "../level/ARZ/Tiles/Animated Tiles.bin" },
+    "arz_blocks":  { "File": "../level/ARZ/Blocks/Blocks.bin" },
+    "arz_chunks_p":  { "File": "../level/ARZ/Chunks/Primary.bin" },
+
+    // Collision
+    "arz_collision":  { "File": "../level/ARZ/Collision/IndexesSK.bin" },
+
+    // Palette
+    "arz_palette_rtwi":  { "File": "../level/ARZ/Palette/Palette RtWI.bin" },
+    "arz_palette":  { "File": "../level/ARZ/Palette/Palette.bin" },
+    "arz_palette_s2":  { "File": "../level/ARZ/Palette/S2 Palette.bin" },
+    "arz_palette_underwater":  { "File": "../level/ARZ/Palette/Palette Underwater.bin" },
+
+    // Object art, mappings, and animation
+    "arz_arrowshooter_art_nem":  { "File": "../level/ARZ/Object Art/Arrow Shooter Nemesis Art.bin" },
+    "arz_arrowshooter_mappings":  { "File": "../level/ARZ/Object Art/Arrow Shooter Mappings.bin" },
+    "arz_arrowshooter_animation":  { "File": "../level/ARZ/Object Art/Arrow Shooter Animation.bin" },
+    "arz_crushingpillar_mappings":  { "File": "../level/ARZ/Object Art/Crushing Pillar Mappings.bin" },
+    "arz_risingpillar_mappings":  { "File": "../level/ARZ/Object Art/Rising Pillar Mappings.bin" },
+    "arz_risingpillar_objdata":  { "File": "../level/ARZ/Object Art/Rising Pillar Object Data.bin" },
+    "arz_specialplatform_mappings":  { "File": "../level/ARZ/Object Art/ARZ Special Platform Mappings.bin" },
+    "arz_watersurface_art_nem":  { "File": "../level/ARZ/Object Art/ARZ Water Surface Nemesis Art.bin" },
+    "arz_watersurface_mappings":  { "File": "../level/ARZ/Object Art/ARZ Water Surface Mappings.bin" },
+    "chopchop_art_nem":  { "File": "../level/ARZ/Object Art/Chop Chop Nemesis Art.bin" },
+    "chopchop_mappings":  { "File": "../level/ARZ/Object Art/Chop Chop Mappings.bin" },
+    "chopchop_animation":  { "File": "../level/ARZ/Object Art/Chop Chop Animation.bin" },
+    "whisp_art_nem":  { "File": "../level/ARZ/Object Art/Whisp Nemesis Art.bin" },
+    "whisp_mappings":  { "File": "../level/ARZ/Object Art/Whisp Mappings.bin" },
+    "whisp_animation":  { "File": "../level/ARZ/Object Art/Whisp Animation.bin" }
 }

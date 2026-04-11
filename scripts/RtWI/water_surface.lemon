@@ -20,7 +20,7 @@ function void WaterSurface.Init()
 	objA0.box_size.x = 0x80
 	objA0.box_size.y = 0x20
 	u16[A0 + 0x30] = objA0.position.x.u16
-	if (unlock_act == s3_CGZ)		// Aquatic Ruin Zone
+	if (unlock_act == s2_ARZ)		// Aquatic Ruin Zone
 	{
 		objA0.base_state += 0x02
 		objA0.mapping_offset = s2_mappings_address + 0x1000	// ARZ mappings offset
@@ -83,6 +83,8 @@ function void WaterSurface.Action2()
 	objA0.position.x.u16 = (camera.position.x.u16 & 0xffe0) + 0x60
 	D1.u16 = water.height.current
 	objA0.position.y.u16 = D1.u16
+	objA0.animation.sprite = 2	// added forcing a screen-width rendering of the waves
+
 	if (u8[A0 + 0x32] == 0)
 	{
 		if ((control.pad1.pressed & 0x80) == 0)
@@ -92,6 +94,7 @@ function void WaterSurface.Action2()
 		}
 		objA0.animation.sprite += 0x02
 		u8[A0 + 0x32] = 0x01
+		objA0.animation.sprite = 2	// added forcing a screen-width rendering of the waves. Remove this if restoring original behavior.
 		DrawObject()
 	}
 	else
@@ -105,6 +108,7 @@ function void WaterSurface.Action2()
 		}
 		else
 		{
+			objA0.animation.sprite = 2	// added forcing a screen-width rendering of the waves. Remove this if restoring original behavior.
 			DrawObject()
 		}
 	}
@@ -119,5 +123,6 @@ function void fn0209f4()
 		++objA0.animation.sprite
 		objA0.animation.sprite &= 0x01
 	}
+	objA0.animation.sprite = 2	// added forcing a screen-width rendering of the waves. Remove this if restoring original behavior.
 	DrawObject()
 }

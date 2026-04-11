@@ -1,0 +1,222 @@
+define objA0.position.x.orig = u16[A0 + 0x32]
+define objA0.position.y.orig = u16[A0 + 0x42]
+define objA1.position.x.orig = u16[A1 + 0x32]
+define objA1.position.y.orig = u16[A1 + 0x42]
+define objA0.value44 = u16[A0 + 0x44]
+
+//# address-hook(0x02a290) end(0x02a29a)
+function void ARZSpecialPlatforms.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ARZSpecialPlatforms.Init()
+	else // if (objA0.base_state == 2)
+		ARZSpecialPlatforms.Main()
+}
+
+constant array<u8> ARZSpecialPlatforms.HeightAndWidth =
+{
+	0x20, 0x08,
+	0x1c, 0x30,	// 0x10, 0x30 for pillars is better for touching the sides, but bad for standing atop them
+	0x10, 0x10,	// unused and lacking mappings frames
+	0x10, 0x10,	// unused and lacking mappings frames
+}
+
+
+//# address-hook(0x02a2aa) end(0x02a354)
+function void ARZSpecialPlatforms.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x50
+	objA0.sprite_attributes = 0
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0180
+	D0 = objA0.subtype2c
+	D0.u16 >>= 3
+	D0.u16 &= 0x0e
+	objA0.hitbox_extends.x = ARZSpecialPlatforms.HeightAndWidth[D0.u16] + 0x20	// added for drawing with less pop-in
+	objA0.box_size.x = ARZSpecialPlatforms.HeightAndWidth[D0.u16]
+	objA0.hitbox_extends.y = ARZSpecialPlatforms.HeightAndWidth[D0.u16 + 1]
+	objA0.box_size.y = objA0.hitbox_extends.y + 0x20	// added for drawing with less pop-in
+	D0.u16 >>= 1
+	objA0.animation.sprite = D0.u8
+	objA0.position.x.orig = objA0.position.x.u16
+	objA0.position.y.orig = objA0.position.y.u16
+	D0.u8 = objA0.subtype2c & 0x0f
+	if (D0.u8 != 0)
+	{
+		if (D0.u8 != 0x07)
+		{
+			objA0.flags38 = 0x01
+		}
+	}
+	objA0.subtype2c &= 0x0f
+	ARZSpecialPlatforms.Main()
+}
+
+function void ARZSpecialPlatforms.Main()
+{
+	u16[A7-=2] = objA0.position.x.u16
+	// The object subtype has its first (hex) digit removed in Init. The last digit should never be more than 7.
+	// A final digit of 0 means no unique code is run.
+	if (objA0.subtype2c == 1 || objA0.subtype2c == 3)
+		fn02a36a()
+	else if (objA0.subtype2c == 2 || objA0.subtype2c == 6)
+		fn02a392()
+	else if (objA0.subtype2c == 4)
+		fn02a3b6()
+	else if (objA0.subtype2c == 5)
+		fn02a3d8()
+	else if (objA0.subtype2c == 7)
+		fn02a3ec()
+
+	D4.u16 = u16[(A7+=2)-2]
+	if (s8(objA0.render_flags) < 0)
+	{
+		D1 = objA0.box_size.x
+		D1.u16 += 0x0b
+		D2 = objA0.hitbox_extends.y
+		D3.u16 = D2.u16
+		++D3.u16
+		fn01dc56()	// SolidObject
+		D6 = (D6 << 16) + (D6 >> 16)
+		objA0.value3b = D6.u8
+		fn02a432()
+	}
+	D0.u16 = objA0.position.x.orig
+	DrawOrUnloadObject()
+}
+
+//# address-hook(0x02a36a) end(0x02a390)
+function void fn02a36a()
+{
+	if (objA0.value44 == 0)
+	{
+		D0.u8 = objA0.flags2a & 0x18
+		if (D0.u8 != 0)
+		{
+			objA0.value44 = 0x1e
+		}
+		return
+	}
+	--objA0.value44
+	if (objA0.value44 != 0)
+	{
+		return
+	}
+	++objA0.subtype2c
+	objA0.flags38 = 0
+}
+
+
+//# address-hook(0x02a392) end(0x02a3b4)
+function void fn02a392()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	objA0.velocity.y += 0x08
+	CheckGroundCollision()
+	if (D1.s16 < 0)
+	{
+		++D1.u16
+		objA0.position.y.u16 += D1.u16
+		objA0.velocity.y = 0
+		objA0.subtype2c = 0
+	}
+}
+
+
+//# address-hook(0x02a3b6) end(0x02a3d6)
+function void fn02a3b6()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	objA0.velocity.y -= 0x08
+	CheckCeilingCollision()
+	if (D1.s16 < 0)
+	{
+		objA0.position.y.u16 -= D1.u16
+		objA0.velocity.y = 0
+		objA0.subtype2c = 0
+	}
+}
+
+
+//# address-hook(0x02a3d8) end(0x02a3ea)
+function void fn02a3d8()
+{
+	D0.u8 = objA0.value3b & 0x03
+	if (D0.u8 != 0)
+	{
+		++objA0.subtype2c
+		objA0.flags38 = 0
+	}
+}
+
+
+//# address-hook(0x02a3ec) end(0x02a430)
+function void fn02a3ec()
+{
+	D0.u16 = water.height.current - objA0.position.y.u16
+	if (D0.u16 != 0)
+	{
+		if (D0.u16 < 0)
+		{
+			if (D0.s16 < -0x02)
+			{
+				D0 = 0xfffffffe
+			}
+			objA0.position.y.u16 += D0.u16
+			CheckCeilingCollision()
+			if (D1.s16 < 0)
+			{
+				objA0.position.y.u16 -= D1.u16
+			}
+			return
+		}
+		if (D0.s16 > 0x02)
+		{
+			D0 = 0x02
+		}
+		objA0.position.y.u16 += D0.u16
+		CheckGroundCollision()
+		if (D1.s16 < 0)
+		{
+			++D1.u16
+			objA0.position.y.u16 += D1.u16
+		}
+	}
+}
+
+
+//# address-hook(0x02a432) end(0x02a474)
+function void fn02a432()
+{
+	if (objA0.flags38 != 0)
+	{
+		D0.u8 = objA0.flags2a & 0x18
+		if (D0.u8 == 0)
+		{
+			if (objA0.value3a == 0)
+			{
+				return
+			}
+			objA0.value3a -= 0x04
+			call 0x02a45a
+			return
+		}
+		if (objA0.value3a != 0x40)
+		{
+			objA0.value3a += 0x04
+		}
+	}
+	fn02a45a()
+}
+
+function void fn02a45a()
+{
+	//	D0.u8 = objA0.value3a	// used for CalcSine
+	D0.u16 = lookupSin(objA0.value3a)
+	D1.u16 = 0x0400
+	D0.s32 = s32(D0.s16) * D1.s16
+	D0 = (D0 << 16) + (D0 >> 16)
+	D0.u16 += objA0.position.y.orig
+	objA0.position.y.u16 = D0.u16
+}

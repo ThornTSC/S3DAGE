@@ -1,0 +1,250 @@
+function void ARZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.ARZ()
+}
+
+function void UpdateBackgroundScrolling.ARZ()
+{
+	
+}
+
+// //# address-hook(0x00d4ae) end(0x00d5cc)
+// function void UpdateBackgroundScrolling.ARZ()
+// {
+// 	D4.s32 = s16[0xffffeeb0]
+// 	D4.s32 = s32(D4.s16) * 0x0119
+// 	D6 = 0x02
+// 	SetHorizScrollFlagsBG_ARZ()
+// 	D5.s32 = s16[0xffffeeb2]
+// 	D5.s32 <<= 7
+// 	if (u8[0xfffffe11] == 0)
+// 	{
+// 		D5.s32 <<= 1
+// 	}
+// 	D6 = 0x06
+// 	SetVertiScrollFlagsBG()
+// 	u16[0xfffff618] = u16[0xffffee0c]
+// 	D2 = 0
+// 	D3 = 0	// bugfix for screen shake during boss fight
+// 	if (u8[0xffffeebd] != 0)
+// 	{
+// 		D0.u16 = u16[0xfffffe04] & 0x3f
+// 	//	A1 = 0xc682	// SwScrl_RippleData
+// 	//	A1 = A1 + D0.s16
+// 		u16 rippleValue = SwScrl_RippleData[D0.u16]
+// 	//	D0 = 0
+// 	//	D0.u8 = u8[(A1+=1)-1]
+// 		u16[0xfffff616] += rippleValue	// D0.u16
+// 		u16[0xfffff618] += rippleValue	// D0.u16
+// 		u16[0xffffeef4] += rippleValue	// D0.u16
+// 		D3.u16 = rippleValue		// bugfix for screen shake during boss fight
+// 		D2.u8 = u8[(A1+=1)-1]
+// 		u16[0xffffeef0] += SwScrl_RippleData[D0.u16 + 1]	// D2.u16
+// 	}
+	
+// 	A2 = 0xffffa800
+// 	A3 = A2 + 0x06
+// 	D0.s32 = s16[0xffffee00]
+// 	D0.s32 <<= 4
+// 	D0.s16 = D0.s32 / 0x0a   // Result should also contain modulo in upper byte/word
+// 	D0.s32 = D0.s16
+// 	D0.s32 <<= 4
+// 	D0.s32 <<= 8
+// 	D1 = D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 *= 2
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1 += D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	u16[(A3+=2)-2] = D1.u16
+// 	u16[A2] = D1.u16
+// 	u16[A2 + 0x04] = D1.u16
+// 	D0.u16 = u16[0xffffee08]
+// 	u16[A2 + 0x02] = D0.u16
+// 	u16[A2 + 0x16] = D0.u16
+// 	u16[A2] = D0.u16
+// 	u16[A2 + 0x04] = D0.u16
+// 	u16[A2 + 0x18] = D0.u16
+// 	u16[A2 + 0x1a] = D0.u16
+// 	u16[A2 + 0x1c] = D0.u16
+// 	u16[A2 + 0x1e] = D0.u16
+
+// 	constant array<u8> SwScrl_ARZ_RowHeights =
+// 	{
+// 		176,
+// 		112,
+// 		48,
+// 		96,
+// 		21,
+// 		12,
+// 		14,
+// 		6,
+// 		12,
+// 		31,
+// 		48,
+// 		192,
+// 		240,
+// 		240,
+// 		240,
+// 		240
+// 	}
+
+// 	// We'll place the RowHeight values in shared memory.
+// 	A3 = 0x880980	// 0xd5ce
+// 	for (u8 i = 0; i <= 15; ++i)
+// 	{
+// 		u8[A3] = SwScrl_ARZ_RowHeights[i]
+// 		++A3
+// 	}
+
+// 	A3 = 0x880980	// 0xd5ce
+// 	A2 = 0xffffa800
+// 	A1 = 0xffffe000
+// 	D1.u16 = u16[0xffffee0c]
+// 	D1.u16 += D3.u16	// bugfix for screen shake during boss fight
+// 	D0 = 0
+// 	while (true)
+// 	{
+// 		D0.u8 = u8[(A3+=1)-1]
+// 		A2 += 0x02
+// 		D1.u16 -= D0.u16
+// 		if (D1.s16 < 0)
+// 			break
+// 	}
+// 	D1.s16 = -D1.s16
+// 	A2 -= 0x02
+// 	D2.u16 = getScreenHeight() - 1
+// 	D0.u16 = u16[0xffffee00]
+// 	D0.s16 = -D0.s16
+// 	D0 = (D0 << 16) + (D0 >> 16)
+// 	D0.u16 = u16[(A2+=2)-2]
+// 	D0.s16 = -D0.s16
+// 	while (true)
+// 	{
+// 		u32[(A1+=4)-4] = D0
+// 		--D1.u16
+// 		if (D1.u16 == 0)
+// 		{
+// 			D1.u8 = u8[(A3+=1)-1]
+// 			D0.u16 = u16[(A2+=2)-2]
+// 			D0.s16 = -D0.s16
+// 		}
+// 		--D2.s16
+// 		if (D2.s16 < 0)
+// 			break
+// 	}
+// 	return
+// }
+
+
+// //# address-hook(0x00d938) end(0x00d96a)
+// function void SetVertiScrollFlagsBG()
+// {
+// 	D3 = u32[0xffffee0c]
+// 	D0 = D3 + D5
+// 	SetVertiScrollFlagsBG2()
+// }
+
+// function void SetVertiScrollFlagsBG2()
+// {
+// 	u32[0xffffee0c] = D0
+// 	D1 = D0
+// 	D1 = (D1 << 16) + (D1 >> 16)
+// 	D1.u16 &= 0x10
+// 	D2.u8 = u8[0xffffee43]
+// 	D1.u8 ^= D2.u8
+// 	if (D1.u8 == D2.u8)
+// 	{
+// 		u8[0xffffee43] ^= 0x10
+// 		D0 -= D3
+// 		if (D0.s32 < 0)
+// 		{
+// 			u8[0xffffee52] |= (u8(1) << D6.u8)
+// 			return
+// 		}
+// 		++D6.u8
+// 		u8[0xffffee52] |= (u8(1) << D6.u8)
+// 	}
+// 	return
+// }
+
+
+// //# address-hook(0x00d96c) end(0x00d9c6)
+// function void SetHorizScrollFlagsBG_ARZ()
+// {
+// 	// 0xfffff672 is Camera_ARZ_BG_X_pos in Sonic 2 disassembly, and still appears to be free in S3&K
+// 	D0 = u32[0xfffff672] + D4
+// 	u32[0xfffff672] = D0
+// 	A1 = 0xffffee08
+// 	D2.u16 = u16[A1]
+// 	D0.u16 = u16[0xfffff672] - D2.u16
+// 	if (D0.u16 >= 0)
+// 	{
+// 		if (D0.u16 > 0)
+// 		{
+// 			// loc_d994
+// 			if (D0.u16 >= 0x10)
+// 			{
+// 				D0.u16 = 0x10
+// 			}
+// 			fn00d99e()
+// 		}
+// 		return
+// 	}
+// 	if (D0.s16 <= -0x10)
+// 	{
+// 		D0.u16 = 0xfff0
+// 		fn00d99e()
+// 		return
+// 	}
+// }
+
+// function void fn00d99e()
+// {
+// 	// loc_d99e
+// 	D0.u16 += u16[A1]
+// 	u16[A1] = D0.u16
+// 	D1.u16 = D0.u16 & 0x10
+// 	D3.u8 = u8[0xffffee42]
+// 	D1.u8 ^= D3.u8
+// 	if (D1.u8 == D3.u8)
+// 	{
+// 		u8[0xffffee42] ^= 0x10
+// 		D0.u16 -= D2.u16
+// 		if (D0.s16 < 0)
+// 		{
+// 			u8[0xffffee52] |= (u8(1) << D6.u8)
+// 		}
+// 		else
+// 		{
+// 			++D6.u8
+// 			u8[0xffffee52] |= (u8(1) << D6.u8)
+// 		}
+// 	}
+// 	return
+// }

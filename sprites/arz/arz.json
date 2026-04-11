@@ -1,0 +1,6 @@
+{
+	// EHZ Platforms
+	"arz_platform_00": { "File": "arz_platforms.bmp", "Rect":   "8,8,64,64", "Center": "32,29" },
+	"arz_platform_01": { "File": "arz_platforms.bmp", "Rect":  "80,8,64,96", "Center": "32,47" },
+	"arz_platform_fall": { "File": "arz_platforms.bmp", "Rect":   "8,8,64,64", "Center": "32,14" }
+}

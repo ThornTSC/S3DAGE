@@ -173,12 +173,14 @@ constant array<u16> UnlockAct_StartPositionsSonicTails =
 {
 	0x0060, 0x0294,		// EHZ
 	0x0060, 0x01ec,		// CPZ
+	0x0060, 0x037c,		// ARZ
 	0x067c, 0x028c		// CGZ
 }
 constant array<u16> UnlockAct_StartPositionsKnuckles =
 {
 	0x0060, 0x0534,		// EHZ
 	0x0060, 0x01ec,		// CPZ
+	0x0060, 0x037c,		// ARZ
 	0x067c, 0x028c		// CGZ
 }
 

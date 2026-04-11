@@ -5,9 +5,9 @@
 
 // Set version number to show at the end of time attacks and marathon runs.
 // This variable is not actually called yet, but may be in the future.
-global u64 DAGE_version_string = "D.A. Garden Edition v1.13.1.6"
-global u16 DAGE_version = 0x1d16
-#define DAGE_running = 0x1d16
+global u64 DAGE_version_string = "D.A. Garden Edition v1.14.0.0"
+global u16 DAGE_version = 0x1e00
+#define DAGE_running = 0x1e00
 
 // Define variables for in-game settings
 global u8 palette_set
@@ -203,7 +203,8 @@ constant u32 s2_decompression_buffer_2 = 0x890000
 // unlock_act constants
 constant u16 s2_EHZ = 1
 constant u16 s2_CPZ = 2
-constant u16 s3_CGZ = 3
+constant u16 s2_ARZ = 3
+constant u16 s3_CGZ = 4
 
 
 
@@ -385,6 +386,8 @@ function void discordRPC.mainGame()
 		gameType = "Emerald Hill Zone"
 	else if (unlock_act == s2_CPZ)
 		gameType = "Chemical Plant Zone"
+	else if (unlock_act == s2_ARZ)
+		gameType = "Aquatic Ruin Zone"
 	// else if (time_attack == 4)	// unused, as it's a special case that won't state emerald count
 	//	gameType = "Any% Speedrun"
 
@@ -1377,6 +1380,8 @@ function void fn0076a6()
 			System.loadExternalRawData("ehz_collision", D0)
 		else if (unlock_act == s2_CPZ)
 			System.loadExternalRawData("cpz_collision", D0)
+		else if (unlock_act == s2_ARZ)
+			System.loadExternalRawData("arz_collision", D0)
 		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_collision", D0)	
 	}
@@ -8386,6 +8391,7 @@ constant array<u16> UnlockAct.LevelSizes =
 {
 	0x0000, 0x7fff, 0x0000, 0x04c0,		// EHZ
 	0x0000, 0x7fff, 0x0000, 0x0720,		// CPZ
+	0x0000, 0x38f0, 0x0180, 0x0620,		// ARZ
 	0x0000, 0x7fff, 0x0000, 0x0720		// CGZ
 }
 
@@ -13365,7 +13371,7 @@ function void fn08598a()
 function void Level.InitializeWater()
 {
 	bool levelHasWater = false
-	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601 || unlock_act == s2_CPZ)
+	if (global.zone_act == 0x0000 || global.zone == 0x01 || global.zone_act == 0x0501 || global.zone_act == 0x0601 || unlock_act == s2_CPZ || unlock_act == s2_ARZ)
 	{
 		levelHasWater = true
 	}
@@ -13427,11 +13433,13 @@ function void Level.InitializeWater()
 		u16 waterHeight = u16[0x006d2c + offset]
 		if (original_mode && global.zone_act == 0x0301)		// Original Mode CNZ2 lines up with base S3&K
 			waterHeight = 0x0a90
-		if (unlock_act == s2_CPZ)	// Chemical Plant Zone
+		else if (unlock_act == s2_CPZ)	// Chemical Plant Zone
 		{
 			bool KnuxHardLayout = (layout.part == 2)
 			waterHeight = (KnuxHardLayout) ? 0x0590 : (layout.part == 1 && (checkpoint.number & 0x7f) <= 10) ? 0x0710 : (layout.part == 1) ? 0x0510 : 0x0c00
 		}
+		else if (unlock_act == s2_ARZ)
+			waterHeight = 0x0410
 		water.height.target = waterHeight
 		water.height.current = waterHeight
 		water.height.next = waterHeight
@@ -23671,7 +23679,8 @@ constant array<u16> SonicRSR.prohibitSidekick.unlockAct =
 {
 //		1	2	3	4	5
 		0,	0,	0,	1,	0,	// EHZ
-		0,	0,	0,	0,	0	// CPZ
+		0,	0,	0,	0,	0,	// CPZ
+		0,	0,	0,	0,	0	// ARZ
 }
 
 function bool RedStarRing_RequiresSonicAlone(u16 currentZoneAndAct, u8 rsrID)
@@ -23722,7 +23731,8 @@ constant array<u16> KnuxRSR.prohibitSidekick.unlockAct =
 {
 //		1	2	3	4	5
 		0,	0,	0,	0,	0,	// EHZ
-		0,	0,	0,	0,	0	// CPZ
+		0,	0,	0,	0,	0,	// CPZ
+		0,	0,	0,	0,	0	// ARZ
 }
 
 function bool RedStarRing_RequiresKnuxAlone(u16 currentZoneAndAct, u8 rsrID)

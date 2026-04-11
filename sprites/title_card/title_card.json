@@ -57,6 +57,7 @@
     "titlecard_specialstage_menu":  { "File": "Title_SpecialStage.png", "Rect": "0,0,163,57", "Center": "92,33" },  // centered as if image is 21px wider due to not having the word ZONE attached
     "titlecard_unlock0001_menu":  { "File": "Title_EHZ.png", "Rect": "0,0,180,66", "Center": "89,33" },
     "titlecard_unlock0002_menu":  { "File": "Title_CPZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
+    "titlecard_unlock0003_menu":  { "File": "Title_CPZ.png", "Rect": "0,0,196,66", "Center": "98,33" },
 
     // Actual S3&K title card parts
 	"angel_titlecard_zone0":  { "File": "angel_zonenames.png", "Rect": "0,0,160,24", "Center": "32,12" },
@@ -78,5 +79,6 @@
 
     "angel_titlecard_zone":  { "File": "angel_zonenames.png", "Rect": "0,360,72,24", "Center": "36,12" },
     "angel_titlecard_unlock0001":  { "File": "angel_zonenames.png", "Rect": "0,384,160,24", "Center": "32,12" },
-    "angel_titlecard_unlock0002":  { "File": "angel_zonenames.png", "Rect": "0,408,198,24", "Center": "70,12" }
+    "angel_titlecard_unlock0002":  { "File": "angel_zonenames.png", "Rect": "0,408,198,24", "Center": "70,12" },
+    "angel_titlecard_unlock0003":  { "File": "angel_zonenames.png", "Rect": "0,408,198,24", "Center": "70,12" }
 }

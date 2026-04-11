@@ -151,7 +151,7 @@ function void fn022688()
 	D2.u16 += D3.u16
 	D2.u16 *= 2
 	D2.u16 &= 0x1e
-	// We'll place spin tube data to shared memory for now.
+	// We'll place spin tube data in shared memory for now.
 	// The amount of address register references to it would require a very careful rework
 	// if the data were converted to constants.
 	A2 = 0x880980
@@ -353,7 +353,7 @@ function void fn022892()
 		D0.s8 = -D0.s8
 		u8[A4 + 0x01] = 0xfc
 		D0.u16 *= 2
-		// We'll place spin tube data to shared memory for now.
+		// We'll place spin tube data in shared memory for now.
 		// The amount of address register references to it would require a very careful rework
 		// if the data were converted to constants.
 		A2 = 0x880e88
@@ -372,7 +372,7 @@ function void fn022892()
 	else
 	{
 		D0.u16 *= 2
-		// We'll place spin tube data to shared memory for now.
+		// We'll place spin tube data in shared memory for now.
 		// The amount of address register references to it would require a very careful rework
 		// if the data were converted to constants.
 		A2 = 0x880e88

@@ -1,0 +1,134 @@
+//# address-hook(0x02588e) end(0x025896)
+// Address is actually 0x02588c in Sonic 2, but this hook is in use in S3&K.
+function void ARZCrushingPillar.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ARZCrushingPillar.Init()
+	else // if (objA0.base_state == 2)
+		ARZCrushingPillar.Main()
+}
+
+
+//# address-hook(0x02589e) end(0x025944)
+function void ARZCrushingPillar.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x50 + 0x4a
+	objA0.sprite_attributes = 0x2000
+	objA0.render_flags |= 0x04
+	objA0.box_size.x = 0x10
+	objA0.hitbox_extends.x = 0x30
+	objA0.box_size.y = 0x50
+	objA0.hitbox_extends.y = 0x20
+	objA0.sprite_priority = 0x0200
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = objA0.update_address
+		objA1.base_state += 0x02
+		objA1.secondary_state += 0x02
+		objA1.mapping_offset = objA0.mapping_offset
+		objA1.sprite_attributes = objA0.sprite_attributes
+		objA1.position.x.u16 = objA0.position.x.u16
+		objA1.position.x.orig = objA0.position.x.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		objA1.position.y.u16 += 0x30
+		objA1.render_flags = objA0.render_flags
+		objA1.box_size.x = 0x10
+		objA1.hitbox_extends.x = 0x10
+		objA1.box_size.y = 0x10
+		objA1.hitbox_extends.y = 0x10
+		objA1.sprite_priority = 0x0200
+		objA1.animation.sprite = 0x01
+	}
+	ARZCrushingPillar.Main()
+}
+
+function void ARZCrushingPillar.Main()
+{
+	u16[A7-=2] = objA0.position.x.u16
+	fn025948()
+	D1 = objA0.box_size.x
+	D1.u16 += 0x0b
+	D2 = objA0.hitbox_extends.y
+	D3.u16 = D2.u16
+	++D3.u16
+	D4.u16 = u16[(A7+=2)-2]
+	fn01dc56()	// this is SolidObject in the Sonic 2 disassembly and SolidObjectFull in the S3&K disassembly
+	DrawOrUnloadObject()
+}
+
+
+//# address-hook(0x025948) end(0x025952)
+function void fn025948()
+{
+	// objA0.secondary_state can be 0; this state does nothing
+	if (objA0.secondary_state == 2)
+		fn02595e()
+	else if (objA0.secondary_state == 4)
+		fn02598e()
+	else if (objA0.secondary_state == 6)
+		fn0259b8()
+}
+
+
+//# address-hook(0x02595e) end(0x02598c)
+function void fn02595e()
+{
+	if (debug_mode.state == 0)
+	{
+		A1 = 0xffffb000
+		fn02596e()
+		A1 = 0xffffb04a
+		fn02596e()
+	}
+}
+
+
+function void fn02596e()
+{
+	if (abs(objA0.position.x.u16 - objA1.position.x.u16) < 0x80)
+	{
+		objA0.secondary_state = 0x04
+		objA0.value3e = 0x08
+	}
+}
+
+
+//# address-hook(0x02598e) end(0x0259ae)
+function void fn02598e()
+{
+	D0.u16 = objA0.value3e
+	--D0.u16
+	if (D0.s16 < 0)
+	{
+		objA0.secondary_state += 0x02
+		return
+	}
+	objA0.value3e = D0.u16
+	D0.u8 = ARZCrushingPillar.ShakeXPosData[D0.u16]
+	D0.s16 = D0.s8
+	D0.u16 += objA0.position.x.orig
+	objA0.position.x.u16 = D0.u16
+}
+
+constant array<u8> ARZCrushingPillar.ShakeXPosData =
+{
+	0, 1, 0xff, 1, 0, 0xff, 0, 1
+}
+
+
+//# address-hook(0x0259b8) end(0x0259e4)
+function void fn0259b8()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	objA0.velocity.y += 0x38
+	CheckGroundCollision()
+	if (D1.s16 < 0)
+	{
+		objA0.position.y.u16 += D1.u16
+		objA0.velocity.y = 0
+		objA0.position.y.orig = objA0.position.y.u16
+		objA0.animation.sprite = 0x02
+		objA0.secondary_state = 0
+	}
+}

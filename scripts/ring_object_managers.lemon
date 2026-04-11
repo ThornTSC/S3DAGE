@@ -745,15 +745,15 @@ constant array<u32> S2.ObjectTable =
 	0x01a51a,	// 0x20		// Ring
 	0x01a51a,	// 0x21		// Ring
 	0x025694,	// 0x22		// ARZ arrow shooter and arrow projectile
-	0x01a51a,	// 0x23		// Ring
-	0x01a51a,	// 0x24		// Ring
+	0x02588e,	// 0x23		// ARZ crushing pillar (bottom half falls off) (adjusted address from Sonic 2 to avoid S3&K conflict)
+	0x02f938,	// 0x24		// Air bubble spawner (currently using code for S3&K version, not S2 code)
 	0x01a51a,	// 0x25		// Ring
 	0x01d566,	// 0x26		// Monitor (using S3&K code, not S2 code)
 	0x01a51a,	// 0x27		// Ring
 	0x01a51a,	// 0x28		// Ring
 	0x01a51a,	// 0x29		// Ring
 	0x01a51a,	// 0x2a		// Ring
-	0x01a51a,	// 0x2b		// Ring
+	0x025a5a,	// 0x2b		// ARZ rising pillar
 	0x01a51a,	// 0x2c		// Ring
 	0x030e24,	// 0x2d		// CPZ/MTZ/DEZ door (using S3&K code, not S2 code)
 	0x01a51a,	// 0x2e		// Ring
@@ -840,7 +840,7 @@ constant array<u32> S2.ObjectTable =
 	0x01a51a,	// 0x7f		// Ring
 	0x02f938,	// 0x80		// Air bubble spawner
 	0x01a51a,	// 0x81		// Ring
-	0x01a51a,	// 0x82		// Ring
+	0x02a290,	// 0x82		// ARZ zone-specific platforms
 	0x01a51a,	// 0x83		// Ring
 	0x01a51a,	// 0x84		// Ring
 	0x01a51a,	// 0x85		// Ring
@@ -850,12 +850,12 @@ constant array<u32> S2.ObjectTable =
 	0x01a51a,	// 0x89		// Ring
 	0x01a51a,	// 0x8a		// Ring
 	0x01a51a,	// 0x8b		// Ring
-	0x01a51a,	// 0x8c		// Ring
+	0x036924,	// 0x8c		// ARZ Whisp
 	0x01a51a,	// 0x8d		// Ring
 	0x01a51a,	// 0x8e		// Ring
 	0x01a51a,	// 0x8f		// Ring
 	0x01a51a,	// 0x90		// Ring
-	0x01a51a,	// 0x91		// Ring
+	0x036dac,	// 0x91		// ARZ Chop Chop
 	0x01a51a,	// 0x92		// Ring
 	0x01a51a,	// 0x93		// Ring
 	0x01a51a,	// 0x94		// Ring

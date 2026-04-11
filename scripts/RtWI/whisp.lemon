@@ -1,0 +1,137 @@
+define whisp.timer = s8[A0 + 0x3a]
+define whisp.attacks_remaining = s8[A0 + 0x3b]
+
+//# address-hook(0x036924) end(0x03692e)
+function void Whisp.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		Whisp.Init()
+	else if (objA0.base_state == 2)
+		Whisp.WaitUntilOnScreen()
+	else if (objA0.base_state == 4)
+		Whisp.ChasePlayer()
+	else if (objA0.base_state == 6)
+		Whisp.WaitUntilTimerExpires()
+	else // if (objA0.base_state == 8)
+		Whisp.FlyAway()
+}
+
+
+//# address-hook(0x03693c) end(0x03694c)
+function void Whisp.Init()
+{
+	objA0.mapping_offset = s2_mappings_address + 0x50 + 0x4a + 0x5a
+	objA0.sprite_attributes = 0xa500
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = 0x0c
+	objA0.box_size.y = 0x10		// added to address pop-in/out
+	objA0.collision_attributes = 0x0b
+	whisp.timer = 0x10
+	whisp.attacks_remaining = 0x04
+
+	objA0.base_state += 2
+	// This Init function does not flow into a Main function
+}
+
+
+//# address-hook(0x03694e) end(0x036954)
+function void Whisp.WaitUntilOnScreen()
+{
+	if (s8(objA0.render_flags) < 0)
+	{
+		fn036970()
+		return
+	}
+	Whisp.Animate()
+}
+
+
+//# address-hook(0x036958) end(0x0369ee)
+function void Whisp.WaitUntilTimerExpires()
+{
+	--whisp.timer
+	if (whisp.timer >= 0)
+	{
+		Whisp.Animate()
+		return
+	}
+	fn036970()
+}
+
+function void fn036970()
+{
+	--whisp.attacks_remaining
+	if (whisp.attacks_remaining < 0)
+	{
+		objA0.base_state = 0x08
+		objA0.flags2a &= ~0x01
+		objA0.velocity.y = 0
+		objA0.velocity.x = -0x0200
+		objA0.velocity.y = -0x0200
+		Whisp.FlyAway()
+		return
+	}
+	objA0.base_state = 0x04
+	objA0.velocity.y = -0x0100
+	whisp.timer = 0x60
+	Whisp.ChasePlayer()
+}
+
+function void Whisp.Animate()
+{
+	A1 = s2_decompression_buffer_2
+	Object.AnimationUpdate()
+	Enemy.DrawOrUnload()
+}
+
+function void Whisp.ChasePlayer()
+{	
+	--whisp.timer
+	if (whisp.timer < 0)
+	{
+		fn0369f8()
+		return
+	}
+	CheckDistanceToPlayers()		// Obj_GetOrientationToPlayer
+	objA0.flags2a &= ~0x01
+	if (D0.u16 != 0)
+	{
+		objA0.flags2a |= 0x01
+	}
+
+	// Set speeds and cap them. From CheckDistanceToPlayers():
+	// 	d0 = 0 if player is left from object, 2 if right
+	//	d1 = 0 if player is above object, 2 if below
+	objA0.velocity.x += (D0.u16 == 0) ? -0x10 : 0x10
+	objA0.velocity.y += (D1.u16 == 0) ? -0x10 : 0x10
+
+	// Cap speed
+	objA0.velocity.x = clamp(objA0.velocity.x, -0x0200, 0x0200)
+	objA0.velocity.y = clamp(objA0.velocity.y, -0x0200, 0x0200)
+
+	UpdateMovementStraightSimple()	// ObjectMove
+	Whisp.Animate()
+}
+
+
+//# address-hook(0x0369f8) end(0x036a20)
+function void fn0369f8()
+{
+	objA0.base_state = 0x06
+	GetRandomNumber()
+	D0 = global.random.seed
+	D0.u8 &= 0x1f
+	whisp.timer = D0.u8
+	objA0.velocity.x = 0
+	objA0.velocity.y = 0
+	Whisp.Animate()
+}
+
+
+//# address-hook(0x036a26) end(0x036a38)
+function void Whisp.FlyAway()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	Whisp.Animate()
+}

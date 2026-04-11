@@ -12,6 +12,9 @@
 	"cpz": { "File": "ChemicalPlant.ogg",  "LoopStart": 684580, "Type": "Music"},
 	"cpz_fast": { "File": "ChemicalPlant_F.ogg",  "LoopStart": 547578, "Type": "Music"},
 
+	"arz": { "File": "AquaticRuin.ogg", "Type": "Music"},	// no loop point needed
+	"arz_fast": { "File": "AquaticRuin_F.ogg", "Type": "Music"},	// no loop point needed
+
 	"s2_boss": { "File": "S2_Boss.ogg", "Type": "Music"},	// no loop point needed
 
 	"s2_chemjump": { "File": "S2_ChemJump.ogg", "Type": "Sound"},

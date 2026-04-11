@@ -312,17 +312,30 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		else
 			System.loadExternalRawData("cpz_palette_s2", destRaw)
 	}
+	else if (unlock_act == s2_ARZ && index == 0x0e)
+	{
+		if (palette_set >= 2)
+			System.loadExternalRawData("arz_palette", destRaw)
+		else if (palette_set == 1)
+			System.loadExternalRawData("arz_palette_rtwi", destRaw)
+		else
+			System.loadExternalRawData("arz_palette_s2", destRaw)
+	}
 
 	else if ((original_mode || palette_set == 1) && index == 0x1a)	// Original ROM Hack has ICZ2 and SOZ1 as exceptions to S3&K palettes (former actually partially hardcoded later, so only SOZ1 here)
 		System.loadExternalRawData(stringformat("Palette%04x", global.zone_act), destRaw)
 	
 	else if (palette_set < 2 || original_mode)	// load from ROM normally if S3&K palettes or Original ROM Hack palettes other than the two above
 	{
-		if (index == 0x2e && unlock_act) // LBZ2 water or unlockable act water
+		if (index == 0x2e && unlock_act == s2_CPZ) // LBZ2 water or unlockable act water
 		{
 			bool KnuxHard = (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 			u64 cpz_underwater_palette = (KnuxHard) ? "cpz_palette_underwater_hard" : "cpz_palette_underwater"
 			System.loadExternalRawData(cpz_underwater_palette, destRaw)
+		}
+		else if (index == 0x2e && unlock_act == s2_ARZ) // ARZ water
+		{
+			System.loadExternalRawData("arz_palette_underwater", destRaw)
 		}
 		return
 	}
@@ -354,11 +367,15 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	{
 		if (!unlock_act)
 			System.loadExternalRawData("PaletteLBZ2Water", destRaw)
-		else
+		else if (unlock_act == s2_CPZ)
 		{
 			bool KnuxHard = (layout.part == 2)
 			u64 cpz_underwater_palette = (KnuxHard) ? "cpz_palette_underwater_hard" : "cpz_palette_underwater"
 			System.loadExternalRawData(cpz_underwater_palette, destRaw)
+		}
+		else if (unlock_act == s2_ARZ) // ARZ water
+		{
+			System.loadExternalRawData("arz_palette_underwater", destRaw)
 		}
 	}
 	else if (index == 0x0a)	// AIZ1 Sonic intro
@@ -452,6 +469,8 @@ function void UpdatePaletteEffects.Default()
 			LevelPaletteUpdate.EHZ()
 		else if (unlock_act == s2_CPZ)
 			LevelPaletteUpdate.CPZ()
+		else if (unlock_act == s2_ARZ)
+			LevelPaletteUpdate.ARZ()
 		else if (unlock_act == s3_CGZ)
 			LevelPaletteUpdate.CGZ()
 		return
@@ -538,10 +557,6 @@ function void LevelPaletteUpdate.EHZ()
 		D0.u16 <<= 3
 		u32[0xfffffc26] = u32[A0 + D0.s16]
 		u32[0xfffffc3c] = u32[A0 + D0.s16 + 0x04]
-//		u16[0xfffffc26] = EHZPaletteCycle[D0.u16]
-//		u16[0xfffffc27] = EHZPaletteCycle[D0.u16 + 1]
-//		u16[0xfffffc3c] = EHZPaletteCycle[D0.u16 + 2]
-//		u16[0xfffffc3e] = EHZPaletteCycle[D0.u16 + 3]
 	}
 }
 
@@ -635,6 +650,23 @@ function void LevelPaletteUpdate.CPZ()
 				
 			}
 		}
+	}
+}
+
+function void LevelPaletteUpdate.ARZ()
+{
+	A0 = 0x870000
+	--u16[0xfffff634]	// PalCycle_Timer in PalCycle_EHZ: in disassembly
+	if (s16[0xfffff634] < 0)
+	{
+		System.loadExternalRawData("ehz_palettecycle", 0x870000)	// shared with EHZ
+		u16[0xfffff634] = 0x05
+		D0.u16 = u16[0xfffff632]	// PalCycle_Frame in PalCycle_EHZ: in disassembly
+		++u16[0xfffff632]
+		D0.u16 &= 0x03
+		D0.u16 <<= 3
+		u32[0xfffffc44] = u32[A0 + D0.s16]
+		u32[0xfffffc48] = u32[A0 + D0.s16 + 0x04]
 	}
 }
 
@@ -965,6 +997,8 @@ function void UpdateLevelScrolling.MGZ1()
 			EHZ_CustomSprites()
 		else if (unlock_act == s2_CPZ)
 			CPZ_CustomSprites()
+		else if (unlock_act == s2_ARZ)
+			ARZ_CustomSprites()
 		else if (unlock_act == s3_CGZ)
 			CGZ_CustomSprites()
 		fn051158()	// call the most basic MGZ1 scroll routine

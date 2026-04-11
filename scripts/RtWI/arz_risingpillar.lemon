@@ -1,0 +1,204 @@
+define objA0.secondary_state		=  u8[A0 + 0x3c]
+define objA1.secondary_state		=  u8[A1 + 0x3c]
+
+//# address-hook(0x025a5a) end(0x025a64)
+function void ARZRisingPillar.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ARZRisingPillar.Init()
+	else if (objA0.base_state == 2)
+		ARZRisingPillar.Main()
+	else // if (objA0.base_state == 4)
+		ARZRisingPillar.UpdateFragment()
+}
+
+
+//# address-hook(0x025a6e) end(0x025af2)
+function void ARZRisingPillar.Init()
+{
+	objA0.base_state += 0x02
+	objA0.mapping_offset = s2_mappings_address + 0x1100
+	objA0.sprite_attributes = 0x2000
+	objA0.render_flags |= 0x04
+	objA0.box_size.x = 0x10
+	objA0.hitbox_extends.x = 0x18
+	objA0.box_size.y = 0x30
+	objA0.hitbox_extends.y = 0x18
+	objA0.sprite_priority = 0x0200
+	ARZRisingPillar.Main()
+}
+
+function void ARZRisingPillar.Main()
+{
+	u16[A7-=2] = objA0.position.x.u16
+	fn025b28()
+	D1 = objA0.box_size.x
+	D1.u16 += 0x0b
+	D2 = objA0.hitbox_extends.y
+	D3.u16 = D2.u16
+	++D3.u16
+	D4.u16 = u16[(A7+=2)-2]
+	fn01dc56()	// this is SolidObject in the Sonic 2 disassembly and SolidObjectFull in the S3&K disassembly
+	D0.u8 = objA0.flags2a & 0x18
+	if (D0.u8 == 0)
+	{
+		DrawOrUnloadObject()
+		return
+	}
+	// loc_25ACE
+	A4 = 0x880e88 + 0x0e	// fragment initial position and velocity data
+	A2 = 0x880e88
+	objA0.animation.sprite += 0x07
+	fn025bf6()
+	A1 = 0xffffb000
+	D6 = 0x03
+	ARZRisingPillar.CheckIfCharacterOnPillar()
+	A1 = 0xffffb04a
+	++D6.u8
+	ARZRisingPillar.CheckIfCharacterOnPillar()
+	ARZRisingPillar.UpdateFragment()
+}
+
+
+// //# address-hook(0x025af6) end(0x025b26)	// already in use in S3&K
+function void ARZRisingPillar.CheckIfCharacterOnPillar()
+{
+	objA0.flags2a &= ~(u8(1) << D6.u8)
+	if (objA0.flags2a == 0)
+	{
+		objA1.flags2a |= 0x04
+		objA1.hitbox_extends.y = 0x0e
+		objA1.hitbox_extends.x = 0x07
+		objA1.state = 0x02
+		objA1.flags2a |= 0x02
+		objA1.flags2a &= ~0x08
+		objA1.base_state = 0x02
+	}
+}
+
+
+//# address-hook(0x025b28) end(0x025b32)
+function void fn025b28()
+{
+	if (objA0.secondary_state == 0)
+		fn025b3c()
+	else if (objA0.secondary_state == 2)
+		fn025b66()
+	// objA0.secondary_state can also be 4; this state does nothing
+}
+
+
+//# address-hook(0x025b3c) end(0x025b64)
+function void fn025b3c()
+{
+	if (debug_mode.state == 0)
+	{
+		A1 = 0xffffb000
+		fn025b4c()
+		A1 = 0xffffb04a
+		fn025b4c()
+	}
+}
+
+function void fn025b4c()
+{
+	if (abs(objA0.position.x.u16 - objA1.position.x.u16) < 0x40)
+	{
+		objA0.secondary_state = 0x02
+	}
+}
+
+
+//# address-hook(0x025b66) end(0x025b8c)
+function void fn025b66()
+{
+	--objA0.value32
+	if (s16(objA0.value32) < 0)
+	{
+		objA0.value32 = 0x03
+		objA0.position.y.u16 -= 0x04
+		objA0.hitbox_extends.y += 0x04
+		++objA0.animation.sprite
+		if (objA0.animation.sprite == 0x06)
+		{
+			objA0.secondary_state = 0x04
+		}
+	}
+}
+
+
+//# address-hook(0x025b8e) end(0x025bac)
+function void ARZRisingPillar.UpdateFragment()
+{
+	if (objA0.value39 != 0)
+	{
+		--objA0.value39
+	}
+	else
+	{
+		UpdateMovementStraightSimple()	// ObjectMove
+		objA0.velocity.y += 0x18
+	}
+	if (objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x20)	// originally if (objA0.render_flags < 0)
+	{
+		UnloadObject()
+		return
+	}
+	DrawObject()
+}
+
+//# address-hook(0x025bf6) end(0x025c1a)
+function void fn025bf6()
+{
+	D0 = objA0.animation.sprite
+	D0.u16 *= 2
+	A3 = objA0.mapping_offset
+	A3 += u16[A3 + D0.s16]	// mappings start with word-length pointers to specific frames. D0 is being used to get the exact frame to jump to.
+	D1.u16 = u16[(A3+=2)-2]
+	--D1.u16
+	objA0.render_flags |= 0x20
+	D4 = objA0.update_address
+	D5.u8 = objA0.render_flags
+	A1 = A0					// the pillar itself is replaced by the first fragment, so we don't need to allocate it.
+	ARZRisingPillar.CreateFragment()
+}
+
+
+//# address-hook(0x025c1c) end(0x025c68)
+function void ARZRisingPillar.AllocateNextFragment()
+{
+	if (allocDynamicObjectStd())
+	{
+		A3 += 0x06	// in Sonic 2's mapping format, this is 0x08 due to different mapping format sizes (0x05 for Sonic 1)
+		ARZRisingPillar.CreateFragment()
+	}
+	else
+		ARZRisingPillar.PlaySound()
+}
+
+function void ARZRisingPillar.CreateFragment()
+{
+	objA1.base_state = 0x04
+	objA1.update_address = D4
+	objA1.mapping_offset = A3
+	objA1.render_flags = D5.u8
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+	objA1.sprite_attributes = objA0.sprite_attributes
+	objA1.sprite_priority = objA0.sprite_priority
+	objA1.box_size.x = objA0.box_size.x
+	objA1.velocity.x = u16[(A4+=2)-2]
+	objA1.velocity.y = u16[(A4+=2)-2]
+	objA1.value39 = u8[(A2+=1)-1]
+	--D1.s16
+	if (D1.s16 >= 0)
+		ARZRisingPillar.AllocateNextFragment()
+	else
+		ARZRisingPillar.PlaySound()
+}
+
+// loc_25C64
+function void ARZRisingPillar.PlaySound()
+{
+	playSound(SFX_COLLAPSE)		// sound 0x4b/0xcb in Sonic 2. SFX_COLLAPSE isn't exactly the same, but it's very close.
+}

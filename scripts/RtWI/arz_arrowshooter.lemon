@@ -17,10 +17,10 @@ function void ARZArrowShooter.BaseUpdate()
 function void ARZArrowShooter.Init()
 {
 	objA0.base_state += 0x02
-	objA0.mapping_offset = 0x025804		// get a new mappings offset!
+	objA0.mapping_offset = s2_mappings_address
 	objA0.sprite_attributes = 0x0417
 	objA0.render_flags |= 0x04
-	objA0.sprite_priority = 0x0180
+	objA0.sprite_priority = 0x0280	// 0x0180 when converted from Sonic 2, but rings can bounce behind shooter and in front of pole this way
 	objA0.box_size.x = 0x10
 	objA0.box_size.y = 0x10
 	objA0.animation.sprite = 0x01
@@ -50,8 +50,8 @@ function void ARZArrowShooter.Main()
 //# address-hook(0x025706) end(0x025710)
 function void ARZArrowShooter.Animate()
 {
-	System.loadExternalRawData("cpz_tubespring_animation", s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06)	// replace with correct animation
-	A1 = s2_decompression_buffer_2 + 0x14 + 0x0c + 0x12 + 0x06														// replace with correct offset
+	System.loadExternalRawData("arz_arrowshooter_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)
+	A1 = s2_decompression_buffer_2 + 0x14 + 0x0c
 	Object.AnimationUpdate()
 	DrawOrUnloadObject()
 }
@@ -59,6 +59,10 @@ function void ARZArrowShooter.Animate()
 //# address-hook(0x025714) end(0x025728)
 function void ARZArrowShooter.DetectPlayer()
 {
+	// Added to prevent detection while off screen
+	if (objA0.position.y.u16 < camera.position.y.u16 || objA0.position.y.u16 >= camera.position.y.u16 + getScreenHeight())
+		return
+	
 	D0.u16 = objA0.position.x.u16 - objA1.position.x.u16
 	if (D0.s16 < 0)
 	{
@@ -83,7 +87,7 @@ function void ARZArrowShooter.ShootArrow()
 		objA1.position.y.u16 = objA0.position.y.u16
 		objA1.render_flags = objA0.render_flags
 		objA1.flags2a = objA0.flags2a
-		playSound(SFX_BOMBFALL)		// place proper SFX! 0xdb in Sonic 2.
+		// playSound(SFX_BOMBFALL)		// 0xdb in Sonic 2. This sound is actually inaudible in gameplay, though.
 	}
 	objA0.base_state -= 0x02
 	ARZArrowShooter.Animate()		// this code is actually duplicated in Sonic 2 instead of a jsr
@@ -93,19 +97,19 @@ function void ARZArrowShooter.ShootArrow()
 function void ARZArrow.Init()
 {
 	objA0.base_state += 0x02
-	objA0.box_size.y = 0x08
-	objA0.box_size.x = 0x10
-	objA0.sprite_priority = 0x0200		// already fixed
-	objA0.collision_attributes = 0x9b
-	objA0.box_size.x = 0x08
-	objA0.box_size.y = 0x10
+	objA0.hitbox_extends.y = 0x08
+	objA0.hitbox_extends.x = 0x10
+	objA0.sprite_priority = 0x0300		// should be 0x0200, but we lowered the priority for the arrow shooters, so this must be lowered as well
+	objA0.collision_attributes = (collision.flag.THREAT | collision.size.8x4)	// objA0.collision_attributes = 0x9b in Sonic 2. We share with MGZ Relief arrow here.
+	objA0.box_size.x = 0x10	// 0x08 in Sonic 2
+	objA0.box_size.y = 0x04	// not in Sonic 2
 	objA0.animation.sprite = 0
 	objA0.velocity.x = 0x0400
 	if (objA0.flags2a & 0x01)
 	{
 		objA0.velocity.x = -objA0.velocity.x
 	}
-	playSound(SFX_BOMBFALL)		// place proper SFX! 0xae in Sonic 2.
+	playSound(0x70)		// MGZ Relief arrow shots use sound 0x67
 	ARZArrow.Main()
 }
 
@@ -113,6 +117,7 @@ function void ARZArrow.Init()
 function void ARZArrow.Main()
 {
 	UpdateMovementStraightSimple()	// ObjectMove
+	AddAsDynamicObject()			// needed to make object hurt player character
 	if (objA0.flags2a & 0x01)
 	{
 		ARZArrow.Main.XFlip()

@@ -1,0 +1,188 @@
+define chopchop.timer_move = s16[A0 + 0x32]
+define chopchop.timer_move.firstbyte = s8[A0 + 0x32]
+define chopchop.timer_bubblespawn = s16[A0 + 0x42]
+define chopchop.timer_bubblespawn.firstbyte = s8[A0 + 0x42]
+
+
+//# address-hook(0x036dac) end(0x036db6)
+function void ChopChop.BaseUpdate()
+{
+	if (objA0.base_state == 0)
+		ChopChop.Init()
+	else if (objA0.base_state == 2)
+		ChopChop.Main()
+	else if (objA0.base_state == 4)
+		ChopChop.Waiting()
+	else // if (objA0.base_state == 6)
+		ChopChop.Charge()
+}
+
+
+//# address-hook(0x036dc2) end(0x036de2)
+function void ChopChop.Init()
+{
+	objA0.mapping_offset = s2_mappings_address + 0x50 + 0x4a + 0x5a + 0x20
+	objA0.sprite_attributes = 0x253b
+	objA0.render_flags = 0x04
+	objA0.sprite_priority = 0x0200
+	objA0.hitbox_extends.x = 0x18	// added to address pop-in/out
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x18		// added to address pop-in/out
+	objA0.collision_attributes = 0x02
+	chopchop.timer_move = 0x0200
+	chopchop.timer_bubblespawn = 0x50
+	D0 = 0x40
+	if ((objA0.flags2a & 0x01) == 0)
+	{
+		D0.s16 = -D0.s16
+	}
+	objA0.velocity.x = D0.u16
+
+	objA0.base_state += 0x02
+	// Does not flow directly into Main function
+}
+
+
+//# address-hook(0x036de4) end(0x036e2e)
+function void ChopChop.Main()
+{
+	--chopchop.timer_bubblespawn.firstbyte
+	if (chopchop.timer_bubblespawn.firstbyte == 0)
+	{
+		ChopChop.MakeBubble()
+	}
+	--chopchop.timer_move
+	if (chopchop.timer_move < 0)
+	{
+		chopchop.timer_move = 0x0200
+		objA0.flags2a ^= 0x01
+		objA0.render_flags ^= 0x01
+		objA0.velocity.x = -objA0.velocity.x
+	}
+	UpdateMovementStraightSimple()	// ObjectMove
+	CheckDistanceToPlayers()		// Obj_GetOrientationToPlayer
+	D4.u16 = D2.u16
+	D5.u16 = D3.u16
+	ChopChop.TestCharacterPos()
+	if (D2.u16 == 0)
+	{
+		Enemy.DrawOrUnload()
+		return
+	}
+	objA0.base_state += 0x02
+	chopchop.timer_move.firstbyte = 0x10
+	objA0.velocity.x = 0
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x036e32) end(0x036e5e)
+function void ChopChop.Waiting()
+{
+	--chopchop.timer_move.firstbyte
+	if (chopchop.timer_move.firstbyte >= 0)
+	{
+		ChopChop.Animate()
+		return
+	}
+	ChopChop.MoveTowardPlayer()
+}
+
+function void ChopChop.MoveTowardPlayer()
+{
+	objA0.base_state += 0x02
+	CheckDistanceToPlayers()		// Obj_GetOrientationToPlayer
+	D0.u16 >>= 1
+	objA0.velocity.x = (D0.u16 == 0) ? -0x0200 : 0x0200
+	D3.u16 += 0x10
+	if (D3.u16 >= 0x20)
+	{
+		D1.u16 >>= 1
+		objA0.velocity.y = (D1.u16 == 0) ? -0x0080 : 0x0080	// the negative sign is not in Sonic 2, but its omission seems like a bug, making a Chop Chop incabale of swimming upward
+	}
+	ChopChop.Animate()
+}
+
+
+//# address-hook(0x036e66) end(0x036e74)
+function void ChopChop.Charge()
+{
+	UpdateMovementStraightSimple()	// ObjectMove
+	ChopChop.Animate()
+}
+
+function void ChopChop.Animate()
+{
+	A1 = s2_decompression_buffer_2 + 0x06
+	Object.AnimationUpdate()
+	Enemy.DrawOrUnload()
+}
+
+
+//# address-hook(0x036e78) end(0x036eb0)
+function void ChopChop.MakeBubble()
+{
+	chopchop.timer_bubblespawn = 0x50
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x018164		// small bubble that comes from a player's mouth underwater (S3&K address)
+		objA1.subtype2c = 0x06
+		objA1.position.x.u16 = objA0.position.y.u16
+		D0 = 0x14
+		if (objA0.render_flags & 0x01)
+		{
+			D0.s16 = -D0.s16
+		}
+		objA1.position.x.u16 += D0.u16
+		objA1.position.y.u16 = objA0.position.y.u16
+		objA1.position.y.u16 += 0x06
+	}
+}
+
+
+//# address-hook(0x036eb2) end(0x036ee4)
+function void ChopChop.TestCharacterPos()
+{
+	D3.u16 += 0x20
+	if (D3.u16 < 0x40)
+	{
+		if (D2.s16 >= 0)
+		{
+			if (objA0.velocity.x >= 0)
+			{
+				ChopChop.DoNotCharge()
+				return
+			}
+			ChopChop.TestHorizontalDist()
+			return
+		}
+		// Obj91_TestPosLeft
+		if (objA0.velocity.x >= 0)
+		{
+			D2.s16 = -D2.s16
+			ChopChop.TestHorizontalDist()
+		}
+		else
+			ChopChop.DoNotCharge()
+		return
+	}
+	ChopChop.DoNotCharge()
+}
+
+function void ChopChop.TestHorizontalDist()
+{
+	if (D2.u16 >= 0x20 && D2.u16 < 0xa0)
+		ChopChop.PlayerInRange()
+	else
+		ChopChop.DoNotCharge()
+}
+
+function void ChopChop.DoNotCharge()
+{
+	D2 = 0
+}
+
+function void ChopChop.PlayerInRange()
+{
+	D2 = 1
+}
