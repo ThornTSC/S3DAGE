@@ -1392,6 +1392,24 @@ function void fn0747d6()
 	DrawObject()
 }
 
+// Adjust distance Big Arms travels when slamming a caught player against the ground based on screen height
+//# address-hook(0x0745e2) end(0x074616)
+function void fn0745e2()
+{
+	if (objA0.position.y.u16 < camera.foreground.y.u16 + 0x88 + getScreenHeightExtend())
+	{
+		objA0.position.y.u16 += 8
+		return
+	}
+
+	objA0.base_state = 0x26
+	objA0.flags38 |= 0x02
+	camera.screenshake.state = 0x14
+	objA0.countdown_value = 0x03
+
+	playSound(0x61)
+}
+
 // Adjust distance Big Arms descends in background when first appearing based on screen height
 //# address-hook(0x07432a) end(0x07435a)
 function void fn07432a()
