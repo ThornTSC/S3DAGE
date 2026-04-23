@@ -728,7 +728,7 @@ function void AIZ2_CustomSprites()
 				unused.teleport_timer = 0
 		}
 		if (camera.update_routine == 0x10 && bomberX != 0x8000)	// 0x8000 is used as a "do not render" value
-			Renderer.drawCustomSprite("aiz2_bomber", bomberX, bomberY, 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
+			Renderer.drawCustomSprite("aiz2_bomber", bomberX, bomberY, 0x00, SPRITE_FLAG_PRIO, 0x9f7f)
 	}
 	else if (camera.update_routine == 0x10 && global.game.paused)	// this is needed to render the bomber section properly while paused at 224px screen height
 		fn04fff0()
@@ -1601,7 +1601,7 @@ function void fn050390()
 	u16 bomberOffset = Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) ? 0 : 20
 	bomberX = 0x3d80 - u16[0xffffee98] - bomberOffset
 	bomberY = 0x0a00 - u16[0xffffee9c]
-//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - u16[0xffffee98] - bomberOffset, 0x0a00 - u16[0xffffee9c], 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
+//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - u16[0xffffee98] - bomberOffset, 0x0a00 - u16[0xffffee9c], 0x00, SPRITE_FLAG_PRIO, 0x9f7f)
 	if (bomberEnded)
 	{
 		// Leverage some scratch RAM to track the bomber as it goes offscreen
@@ -1757,7 +1757,7 @@ function void fn050700()
 	u16 bomberOffset = Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) ? 0 : 20
 	bomberX = 0x3d80 - unused.player2.total_rings - bomberOffset
 	bomberY = 0x0a00 - unused.player2.item_count
-//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - unused.player2.total_rings - bomberOffset, 0x0a00 - unused.player2.item_count, 0x00, SPRITE_FLAG_PRIO, 0x9f7b)
+//	Renderer.drawCustomSprite("aiz2_bomber", 0x3d80 - unused.player2.total_rings - bomberOffset, 0x0a00 - unused.player2.item_count, 0x00, SPRITE_FLAG_PRIO, 0x9f7f)
 
 	base.fn050700()
 }
