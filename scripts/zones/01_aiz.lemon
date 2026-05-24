@@ -687,6 +687,53 @@ function void UpdateLevelTiles.AIZ1()
 	fn04f912_internal(0x0c)
 }
 
+// Remove special handling of AIZ decorative flame in Original Mode.
+//# address-hook(0x02bf20) end(0x02bf54)
+function void GenericObject.Init()
+{
+	objA0.mapping_offset = 0x02bfda
+	objA0.render_flags |= render_flag.WORLD
+	objA0.state = objA0.subtype2c
+
+	A1 = 0x02bf6c + objA0.subtype2c * 6
+	objA0.sprite_attributes = u16[A1]
+	objA0.sprite_priority = u16[A1+2]
+	objA0.box_size.x = u8[A1+4]
+	objA0.box_size.y = u8[A1+5]
+	objA0.update_address = addressof(GenericObject.Update)
+
+#if STANDALONE
+	// Check if it's a flame in AIZ
+	if ((objA0.sprite_attributes == (sprite_attribute.PALETTE.LINE3 | 0x02e9) && objA0.mapping_offset == 0x02bfda) && !original_mode)
+	{
+		// Make it a little bit higher to prevent early clipping
+		objA0.box_size.y += 4
+	}
+#endif
+
+	GenericObject.Update()
+}
+
+
+//# address-hook(0x02bf5a) end(0x02bf66)
+function void GenericObject.Update()
+{
+#if STANDALONE
+	// Check if it's an underwater flame in AIZ
+	if ((objA0.sprite_attributes == (sprite_attribute.PALETTE.LINE3 | 0x02e9) && objA0.mapping_offset == 0x02bfda) && !original_mode)
+	{
+		if (objA0.position.y.u16 >= water.height.current - 10)
+		{
+			UnloadObject()
+			return
+		}
+	}
+#endif
+
+	Object.animationUpdate(0x02bf9c)
+	DrawOrUnloadObject()
+}
+
 function void AIZ1_CustomSprites()
 {
 	if (!original_mode && palette_set < 2)
