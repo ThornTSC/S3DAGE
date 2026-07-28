@@ -11514,7 +11514,7 @@ function void fn025ea6()
 
 
 // Load MGZ chunks from rawdata instead of ROM.
-// Function taken from level\03mgcz\level_mgz.lemon
+// Function taken from level\03_mgz\level_mgz.lemon
 //# address-hook(0x051160) end(0x0511c4)
 function void fn051160()
 {
