@@ -4443,8 +4443,11 @@ function void fn0502c6()
 
 	#if STANDALONE
 		// Also update position backup data (e.g. for after-images)
-		for (u32 address = 0xffffe500; address < 0xffffe600; address += 4)
-			u16[address] -= D1.u16
+		if (!original_mode)
+		{
+			for (u32 address = 0xffffe500; address < 0xffffe600; address += 4)
+				u16[address] -= D1.u16
+		}
 	#endif
 
 		D0.u16 = camera.position.x.u16 - D1.u16
