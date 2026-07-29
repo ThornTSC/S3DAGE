@@ -1,15 +1,8 @@
 // We make selective edits to standard Sonic 3 moving platforms and LBZ moving platforms
 // to match Sonic 2 behavior when needed.
-
-//# address-hook(0x025506) end(0x0255ee)
-function void MovingPlatform.Init()
+// The normal MovingPlatform.Init() is in object_load_unload.lemon and calls this function when needed.
+function void MovingPlatform.UnlockAct.Init()
 {
-	if (!unlock_act)
-	{
-		base.MovingPlatform.Init()
-		return
-	}
-
 	objA0.mapping_offset = 0x8802d2		// Dummy value. We're using a bitmap image for platforms.
 	objA0.sprite_attributes = 0x4000
 
@@ -39,7 +32,7 @@ function void MovingPlatform.Init()
 	u16[A0 + 0x32] = objA0.position.x.u16
 	u16[A0 + 0x34] = objA0.position.y.u16
 	objA0.flags2e = objA0.flags2a
-	objA0.value42 = 0x280
+	objA0.value42 = object_x_threshold
 	u16[A0 + 0x44] = objA0.position.x.u16
 
 	D0 = (objA0.subtype2c & 0x0f) - 8
@@ -55,7 +48,7 @@ function void MovingPlatform.Init()
 		}
 		else
 		{
-			objA0.value42 = 0x380
+			objA0.value42 = object_x_threshold + 0x100
 			u16[A0 + 0x44] += 0x100
 		}
 	}

@@ -617,7 +617,7 @@ function void fn039182()
 //	}
 /*
 	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
-	if (D0.u16 <= 0x0280)
+	if (D0.u16 <= object_x_threshold)
 	{
 		DrawObject() // Enemy.DrawOrUnload()
 		return

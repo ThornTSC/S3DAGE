@@ -24,7 +24,12 @@ global u8 greenspheres_music
 global u8 pause_menu
 define u8 theme.hud = u8[0x840273]
 global u8 theme.max
+global u8 res_preset
 global u16 screen_width
+global u16 screen_height
+global bool blue_sphere_safe
+global s8 set_screen_size
+global u8 HUD_position
 global u16 RSDK_width
 global bool challenge_greenspheres
 global bool sonic_moves
@@ -137,6 +142,7 @@ include debug_mode
 include dynamic_objects
 include level_display
 include level_layouts
+include object_load_unload
 include renderhooks
 include resolution
 include vram_relocations
@@ -4097,7 +4103,7 @@ function void fn0418e4()
 	u8[A3] = D1.u8
 
 	D0.u16 = (u16[A0 + 0x44] & 0xff80) - level.despawn_position.x
-	if (D0.u16 <= 0x0280)
+	if (D0.u16 <= object_x_threshold)
 	{
 		DrawObject()
 	}
@@ -5813,6 +5819,8 @@ function void fn0612a8()
 //# address-hook(0x003e32) end(0x004342)
 function void TitleScreen()
 {
+	set_screen_size = -1
+
 	original_mode = 0
 	speedSpheres = 0
 	time_attack = 0
@@ -5829,8 +5837,7 @@ function void TitleScreen()
 	FadeOutScreenBlocking()
 	set_status_register(0x2700)
 
-	// Enforce AIR normal screen resolution after the screen is fully white or black.
-	Renderer.setScreenSize(400, 224)
+	set_screen_size = 0
 
 	VDP.Config.enableHInt(false)
 	VDP.Config.setNameTableBasePlaneA(0xc000)

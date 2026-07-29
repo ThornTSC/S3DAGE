@@ -137,6 +137,8 @@ function void PrintVersionNumber()
 // Function taken from maingame\maingame.lemon
 function void initializeMainGame()
 {
+	set_screen_size = 1
+
 	ApplyROMManipulations()
 
 	S2TitleCard.full = true
@@ -285,17 +287,7 @@ function void initializeMainGame()
 		set_status_register(0x2300)
 	#endif
 
-		// Set screen resolution
-		if (original_mode)
-			Renderer.setScreenSize(320, 224)
-		else if (time_attack)
-			Renderer.setScreenSize(426, 240)
-		else if (RSDK_width && !competition_mode.active)
-			Renderer.setScreenSize(RSDK_width, 240)
-		else if (screen_width)
-			Renderer.setScreenSize(screen_width, 224)
-		else
-			Renderer.setScreenSize(400, 224)
+		set_screen_size = 0
 
 		level.framecounter = 0
 		if (checkpoint.number != 0)	// this may need to be adjusted for other game modes and for menus
@@ -3052,6 +3044,14 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 {
 	if (global.game_mode == 0x9c)		// not in Extra Slots character select, which renders in front of the normal level
 		return
+
+	if (global.game_mode != 0x48)
+	{
+		if ((HUD_position == 1 || HUD_position == 3) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
+			px += 8
+		if (HUD_position >= 2)	// Origins non-S3&K or hybrid position
+			py += (py >= getScreenHeight() - 40) ? -4 : (py <= 40) ? 4 : 0
+	}
 
 	if (hud.layout == 2 && (key == "hud_text_score" || key == "hud_text_time" || key == "hud_text_time_red"))
 		return

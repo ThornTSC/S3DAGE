@@ -17,6 +17,150 @@
 	{
 		"List":
   		[
+
+			{
+				"InternalName": "BlueSphereSafe",
+				"DisplayName": "Blue Sphere Resolution",
+				"Variable": "blue_sphere_safe",
+				"DefaultValue": "1",
+			 	"Category": "Display Settings",
+				"Options":
+				{
+					"0": "Match User Selection",
+					"1": "Nearest Safe Resolution"
+				}
+			},
+			{
+				"InternalName": "Preset",
+				"DisplayName": "Resolution Presets",
+				"Variable": "res_preset",
+				"DefaultValue": "7",
+			 	"Category": "Display Settings",
+				"Options":
+				{
+					"0": "None (Use Custom)",
+					"1": "Mega Drive / Genesis",
+					"2": "Origins 4:3",
+					"3": "16:10",
+					"4": "Origins 16:10",
+					"5": "A.I.R.",
+					"6": "Origins 16:9",
+					"7": "Forever/Absolute 16:9",
+					"8": "20:9 (limited support)",
+					"9": "Max Res (limited support)"
+				}
+			},
+			{
+				"InternalName": "ScreenWidth",
+				"DisplayName": "Screen Width (if Preset = None)",
+				"Variable": "screen_width",
+				"DefaultValue": "426",
+			 	"Category": "Display Settings",
+				"Options":
+				{
+					"320": "320px",
+					"322": "322px",
+					"324": "324px",
+					"326": "326px",
+					"328": "328px",
+					"330": "330px",
+					"332": "332px",
+					"334": "334px",
+					"336": "336px",
+					"338": "338px",
+					"340": "340px",
+					"342": "342px",
+					"344": "344px",
+					"346": "346px",
+					"348": "348px",
+					"350": "350px",
+					"352": "352px",
+					"354": "354px",
+					"356": "356px",
+					"358": "358px",
+					"360": "360px",
+					"362": "362px",
+					"364": "364px",
+					"366": "366px",
+					"368": "368px",
+					"370": "370px",
+					"372": "372px",
+					"374": "374px",
+					"376": "376px",
+					"378": "378px",
+					"380": "380px",
+					"382": "382px",
+					"384": "384px",
+					"386": "386px",
+					"388": "388px",
+					"390": "390px",
+					"392": "392px",
+					"394": "394px",
+					"396": "396px",
+					"398": "398px",
+					"400": "400px",
+					"402": "402px",
+					"404": "404px",
+					"406": "406px",
+					"408": "408px",
+					"410": "410px",
+					"412": "412px",
+					"414": "414px",
+					"416": "416px",
+					"418": "418px",
+					"420": "420px",
+					"422": "422px",
+					"424": "424px",
+					"426": "426px",
+					"428": "428px",
+					"430": "430px",
+					"432": "432px",
+					"434": "434px (limited support)",
+					"436": "436px (limited support)",
+					"438": "438px (limited support)",
+					"440": "440px (limited support)",
+					"442": "442px (limited support)",
+					"444": "444px (limited support)",
+					"446": "446px (limited support)",
+					"448": "448px (limited support)",
+					"450": "450px (limited support)",
+					"452": "452px (limited support)",
+					"454": "454px (limited support)",
+					"456": "456px (limited support)",
+					"458": "458px (limited support)",
+					"460": "460px (limited support)",
+					"462": "462px (limited support)",
+					"464": "464px (limited support)",
+					"466": "466px (limited support)",
+					"468": "468px (limited support)",
+					"470": "470px (limited support)",
+					"472": "472px (limited support)",
+					"474": "474px (limited support)",
+					"476": "476px (limited support)",
+					"478": "478px (limited support)",
+					"480": "480px (limited support)",
+					"482": "482px (limited support)",
+					"484": "484px (limited support)",
+					"486": "486px (limited support)",
+					"488": "488px (limited support)",
+					"490": "490px (limited support)",
+					"492": "492px (limited support)",
+					"494": "494px (limited support)",
+					"496": "496px (limited support)"
+				}
+			},
+			{
+				"InternalName": "ScreenHeight",
+				"DisplayName": "Screen Height (if Preset = None)",
+				"Variable": "screen_height",
+				"DefaultValue": "240",
+			 	"Category": "Display Settings",
+				"Options":
+				{
+					"224": "224px",
+					"240": "240px"
+				}
+			},
 			{
 				"InternalName": "BonusStage",
 				"DisplayName": "Bonus Stage",
@@ -175,41 +319,6 @@
 				{
 					"0": "Off",
 					"1": "On (default)"
-				}
-			},
-			{
-				"InternalName": "RSDKWidth",
-				"DisplayName": "Screen Height",
-				"Variable": "RSDK_width",
-				"DefaultValue": "426",
-			 	"Category": "Resolution",
-				"Options":
-				{
-					"0": "224px (Classic)",
-					"424": "240px (Origins)",
-					"426": "240px (Forever)"
-				}
-			},
-			{
-				"InternalName": "ScreenWidth",
-				"DisplayName": "Classic Height Resolution",
-				"Variable": "screen_width",
-				"DefaultValue": "400",
-			 	"Category": "Resolution",
-				"Options":
-				{
-					"320": "320x224",
-					"336": "336x224",
-					"352": "352x224",
-					"368": "368x224",
-					"384": "384x224",
-					"400": "400x224 (default)",
-					"416": "416x224 (not supported)",
-					"432": "432x224 (not supported)",
-					"448": "448x224 (not supported)",
-					"464": "464x224 (not supported)",
-					"480": "480x224 (not supported)",
-					"496": "496x224 (not supported)"
 				}
 			}
 	  	]

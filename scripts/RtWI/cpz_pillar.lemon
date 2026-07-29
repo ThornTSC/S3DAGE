@@ -24,7 +24,7 @@ function void CPZPillar.Main()
 	{
 		D0 = -(D1 * 3/4)
 		objA0.position.x.u16 = D0 + 0x280	// 0x0280 is new for this port
-		D1 = -((camera.position.y.u16 / 2) & 0x3F) + 0x0100
+		D1 = -((camera.position.y.u16 / 2) & 0x3f) + 0x0100
 		objA0.position.y.u16 = D1
 		DrawObject()
 	}

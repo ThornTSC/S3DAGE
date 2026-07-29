@@ -77,7 +77,7 @@ function void CPZPlatform.Main()
 	D4.u16 = objA0.position.x.beforeMove
 	PlatformCheckClimbOn()
 	D0.u16 = (cpzplatform.position.center.x & 0xff80) - level.despawn_position.x
-	if (D0.u16 <= 0x0280)
+	if (D0.u16 <= object_x_threshold)
 	{
 		DrawObject()
 	}

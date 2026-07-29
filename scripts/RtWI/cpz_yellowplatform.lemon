@@ -98,10 +98,10 @@ function void YellowPlatform.Main()
 	fn0294f4()
 	// These objects are subject to extreme pop-in. We load them in memory as the level starts and never unload them to always have them ready to be drawn.
 //	D0.u16 = (u16[A0 + 0x32] & 0xff80) - level.despawn_position.x	// camera_x_pos_coarse in disassemblies
-//	if (D0.u16 > 0x0280)
+//	if (D0.u16 > object_x_threshold)
 //	{
 //		D0.u16 = (u16[A0 + 0x34] & 0xff80) - level.despawn_position.x
-//		if (D0.u16 > 0x0280)
+//		if (D0.u16 > object_x_threshold)
 //		{
 //			YellowPlatform.CheckUnload()
 //			return

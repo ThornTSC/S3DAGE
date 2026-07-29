@@ -1332,6 +1332,8 @@ function void fn04df52()
 //# address-hook(0x0081c6) end(0x00858e)
 function void SpecialStage()
 {
+	set_screen_size = 1
+
 	if (!original_mode)
 		playMusic(MUSIC_CTRL_FADEOUT)
 	else
@@ -1352,17 +1354,7 @@ function void SpecialStage()
 	set_status_register(0x2700)
 #endif
 
-	// Set screen resolution
-	if (original_mode)
-		Renderer.setScreenSize(320, 224)
-	else if (time_attack)
-		Renderer.setScreenSize(426, 240)
-	else if (RSDK_width)
-		Renderer.setScreenSize(RSDK_width, 240)
-	else if (screen_width)
-		Renderer.setScreenSize(screen_width, 224)
-	else
-		Renderer.setScreenSize(400, 224)
+	set_screen_size = 0
 
 	VDP.Config.enableHInt(false)
 	VDP.Config.setNameTableBasePlaneA(0xc000)

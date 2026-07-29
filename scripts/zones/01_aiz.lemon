@@ -817,7 +817,9 @@ function void fn01caae()
 	}
 }
 
-// If the screen height is extended, remove fire wall art from VRAM, as we use images instead
+// If the screen height is extended, remove fire wall art from VRAM, as we use images instead.
+// Also load the AIZ1 Boss art a second time in wider screen widths, as the extended object
+// spawn range causes that art to have loaded *before* object sprites instead of after.
 //# address-hook(0x01c5c6) end(0x01c600)
 function void fn01c5c6()
 {
@@ -834,6 +836,8 @@ function void fn01c5c6()
 			VDP.zeroVRAM(0xaf20 - 0xa000)
 		}
 		requestLoadingPatterns(0x0c)		// AIZ2 object sprites
+		if (object_x_threshold > 0x0280)
+			requestLoadingPatterns(0x5a)	// Boss sprites
 		camera.update_routine += 2
 	}
 }

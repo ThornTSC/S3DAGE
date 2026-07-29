@@ -3,7 +3,7 @@
 // For this mod, we only care to have the RSDK height, so it always returns true.
 function bool useRSDKheight()
 {
-    return ((RSDK_width && !original_mode) || (time_attack >= 2) || (time_attack == 1 && selectedZoneAct < 0xff18))
+    return ((screen_height == 240 && !original_mode) || (time_attack >= 2) || (time_attack == 1 && selectedZoneAct < 0xff00))
 }
 
 function s16 getScreenHeightExtend()
@@ -71,22 +71,6 @@ function void fn00111a()
 	u16[A5] = 0x8f02
 	D1 = u32[(A7+=4)-4]
 	return
-}
-
-//# address-hook(0x085180) end(0x0851ae)
-function void fn085180()
-{
-	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
-	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x100
-	if (dx <= 0x0280 && dy <= 0x0200 + getScreenHeightExtend())
-	{
-		AddAsDynamicObject()
-		DrawObject()
-	}
-	else
-	{
-		Object.TriggerUnloading()
-	}
 }
 
 // Ensure small sprites from compound objects render when at the bottom of the screen
@@ -164,4 +148,60 @@ function void writeToSpriteTableCompound(u16 renderQueue)
 		--D4.s16
 		++spriteCounter
 	}
+}
+
+///////////////////////////
+// Choose new resolution //
+///////////////////////////
+
+function void SetResolution()
+{
+	SetResolution(0)
+}
+
+function void SetResolution(bool enforceSafe)
+{
+	constant array<u16> preset_xres =
+	{
+		320, 320, 358, 384, 400, 424, 426, 496, 496
+	}
+	constant array<u16> preset_yres =
+	{
+		224, 240, 224, 240, 224, 240, 240, 224, 240
+	}
+
+	u16 xres = (res_preset) ? preset_xres[res_preset - 1] : screen_width
+	u16 yres = (res_preset) ? preset_yres[res_preset - 1] : screen_height
+
+	// If the time_attack variable is set, we only allow Special Stage Time Attack to use custom resolutions
+	if (time_attack)
+	{
+		xres = (time_attack == 1 && selectedZoneAct >= 0xff00) ? xres : 426
+		yres = (time_attack == 1 && selectedZoneAct >= 0xff00) ? yres : 240
+	}
+
+	Renderer.setScreenSize((enforceSafe && blue_sphere_safe) ? (xres & 0xfffd) : xres, yres)
+}
+
+////////////////////////////
+// Display new resolution //
+////////////////////////////
+
+//# address-hook(0x003be4) end(0x003c02)
+function void FadeOutScreenBlocking()
+{
+	base.FadeOutScreenBlocking()
+	if (set_screen_size == 1 && s16(global.rolling_demo) >= 0 && !competition_mode.active)
+		SetResolution()
+	else if (set_screen_size == -1)
+		Renderer.setScreenSize(400, 224)
+	object_x_threshold = (getScreenWidth() > 400) ? 0x0300 : 0x0280
+}
+
+//# address-hook(0x003d30) end(0x003d4e)
+function void FadeScreenToWhiteBlocking()
+{
+	base.FadeScreenToWhiteBlocking()
+	if (set_screen_size == 1 && s16(global.rolling_demo) >= 0 && !competition_mode.active)
+		SetResolution(true)	// set safe resolution flag to true for special stages
 }

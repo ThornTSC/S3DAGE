@@ -1,0 +1,1875 @@
+global u16 object_x_threshold
+
+//////////////////////////////////////////////////////
+// Manage object spawning and despawning thresholds //
+//////////////////////////////////////////////////////
+
+// Objects have hardcoded checks for an x range of 0x0280 pixels,
+// beyond which they despawn. We replace 0x0280 with a value that
+// can be extended (currently to 0x0300) for wider screen widths
+// than A.I.R.'s default.
+
+// First, the load/unload functions used in generic situations.
+
+//# address-hook(0x01b7f2) end(0x01b9fe)
+function void DynamicObjectsLoading.UpdateDefault()
+{
+	level.despawn_position.x = (camera.position.x.u16 - 0x80) & 0xff80
+	level.despawn_position.y = (camera.position.y.u16 - 0x80) & 0xff80
+
+	A4 = level.object_type_table
+	D3.u16 = (camera.position.y.u16 & 0xff80) - 0x80
+	D4.u16 = (camera.position.y.u16 & 0xff80) + 0x200
+
+	bool considerLevelWrap = false
+	if (level.vertical_wrap & 0x8000)
+	{
+		A6 = 0x01ba40
+		if (D3.s16 < 0)
+		{
+			D3.u16 &= level.height.bitmask
+			considerLevelWrap = true
+		}
+		else if (D4.u16 > level.height.bitmask + 1)
+		{
+			D4.u16 &= level.height.bitmask
+			considerLevelWrap = true
+		}
+	}
+	else
+	{
+		A6 = 0x01ba92
+		if (D3.s16 < 0)
+			D3 = 0
+	}
+
+	D5.u16 = 0x0fff
+
+	// React to camera movement in x-direction
+	s16 newAreaStartX = camera.position.x.u16 & 0xff80
+	if (newAreaStartX != dynobjects.areastart.x)
+	{
+		if (newAreaStartX < s16(dynobjects.areastart.x))
+		{
+			// Load objects to the left
+			A0 = dynobjects.addr.begin
+			A3 = 0xffff0000 + dynobjects.respawn.begin
+			s16 px = newAreaStartX - 0x80
+			if (px >= 0)
+			{
+				if (allocDynamicObjectStd())
+				{
+					while (s16[A0-6] > px)
+					{
+						A0 -= 6
+						--A3
+						bool success = conditionalSpawnDynamicObject(considerLevelWrap, false)
+						if (!success)
+						{
+						#if STANDALONE
+							A0 += 6
+						#else
+							// To me, it looks like the original game code is incorrect here
+							//  -> I double-checked it and this here really seems to be what the original does, so it's not a bug in 86K-to-script translation
+							//      (when comparing to original, note that "conditionalSpawnDynamicObject" does not increase A0 by 6 itself, but the function at A6 does in all cases)
+							//  -> But adding 12 here leads to a subtle bug that desyncs dynobjects.addr.begin and dynobjects.respawn.begin
+							//  -> Subtle because it happens only rarely, as "conditionalSpawnDynamicObject" usually won't fail
+							A0 += 12
+						#endif
+							++A3
+							break
+						}
+					}
+				}
+			}
+			dynobjects.addr.begin = A0
+			dynobjects.respawn.begin = A3.u16
+
+			px = newAreaStartX + object_x_threshold
+			while (s16[dynobjects.addr.end-6] >= px)
+			{
+				dynobjects.addr.end -= 6
+				--dynobjects.respawn.end
+			}
+		}
+		else
+		{
+			// Load objects to the right
+			A0 = dynobjects.addr.end
+			A3 = 0xffff0000 + dynobjects.respawn.end
+			s16 px = newAreaStartX + object_x_threshold
+			if (allocDynamicObjectStd())
+			{
+				while (u16[A0] < u16(px))
+				{
+					bool success = conditionalSpawnDynamicObject(considerLevelWrap, false)
+					A0 += 6
+					++A3
+					if (!success)
+						break
+				}
+			}
+			dynobjects.addr.end = A0
+			dynobjects.respawn.end = A3.u16
+
+			px = newAreaStartX - 0x80
+			if (px >= 0)
+			{
+				while (u16(px) > u16[dynobjects.addr.begin])
+				{
+					dynobjects.addr.begin += 6
+					++dynobjects.respawn.begin
+				}
+			}
+		}
+		dynobjects.areastart.x = newAreaStartX
+	}
+
+	// React to camera movement in y-direction
+	s16 newAreaStartY = camera.position.y.u16 & 0xff80
+	if (newAreaStartY != dynobjects.areastart.y)
+	{
+		s16 py = newAreaStartY
+		if (level.vertical_wrap & 0x8000)
+		{
+		#if STANDALONE
+			// This seems to fix the occasionally missing corner sprite in SOZ 2's first rising sand section (and some other places where spawning can potentially fail)
+			//  -> For the missing corner sprite specifically, it seems to be somewhat reproducible this way:
+			//      - Go through the first part of the rising sand section without moving too much
+			//      - When reaching the breakable rock at (0x1ec0, 0x0080), briefly push towards it, then jump over with reduced jump height it while holding left (so you just make it over the rock)
+			//      - Jump again up the steps and stay on the left side until the sand stops, then go right to the corner sprite
+			py &= level.height.bitmask
+			dynobjects.areastart.y &= level.height.bitmask
+		#endif
+			if (newAreaStartY < s16(dynobjects.areastart.y))
+			{
+				if (newAreaStartY == 0 && dynobjects.areastart.y != 0x80)
+				{
+					// Load objects below (this happens after the camera went down and crossed the wrapping border)
+					py += 0x180
+				}
+				else
+				{
+					// Load objects above
+					py -= 0x80
+				}
+			}
+			else
+			{
+				if (dynobjects.areastart.y == 0 && newAreaStartY != 0x80)
+				{
+					// Load objects above (this happens when the camera went up and crossed the wrapping border)
+					py -= 0x80
+				}
+				else
+				{
+					// Load objects below
+					py += 0x180
+				}
+			}
+			py &= level.height.bitmask
+		}
+		else
+		{
+			if (newAreaStartY < s16(dynobjects.areastart.y))
+			{
+				py -= 0x80
+				if (py < 0)
+				{
+					dynobjects.areastart.y = 0
+					return
+				}
+			}
+			else
+			{
+				// Load objects below
+				py += 0x180
+				if (py > level.height.bitmask)
+				{
+					dynobjects.areastart.y = newAreaStartY
+					return
+				}
+			}
+		}
+
+		if (allocDynamicObjectStd())
+		{
+			D3.u16 = py
+			D4.u16 = py + 0x80
+			A0 = dynobjects.addr.begin
+			A3 = 0xffff0000 + dynobjects.respawn.begin
+			D7 = dynobjects.addr.end - dynobjects.addr.begin
+			while (D7 != 0)
+			{
+				if (!conditionalSpawnDynamicObject(false, true))
+					break
+
+				A0 += 6
+				++A3
+				D7 -= 6
+			}
+		}
+	}
+
+	dynobjects.areastart.y = newAreaStartY
+}
+
+#if STANDALONE
+//# address-hook(0x01b58a)
+function void DrawOrUnloadObjectAtPosition()
+{
+	if (!checkForUnloadObjectAtPosition(objA0.position.x.u16, object_x_threshold + 0x180))
+	{
+		DrawObject()
+	}
+}
+#endif
+
+function bool checkForUnloadObjectAtPosition(u16 px)
+{
+	return checkForUnloadObjectAtPosition(px, object_x_threshold)
+}
+
+function bool shouldUnloadObjectAtPosition(u16 px)
+{
+	return shouldUnloadObjectAtPosition(px, object_x_threshold)
+}
+
+//# address-hook(0x0850a2) end(0x0850d2)
+function void fn0850a2()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (dx <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		fn0850ba()
+	}
+}
+
+//# address-hook(0x0850d4) end(0x0850fc)
+function void fn0850d4()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+	if (dx <= object_x_threshold && dy <= 0x0200 + getScreenHeightExtend())
+	{
+		DrawObject()
+	}
+	else
+	{
+		Object.TriggerUnloading()
+	}
+}
+
+//# address-hook(0x085180) end(0x0851ae)
+function void fn085180()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x100
+	if (dx <= object_x_threshold && dy <= 0x0200 + getScreenHeightExtend())
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		Object.TriggerUnloading()
+	}
+}
+
+//# address-hook(0x0851b4) end(0x0851c6)
+function void fn0851b4()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (dx <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		fn0851cc()
+	}
+}
+
+//# address-hook(0x085208) end(0x085232)
+function void fn085208()
+{
+	if (s8[A0 + 0x2a] >= 0)
+	{
+		D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+		if (D0.u16 <= object_x_threshold)
+		{
+			AddAsDynamicObject()
+			DrawObject()
+		}
+		else
+		{
+			fn0851cc()
+		}
+	}
+	else
+	{
+		fn08522c()
+	}
+}
+
+//# address-hook(0x01b666) end(0x01b68c)
+function void fn01b666()
+{
+	D0.u16 = (D0.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+//# address-hook(0x085070) end(0x0850a0)
+function void Object.DrawOrUnload()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		Enemy.UnloadDelayed()
+	}
+}
+
+//# address-hook(0x085102) end(0x08513a)
+function void fn085102()
+{
+	// Scattered boss giblets, Called after destruction
+
+	UpdateMovementSimple()
+
+	u16 px = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 py = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+	if (px > object_x_threshold || py > 0x200 + getScreenHeightExtend())
+	{
+		Object.TriggerUnloading()
+		objA0.flags38 |= 0x10
+	}
+	else
+	{
+		// Flickering: Draw only every second frame
+		objA0.flags38 ^= 0x40
+		if ((objA0.flags38 & 0x40) == 0)
+		{
+			DrawObject()
+		}
+	}
+}
+
+//# address-hook(0x085140) end(0x08515a)
+function void Enemy.DrawOrUnload()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		Enemy.UnloadDelayed()
+	}
+}
+
+// Next, load/unload threshold checks baked into specific objects.
+
+// With "GTGT" removed from VRAM, do not show this in debug mode.
+// The invisible collision object also handles its deletion checks with a direct check again 0x0280,
+// which we update to a threshold based on screen width.
+function void BlockerElement.checkForUnloadAndDebugRender(u32 color)
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		Object.DespawnAndUnload()
+	}
+	else if (debug_mode.state)
+	{
+//		DrawObject()
+
+	#if STANDALONE
+		debugDrawOutlineRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, color)
+		debugDrawRect(objA0.position.x.u16 - objA0.box_size.x, objA0.position.y.u16 - objA0.box_size.y, s16(objA0.box_size.x) * 2, s16(objA0.box_size.y) * 2, (color & 0xffffff) + (((color >> 24) / 2) << 24))
+	#endif
+	}
+}
+
+// Basic moving platform
+//# address-hook(0x025506) end(0x0255ee)
+function void MovingPlatform.Init()
+{
+	if (unlock_act)
+	{
+		MovingPlatform.UnlockAct.Init()
+		return
+	}
+
+	if (global.zone_act == 0x0000)
+	{
+		// Angel Island Act 1
+		objA0.mapping_offset = 0x0256a2
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x03f7)
+	}
+	else if (global.zone_act == 0x0001)
+	{
+		// Angel Island Act 2
+		objA0.mapping_offset = 0x0256a2
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0440)
+	}
+	else if (global.zone == 0x01)
+	{
+		// Hydrocity Zone
+		objA0.mapping_offset = 0x025688
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x041d)
+	}
+	else if (global.zone == 0x02)
+	{
+		// Marble Garden Zone
+		objA0.mapping_offset = 0x025654
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0001)
+	}
+
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x180
+	D0 = (u16(objA0.subtype2c) >> 2) & 0x1c
+	A2 = 0x0254fa + D0.u16
+	objA0.box_size.x = u8[A2]
+	objA0.box_size.y = u8[A2+1]
+	objA0.animation.sprite = u8[A2+2]
+	u16[A0 + 0x30] = objA0.position.x.u16
+	u16[A0 + 0x32] = objA0.position.x.u16
+	u16[A0 + 0x34] = objA0.position.y.u16
+	objA0.flags2e = objA0.flags2a
+	objA0.value42 = object_x_threshold
+	u16[A0 + 0x44] = objA0.position.x.u16
+
+	D0 = (objA0.subtype2c & 0x0f) - 8
+	if (D0.s16 >= 0)
+	{
+		if (D0.u16 < 4)
+		{
+			A2 = 0xfffffe9a + D0.u16 * 4
+			if (s16[A2] < 0)
+			{
+				objA0.flags2e ^= 0x01
+			}
+		}
+		else
+		{
+			objA0.value42 = object_x_threshold + 0x100
+			u16[A0 + 0x44] += 0x100
+		}
+	}
+
+	objA0.subtype2c = (objA0.subtype2c & 0x0f) * 2
+	objA0.update_address = addressof(MovingPlatform.Update)
+	MovingPlatform.Update()
+}
+
+// Basic moving platform (LBZ variant)
+//# address-hook(0x024e3c) end(0x024eec)
+function void fn024e3c()
+{
+	objA0.mapping_offset = 0x025338
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x03c3)
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x0180
+
+	if (objA0.subtype2c & 0x80)
+	{
+		u16[A0 + 0x38] = (objA0.subtype2c & 0x7f) << 4
+		objA0.subtype2c = 0x17
+	}
+
+	D0 = (objA0.subtype2c >> 2) & 0x1c
+	A2 = 0x024e34 + D0.u16
+	objA0.box_size.x = u8[(A2+=1)-1]
+	objA0.box_size.y = u8[(A2+=1)-1]
+	objA0.animation.sprite = u8[(A2+=1)-1]
+	u16[A0 + 0x30] = objA0.position.x.u16
+	objA0.value32 = objA0.position.x.u16
+	u16[A0 + 0x34] = objA0.position.y.u16
+	objA0.flags2e = objA0.flags2a
+	objA0.value42 = object_x_threshold
+	u16[A0 + 0x44] = objA0.position.x.u16
+
+	D0 = u16(objA0.subtype2c & 0x0f) - 8
+	if (D0.s16 > 0)
+	{
+		if (D0.u16 < 4)
+		{
+			D0.u16 <<= 2
+			A2 = 0xfffffe9a + D0.u16
+			if (s16[A2] < 0)
+			{
+				objA0.flags2e ^= 0x01
+			}
+		}
+		else
+		{
+			objA0.value42 = object_x_threshold + 0x100
+			u16[A0 + 0x44] += 0x0100
+		}
+	}
+
+	objA0.subtype2c = (objA0.subtype2c & 0x0f) * 2
+
+	objA0.update_address = 0x024ef2
+	fn024ef2()
+}
+
+// Ring
+//# address-hook(0x01a88c) end(0x01a91a)
+function void DynamicRing.Update()
+{
+	if (objA0.base_state == 0)
+	{
+		// In this state, the ring is attracted by a lightning shield
+		DynamicRing.UpdateAttraction()
+
+		// Lost lightning shield?
+		if ((u8[0xffffb000 + 0x2b] & char.bonus.SHIELD_LIGHTNING) == 0)
+		{
+		#if STANDALONE
+			objA0.update_address = global.inv_gravity ? 0x01a662 : 0x01a64a
+		#else
+			objA0.update_address = 0x01a64a
+		#endif
+			objA0.base_state = 0x02
+			spilled_rings.speed = 0xff
+		}
+
+		--objA0.animation.timer
+		if (s8(objA0.animation.timer) < 0)
+		{
+			objA0.animation.timer = 3
+			objA0.animation.sprite = (objA0.animation.sprite + 1) & 0x03
+		}
+
+		D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+		if (D0.u16 <= object_x_threshold)
+		{
+			AddAsDynamicObject()
+			DrawObject()
+		}
+		else
+		{
+			if (objA0.respawn_entry)
+			{
+				A2 = 0xffff0000 + objA0.respawn_entry
+				u8[A2] &= ~0x80
+			}
+
+			D0.u16 = u16[0x30]
+			if (D0.u16 != 0)
+			{
+				A2 = 0xffff0000 + D0.u16
+				u16[A2] = 0
+			}
+			UnloadObject()
+		}
+	}
+	else
+	{
+		u8[A0 + 0x28] = 0
+		objA0.sprite_priority = 0x80
+		--level.total_rings
+		CollectRing()
+
+		objA0.update_address = addressof(DynamicRing.FadeOut)
+		objA0.base_state = 0
+		DynamicRing.FadeOut()
+	}
+}
+
+// Giant ring
+//# address-hook(0x0618fc) end(0x061988)
+function void fn0618fc()
+{
+	if ((objA0.flags38 & 0x20) == 0)
+	{
+		if (objA0.render_flags & render_flag.VISIBLE)
+		{
+			if (objA0.flags38 & 0x40)
+			{
+				fn08598a()
+			}
+
+			Object.loadSpritePatternsForVDP(0x0619b2)
+			DrawObject()
+			return
+		}
+
+		u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	#if STANDALONE
+		// This is done to prevent the AIZ 1 ring shortly after fire transition from despawning and not easily reappearing
+		u16 dy = (objA0.position.y.u16 & 0xff80) - (camera.position.y.u16 & 0xff80) + 0x80
+		if (dx <= object_x_threshold && dy <= 0x280 + getScreenHeightExtend())
+	#else
+		u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+		if (dx <= object_x_threshold && dy <= 0x200 + getScreenHeightExtend())
+	#endif
+		{
+			// Reset ring palette to non-flashing
+			u32[0xfffffc2a] = 0x00ee0088
+			u16[0xfffffc3e] = 0x0044
+			DrawObject()
+			return
+		}
+	}
+
+	// Despawn
+	u32[0xfffffc2a] = 0x00ee0088
+	u16[0xfffffc3e] = 0x0044
+
+	// Restore the art that was overwritten by the giant ring
+	Kosinski.addToDMAQueue(0x0db406, 0xb400)		// Explosion smoke sprites
+
+	fn0851cc()
+}
+
+// Signpost
+//# address-hook(0x083938) end(0x083996)
+function void fn083938()
+{
+	if (global.zone == 0x0b)
+	{
+		CheckGroundCollision()
+		if (D1.s16 > 0)
+		{
+			UpdateMovementSimple()
+		}
+		else
+		{
+			objA0.position.y.u16 += D1.u16
+			objA0.velocity.y = 0
+		}
+	}
+	else
+	{
+		objA0.velocity.y = 0
+	}
+
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+	if (dx <= object_x_threshold && dy <= 0x0200 + getScreenHeightExtend())
+	{
+		fn086932()
+	}
+	else
+	{
+		addPatternLoadingCue(0x08399a)		// Spike and Springs
+		fn0851e4()
+		Object.TriggerUnloading()
+	}
+}
+
+// Air bubbles
+//# address-hook(0x02fb5c)
+function void fn02fb5c()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		if (objA0.position.y.u16 > water.height.current)
+		{
+			DrawObject()
+		}
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// Jump ramp
+//# address-hook(0x024d68) end(0x024d94)
+function void fn024d68()
+{
+	A1 = 0xffffb000
+	fn024d9a()
+
+	A1 = 0xffffb04a
+	fn024d9a()
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// Round bumper (CNZ, glowing spheres bonus)
+//# address-hook(0x032eaa) end(0x032eea)
+function void fn032eaa()
+{
+	if (u8[A0 + 0x29] != 0)
+	{
+		fn032f34()
+	}
+
+	Object.animationUpdate(0x033094)
+	D0.u16 = (u16[A0 + 0x30] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		AddAsDynamicObject()
+		DrawObject()
+		return
+	}
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+	UnloadObject()
+}
+
+// AIZ swinging vine
+//# address-hook(0x022442) end(0x022484)
+function void fn022442()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+		return
+	}
+
+	D2.u16 = u16[A0 + 0x36]
+	A2 = 0xffff0000 + u16[A0 + 0x3e]
+	while (D2.s16 > 0)
+	{
+		A1 = A2
+		A2 = 0xffff0000 + u16[A1 + 0x3e]
+		UnloadObjectA1()
+		--D2.s16
+	}
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+	UnloadObject()
+}
+
+// AIZ zipline
+//# address-hook(0x021f38) end(0x021f7a)
+function void fn021f38()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		A2 = 0xffff0000 + u16[A0 + 0x3e]
+		D2.u16 = u16[A0 + 0x36]
+		while (D2.s16 > 0)
+		{
+			A1 = A2
+			A2 = 0xffff0000 + u16[A1 + 0x3e]
+			UnloadObjectA1()
+			--D2.s16
+		}
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// AIZ spiked rotating log
+//# address-hook(0x02b896) end(0x02b8e8)
+function void fn02b896()
+{
+	D1 = objA0.box_size.x + 11
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16 + 1
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		D0.u16 = u16[A0 + 0x3c]
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			UnloadObjectA1()
+		}
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// AIZ2 post-boss bridge
+//# address-hook(0x02b304) end(0x02b37a)
+function void fn02b304()
+{
+	D0.u8 = objA0.flags38
+	if (D0.u8 == 0x40 || D0.u8 == 0xc0)
+	{
+		D1.u16 = 0x13
+		D2.u16 = 0x60
+		D3.u16 = 0x61
+	}
+	else
+	{
+		D1.u16 = 0x6b
+		D2.u16 = 0x08
+		D3.u16 = 0x08
+	}
+
+	D4.u16 = objA0.position.x.u16
+	CheckCharacterOnClimbableObject()
+
+	D0.u16 = (u16[A0 + 0x30] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		D0.u16 = u16[A0 + 0x3c]
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			UnloadObjectA1()
+		}
+
+		D0.u16 = objA0.value3e
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			UnloadObjectA1()
+		}
+
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// HCZ conveyor belt
+//# address-hook(0x0311c4) end(0x031220)
+function void fn0311c4()
+{
+	A2 = A0 + 0x32
+	A1 = 0xffffb000
+	D1.u16 = control.player1
+	D2 = 0
+	fn031226()
+
+	++A2
+	A1 = 0xffffb04a
+	D1.u16 = control.tails
+	D2 = 1
+	fn031226()
+
+	D1.u16 = level.despawn_position.x
+	D0.u16 = (u16[A0 + 0x3c] & 0xff80) - object_x_threshold
+	if (D1.u16 >= D0.u16)
+	{
+		D0.u16 = objA0.value3e & 0xff80
+		if (D1.u16 <= D0.u16)
+			return
+	}
+
+	u8[0xffffcfe0 + objA0.subtype2c] = 0
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+	UnloadObject()
+}
+
+// HCZ conveyor belt
+//# address-hook(0x031626) end(0x03165e)
+function void fn031626()
+{
+	D1.u16 = level.despawn_position.x
+	D0.u16 = (u16[A0 + 0x3c] & 0xff80) - object_x_threshold
+	if (D1.u16 >= D0.u16 && D1.u16 <= (objA0.value3e & 0xff80))
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}
+
+// MGZ Driller cutscenes
+//# address-hook(0x088460) end(0x088472)
+function void Driller.Update()
+{
+	// Targets:
+	//  - 0x088480	-> objA0.base_state = 0x00	-> Initialization
+	//  - 0x0884a2	-> objA0.base_state = 0x02	-> Waiting for the player to come close
+	//  - 0x0884d2	-> objA0.base_state = 0x04	-> Hovering
+	//  - 0x0884fa	-> objA0.base_state = 0x06	-> Going up without drilling
+	//  - 0x08852e	-> objA0.base_state = 0x08	-> Going up, drilling through the ceiling
+	call tableLookupAddress(0x088476, objA0.base_state)
+
+	fn088a62()
+
+#if STANDALONE
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		Enemy.UnloadDelayed()
+
+		// Stop screenshake
+		camera.screenshake.state = 0
+
+		// Reset palette changes due to flashing in any case
+		objA0.state = 1
+		Boss.updateHitFlashing(3, 0x088ae4, 0x088aea)
+	}
+
+#else
+	Enemy.DrawOrUnload()
+#endif
+}
+
+// ICZ swinging platform
+//# address-hook(0x085160) end(0x08517a)
+function void fn085160()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		fn0850ba()
+	}
+	else
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+}
+
+// LBZ cup elevator
+//# address-hook(0x026e78) end(0x026eae)
+function void fn026e78()
+{
+	// u16[A0 + 0x30] is the central x-position
+
+	D0.u16 = (u16[A0 + 0x30] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+
+		A1 = 0xffffb000
+		D6 = 3		// object.flag.P1_ON_OBJECT
+		fn026eb4()
+
+		A1 = 0xffffb04a
+		D6 = 4		// object.flag.P2_ON_OBJECT
+		fn026eb4()
+
+		UnloadObject()
+	}
+}
+
+// LBZ zipline
+//# address-hook(0x026588) end(0x0265d6)
+function void fn026588()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+		return
+	}
+
+	D0.u16 = (u16[A0 + 0x38] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+		return
+	}
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+
+	D0.u16 = u16[A0 + 0x3c]
+	if (D0.u16 != 0)
+	{
+		A1 = 0xffff0000 + D0.u16
+		UnloadObjectA1()
+	}
+	UnloadObject()
+}
+
+// LBZ1 pre-boss cutscene
+//# address-hook(0x08cf1e) end(0x08cf5c)
+function void fn08cf1e()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (!isMainCharacter(CHARACTER_KNUCKLES))
+		{
+			if (objA0.subtype2c != 0x0c)
+			{
+				UnloadObject()
+				return
+			}
+
+			addPatternLoadingCue(0x083d3a)		// Some common object sprites
+		}
+
+		addPatternLoadingCue(0x08cf62)		// LBZ2 object sprites
+		UnloadObject()
+	}
+}
+
+// MHZ curled vine bridge
+//# address-hook(0x03e952)
+//# translated(0x03e93c) end(0x03e9a0)
+function void fn03e952()
+{
+	while (true)
+	{
+		u16[(A2+=2)-2] = D2.u16
+		u16[(A2+=2)-2] = D3.u16
+		A2 += 2
+		D5 += D4
+		D1 = u32[(A7+=4)-4]
+		D4 += D1
+		--D6.s16
+		if (D6.s16 < 0)
+			break
+
+		u32[A7-=4] = D1
+		D5 = (D5 << 16) + (D5 >> 16)
+		D0.u16 = D5.u16
+		D5 = (D5 << 16) + (D5 >> 16)
+		LookupSinCos()
+		D1.s16 >>= 4
+		D0.s16 >>= 4
+		D2.u16 += D1.u16
+		D3.u16 += D0.u16
+	}
+
+	D2.u16 = u16[(A7+=2)-2]
+	D1.u16 = 0x40
+	D3 = 8
+	D4.u16 = objA0.position.x.u16
+	A2 = A1
+
+	fn03e9ac()
+
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (dx > object_x_threshold)
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		UnloadObjectA1()
+		UnloadObject()
+	}
+}
+
+// MHZ sticky vine
+//# address-hook(0x03ebf8) end(0x03ec24)
+function void fn03ebf8()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (dx <= object_x_threshold)
+		return
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	UnloadObjectA1()
+	UnloadObject()
+}
+
+// MHZ swing vine
+//# address-hook(0x022824) end(0x022866)
+function void fn022824()
+{
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (dx <= object_x_threshold)
+	{
+		DrawObject()
+		return
+	}
+
+	D2.u16 = u16[A0 + 0x36] - 1
+	if (D2.s16 >= 0)
+	{
+		A2 = 0xffff0000 + objA0.value3e
+		while (D2.s16 >= 0)
+		{
+			A1 = A2
+			A2 = 0xffff0000 + u16[A1 + 0x3e]
+			UnloadObjectA1()
+			--D2.s16
+		}
+	}
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+	UnloadObject()
+}
+
+// MHZ Madmole projectiles
+//# address-hook(0x08d6e6) end(0x08d736)
+function void fn08d6e6()
+{
+	// Targets:
+	//  - 0x08d746	-> objA0.base_state = 0x00
+	//  - 0x08d768	-> objA0.base_state = 0x02
+	//  - 0x08d778	-> objA0.base_state = 0x04
+	//  - 0x08d79c	-> objA0.base_state = 0x06
+	//  - 0x08d7a8	-> objA0.base_state = 0x08
+	call tableLookupAddress(0x08d73c, objA0.base_state)
+
+	u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	u16 dy = (objA0.position.y.u16 - camera.position.y.u16) + 0x80
+	if (dx <= object_x_threshold && dy <= 0x0200 + getScreenHeightExtend())
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		if (u16[A0 + 0x44])
+		{
+			A1 = 0xffff0000 + u16[A0 + 0x44]
+			u8[A1 + 0x2a] |= 0x02
+			u8[A1 + 0x2e] = 0
+		}
+		Object.TriggerUnloading()
+	}
+}
+
+// FBZ magnetic pendulum
+//# address-hook(0x03d4c2) end(0x03d730)
+function void fn03d4c2()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		D0.u16 = u16[A0 + 0x44]
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			u8[A1 + 0x05] = 0xff
+		}
+
+		D0.u16 = objA0.respawn_entry
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			D0.u8 = objA0.value26
+			if (s8[A0 + 0x2c] >= 0)
+			{
+				D0.u8 += 0x40
+			}
+
+			D1 = (D0.s8 >= 0) ? 1 : 0
+			u8[A1] = D1.u8
+		}
+
+		UnloadObject()
+		return
+	}
+
+	A2 = 0xffffb000
+	if (objA0.value2f != 0)
+	{
+		if (s8[A0 + 0x2f] >= 0)
+		{
+			D0.s32 = s16[A2 + 0x18]
+			D0 <<= 8
+			u32[A2 + 0x10] += D0
+			D0.s32 = s16[A2 + 0x1a]
+			D0 <<= 8
+			u32[A2 + 0x14] += D0
+
+			--objA0.value2f
+			if (objA0.value2f == 0)
+			{
+				u8[A2 + 0x2e] = 0
+				u8[A2 + 0x2a] &= ~0x02
+			}
+		}
+		else
+		{
+			D0.u16 = u16[A0 + 0x30]
+			u16[A0 + 0x26] += D0.u16
+			D0.u8 = objA0.value26 - 0x40
+			D1 = (D0.s8 >= 0) ? -6 : 6
+			u16[A0 + 0x30] += D1.u16
+
+			bool goto03d5c4 = false
+			D0.u8 = objA0.value26
+			if (s8[A0 + 0x2c] < 0)
+			{
+				if (s16[A0 + 0x30] < 0)
+				{
+					if (D0.s8 < 0 && D0.u8 <= 0xc0)
+					{
+						D0 = 0xffffffc0
+						D1 = 0
+						goto03d5c4 = true
+					}
+				}
+				else
+				{
+					if (D0.s8 >= 0 && D0.u8 >= 0x40)
+					{
+						D0 = 0x40
+						D1 = 0xffffffff
+						goto03d5c4 = true
+					}
+				}
+			}
+			else
+			{
+				D0.u8 += 0x40
+				if (s16[A0 + 0x30] < 0)
+				{
+					if (D0.s8 < 0 && D0.u8 <= 0xc0)
+					{
+						D0 = 0xffffff80
+						D1 = 0
+						goto03d5c4 = true
+					}
+				}
+				else
+				{
+					if (D0.s8 >= 0 && D0.u8 >= 0x40)
+					{
+						D0 = 0
+						D1 = 0xffffffff
+						goto03d5c4 = true
+					}
+				}
+			}
+
+			bool goto03d648 = false
+			if (goto03d5c4)
+			{
+				objA0.value26 = D0.u8
+				u8[A0 + 0x27] = 0
+				objA0.flags2e = D1.u8
+				objA0.value2f = 0
+				playSound(0x9e)
+				if (u8[A0 + 0x32] != 0)
+				{
+					u8[A0 + 0x32] = 0
+					objA0.value2f = 1
+
+					D0 = abs(s16[A0 + 0x30]) << 8
+					D0.u16 = D0 / 0x51
+					if (D0.u16 < 0x0100)
+						D0.u16 = 0x0100
+
+					if (s8[A0 + 0x2c] < 0)
+					{
+						u16[A2 + 0x1a] = 0
+						D0.s16 = -D0.s16
+						u16[A2 + 0x18] = D0.u16
+						u16[A2 + 0x1c] = D0.u16
+						if (s8[A0 + 0x26] >= 0)
+						{
+							s16[A2 + 0x1c] = -s16[A2 + 0x1c]
+						}
+					}
+					else
+					{
+						u16[A2 + 0x18] = 0
+						u16[A2 + 0x1a] = D0.u16
+						u16[A2 + 0x1c] = D0.u16
+						if (s8[A0 + 0x26] < 0)
+						{
+							s16[A2 + 0x1c] = -s16[A2 + 0x1c]
+						}
+					}
+
+					goto03d648 = true
+				}
+			}
+			else
+			{
+				goto03d648 = (u8[A0 + 0x32] != 0)
+			}
+
+			if (goto03d648)
+			{
+				D0.u8 = objA0.value26
+				LookupSinCos()
+				D1 = (D1 << 16)
+				D1.s32 >>= 1
+				D3 = D1
+				D3.s32 >>= 3
+				D1 += D3
+				D0 = (D0 << 16)
+				D0.s32 >>= 1
+				D2 = D0
+				D2.s32 >>= 3
+				D0 += D2
+				if ((u8[A2 + 0x2a] & char.flag.ROLLING) == 0)
+				{
+					D3.s32 >>= 2
+					D1 += D3
+					D2.s32 >>= 2
+					D0 += D2
+				}
+				else
+				{
+					D3.s32 >>= 4
+					D1 -= D3
+					D2.s32 >>= 4
+					D0 -= D2
+				}
+				D1 = (D1 << 16) + (D1 >> 16)
+				D1.u16 += objA0.position.x.u16
+				u16[A2 + 0x10] = D1.u16
+				D0 = (D0 << 16) + (D0 >> 16)
+				D0.u16 += objA0.position.y.u16
+				u16[A2 + 0x14] = D0.u16
+				D0.u8 = objA0.value26 + 0x40
+				u8[A2 + 0x26] = D0.u8
+				if (u8[A0 + 0x32] != 0)
+				{
+					D0.u8 = objA0.value26 + 0x40
+					LookupSinCos()
+					if (s16[A0 + 0x30] < 0)
+					{
+						D1.s16 = -D1.s16
+						D0.s16 = -D0.s16
+					}
+					u16[A2 + 0x18] = D1.u16
+					u16[A2 + 0x1a] = D0.u16
+
+					// Check if jump button pressed
+					D0.u16 = control.player1.pressed & CONTROL_ABC
+					if (D0.u16 != 0)
+					{
+						u8[A0 + 0x32] = 0
+						u8[A2 + 0x2e] = 0
+						u8[A2 + 0x3d] = 0
+						u8[A2 + 0x2a] |= 0x02
+						u8[A2 + 0x40] = 0x01
+						u8[A2 + 0x2a] |= 0x04
+						u8[A2 + 0x20] = char.state.ROLLING
+						u8[A2 + 0x1e] = char.hitbox.y.ROLLING
+						u8[A2 + 0x1f] = char.hitbox.x.ROLLING
+						u16[A2 + 0x1c] = 0
+						D0.u8 = objA0.value26
+						LookupSinCos()
+						D3.u16 = D1.u16
+						D1.u16 <<= 3
+						D1.u16 -= D3.u16
+						u16[A2 + 0x18] = D1.u16
+						D2.u16 = D0.u16
+						D0.u16 <<= 3
+						D0.u16 -= D2.u16
+						u16[A2 + 0x1a] = D0.u16
+
+						playSound(SFX_JUMP)
+					}
+				}
+			}
+		}
+	}
+
+	DrawObject()
+}
+
+// FBZ1 Boss
+//# address-hook(0x06f764) end(0x06f780)
+function void fn06f764()
+{
+	fn06f786()
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		UnloadObject()
+	}
+}
+
+// SOZ push switch is handled in main.lemon to also cover the pushing speed in Original Mode
+
+// SOZ sand slide block platforms
+//# address-hook(0x040276) end(0x0402c6)
+function void fn040276()
+{
+	objA0.mapping_offset = 0x04043a
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x03c0)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x0c
+	objA0.sprite_priority = 0x0200
+
+	D0 = objA0.subtype2c * 8
+	objA0.position.x.u16 += D0.u16
+	u16[A0 + 0x44] = objA0.position.x.u16
+	u16[A0 + 0x46] = objA0.position.y.u16
+	u16[A0 + 0x30] = u16[A0 + 0x44]
+	D0.u16 = (D0.u16 & 0xff80) + object_x_threshold + 0x80
+	objA0.value32 = D0.u16
+
+	objA0.update_address = 0x0402cc
+	fn0402cc()
+}
+
+// SOZ swinging platform
+//# address-hook(0x0414fe) end(0x041546)
+function void fn0414fe()
+{
+	u16 px = objA0.position.x.u16
+	fn04154c()
+
+	D1.u16 = 0x20
+	D3.u16 = 0x11
+	D4.u16 = px
+	PlatformCheckClimbOn()
+
+	D0.u16 = (u16[A0 + 0x44] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		A1 = 0xffff0000 + u16[A0 + 0x3c]
+		UnloadObjectA1()
+		UnloadObject()
+	}
+}
+
+// SOZ zipline
+//# address-hook(0x04ad36) end(0x04ad74)
+function void fn04ad36()
+{
+	D0.u16 = (D0.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+		return
+	}
+
+	D2.u16 = u16[A0 + 0x34]
+	A2 = 0xffff0000 + u16[A0 + 0x44]
+	while (D2.s16 > 0)
+	{
+		A1 = A2
+		A2 = 0xffff0000 + u16[A1 + 0x44]
+		UnloadObjectA1()
+		--D2.s16
+	}
+
+	if (objA0.respawn_entry)
+	{
+		A2 = 0xffff0000 + objA0.respawn_entry
+		u8[A2] &= ~0x80
+	}
+
+	UnloadObject()
+}
+
+// LRZ Fireworm
+//# address-hook(0x08f7a4) end(0x08f7da)
+//# alias(fn08f7a4) deprecated
+function void Fireworm.BaseUpdate()
+{
+	// Targets:
+	//  - 0x08f7ea	-> objA0.base_state = 0x00
+	//  - 0x08f812	-> objA0.base_state = 0x04
+	//  - 0x08f862	-> objA0.base_state = 0x06
+	//  - 0x08f89a	-> objA0.base_state = 0x08
+	call tableLookupAddress(0x08f7e0, objA0.base_state)
+
+	Object.loadSpritePatterns(0x08fa38)
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		AddAsDynamicObject()
+		DrawObject()
+	}
+	else
+	{
+		fn0851d8()
+	}
+}
+
+// LRZ Iwamodoki
+//# address-hook(0x08faec) end(0x08fb36)
+//# alias(fn08faec) deprecated
+function void Iwamodoki.BaseUpdate()
+{
+	// Targets:
+	//  - 0x08fb42	-> objA0.base_state = 0x00
+	//  - 0x08fb4c	-> objA0.base_state = 0x02
+	//  - 0x08fb70	-> objA0.base_state = 0x04
+	call tableLookupAddress(0x08fb3c, objA0.base_state)
+
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		if (objA0.flags2a & 0x80)
+		{
+			fn08594e()
+			return
+		}
+
+		D1 = 0x17
+		D2 = 0x0c
+		D3 = 0x0b
+		D4.u16 = objA0.position.x.u16
+		fn01dc56()
+
+		DrawObject()
+	}
+	else
+	{
+		fn08594e()
+		Enemy.UnloadDelayed()
+	}
+}
+
+// LRZ Driller cutscenes
+//# address-hook(0x09026e) end(0x0902e6)
+function void fn09026e()
+{
+	playSoundRepeatedly(0xcc)
+
+	D0 = 1
+	if (objA0.flags38 & 0x01)
+		D0.s16 = -D0.s16
+	objA0.flags38 ^= 0x01
+	objA0.position.y.u16 += D0.u16
+
+	CheckGroundCollision()
+	if (D1.s16 < 0)
+	{
+		u16 dx = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+		u16 dy = objA0.position.y.u16 - camera.position.y.u16 + 0x80
+		if (dx <= object_x_threshold && dy <= 0x0200 + getScreenHeightExtend())
+			return
+
+		camera.screenshake.state.hi = 0
+		fn090368()
+	}
+	else
+	{
+		objA0.base_state = 0x04
+		objA0.flags38 |= 0x28
+		objA0.countdown_value = 0x27
+		u16[A0 + 0x3a] = u16[0x0902ec + objA0.subtype2c]
+		move_area.bottom.target = screenmover_target.bottom
+
+		// "spawnChildObjectsStd(0x090660)" replaced by:
+		spawnChildObjectsStd(0x084aa4, 0x00, 0, 0)		// Screen mover for the upper border
+		spawnChildObjectsStd(0x084ad2, 0x02, 0, 0)		// Screen mover for the lower border
+		spawnChildObjectsStd(0x084a76, 0x04, 0, 0)		// Screen mover for the left border
+		spawnChildObjectsStd(0x084a48, 0x06, 0, 0)		// Screen mover for the right border
+	}
+}
+
+// SSZ moving bar
+//# address-hook(0x04539e) end(0x0453e0)
+function void fn04539e()
+{
+	D0 = 0x018000
+	D1 = 0x0480
+	fn0465d6()
+	D0.u16 += objA0.velocity.y
+	objA0.position.y.u16 = D0.u16
+
+#if STANDALONE	
+	if (debug_mode.state == 0)
+#endif
+	{
+		A1 = 0xffffb000
+		A2 = A0 + 0x38
+		D0.u16 = control.player1
+		D1 = isMainCharacter(CHARACTER_TAILS) ? 0x11 : 0x14
+		fn0453e6()
+
+		A1 = 0xffffb04a
+		A2 = A0 + 0x39
+		D0.u16 = control.tails
+		D1 = 0x11
+		fn0453e6()
+	}
+	if (!original_mode)
+	{
+		// If unloaded, "free" characters still attached (2nd player Tails usually)
+		bool doUnload = shouldUnloadObjectAtPosition(objA0.position.x.u16, object_x_threshold)
+		if (doUnload)
+		{
+			if (u8[A0 + 0x38])
+				u8[0xffffb000 + 0x2e] = 0
+			if (u8[A0 + 0x39])
+				u8[0xffffb04a + 0x2e] = 0
+
+			if (objA0.respawn_entry)
+			{
+				A2 = 0xffff0000 + objA0.respawn_entry
+				u8[A2] &= ~0x80
+			}
+			UnloadObject()
+		}
+		else
+		{
+			DrawObject()
+		}
+	}
+	else
+		DrawOrUnloadObject()
+}
+
+// SSZ spinning disk
+//# address-hook(0x045dfe) end(0x045e68)
+function void fn045dfe()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		if (objA0.value32 != 0)
+		{
+			A1 = 0xffff0000 + objA0.value32
+			u8[A1 + 0x05] = 0xff
+		}
+
+		if (objA0.respawn_entry)
+		{
+			A1 = 0xffff0000 + objA0.respawn_entry
+			u8[A1] &= ~0x80
+		}
+
+		UnloadObject()
+		return
+	}
+
+	Object.animationUpdate(0x046d18)
+
+#if STANDALONE
+	if (debug_mode.state)
+	{
+		u8[A0 + 0x2e] = 0
+		u8[A0 + 0x30] = 0
+	}
+	else
+#endif
+	{
+		D1 = 0x10
+		D2 = 0x21
+		D3 = 0x21
+		D4.u16 = objA0.position.x.u16
+		PlatformCheckClimbOn()
+
+		A1 = 0xffffb000
+		A2 = addressof(control.player1)		// Address: 0xfffff602
+		A3 = A0 + 0x2e
+		D6 = 3		// object.flag.P1_ON_OBJECT
+		fn045e6e()
+
+		A1 = 0xffffb04a
+		A2 = addressof(control.tails)		// Address: 0xfffff66a
+		A3 = A0 + 0x30
+		D6 = 4		// object.flag.P2_ON_OBJECT
+		fn045e6e()
+	}
+
+	DrawObject()
+}
+
+// SSZ swinging shell
+//# address-hook(0x046142) end(0x0461a2)
+function void fn046142()
+{
+	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold)
+	{
+		D0.u16 = u16[A0 + 0x38]
+		if (D0.u16 != 0)
+		{
+			A1 = 0xffff0000 + D0.u16
+			u8[A1 + 0x05] = 0xff
+		}
+
+		if (objA0.respawn_entry)
+		{
+			A1 = 0xffff0000 + objA0.respawn_entry
+			u8[A1] &= ~0x80
+		}
+
+		UnloadObject()
+		return
+	}
+
+	if (s8[A0 + 0x2c] >= 0)
+	{
+		D0 = 0x020000
+		D1 = 0x0821
+		fn0465d6()
+
+		D0.u16 += 0x41
+		objA0.state.both = D0.u16
+	}
+	else
+	{
+		objA0.state.both += (objA0.flags2a & 0x01) ? -1 : 1
+	}
+
+	DrawObject()
+}
+
+// DEZ swinging lift pad
+//# address-hook(0x047440) end(0x047488)
+function void fn047440()
+{
+	u16 backup_px = objA0.position.x.u16
+	fn04748e()
+
+	D1.u16 = 0x18
+	D3.u16 = 0x09
+	D4.u16 = backup_px
+	PlatformCheckClimbOn()
+
+	D0.u16 = (u16[A0 + 0x44] & 0xff80) - level.despawn_position.x
+	if (D0.u16 <= object_x_threshold)
+	{
+		DrawObject()
+	}
+	else
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		A1 = 0xffff0000 + objA0.value3e
+		UnloadObjectA1()
+		UnloadObject()
+	}
+}
+
+// DEZ1 wind tunnel
+//# address-hook(0x049602) end(0x049644)
+function void fn049602()
+{
+	A2 = A0 + 0x30
+	A1 = 0xffffb000
+	D4.u16 = control.player1
+	fn04964a()
+
+	A2 = A0 + 0x31
+	A1 = 0xffffb04a
+	D4.u16 = control.tails
+	fn04964a()
+
+	D0.u16 = ((objA0.position.x.u16 + 0x0400) & 0xff80) - level.despawn_position.x
+	if (D0.u16 > object_x_threshold + 0x0400)
+	{
+		if (objA0.respawn_entry)
+		{
+			A2 = 0xffff0000 + objA0.respawn_entry
+			u8[A2] &= ~0x80
+		}
+		UnloadObject()
+	}
+}

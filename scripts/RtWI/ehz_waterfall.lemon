@@ -30,14 +30,14 @@ function void EHZwaterfall.DeleteOrDisplay()
 //	if (u16[0xffffffd8] == 0)		// if not two-player mode
 //	{
 	//	D0.u16 = (objA0.position.x.u16 & 0xff80) - level.despawn_position.x
-	//	if (D0.u16 <= 0x0280)
+	//	if (D0.u16 <= object_x_threshold)
 	//	{
 	//		DrawObject()
 	//	}
 		// Original code here seems backwards compared to S3&K.
 		
 		D0.u16 = (objA0.position.x.u16 & 0xff80) - u16[0xfffff7da]
-		if (D0.u16 > 0x0280)
+		if (D0.u16 > object_x_threshold)
 		{
 			DrawOrUnloadObject()		// DeleteObject	// Just calling UnloadObject() doesn't seem to set the respawn flags properly
 			return
