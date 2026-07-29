@@ -895,42 +895,9 @@ function void fn07399e()
 //# address-hook(0x073906) end(0x073954)
 function void fn073906()
 {
-	setupObjectAttributesFull(0x0740ec)
-
-	boss.remaining_hits = 8
-	objA0.countdown_callback = 0x073960
-	A1 = 0x0738ce
-	objA0.value26 = MUSIC_MAINBOSS
-	StartBossFight()
-
-#if STANDALONE
-	if (getScreenWidth() > 320)
-	{
-		// Both are 0x3a20 originally
-		level.bossarea.left = 0x3a20 - getScreenExtend() * 2
-		level.bossarea.right = 0x3a20
-	}
+	base.fn073906()
     level.bossarea.top -= getScreenHeightExtend()
     level.bossarea.bottom -= getScreenHeightExtend()
-#endif
-
-	// "spawnChildObjects(0x07414c)" replaced by:
-	spawnChildObject(0x073e0e, 0x00, 0, -8)		// Robotnik head, Egg Mobile empty seat
-	spawnChildObject(0x073ea2, 0x02, -24, -112)
-
-	requestLoadingPatterns(0x77)		// Robotnik running + ship and boss explosion sprites
-
-	Kosinski.addToDMAQueue(0x376542, 0x84a0)		// Boss sprites
-
-	loadPaletteLine1(0x0741fe)
-
-#if STANDALONE
-	// If you made it here and stayed dry, you've earned this achievement
-	if (Game.getAchievementValue(ACHIEVEMENT_LBZ_STAY_DRY) == 1)
-	{
-		Game.setAchievementComplete(ACHIEVEMENT_LBZ_STAY_DRY)
-	}
-#endif
 }
 
 // Adjust background scrolling when Death Egg begins to launch
@@ -1220,25 +1187,9 @@ function void fn0549c6()
 //# address-hook(0x072ffa) end(0x073028)
 function void fn072ffa()
 {
-	A1 = 0x072fea
-	if (InitBoss(0x073004))
-		return
-
-	objA0.value26 = MUSIC_MAINBOSS
-	StartBossFight()
-
-	level.bossarea.left -= getScreenExtend()
-	level.bossarea.right += getScreenExtend()
+	base.fn072ffa()
     level.bossarea.top -= getScreenHeightExtend()
     level.bossarea.bottom -= getScreenHeightExtend()
-
-	objA0.update_address = 0x073046
-	objA0.countdown_callback = 0x07304c
-	u8[0xfffffaa2] = 0
-	u8[0xfffffaa3] = 0
-
-	requestLoadingPatterns(0x71)		// Boss sprites
-	fn07302e()
 }
 
 // Adjust vertical position at which LBZ2 boss 2 is consider off the bottom of the screen based on screen height

@@ -1713,17 +1713,8 @@ function void fn008df8()
 //# address-hook(0x008e5c) end(0x008e8e)
 function void fn008e5c()
 {
-	objA0.box_size.x = 0x80
-	objA0.box_size.y = 0x80
-	objA0.sprite_priority = 0
-	objA0.mapping_offset = 0x008f5e
-	objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE1 | (SpecialStage.TextPromps.targetInVRAM >> 5))
-	objA0.position.x.u16 = 0x120 + getScreenExtend()
-	objA0.position.y.u16 = 0xe8 + getScreenHeightExtend()
-	objA0.value32 = 0xb4
-
-	objA0.update_address = 0x008e94
-	fn008e94()
+	base.fn008e5c()
+	objA0.position.y.u16 += getScreenHeightExtend()
 }
 
 

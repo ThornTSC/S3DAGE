@@ -20792,6 +20792,12 @@ function void fn065068()
 		}
 
 		D0.u16 = objA0.velocity.y + 0x80
+
+		// If the screen height is extended, lower the crane faster
+		// to maintain appropriate timing for the cutscene.
+		if (getScreenHeightExtend() > 0)
+			D0.u16 += getScreenHeightExtend() * 23/8
+
 		if (D0.s16 >= 0)
 		{
 			objA0.velocity.y = D0.u16

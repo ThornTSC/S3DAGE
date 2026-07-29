@@ -173,16 +173,7 @@ function void fn065cac()
 //# address-hook(0x06e488) end(0x06e4b2)
 function void fn06e488()
 {
-	objA0.update_address = 0x06e4b8
-	objA0.countdown_callback = 0x06e4be
-
-	A1 = 0x06e476
-	objA0.value26 = MUSIC_MAINBOSS
-	StartBossFight()
-
+	base.fn06e488()
     level.bossarea.top -= getScreenHeightExtend()
     level.bossarea.bottom -= getScreenHeightExtend()
-
-	requestLoadingPatterns(0x6e)		// Boss sprites
-	loadPaletteLine1(0x06ee48)
 }

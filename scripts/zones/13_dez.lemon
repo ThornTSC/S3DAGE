@@ -6,52 +6,9 @@ global bool drawCockpitDoor
 //# address-hook(0x07ddb4) end(0x07de24)
 function void fn07ddb4()
 {
-	A1 = 0x07dda4
-	if (InitBoss(0x07ddbe))
-		return
-
-	objA0.value26 = MUSIC_MINIBOSS_2
-	StartBossFight()
-
-#if STANDALONE
-	if (getScreenWidth() >= 400)
-	{
-		level.bossarea.left = 0x3740 - getScreenWidth() / 2
-		level.bossarea.right = level.bossarea.left + getScreenExtend() * 2
-		level.bossarea.top -= getScreenHeightExtend()
-        level.bossarea.bottom -= getScreenHeightExtend()
-
-		if (isMainCharacter(CHARACTER_KNUCKLES))
-		{
-			level.bossarea.right += 0x0a
-			u8[0xffff82e0] = 0x8f
-			u8[0xffff835a] = 0x8f
-			u8[0xffff83d4] = 0x8f
-		}
-	}
-#endif
-
-	objA0.update_address = 0x07de28
-	objA0.countdown_callback = 0x07de2c
-
-	setupObjectAttributesFull(0x07ef46)
-
-	objA0.base_state = 0
-	boss.remaining_hits = 0
-	u8[A0 + 0x42] = 0
-	u16[A0 + 0x3a] = 0x4000
-	u16[A0 + 0x3c] = 0x8000
-
-	// "spawnChildObjects(0x07ef8e)" replaced by:
-	spawnChildObject(0x07e768, 0x00, 0, -4)			// The eye
-
-	// "spawnSimpleChildObjects(0x07ef96)" replaced by:
-	spawnSimpleChildObjects(0x07e80e, 8)			// Ominous black orbs
-
-	requestLoadingPatterns(0x7b)		// Robotnik's ship and boss explosion sprites
-	Kosinski.addToDMAQueue(0x1805a0, 0x8000)		// Boss sprites
-
-	loadPaletteLine1(0x07effc)
+	base.fn07ddb4()
+	level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
 }
 
 // When the DEZ1 boss's laser strikes the ground, show the impact graphic
@@ -188,13 +145,8 @@ function void fn07fd9e()
 //# address-hook(0x080de0) end(0x080dfc)
 function void fn080de0()
 {
-	setupObjectAttributesFull(0x0812e0)
-	objA0.update_address = 0x080e02
-
-	objA0.position.x.u16 = 0x70
-	objA0.position.y.u16 = 0xc0 + getScreenHeightExtend()
-	objA0.render_flags |= render_flag.FLIP_X
-	fn080e02()
+	base.fn080de0()
+	objA0.position.y.u16 += getScreenHeightExtend()
 }
 
 // DEZ boss floor collision. The actual art of the floor is baked directly into the background chunks.

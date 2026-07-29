@@ -268,18 +268,8 @@ function void fn0575ea()
 
 function void BossMecha1.setBossArea()
 {
-	level.bossarea.left  = camera.position.x.u16 + 0x20
-	level.bossarea.right = camera.position.x.u16 + getScreenWidth() - 0x20
-	level.bossarea.top   = camera.position.y.u16 + 0x30 + getScreenHeightExtend()/2
-
-	#if STANDALONE
-		if (getScreenWidth() >= 400)
-		{
-			// Reduce move area of the boss, so he does not stand too close to the edge
-			level.bossarea.left += 0x0f
-			level.bossarea.right -= 0x0f
-		}
-	#endif
+	base.BossMecha1.setBossArea()
+	level.bossarea.top   += getScreenHeightExtend()/2
 }
 
 // Implement a visual fix for the GHZ boss only outside of Original Mode.

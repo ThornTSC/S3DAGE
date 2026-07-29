@@ -73,6 +73,8 @@ function void fn063d1a()
 
 	level.bossarea.left -= getScreenExtend()
 	level.bossarea.right += getScreenExtend()
+	// This can probably be reworked to use a base function, but the returns at the start and potential for another mod
+	// to overwrite some other values means this must be implemented very carefully.
     level.bossarea.top -= getScreenHeightExtend()
     level.bossarea.bottom -= getScreenHeightExtend()
 }
@@ -102,6 +104,64 @@ function void fn064c70()
 		objA1.update_address = 0x0863c0
 	}
 	move_area.bottom.target = 0x0300 - getScreenHeightExtend()
+}
+
+// Raise Egg Mobile starting position up if screen height is extended
+// to avoid showing the crane too early.
+//# address-hook(0x064e88) end(0x064ebe)
+function void fn064e88()
+{
+	setupObjectAttributesFull(0x0664ee)
+
+	u16[0xfffffaae] = A0.u16
+	objA0.update_address = 0x064ec4
+	objA0.render_flags |= render_flag.FLIP_X
+	objA0.position.x.u16 = 0x1640
+	objA0.position.y.u16 = 0x02d0 - getScreenHeightExtend()
+
+	// "spawnChildObjects(0x068184)" replaced by:
+	spawnChildObject(0x067cd2, 0x00, 0, -28)		// Robotnik head
+
+	// "spawnChildObjects(0x066608)" replaced by:
+	spawnChildObject(0x06502e, 0x00, 0, 35)			// Egg Mobile crane hook
+
+	fn064ec4()
+}
+
+// If the screen height is extended, raise the crane faster
+// to maintain appropriate timing for the cutscene.
+// (The initial crane lowering is handled in function void fn065068() in main.lemon.)
+//# address-hook(0x0650d4) end(0x065108)
+function void fn0650d4()
+{
+	D2.u16 = objA0.velocity.y - 0x80
+	if (getScreenHeightExtend() > 0)
+		D2.u16 -= getScreenHeightExtend() * 2
+	if (D2.s16 < 0)
+	{
+		objA0.update_address = 0x06510c
+		D2 = 0
+		A1 = 0xffff0000 + u16[A0 + 0x46]
+		u8[A1 + 0x38] |= 0x04
+		A2 = 0xffff0000 + u16[0xfffffaba]
+		u8[A2 + 0x0a] |= 0x80
+	}
+
+	objA0.velocity.y = D2.u16
+	D2.u8 = u8[A0 + 0x1a]
+	D3.u8 = objA0.value3a + D2.u8
+	u8[A0 + 0x43] = D3.u8
+
+	fn06510c()
+}
+
+// If the screen height is extended, have Eggman fly lower faster and farther
+// to return to his usual height for the cutscene.
+//# address-hook(0x064ec4) end(0x064eec)
+function void fn064ec4()
+{
+	base.fn064ec4()
+	objA0.velocity.y += 4 * getScreenHeightExtend()
 }
 
 // This function handles the fall.

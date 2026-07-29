@@ -81,23 +81,9 @@ function void fn053a4c()
 //# address-hook(0x07117e) end(0x0711aa)
 function void fn07117e()
 {
-	objA0.value26 = MUSIC_MINIBOSS_2
-	StartBossFight()
-
-	#if STANDALONE
-	{
-		// Manipulate target values for camera boundaries
-		level.bossarea.left -= getScreenExtend() * 2
-        level.bossarea.top -= getScreenHeightExtend()
-        level.bossarea.bottom -= getScreenHeightExtend()
-	}
-	#endif
-
-	objA0.update_address = 0x0711b0
-	objA0.countdown_callback = addressof(Boss.ICZ1.Init)
-
-	requestLoadingPatterns(0x5f)		// Boss sprites
-	loadPaletteLine1(0x0719da)
+	base.fn07117e()
+    level.bossarea.top -= getScreenHeightExtend()
+    level.bossarea.bottom -= getScreenHeightExtend()
 }
 
 // When the ICZ1 boss snowballs spawn or snap to positions, adjust those positions for the screen height

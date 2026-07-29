@@ -1283,6 +1283,14 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 		return true
 	}
 
+    // AIZ2 bomber propeller
+	if (objA0.update_address == 0x050458 && !original_mode)
+	{
+        // Adjust the propeller renderqueue to draw it in front of the bomber itself
+        Renderer.drawVdpSprite(px, py, size, index, 0x9f80)
+        return true
+	}
+
 	// DEZ 1 Retractable Spring (the one added for S3AIR specifically)
 	if (objA0.update_address == 0x0480d4 && global.zone_act == 0x0b00 && index >= sprite_attribute.PALETTE.LINE1)	// >= works for now, but if yellow spring art is ever used, this is insufficient
 	{

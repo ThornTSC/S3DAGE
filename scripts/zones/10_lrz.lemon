@@ -147,22 +147,9 @@ function void fn0900f0()
 //# address-hook(0x0784f0) end(0x07851c)
 function void fn0784f0()
 {
-	A1 = 0x0784e0
-	if (InitBoss(0x0784fa))
-		return
-
-	objA0.update_address = 0x078522
-	objA0.countdown_callback = 0x078528
-	A1 = 0x0784e8
-	objA0.value26 = MUSIC_MINIBOSS_2
-	StartBossFight()
-
-	// Manipulate target values for camera boundaries
-	level.bossarea.right += getScreenExtend() * 2
+	base.fn0784f0()
     level.bossarea.top -= getScreenHeightExtend()
     level.bossarea.bottom -= getScreenHeightExtend()
-
-	loadPaletteLine1(0x078e0a)
 }
 
 // Reposition the LRZ1 boss's tendrils to the correct height at extended screen heights.

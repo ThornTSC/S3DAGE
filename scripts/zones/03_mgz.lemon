@@ -166,7 +166,60 @@ function void fn051504()
 // 	}
 // }
 
+// Fix tile rendering issue with collapsing landslide floors when moving too fast or off screen.
+//# address-hook(0x051762) end(0x0517c2)
+function void fn051762()
+{
+	--u16[0xffffeeda]
+	if (s16[0xffffeeda] < 0)
+	{
+		u16[0xffffeeda] = 6
+		D2.u16 = D0.u16
+		fn0517d6()
 
+		D0.u16 = u16[0xffffeedc] - camera.foreground.x.u16 + 0x80 - getScreenExtend()
+		if (D0.s16 >= 0 && D0.u16 < 0x01c0)
+		{
+			D0.u16 = u16[0xffffeede]
+			A1 = 0x23cfa0
+			D0.u16 += u16[A1 + D2.s16]
+			D2.u16 = u16[A1 + D2.s16 + 2]
+
+			while (D2.s16 >= 0)
+			{
+				D3.u16 = (camera.foreground.y.u16 + getScreenHeightExtend()) & level.height.tilemask
+				if (D0.u16 >= D3.u16)
+				{
+					D3.u16 += 0xf0
+					if (D0.u16 < D3.u16)
+					{
+						D1.u16 = u16[0xffffeedc]
+						D6 = 8
+						D2 = (D2 << 16) + (D2 >> 16)
+						LoadTileContentSingleLine()
+						D2 = (D2 << 16) + (D2 >> 16)
+					}
+				}
+				D0.u16 += 0x10
+				--D2.s16
+			}
+		}
+	}
+}
+
+// Fixes the cut grass tops during the MGZ2 earthquake sequence.
+// Same graphic can be rendered for both the Sonic path and Knuckles path.
+//# address-hook(0x23d1fc) end(0x23d21c)
+function void fn23d1fc()
+{
+	base.fn23d1fc()
+
+	if (!original_mode)
+	{
+		Renderer.drawCustomSprite("mgz2_collapse_scene_grass", 0x36b9, 0x0af8 - camera.screenshake.offset  - u16[0xffffeed4], 0x20, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x2001)
+		Renderer.drawCustomSprite("mgz2_collapse_scene_grass", 0x3a39, 0x03e8 - camera.screenshake.offset  - u16[0xffffeed4], 0x20, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x2001)
+	}
+}
 
 // Set the MGZ2 flying boss screen lock in accordance with screen height and make move_area.right here match move_area.left from fn01c96e().
 // Also accommodate ultrawide resolutions by checking the character x position, not the camera x position.
@@ -568,32 +621,10 @@ function void fn06d710()
 //# address-hook(0x06c698) end(0x06c6ee)
 function void fn06c698()
 {
-	A1 = 0x06c688
-	if (InitBoss(0x06c6a2))
+	base.fn06c698()
+	if (objA0.value26 != MUSIC_MAINBOSS && objA0.value26 != MUSIC_MINIBOSS_2) // if for some reason the boss uses MUSIC_MINIBOSS_2, it has been included here
 		return
 
-	if (!original_mode)
-	{
-		// Use main boss music
-		objA0.value26 = MUSIC_MAINBOSS
-	}
-	else
-		objA0.value26 = MUSIC_MINIBOSS_2
-	
-	StartBossFight()
-
-	objA0.update_address = 0x06c6f4
-	objA0.countdown_callback = 0x06c6fa
-
-	Kosinski.addToDMAQueue(0x36b340, 0x67e0)		// Boss sprites
-
-	Kosinski.addToDMAQueue(0x36d572, 0x8bc0)		// Falling debris sprites
-
-	requestLoadingPatterns(0x6d)		// Robotnik's ship, boss explosions, and capsule sprites
-	loadPaletteLine1(0x06d97c)
-
-	level.bossarea.left -= getScreenExtend()
-	level.bossarea.right += getScreenExtend()
     level.bossarea.top -= getScreenHeightExtend()/2
     level.bossarea.bottom -= getScreenHeightExtend()/2
 
