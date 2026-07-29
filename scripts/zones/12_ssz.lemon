@@ -541,6 +541,24 @@ function void fn07ce90()
 	objA0.animation.sprite = D0.u8
 }
 
+// Ensure Knuckles does not get visibly shifted into the SSZ2 final boss area at ultrawide resolutions
+//# address-hook(0x07bb20) end(0x07bb76)
+function void fn07bb20()
+{
+	base.fn07bb20()
+	if (getScreenWidth() > 480)
+		move_area.left -= 0x10
+}
+
+// Undo the temporary left boundary change from above the instant the actual boss is initialized
+//# address-hook(0x07bbe0) end(0x07bc2e)
+function void fn07bbe0()
+{
+	base.fn07bbe0()
+	if (objA0.update_address == 0x07bd4c && getScreenWidth() > 480)
+		move_area.left += 0x10
+}
+
 // When spawning the Tornado, its pilot, Knuckles, and (with all Emeralds) the Master Emerald,
 // adjust based on scren height to prevent a held Master Emerald from being visible early.
 // Also swap the target palette after a fade to white in SSZ2 and set the transparency color to

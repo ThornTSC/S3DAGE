@@ -9271,12 +9271,21 @@ function void fn0504dc()
 
 // Undo AIR's adjustments for the camera position in the AIZ2 boss in Original Mode,
 // as they prevent the right-side pit from being on screen.
+// Outside of Original Mode, center the boss arena better than AIR does.
 //# address-hook(0x069456) end(0x069466)
 function void fn069456()
 {
 	D0.u16 = move_area.left + 2
-	if (D0.u16 <= u16[0xfffffa84])
-		move_area.left = D0.u16
+	if (original_mode)
+	{
+		if (D0.u16 <= u16[0xfffffa84])
+			move_area.left = D0.u16
+	}
+	else
+	{
+		if (D0.u16 <= u16[0xfffffa84] + 8)	// + 8 narrows pit on left
+			move_area.left = D0.u16
+	}
 
 	move_area.right += 2
 	if (!original_mode)
@@ -9284,18 +9293,54 @@ function void fn069456()
 		if (camera.position.y.u16 < 0x300)
 		{
 			// Sonic/Tails route boss
-			move_area.right = min(move_area.right, 0x4990)
+			move_area.right = min(move_area.right, 0x4990 + 8)	// + 8 expands pit on right
 		}
 		else
 		{
 			// Knuckles route boss
-			move_area.right = min(move_area.right, 0x4240)
+			move_area.right = min(move_area.right, 0x4210 + 8)	// + 8 expands pit on right. Used to be 0x4240.
 		}
 	}
 
 	fn06946a()
 }
 
+// Continue the centering from above.
+// At very low screen widths, the above function may end before the
+// boss area finishes expanding to the right, so shift more here if needed.
+//# address-hook(0x06923e) end(0x069256)
+function void Boss.AIZ2.BaseUpdate()
+{
+	base.Boss.AIZ2.BaseUpdate()
+
+	if (original_mode)
+		return
+
+	if (camera.position.y.u16 < 0x300)
+	{
+		if (move_area.right < 0x4980 || move_area.right >= 0x4990 + 8)
+			return
+	}
+	if (camera.position.y.u16 >= 0x300)
+	{
+		if (move_area.right < 0x4200 || move_area.right >= 0x4210 + 8)
+			return
+	}
+
+	move_area.right += 2
+#if STANDALONE
+	if (camera.position.y.u16 < 0x300)
+	{
+		// Sonic/Tails route boss
+		move_area.right = min(move_area.right, 0x4990 + 8)	// + 8 expands pit on right
+	}
+	else
+	{
+		// Knuckles route boss
+		move_area.right = min(move_area.right, 0x4210 + 8)	// + 8 expands pit on right
+	}
+#endif
+}
 
 
 // AIZ2 boss Original Mode reversions.
@@ -14079,33 +14124,6 @@ function void Boss.ICZ1.UpdateState00()
 
 
 
-
-
-
-
-// In Original Mode, let the camera at the ICZ2 Knux start scroll left.
-// Function taken from level\05_icz\level_icz.lemon
-//# address-hook(0x053cc4) end(0x053cc8)
-function void InitLevelTiles.ICZ2()
-{
-	if (camera.position.x.u16 >= 0x0700 && !original_mode)
-	{
-		move_area.left = 0x0740
-		camera.position.x.u16 = max(0x0740, camera.position.x.u16)
-	}
-
-	// These seems to fill the patterns on screen initially
-	//  (the same as will be done when scrolling, but here for the whole screen once)
-	Level.GetCameraPosition()
-	Level.InitialTilesFill()
-}
-
-
-
-
-
-
-
 // Revert ICZ sloped bridge loading to use S3&K y bounds in Original Mode
 // Function taken from object\level\bridge.lemon
 //# address-hook(0x038756) end(0x0387b4)
@@ -17510,7 +17528,10 @@ function void fn03d278()
 
 
 // Draw a ship exterior overlay at the start of FBZ1 if new visuals are enabled
-// and display hanging inputs
+// and display hanging inputs.
+// FBZ1_CustomSprites() also renders an image and sprite mask to hide the FBZ1 boss graphics loading at wide screen resolutions.
+// The timer "counts" to three but increments twice in the initial frame due to function execution order,
+// so this actually only runs for two frames.
 // Function takes from level\08_fbz\level_fbz.lemon
 //# address-hook(0x0528be) end(0x0528c2)
 function void UpdateLevelScrolling.FBZ1()
@@ -17639,6 +17660,15 @@ function void FBZ1_CustomSprites()
 		Renderer.drawCustomSprite("fbz_floorend", 0x1e40 - camera.foreground.x.u16, 0x0a00 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x25e0 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.drawCustomSprite("fbz_floorend", 0x2700 - camera.foreground.x.u16, 0x0480 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO, 0xa001)
+	}
+
+	// Properly render approach to boss
+	if (level.trigger0f < 3 && !original_mode)
+	{
+		Renderer.drawCustomSprite("fbz_prison", 0x2f00, 0x05e0, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+		Renderer.addSpriteMaskWorld(0x2ee0, 0x05b0, 0x40, 0x50, 0xa000, 1)
+		if (level.trigger0f > 0 && !global.game.paused)
+			++level.trigger0f
 	}
 }
 
@@ -18099,12 +18129,22 @@ function void FBZ2_CustomSprites()
 	if (global.game.paused)		// a sprite mask for the laser miniboss is hidden when the game is paused
 		Renderer.addSpriteMaskWorld(0x2aa0, 0x05e0, 0x2be0 - 0x2aa0, 0x0600 - 0x05e0, 0x9f80, 1)
 
+	// Draw laser beam ends for start of miniboss area before object loads
+	if (move_area.left < 0x2900 && !original_mode)
+		Renderer.drawCustomSprite("fbz_laserends", 0x2a88, 0x0600, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+
 	// Draw a rectangle to cover an area after the laser miniboss that may not be covered with sky if the camera moves there too quickly
 	if (!original_mode)
 		Renderer.drawCustomSprite("atex_rectangle", 0x2c90 - 512, 0x0480 - (global.game.paused) ? 0 : camera.screenshake.offset, 0x37, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x1001)
 }
 
-
+// Draw the laser ends for the frame between the above function ending drawing and the object loading
+//# address-hook(0x06fd38) end(0x06fdba)
+function void fn06fd38()
+{
+	base.fn06fd38()
+	Renderer.drawCustomSprite("fbz_laserends", 0x2a88, 0x0600, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+}
 
 
 // Add a new outdoor area to FBZ2.
@@ -19762,189 +19802,6 @@ function void fn059b1c()
 	u16[0xffffeec0] += 4
 	fn059b46()
 }
-
-
-
-// In Original Mode, allow players to move while falling into the LRZ boss act
-// and use the original sloping lava behavior.
-// Functions taken from bosses\boss_lrz2.lemon
-//# address-hook(0x059fc4) end(0x059fd6)
-function void fn059fc4()
-{
-	objA0.update_address = 0x059fdc
-	objA0.box_size.y = 0xc0
-	objA0.position.y.u16 = 0x0640
-	objA0.flags2a |= 0x80
-	fn059fdc()
-
-	if (camera.position.x.u16 < 0x0100 && !original_mode)
-	{
-		// Only purpose of this is to disable control
-		//  -> We can't do it right here, as initializeMainGame would overwrite the value
-		objA0.update_address = 0x059fda
-	}
-}
-
-//# address-hook(0x059fdc) end(0x05a104)
-function void fn059fdc()
-{
-	if (level.scrolling_routine == 0x0c)
-	{
-		// Update lava heights
-		D0.u16 = u16[0xffffeedc]
-		if (u8[0xffffeedb] != 0)
-		{
-			if (D0.u16 < 0x80)
-			{
-				++D0.u16
-			}
-		}
-		else
-		{
-			if (D0.u16 != 0)
-			{
-				--D0.u16
-			}
-		}
-
-		u16[0xffffeedc] = D0.u16
-		u32 result
-
-		D0 = (D0 << 16)
-		D0.s32 >>= 8
-		D1.u16 = D0.u16
-		D0 = (D0 << 16) + (D0 >> 16)
-		if (!original_mode)
-			D2 = 0x30 - (D0 >> 26)	// Move lava down on Robotnik's side
-		else
-			D2 = 0x30
-		D3 = 0
-		D4.u16 = getScreenWidth() / 2 + 0x0f
-		if (u8[0xffffeeda] == 0)
-		{
-			// Lava height increasing from left to right (Robotnik on the left side)
-			A1 = 0xffffa910
-			while (D4.s16 >= 0)
-			{
-				u8[A1] = D2.u8
-
-				result = u32(D3.u16) + u32(D1.u16)
-				D3.u16 = result
-				D2.u16 += D0.u16
-				if (result & 0x10000)	// Carry flag
-					++D2.u16
-
-				++A1
-				--D4.s16
-			}
-
-			D2 = 0x30
-			D3 = 0
-			D4 = 0x0f
-			A1 = 0xffffa910
-			while (D4.s16 >= 0)
-			{
-				result = u32(D3.u16) - u32(D1.u16)
-				D3.u16 = result
-				D2.u16 -= D0.u16
-				if (result & 0x10000)	// Carry flag
-					--D2.u16
-
-				--A1
-				u8[A1] = D2.u8
-				--D4.s16
-			}
-		}
-		else
-		{
-			// Lava height increasing from right to left (Robotnik on the right side)
-			A1 = 0xffffa9b0 + getScreenExtend()
-			while (D4.s16 >= 0)
-			{
-				--A1
-				u8[A1] = D2.u8
-
-				result = u32(D3.u16) + u32(D1.u16)
-				D3.u16 = result
-				D2.u16 += D0.u16
-				if (result & 0x10000)	// Carry flag
-					++D2.u16
-
-				--D4.s16
-			}
-
-			D2 = 0x30
-			D3 = 0
-			D4 = 0x0f
-			A1 = 0xffffa9b0 + getScreenExtend()
-			while (D4.s16 >= 0)
-			{
-				result = u32(D3.u16) - u32(D1.u16)
-				D3.u16 = result
-				D2.u16 -= D0.u16
-				if (result & 0x10000)	// Carry flag
-					--D2.u16
-
-				u8[A1] = D2.u8
-				++A1
-				--D4.s16
-			}
-		}
-
-		// Collision check against the lava
-		D1.u16 = getScreenWidth() / 2
-		A2 = 0xffffa910
-		D4.u16 = 0x0a00 + getScreenWidth() / 2
-		objA0.position.x.u16 = D4.u16
-		fn01e2fe()
-	}
-	else
-	{
-		D1.u16 = 0x0180
-		D2.u16 = 0x40
-		D3.u16 = 0x30
-		D4.u16 = 0x0b80
-		objA0.position.x.u16 = D4.u16
-		PlatformCheckClimbOn()
-	}
-
-	D0.u16 = u16[0xffffeedc]
-	D0 = (D0 << 16)
-	D0 >>= 7
-	D1 = D0 >> 1
-	D0 += D1
-	if (u8[0xffffeeda] == 0)
-	{
-		D0.s32 = -D0.s32
-	}
-
-	u32[0xffffeee6] = D0
-	if (objA0.flags2a & object.flag.P1_ON_OBJECT)
-	{
-		A1 = 0xffffb000
-		if (!level.results_done && (u8[A1 + 0x2b] & char.bonus.SHIELD_FIRE) == 0 && !level.capsule_opened)
-		{
-			DamageCharacter()
-		}
-
-		D0 = u32[0xffffeee6]
-		u32[A1 + 0x10] += D0
-	}
-
-	if (objA0.flags2a & object.flag.P2_ON_OBJECT)
-	{
-		A1 = 0xffffb04a
-		if (!level.results_done && !level.capsule_opened)
-		{
-			DamageCharacter()
-		}
-
-		D0 = u32[0xffffeee6]
-		u32[A1 + 0x10] += D0
-	}
-}
-
-
 
 
 
@@ -21963,14 +21820,22 @@ function void DEZ1_CustomSprites()
 
 function void DEZ1_DrawBackground()
 {
-	if (getScreenWidth() > 464)
-		Renderer.drawCustomSprite("bg_dez1_496", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
-	else if (getScreenWidth() > 432)
-		Renderer.drawCustomSprite("bg_dez1_464", getScreenWidth()/2, 0, 0x00, 0, 0x1100)
-	else
-		Renderer.drawCustomSprite("bg_dez1_origins", getScreenWidth()/2, 0, 0x00, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
-	if (palette_set >= 2 && !original_mode)											// if new palettes,
-		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x1101, 0, 0x40)	// dim background
+	u16 screenCenter = min(getScreenWidth()/2, 216)
+	Renderer.drawCustomSprite("bg_dez1_tower", getScreenWidth()/2, 0, 0, SPRITE_FLAG_FULLY_OPAQUE, 0x1102)
+
+	// Draw at least one column of the most distant background on each side of center.
+	Renderer.drawCustomSprite("bg_dez1_distant", getScreenWidth()/2 - 56, 0, 0, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
+	Renderer.drawCustomSprite("bg_dez1_distant", getScreenWidth()/2 + 56, 0, 0, SPRITE_FLAG_FLIP_X | SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
+
+	// Draw additional needed columns
+	for (u16 px = getScreenWidth()/2 - 72; px > 144; px -= 16)
+	{
+		Renderer.drawCustomSprite("bg_dez1_distant", px, 0, 0, SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
+		Renderer.drawCustomSprite("bg_dez1_distant", getScreenWidth() - px, 0, 0, SPRITE_FLAG_FLIP_X | SPRITE_FLAG_FULLY_OPAQUE, 0x1100)
+	}
+	u16 sideOffset = min(getScreenWidth()/2 - 140, 76)
+	Renderer.drawCustomSprite("bg_dez1_side", sideOffset, 0, 0, SPRITE_FLAG_FULLY_OPAQUE, 0x1101)
+	Renderer.drawCustomSprite("bg_dez1_side", getScreenWidth() - sideOffset, 0, 0, SPRITE_FLAG_FLIP_X | SPRITE_FLAG_FULLY_OPAQUE, 0x1101)
 }
 
 function void DEZ2_DrawBackground()

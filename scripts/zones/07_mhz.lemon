@@ -320,3 +320,33 @@ function void MHZLeavesEffect.Update()
 	if (original_mode)
 		debug_mode.state = debug_mode.state.backup
 }
+
+// Stop potential one-frame disappearance of foreground pole sprites during MHZ2 boss
+// by increasing the box size from Euka's 0x40 to 0x80.
+//# address-hook(0x05576a) end(0x055776)
+function void fn05576a()
+{
+#if STANDALONE
+	if (!original_mode)
+		objA0.box_size.x = 0x80		// Avoid clipping in standalone (done here so it works with loaded save state as well)
+#endif
+
+	if (u8[0xffffeed3] == 0)
+	{
+		UnloadObject()
+	}
+	else
+	{
+		DrawObject()
+	}
+}
+
+// Ensure foreground chunks render correctly during transition to FBZ
+//# address-hook(0x076456) end(0x076468)
+function void fn076456()
+{
+	base.fn076456()
+	
+	if (global.zone_act == 0x0400)
+		fn054f64()	// added to prevent foreground chunks from moving up one block as zone changes
+}

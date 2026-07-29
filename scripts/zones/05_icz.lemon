@@ -101,6 +101,38 @@ function void fn0718ca()
 	fn071700()
 }
 
+// In Original Mode, let the camera at the ICZ2 Knux start scroll left.
+// Ensure the leftmost boundary is setup properly at large screen widths.
+// Function taken from level\05_icz\level_icz.lemon
+//# address-hook(0x053cc4) end(0x053cc8)
+function void InitLevelTiles.ICZ2()
+{
+	s16 widthCheckDelta = max(s16(getScreenWidth() - 432), 0)
+
+	if ((camera.position.x.u16 >= 0x0700 - widthCheckDelta) && !original_mode)
+	{
+		move_area.left = 0x0740 - widthCheckDelta
+		camera.position.x.u16 = max(move_area.left, camera.position.x.u16)
+	}
+
+	// These seems to fill the patterns on screen initially
+	//  (the same as will be done when scrolling, but here for the whole screen once)
+	Level.GetCameraPosition()
+	Level.InitialTilesFill()
+}
+
+//# address-hook(0x01ca20) end(0x01ca3a)
+function void fn01ca20()
+{
+	s16 widthCheckDelta = max(s16(getScreenWidth() - 432), 0)
+
+	if ((camera.position.x.u16 >= 0x0740 - widthCheckDelta && camera.position.y.u16 < 0x0400) && !original_mode)
+	{
+		move_area.left = 0x0740 - widthCheckDelta
+		camera.update_routine += 2
+	}
+}
+
 // For aesthetics (and to align with Origins), align the ICZ2 outdoor background down
 // when the screen height increases and draw a rectangle of extra sky.
 //# address-hook(0x23e0c2) end(0x23e138)
@@ -255,6 +287,7 @@ function void fn01ca3c()
 
 // Adjust the x-coordinates for which background loading can occur to accommodate for the final Sonic/Tails ICZ2 giant ring
 // and reintroduce flying over the ICZ1 boss in Original Mode.
+// Ensure the correct palette is loaded when starting ICZ2 from its beginning.
 //# address-hook(0x053cd0) end(0x053d50)
 function void InitLevelScrolling.ICZ2()
 {
@@ -277,7 +310,8 @@ function void InitLevelScrolling.ICZ2()
 	u16[0xffffeee8] = indoors * 0xff
 	if (!indoors)
 	{
-		if (camera.position.x.u16 < 0x0720)
+		u16 xMax = (original_mode) ? 0x0720 : 0x0700
+		if (camera.position.x.u16 < xMax)
 		{
 			fn23e20e()
 		}

@@ -11,5 +11,11 @@
     "fbz_propeller0": { "File": "fbz_propeller.bmp", "Rect": "0,0,208,16", "Center": "104, 8" },
     "fbz_propeller1": { "File": "fbz_propeller.bmp", "Rect": "0,16,208,16", "Center": "104, 8" },
     "fbz_propeller2": { "File": "fbz_propeller.bmp", "Rect": "0,32,208,16", "Center": "104, 8" },
-    "fbz_propeller3": { "File": "fbz_propeller.bmp", "Rect": "0,16,208,16", "Center": "104, 8" }    // identical to fbz_propellor1
+    "fbz_propeller3": { "File": "fbz_propeller.bmp", "Rect": "0,16,208,16", "Center": "104, 8" },    // identical to fbz_propellor1
+
+    "fbz_laserends": { "File": "fbz_laserends.png" },
+    "fbz_cloud1": { "File": "fbz_cloud1.bmp", "Center": "32,11" },
+    "fbz_cloud2": { "File": "fbz_cloud2.bmp", "Center": "44, 8" },
+    "fbz_cloud3": { "File": "fbz_cloud3.bmp", "Center": "32, 4" },
+    "fbz_prison": { "File": "fbz_prison.bmp", "Center": "32,48" }
 }

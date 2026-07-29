@@ -334,6 +334,7 @@ function void fn05134c()
 			u8[A1]   = 0
 			u8[A1+1] = 0
 			u8[A1+2] = 0
+			u8[A1+3] = 0
 
 			// For our image version of the collapse, we repeat this process for several rows of chunks above the boss area.
 			// We then force a single redraw of the area so only the image graphics remain as visible terrain.
@@ -345,6 +346,7 @@ function void fn05134c()
 				u8[A1-0x80] = 0
 				u8[A1-0x7f] = 0
 				u8[A1-0x7e] = 0
+				u8[A1-0x7d] = 0
 
 			#if STANDALONE
 				u8[A1-0x101] = 0	// Need to clear one more chunk on the left for widescreen
@@ -352,6 +354,7 @@ function void fn05134c()
 				u8[A1-0x100] = 0
 				u8[A1-0xff] = 0
 				u8[A1-0xfe] = 0
+				u8[A1-0xfd] = 0
 
 			#if STANDALONE
 				u8[A1-0x181] = 0	// Need to clear one more chunk on the left for widescreen
@@ -359,6 +362,7 @@ function void fn05134c()
 				u8[A1-0x180] = 0
 				u8[A1-0x17f] = 0
 				u8[A1-0x17e] = 0
+				u8[A1-0x17d] = 0
 
 			#if STANDALONE
 				u8[A1-0x201] = 0	// Need to clear one more chunk on the left for widescreen
@@ -366,6 +370,7 @@ function void fn05134c()
 				u8[A1-0x200] = 0
 				u8[A1-0x1ff] = 0
 				u8[A1-0x1fe] = 0
+				u8[A1-0x1fd] = 0
 
 			#if STANDALONE
 				u8[A1-0x281] = 0	// Need to clear one more chunk on the left for widescreen
@@ -373,6 +378,7 @@ function void fn05134c()
 				u8[A1-0x280] = 0
 				u8[A1-0x27f] = 0
 				u8[A1-0x27e] = 0
+				u8[A1-0x27d] = 0
 
 			#if STANDALONE
 				u8[A1-0x301] = 0	// Need to clear one more chunk on the left for widescreen
@@ -380,6 +386,7 @@ function void fn05134c()
 				u8[A1-0x300] = 0
 				u8[A1-0x2ff] = 0
 				u8[A1-0x2fe] = 0
+				u8[A1-0x2fd] = 0
 
 			#if STANDALONE
 				u8[A1-0x381] = 0	// Need to clear one more chunk on the left for widescreen
@@ -387,6 +394,7 @@ function void fn05134c()
 				u8[A1-0x380] = 0
 				u8[A1-0x37f] = 0
 				u8[A1-0x37e] = 0
+				u8[A1-0x37d] = 0
 
 			#if STANDALONE
 				u8[A1-0x401] = 0	// Need to clear one more chunk on the left for widescreen
@@ -394,6 +402,7 @@ function void fn05134c()
 				u8[A1-0x400] = 0
 				u8[A1-0x3ff] = 0
 				u8[A1-0x3fe] = 0
+				u8[A1-0x3fd] = 0
 			}
 
 			A1 += D0.u16
@@ -420,10 +429,10 @@ function void fn05134c()
 		//  -> There's an upper and a lower line of these objects
 		if (allocDynamicObjectStd())
 		{
-			D1.u16 = 0x3c90
+			D1.u16 = (original_mode) ? 0x3c90 : 0x3c30
 			D2 = 0x05c00790
 			D3 = 0xffffa93c
-			D4 = 9
+			D4 = (original_mode) ? 9 : 15
 			while (D4.s16 >= 0)
 			{
 				objA1.update_address = 0x05180a
@@ -441,6 +450,8 @@ function void fn05134c()
 				D1.u16 += 0x20
 				D2 = (D2 << 16) + (D2 >> 16)
 				D3 += 4
+				if (D3 > 0xffffa960)	// we're beyond the normal range of offsets
+					D3 = 0xffffa93c		// loop from the start
 				if (!allocDynamicObjectAfterA1())
 					break
 
@@ -448,7 +459,7 @@ function void fn05134c()
 			}
 		}
 		// Blank out the layout parts chunks we set to 0 earlier and render an image for the one frame before the collision objects render the image parts.
-		if (getScreenHeightExtend() > 0)
+		if (!original_mode)
 		{
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())
 		}
@@ -543,7 +554,7 @@ function void fn05180a()
 	D4.u16 = objA0.position.x.u16
 	CheckCharacterOnClimbableObject()
 
-	if (u16[A0 + 0x2e] == 0x05c0 && getScreenHeightExtend() > 0)
+	if (u16[A0 + 0x2e] == 0x05c0 && !original_mode)
 	{
 		DrawObject()	// call the renderhook to draw image sections of the collapsing terrain
 	}

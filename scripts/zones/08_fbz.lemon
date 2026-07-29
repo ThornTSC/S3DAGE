@@ -64,36 +64,43 @@ function void fn052a2a()
 }
 
 // Align screen boundaries properly for FBZ1 boss based on screen height
+// and start the timer for some rendering changes needed in ultrawide resolutions.
 //# address-hook(0x06eea8) end(0x06ef08)
 function void fn06eea8()
 {
-	setupObjectAttributesFull(0x06fa34)
+	base.fn06eea8()
+	if (original_mode)
+		return
 
-	boss.remaining_hits = 6
-	level.boss_encounter = 1
-	screenmover_target.right = move_area.right
-	screenmover_target.bottom = move_area.bottom.current
+	level.trigger0f = 1		// start timer used in UpdateLevelScrolling.FBZ1() to hide boss graphics loading
 	move_area.bottom.target = 0x0540 - getScreenHeightExtend()
-#if STANDALONE
-	move_area.right = 0x2e20 + getScreenExtend() * 2
-#endif
-	u16[A0 + 0x3a] = 0x2e20		// Needed minimum camera-x position
-	objA0.countdown_callback = 0x06ef14
+	if (getScreenWidth() <= 400)
+		return
 
-	addPatternLoadingCue(0x083d64)		// Boss explosion sprites
+	u16 widthDelta = (getScreenWidth() - 400) / 4
+	move_area.right = u16[A0 + 0x3a] + 0x80 + widthDelta
+}
 
-	Kosinski.addToDMAQueue(0x1652b4, 0xa5c0)		// Boss sprites
+//# address-hook(0x06ef0e) end(0x06ef0e)
+function void fn06ef0e()
+{
+	base.fn06ef0e()
+	if (getScreenWidth() <= 400)
+		return
 
-	loadPaletteLine1(0x06fac0)
+	objA0.base_state = 0x04
+	level.vertical_wrap = move_area.bottom.target
+}
 
-	// "spawnChildObjects(0x06fa76)" replaced by:
-	spawnChildObject(0x06f10e, 0x00, -16, -8)		// Window hiding the eyes
-	spawnChildObject(0x06f10e, 0x02, 16, -8)		// Window hiding the eyes
-	spawnChildObject(0x06f10e, 0x04, 0, -8)			// Window hiding the eyes
-	spawnChildObject(0x06efda, 0x06, 0, -36)		// Capsule button
-	spawnChildObject(0x06f060, 0x08, 0, -8)			// Eyes
-	spawnChildObject(0x06f178, 0x0a, 0, 0)			// Left arm
-	spawnChildObject(0x06f178, 0x0c, 0, 0)			// Right arm
+//# address-hook(0x06ee72) end(0x06ee88)
+function void fn06ee72()
+{
+	base.fn06ee72()
+	if (getScreenWidth() <= 400)
+		return
+
+	if (objA0.position.x.u16 > move_area.left + getScreenWidth()/2)
+		move_area.left = max((move_area.left & 0xfffe) + 2, camera.position.x.u16)
 }
 
 // Minor screen width extensions can place the pillar/gate at the start of the

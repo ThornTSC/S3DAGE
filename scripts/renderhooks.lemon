@@ -811,12 +811,37 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         return true
     }
 
+    // MHZ2 boss foreground pole sprite pieces must be drawn a second time if two poles are visible at once.
+    if (objA0.update_address == 0x05576a && objA0.animation.sprite == 0)    // foreground pole sprite is 0, background is 1
+    {
+	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw the next pole
+        return true
+    }
+
+    // Propellers in MHZ-to-FBZ cutscene must be drawn a second time to avoid disappearing sprites,
+    // but only when we reach the edge of the terrain and the propellers have recently moved backward.
+    if (objA0.update_address == 0x05582e && u16[0xffffb010] >= 0x4778 && objA0.position.x.u16 < 0x0080)
+    {
+	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw additional propellers
+        return true
+    }
+
 	// FBZ propeller for Act 2
 	if (objA0.update_address == 0x03c1ee && !original_mode)
 	{
 		Renderer.drawCustomSprite(stringformat("fbz_propeller%d", u8[A0 + 0x1d]), px, py , 0x00, (objA0.render_flags & 0x01) | SPRITE_FLAG_PRIO, renderQueue)	// frame to show is kept in offset 0x1d
 		return true
 	}	
+
+    // Clouds in the FBZ2 ending area must be drawn a second time to avoid sprites popping in.
+    // These clouds use the update address of DrawObject() directly, so we check their mapping offset instead.
+    if (objA0.mapping_offset == 0x053518 && objA0.animation.sprite != 0)
+    {
+        Renderer.drawCustomSprite(stringformat("fbz_cloud%x", objA0.animation.sprite), px + 512, py, 0x00, 0, renderQueue)
+        return false    // allow the VDP sprite to exist as well
+    }
 
     // DEZ2 final boss robot and attached parts
     if (objA0.update_address == 0x07fd68 && !original_mode)
@@ -1283,7 +1308,7 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
 		return true
 	}
 
-    // AIZ2 bomber propeller
+    // AIZ2 bomber propellers must be rendered in front of the bomber when we draw the bomber as an image.
 	if (objA0.update_address == 0x050458 && !original_mode)
 	{
         // Adjust the propeller renderqueue to draw it in front of the bomber itself

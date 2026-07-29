@@ -1,5 +1,6 @@
 global u16 bomberX
 global u16 bomberY
+global u16 loopBGAdjust
 
 // Adjust some timings for Original Mode and add Origins sound effects outside of Original Mode
 // Functions taken from level\01_aiz\intro_sonic.lemon
@@ -688,6 +689,7 @@ function void UpdateLevelTiles.AIZ1()
 }
 
 // Remove special handling of AIZ decorative flame in Original Mode.
+// Also modify LRZ2 pulley wheel rendering range.
 //# address-hook(0x02bf20) end(0x02bf54)
 function void GenericObject.Init()
 {
@@ -709,6 +711,10 @@ function void GenericObject.Init()
 		// Make it a little bit higher to prevent early clipping
 		objA0.box_size.y += 4
 	}
+
+	// Check if it's the center of an LRZ2 pulley wheel
+	if (objA0.subtype2c == 0x03 && !original_mode)
+		objA0.box_size.y = 0x30
 #endif
 
 	GenericObject.Update()
@@ -763,7 +769,8 @@ function void AIZ2_CustomSprites()
 	{
 		AIZ.DrawFireWallImage()
 	}
-	if (getScreenHeightExtend() > 0)	// && unused.teleport_timer > 0)
+//	if (getScreenHeightExtend() > 0)	// && unused.teleport_timer > 0)
+	if (!original_mode)
 	{
 		if (camera.position.x.u16 > 0x3f00 && camera.position.x.u16 < 0x4600)
 			Renderer.drawCustomSprite("aiz2_autoscrollterrainpatch", 0x4120, 0x0230, 0x00, SPRITE_FLAG_WORLDSPACE, 0x1fff)
@@ -776,6 +783,17 @@ function void AIZ2_CustomSprites()
 		}
 		if (camera.update_routine == 0x10 && bomberX != 0x8000)	// 0x8000 is used as a "do not render" value
 			Renderer.drawCustomSprite("aiz2_bomber", bomberX, bomberY, 0x00, SPRITE_FLAG_PRIO, 0x9f7f)
+
+		// Cover an art error in the background when approaching the boss area
+		if (getScreenHeightExtend() > 0 && camera.position.x.u16 > 0x3900)
+		{
+			s64 parallaxShift = -((camera.position.x.u16 + loopBGAdjust) * 512 / 0x03a8) % 512
+			Renderer.drawCustomSprite("atex_rectangle_80x16", parallaxShift + 448, 384 - camera.background.y.u16, 0x33, 0, 0x1001)
+			Renderer.drawCustomSprite("atex_rectangle_80x16", parallaxShift + 448 + 512, 384 - camera.background.y.u16, 0x33, 0, 0x1001)
+			Renderer.drawCustomSprite("atex_rectangle_80x16", parallaxShift + 448 + 2*512, 384 - camera.background.y.u16, 0x33, 0, 0x1001)
+		}
+		else
+			loopBGAdjust = 0
 	}
 	else if (camera.update_routine == 0x10 && global.game.paused)	// this is needed to render the bomber section properly while paused at 224px screen height
 		fn04fff0()
@@ -841,7 +859,6 @@ function void fn01c5c6()
 		camera.update_routine += 2
 	}
 }
-
 
 function void AIZ.DrawFireWallImage()
 {
@@ -1421,6 +1438,57 @@ function void fn01c760()
 	}
 }
 
+// AIZ2: disable blimp sequence scrolling in time attack modes.
+// Track how many times the player has looped backwards to properly
+// position a background fix in AIZ2_CustomSprites().
+// Function taken from level\01_aiz\aiz2_blimp_sequence.lemon and is called by UpdateSpecialScrolling() in maingame\maingame.lemon.
+//# address-hook(0x0502c6) end(0x050348)
+function void fn0502c6()
+{
+	if (time_attack == 1 || time_attack == 2)
+		return
+
+	// This does the auto-scrolling!
+
+	u16[0xffffeebc] = 0
+	D0.u16 = camera.position.x.u16 + 4
+	if (D0.u16 >= u16[0xffffeed4] - getScreenExtend() * 2)
+	{
+		D1.u16 = 0x0200
+		u16[0xffffeebc] = D1.u16
+		u16[0xffffb010] -= D1.u16
+		u16[0xffffb05a] -= D1.u16
+
+	#if STANDALONE
+		// Also update position backup data (e.g. for after-images) and count loops
+		if (!original_mode)
+		{
+			loopBGAdjust += D1.u16
+			for (u32 address = 0xffffe500; address < 0xffffe600; address += 4)
+				u16[address] -= D1.u16
+		}
+	#endif
+
+		D0.u16 = camera.position.x.u16 - D1.u16
+		D1.u16 = (D0.u16 & 0xfff0) - 0x10
+		camera.foreground.x.old = D1.u16
+		u16[0xffffa9fe] = D1.u16
+	}
+
+	camera.position.x.u16 = D0.u16
+	camera.foreground.x.u16 = D0.u16
+	move_area.left = D0.u16
+	move_area.right = D0.u16
+
+	D1.u16 = D0.u16
+	A1 = 0xffffb000
+	fn050318()
+
+	D0.u16 = D1.u16
+	A1 = 0xffffb04a
+	fn050318()
+}
+
 // Load the extra background trees between the airship and the boss
 // at an appropriate y position when the screen height is altered.
 //# address-hook(0x050664) end(0x050684)
@@ -1468,7 +1536,8 @@ function void fn04ff3a()
 
 	// This code is only reached in the blimp sequence before AIZ 2 boss
 
-	if (getScreenHeightExtend() <= 0)
+	// if (getScreenHeightExtend() <= 0)
+	if (original_mode)
 	{
 		u16[0xffffeec4] = 0
 	}
@@ -1508,7 +1577,8 @@ function void fn04ff74()
 		}
 
 		// Set a timer to determine when to use fillPlaneA_Default() to redraw screen oddities from the unique scrolling here
-		if (getScreenHeightExtend() > 0)
+		// if (getScreenHeightExtend() > 0)
+		if (!original_mode)
 		{
 			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth() + 16, getScreenHeight())
 			unused.teleport_timer = 1
@@ -1562,7 +1632,8 @@ function void fn05001c()
 	{
 		D0.u16 = (camera.foreground.x.u16 & 0xfff0) - 0x10
 		camera.foreground.x.old = D0.u16
-		if (getScreenHeightExtend() <= 0)
+		// if (getScreenHeightExtend() <= 0)
+		if (original_mode)
 		{
 			u16[0xffffeed4] = 0x46c0
 		}
@@ -1598,6 +1669,8 @@ function void fn0500e6()
 // Have the main blimp controller object render an image of the blimp when the screen height is extended.
 // We also need to shift the blimp back a bit in the original bombing sequence, else it hurts player
 // characters running full speed.
+// Even this isn't enough at very high screen resolutions, so we remove the final bomb from the original
+// sequence at high screen widths.
 // Also enforce the base game bombing in Original Mode.
 //# address-hook(0x050390) end(0x050424)
 function void fn050390()
@@ -1677,7 +1750,10 @@ function void fn050390()
 		A2 = u32[A0 + 0x2e]
 		objA0.value32 = u16[A2]
 
-		if (s16[A0 + 0x32] >= 0)
+		// Remove the final bomb from the original bombing sequence at high screen widths
+		// so it does not hit players running at full speed.
+		bool noFinalBomb = (!Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) && A2 == 0x23c0f6 && getScreenWidth() > 448)
+		if (s16[A0 + 0x32] >= 0 && !noFinalBomb)
 		{
 			if (allocDynamicObjectAfterA0())
 			{
@@ -1747,7 +1823,10 @@ function void fn050390_NormalHeight()
 		A2 = u32[A0 + 0x2e]
 		objA0.value32 = u16[A2]
 
-		if (s16[A0 + 0x32] >= 0)
+		// Remove the final bomb from the original bombing sequence at high screen widths
+		// so it does not hit players running at full speed.
+		bool noFinalBomb = (!Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE) && A2 == 0x23c0f6 && getScreenWidth() > 448)
+		if (s16[A0 + 0x32] >= 0 && !noFinalBomb)
 		{
 			if (allocDynamicObjectAfterA0() && u16[A0 + 0x30] != 0x7fff)
 			{
@@ -1759,18 +1838,6 @@ function void fn050390_NormalHeight()
 			}
 		}
 	}
-}
-
-// Align bombs and propellors with the image of the bomber in the original sequence
-//# address-hook(0x050586) end(0x0505a2)
-function void fn050586()
-{
-	objA0.position.x.u16 = objA0.countdown_value - u16[0xffffee98] + camera.foreground.x.u16
-	if (getScreenHeightExtend() > 0 && !Game.getSetting(SETTING_AIZ_BLIMPSEQUENCE))
-	{
-		objA0.position.x.u16 -= 20
-	}
-	objA0.position.y.u16 = D0.u16 + camera.screenshake.offset - camera.screenshake.prev_offset
 }
 
 // Set the height for Eggman flying behind trees before the boss based on screen height
@@ -1817,14 +1884,35 @@ function void fn050700()
 //# address-hook(0x050458) end(0x050476)
 function void fn050458()
 {
-	if ((u16[0xffffeec0] == 0x0c && getScreenHeightExtend() <= 0) || unused.player2.item_count > 0)
+	if ((u16[0xffffeec0] == 0x0c && original_mode) || unused.player2.item_count == 0x0a80)
 	{
 		UnloadObject()
 	}
 	else
 	{
+		if (unused.player2.item_count > 0)
+		{
+			if (level.framecounter.low % 2 == 0)
+				objA0.position.x.u16 += 1
+			if (level.framecounter.low % 4 == 0)
+				objA0.position.y.u16 -= 1				
+		}
+
 		Object.animationUpdate(0x23c1aa)
 		fn05057a()
 		DrawObject()
+	}
+}
+
+// Move propellers properly as blimp moves off the screen
+//# address-hook(0x050586) end(0x0505a2)
+function void fn050586()
+{
+	base.fn050586()
+
+	if (unused.player2.item_count > 0 && !original_mode)
+	{
+		objA0.position.x.u16 += (0x3cdb - unused.player2.total_rings)
+		objA0.position.y.u16 -= (unused.player2.item_count - 0x0a70)
 	}
 }

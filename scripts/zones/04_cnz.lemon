@@ -40,6 +40,22 @@ function void UpdateBackground.CNZ1()
 	u16[A1-=2] = D0.u16
 }
 
+// Move characters into the CNZ1 boss area if they are in the entryway
+// when vertical scrolling starts to prevent softlocks.
+//# address-hook(0x052020) end(0x052046)
+function void fn052020()
+{
+	base.fn052020()
+
+	if (original_mode)
+		return
+
+	if (u16[0xffffb010] < 0x320a)
+		u16[0xffffb010] = 0x320a
+	if (u16[0xffffb05a] != 0 && u16[0xffffb05a] < 0x320a)
+		u16[0xffffb05a] = 0x320a
+}
+
 // Adjust the lower screen boundary during the CNZ1 boss to match screen height changes.
 // Do not load the boss in time attack modes.
 //# address-hook(0x06d99c) end(0x06d9fa)
@@ -129,6 +145,288 @@ function void fn051d82()
 	u16[0xffffeeca] = 0x0f
 	level.scrolling_routine += 4
 	fn051e12()
+}
+
+// With extended camera active at the default resolution, the player character
+// does not smoothly transfer from one barber pole section to another.
+// Print debugging revealed the issue was in the y position check for moving the
+// player character between two objects (here, two sections of the pole).
+// We extend the y range at which player characters can change objects.
+// First, the upper left to lower right variant.
+//# address-hook(0x033392) end(0x0335a6)
+function void fn033392()
+{
+	u8 bit = (1 << D6.u8)
+
+	D0 = 0
+	if ((objA0.flags2a & bit) == 0)
+	{
+		if ((u8[A1 + 0x2a] & char.flag.ON_OBJECT) == 0)
+		{
+			D0.u16 = objA1.position.x.u16 - s8[A1 + 0x1f] - objA0.position.x.u16 + 0x40
+			if (D0.u16 < 0xa0)
+			{
+				D0.u16 -= 0x61
+				D1.u16 = objA1.position.y.u16 + u8[A1 + 0x1e] - objA0.position.y.u16 - D0.u16
+				if (D1.u16 < 0x10 && u8[A1 + 0x2e] == 0 && debug_mode.state == 0)
+				{
+					if (u8[A1 + 0x2a] & char.flag.IN_AIR && objA1.velocity.y < 0)
+						return
+
+					u32[A2] = objA1.position.x
+					D0.u16 = u16[A2] - objA0.position.x.u16 + 0x40
+					u16[A2] = D0.u16
+					D0.u16 -= 0x18
+					u16[A2 + 0x04] = (D0.u16 < 0x70) ? 1 : 0
+
+					fn0337d8()
+					s8[A1 + 0x26] = 0x20
+					u8[A1 + 0x2d] = 0x02		// Diagonal corkscrew animation, walking right
+				}
+			}
+		}
+		else
+		{
+			D0.u16 = objA1.position.x.u16 - s8[A1 + 0x1f] - objA0.position.x.u16 + 0x30
+			if (D0.u16 < 0x80)
+			{
+				D0.u16 -= 0x51
+				D1.u16 = objA1.position.y.u16 + u8[A1 + 0x1e] - objA0.position.y.u16 - D0.u16
+				u16 yThreshold = (original_mode) ? 0x10 : 0x20
+				if (D1.u16 < yThreshold && u8[A1 + 0x2e] == 0)	// originally 0x10 for first check
+				{
+					if (u8[A1 + 0x2a] & char.flag.IN_AIR && objA1.velocity.y < 0)
+						return
+
+					A3 = 0xffff0000 + u16[A1 + 0x42]
+					if (u32[A3] == addressof(CNZBarberPole.UpdateVariantLeftToRight))
+					{
+						u32[A2] = objA1.position.x
+						D0.u16 = u16[A2] - objA0.position.x.u16 + 0x40
+						u16[A2] = D0.u16
+						D0.u16 -= 0x20
+						u16[A2 + 0x04] = (D0.u16 < 0x60) ? 1 : 0
+
+						fn0337d8()
+						s8[A1 + 0x26] = 0x20
+						u8[A1 + 0x2d] = 0x02		// Diagonal corkscrew animation, walking right
+					}
+				}
+			}
+		}
+		return
+	}
+
+	if (u16[A2 + 0x04] == 0 && abs(s16[A1 + 0x1c]) < 0x0118)
+	{
+		u8[A1 + 0x2a] |= char.flag.IN_AIR
+	}
+	else if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+	{
+		D0.s32 = objA1.velocity.x
+		D0 <<= 6
+		D1 = D0
+		D0 *= 3
+		u32[A2] += D0
+
+		D0.u16 = u16[A2] - s8[A1 + 0x1f]
+		if (D0.u16 < 0xa0)
+		{
+			if (u8[A1 + 0x2a] & char.flag.ON_OBJECT)
+			{
+				D2.u16 = D0.u16
+				D0.u8 -= 0x10
+				if (D0.s8 >= -0x10 && D0.s8 < 0)
+				{
+					u16[A2 + 0x04] = 0
+					D0 = 0
+				}
+				if (D0.s8 < 0)
+				{
+					u16[A2 + 0x04] = 0
+					D0.u16 = 0x80
+				}
+
+				objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+				if (D0.u8 < 0x34)
+				{
+					objA1.sprite_attributes |= sprite_attribute.PRIORITY
+				}
+				if (u16[A2 + 0x04] != 0)
+				{
+					D0 = 0
+				}
+
+				D0.u16 *= 2
+				u8[A1 + 0x27] = D0.u8		// Set x-rotation of character
+				LookupSinCos()
+				D4.u16 = D1.u16
+				D1.s16 >>= 4
+				D3.u16 = D1.u16
+				D1.u16 += D2.u16 + objA0.position.x.u16 - 0x50
+
+				D0 = u8[A1 + 0x1f]
+				D0.s32 = s32(D0.s16) * D4.s16
+				D0.s16 >>= 8
+				D1.u16 += D0.u16
+				objA1.position.x.u16 = D1.u16
+
+				D0.u16 = D2.u16 - 0x51
+				D2.u16 = objA0.position.y.u16 - D3.u16 + D0.u16
+				D1 = u8[A1 + 0x1e]
+				D1.s32 = s32(D1.s16) * D4.s16
+				D1.s16 >>= 8
+				D2.u16 -= D1.u16
+				objA1.position.y.u16 = D2.u16
+			}
+			return
+		}
+	}
+
+	u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+	objA0.flags2a &= ~bit
+	u8[A1 + 0x30] = 0			// "char.rotation.x.count"
+	u8[A1 + 0x31] = 0x04		// "char.rotation.x.speed"
+	objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+}
+
+// Next, the upper right to lower left variant.
+//# address-hook(0x0335c4) end(0x0337d6)
+function void fn0335c4()
+{
+	u8 bit = (1 << D6.u8)
+
+	D0 = 0
+	if ((objA0.flags2a & bit) == 0)
+	{
+		if ((u8[A1 + 0x2a] & char.flag.ON_OBJECT) == 0)
+		{
+			D0.u16 = objA1.position.x.u16 + s8[A1 + 0x1f] - objA0.position.x.u16 + 0x60
+			if (D0.u16 < 0xa0)
+			{
+				D0.u16 -= 0x3e
+				D1.u16 = objA1.position.y.u16 + u8[A1 + 0x1e] - objA0.position.y.u16 + D0.u16
+				if (D1.u16 < 0x10 && u8[A1 + 0x2e] == 0 && debug_mode.state == 0)
+				{
+					if (u8[A1 + 0x2a] & char.flag.IN_AIR && objA1.velocity.y < 0)
+						return
+
+					u32[A2] = objA1.position.x
+					D0.u16 = u16[A2] - objA0.position.x.u16 + 0x60
+					u16[A2] = D0.u16
+					D0.u16 -= 0x18
+					u16[A2 + 0x04] = (D0.u16 < 0x70) ? 1 : 0
+
+					fn0337d8()
+					s8[A1 + 0x26] = -0x20
+					u8[A1 + 0x2d] = 0x03		// Diagonal corkscrew animation, walking left
+				}
+			}
+		}
+		else
+		{
+			D0.u16 = objA1.position.x.u16 + s8[A1 + 0x1f] - objA0.position.x.u16 + 0x50
+			if (D0.u16 < 0x80)
+			{
+				D0.u16 -= 0x2e
+				D1.u16 = objA1.position.y.u16 + u8[A1 + 0x1e] - objA0.position.y.u16 + D0.u16
+				u16 yThreshold = (original_mode) ? 0x10 : 0x20
+				if (D1.u16 < yThreshold && u8[A1 + 0x2e] == 0)	// originally 0x10 for first check
+				{
+					if (u8[A1 + 0x2a] & char.flag.IN_AIR && objA1.velocity.y < 0)
+						return
+
+					A3 = 0xffff0000 + u16[A1 + 0x42]
+					if (u32[A3] == addressof(CNZBarberPole.UpdateVariantRightToLeft))
+					{
+						u32[A2] = objA1.position.x
+						D0.u16 = u16[A2] - objA0.position.x.u16 + 0x60
+						u16[A2] = D0.u16
+						D0.u16 -= 0x20
+						u16[A2 + 0x04] = (D0.u16 < 0x60) ? 1 : 0
+
+						fn0337d8()
+						s8[A1 + 0x26] = -0x20
+						u8[A1 + 0x2d] = 0x03		// Diagonal corkscrew animation, walking left
+					}
+				}
+			}
+		}
+		return
+	}
+
+	if (u16[A2 + 0x04] == 0 && abs(s16[A1 + 0x1c]) < 0x0118)
+	{
+		u8[A1 + 0x2a] |= char.flag.IN_AIR
+	}
+	else if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+	{
+		D0.s32 = objA1.velocity.x
+		D0 <<= 6
+		D1 = D0
+		D0 *= 3
+		u32[A2] += D0
+
+		D0.u16 = u16[A2] + s8[A1 + 0x1f]
+		if (D0.u16 < 0xa0)
+		{
+			if (u8[A1 + 0x2a] & char.flag.ON_OBJECT)
+			{
+				D2.u16 = D0.u16
+				D0.u8 -= 0x10
+				if (D0.s8 >= -0x10 && D0.s8 < 0)
+				{
+					u16[A2 + 0x04] = 0
+					D0 = 0
+				}
+				if (D0.s8 < 0)
+				{
+					u16[A2 + 0x04] = 0
+					D0.u16 = 0x80
+				}
+
+				objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
+				if (D0.u8 >= 0x4c)
+				{
+					objA1.sprite_attributes |= sprite_attribute.PRIORITY
+				}
+				if (u16[A2 + 0x04] != 0)
+				{
+					D0 = 0
+				}
+
+				D0.s8 = -D0.s8
+				D0.u16 *= 2
+				u8[A1 + 0x27] = D0.u8		// Set x-rotation of character
+				LookupSinCos()
+				D4.u16 = D1.u16
+				D1.s16 >>= 4
+				D3.u16 = D1.u16
+				D1.u16 = D2.u16 - D1.u16 + objA0.position.x.u16 - 0x50
+
+				D0 = u8[A1 + 0x1f]
+				D0.s32 = s32(D0.s16) * D4.s16
+				D0.s16 >>= 8
+				D1.u16 -= D0.u16
+				objA1.position.x.u16 = D1.u16
+
+				D0.u16 = D2.u16 - 0x4e
+				D2.u16 = objA0.position.y.u16 - D3.u16 - D0.u16
+				D1 = u8[A1 + 0x1e]
+				D1.s32 = s32(D1.s16) * D4.s16
+				D1.s16 >>= 8
+				D2.u16 -= D1.u16
+				objA1.position.y.u16 = D2.u16
+			}
+			return
+		}
+	}
+
+	u8[A1 + 0x2a] &= ~char.flag.ON_OBJECT
+	objA0.flags2a &= ~bit
+	u8[A1 + 0x30] = 0           // "char.rotation.x.count"
+	u8[A1 + 0x31] = 0x04		// "char.rotation.x.speed"
+	objA1.sprite_attributes &= ~sprite_attribute.PRIORITY
 }
 
 // Redraw more of the vacuum tube Knuckles switches around if the screen height is extended

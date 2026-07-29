@@ -262,6 +262,107 @@ function void fn059d24()
 #endif
 }
 
+// In Original Mode, allow players to move while falling into the LRZ boss act.
+// Function taken from bosses\boss_lrz2.lemon
+//# address-hook(0x059fc4) end(0x059fd6)
+function void fn059fc4()
+{
+	objA0.update_address = 0x059fdc
+	objA0.box_size.y = 0xc0
+	objA0.position.y.u16 = 0x0640
+	objA0.flags2a |= 0x80
+	fn059fdc()
+
+	if (camera.position.x.u16 < 0x0100 && !original_mode)
+	{
+		// Only purpose of this is to disable control
+		//  -> We can't do it right here, as initializeMainGame would overwrite the value
+		objA0.update_address = 0x059fda
+	}
+}
+
+// Alter an A.I.R. check to display the LRZ2 background Death Egg to accommodate ultrawide resolutions
+//# address-hook(0x057082) end(0x05711c)
+function void UpdateBackground.LRZ2()
+{
+	D0.u16 = camera.foreground.y.u16 - camera.screenshake.offset
+	D0 = (D0 << 16)
+	D0.s32 >>= 3
+	D2 = D0.s32 >> 2
+	D0 -= D2
+	camera.background.y.u16 = (D0 >> 16) + camera.screenshake.offset
+
+	D0 = camera.foreground.x.u16
+	D0 = (D0 << 16)
+	D0.s32 >>= 3
+	D1 = D0
+	D2 = D0
+	D0.s32 >>= 2
+	camera.background.x.u16 = D1 >> 16
+
+	D1 -= D0
+	u16[0xffffeee2] = D1 >> 16
+	D1 -= D0
+	u16[0xffffeee4] = D1 >> 16
+
+	A1 = 0xffffa810
+	D1 = D2
+	for (u8 i = 0; i < 8; ++i)
+	{
+		u16[A1-=2] = D1 >> 16
+		D1 += D0
+	}
+
+	A1 = 0xffffa810
+	D2 += D0
+	D0 += D0
+	for (u8 i = 0; i < 5; ++i)
+	{
+		u16[(A1+=2)-2] = D2 >> 16
+		D2 += D0
+	}
+
+	// Update Death Egg position
+	D0.u16 = u16[0xffffeed8]
+	if (D0.u16 != 0)
+	{
+		A1 = 0xffff0000 + D0.u16
+
+		if (!original_mode)
+		{
+			objA1.position.x.u16 = 0x1078 - u16[0xffffa804] + (getScreenExtend() / 4)
+
+			// This check is important so that Death Egg patterns don't get loaded too early;
+			//  they interfere with sprites around the spinning cylinder
+			if (objA1.position.x.u16 >= 0x300)	// 0x260 in base A.I.R.
+				objA1.position.x.u16 = 0
+		}
+		else
+		{
+			D0.u16 = 0x0678 - u16[0xffffa804]
+			objA1.position.x.u16 = (D0.s16 > -0x07e0) ? 0 : D0.u16
+		}
+
+		objA1.position.y.u16 = 0xc0 - camera.background.y.u16
+	}
+}
+
+//# address-hook(0x057082) end(0x05711c)
+function void UpdateBackground.LRZ2()
+{
+	base.UpdateBackground.LRZ2()
+
+	if (original_mode)
+		return
+
+	objA1.position.x.u16 = 0x1078 - u16[0xffffa804] + (getScreenExtend() / 4)
+
+	// This check is important so that Death Egg patterns don't get loaded too early;
+	//  they interfere with sprites around the spinning cylinder
+	if (objA1.position.x.u16 >= 0x300)	// 0x260 in base A.I.R.
+		objA1.position.x.u16 = 0
+}
+
 // Reposition Death Egg eye flashing effect to light LRZ2 boss area on fire based on screen height
 //# address-hook(0x0793e2) end(0x0793fe)
 function void fn0793e2()
@@ -274,6 +375,24 @@ function void fn0793e2()
 	objA0.countdown_callback = 0x079416
 
 	fn079406()
+}
+
+// Adjust timing on initial LRZ2 boss area lava fall platform spawns for flow
+// and to ensure final platform spawns in time at very wide resolutions.
+//# address-hook(0x07a040) end(0x07a062)
+function void fn07a040()
+{
+	_setZeroFlagByValue(0)
+	D0.u16 = objA0.position.x.u16 - camera.position.x.u16
+	u16 screenWidthAdjustment = (getScreenWidth() > 400) ? getScreenWidth() - 400 : 0
+	if (D0.u16 < 0x0140 + screenWidthAdjustment)
+	{
+		D0.u16 = objA0.position.y.u16 - camera.position.y.u16
+		if (D0.u16 < 0xe0)
+		{
+			_setZeroFlagByValue(1)
+		}
+	}
 }
 
 // Alter the camera when at the actual boss when using an altered screen height.
@@ -305,3 +424,174 @@ function void fn059f00()
 	fn059f3c()
 }
 */
+
+// Adjust the tilt of the lava in the LRZ2 boss to ensure the highest sections
+// aren't too high and thus lose collision at ultrawide resolutions.
+//# address-hook(0x059fdc) end(0x05a104)
+function void fn059fdc()
+{
+	if (level.scrolling_routine == 0x0c)
+	{
+		// Update lava heights
+		D0.u16 = u16[0xffffeedc]
+		if (u8[0xffffeedb] != 0)
+		{
+			if (D0.u16 < 0x80)
+			{
+				++D0.u16
+			}
+		}
+		else
+		{
+			if (D0.u16 != 0)
+			{
+				--D0.u16
+			}
+		}
+
+		u16[0xffffeedc] = D0.u16
+		u32 result
+
+		D0 = (D0 << 16)
+		D0.s32 >>= 8
+		D1.u16 = D0.u16
+		D0 = (D0 << 16) + (D0 >> 16)
+	#if STANDALONE
+		if (getScreenWidth() <= 336)
+			D2 = 0x30
+		else if (getScreenWidth() <= 352)
+			D2 = 0x30 - (D0 >> 28)
+		else if (getScreenWidth() <= 432)
+			D2 = 0x30 - (D0 >> 27)
+		else if (getScreenWidth() <= 464)
+			D2 = 0x30 - (D0 >> 26)
+		else
+			D2 = 0x30 - (D0 >> 26) - (D0 >> 28)
+	#else
+		D2 = 0x30
+	#endif
+		D3 = 0
+		D4.u16 = getScreenWidth() / 2 + 0x0f
+		if (u8[0xffffeeda] == 0)
+		{
+			// Lava height increasing from left to right (Robotnik on the left side)
+			A1 = 0xffffa910
+			while (D4.s16 >= 0)
+			{
+				u8[A1] = D2.u8
+
+				result = u32(D3.u16) + u32(D1.u16)
+				D3.u16 = result
+				D2.u16 += D0.u16
+				if (result & 0x10000)	// Carry flag
+					++D2.u16
+
+				++A1
+				--D4.s16
+			}
+
+			D2 = 0x30
+			D3 = 0
+			D4 = 0x0f
+			A1 = 0xffffa910
+			while (D4.s16 >= 0)
+			{
+				result = u32(D3.u16) - u32(D1.u16)
+				D3.u16 = result
+				D2.u16 -= D0.u16
+				if (result & 0x10000)	// Carry flag
+					--D2.u16
+
+				--A1
+				u8[A1] = D2.u8
+				--D4.s16
+			}
+		}
+		else
+		{
+			// Lava height increasing from right to left (Robotnik on the right side)
+			A1 = 0xffffa9b0 + getScreenExtend()
+			while (D4.s16 >= 0)
+			{
+				--A1
+				u8[A1] = D2.u8
+
+				result = u32(D3.u16) + u32(D1.u16)
+				D3.u16 = result
+				D2.u16 += D0.u16
+				if (result & 0x10000)	// Carry flag
+					++D2.u16
+
+				--D4.s16
+			}
+
+			D2 = 0x30
+			D3 = 0
+			D4 = 0x0f
+			A1 = 0xffffa9b0 + getScreenExtend()
+			while (D4.s16 >= 0)
+			{
+				result = u32(D3.u16) - u32(D1.u16)
+				D3.u16 = result
+				D2.u16 -= D0.u16
+				if (result & 0x10000)	// Carry flag
+					--D2.u16
+
+				u8[A1] = D2.u8
+				++A1
+				--D4.s16
+			}
+		}
+
+		// Collision check against the lava
+		D1.u16 = getScreenWidth() / 2
+		A2 = 0xffffa910
+		D4.u16 = 0x0a00 + getScreenWidth() / 2
+		objA0.position.x.u16 = D4.u16
+		fn01e2fe()
+	}
+	else
+	{
+		D1.u16 = 0x0180
+		D2.u16 = 0x40
+		D3.u16 = 0x30
+		D4.u16 = 0x0b80
+		objA0.position.x.u16 = D4.u16
+		PlatformCheckClimbOn()
+	}
+
+	D0.u16 = u16[0xffffeedc]
+	D0 = (D0 << 16)
+	D0 >>= 7
+	D1 = D0 >> 1
+	D0 += D1
+	if (u8[0xffffeeda] == 0)
+	{
+		D0.s32 = -D0.s32
+	}
+
+	u32[0xffffeee6] = D0
+	if (objA0.flags2a & object.flag.P1_ON_OBJECT)
+	{
+		A1 = 0xffffb000
+		if (!level.results_done && (u8[A1 + 0x2b] & char.bonus.SHIELD_FIRE) == 0 && !level.capsule_opened)
+		{
+			DamageCharacter()
+		}
+
+		D0 = u32[0xffffeee6]
+		u32[A1 + 0x10] += D0
+	}
+
+	if (objA0.flags2a & object.flag.P2_ON_OBJECT)
+	{
+		A1 = 0xffffb04a
+		if (!level.results_done && !level.capsule_opened)
+		{
+			DamageCharacter()
+		}
+
+		D0 = u32[0xffffeee6]
+		u32[A1 + 0x10] += D0
+	}
+}

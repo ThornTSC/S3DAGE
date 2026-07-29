@@ -101,27 +101,11 @@ function void fn07f06c()
 		return
 	}
 
-	A1 = 0x07f0be
-	if (InitBoss(0x07f076))
+	base.fn07f06c()
+	if (objA0.value26 != MUSIC_MAINBOSS) // if for some reason the boss uses MUSIC_MINIBOSS_2, it has been included here
 		return
 
-	objA0.update_address = 0x07f0ce
-	objA0.countdown_callback = 0x07f0d2
-
-	A1 = 0x07f0c6
-	objA0.value26 = MUSIC_MAINBOSS
-	StartBossFight()
-	u8[0xfffffab8] = 0
-
 	level.bossarea.bottom -= getScreenHeightExtend()
-
-	requestLoadingPatterns(0x76)		// Robotnik running and standing sprites
-	Kosinski.addToDMAQueue(0x181002, 0x7140)		// Boss sprites
-	loadPaletteLine1(0x07fd08)
-
-	// "spawnChildObjects(0x07fc8c)" replaced by:
-	spawnChildObject(0x07f71c, 0x00, 0, 0)
-	spawnChildObject(0x07f782, 0x02, 0, 0)
 }
 
 // Adjust some final boss act initialization based on screen height
@@ -637,10 +621,20 @@ function void fn080e2c()
 					if (allocDynamicObjectStd())
 					{
 						objA1.update_address = 0x01ec18
-						objA1.position.x.u16 = u16[address + 0x2e] + 0xb8
+						objA1.position.x.u16 = u16[address + 0x2e] + 0xa0 + getScreenExtend()	// originally 0xb8
 						objA1.position.y.u16 = 0x0080 + getScreenHeightExtend()
 						objA1.subtype2c = 0x3f
-					}
+
+						// Place main character in a safe position if necessary.
+						if (u16[0xffffb010] < objA1.position.x.u16 + 0x28)
+						{
+							u16[0xffffb010] = objA1.position.x.u16 + 0x28
+						}
+						if (u16[0xffffb014] > camera.position.y.u16 + getScreenHeight() - 24)
+						{
+							u16[0xffffb010] = camera.position.y.u16 + getScreenHeight() - 24
+						}
+					}					
 					break
 				}
 			}

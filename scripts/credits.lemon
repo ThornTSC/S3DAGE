@@ -1,3 +1,53 @@
+// In the Sonic and Tails outro, ensure the character and plane have enough time to
+// scroll off the left side of the screen for very wide screen resolutions.
+//# address-hook(0x05dbdc) end(0x05dbf2)
+function void fn05dbdc()
+{
+	base.fn05dbdc()
+	if (objA0.base_state == 0x12)
+		objA0.countdown_value += getScreenExtend() / 2
+}
+
+// Due to the extra time given in the above function, some water effects on the island's coast
+// must be shifted to match the island's new location.
+//# address-hook(0x05fe48) end(0x05fe80)
+function void fn05fe48()
+{
+	objA0.flags38 &= ~0x40
+	D0.u16 = u16[A0 + 0x3a] - u16[0xffffee98] + 0x80 + getScreenExtend() * 3	// was * 2
+	objA0.position.x.u16 = D0.u16
+	if (D0.u16 < 0x0200)
+	{
+		D0.u16 = u16[A0 + 0x3c] - u16[0xffffee9c] + 0x80
+		objA0.position.y.u16 = D0.u16
+		if (D0.u16 < 0x0200)
+			return
+	}
+	objA0.flags38 |= 0x40
+}
+
+// Shift an effect on the ocean's surface as the island rises
+// to align with the island based on screen width.
+// This is a base A.I.R. bug.
+//# address-hook(0x05fe1e) end(0x05fe46)
+function void fn05fe1e()
+{
+	D3 = 0
+	while (D2.s16 >= 0)
+	{
+		AllocDynamicObjectStd()
+		objA1.update_address = 0x05edac
+		u8[A1 + 0x2c] = D1.u8
+		u8[A1 + 0x2d] = D3.u8
+		objA1.position.x.u16 = u16[A2 + D3.u16]
+		if (objA1.subtype2c == 0x43)					// New: if this is the surface water splash,
+			objA1.position.x.u16 += getScreenExtend()	// align it with the island properly.
+		objA1.position.y.u16 = u16[A2 + D3.u16 + 2]
+		D3.u16 += 4
+		--D2.s16
+	}
+}
+
 // Adjust credits length and speed for Original Mode.
 // Function taken from maingame\outro\outro_shared.lemon
 //# address-hook(0x05b514) end(0x05b564)

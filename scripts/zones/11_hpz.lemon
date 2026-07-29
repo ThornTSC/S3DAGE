@@ -2,6 +2,46 @@
 // but there is a ceiling at that boundary that becomes visible and looks incorrect if shown.
 // We leave the threshold as is.
 
+// Center the background's opening above the teleporter as in base S3&K.
+// This can cause a hole in the upper-left of the background, so also set the
+// transparency color to the same gray as used in the background.
+//# address-hook(0x05a33c) end(0x05a39a)
+function void UpdateBackground.HPZ()
+{
+	u16[0xfffffc40] = u16[0xfffffc72]	// change transparency color to match rest of background
+
+	D0.u16 = camera.foreground.y.u16 - camera.screenshake.offset + D3.u16
+	D0 <<= 16
+	D0.s32 >>= 4
+	D0 *= 3
+	D0 >>= 16
+	camera.background.y.u16 = D0.u16 + camera.screenshake.offset
+
+	D0.u16 = camera.foreground.x.u16 - D2.u16 - getScreenExtend()*13/3	// Adjust background x offset based on screen extension
+	D0 = (D0 << 16)
+	D2 = D0
+	D0.s32 >>= 4
+	D0 *= 3
+	D0 = (D0 << 16) + (D0 >> 16)
+	u16[0xffffa800] = D0.u16
+	u16[0xffffa808] = D0.u16
+
+	A1 = 0xffffa81c
+	D0 = D2
+	D2.s32 >>= 2
+	D0 -= D2
+	D2.s32 >>= 2
+	D1 = 8
+	while (D1.s16 >= 0)
+	{
+		u16[A1-=2] = D0 >> 16
+		D0 -= D2
+		--D1.s16
+	}
+
+	u16[0xffffa804] = u16[0xffffa81a]
+}
+
 // Alter camera boundaries based on screen height for Knuckles fight
 //# address-hook(0x063d1a) end(0x063dd2)
 function void fn063d1a()
