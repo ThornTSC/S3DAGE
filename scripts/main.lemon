@@ -18150,14 +18150,6 @@ function void FBZ2_CustomSprites()
 		Renderer.drawCustomSprite("atex_rectangle", 0x2c90 - 512, 0x0480 - (global.game.paused) ? 0 : camera.screenshake.offset, 0x37, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x1001)
 }
 
-// Draw the laser ends for the frame between the above function ending drawing and the object loading
-//# address-hook(0x06fd38) end(0x06fdba)
-function void fn06fd38()
-{
-	base.fn06fd38()
-	Renderer.drawCustomSprite("fbz_laserends", 0x2a88, 0x0600, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
-}
-
 
 // Add a new outdoor area to FBZ2.
 // Function taken from level\08_fbz\level_fbz.lemon
@@ -18352,6 +18344,9 @@ function void fn06fd38()
 
 	// "spawnIdenticalChildObjects(0x0703c8)" replaced by:
 	spawnChildObjects(0x06ff5c, 0, 0, 4)		// Force field generators
+
+	// Draw laser ends for the one frame between FBZ2_CustomSprites drawing it and the boss art loading
+	Renderer.drawCustomSprite("fbz_laserends", 0x2a88, 0x0600, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
 }
 
 //# address-hook(0x06ff70) end(0x06ffb6)
