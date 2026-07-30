@@ -23000,7 +23000,7 @@ function void fn05dfee()
 		objA1.update_address = 0x05de60
 		u16[A1 + 0x46] = A0.u16
 		objA1.position.x.u16 = 0x0190 + getScreenExtend()
-		objA1.position.y.u16 = (getScreenHeightExtend() > 0) ? 0xfc : 0xdc
+		objA1.position.y.u16 = (!original_mode) ? 0xfc : 0xdc
 		u8[A1 + 0x2c] = 0xff
 	}
 
