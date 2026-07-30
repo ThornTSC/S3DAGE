@@ -147,6 +147,7 @@ function void fn00881a()
 function void fn04c97e()
 {
 	original_mode = 0					// Remove original mode in Green Sphere menu
+	set_screen_size = 1
 	ApplyROMManipulations()
 
 	if (!menu_initialized)
@@ -194,7 +195,8 @@ function void fn04c97e()
 	FadeOutScreenBlocking()
 
 	// Enforce AIR normal screen height after the screen is fully white or black.
-	Renderer.setScreenSize(screen_width, 224)
+//	Renderer.setScreenSize(screen_width, 224)
+	set_screen_size = 0
 
 	fn04c8e4()
 	fn04cca6()
@@ -403,6 +405,58 @@ function void saveEndlessModeData()
 		System.savePersistentData(0xffffffa6, "DAGE_GreenSphereGame", 4)
 	}
 }
+
+
+// Respect screen height when loading elements for Blue Sphere game menu
+//# address-hook(0x04cef8) end(0x04cf80)
+function void fn04cef8()
+{
+	objA0.update_address = 0x04cf82	// Controls scrolling the "noway!" text on the top of the screen, as well as player input
+	u32[0xffffb1bc] = 0x04d03e	// Level text and number
+	u16[0xffffb1bc + 0x14] = 0xc0
+	bluespheregame.menu_flags = 0x01
+	bluespheregame.menu_selection = 0
+	u32[0xffffbd4c] = 0x04d64e	// First bumper cursor
+	u32[0xffffbd96] = 0x04d64e	// Second bumper cursor
+	u8[0xffffbd96 + 0x04] |= render_flag.FLIP_X	// Flip second bumper
+
+	if (bluespheregame.fully_unlocked != 0)
+	{
+		u16[0xffffb1bc + 0x14] = 0xb0
+		u32[0xffffb534] = 0x04d2f4	// Active code entry
+		u16[0xffffb534 + 0x14] = 0x0144 + getScreenHeightExtend()
+		u32[0xffffb8f6] = 0x04d302	// Inactive code display
+		u16[0xffffb8f6 + 0x14] = 0x0144 + getScreenHeightExtend()
+		u32[0xffffbd02] = 0x04d610	// Text "Start"
+		bluespheregame.menu_selection = 1
+	}
+	else
+	{
+		if (bluespheres.blue_remaining == 0 && bluespheres.rings_remaining == 0)
+		{
+			u32[0xffffb8f6] = 0x04d302	// Inactive code display
+			u16[0xffffb8f6 + 0x14] = 0x0144
+		}
+	}
+}
+
+// START text
+//# address-hook(0x04d610) end(0x04d642)
+function void fn04d610()
+{
+	objA0.mapping_offset = 0x04d7be
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | (BlueSphereGame.Menu.targetInVRAM >> 5))
+	objA0.position.x.u16 = 0x0120 + getScreenExtend()
+	objA0.position.y.u16 = 0x0128 + getScreenHeightExtend()
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x14
+	objA0.box_size.y = 0x08
+	objA0.animation.sprite = 0x03	// "START"
+
+	objA0.update_address = 0x04d648
+	fn04d648()
+}
+
 
 // Upon getting a PERFECT, make stage advancement bonus based on difficulty instead of a static 10.
 //# address-hook(0x04da7e) end(0x04dde6)
@@ -942,12 +996,33 @@ function void BlueSphereGame()
 
 
 
+// Make sure menu options spheres start at an appropriate y position if screen height is extended
+//# address-hook(0x04d64e) end(0x04d6b2)
+function void fn04d64e()
+{
+	objA0.mapping_offset = 0x04d926
+	objA0.sprite_attributes = (levelselect.characters == CHARS_KNUCKLES_ALONE) ? (sprite_attribute.PRIORITY | (BlueSphereGame.Bumpers.targetInVRAM >> 5)) : (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE3 | (BlueSphereGame.Bumpers.targetInVRAM >> 5))
+#if STANDALONE
+	if (levelselect.characters == CHARS_TAILS_ALONE)
+		objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE2 | (BlueSphereGame.Bumpers.targetInVRAM >> 5))
+#endif
 
+	objA0.position.x.u16 = ((objA0.render_flags & render_flag.FLIP_X) ? 0x140 : 0x100) + getScreenExtend()
+	objA0.position.y.u16 = (bluespheregame.fully_unlocked == 0) ? 0xbe : 0x0126 + getScreenHeightExtend()
+	u32[A0 + 0x30] = (objA0.render_flags & render_flag.FLIP_X) ? 0x04d7b2 : 0x04d7a6
+	objA0.sprite_priority = 0
+	objA0.box_size.x = 0x08
+	objA0.box_size.y = 0x08
 
+	objA0.update_address = 0x04d6b8
+	fn04d6b8()
+}
 
 
 // If exiting the Blue Sphere game, return to the D.A. Garden menu.
 // Also ensure Original Mode rendering is not happening and set controller LEDs.
+// Finally, move options along bottom of screen for extended screen height
+// and make sure menu options spheres move properly to match this.
 //# address-hook(0x04d6b8) end(0x04d7a0)
 function void fn04d6b8()
 {
@@ -1004,7 +1079,9 @@ function void fn04d6b8()
 		A1 = u32[A0 + 0x30]
 		D0 = bluespheregame.menu_selection * 4
 		D2.u16 = u16[A1 + D0.s16] + getScreenExtend()
-		D3.u16 = u16[A1 + D0.s16 + 2]
+		D3.u16 = u16[A1 + D0.s16 + 2]			// y coordinate that menu option spheres aim for
+		if (bluespheregame.menu_selection > 0)
+			D3.u16 += getScreenHeightExtend()	// aim lower if using extended screen height
 
 		// Update velocity-x
 		bool skipPart = false
@@ -1149,6 +1226,32 @@ function void fn04d6b8()
 	DrawObject()
 }
 
+
+// Adjust copyright texts in Blue Spheres menu if screen height is extended
+//# address-hook(0x04da30) end(0x04da5c)
+function void fn04da30()
+{
+	objA0.mapping_offset = 0x04da68
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | 0x05b2)
+	objA0.position.x.u16 = 0x0180 + getScreenExtend() * 2
+	objA0.position.y.u16 = 0x0152 + getScreenHeightExtend()
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x2c
+	objA0.box_size.y = 0x04
+
+	objA0.update_address = 0x04da62
+	fn04da62()
+}
+
+//# address-hook(0x04da62) end(0x04da62)
+function void fn04da62()
+{
+	DrawObject()
+
+#if STANDALONE
+	Renderer.drawCustomSprite("title_screen_cr", getScreenWidth() - 92, getScreenHeight() - 18, 0x00, 0, 0x9fff)
+#endif
+}
 
 
 

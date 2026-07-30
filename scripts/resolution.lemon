@@ -173,8 +173,14 @@ function void SetResolution(bool enforceSafe)
 	u16 xres = (res_preset) ? preset_xres[res_preset - 1] : screen_width
 	u16 yres = (res_preset) ? preset_yres[res_preset - 1] : screen_height
 
+	if (time_attack == 1 && selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
+	{
+		xres = 320
+		yres = 224
+	}
 	// If the time_attack variable is set, we only allow Special Stage Time Attack to use custom resolutions
-	if (time_attack)
+	// (outside of the Prototype stages)
+	else if (time_attack)
 	{
 		xres = (time_attack == 1 && selectedZoneAct >= 0xff00) ? xres : 426
 		yres = (time_attack == 1 && selectedZoneAct >= 0xff00) ? yres : 240
