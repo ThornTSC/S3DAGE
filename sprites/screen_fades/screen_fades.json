@@ -2,6 +2,7 @@
 	"whitescreen":  { "File": "whitescreen.png"},
 	"blackscreen":  { "File": "blackscreen.png"},
 	"atex_rectangle":  { "File": "atex_rectangle.bmp"},
+    "atex_rectangle_80x16": { "File": "atex_rectangle.bmp", "Rect": "0, 0, 80, 16" },
 
 	// Menu border rectangles
 	"blackscreen_optionsdim":  { "File": "blackscreen.png", "Rect": "0,0,229,60", "Center": "114,30" },

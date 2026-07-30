@@ -11364,6 +11364,14 @@ function void MGZ2_CustomSprites()
 		}																								// Different values for the first nybble make the rain render above low plane foreground and above sprites,
 	}																									// as stated in the Oxygen handbook.
 	#endif
+
+	// Fixes the cut grass tops during the MGZ2 earthquake sequence.
+	// Same graphic can be rendered for both the Sonic path and Knuckles path.
+	if (!original_mode && (level.display_routine == 4 || level.display_routine == 8))
+	{
+		Renderer.drawCustomSprite("mgz2_collapse_scene_grass", 0x36b9, 0x0af8 - camera.screenshake.offset  - u16[0xffffeed4], 0x20, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x2001)
+		Renderer.drawCustomSprite("mgz2_collapse_scene_grass", 0x3a39, 0x03e8 - camera.screenshake.offset  - u16[0xffffeed4], 0x20, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x2001)
+	}
 }
 
 
