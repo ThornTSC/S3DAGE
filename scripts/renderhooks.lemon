@@ -3,6 +3,9 @@
 
 function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 {
+	// Debug object address display
+//	Renderer.drawText("oxyfont_small", px, py, stringformat("%x", objA0.update_address), 0xffff00ff, 1, 0, 0xffff, false)
+
 	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
 
 	if ((A0 == 0xffffb000 || A0 == 0xffffb04a || A0 == 0xffffcc0a) && original_mode)	// Player 1, sidekick Tails, Tails' tails
@@ -1134,6 +1137,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 // Function taken from standalone\rendering\renderhooks.lemon
 function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 index, u16 renderQueue, u8 spriteCounter)
 {
+	// Debug object address display
+//	Renderer.drawText("oxyfont_small", px, py, stringformat("%x", objA0.update_address), 0xffff00ff, 1, 0, 0xffff, false)
+
 	// HCZ water waves effect
 	if (objA0.update_address == 0x01f244)
 	{
@@ -1274,6 +1280,9 @@ function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 in
 // Function taken from standalone\rendering\renderhooks.lemon
 function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16 renderQueue)
 {
+	// Debug object address display
+//	Renderer.drawText("oxyfont_small", px, py, stringformat("%x", objA0.update_address), 0xffff00ff, 1, 0, 0xffff, false)
+
 	// Hyper Sonic stars
 	if (objA0.update_address == 0x0193ec || objA0.update_address == 0x0193ca)
 	{
