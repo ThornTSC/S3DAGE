@@ -1053,9 +1053,19 @@ function void InitLevelTiles.MGZ2()
 	Level.InitialTilesFill()
 }
 
+// Apply sunset palette when necessary and update various chunks for wider resolutions
 //# address-hook(0x0512be) end(0x0512d8)
 function void UpdateLevelTiles.MGZ2()
 {
+	if (getScreenWidth() > 442 && u8[0xffff888b] != 0x49)
+	{
+		// Remove the hanging pillar at the start of the act if the screen is so wide
+		// that the pillar should be in (or nearly in) the MGZ1 boss area.
+		u8[0xffff888b] = 0x49
+		u8[0xffff888c] = 0x49
+		fillPlaneA_Default(camera.position.x.u16, camera.position.y.u16, getScreenWidth(), getScreenHeight())
+	}
+
 	if (u32[0xffff8800] == 0 && !original_mode)	// if the ground has collapsed from the MGZ2 boss,
 	{
 		u8[0xffff8804] = 0		// also remove a chunk to the right, which can be stood on in ultrawide...
