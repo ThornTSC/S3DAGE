@@ -1230,6 +1230,27 @@ function void fn08d6e6()
 	}
 }
 
+// FBZ "golden bullet" object
+//# address-hook(0x03c25c) end(0x03c2a0)
+function void fn03c25c()
+{
+	objA0.mapping_offset = 0x03c328
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE1 | 0x031b)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.box_size.x = 0x20
+	objA0.box_size.y = 0x20
+	objA0.sprite_priority = 0x0280
+	u16[A0 + 0x44] = objA0.position.x.u16
+
+	D0 = objA0.subtype2c * 8
+	u16[A0 + 0x34] = D0.u16
+	D0.u16 = (D0.u16 & 0xff80) + object_x_threshold - 0x80
+	u16[A0 + 0x36] = D0.u16
+
+	objA0.update_address = 0x03c2a6
+	fn03c2a6()
+}
+
 // FBZ magnetic pendulum
 //# address-hook(0x03d4c2) end(0x03d730)
 function void fn03d4c2()
