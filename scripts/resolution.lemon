@@ -173,7 +173,7 @@ function void SetResolution(bool enforceSafe)
 	u16 xres = (res_preset) ? preset_xres[res_preset - 1] : screen_width
 	u16 yres = (res_preset) ? preset_yres[res_preset - 1] : screen_height
 
-	if (time_attack == 1 && selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20)
+	if ((time_attack == 1 && selectedZoneAct >= 0xff18 && selectedZoneAct < 0xff20) || original_mode)
 	{
 		xres = 320
 		yres = 224
