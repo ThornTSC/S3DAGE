@@ -38,7 +38,7 @@
 			 	"Category": "Display Settings",
 				"Options":
 				{
-					"0": "None (Use Custom)",
+					"0": "None",
 					"1": "Mega Drive / Genesis",
 					"2": "Origins 4:3",
 					"3": "16:10",
@@ -52,7 +52,7 @@
 			},
 			{
 				"InternalName": "ScreenWidth",
-				"DisplayName": "Screen Width (if Preset = None)",
+				"DisplayName": "Width (if Preset = None)",
 				"Variable": "screen_width",
 				"DefaultValue": "426",
 			 	"Category": "Display Settings",
@@ -151,7 +151,7 @@
 			},
 			{
 				"InternalName": "ScreenHeight",
-				"DisplayName": "Screen Height (if Preset = None)",
+				"DisplayName": "Height (if Preset = None)",
 				"Variable": "screen_height",
 				"DefaultValue": "240",
 			 	"Category": "Display Settings",
