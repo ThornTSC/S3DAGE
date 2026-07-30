@@ -21848,6 +21848,9 @@ function void DEZ1_DrawBackground()
 	u16 sideOffset = min(getScreenWidth()/2 - 140, 76)
 	Renderer.drawCustomSprite("bg_dez1_side", sideOffset, 0, 0, SPRITE_FLAG_FULLY_OPAQUE, 0x1101)
 	Renderer.drawCustomSprite("bg_dez1_side", getScreenWidth() - sideOffset, 0, 0, SPRITE_FLAG_FLIP_X | SPRITE_FLAG_FULLY_OPAQUE, 0x1101)
+
+	if (palette_set >= 2 && !original_mode)											// if new palettes,
+		Renderer.drawCustomSprite("blackscreen", 0, 0, 0x00, 0, 0x1103, 0, 0x40)	// dim background
 }
 
 function void DEZ2_DrawBackground()
