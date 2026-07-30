@@ -310,7 +310,7 @@ function void InitLevelScrolling.ICZ2()
 	u16[0xffffeee8] = indoors * 0xff
 	if (!indoors)
 	{
-		u16 xMax = (original_mode) ? 0x0720 : 0x0700
+		xMax = (original_mode) ? 0x0720 : 0x0700
 		if (camera.position.x.u16 < xMax)
 		{
 			fn23e20e()

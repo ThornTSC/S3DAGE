@@ -41,7 +41,7 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x26021500	// use for test version
 		length = Renderer.getTextWidth("version", "A.I.R. v26.02.15.0")
 	#endif
-	#if GAMEAPP == 0x26022800	// use for test version
+	#if GAMEAPP == 0x26022800	// use for preview version
 		length = Renderer.getTextWidth("version", "A.I.R. v26.02.28.0")
 	#endif
 	#if GAMEAPP == 0x26032800	// use for latest stable version
@@ -118,7 +118,7 @@ function void PrintVersionNumber()
 		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v26.02.15.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
-	#if GAMEAPP == 0x26022800	// use for test version
+	#if GAMEAPP == 0x26022800	// use for preview version
 		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v26.02.28.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif

@@ -811,23 +811,6 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         return true
     }
 
-    // MHZ2 boss foreground pole sprite pieces must be drawn a second time if two poles are visible at once.
-    if (objA0.update_address == 0x05576a && objA0.animation.sprite == 0)    // foreground pole sprite is 0, background is 1
-    {
-	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
-	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw the next pole
-        return true
-    }
-
-    // Propellers in MHZ-to-FBZ cutscene must be drawn a second time to avoid disappearing sprites,
-    // but only when we reach the edge of the terrain and the propellers have recently moved backward.
-    if (objA0.update_address == 0x05582e && u16[0xffffb010] >= 0x4778 && objA0.position.x.u16 < 0x0080)
-    {
-	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
-	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw additional propellers
-        return true
-    }
-
 	// FBZ propeller for Act 2
 	if (objA0.update_address == 0x03c1ee && !original_mode)
 	{
@@ -1315,6 +1298,23 @@ function bool Standalone.onDrawVdpSprite(s16 px, s16 py, u8 size, u16 index, u16
         Renderer.drawVdpSprite(px, py, size, index, 0x9f80)
         return true
 	}
+
+    // MHZ2 boss foreground pole sprite pieces must be drawn a second time if two poles are visible at once.
+    if (objA0.update_address == 0x05576a && objA0.animation.sprite == 0)    // foreground pole sprite is 0, background is 1
+    {
+	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw the next pole
+        return true
+    }
+
+    // Propellers in MHZ-to-FBZ cutscene must be drawn a second time to avoid disappearing sprites,
+    // but only when we reach the edge of the terrain and the propellers have recently moved backward.
+    if (objA0.update_address == 0x05582e && u16[0xffffb010] >= 0x4778 && objA0.position.x.u16 < 0x0080)
+    {
+	   	Renderer.drawVdpSprite(px, py, size, index, renderQueue)
+	   	Renderer.drawVdpSprite(px + 0x0200, py, size, index, renderQueue)   // draw additional propellers
+        return true
+    }
 
 	// DEZ 1 Retractable Spring (the one added for S3AIR specifically)
 	if (objA0.update_address == 0x0480d4 && global.zone_act == 0x0b00 && index >= sprite_attribute.PALETTE.LINE1)	// >= works for now, but if yellow spring art is ever used, this is insufficient
