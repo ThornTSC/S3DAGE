@@ -1525,6 +1525,8 @@ function void fn072d24()
 //# address-hook(0x054444) end(0x054448)
 function void UpdateLevelScrolling.LBZ2()
 {
+	LBZ2_CustomSprites()
+	
 	if (camera.position.x.u16 > 0x4000 && camera.position.y.u16 > 0x04c0 && getScreenHeightExtend() > 0)
 	{
 		if (unused.lives_counter.player2 == 0)
@@ -1533,8 +1535,6 @@ function void UpdateLevelScrolling.LBZ2()
 			deathEggY = 0x660 - camera.screenshake.offset - getScreenHeightExtend() - camera.position.y.u16
 //			Renderer.drawCustomSprite("lbz2_death_egg", 0x4430 - 256, 0x660 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 		}
-
-		LBZ2_CustomSprites()
 //		Renderer.drawCustomSprite("lbz2_death_egg_platform", 0x4430 - 160, 0x730 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0x4001)
 //		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 - 152, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
 //		Renderer.drawCustomSprite("lbz2_death_egg_platformsupport", 0x4430 + 112, 0x6a0 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
@@ -1563,8 +1563,10 @@ function void fn0545da()
 function void LBZ2_CustomSprites()
 {
 	// This image stops drawing once the appropriate art is loaded, letting chunk art act normally once it's drawn in.
-	if ((u16[0xffffb010] > 0x3c00 && camera.position.y.u16 >= 0x0500 && camera.update_routine == 0) || level.trigger0f)	// if flying in the Egg Mobile and approaching a rocket without art loaded yet
+	if (((u16[0xffffb010] > 0x3c00 && camera.position.y.u16 >= 0x0500 && camera.update_routine == 0) || level.trigger0f) && !original_mode)	// if flying in the Egg Mobile and approaching a rocket without art loaded yet
+	{
 		Renderer.drawCustomSprite("lbz2_death_egg_rocket_side", 0x3d80, 0x590 - camera.screenshake.offset - getScreenHeightExtend(), 0, SPRITE_FLAG_WORLDSPACE, 0x2001)
+	}
 
 	if (camera.position.x.u16 > 0x4000 && camera.position.y.u16 > 0x04c0 && getScreenHeightExtend() > 0)
 	{
