@@ -5,10 +5,10 @@ function void PrintVersionNumber()
 {
 	u16 renderQueue = 0xe001
 	s32 length = Renderer.getTextWidth("version", "DAGE  v1.14.0.0")
-	#if GAMEAPP == 0x24020200	// use for latest stable version
+	#if GAMEAPP == 0x24020200	// use for previous stable version
 		length = Renderer.getTextWidth("version", "A.I.R. v24.02.02.0")
 	#endif
-	#if GAMEAPP == 0x24020201	// use for latest stable version + security fix
+	#if GAMEAPP == 0x24020201	// use for previous stable version + security fix
 		length = Renderer.getTextWidth("version", "A.I.R. v24.02.02.1")
 	#endif
 	#if GAMEAPP == 0x24061800	// use for test version
@@ -44,8 +44,14 @@ function void PrintVersionNumber()
 	#if GAMEAPP == 0x26022800	// use for test version
 		length = Renderer.getTextWidth("version", "A.I.R. v26.02.28.0")
 	#endif
-	#if GAMEAPP == 0x26032800	// use for test version
+	#if GAMEAPP == 0x26032800	// use for latest stable version
 		length = Renderer.getTextWidth("version", "A.I.R. v26.03.28.0")
+	#endif
+	#if GAMEAPP == 0x26071200	// use for test version
+		length = Renderer.getTextWidth("version", "A.I.R. v26.07.12.0")
+	#endif
+	#if GAMEAPP == 0x26071201	// use for test version + hotfix
+		length = Renderer.getTextWidth("version", "A.I.R. v26.07.12.1")
 	#endif
 
 	u16 px = 16
@@ -64,11 +70,11 @@ function void PrintVersionNumber()
 	if (global.game_mode == 0x34)
 		py += 3
 
-	#if GAMEAPP == 0x24020200	// use for latest stable version
+	#if GAMEAPP == 0x24020200	// use for previous stable version
 		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v24.02.02.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
-	#if GAMEAPP == 0x24020201	// use for latest stable version
+	#if GAMEAPP == 0x24020201	// use for previous stable version + security fix
 		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v24.02.02.1", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#endif
@@ -118,6 +124,14 @@ function void PrintVersionNumber()
 	#endif
 	#if GAMEAPP == 0x26032800	// use for stable version
 		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v26.03.28.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		return
+	#endif
+	#if GAMEAPP == 0x26071200	// use for stable version
+		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v26.07.12.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
+		return
+	#endif
+	#if GAMEAPP == 0x26071201	// use for stable version + hotfix
+		Renderer.drawText("version", px, py, "DAGE  v1.14.0.0\nA.I.R. v26.07.12.1", 0xffffffff, 1, 0, renderQueue, 0, 1)
 		return
 	#else
 		Renderer.drawText("version", px, py, "\nDAGE  v1.14.0.0", 0xffffffff, 1, 0, renderQueue, 0, 1)
