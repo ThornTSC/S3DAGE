@@ -1675,9 +1675,9 @@ function void fn0500e6()
 //# address-hook(0x050390) end(0x050424)
 function void fn050390()
 {
-	if (getScreenHeightExtend() <= 0)
+	if (original_mode)
 	{
-		fn050390_NormalHeight()
+		fn050390_Orig()
 		return
 	}
 	
@@ -1767,7 +1767,7 @@ function void fn050390()
 	}
 }
 
-function void fn050390_NormalHeight()
+function void fn050390_Orig()
 {
 	// Blimp movement
 #if STANDALONE

@@ -8774,7 +8774,11 @@ function void fn01c664()
 		if (global.zone_act.apparent == 1)
 		{
 			if (!original_mode)
+			{
 				move_area.left = 0x1178
+				if (getScreenWidth() > 400)
+					move_area.left -= (getScreenWidth() - 400)/2
+			}
 			else
 				move_area.left = 0x0f50
 			camera.update_routine += 2
