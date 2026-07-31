@@ -4013,8 +4013,8 @@ function void BlueSpheres.renderCustomSpheres()
 		}
 		
 		u16 renderQueue_hud = 0xe800
-		u16 ringsToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.blue_collected : bluespheres.rings_collected
-		u16 spheresToDisplay = (bluespheres.stage_exit_state == 4 || bluespheres.stage_exit_animation) ? bluespheres.rings_collected : bluespheres.blue_collected
+		u16 ringsToDisplay = (bluespheres.stage_exit_state == 4 || (bluespheres.stage_exit_animation && global.game_mode < 0x54)) ? bluespheres.blue_collected : bluespheres.rings_collected
+		u16 spheresToDisplay = (bluespheres.stage_exit_state == 4 || (bluespheres.stage_exit_animation && global.game_mode < 0x54)) ? bluespheres.rings_collected : bluespheres.blue_collected
 
 		// Draw "GET X RINGS" messages
 		u16 ringTargetFirst = (speedSpheres || BlueSpheres.useGeneratedStages()) ? (bluespheres.rings_total * 25 / 100) : S2Special.RingTargets[challenge_greenspheres * 3 - 3]
@@ -4472,9 +4472,7 @@ function void BlueSpheres.displayTotalTime()
 	u32 devTime = u32[medalOffset + 0x840240]
 	u32 medalTime = u32[medalOffset + 0x840240 + 0x04]
 
-	u16 baseXPosition = getScreenExtend() - 40 + medal_px
-	if (s16(baseXPosition) < medal_px && challenge_greenspheres)
-		baseXPosition = medal_px
+	u16 baseXPosition = (challenge_greenspheres) ? (max(getScreenWidth()/2 - 100, 100) - 68) : (getScreenExtend() - 40 + medal_px)
 
 	if (currentTime <= devTime && u8[best_time_address] && !time_attack_end)				// dev time? (only show if medal already earned)
 		Renderer.drawCustomSprite("angel_text_dev", baseXPosition, medal_py, 0, 0, 0xf003)
