@@ -865,11 +865,11 @@ function void LevelSelect()
 
 	global.zone_act = 0
 	FadeOutScreenBlocking()
-	if (original_mode)
-		Renderer.setScreenSize(320, 224)
-	else if (screen_width && !time_attack)
-		Renderer.setScreenSize(screen_width, 224)
-	else
+//	if (original_mode)
+//		Renderer.setScreenSize(320, 224)
+//	else if (screen_width && !time_attack)
+//		Renderer.setScreenSize(screen_width, 224)
+//	else
 		Renderer.setScreenSize(400, 224)
 
 	// Load data that usually gets loaded in the main menu, just in case players use AIR menus to get here
@@ -3774,7 +3774,6 @@ function void Standalone.onLevelStart()
 		lives_counter = 3
 		player.score = 0
 		TA_menu_selection = 0
-		time_attack_end = 0
 		checkpoint.time = 0
 
 		loadMedalTimes()
@@ -3864,31 +3863,6 @@ function void Standalone.onLevelStart()
 	}
 
 	Game.onLevelStart()
-}
-
-
-
-// Copy the v23.08.27.0 version of restartAtCheckpoint() to fix shield saving at star posts in previous A.I.R. versions.
-// Function taken from standalone\enginecallbacks.lemon
-function void restartAtCheckpoint()
-{
-	// This check should always be false, but it's relevant if restart is allowed from within special / bonus stages
-	if (global.stage_type != 0)
-	{
-		global.zone_act = checkpoint.zone_act
-		global.zone_act.apparent = checkpoint.zone_act.apparent
-		checkpoint.number = checkpoint.number.backup
-
-		global.stage_type = 0
-	}
-
-	global.zone_act = global.zone_act.apparent
-	global.in_extra_stage = 0
-	global.shields_backup_1 = 0		// new for v23.08.27.0
-	global.shields_backup_2 = 0		// new for v23.08.27.0
-	level.restart = 1
-
-	Standalone.onRestartAtCheckpoint()
 }
 
 
@@ -4515,7 +4489,7 @@ function void Driller.Init()
 
 
 
-// MGZ1 boss: unload boss in time attack modes and set camera
+// MGZ1 boss: unload boss in time attack modes
 // Function taken from bosses\boss_hcz1.lemon
 //# address-hook(0x088568) end(0x08856c)
 function void fn088568()
@@ -4524,9 +4498,9 @@ function void fn088568()
 		if (time_attack == 1 || time_attack == 2)
 		{
 			UnloadObject()
-//			move_area.left = 0x2d00
-//			move_area.bottom.target = 0x0e10
-//			level.vertical_wrap = move_area.bottom.target
+			move_area.left = (camera.position.x.u16 & 0xfffe)
+			move_area.bottom.target = 0x0e10
+			level.vertical_wrap = move_area.bottom.target
 			return
 		}
 	#endif
@@ -4548,31 +4522,10 @@ function void fn088568()
 //# address-hook(0x051560) end(0x0515a2)
 function void fn051560()
 {
-/*
-	if (D0.u16 < 0x0780)
-	{
-		fn051656()
+	if (!original_mode)
 		return
-	}
-
-	D0.u16 = move_area.right + (320 - getScreenWidth())
-	if (camera.position.x.u16 >= D0.u16)
-	{
-		move_area.left = D0.u16
-		u8[0xffffeee4] = 0xff
-		u16[0xffffeee2] += 0x0c
-
-		if (allocDynamicObjectStd())
-		{
-			// Mid-level Robotnik encounter
-			objA1.update_address = 0x06bf2a
-			objA1.position.x.u16 = 0x08e0
-			objA1.position.y.u16 = 0x0690
-			camera.screenshake.state.hi = 0xff
-			u8[0xffffeeb4] = 0xff
-		}
-	}
-*/
+	
+	base.fn051560()
 }
 
 //# address-hook(0x0515a4) end(0x05160c)
@@ -5321,7 +5274,7 @@ function void fn06ee68()
 {
 	if (time_attack == 1 || time_attack == 2)
 	{
-		move_area.left = 0x2d00
+		move_area.left = (camera.position.x.u16 & 0xfffe)
 		level.vertical_wrap = 0x0540
 		move_area.bottom.target = 0x0540
 		return
@@ -5347,12 +5300,12 @@ function void fn06fd0c()
 	{
 		UnloadObject()
 
-		move_area.left = 0x2900
+		move_area.left = (camera.position.x.u16 & 0xfffe)
 		move_area.bottom.target = 0x05e0
 
 		u32[0xffff82e4] = 0xa1a1a16b	// these lines correct the goal pole area's chunks
 		u32[0xffff8362] = 0x7f7f7f3a
-		u32[0xffff83e0] = 0x33333333
+		u32[0xffff83e0] = 0x3333330c
 
 		Kosinski.addToDMAQueue(0x165826, 0x7460)	// Load graphics for collapse sequence.
 		Kosinski.addToDMAQueue(0x165ab8, 0x7aa0)	// These lines taken from level\08_fbz\level_fbz.lemon, used if spawning at the final star post
@@ -6925,7 +6878,7 @@ function void Standalone.checkTimeAttackFinish()
 		if (!Challenge.checkAndRenderFinish_unlockAct())
 			return										// Only run the rest of this function if the player has actually finished		
 	}
-	else if (!Challenge.checkAndRenderFinish())
+	else if (!Challenge.checkAndRenderFinish() && !time_attack_end)
 		return											// Only run the rest of this function if the player has actually finished
 
 	if (hud.dirty.timer)
@@ -7182,7 +7135,7 @@ function u16 Challenge.checkAndRenderFinish()
 	{
 	//	if (py < 0x0700)
 	//	{
-			pole.x = 0x32c8	// 0x3300	// 0x29f0
+			pole.x = 0x32c0	// 0x3300	// 0x29f0
 			pole.y = 0x0340	// 0x0680
 	//	}
 	}

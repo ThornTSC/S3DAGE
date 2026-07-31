@@ -146,7 +146,7 @@ function void fn055e96()
 	if (D0.u16 == 0x0960 - getScreenHeightExtend() && D0.u16 <= camera.position.y.u16)
 	{
 		level.vertical_wrap = D0.u16
-		if (camera.position.x.u16 >= 0x4310 - (getScreenWidth() - 320))
+		if (camera.position.x.u16 >= 0x4310 - (getScreenWidth() - 320)) || ((time_attack == 1 || time_attack == 2) && u8[0xffffb020] == char.state.WIN_POSE)
 		{
 			// Trigger pyramid rising
 			move_area.left = 0x4180

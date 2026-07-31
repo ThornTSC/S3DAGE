@@ -17675,7 +17675,7 @@ function void FBZ1_CustomSprites()
 	}
 
 	// Properly render approach to boss
-	if (level.trigger0f < 3 && !original_mode)
+	if (level.trigger0f < 3 && !original_mode && time_attack != 1 && time_attack != 2)
 	{
 		Renderer.drawCustomSprite("fbz_prison", 0x2f00, 0x05e0, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.addSpriteMaskWorld(0x2ee0, 0x05b0, 0x40, 0x50, 0xa000, 1)
@@ -18079,6 +18079,12 @@ function void UpdateLevelTiles.FBZ2()
 			move_area.left = 0x0000																					// allow returning to the start.
 	}
 
+	if (time_attack == 1 || time_attack == 2)
+	{
+		if (camera.position.x.u16 >= 0x2900)
+			move_area.left = 0x2900
+	}
+
 	camera.foreground.y.u16 += camera.screenshake.offset
 	call 0x052e44 + s16[0xffffeec0]
 }
@@ -18142,7 +18148,7 @@ function void FBZ2_CustomSprites()
 		Renderer.addSpriteMaskWorld(0x2aa0, 0x05e0, 0x2be0 - 0x2aa0, 0x0600 - 0x05e0, 0x9f80, 1)
 
 	// Draw laser beam ends for start of miniboss area before object loads
-	if (move_area.left < 0x2900 && !original_mode)
+	if (move_area.left < 0x2900 && !original_mode && time_attack != 1 && time_attack != 2)
 		Renderer.drawCustomSprite("fbz_laserends", 0x2a88, 0x0600, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
 
 	// Draw a rectangle to cover an area after the laser miniboss that may not be covered with sky if the camera moves there too quickly

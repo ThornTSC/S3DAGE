@@ -114,6 +114,9 @@ function void fn051504()
 		return
 	
 	base.fn051504()
+
+//	if (time_attack)
+//		move_area.left = 0
 }
 
 // We can adjust MGZ2 mid-act Eggman encounter screen boundaries to account for screen height,
