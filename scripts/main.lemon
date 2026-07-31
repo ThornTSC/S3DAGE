@@ -18063,8 +18063,10 @@ function void fn089dee()
 
 
 
-// Adjust camera on the outdoor section on the lowest route of FBZ2
-// to prevent sight of interior tiles, and display hanging inputs
+// Adjust chunks on the outdoor section on the lowest route of FBZ2
+// to prevent sight of interior tiles, and display hanging inputs.
+// The chunk adjustment won't fully hide everything in ultrawide unless
+// a fake background is used to conceal the background change.
 //# address-hook(0x052e34) end(0x052e40)
 function void UpdateLevelTiles.FBZ2()
 {
@@ -18073,10 +18075,21 @@ function void UpdateLevelTiles.FBZ2()
 	// New for the outdoor section
 	if (!original_mode)
 	{
-		if (camera.position.x.u16 >= 0x0d00 && camera.position.x.u16 <= 0x1180 && camera.position.y.u16 >= 0x0a00)	// If outdoors and not leaving,
-			move_area.left = 0x0d00																					// prevent seeing within left wall,
-		else if (camera.position.x.u16 <= 0x1500)																	// else if still early in the level,
-			move_area.left = 0x0000																					// allow returning to the start.
+		// Update level chunks when moving between indoors and outdoors
+		if (u8[0xffff8af8] == 0xb2 && u8[0xffff8a79] != 0x89)	// outdoor
+		{
+			u16[0xffff8af6] = 0x8989
+			u16[0xffff8b74] = 0x8989
+			u16[0xffff8bf2] = 0x8989
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())
+		}
+		else if (u8[0xffff8af8] == 0x18 && u8[0xffff8af6] != 0x20)	// indoor
+		{
+			u16[0xffff8af6] = 0x2010
+			u16[0xffff8b74] = 0xa1a1
+			u16[0xffff8bf2] = 0x7878
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth(), getScreenHeight())
+		}
 	}
 
 	if (time_attack == 1 || time_attack == 2)
