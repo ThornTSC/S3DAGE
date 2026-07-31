@@ -4221,14 +4221,15 @@ function void BlueSpheres.renderCustomSpheres()
 			if (neededRings == 1)
 				px_warning += 4
 			u16 px_warningText = (neededRings == 1) ? px_warning + 60 : px_warning + 64
+			u16 py_warningText = py_rings + 32
 
 			if (neededRings == 1)
-				Renderer.drawCustomSprite("sonic2_ringtogo", px_warningText, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
+				Renderer.drawCustomSprite("sonic2_ringtogo", px_warningText, py_warningText, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
 			else
-				Renderer.drawCustomSprite("sonic2_ringstogo", px_warningText, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
+				Renderer.drawCustomSprite("sonic2_ringstogo", px_warningText, py_warningText, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
 			for (u32 valueWarning = neededRings;;)
 			{
-				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", valueWarning % 10), px_warning, py_rings, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
+				Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d", valueWarning % 10), px_warning, py_warningText, 0, SPRITE_FLAG_PRIO, renderQueue_hud, 0, 128)
 				px_warning -= 8
 				valueWarning /= 10
 				if (valueWarning == 0)
