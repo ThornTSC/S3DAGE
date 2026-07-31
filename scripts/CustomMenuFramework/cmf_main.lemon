@@ -546,6 +546,8 @@ function void customMenu.mainControlLoop()
 		if (selectedMenuOption == 6)
 		{
 			selectedMenuOption = selectedMenuOptionLast
+			if (selectedMenuOption == 2 && selectedZoneAct >= 0xff00)	// if we've exited selecting NORMAL or HARD/SPEED in Special Stage selections after getting into these menus from the game mode option,
+				selectedMenuOption = 1									// move to a valid option.
 			if (selectedMenuOption == 3 && setting.unlock_act != 1) // && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 			{
 				selectedMenuOption = 4
