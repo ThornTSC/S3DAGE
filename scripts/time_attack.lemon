@@ -7473,7 +7473,15 @@ function void Challenge.saveMedalsAndRecords_Special()
 	}
 	if (medalType)			// if we earned a non-perfect medal at all this run
 	{
-		Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 - 48 - ((challenge_greenspheres) ? 26 : 0), 20, 0x00, 0x40, 0xe800)
+		if (!challenge_greenspheres)
+			Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 - 48, 20, 0x00, 0x40, 0xe800)
+		else
+		{
+			s16 px = (getScreenWidth() - 400)/2 + 126
+			if (getScreenWidth() < 400)
+				px += (400 - getScreenWidth())/2
+			Renderer.drawCustomSprite(medalKey, px, 20, 0x00, 0x40, 0xffff)
+		}
 	}
 	// Check if the achieved time is the best one.
 	if (currentTime < (u32[best_time_address] & 0x00ffffff))	// the & 0x00ffffff here equals best_time without affecting best_time for NEW RECORD text.
@@ -7498,7 +7506,15 @@ function void Challenge.saveMedalsAndRecords_Special()
 		}
 		if (perfectMedalType)	// if we earned a perfect medal at all this run
 		{
-			Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 + 48 + ((challenge_greenspheres) ? 26 : 0), 20, 0x00, 0x40, 0xe800)
+			if (!challenge_greenspheres)
+				Renderer.drawCustomSprite(medalKey, getScreenWidth()/2 + 48, 20, 0x00, 0x40, 0xe800)
+			else
+			{
+				s16 px = (getScreenWidth() - 400)/2 + 274
+				if (getScreenWidth() < 400)
+					px -= (400 - getScreenWidth())/2
+				Renderer.drawCustomSprite(medalKey, px, 20, 0x00, 0x40, 0xffff)
+			}
 		}
 		// Check if the achieved time is the best one.
 		if (currentTime < (u32[best_time_address_perfect] & 0x00ffffff))	// the & 0x00ffffff here equals best_time without affecting best_time for NEW RECORD text.

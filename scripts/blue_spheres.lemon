@@ -4472,12 +4472,16 @@ function void BlueSpheres.displayTotalTime()
 	u32 devTime = u32[medalOffset + 0x840240]
 	u32 medalTime = u32[medalOffset + 0x840240 + 0x04]
 
+	u16 baseXPosition = getScreenExtend() - 40 + medal_px
+	if (s16(baseXPosition) < medal_px && challenge_greenspheres)
+		baseXPosition = medal_px
+
 	if (currentTime <= devTime && u8[best_time_address] && !time_attack_end)				// dev time? (only show if medal already earned)
-		Renderer.drawCustomSprite("angel_text_dev", getScreenExtend() - 40 + medal_px, medal_py, 0, 0, 0xf003)
+		Renderer.drawCustomSprite("angel_text_dev", baseXPosition, medal_py, 0, 0, 0xf003)
 	else if (currentTime <= medalTime && !time_attack_end)	// gold medal?
 	{
 		medalOffset += 4
-		Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + medal_px + 3, medal_py - 1, 0, 0, 0xe008)
+		Renderer.drawCustomSprite("star_special", baseXPosition + 3, medal_py - 1, 0, 0, 0xe008)
 	}
 	else
 		medalOffset = 0xff	// null value that avoids drawing any target times
@@ -4487,8 +4491,6 @@ function void BlueSpheres.displayTotalTime()
 	u16 medal_time_seconds = u8[medal_time_address + 2]
 	u16 medal_time_frames = u8[medal_time_address + 3]
 	u16 medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
-
-	u16 baseXPosition = getScreenExtend() - 40 + medal_px
 
 	if (medalOffset != 0xff)
 	{
@@ -4502,18 +4504,22 @@ function void BlueSpheres.displayTotalTime()
 	}
 
 	// Render perfect target times
-	medal_px = (challenge_greenspheres) ? 0x11f : 0x105
+	medal_px = (challenge_greenspheres) ? (getScreenWidth() < 400 ? getScreenWidth() - 0x71 : 0x11f) : 0x105
+
+	baseXPosition = getScreenExtend() - 40 + medal_px
+	if (s16(baseXPosition) < medal_px && challenge_greenspheres)
+		baseXPosition = medal_px
 
 	medalOffset = (selectedZoneAct < 0xff18) ? (0x10 * selectedSpecialStageType) + 8 : 8
 	devTime = u32[medalOffset + 0x840240]
 	medalTime = u32[medalOffset + 0x840240 + 0x04]
 
 	if (currentTime <= devTime && u8[best_time_address_perfect] && !time_attack_end)				// dev time? (only show if medal already earned)
-		Renderer.drawCustomSprite("angel_text_dev", getScreenExtend() - 40 + medal_px, medal_py, 0, 0, 0xf003)
+		Renderer.drawCustomSprite("angel_text_dev", baseXPosition, medal_py, 0, 0, 0xf003)
 	else if (currentTime <= medalTime && !time_attack_end)	// gold medal?
 	{
 		medalOffset += 4
-		Renderer.drawCustomSprite("star_special", getScreenExtend() - 40 + medal_px + 3, medal_py - 1, 0, 0, 0xe008)
+		Renderer.drawCustomSprite("star_special", baseXPosition + 3, medal_py - 1, 0, 0, 0xe008)
 	}
 	else
 		medalOffset = 0xff	// null value that avoids drawing any target times
@@ -4523,8 +4529,6 @@ function void BlueSpheres.displayTotalTime()
 	medal_time_seconds = u8[medal_time_address + 2]
 	medal_time_frames = u8[medal_time_address + 3]
 	medal_time_centiseconds = (medal_time_frames * 99 + 30) / 59
-
-	baseXPosition = getScreenExtend() - 40 + medal_px
 
 	if (medalOffset != 0xff)
 	{
