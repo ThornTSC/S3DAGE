@@ -18302,7 +18302,7 @@ function void fn06fd16()
 
     if (!original_mode)
     {
-        // Destructible laser logic here and in other functions below was #contributed by HazelSpooder
+        // Destructible laser logic here and in other functions below was #contributed by AmberChromatic
         if (objA0.base_state < 0x06)
         {
             // Prevent boss from being damaged too early
