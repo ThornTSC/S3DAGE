@@ -3872,6 +3872,8 @@ function void Standalone.onLevelStart()
 
 function void Standalone.onRestartAtCheckpoint()
 {
+	global.shields_backup_1 = 0
+	global.shields_backup_2 = 0	
 	S2TitleCard.disappear = false
 	S2TitleCard.loaded = false
 	draw_HUD = true
