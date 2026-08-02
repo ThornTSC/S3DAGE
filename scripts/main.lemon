@@ -12692,7 +12692,8 @@ function void fn06c8f4()
 	objA0.update_address = 0x06c932
 	level.wait_for_results = 0
 	stopCharacterWinPose(0xffffb000)
-	stopCharacterWinPose(0xffffb04a)	// added to unlock Tails' movement
+	if (!original_mode)
+		stopCharacterWinPose(0xffffb04a)	// added to unlock Tails' movement
 	PlayMusicAfterLevelResults()
 	control.player1 = 0
 	player1.control_override = 0xff

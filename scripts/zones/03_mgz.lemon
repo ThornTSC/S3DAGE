@@ -621,6 +621,12 @@ function void fn06d710()
 //# address-hook(0x06c698) end(0x06c6ee)
 function void fn06c698()
 {
+	if (original_mode)
+	{
+		fn06c698_Orig()
+		return
+	}
+
 	base.fn06c698()
 	if (objA0.value26 != MUSIC_MAINBOSS && objA0.value26 != MUSIC_MINIBOSS_2) // if for some reason the boss uses MUSIC_MINIBOSS_2, it has been included here
 		return
@@ -630,12 +636,32 @@ function void fn06c698()
 
 	// Alter some chunks to the right of the level's edge (i.e., the left edge due to wrapping)
 	// to allow the correct zone transition in ultrawide resolutions.
-	if (!original_mode)
-	{
-		u8[0xffff8108] = 0x50
-		u8[0xffff8188] = 0x4f
-		u8[0xffff8208] = 0xbc
-	}
+	u8[0xffff8108] = 0x50
+	u8[0xffff8188] = 0x4f
+	u8[0xffff8208] = 0xbc
+}
+
+function void fn06c698_Orig()
+{
+	A1 = 0x06c688
+	if (InitBoss(0x06c6a2))
+		return
+
+	objA0.value26 = MUSIC_MINIBOSS_2	// Original Mode uses S&K miniboss music
+	StartBossFight()
+
+	objA0.update_address = 0x06c6f4
+	objA0.countdown_callback = 0x06c6fa
+
+	Kosinski.addToDMAQueue(0x36b340, 0x67e0)		// Boss sprites
+
+	Kosinski.addToDMAQueue(0x36d572, 0x8bc0)		// Falling debris sprites
+
+	requestLoadingPatterns(0x6d)		// Robotnik's ship, boss explosions, and capsule sprites
+	loadPaletteLine1(0x06d97c)
+
+	level.bossarea.left -= getScreenExtend()
+	level.bossarea.right += getScreenExtend()
 }
 
 //# address-hook(0x06d45e) end(0x06d4aa)
