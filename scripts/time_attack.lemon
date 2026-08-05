@@ -7601,7 +7601,14 @@ function void Challenge.manageEndMenu()
 		playSound(0x5b)
 	}
 
-	if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
+	if ((global.game_mode & 0x7f) == 0x34)
+	{
+		if (challenge_greenspheres || speedSpheres)
+			WestsideSpecial.TAEndMenu()
+		else
+			AngelSpecial.TAEndMenu()
+	}
+	else if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		Flicky.TAEndMenu()
 	else if (theme.hud == theme.saturn && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && !original_mode)
 		Saturn.TAEndMenu()

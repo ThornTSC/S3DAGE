@@ -1,0 +1,221 @@
+{
+	// ANGEL SPECIAL THEME
+
+	// PAUSED text
+	"angel_special_paused":  { "File": "angel_special_smallmenu.png", "Rect": "0, 176, 80,16", "Center": "40,8" },
+
+	// Normal game pause menu
+	"angel_special_normal_continue_0":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"angel_special_normal_continue_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_normal_continue_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_normal_continue_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	
+	"angel_special_normal_restart_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+	"angel_special_normal_restart_1":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 96, 56,16", "Center": "28,8" },	// selected
+	"angel_special_normal_restart_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+	"angel_special_normal_restart_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+
+	"angel_special_normal_options_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"angel_special_normal_options_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"angel_special_normal_options_2":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "28,8" },	// selected
+	"angel_special_normal_options_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	
+	"angel_special_normal_exit_game_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_normal_exit_game_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_normal_exit_game_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_normal_exit_game_3":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// Normal game pause menu for Restart
+	"angel_special_normal_cancel_10":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "24,8" },	// selected
+	"angel_special_normal_cancel_11":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	"angel_special_normal_cancel_12":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	
+	"angel_special_normal_star_post_10":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "36,8" },
+	"angel_special_normal_star_post_11":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 112, 72,16", "Center": "36,8" },	// selected
+	"angel_special_normal_star_post_12":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "36,8" },
+	
+	"angel_special_normal_act_start_10":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "36,8" },
+	"angel_special_normal_act_start_11":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "36,8" },
+	"angel_special_normal_act_start_12":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 128, 72,16", "Center": "36,8" },	// selected
+
+	// Pause menu for Exit Game
+	"angel_special_cancel_20":		  { "File": "angel_special_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "24,8" },	// selected
+	"angel_special_cancel_21":		  { "File": "angel_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	"angel_special_cancel_22":		  { "File": "angel_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	
+	"angel_special_main_menu_20":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "36,8" },
+	"angel_special_main_menu_21":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 64, 72,16", "Center": "36,8" },	// selected
+	"angel_special_main_menu_22":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "36,8" },
+	
+	"angel_special_air_menu_20":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "34,8" },
+	"angel_special_air_menu_21":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "34,8" },
+	"angel_special_air_menu_22":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 80, 68,16", "Center": "34,8" },	// selected
+
+	// Special Stage pause menu
+	"angel_special_ss_continue_0":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"angel_special_ss_continue_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_ss_continue_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_ss_continue_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	
+	"angel_special_ss_retry_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"angel_special_ss_retry_1":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"angel_special_ss_retry_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"angel_special_ss_retry_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+
+	"angel_special_ss_options_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"angel_special_ss_options_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"angel_special_ss_options_2":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "28,8" },	// selected
+	"angel_special_ss_options_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	
+	"angel_special_ss_exit_game_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_ss_exit_game_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_ss_exit_game_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_ss_exit_game_3":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// Challenges pause menu
+	"angel_special_challenge_pause_continue_0":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"angel_special_challenge_pause_continue_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_challenge_pause_continue_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"angel_special_challenge_pause_continue_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+
+	"angel_special_challenge_pause_retry_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"angel_special_challenge_pause_retry_1":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"angel_special_challenge_pause_retry_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"angel_special_challenge_pause_retry_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	
+	"angel_special_challenge_pause_select_act_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"angel_special_challenge_pause_select_act_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"angel_special_challenge_pause_select_act_2":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 16, 80,16", "Center": "40,8" },	// selected
+	"angel_special_challenge_pause_select_act_3":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	
+	"angel_special_challenge_pause_exit_game_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_challenge_pause_exit_game_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_challenge_pause_exit_game_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_challenge_pause_exit_game_3":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// End of Time Attack / Time Stone Trial menu
+	"angel_special_ta_retry_0":		  { "File": "angel_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"angel_special_ta_retry_1":		  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"angel_special_ta_retry_2":		  { "File": "angel_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	
+	"angel_special_ta_select_act_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"angel_special_ta_select_act_1":	  { "File": "angel_special_smallmenu.png", "Rect": "80, 16,80,16", "Center": "40,8" },	// selected
+	"angel_special_ta_select_act_2":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	
+	"angel_special_ta_exit_game_0":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_ta_exit_game_1":	  { "File": "angel_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"angel_special_ta_exit_game_2":	  { "File": "angel_special_smallmenu.png", "Rect": "80,32, 72,16", "Center": "36,8" },	// selected
+
+	// NEW RECORD! text
+	"angel_special_new_record": { "File": "angel_special_smallmenu.png", "Rect": "0,192,86,16", "Center": "43,8" },
+
+	// WESTSIDE SPECIAL THEME
+
+	// PAUSED text
+	"westside_special_paused":  { "File": "westside_special_smallmenu.png", "Rect": "0, 176, 96,32", "Center": "48,16" },
+
+	// Normal game pause menu
+	"westside_special_normal_continue_0":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"westside_special_normal_continue_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_normal_continue_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_normal_continue_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	
+	"westside_special_normal_restart_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+	"westside_special_normal_restart_1":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 96, 56,16", "Center": "28,8" },	// selected
+	"westside_special_normal_restart_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+	"westside_special_normal_restart_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 96, 56,16", "Center": "28,8" },
+
+	"westside_special_normal_options_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"westside_special_normal_options_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"westside_special_normal_options_2":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "28,8" },	// selected
+	"westside_special_normal_options_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	
+	"westside_special_normal_exit_game_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_normal_exit_game_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_normal_exit_game_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_normal_exit_game_3":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// Normal game pause menu for Restart
+	"westside_special_normal_cancel_10":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "24,8" },	// selected
+	"westside_special_normal_cancel_11":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	"westside_special_normal_cancel_12":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	
+	"westside_special_normal_star_post_10":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "36,8" },
+	"westside_special_normal_star_post_11":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 112, 72,16", "Center": "36,8" },	// selected
+	"westside_special_normal_star_post_12":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 112, 72,16", "Center": "36,8" },
+	
+	"westside_special_normal_act_start_10":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "36,8" },
+	"westside_special_normal_act_start_11":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 128, 72,16", "Center": "36,8" },
+	"westside_special_normal_act_start_12":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 128, 72,16", "Center": "36,8" },	// selected
+
+	// Pause menu for Exit Game
+	"westside_special_cancel_20":		  { "File": "westside_special_smallmenu.png", "Rect": "80, 48, 48,16", "Center": "24,8" },	// selected
+	"westside_special_cancel_21":		  { "File": "westside_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	"westside_special_cancel_22":		  { "File": "westside_special_smallmenu.png", "Rect": "0, 48, 48,16", "Center": "24,8" },
+	
+	"westside_special_main_menu_20":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "36,8" },
+	"westside_special_main_menu_21":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 64, 72,16", "Center": "36,8" },	// selected
+	"westside_special_main_menu_22":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 64, 72,16", "Center": "36,8" },
+	
+	"westside_special_air_menu_20":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "34,8" },
+	"westside_special_air_menu_21":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 80, 68,16", "Center": "34,8" },
+	"westside_special_air_menu_22":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 80, 68,16", "Center": "34,8" },	// selected
+
+	// Special Stage pause menu
+	"westside_special_ss_continue_0":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"westside_special_ss_continue_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_ss_continue_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_ss_continue_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	
+	"westside_special_ss_retry_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"westside_special_ss_retry_1":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"westside_special_ss_retry_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"westside_special_ss_retry_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+
+	"westside_special_ss_options_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"westside_special_ss_options_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	"westside_special_ss_options_2":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 160, 56,16", "Center": "28,8" },	// selected
+	"westside_special_ss_options_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 160, 56,16", "Center": "28,8" },
+	
+	"westside_special_ss_exit_game_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_ss_exit_game_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_ss_exit_game_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_ss_exit_game_3":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// Challenges pause menu
+	"westside_special_challenge_pause_continue_0":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 144, 64,16", "Center": "32,8" },	// selected
+	"westside_special_challenge_pause_continue_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_challenge_pause_continue_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+	"westside_special_challenge_pause_continue_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 144, 64,16", "Center": "32,8" },
+
+	"westside_special_challenge_pause_retry_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"westside_special_challenge_pause_retry_1":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"westside_special_challenge_pause_retry_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"westside_special_challenge_pause_retry_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	
+	"westside_special_challenge_pause_select_act_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"westside_special_challenge_pause_select_act_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"westside_special_challenge_pause_select_act_2":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 16, 80,16", "Center": "40,8" },	// selected
+	"westside_special_challenge_pause_select_act_3":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	
+	"westside_special_challenge_pause_exit_game_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_challenge_pause_exit_game_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_challenge_pause_exit_game_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_challenge_pause_exit_game_3":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 32, 72,16", "Center": "36,8" },	// selected
+
+	// End of Time Attack / Time Stone Trial menu
+	"westside_special_ta_retry_0":		  { "File": "westside_special_smallmenu.png", "Rect": "80, 0, 40,16", "Center": "20,8" },	// selected
+	"westside_special_ta_retry_1":		  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	"westside_special_ta_retry_2":		  { "File": "westside_special_smallmenu.png", "Rect": "0, 0, 40,16", "Center": "20,8" },
+	
+	"westside_special_ta_select_act_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	"westside_special_ta_select_act_1":	  { "File": "westside_special_smallmenu.png", "Rect": "80, 16,80,16", "Center": "40,8" },	// selected
+	"westside_special_ta_select_act_2":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 16, 80,16", "Center": "40,8" },
+	
+	"westside_special_ta_exit_game_0":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_ta_exit_game_1":	  { "File": "westside_special_smallmenu.png", "Rect": "0, 32, 72,16", "Center": "36,8" },
+	"westside_special_ta_exit_game_2":	  { "File": "westside_special_smallmenu.png", "Rect": "80,32, 72,16", "Center": "36,8" },	// selected
+
+	// NEW RECORD! text
+	"westside_special_new_record": { "File": "westside_special_smallmenu.png", "Rect": "0,208,86,16", "Center": "43,8" }
+}

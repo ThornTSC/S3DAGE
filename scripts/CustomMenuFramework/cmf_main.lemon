@@ -2018,7 +2018,9 @@ function void customMenu.displayStarCounter()
 
 	y_offset += getScreenHeightExtend()
 
-	if (theme.hud == theme.flicky && renderQueue == 0xfff1)
+	if ((global.game_mode & 0x7f) == 0x34)
+		Westside.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)		// Special Stages always call the shared Westside/Angel star counters
+	else if (theme.hud == theme.flicky && renderQueue == 0xfff1)
 		Flicky.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)
 	else if (theme.hud == theme.south && renderQueue == 0xfff1)
 		South.TotalStars(starCount, x_offset, y_offset, spriteFlags, renderQueue)

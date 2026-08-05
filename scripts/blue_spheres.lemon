@@ -4543,7 +4543,7 @@ function void BlueSpheres.displayTotalTime()
 	// Render NEW RECORD text if necessary
 	if (time_attack_end && ((currentTime < best_time) || (currentTime < (best_time_perfect & 0x00ffffff)) && ((!challenge_greenspheres && bluespheres.rings_remaining == 0) || (challenge_greenspheres && bluespheres.blue_remaining == 0))))
 	{
-		u64 newRecordKey = (challenge_greenspheres) ? "westside_new_record" : "new_record"
+		u64 newRecordKey = (challenge_greenspheres) ? "westside_special_new_record" : "angel_special_new_record"
 		Renderer.drawCustomSprite(newRecordKey, getScreenWidth() / 2, 0x2e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 }
