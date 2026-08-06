@@ -435,7 +435,7 @@ function void fn04cef8()
 		if (bluespheres.blue_remaining == 0 && bluespheres.rings_remaining == 0)
 		{
 			u32[0xffffb8f6] = 0x04d302	// Inactive code display
-			u16[0xffffb8f6 + 0x14] = 0x0144
+			u16[0xffffb8f6 + 0x14] = 0x0144 + getScreenHeightExtend()
 		}
 	}
 }
@@ -455,6 +455,46 @@ function void fn04d610()
 
 	objA0.update_address = 0x04d648
 	fn04d648()
+}
+
+// DIFFICULTY text, number, and stars surrounding number
+//# address-hook(0x04e0a4) end(0x04e110)
+function void fn04e0a4()
+{
+	// "Difficulty" text
+	objA0.mapping_offset = 0x04d7be
+	objA0.sprite_attributes = (sprite_attribute.PRIORITY | (BlueSphereGame.Menu.targetInVRAM >> 5))
+	objA0.position.x.u16 = 0x0120 + getScreenExtend()
+	objA0.position.y.u16 = 0x0140 + getScreenHeightExtend()
+	objA0.sprite_priority = 0x80
+	objA0.box_size.x = 0x28
+	objA0.box_size.y = 0x08
+	objA0.animation.sprite = 0x04	// "DIFFICULTY"
+
+	A1 = A0
+
+	// A1 += 0x4a
+	// objA1.animation.sprite = 0x0a
+	u8[A1 + 0x4a + 0x22] = 0x0a	// Left star sprite
+
+	D2.u16 = 0x0114 + getScreenExtend()
+	D3.u16 = objA0.position.y.u16 + 0x10
+
+	for (u8 i = 0; i < 4; ++i)
+	{
+		// Create the stars and digits
+		//  -> Note that they will get updated in "fn04d1aa"
+		A1 += 0x4a
+		objA1.update_address = 0x04e1aa
+		objA1.position.x.u16 = D2.u16
+		objA1.position.y.u16 = D3.u16
+		D2.u16 += 8
+	}
+
+	objA1.animation.sprite = 0x0b	// Right star sprite
+	u16[A0 + 0x30] = 29		// Half a second (minus one frame)
+	objA0.update_address = 0x04e116
+	fn04e116()
 }
 
 
