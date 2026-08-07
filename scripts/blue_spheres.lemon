@@ -1266,6 +1266,15 @@ function void fn04d6b8()
 	DrawObject()
 }
 
+// Prevent the Tails star sphere palette from flashing when returning to the Challenges menu
+function void BlueSphereGame.applyTailsPalette(u32 targetPaletteLineAddress)
+{
+	if ((global.game_mode & 0x7f) != 0x2c)
+		return
+	
+	base.BlueSphereGame.applyTailsPalette(targetPaletteLineAddress)
+}
+
 
 // Adjust copyright texts in Blue Spheres menu if screen height is extended
 //# address-hook(0x04da30) end(0x04da5c)
