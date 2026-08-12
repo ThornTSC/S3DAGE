@@ -404,11 +404,11 @@ function void customMenu.mainControlLoop()
 			// Start level.
 			global.game_mode = 0x8c
 			// Dev cheat for testing new levels without a menu option
-			if (Input.buttonDown(BUTTON_Y))
-			{
-				global.zone_act = 0x0200
-				setting.unlock_act = 3
-			}
+//			if (Input.buttonDown(BUTTON_Y))
+//			{
+//				global.zone_act = 0x0200
+//				setting.unlock_act = 3
+//			}
 			unlock_act = setting.unlock_act
 
 			playSound(0xaf)
