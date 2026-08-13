@@ -7437,12 +7437,9 @@ function void fn0067ee()
 		objA1.state = char.state.FALLING_PANIC
 		if (global.characters == CHARS_KNUCKLES_ALONE)
 		{
-			objA1.state.both = 0x2121	// char.state.KNUX_FALLING, char.state.KNUX_FALLING
-			objA1.animation.frame = 1
-			if (!original_mode)
-				objA1.animation.timer = 0	// This is A0 instead of A1 in original, thanks to Clownacy (https://forums.sonicretro.org/index.php?showtopic=30778&view=findpost&p=893997)
-			else
-				objA0.animation.timer = 0	// reintroduce bug for Original Mode
+			u16[A1 + 0x20] = 0x2121
+			u8[A1 + 0x23] = 1
+			objA1.animation.timer = 0	// This is A0 instead of A1 in original, thanks to Clownacy (https://forums.sonicretro.org/index.php?showtopic=30778&view=findpost&p=893997)
 		}
 		objA1.flags2a |= char.flag.IN_AIR
 		if (global.characters == CHARS_TAILS_ALONE)
