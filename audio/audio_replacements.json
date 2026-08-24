@@ -61,7 +61,12 @@
 
 	// Sonic Jam credits music
 	"credits": { "File": "Jam_Credits.ogg", "Type": "Music"},	// no loop point needed
-	
+
+	// Sonic Jam menu selection sounds
+	"jam_changeselection": { "File": "Jam_ChangeSelection.ogg", "Type": "Sound"},
+	"jam_confirm": { "File": "Jam_Confirm.ogg", "Type": "Sound"},
+	"jam_cancel": { "File": "Jam_Cancel.ogg", "Type": "Sound"},
+
 	// Sonic 2 title screen star twinkle, used for Mini Time Stone collection
 	"DD": { "File": "TwinkleRight.ogg", "Type": "Sound"},
 	"DE": { "File": "TwinkleLeft.ogg", "Type": "Sound"},

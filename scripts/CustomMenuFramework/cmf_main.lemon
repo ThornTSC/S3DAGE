@@ -372,14 +372,14 @@ function void customMenu.mainControlLoop()
 						pause_menu_selection -= 2
 						if (pause_menu_selection < 0)
 							pause_menu_selection = 2
-						playSound(0x5b)
+						Audio.playAudio("jam_changeselection")
 					}
 					else if (customMenu.scrollDown())
 					{
 						pause_menu_selection += 2
 						if (pause_menu_selection > 2)
 							pause_menu_selection = 0
-						playSound(0x5b)
+						Audio.playAudio("jam_changeselection")
 					}
 
 					if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -530,7 +530,7 @@ function void customMenu.mainControlLoop()
 			if (!setting.time_attack)
 				challenges_normalmode = 1
 
-			playSound(0x63)
+			Audio.playAudio("jam_confirm")
 		}
 
 		levelselect.characters = setting.levelselect.characters
@@ -542,7 +542,7 @@ function void customMenu.mainControlLoop()
 	// This code exits to the base D.A. Garden menu or backs out of selecting a character.
 	else if (control.pad1.pressed & CONTROL_B || Input.buttonPressed(BUTTON_BACK))
 	{
-		playSound(0xad)
+		Audio.playAudio("jam_cancel")
 		if (selectedMenuOption == 6)
 		{
 			selectedMenuOption = selectedMenuOptionLast
@@ -575,32 +575,32 @@ function void customMenu.mainControlLoop()
 		if (selectedMenuOption == 4 && selectedZoneAct >= 0xff00)
 		{
 			selectedMenuOption -= 1
-			playSound(0x5b)			
+			Audio.playAudio("jam_changeselection")			
 		}
 		else if (selectedMenuOption == 4 && setting.unlock_act != 1)
 		{
 			selectedMenuOption = 2
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 4 && setting.unlock_act != 1 && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 		{
 			selectedMenuOption = 2
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 3 && selectedZoneAct >= 0xff00)
 		{
 			selectedMenuOption = 1
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption > 0 && selectedMenuOption <= maxSettingsOption)		// used to be 5 when retry and exit were separate
 		{
 			selectedMenuOption -= 1
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 0)
 		{
 			selectedMenuOption = maxSettingsOption		// used to be 5 when retry and exit were separate
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
 		{
@@ -609,7 +609,7 @@ function void customMenu.mainControlLoop()
 				setting.levelselect.characters -= 1
 				if (setting.levelselect.characters == 0)
 					setting.levelselect.characters = 3
-				playSound(0x5b)
+				Audio.playAudio("jam_changeselection")
 			}
 			else if (selectedZoneAct < 0xff18)
 			{
@@ -618,13 +618,13 @@ function void customMenu.mainControlLoop()
 				if (normalStageSeen && hardStageSeen)
 				{
 					selectedSpecialStageType = !selectedSpecialStageType
-					playSound(0x5b)
+					Audio.playAudio("jam_changeselection")
 				}
 			}
 			else if (selectedZoneAct == 0xffff && (unlock_flags & 0x0001))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
-				playSound(0x5b)
+				Audio.playAudio("jam_changeselection")
 			}
 
 			// Set controller LEDs (for game controllers that support it) depending on character selection.
@@ -643,32 +643,32 @@ function void customMenu.mainControlLoop()
 		if (selectedMenuOption == 2 && selectedZoneAct >= 0xff00 && time_attack == 1)
 		{
 			selectedMenuOption += 1
-			playSound(0x5b)			
+			Audio.playAudio("jam_changeselection")			
 		}
 		else if (selectedMenuOption == 2 && maxNormalGameSettingsOption != 2  && setting.unlock_act != 1)
 		{
 			selectedMenuOption = 4
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 2 && setting.unlock_act != 1 && (setting.time_attack == 1 || setting.time_attack == 2) && (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")))
 		{
 			selectedMenuOption = 4
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 1 && selectedZoneAct >= 0xff00)
 		{
 			selectedMenuOption = 3
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption < maxSettingsOption)			// used to be 5 when retry and exit were separate
 		{
 			selectedMenuOption += 1
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == maxSettingsOption)	// used to be 5 when retry and exit were separate
 		{
 			selectedMenuOption = 0
-			playSound(0x5b)
+			Audio.playAudio("jam_changeselection")
 		}
 		else if (selectedMenuOption == 6 && !System.getGlobalVariableValueByName("DAGE_characterName"))
 		{
@@ -677,7 +677,7 @@ function void customMenu.mainControlLoop()
 				++setting.levelselect.characters
 				if (setting.levelselect.characters > 3)
 					setting.levelselect.characters = 1
-				playSound(0x5b)
+				Audio.playAudio("jam_changeselection")
 			}
 			else if (selectedZoneAct < 0xff18)
 			{
@@ -686,13 +686,13 @@ function void customMenu.mainControlLoop()
 				if (normalStageSeen && hardStageSeen)
 				{
 					selectedSpecialStageType = !selectedSpecialStageType
-					playSound(0x5b)
+					Audio.playAudio("jam_changeselection")
 				}
 			}
 			else if (selectedZoneAct == 0xffff && (unlock_flags & 0x0001))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
-				playSound(0x5b)
+				Audio.playAudio("jam_changeselection")
 			}
 			// Set controller LEDs (for game controllers that support it) depending on character selection.
 			{
@@ -731,7 +731,7 @@ function void customMenu.mainControlLoop()
 					level.start_location = 1
 				else
 					level.start_location = 2
-				playSound(0x5b)
+				Audio.playAudio("jam_changeselection")
 			}
 
 			u32 alphaSonic = (level.start_location != 2) ? 0xffff00ff : 0x666666ff
@@ -798,7 +798,7 @@ function void customMenu.selectZone()
 		{
 			selectedZoneAct += 0x0100
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 		customMenu.matchActToSelection()
 	}
 	else if (customMenu.scrollLeft())
@@ -837,7 +837,7 @@ function void customMenu.selectZone()
 		{
 			selectedZoneAct -= 0x0100
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 		customMenu.matchActToSelection()
 	}
 }
@@ -898,7 +898,7 @@ function void customMenu.selectAct()
 //				else
 //					selectedSpecialStageType = 0
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 		customMenu.matchActToSelection()
 	}
 	else if (customMenu.scrollLeft() || Input.buttonPressed(BUTTON_L))
@@ -940,7 +940,7 @@ function void customMenu.selectAct()
 //				else
 //					selectedSpecialStageType = 0
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 		customMenu.matchActToSelection()
 	}
 }
@@ -1055,7 +1055,7 @@ function void customMenu.selectTAMode()
 			if ((setting.time_attack == 0 && !setting.unlock_act) && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles")) && selectedZoneAct < 0xff00)	// only set Classic Mode when allowed
 				setting.original_mode = 1
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if (customMenu.scrollRight())
 	{
@@ -1074,7 +1074,7 @@ function void customMenu.selectTAMode()
 					setting.original_mode = 0
 			}
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 }
 
@@ -1086,14 +1086,14 @@ function void customMenu.selectSpecialStageChar()
 		--setting.levelselect.characters
 		if (setting.levelselect.characters < 1)
 			setting.levelselect.characters = 3
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if (customMenu.scrollRight())
 	{
 		++setting.levelselect.characters
 		if (setting.levelselect.characters > 3)
 			setting.levelselect.characters = 1
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 }
 
@@ -1106,7 +1106,7 @@ function void customMenu.selectMusicOption()
 			setting.ehz_music = 1
 		else
 			setting.ehz_music = 0
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 }
 
@@ -1118,7 +1118,7 @@ function void customMenu.selectSidekick()
 			sidekick = 1
 		else
 			sidekick = 0
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 }
 
@@ -1130,7 +1130,7 @@ function u8 customMenu.selectRetryAndExit(u8 shortcut_threshold)
 			shortcut_threshold = 30
 		else
 			shortcut_threshold = 1
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 
 	return shortcut_threshold
@@ -2905,7 +2905,7 @@ function void customMenu.mainControlLoop.main()
 	{
 		if (selectedMenuOption.main <= 2)	// Revisited or Classic Mode was selected
 		{
-			playSound(0x63)
+			Audio.playAudio("jam_confirm")
 			global.game_mode = 0x4c			// Data Select
 			time_attack = 0
 			if (selectedMenuOption.main == 1)
@@ -2919,7 +2919,7 @@ function void customMenu.mainControlLoop.main()
 		}
 		else if (selectedMenuOption.main == 3)	// Challenges was selected
 		{
-			playSound(0x63)
+			Audio.playAudio("jam_confirm")
 			global.game_mode = 0x54		// Challenges
 	//		if (setting.time_attack != 1 && setting.time_attack != 2)		// no longer needed as Challenges also contains Act Select
 	//			setting.time_attack = 1
@@ -2935,7 +2935,7 @@ function void customMenu.mainControlLoop.main()
 		}
 		else if (selectedMenuOption.main == 5)	// A.I.R. Menu was selected
 		{
-			playSound(0xad)
+			Audio.playAudio("jam_cancel")
 			time_attack = 0
 
 			u32 backupA0 = A0
@@ -2951,7 +2951,7 @@ function void customMenu.mainControlLoop.main()
 	// This code exits to the SEGA Screen. (B button or Back button was pressed.)
 	else if (control.pad1.pressed & CONTROL_B || Input.buttonPressed(BUTTON_BACK))
 	{
-		playSound(0xad)
+		Audio.playAudio("jam_cancel")
 		
 		u32 backupA0 = A0
 		FadeOutScreenBlocking()
@@ -2976,7 +2976,7 @@ function void customMenu.mainControlLoop.main()
 		{
 			selectedMenuOption.main = 5
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if (customMenu.scrollDown())
 	{
@@ -2990,17 +2990,17 @@ function void customMenu.mainControlLoop.main()
 		{
 			selectedMenuOption.main = 0
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 2)
 	{
 		selectedGameType = (selectedGameType + 1) & 0x01	// change 0 to 1 or vice versa
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if ((customMenu.scrollLeft() || customMenu.scrollRight()) && selectedMenuOption.main == 4 && ((unlock_flags & 0x0001) || cheatStars))
 	{
 		selectedSpecialStageType = (selectedSpecialStageType + 1) & 0x01	// change 0 to 1 or vice versa
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 /*
 	else if (customMenu.scrollLeft() && selectedMenuOption.main == 2)
@@ -3017,7 +3017,7 @@ function void customMenu.mainControlLoop.main()
 		{
 			selectedGameType = 3
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 	else if (customMenu.scrollRight() && selectedMenuOption.main == 0)
 	{
@@ -3033,7 +3033,7 @@ function void customMenu.mainControlLoop.main()
 		{
 			selectedGameType = 0
 		}
-		playSound(0x5b)
+		Audio.playAudio("jam_changeselection")
 	}
 */
 }
@@ -3467,14 +3467,14 @@ function void fn00d42c()
 							pause_menu_selection -= 2
 							if (pause_menu_selection < 0)
 								pause_menu_selection = 2
-							playSound(0x5b)
+							Audio.playAudio("jam_changeselection")
 						}
 						else if (customMenu.scrollDown())
 						{
 							pause_menu_selection += 2
 							if (pause_menu_selection > 2)
 								pause_menu_selection = 0
-							playSound(0x5b)
+							Audio.playAudio("jam_changeselection")
 						}
 
 						if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -3564,14 +3564,14 @@ function void fn00d42c()
 							pause_menu_selection -= 2
 							if (pause_menu_selection < 0)
 								pause_menu_selection = 2
-							playSound(0x5b)
+							Audio.playAudio("jam_changeselection")
 						}
 						else if (customMenu.scrollDown())
 						{
 							pause_menu_selection += 2
 							if (pause_menu_selection > 2)
 								pause_menu_selection = 0
-							playSound(0x5b)
+							Audio.playAudio("jam_changeselection")
 						}
 
 						if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
@@ -3704,14 +3704,14 @@ function void fn00d30c()
 						pause_menu_selection -= 2
 						if (pause_menu_selection < 0)
 							pause_menu_selection = 2
-						playSound(0x5b)
+						Audio.playAudio("jam_changeselection")
 					}
 					else if (customMenu.scrollDown())
 					{
 						pause_menu_selection += 2
 						if (pause_menu_selection > 2)
 							pause_menu_selection = 0
-						playSound(0x5b)
+						Audio.playAudio("jam_changeselection")
 					}
 
 					if (control.pad1.pressed & 0xe0 && pause_menu_selection == 0)	// 0xe0 is CONTROL_START | CONTROL_A | CONTROL_C
