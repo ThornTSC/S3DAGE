@@ -10,8 +10,8 @@ function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		py += 12
 	}
 
-	u8 ringDigitsXOffset = ((HUD_position == 1 || HUD_position == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
-	u8 ringDigitsYOffset = (HUD_position >= 2) ? 4 : 0
+	u8 ringDigitsXOffset = ((getModeHUDPosition() == 1 || getModeHUDPosition() == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
+	u8 ringDigitsYOffset = (getModeHUDPosition() >= 2) ? 4 : 0
 	if (hud.layout == 2 && (py == 0x28 + ringDigitsYOffset || (py == 0x08 + ringDigitsYOffset && unlock_act == s3_CGZ) || (py == 0x08 + ringDigitsYOffset && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "flicky_hud_lives_icon_sonic" && key != "flicky_hud_lives_icon_tails" && key != "flicky_hud_lives_icon_miles" && key != "flicky_hud_lives_icon_knuckles"))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
@@ -36,7 +36,7 @@ function void Flicky.HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
   	if ((time_attack == 1 || time_attack == 2) && py != 0x48 && !HUD.isShadowTarget(key))	// 0x48 is the height of Shadow's boost bar
 	{
         py -= 0x10
-		if (time_attack_hud)	// center HUD?
+		if (ChallengeHUD.Centered())	// center HUD?
 		{
 			//px += 136			// move time and rings to the right, half a pixel left of center
 			px += getScreenWidth() / 2 - 64
@@ -82,14 +82,14 @@ function void Flicky.HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 rend
 {
     u16 inputY = py
 	u16 yOffset
-	if (HUD_position >= 2)
+	if (getModeHUDPosition() >= 2)
 	{
 		yOffset = (py < getScreenHeight()/2) ? 4 : -4
 	}
     if (time_attack == 1 || time_attack == 2)
 	{
         py -= 0x10
-		if (time_attack_hud)	// center HUD?
+		if (ChallengeHUD.Centered())	// center HUD?
 		{
 			// px += 136			// move time and rings to the right, half a pixel left of center
 			px += getScreenWidth() / 2 - 64

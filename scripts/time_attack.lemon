@@ -58,7 +58,7 @@ function void PrintVersionNumber()
 	#endif
 
 	u16 px = 16
-	if ((time_attack_end && !time_attack_hud) || (global.game_mode & 0x7f) >= 0x54)	// time attack left-aligned HUD
+	if ((time_attack_end && !ChallengeHUD.Centered()) || (global.game_mode & 0x7f) >= 0x54)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
 	u16 py = getScreenHeight() - 15 // (global.game_mode == 0x04 || global.game_mode == 0x58 || (global.zone_act == 0x0d01 && camera.foreground.x.u16 >= 0x0296)) ? 190 : 193	// the final check here is for the A.I.R. menu, which is the outro at a specific coordinate not in normal gameplay
 	if ((global.game_mode & 0x7f) == 0x54)
@@ -67,7 +67,7 @@ function void PrintVersionNumber()
 		px += 8
 		py += 2
 	}
-	if (((time_attack_end && !time_attack_hud) || global.game_mode == 0x58) && global.game_mode != 0x34)	// time attack left-aligned HUD
+	if (((time_attack_end && !ChallengeHUD.Centered()) || global.game_mode == 0x58) && global.game_mode != 0x34)	// time attack left-aligned HUD
 		px = getScreenWidth() - 16 - length			// 16 pixels away from right edge
 
 	if (global.game_mode == 0x34)
@@ -148,8 +148,15 @@ function void PrintVersionNumber()
 
 
 
+function u8 ChallengeHUD.Centered()
+{
+	return (time_attack_hud & 0x01)
+}
 
-
+function u8 getModeHUDPosition()
+{
+	return (time_attack == 1 || time_attack == 2) ? time_attack_hud : HUD_position
+}
 
 
 
@@ -884,9 +891,14 @@ function void LevelSelect()
 	loadChallengeRecords()
 	loadRSR()
 	loadUnlocks()
-	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load save theme if it exists,
+	if (!System.loadPersistentData(0x840273, "DAGE_Theme", 1))	// load saved theme if it exists,
 	{
 		theme.hud = theme.saturn								// else use the theme matching the menu
+		hud.layout = (Game.getSetting(SETTING_EXTENDED_HUD)) ? 1 : 3
+	}
+	if (!System.loadPersistentData(HUD_position_address, "DAGE_HUDPosition", 1))	// load saved position if it exists,
+	{
+		HUD_position = 2								// else use the Origins non-S3&K position
 		hud.layout = (Game.getSetting(SETTING_EXTENDED_HUD)) ? 1 : 3
 	}
 	countTotalStars()
@@ -1983,9 +1995,9 @@ function void RenderHUD_RedRings()
 	u64 ringKey
 	u16 px = getScreenWidth() - 70
 	u16 py = getScreenHeight() - 16
-	if (time_attack_end && time_attack_hud == 0)
+	if (time_attack_end && ChallengeHUD.Centered() == 0)
 		py -= 9	// 6 if version number is against bottom of screen as in older versions
-	if (HUD_position >= 2)
+	if (getModeHUDPosition() >= 2)
 		py -= 2
 	u8 flags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 	u16 renderQueue = (global.game.paused && !clean_screenshot) ? 0xfff1 : 0xe006
@@ -2101,7 +2113,7 @@ function void RenderHUD_Marathon()
 			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_mini_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_mini_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_mini_%d", emeraldIndex) : "hud_chaos_mini_empty"
 			px = getScreenWidth() - emeraldDistFromBottomRight[2 * (emeraldIndex - 1)]
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
-			if (HUD_position >= 2)
+			if (getModeHUDPosition() >= 2)
 				py -= 2
 			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c)	// before introduction of sidekick-allowed red star rings, included  || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails)
@@ -2404,7 +2416,7 @@ function void RenderHUD_Challenges()
 	if ((global.game_mode & 0x7f) == 0x4c || (global.game_mode & 0x7f) == 0x2c)	// stop the HUD from showing in Data Select and Green Sphere menus due to leaving a time attack
 		return
 
-	u16 yOffset = (HUD_position >= 2) ? 4 : 0
+	u16 yOffset = (getModeHUDPosition() >= 2) ? 4 : 0
 
 	System.callFunctionByName("RenderBoostBar")	// 3D in 2D Shadow boost bar is in standard RenderHUD(), so we need a copy in the Challenges variant
 	System.callFunctionByName("shadow.RenderBoostBar")	// same, but for Extra Slot Shadow
@@ -2501,7 +2513,7 @@ function void RenderHUD_Challenges()
 			++renderQueue
 
 			bool inPainWater = (unlock_act == s2_CPZ && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
-			u16 px = baseX + ((!time_attack_hud && hud.layout) ? 0x40 : 0x58)
+			u16 px = baseX + ((!ChallengeHUD.Centered() && hud.layout) ? 0x40 : 0x58)
 			if (!inPainWater || (level.framecounter & 0x08))
 			{
 				for (u32 value = ring_counter;;)
@@ -2541,7 +2553,7 @@ function void RenderHUD_Challenges()
 		// Best time display (not rendered for Extra Slot Characters at this time)
 		else if (best_time != 0x00ffffff && (time_attack == 1 || time_attack == 2) && !u8[0xffffe654])	// the leading two zeroes on best_time come from it being anded with 0x00ffffff when set
 		{
-			u16 px = time_attack_hud ? (baseX + (getScreenWidth() / 2 - 64)) : baseX
+			u16 px = ChallengeHUD.Centered() ? (baseX + (getScreenWidth() / 2 - 64)) : baseX
 			u16 py = getScreenHeight() - 20	// there is a 4-pixel height difference between the life counter and HUD text. We choose to bottom-align.
 
 			if (theme.hud == theme.flicky && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
@@ -2627,7 +2639,7 @@ function void RenderHUD_MedalTimes()
 		u16 medal_px = getScreenExtend() - 40 + 400 - 0x35 - 0x10	// 0x35 to make sure it doesn't run off the right edge, and then 0x10 to space it away from the edge
 		u16 medal_py = 8 + 1	// most HUDs are 9 pixels from the top of the screen, not 8
 
-		medal_py += (HUD_position >= 2) ? 4 : 0
+		medal_py += (getModeHUDPosition() >= 2) ? 4 : 0
 
 		u8 medalOffset = (0x10 * (levelselect.characters - 1))
 		// Due to how the timer works by starting at 0'00"02, there's a one-frame timer offset. Thus we use < instead of <= for these checks, to hide that frame.
@@ -3079,10 +3091,10 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 
 	if (global.game_mode != 0x48)
 	{
-		if (((HUD_position == 1 || HUD_position == 3) && (time_attack != 1 && time_attack != 2)) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
+		if (((getModeHUDPosition() == 1 || getModeHUDPosition() == 3) && (time_attack != 1 && time_attack != 2)) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
 			if (!HUD.isRingsDigitCompact(key, py))
 				px += 8
-		if (HUD_position >= 2)	// Origins non-S3&K or hybrid position
+		if (getModeHUDPosition() >= 2)	// Origins non-S3&K or hybrid position
 			py += (py >= getScreenHeight() - 40) ? -4 : (py <= 40) ? 4 : 0
 	}
 
@@ -3107,7 +3119,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	}
 
 	if (hud.layout == 2 && (time_attack == 1 || time_attack == 2) && (key == "hud_char_minutes" || key == "hud_char_seconds") && (py == 0x18 || py == 0x1c))
-		px += (time_attack_hud) ? -20 : 8
+		px += (ChallengeHUD.Centered()) ? -20 : 8
 
 	bool inPainWater = (unlock_act == s2_CPZ && layout.part == 2 && (u8[0xffffb02a] & char.flag.UNDERWATER) && !(u8[0xffffb02b] & char.bonus.SHIELD_BUBBLE) && !super.active && !(Mods.isModActive("Chaos The Impostor") && isMainCharacter(CHARACTER_TAILS)))
 	bool spriteInRingsPosition = (((py == 0x10 && px < getScreenWidth()/2) || py == 0x28) || ((py == 0x14 && px < getScreenWidth()/2) || py == 0x2c))
@@ -3155,8 +3167,8 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		}
 	}
 
-	u8 ringDigitsXOffset = ((HUD_position == 1 || HUD_position == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
-	u8 ringDigitsYOffset = (HUD_position >= 2) ? 4 : 0
+	u8 ringDigitsXOffset = ((getModeHUDPosition() == 1 || getModeHUDPosition() == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
+	u8 ringDigitsYOffset = (getModeHUDPosition() >= 2) ? 4 : 0
 	if (hud.layout == 2 && (py == 0x28 + ringDigitsYOffset || (py == 0x08 + ringDigitsYOffset && unlock_act == s3_CGZ) || (py == 0x08 + ringDigitsYOffset && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
@@ -3181,7 +3193,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
   	if ((time_attack == 1 || time_attack == 2) && py != 0x48 && !HUD.isShadowTarget(key))	// 0x48 is the height of Shadow's boost bar
 	{
         py -= 0x10
-		if (time_attack_hud)	// center HUD?
+		if (ChallengeHUD.Centered())	// center HUD?
 		{
 			//px += 136			// move time and rings to the right, half a pixel left of center
 			px += getScreenWidth() / 2 - 64
@@ -3222,17 +3234,17 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 function void HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue)
 {
 	u16 yOffset
-	if (HUD_position >= 2)
+	if (getModeHUDPosition() >= 2)
 	{
 		yOffset = (py < getScreenHeight()/2) ? 4 : -4
 		py += yOffset
 	}
 
 	if (hud.layout == 2 && py == 0x18 + yOffset)
-		px += (time_attack_hud) ? -20 : 8
+		px += (ChallengeHUD.Centered()) ? -20 : 8
 	else if (hud.layout == 2 && py == 0x28 + yOffset)
 	{
-		px -= (time_attack_hud) ? getScreenWidth()/2 : 40
+		px -= (ChallengeHUD.Centered()) ? getScreenWidth()/2 : 40
 		py -= 8
 	}
 	
@@ -3261,7 +3273,7 @@ function void HUD.drawDigit_Challenges(u8 digit, u16 px, u16 py, u16 renderQueue
     if (time_attack == 1 || time_attack == 2)
 	{
         py -= 0x10
-		if (time_attack_hud)	// center HUD?
+		if (ChallengeHUD.Centered())	// center HUD?
 		{
 			// px += 136			// move time and rings to the right, half a pixel left of center
 			px += getScreenWidth() / 2 - 64

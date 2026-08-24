@@ -447,14 +447,15 @@ function void PauseMenu_ChangeLayout()
 	}
 	if (Input.buttonDown(BUTTON_L) && (customMenu.scrollUp() || customMenu.scrollDown()))
 	{
-		HUD_position ^= 0x02
+		if (time_attack == 1 || time_attack == 2)
+			time_attack_hud ^= 0x02
+		else
+			HUD_position ^= 0x02
 
 		// Modded characters' themes no longer get saved, as they force the base characters back to using theme.s3k without easy alternatives beyond another persistent data key just for them.
 		if (time_attack != 1 && time_attack != 2 && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
-			theme.hud += (hud.layout << 6)		// combine theme and layout values…
-			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+			System.savePersistentData(HUD_position_address, "DAGE_HUDPosition", 1)	// save HUD position
 		}
 		else if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
@@ -467,16 +468,14 @@ function void PauseMenu_ChangeLayout()
 	else if (Input.buttonDown(BUTTON_L) && (customMenu.scrollLeft() || customMenu.scrollRight()))
 	{
 		if (time_attack == 1 || time_attack == 2)
-			time_attack_hud = !time_attack_hud
+			time_attack_hud ^= 0x01
 		else
 			HUD_position ^= 0x01
 
 		// Modded characters' themes no longer get saved, as they force the base characters back to using theme.s3k without easy alternatives beyond another persistent data key just for them.
 		if (time_attack != 1 && time_attack != 2 && !(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
-			theme.hud += (hud.layout << 6)		// combine theme and layout values…
-			System.savePersistentData(0x840273, "DAGE_Theme", 1)	// save theme
-			theme.hud -= (hud.layout << 6)		// …and then reset them to normal after saving
+			System.savePersistentData(HUD_position_address, "DAGE_HUDPosition", 1)	// save HUD position
 		}
 		else if (!(System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654]))
 		{
