@@ -3079,7 +3079,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 
 	if (global.game_mode != 0x48)
 	{
-		if ((HUD_position == 1 || HUD_position == 3) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
+		if (((HUD_position == 1 || HUD_position == 3) && (time_attack != 1 && time_attack != 2)) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
 			if (!HUD.isRingsDigitCompact(key, py))
 				px += 8
 		if (HUD_position >= 2)	// Origins non-S3&K or hybrid position
@@ -3155,7 +3155,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		}
 	}
 
-	u8 ringDigitsXOffset = (HUD_position == 1 || HUD_position == 3) ? 8 : 0
+	u8 ringDigitsXOffset = ((HUD_position == 1 || HUD_position == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
 	u8 ringDigitsYOffset = (HUD_position >= 2) ? 4 : 0
 	if (hud.layout == 2 && (py == 0x28 + ringDigitsYOffset || (py == 0x08 + ringDigitsYOffset && unlock_act == s3_CGZ) || (py == 0x08 + ringDigitsYOffset && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
 	{
