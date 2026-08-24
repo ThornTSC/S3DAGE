@@ -819,6 +819,7 @@ function void BonusBubble.Init()
 	objA0.collision_attributes = (collision.flag.ITEM | collision.size.8x8)
 	objA0.hitbox_extends.x = 8
 	objA0.hitbox_extends.y = 8
+	objA0.value42 = 255		// set a value that handles the fade-in as bubbles respawn to start fully opaque
 
 	BonusBubble.Main()
 }
@@ -827,6 +828,7 @@ function void BonusBubble.Init()
 function void BonusBubble.Main()
 {
 	AddAsDynamicObject()
+	objA0.value42 = min(objA0.value42 + 16, 255)	// increment a value that handles the fade-in as bubbles respawn
 	// DrawObject() is not called. This is handled in CGZ_CustomSprites so the drawing in other loops of the level is handled properly.
 }
 
@@ -853,6 +855,7 @@ function void BonusBubble.AwardBonusAndVanish()
 		fn061100()		// turns bubble subtype into item effect
 
 	u16[A0 + 0x3e] = 480	// disappear for eight seconds
+	objA0.value42 = 0		// set bubble opacity to 0 for future fade-in during respawn
 	objA0.base_state += 2
 }
 

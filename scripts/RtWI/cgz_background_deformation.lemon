@@ -18,11 +18,12 @@ function void CGZ_CustomSprites()
 		if (u32[objAddress] == 0x04a1e6 && u8[objAddress + 0x05] == 2)	// check for bonus bubbles with a base state of 2
 		{
 			A0 = objAddress
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000)		
+			u8 alpha = u8(objA0.value42)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
 		}
 	}
 	A0 = backupA0
