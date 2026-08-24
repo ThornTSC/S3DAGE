@@ -350,6 +350,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		u16 py_hud = getScreenHeight() - 16
 		if (time_attack_end && time_attack_hud == 0)
 			py_hud -= 9	// 6 if version number is against bottom of screen as in older versions
+		if (HUD_position >= 2)
+			py_hud -= 2
 		u8 sparkleNum = objA0.subtype2c & 0x1f
 		if (sparkleNum == 0x02)
 			px_hud += 12

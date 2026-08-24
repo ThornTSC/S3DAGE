@@ -21,6 +21,7 @@
 	"medal_03_05": { "File": "medals.png", "Rect": "120,0,24,24", "Center": "12,12" },
 	"medal_03_06": { "File": "medals.png", "Rect": "144,0,24,24", "Center": "12,12" },
 	"medal_03_07": { "File": "medals.png", "Rect": "168,0,24,24", "Center": "12,12" },
+	"medal_03_hud": { "File": "medals.png", "Rect": "192,0,12,12", "Center": "6,6" },
 	
 	"medal_02_00": { "File": "medals.png", "Rect":   "0,24,24,24", "Center": "12,12" },	// Silver medal
 	"medal_02_01": { "File": "medals.png", "Rect":  "24,24,24,24", "Center": "12,12" },
@@ -30,6 +31,7 @@
 	"medal_02_05": { "File": "medals.png", "Rect": "120,24,24,24", "Center": "12,12" },
 	"medal_02_06": { "File": "medals.png", "Rect": "144,24,24,24", "Center": "12,12" },
 	"medal_02_07": { "File": "medals.png", "Rect": "168,24,24,24", "Center": "12,12" },
+	"medal_02_hud": { "File": "medals.png", "Rect": "192,24,12,12", "Center": "6,6" },
 	
 	"medal_01_00": { "File": "medals.png", "Rect":   "0,48,24,24", "Center": "12,12" },	// Bronze medal
 	"medal_01_01": { "File": "medals.png", "Rect":  "24,48,24,24", "Center": "12,12" },
@@ -39,6 +41,7 @@
 	"medal_01_05": { "File": "medals.png", "Rect": "120,48,24,24", "Center": "12,12" },
 	"medal_01_06": { "File": "medals.png", "Rect": "144,48,24,24", "Center": "12,12" },
 	"medal_01_07": { "File": "medals.png", "Rect": "168,48,24,24", "Center": "12,12" },
+	"medal_01_hud": { "File": "medals.png", "Rect": "192,48,12,12", "Center": "6,6" },
 
 	"medal_special_00": { "File": "medals.png", "Rect":   "0,72,24,24", "Center": "12,12" },	// Emerald medal
 	"medal_special_01": { "File": "medals.png", "Rect":  "24,72,24,24", "Center": "12,12" },
@@ -47,5 +50,6 @@
 	"medal_special_04": { "File": "medals.png", "Rect":  "96,72,24,24", "Center": "12,12" },
 	"medal_special_05": { "File": "medals.png", "Rect": "120,72,24,24", "Center": "12,12" },
 	"medal_special_06": { "File": "medals.png", "Rect": "144,72,24,24", "Center": "12,12" },
-	"medal_special_07": { "File": "medals.png", "Rect": "168,72,24,24", "Center": "12,12" }
+	"medal_special_07": { "File": "medals.png", "Rect": "168,72,24,24", "Center": "12,12" },
+	"medal_special_hud": { "File": "medals.png", "Rect": "192,72,12,12", "Center": "6,6" }
 }

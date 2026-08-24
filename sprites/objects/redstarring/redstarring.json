@@ -8,6 +8,7 @@
 	"redstarring_05": { "File": "redstarring.png", "Rect": "120,0,24,24", "Center": "12,12" },
 	"redstarring_06": { "File": "redstarring.png", "Rect": "144,0,24,24", "Center": "12,12" },
 	"redstarring_07": { "File": "redstarring.png", "Rect": "168,0,24,24", "Center": "12,12" },
+	"redstarring_hud": { "File": "redstarring.png", "Rect": "192,0,12,12", "Center": "6,6" },
 	"redstarring_sparkle": { "File": "redstarring_sparkle.png", "Rect": "0,0,0,0", "Center": "8,8" },
 
 	// Character icons

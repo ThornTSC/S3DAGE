@@ -1985,6 +1985,8 @@ function void RenderHUD_RedRings()
 	u16 py = getScreenHeight() - 16
 	if (time_attack_end && time_attack_hud == 0)
 		py -= 9	// 6 if version number is against bottom of screen as in older versions
+	if (HUD_position >= 2)
+		py -= 2
 	u8 flags = (global.game.paused && !level.restart) ? SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT : SPRITE_FLAG_PRIO
 	u16 renderQueue = (global.game.paused && !clean_screenshot) ? 0xfff1 : 0xe006
 	if (draw_HUD && !original_mode && !debug_mode.enabled && !global.stage_type && global.zone_act != 0x0a01 && global.zone_act != 0x0c00) // && global.characters != 0 && !(global.characters == 3 && useKnucklesAndTails)
@@ -1992,82 +1994,82 @@ function void RenderHUD_RedRings()
 		if (u8[redstarring_address] & 0x01)
 		{
 			alpha = 0xffffffff
-			ringKey = "redstarring_00"
+			ringKey = "redstarring_hud"
 		}
 		else
 		{
 			alpha = 0x80c0c0c0
-			ringKey = "medal_02_00"
+			ringKey = "medal_02_hud"
 			if (global.characters == CHARS_SONIC_AND_TAILS && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, 0))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, 0))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 		}
-		Renderer.drawCustomSprite(ringKey, px, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px, py, 0, flags, renderQueue, 0, alpha, 0x10000)	// (6, 6) is center of medal
 
 		if (u8[redstarring_address] & 0x02)
 		{
 			alpha = 0xffffffff
-			ringKey = "redstarring_00"
+			ringKey = "redstarring_hud"
 		}
 		else
 		{
 			alpha = 0x80c0c0c0
-			ringKey = "medal_02_00"
+			ringKey = "medal_02_hud"
 			if (global.characters == CHARS_SONIC_AND_TAILS && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, 1))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 12, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, 1))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 12, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 		}
-		Renderer.drawCustomSprite(ringKey, px + 12, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 12, py, 0, flags, renderQueue, 0, alpha, 0x10000)	// (6, 6) is center of medal
 
 		if (u8[redstarring_address] & 0x04)
 		{
 			alpha = 0xffffffff
-			ringKey = "redstarring_00"
+			ringKey = "redstarring_hud"
 		}
 		else
 		{
 			alpha = 0x80c0c0c0
-			ringKey = "medal_02_00"
+			ringKey = "medal_02_hud"
 			if (global.characters == CHARS_SONIC_AND_TAILS && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, 2))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 24, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, 2))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 24, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 		}
-		Renderer.drawCustomSprite(ringKey, px + 24, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 24, py, 0, flags, renderQueue, 0, alpha, 0x10000)	// (6, 6) is center of medal
 
 		if (u8[redstarring_address] & 0x08)
 		{
 			alpha = 0xffffffff
-			ringKey = "redstarring_00"
+			ringKey = "redstarring_hud"
 		}
 		else
 		{
 			alpha = 0x80c0c0c0
-			ringKey = "medal_02_00"
+			ringKey = "medal_02_hud"
 			if (global.characters == CHARS_SONIC_AND_TAILS && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, 3))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 36, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, 3))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 36, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 		}
-		Renderer.drawCustomSprite(ringKey, px + 36, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 36, py, 0, flags, renderQueue, 0, alpha, 0x10000)	// (6, 6) is center of medal
 
 		if (u8[redstarring_address] & 0x10)
 		{
 			alpha = 0xffffffff
-			ringKey = "redstarring_00"
+			ringKey = "redstarring_hud"
 		}
 		else
 		{
 			alpha = 0x80c0c0c0
-			ringKey = "medal_02_00"
+			ringKey = "medal_02_hud"
 			if (global.characters == CHARS_SONIC_AND_TAILS && RedStarRing_RequiresSonicAlone(global.zone_act.apparent, 4))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 48, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 			else if (global.characters == CHARS_KNUCKLES_ALONE && useKnucklesAndTails && RedStarRing_RequiresKnuxAlone(global.zone_act.apparent, 4))
 				Renderer.drawCustomSprite("rsr_icon_x_small", px + 48, py, 0, flags, renderQueue + 1, 0, 0xa0ffffff, 0x10000)
 		}
-		Renderer.drawCustomSprite(ringKey, px + 48, py, 0, flags, renderQueue, 0, alpha, 0x8000)	// (12, 12) is center of medal
+		Renderer.drawCustomSprite(ringKey, px + 48, py, 0, flags, renderQueue, 0, alpha, 0x10000)	// (6, 6) is center of medal
 	}
 }
 
@@ -2099,6 +2101,8 @@ function void RenderHUD_Marathon()
 			key = (u8[0xffffffb1 + emeraldIndex] == 3) ? stringformat("hud_super_mini_%d", emeraldIndex) : (u8[0xffffffb1 + emeraldIndex] == 2) ? "hud_super_mini_empty" : (u8[0xffffffb1 + emeraldIndex] == 1) ? stringformat("hud_chaos_mini_%d", emeraldIndex) : "hud_chaos_mini_empty"
 			px = getScreenWidth() - emeraldDistFromBottomRight[2 * (emeraldIndex - 1)]
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
+			if (HUD_position >= 2)
+				py -= 2
 			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c)	// before introduction of sidekick-allowed red star rings, included  || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails)
 				py += 14
