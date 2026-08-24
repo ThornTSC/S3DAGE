@@ -370,9 +370,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			}
 			else
 				if (!unlock_act)
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 2, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 				else
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 2, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 2, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 		}
 		else if (objA0.animation.sprite == 5)
 		{
@@ -383,9 +389,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			}
 			else
 				if (!unlock_act)
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 1, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 				else
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 1, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 1, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 		}
 		else if (objA0.animation.sprite == 6)
 		{
@@ -396,9 +408,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			}
 			else
 				if (!unlock_act)
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 3, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 				else
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 3, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 3, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 		}
 		else
 		{
@@ -409,9 +427,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			}
 			else
 				if (!unlock_act)
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 0, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 				else
+				{
 					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px, py, 0x00, 0, sparkleRenderQueue, 0, 0x80ffffff, 0x10000)
+					Renderer.drawCustomSprite("minitimestone_sparkle_s2", px_hud, py_hud, 0x00, SPRITE_FLAG_PRIO + 0, 0xfff2, 0, 0xc0ffffff, 0x10000)
+				}
 		}
 		return true
 	}
