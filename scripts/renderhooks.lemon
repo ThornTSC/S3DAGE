@@ -525,7 +525,11 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 //			return false
 		
 		if (!original_mode && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
-		{		
+		{
+			// Shift results graphics for Speed Spheres stages to better match Sonic 2 special stage results
+			if (unlock_act && py >= 128)
+				py += 8
+
 			if (theme.hud == theme.flicky)
 				return Flicky.SpecialStageResults(px, py, renderQueue)
 			else if (theme.hud == theme.saturn)

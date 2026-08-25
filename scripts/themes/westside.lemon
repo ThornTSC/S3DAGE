@@ -654,7 +654,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 				x_offset = 3
 			else if (getMainCharacter() == CHARACTER_KNUCKLES)	// offset less for GOT ALL
 				x_offset = (px == 0x00d4) ? 3 : 0
-			Renderer.drawCustomSprite(isSKStage ? "westside_gota_text_super" : "westside_gota_text", px + 5 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			Renderer.drawCustomSprite(isSKStage ? "westside_gota_text_super" : "westside_gota_text", px + 4 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x24)
@@ -669,7 +669,7 @@ function bool Westside.SpecialStageResults(s16 px, s16 py, s16 renderQueue)
 				x_offset = 3
 			else if (getMainCharacter() == CHARACTER_KNUCKLES)
 				x_offset = 3
-			Renderer.drawCustomSprite(isSKStage ? "westside_gotall_text_super" : "westside_gotall_text", px + 5 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+			Renderer.drawCustomSprite(isSKStage ? "westside_gotall_text_super" : "westside_gotall_text", px + 4 + x_offset, py, 0, SPRITE_FLAG_PRIO, renderQueue)
 			return true
 		}
 		else if (objA0.animation.sprite == 0x26)

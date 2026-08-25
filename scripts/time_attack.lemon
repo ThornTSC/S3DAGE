@@ -3089,7 +3089,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 	if (global.game_mode == 0x9c)		// not in Extra Slots character select, which renders in front of the normal level
 		return
 
-	if (global.game_mode != 0x48)
+	if (global.game_mode != 0x48 && objA0.update_address != 0x02ea50)	// update address of some blue sphere results texts, which we cannot allow to move during a game mode change screen fade
 	{
 		if (((getModeHUDPosition() == 1 || getModeHUDPosition() == 3) && (time_attack != 1 && time_attack != 2)) && py <= 40 && px >= 56 && (Mods.isModActive("SandoHundo Helper") || px <= 104))	// Origins S3&K or hybrid position
 			if (!HUD.isRingsDigitCompact(key, py))

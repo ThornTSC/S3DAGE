@@ -5170,6 +5170,15 @@ function void fn02df64()
 	copyMemory(0xfffffc00, 0x02e318, 0x80)
 	copyMemory(0xfffffc80, 0x02e318, 0x80)
 
+	// For Sonic 2 special stage results, use pure white instead of off white for the background.
+	if (unlock_act)
+	{
+		for (u32 address = 0xfffffc00; address < 0xfffffd00; address += 0x20)
+		{
+			u16[address] = 0x0eee
+		}
+	}
+
 #if STANDALONE
 	globalComponentTintColorR = 0xff
 	globalComponentTintColorG = 0xff

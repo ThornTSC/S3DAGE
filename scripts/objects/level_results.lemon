@@ -95,6 +95,8 @@ function void fn02ebe8()
 	objA0.mapping_offset = 0x02f26a
 	objA0.position.x.u16 = 0x017c + getScreenExtend()
 	objA0.position.y.u16 = 0x014c + (getScreenHeightExtend()/2)
+	if (unlock_act)
+		objA0.position.y.u16 += 8
 	objA0.animation.sprite = 0x29 + min(getMainCharacter(), 2)	// 0x29 for Sonic (with or without Tails), 0x2a for Tails, 0x2b for Knuckles
 
 	if (level.framecounter.low & 0x08)
