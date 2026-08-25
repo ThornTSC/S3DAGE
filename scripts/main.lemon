@@ -101,6 +101,7 @@ define u16 unlock_flags = u16[0x8402fc]
 define u16 total_stars = u16[0x8402fe]
 
 // Define memory location for HUD_position
+constant u32 theme_temp_address = 0x8405ec
 constant u32 HUD_position_address = 0x8405ed
 define HUD_position = u8[HUD_position_address]
 
