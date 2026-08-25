@@ -206,13 +206,13 @@
 				"Options":
 				{
 					"0": "Up+Jump",
-					"1": "L Button",
-					"2": "Up+Jump or L (default)"
+					"1": "L/R Button",
+					"2": "Up+Jump or L/R (default)"
 				}
 			},
 			{
 				"InternalName": "EasySpindash",
-				"DisplayName": "L Button Spindash",
+				"DisplayName": "L/R Button Spindash",
 				"Variable": "L_Spindash",
 				"DefaultValue": "1",
 			  	"Category": "Control Settings",
