@@ -72,6 +72,39 @@ function void fn029e42()
 	}
 }
 
+// Prevent a softlock while climbing the building leading to the Knuckles bomb cutscene.
+// We also fix an elevator at the end of LBZ2 that is not quite a softlock but that is
+// only barely able to be reset by going far enough to the left.
+//# address-hook(0x026b34) end(0x026b44)
+function void fn026b34()
+{
+#if STANDALONE
+	// Fix for a potential softlock with widescreen:
+	// Move the elevator down again if the main character is close to the lower end
+	if ((u16[A0 + 0x30] == 0x3a88 && global.act == 0) || (u16[A0 + 0x30] == 0x30a0 && global.act == 1))	// Only consider this very elevator instance
+	{
+		if (u16[A0 + 0x3a] == u16[A0 + 0x38])	// Only if it's on the upper position
+		{
+			// Check if character is close to the lower position
+			s16 dx = u16[0xffffb010] - u16[A0 + 0x30]
+			s16 dy = u16[0xffffb014] - (objA0.position.y.u16 + u16[A0 + 0x38])
+			if (abs(dx) <= 0x80 && abs(dy) <= 0x30)
+			{
+				u16[A0 + 0x36] += 2
+				return
+			}
+		}
+	}
+#endif
+
+	// Waiting for any character to enter
+	if (u16[A0 + 0x3c] != 0)
+	{
+		u16[A0 + 0x34] = 1
+		u16[A0 + 0x36] += 2
+	}
+}
+
 // When setting screen boundaries from the Knuckles bomb cutscene, adjust for screen height.
 // Without moving the boundary up, rotating cylinder tiles in the ground
 // under the boss area show the wrong palette.
