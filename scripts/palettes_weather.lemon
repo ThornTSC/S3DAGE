@@ -2521,7 +2521,8 @@ function void LevelPaletteUpdate.SOZ2()
 			A0 = 0x2d47e4 + s16[0xfffff652]
 			copyMemory(0xfffffc42, A0, 0x16)
 			A0 += 0x16
-			copyMemory(0xfffffc62, A0, 0x1e)
+			if (u16[0xfffffc6e] != 0x024c || original_mode)		// if the boss palette hasn't already loaded (or in Original Mode)
+				copyMemory(0xfffffc62, A0, 0x1e)
 
 			D0.u16 = u16[0xfffff654]
 			goto00264e = true
