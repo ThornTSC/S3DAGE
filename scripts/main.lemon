@@ -822,11 +822,10 @@ function void InitHUDTheme()
 		resetTheme = true
 
 	// If saved version is before v1.13.2.0, create the HUD position variables.
-	// This function is called in title cards or after setting screen resolution for Green/Speed Spheres,
-	// so the screen resolution is already set.
 	if (u16[DAGE_version_address] < 0x1d20 || !System.loadPersistentData(HUD_position_address, "DAGE_HUDPosition", 1))
 	{
-		HUD_position = (getScreenHeight() > 224) ? 2 : 0
+		u16 yres = (res_preset) ? preset_yres[res_preset - 1] : screen_height
+		HUD_position = (yres > 224) ? 2 : 0
 		System.savePersistentData(HUD_position_address, "DAGE_HUDPosition", 1)	// save HUD position
 		time_attack_hud |= 0x02
 		System.savePersistentData(0x840270, "DAGE_TASettings", 0x03)

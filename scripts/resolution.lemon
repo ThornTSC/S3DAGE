@@ -154,6 +154,15 @@ function void writeToSpriteTableCompound(u16 renderQueue)
 // Choose new resolution //
 ///////////////////////////
 
+constant array<u16> preset_xres =
+{
+	320, 320, 358, 384, 400, 424, 426, 496, 496
+}
+constant array<u16> preset_yres =
+{
+	224, 240, 224, 240, 224, 240, 240, 224, 240
+}
+
 function void SetResolution()
 {
 	SetResolution(0)
@@ -161,15 +170,6 @@ function void SetResolution()
 
 function void SetResolution(bool enforceSafe)
 {
-	constant array<u16> preset_xres =
-	{
-		320, 320, 358, 384, 400, 424, 426, 496, 496
-	}
-	constant array<u16> preset_yres =
-	{
-		224, 240, 224, 240, 224, 240, 240, 224, 240
-	}
-
 	u16 xres = (res_preset) ? preset_xres[res_preset - 1] : screen_width
 	u16 yres = (res_preset) ? preset_yres[res_preset - 1] : screen_height
 
