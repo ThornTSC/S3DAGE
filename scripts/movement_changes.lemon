@@ -68,7 +68,7 @@ function bool rollLeniency.CheckMaintainRoll()
 // Function taken from maingame\character\character.lemon
 function void Character.LandingOnGroundStandUp()
 {
-	if (char.state == char.state.SONIC_DROPDASH)
+	if (global.characters <= 1 && !u8[0xffffe654] && char.state == char.state.SONIC_DROPDASH)
 		return
 
 	// Check for exactly 1 in roll_maintain, as a value of 2 means we are actively setting the character win pose and should in fact run the base function
