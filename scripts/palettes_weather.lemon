@@ -3124,9 +3124,14 @@ function void fn07e4a2()
 	if (palette_set >= 2 && !original_mode)
 		System.loadExternalRawData("PaletteDEZ2Boss", 0xfffffc20)
 
-	u8[0xffffb02e] = 0
+	u8[0xffffb000 + 0x2e] = 0
 	player1.control_override = 0
 	player2.control_override = 0
+
+#if STANDALONE
+	Game.endSkippableCutscene()
+#endif
+
 	UnloadObject()
 }
 
