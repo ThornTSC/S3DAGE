@@ -461,7 +461,7 @@ function void fn059fdc()
 			D2 = 0x30
 		else if (getScreenWidth() <= 352)
 			D2 = 0x30 - (D0 >> 28)
-		else if (getScreenWidth() <= 432)
+		else if (getScreenWidth() <= 400)
 			D2 = 0x30 - (D0 >> 27)
 		else if (getScreenWidth() <= 464)
 			D2 = 0x30 - (D0 >> 26)
