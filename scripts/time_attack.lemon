@@ -7459,7 +7459,7 @@ function void Challenge.saveMedalsAndRecords()
 	{
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
 		u64 medalKey = stringformat("medal_0%d_0%d", medalType, animFrame)
-		Renderer.drawCustomSprite(medalKey, getScreenExtend() - 40 + 200, 69, 0x00, 0x40, 0xe800)	// y position of 68 in pre-theme DAGE versions
+		Renderer.drawCustomSprite(medalKey, getScreenExtend() - 40 + 200, 69 + ((time_attack_hud >= 2) ? 4 : 0), 0x00, 0x40, 0xe800)	// y position of 68 in pre-theme DAGE versions
 	}
 
 	// Allow other mods to make custom data when completing the level.
@@ -7584,7 +7584,7 @@ function void Challenge.showEndInterface()
 		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			Westside.NewRecordText()
 		else
-			Renderer.drawCustomSprite("new_record", getScreenWidth() / 2, 0x2e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+			Renderer.drawCustomSprite("new_record", getScreenWidth() / 2, 0x2e + ((time_attack_hud >= 2) ? 4 : 0), 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 	}
 
 	// Show TIME STOP BONUS! text
@@ -7599,7 +7599,7 @@ function void Challenge.showEndInterface()
 		else if (theme.hud == theme.westside && !System.getGlobalVariableValueByName("DAGE_characterName") && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles"))
 			Westside.TimeStopBonusText()
 		else
-			Renderer.drawCustomSprite("time_stop_bonus", getScreenWidth() - 62 - 16, 0x0e, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
+			Renderer.drawCustomSprite("time_stop_bonus", getScreenWidth() - 62 - 16, 0x0e + ((time_attack_hud >= 2) ? 4 : 0), 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
 	}
 
 	PrintVersionNumber()

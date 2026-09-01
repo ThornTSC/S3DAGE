@@ -98,12 +98,12 @@ function void South.BestText(u16 px, u16 py, u16 renderQueue)
 
 function void South.NewRecordText()
 {
-	Renderer.drawCustomSprite("south_new_record", getScreenWidth() / 2, 0x30, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
+	Renderer.drawCustomSprite("south_new_record", getScreenWidth() / 2, 0x30 + ((time_attack_hud >= 2) ? 4 : 0), 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)
 }
 
 function void South.TimeStopBonusText()
 {
-	Renderer.drawCustomSprite("south_time_stop_bonus", getScreenWidth() - 62 - 16, 0x10, 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
+	Renderer.drawCustomSprite("south_time_stop_bonus", getScreenWidth() - 62 - 16, 0x10 + ((time_attack_hud >= 2) ? 4 : 0), 0, SPRITE_FLAG_PRIO, 0xe001, 0, 255)	// 62 = sprite center, 16 = space to screen edge
 }
 
 function void South.DevText(u16 medal_py)
