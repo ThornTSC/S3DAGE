@@ -954,6 +954,35 @@ function void fn031626()
 	}
 }
 
+// HCZ snake blocks
+//# address-hook(0x0256be) end(0x02571e)
+function void fn0256be()
+{
+	objA0.mapping_offset = 0x025688
+	objA0.sprite_attributes = 0x0028
+	objA0.render_flags = render_flag.WORLD
+	objA0.sprite_priority = 0x0180
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.animation.sprite = 0x01
+	u16[A0 + 0x30] = objA0.position.x.u16
+	u16[A0 + 0x34] = objA0.position.y.u16
+	objA0.flags2e = objA0.flags2a
+
+	D0 = 0x01
+	D1.u8 = objA0.subtype2c
+	if (D1.s8 < 0)
+		D0.s16 = -D0.s16
+	u8[A0 + 0x40] = D0.u8
+	D1.u8 &= 0x7f
+	objA0.value26 = D1.u8
+	objA0.value42 = object_x_threshold
+	u16[A0 + 0x44] = objA0.position.x.u16
+
+	objA0.update_address = 0x025724
+	fn025724()
+}
+
 // MGZ Driller cutscenes
 //# address-hook(0x088460) end(0x088472)
 function void Driller.Update()
