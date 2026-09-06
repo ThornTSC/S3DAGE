@@ -18202,10 +18202,10 @@ function void fn053234()
 
 function void FBZ2.newRouteArtSwap()
 {
+	debugWatch(0xffffeed6, 2)
 	bool skyBackground = ((u16[0xffffb010] > 0x2300 && u16[0xffffb014] > 0x0b00) || (u16[0xffffb010] > 0x2540 && u16[0xffffb010] < 0x2840 && u16[0xffffb014] > 0x0a00) || (u16[0xffffb010] >= 0x2840 && camera.position.y.u16 > 0x0918))
 	bool outdoorChunks = ((u16[0xffffb010] > 0x2540 && u16[0xffffb010] <= 0x2578 && u16[0xffffb014] > 0x0a00 && u16[0xffffb014] < 0x0b40) || (u16[0xffffb010] > 0x2578 && u16[0xffffb010] < 0x2840 && u16[0xffffb014] > 0x0a00) || (u16[0xffffb010] >= 0x2840 && u16[0xffffb014] > 0x0a72))
 
-	u32 chunkAddress
 	if (outdoorChunks && u32[0xffff89ac] != 0x8989f089)
 	{
 		u32[0xffff89ac] = 0x8989f089
@@ -18259,7 +18259,6 @@ function void FBZ2.newRouteArtSwap()
 		u32[0xffff8c2a] = 0x006aa1a1
 	}
 
-
 	if (u16[0xffffb014] > 0x0b7e)	// If the player is stuck under the first outside platform,
 		u8[0xffff8c25] = 0x35		// use the top-solid only variant to let the player back up.
 	else							// Otherwise, use the variant with thicker solidity
@@ -18274,6 +18273,17 @@ function void FBZ2.newRouteArtSwap()
 		Renderer.drawCustomSprite("fbz_tunnellights", 0x2410 - camera.foreground.x.u16, 0x0b00 - camera.foreground.y.u16, 0, 0, 0x8000)
 		Renderer.drawCustomSprite("fbz_door", 0x2580 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 0, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x9f00)
 		Renderer.drawRect(0x2570 - camera.foreground.x.u16, 0x0b40 - camera.foreground.y.u16, 16, 64, 0x482448ff, 0x9eff, 0, 1)
+	}
+
+	// If respawning from the giant ring, prepare the outdoor background palette directly.
+	// Title cards that don't use a fade will copy the fade target palette into the active palette,
+	// erroneously replacing the sky palette with the indoor palette.
+	if (u16[0xffffb010] >= 0x2380 && u16[0xffffb010] <= 0x2400 && skyBackground == true)
+	{
+		u32 backupA1 = A1
+		A1 = 0x052dd0
+		FBZ2.loadSkyPalette()
+		A1 = backupA1
 	}
 
 	// Handle background swap

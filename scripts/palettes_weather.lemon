@@ -2379,20 +2379,9 @@ function void fn052cd8()
 //# address-hook(0x05327e) end(0x0532b2)
 function void fn05327e()
 {
-	A5 = 0xfffffc64
-	u32 paletteSource = A1
-	u32[(A5+=4)-4] = u32[(A1+=4)-4]
-	u32[(A5+=4)-4] = u32[(A1+=4)-4]
-	u32[(A5+=4)-4] = u32[(A1+=4)-4]
-	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	FBZ2.loadSkyPalette()
+
 	level.scrolling_routine = D0.u16
-	if (palette_set >= 2 && !original_mode)
-	{
-		if (paletteSource == 0x052dd0)
-			System.loadExternalRawData("PaletteFBZSky", 0xfffffc64)		// set the redesigned outdoor palette
-		else if (paletteSource == 0x052dc0)
-			System.loadExternalRawData("PaletteFBZIndoor", 0xfffffc64)	// set the redesigned indoor palette
-	}
 	fn052a2a()
 	fn04f2f6()
 
@@ -2411,7 +2400,22 @@ function void fn05327e()
 	}
 }
 
-
+function void FBZ2.loadSkyPalette()
+{
+	A5 = 0xfffffc64
+	u32 paletteSource = A1
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	u32[(A5+=4)-4] = u32[(A1+=4)-4]
+	if (palette_set >= 2 && !original_mode)
+	{
+		if (paletteSource == 0x052dd0)
+			System.loadExternalRawData("PaletteFBZSky", 0xfffffc64)		// set the redesigned outdoor palette
+		else if (paletteSource == 0x052dc0)
+			System.loadExternalRawData("PaletteFBZIndoor", 0xfffffc64)	// set the redesigned indoor palette
+	}
+}
 
 
 
