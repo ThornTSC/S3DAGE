@@ -23160,7 +23160,6 @@ function bool Standalone.useMultiSampleCollision()
 		else if (global.zone_act == 0x0101)
 		{
 			// HCZ 2
-			Standalone.MultiSampleCollision.addRect(0x12C0, 0x0920, 0x1360, 0x09B0)
 			Standalone.MultiSampleCollision.addRect(0x2040, 0x01A0, 0x20E0, 0x0230)
 			Standalone.MultiSampleCollision.addRect(0x38C0, 0x01A0, 0x3960, 0x0230)
 			Standalone.MultiSampleCollision.addRect(0x38C0, 0x04A0, 0x3960, 0x0530)
