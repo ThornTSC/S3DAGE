@@ -394,6 +394,20 @@
     "obj1E_a":  { "File": "../level/CPZ/Spin Tube Data/obj1E_a.bin" },
     "obj1E_b":  { "File": "../level/CPZ/Spin Tube Data/obj1E_b.bin" },
 
+  // ALZ
+    // Layout
+    "alz_layout": { "File": "../level/ALZ/Layout/1.bin" },
+    "alz_objects": { "File": "../level/ALZ/Object Pos/1.bin" },
+    "alz_rings": { "File": "../level/ALZ/Ring Pos/1.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "alz_tiles":  { "File": "../level/ALZ/Tiles/Primary.bin" },
+    "alz_blocks":  { "File": "../level/ALZ/Blocks/Primary.bin" },
+    "alz_chunks_p":  { "File": "../level/ALZ/Chunks/Primary.bin" },
+
+    // Collision
+    "alz_collision":  { "File": "../level/ALZ/Collision/1.bin" },
+
   // CGZ
     // Layout
     "cgz_layout": { "File": "../level/CGZ/Layout/1.bin" },

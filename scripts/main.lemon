@@ -214,7 +214,8 @@ constant u32 s2_decompression_buffer_2 = 0x890000
 constant u16 s2_EHZ = 1
 constant u16 s2_CPZ = 2
 constant u16 s2_ARZ = 3
-constant u16 s3_CGZ = 4
+constant u16 s3_ALZ = 4
+constant u16 s3_CGZ = 5
 
 
 
@@ -722,7 +723,7 @@ function void TitleCard.Init()
 	stars.timer = 0
 	
 	competition_mode.current_lap.player1 = 0	// reset lap counter in circuit levels
-	competition_mode.current_lap.player2 = 0	// reset lap bonuses in circuit levels
+	competition_mode.lap_count.player1 = 0	// reset lap bonuses in circuit levels
 	u8[0xfffffff1] = 0							// reset LAP BONUS display timer
 	if (u8[0xffffe654])		// no Knuckles settings for Extra Character Slot characters
 	{
@@ -798,9 +799,9 @@ function void TitleCard.Init()
 		// Death Egg Boss
 		D0 = 11
 	}
-	else if (unlock_act == s3_CGZ)
+	else if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 	{
-		// Chrome Gadget bonus stage
+		// Competition bonus stage
 		D0 = 20
 	}
 
@@ -867,7 +868,7 @@ function void InitHUDTheme()
 //# address-hook(0x006a76) end(0x006bd6)
 function void InitializeGameCharacters()
 {
-	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600)|| unlock_act == s3_CGZ)	//    The CHZ case is *also* handled in fn0067ee() so mods with their own InitializeGameCharacters() don't break things.
+	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_ALZ || unlock_act == s3_CGZ)	//    The CZ case is *also* handled in fn0067ee() so mods with their own InitializeGameCharacters() don't break things.
 	// One of the bonus stages?
 	if (isBonusStage)
 	{
@@ -891,7 +892,7 @@ function void InitializeGameCharacters()
 			u8[0xffffee30] = 0xff
 			return
 		}
-		else if (unlock_act == s3_CGZ)		// CGZ bonus stage exiting, now handled in fn0067ee()
+		else if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)		// Competition bonus stage exiting, now handled in fn0067ee()
 		{
 			ring_counter = checkpoint.rings
 			extra_lives_granted = checkpoint.lives_granted
@@ -1310,7 +1311,7 @@ function u16 getTileAndAngle()
 		u8 tileForm = u8[A2 + tileType * 2]
 		if (tileForm != 0)
 		{
-			u32 angleArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_angles_address : 0x096000
+			u32 angleArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_angles_address : 0x096000
 			u8 angle = u8[angleArray + tileForm]
 			if (tile & 0x0400)	// Flip horizontally
 			{
@@ -1342,7 +1343,7 @@ function s16 getCollisionIndentX()
 			iy = 15 - iy
 		}
 
-		u32 xArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_heightmapsrotated_address : 0x097100
+		u32 xArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_heightmapsrotated_address : 0x097100
 		s16 indent = s8[xArray + (tileForm * 0x10) + iy]
 		if (indent != 0)
 		{
@@ -1371,7 +1372,7 @@ function s16 getCollisionIndentY()
 			ix = 15 - ix
 		}
 
-		u32 yArray = (unlock_act && (unlock_act != s3_CGZ)) ? s2_heightmaps_address : 0x096100
+		u32 yArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_heightmaps_address : 0x096100
 		s16 indent = s8[yArray + (tileForm * 0x10) + ix]
 		if (indent != 0)
 		{
@@ -1404,8 +1405,10 @@ function void fn0076a6()
 			System.loadExternalRawData("cpz_collision", D0)
 		else if (unlock_act == s2_ARZ)
 			System.loadExternalRawData("arz_collision", D0)
+		else if (unlock_act == s3_ALZ)
+			System.loadExternalRawData("alz_collision", D0)
 		else if (unlock_act == s3_CGZ)
-			System.loadExternalRawData("cgz_collision", D0)	
+			System.loadExternalRawData("cgz_collision", D0)
 	}
 	else
 	{
@@ -4876,7 +4879,7 @@ function void Character.updateBonusEffects()
 function bool Character.performSuperTransformation()
 {
 	// In a new bonus stage?
-	if (unlock_act == s3_CGZ)
+	if (unlock_act == s3_ALZ && unlock_act == s3_CGZ)
 		return false
 
 	// Already super?
@@ -8415,6 +8418,7 @@ constant array<u16> UnlockAct.LevelSizes =
 	0x0000, 0x7fff, 0x0000, 0x04c0,		// EHZ
 	0x0000, 0x7fff, 0x0000, 0x0720,		// CPZ
 	0x0000, 0x38f0, 0x0180, 0x0620,		// ARZ
+	0x0000, 0x7fff, 0x0000, 0x00a0,		// ALZ
 	0x0000, 0x7fff, 0x0000, 0x0720		// CGZ
 }
 

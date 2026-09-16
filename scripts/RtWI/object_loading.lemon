@@ -75,6 +75,104 @@ function void fn024d9a()
 // Alterations to competition zone objects
 // Functions taken from level\competition\competition_objects.lemon
 
+// Standard button. VRAM location of art must be changed in Azure Lake due to tile count.
+// We use some VRAM usually meant for star posts instead.
+
+//# address-hook(0x02c518) end(0x02c5b8)
+function void Button.Init()
+{
+	base.Button.Init()
+	if (unlock_act == s3_ALZ)
+		objA0.sprite_attributes = 0x05fa
+}
+
+// ALZ tar pit is just the MGZ tar pit when not in Competition Mode.
+// Modify to not allow for character deaths in the ALZ bonus stage
+// (and to undo an A.I.R. tweak when in Original Mode)
+
+//# address-hook(0x032aae) end(0x032b8a)
+function void fn032aae()
+{
+	if (debug_mode.state == 0)
+	{
+		// Make the highest position where you can stand on the tar a little bit higher
+		// (Per Euka: call it personal preference, but this always bugged me)
+		u8 maxValue = 0x34
+		if (original_mode)
+			maxValue = 0x30
+
+		// Check first character
+		A1 = 0xffffb000
+		if ((objA0.flags2a & object.flag.P1_ON_OBJECT) == 0)
+		{
+			if (objA0.flags38 < maxValue)
+			{
+				objA0.flags38 += 2
+			}
+
+			A2 = 0xffff0000 + u16[A1 + 0x42]
+			if ((u8[A1 + 0x2a] & char.flag.ON_OBJECT) && u32[A2] == 0x032aae)
+			{
+				objA0.flags38 = u8[A2 + 0x38]
+			}
+		}
+		else
+		{
+			if (objA0.flags38 == 0)
+			{
+				objA0.flags38 = maxValue
+				fn032b76()
+				return
+			}
+
+			if (!(unlock_act == s3_ALZ && objA0.flags38 == 1))	// do not let the depth remaining value drop to 0 in the bonus stage
+				--objA0.flags38
+		}
+
+		D1 = objA0.box_size.x
+		D3 = objA0.flags38
+		D6 = 3		// object.flag.P1_ON_OBJECT
+		D4.u16 = objA0.position.x.u16
+		PlatformCheckClimbOnForCharacterA1()
+
+		// Check second character
+		A1 = 0xffffb04a
+		if ((objA0.flags2a & object.flag.P2_ON_OBJECT) == 0)
+		{
+			if (objA0.value3a < maxValue)
+			{
+				objA0.value3a += 2
+			}
+			A2 = 0xffff0000 + u16[A1 + 0x42]
+
+			if ((u8[A1 + 0x2a] & char.flag.ON_OBJECT) && u32[A2] == 0x032aae)
+			{
+				objA0.value3a = u8[A2 + 0x3a]
+			}
+		}
+		else
+		{
+			if (objA0.value3a == 0)
+			{
+				objA0.value3a = maxValue
+				fn032b76()
+				return
+			}
+
+			if (!(unlock_act == s3_ALZ && objA0.value3a == 1))	// do not let the depth remaining value drop to 0 in the bonus stage
+				--objA0.value3a
+		}
+
+		D1 = objA0.box_size.x
+		D3 = objA0.value3a
+		D6 = 4		// object.flag.P2_ON_OBJECT
+		D4.u16 = objA0.position.x.u16
+		PlatformCheckClimbOnForCharacterA1()
+	}
+
+	CheckForUnloadObject()
+}
+
 // Yellow bumper objects in CGZ
 
 //# address-hook(0x032c6a) end(0x032d14)
@@ -356,7 +454,7 @@ function void fn035ba6()
 
 
 
-// CGZ retracting spring + base
+// ALZ/CGZ retracting spring + base
 // We only concern ourselves with the functions that load, unload, and move the spring and its base.
 
 //# address-hook(0x023b38) end(0x023c0e)
@@ -441,12 +539,17 @@ function void fn023b38()
 	}
 }
 
-// CGZ retracting spring
+// ALZ/CGZ retracting spring
 
 //# address-hook(0x023c8e) end(0x023ca0)
 function void fn023c8e()
 {
 	fn023cdc()
+	if (unlock_act == s3_ALZ)	// must edit spring VRAM location and launch speed
+	{
+		objA0.sprite_attributes = 0x05c0
+		s16[A0 + 0x30] = -0x1000
+	}
 	objA0.position.y.u16 = u16[A0 + 0x34] + u8[A0 + 0x36]
 //	if (!competition_mode.active)
 //		SpringHorizontal.Update()	// this function also deletes the spring when off screen
@@ -477,7 +580,7 @@ function void fn023cc6()
 }
 
 
-// CGZ retracting spring base
+// ALZ/CGZ retracting spring base
 
 //# address-hook(0x023ed0) end(0x023f24)
 function void fn023ed0()
@@ -530,8 +633,15 @@ function void fn023ed0()
 //# address-hook(0x023cdc) end(0x023ece)
 function void fn023cdc()
 {
+	// Despite being called .x, these are used for vertical movement in ALZ.
 	u16 springPosition.x = (!competition_mode.active) ? 0x2000 : 0x1800
 	u16 springMovement.x = (!competition_mode.active) ? 0x0b00 : 0x0800
+
+	if (unlock_act == s3_ALZ)
+	{
+		springPosition.x = 0x2400
+		springMovement.x = 0x0c60
+	}
 
 	if (s8[A0 + 0x2c] >= 0)
 	{
@@ -795,7 +905,7 @@ function void fn030a38()
 //# address-hook(0x04a1e6) end(0x04a212)
 function void fn04a1e6()
 {
-	if (unlock_act != s3_CGZ)
+	if (unlock_act != s3_ALZ && unlock_act != s3_CGZ)
 	{
 		base.fn04a1e6()
 		return

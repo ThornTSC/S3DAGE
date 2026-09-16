@@ -1,3 +1,14 @@
+// Do not load explosion or animal graphics in new bonus stages.
+//# address-hook(0x085fde) end(0x085ff8)
+function void StartLoadingPatternsForZone()
+{	
+	if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
+		return
+
+	base.StartLoadingPatternsForZone()
+}
+
+
 // Do not load post-title card patterns in unlockable acts;
 // we take advantage of the image title cards to overwrite them during the title card itself.
 // Function taken from maingame\hud\titlecard.lemon
@@ -22,7 +33,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		base.RequestLoadingPatterns()
 		return
 	}
-	if (unlock_act != s3_CGZ && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	if (unlock_act != s3_ALZ && unlock_act != s3_CGZ && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
 	{
 		// Life icon art needed. Goes to 0xfa80.
 
@@ -258,6 +269,14 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		System.loadExternalRawData("chopchop_animation", s2_decompression_buffer_2 + 0x06)	// 0x06 bytes
 		System.loadExternalRawData("springboard_animation", s2_decompression_buffer_2 + 0x14)	// 0x0c bytes
 		System.loadExternalRawData("arz_arrowshooter_animation", s2_decompression_buffer_2 + 0x14 + 0x0c)	// 0x16 bytes
+	}
+	else if (unlock_act == s3_ALZ)
+	{
+		// Spikes and springs
+		Nemesis.loadDataToVRAM(0x1927fe, 0xb400)
+
+		// Button (in custom VRAM location for stage)
+		Nemesis.loadDataToVRAM(0x190ac4, 0xbf40)
 	}
 	else if (unlock_act == s3_CGZ)
 	{

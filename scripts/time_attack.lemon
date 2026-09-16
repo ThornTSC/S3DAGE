@@ -626,7 +626,7 @@ function void initializeMainGame()
 		{
 			global.in_extra_stage = 0
 		}
-		else if ((global.zone < 0x13 && unlock_act != s3_CGZ) || (global.zone > 0x15 && global.zone_act != 0x1701))
+		else if ((global.zone < 0x13 && unlock_act != s3_ALZ && unlock_act != s3_CGZ) || (global.zone > 0x15 && global.zone_act != 0x1701))
 		{
 			global.shields_backup_2 = 0
 			global.in_extra_stage = 0
@@ -1779,14 +1779,14 @@ function void RenderSprites()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == s3_CGZ)
+				if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == s3_CGZ)
+			else if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1893,14 +1893,14 @@ function void fn00db3c()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == s3_CGZ)
+				if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == s3_CGZ)
+			else if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1933,14 +1933,14 @@ function void fn00db3c()
 			{
 				if (!global.game.paused)
 					DecrementTimerDisplay()
-				if (hud.layout != 3 || unlock_act == s3_CGZ)
+				if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 					RenderHUD()
 				else
 					RenderHUD_Orig()
 				if (!global.game.paused)
 					IncrementTimerDisplay()
 			}
-			else if (hud.layout != 3 || unlock_act == s3_CGZ)
+			else if (hud.layout != 3 || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 				RenderHUD()
 			else
 				RenderHUD_Orig()
@@ -1972,7 +1972,7 @@ function void RenderHUD_RedRings()
 	if (System.getGlobalVariableValueByName("DAGE_characterName") || Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") || u8[0xffffe654])
 		return
 
-	if (unlock_act == s3_CGZ)
+	if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 		return
 
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone.apparent) + global.act.apparent	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
@@ -2115,7 +2115,7 @@ function void RenderHUD_Marathon()
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
 			if (getModeHUDPosition() >= 2)
 				py -= 2
-			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
+			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c)	// before introduction of sidekick-allowed red star rings, included  || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails)
 				py += 14
 
@@ -2156,7 +2156,7 @@ function void RenderHUD()
 	s16 baseY = 0x08
 	u16 renderQueue = 0xe000
 
-	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
+	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 #if STANDALONE
 	if (!(original_mode && debug_mode.state))
 	{
@@ -2439,7 +2439,7 @@ function void RenderHUD_Challenges()
 	s16 baseY = 0x08
 	u16 renderQueue = 0xe000
 
-	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_CGZ)
+	bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 #if STANDALONE
 	if (!original_mode)
 	{
@@ -3079,7 +3079,7 @@ function void UpdateTimeAndHud()
 
 function bool HUD.isRingsDigitCompact(u64 key, u16 py)
 {
-	return (hud.layout == 2 && (py == 0x28 || (py == 0x08 && unlock_act == s3_CGZ) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
+	return (hud.layout == 2 && (py == 0x28 || (py == 0x08 && (unlock_act == s3_ALZ || unlock_act == s3_CGZ)) || (py == 0x08 && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
 }
 
 // Draw on top of the existing time digits and text with graphics that fade out as frozen time prepares to resume
@@ -3108,10 +3108,10 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 		{
 			alpha = 0xff0000ff
 		}
-		key = (unlock_act && unlock_act != s3_CGZ) ? "hud_ring_s2" : "hud_ring"
+		key = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? "hud_ring_s2" : "hud_ring"
 		if (theme.hud == theme.south)
 			px += 1
-		if ((global.zone < 0x13 || global.zone > 0x15) && unlock_act != s3_CGZ)		// not a bonus stage
+		if ((global.zone < 0x13 || global.zone > 0x15) && unlock_act != s3_ALZ && unlock_act != s3_CGZ)		// not a bonus stage
 			py -= 32
 
 		Renderer.drawCustomSprite(key, px, py, 0, SPRITE_FLAG_PRIO, renderQueue, 0, alpha, 0x10000)
@@ -3169,7 +3169,7 @@ function void HUD.drawSprite(u64 key, u16 px, u16 py, u16 renderQueue)
 
 	u8 ringDigitsXOffset = ((getModeHUDPosition() == 1 || getModeHUDPosition() == 3) && (time_attack != 1 && time_attack != 2)) ? 8 : 0
 	u8 ringDigitsYOffset = (getModeHUDPosition() >= 2) ? 4 : 0
-	if (hud.layout == 2 && (py == 0x28 + ringDigitsYOffset || (py == 0x08 + ringDigitsYOffset && unlock_act == s3_CGZ) || (py == 0x08 + ringDigitsYOffset && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
+	if (hud.layout == 2 && (py == 0x28 + ringDigitsYOffset || (py == 0x08 + ringDigitsYOffset && (unlock_act == s3_ALZ || unlock_act == s3_CGZ)) || (py == 0x08 + ringDigitsYOffset && global.zone >= 0x13 && global.zone <= 0x15)) && (key != "hud_lives_icon_sonic" && key != "hud_lives_icon_tails" && key != "hud_lives_icon_miles" && key != "hud_lives_icon_knuckles"))
 	{
 		bool showRingHUD = (ring_counter != 0 || (level.framecounter & 0x08))
 		u32 alpha = 0xffffffff

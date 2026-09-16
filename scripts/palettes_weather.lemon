@@ -47,7 +47,7 @@ function void loadCharacterPalette(u8 character, u32 targetAddress, u8 paletteVa
 		// Normal palette variant
 		sourceAddress = (character != CHARACTER_KNUCKLES) ? 0x0a8a3c : 0x0a8afc
 		copyMemory(targetAddress, sourceAddress, 0x20)
-		if ((targetAddress == 0x802080 || targetAddress == 0x802200) && !u8[0xffffe654] && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && unlock_act && unlock_act != s3_CGZ)		// loading Knuckles's palette in unlockable acts
+		if ((targetAddress == 0x802080 || targetAddress == 0x802200) && !u8[0xffffe654] && !Mods.isModActive("3D2D Glitches: Sonic 3 With Bluckles") && unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ)		// loading Knuckles's palette in unlockable acts
 		{
 			System.loadExternalRawData("s2_character_palette", targetAddress + 0x18, 0x0e, 6, 1, 1)		// load grays
 			u16[targetAddress + 0x1e] = 0x0000															// place black in appropriate palette entry
@@ -198,6 +198,11 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 	}
 #endif
 
+	// Load ALZ palette
+	if (unlock_act == s3_ALZ && index == 0x0e)
+	{
+		index = 0x26
+	}
 	// Load CGZ palette
 	if (unlock_act == s3_CGZ && index == 0x0e)
 	{
@@ -211,12 +216,12 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 
 	dest += ramAddress - 0xfc00				// With this, dest can be changed to non-faded palette and/or secondary palette
 	copyMemory(dest, source, bytes)
-	if (unlock_act && unlock_act != s3_CGZ)
+	if (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ)
 		System.loadExternalRawData("s2_character_palette", dest)
-	else if (unlock_act == s3_CGZ)
+	else if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
 	{
 		System.loadExternalRawData("Palette0200", 0xfffffca0, 0, 0x20, 1, 1)		// temporary to get MGZ1 object palette line
-		if (palette_set >= 2)	// add prototype blues to CGZ background
+		if (unlock_act == s3_CGZ && palette_set >= 2)	// add prototype blues to CGZ background
 		{
 			u32[dest + 0x3a] += 0x02000200
 	//		u16[dest + 0x40] += 0x0200
@@ -471,6 +476,8 @@ function void UpdatePaletteEffects.Default()
 			LevelPaletteUpdate.CPZ()
 		else if (unlock_act == s2_ARZ)
 			LevelPaletteUpdate.ARZ()
+//		else if (unlock_act == s3_ALZ)		// no palette update for ALZ at this time
+//			LevelPaletteUpdate.ALZ()
 		else if (unlock_act == s3_CGZ)
 			LevelPaletteUpdate.CGZ()
 		return
@@ -999,6 +1006,8 @@ function void UpdateLevelScrolling.MGZ1()
 			CPZ_CustomSprites()
 		else if (unlock_act == s2_ARZ)
 			ARZ_CustomSprites()
+		else if (unlock_act == s3_ALZ)
+			ALZ_CustomSprites()
 		else if (unlock_act == s3_CGZ)
 			CGZ_CustomSprites()
 		fn051158()	// call the most basic MGZ1 scroll routine

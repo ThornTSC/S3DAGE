@@ -96,16 +96,21 @@ function void fn02d47e()
 					if (!original_mode && !u8[0xffffe654] && use_new_bonus)	//   && !Mods.isModActive("Extra Character Slots")	// taking a risk by allowing Chrome Gadget again with Extra Slots mod on. Ee've seen at least one report of the framework alone breaking things.
 					{
 						D1.u16 = 0x0200
-						unlock_act = s3_CGZ
-						// The foreground camera must be set to prevent the CGZ retractable spring, which has its palette loaded during the title card, from showing on screen.
-						camera.foreground.x = 0x05b40000
-						camera.foreground.y = 0x022c0000
+						unlock_act = s3_ALZ
 					}
 				}
 				else if (stageChosen == 1)
 				{
 					// Glowing spheres
 					D1.u16 = 0x1400
+					if (!original_mode && !u8[0xffffe654] && use_new_bonus)	//   && !Mods.isModActive("Extra Character Slots")	// taking a risk by allowing Chrome Gadget again with Extra Slots mod on. Ee've seen at least one report of the framework alone breaking things.
+					{
+						D1.u16 = 0x0200
+						unlock_act = s3_CGZ
+						// The foreground camera must be set to prevent the CGZ retractable spring, which has its palette loaded during the title card, from showing on screen.
+						camera.foreground.x = 0x05b40000
+						camera.foreground.y = 0x022c0000
+					}
 				}
 				else
 				{

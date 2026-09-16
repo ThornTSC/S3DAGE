@@ -91,13 +91,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		else if (objA0.animation.sprite == 0x12 || objA0.animation.sprite == 0x13)
 		{
 			Renderer.drawCustomSprite("angel_titlecard_bonus", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return false
+			return true
 		}
 		// "Stage"
 		else if (objA0.animation.sprite == 0x14)
 		{
 			Renderer.drawCustomSprite("angel_titlecard_stage", px, py + 12, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue + 0x4000)
-			return false
+			return true
 		}
 	}
 
@@ -1152,10 +1152,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
-	// CGZ retracting spring base in single player
+	// ALZ/CGZ retracting spring base in single player
 	if (objA0.update_address == 0x023ed0 && unlock_act)
 	{
-		Renderer.drawCustomSprite("cgz_springbase", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		if (unlock_act == s3_ALZ)
+			Renderer.drawCustomSprite("alz_springbase", px, py, 0x00, ((objA0.render_flags & render_flag.FLIP_X) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+		else	// (unlock_act == s3_CGZ)
+			Renderer.drawCustomSprite("cgz_springbase", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}
 

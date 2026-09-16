@@ -1,17 +1,16 @@
-function void CGZ_CustomSprites()
+global s8 backgroundCameraLoopCount
+global s8 animatedTileRender.animationTimer
+global u8 animatedTileRender.animationFrame
+
+function void BonusStage.RenderGoalPole(u16 pole.x, u16 pole.y)
 {
-	UpdateBackgroundScrolling.CGZ()
-
-	BonusStage.UpdateTimeRemaining()
-
-	// Render the goal pole
-	pole.x = 0x0690
-	pole.y = 0x02a0
 	u64 key = stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1)
 	u8 flags = 0 // SPRITE_FLAG_PRIO
 	Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00 - 1)
+}
 
-	// Draw bonus bubbles
+function void BonusStage.DrawBonusBubbles()
+{
 	u32 backupA0 = A0
 	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
 	{
@@ -27,88 +26,6 @@ function void CGZ_CustomSprites()
 		}
 	}
 	A0 = backupA0
-
-	// Use competition_mode.current_lap.player2 as a lap counter.
-	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
-	// Otherwise, render the player2 value plus 1.
-	s8 lapNum = clamp(s8(competition_mode.current_lap.player2), 0, 0x7f) + 1
-	bool underStart = (u16[0xffffb010] > 0x0600 && u16[0xffffb010] < pole.x && u16[0xffffb014] < 0x02a8)
-	bool beforeStart = (u16[0xffffb010] <= 0x0600)
-	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && (underStart || beforeStart) && competition_mode.current_lap.player1 == 0))
-		lapNum = 0
-	u16 px = getScreenWidth() - 56
-	u16 py = 12
-	if (HUD.useMobileLivesDisplay())
-	{
-		py = getScreenHeight() - 32
-		if (time_attack == 3)	// emerald HUD is displayed
-			py -= 24
-	}
-	for (u32 value = lapNum;;)
-	{
-		Renderer.drawCustomSprite(stringformat("lap_%d", value % 10), px, py, 0x00, SPRITE_FLAG_PRIO, 0xe800)
-		px -= 16
-		value /= 10
-		if (value == 0)
-			break
-	}
-
-	// Here and in the called function, we repurpose competition_mode.current_lap.player2 as a field to hold the highest awarded lap bonus
-	if (u16[0xffffb010] >= pole.x && s8(competition_mode.current_lap.player1) > competition_mode.current_lap.player2 && s8(competition_mode.current_lap.player1) > 0)
-		BonusStage.AwardLapBonus()	// function must be called after pole.x is defined
-
-	// Render LAP BONUS
-	if (u8[0xfffffff1])	// LAP BONUS display timer
-	{
-		if (!global.game.paused)
-			--u8[0xfffffff1]	// decrement timer
-		u16 currentRingBonus = CGZ.LapBonuses[min(competition_mode.current_lap.player2 - 1, 7)]
-
-		if (theme.hud == theme.saturn)
-			Saturn.displayLapBonus(currentRingBonus)
-		else if (theme.hud == theme.flicky)
-			Flicky.displayLapBonus(currentRingBonus)
-		else if (theme.hud == theme.south)
-			South.displayLapBonus(currentRingBonus)
-		else if (theme.hud == theme.westside)
-			Westside.displayLapBonus(currentRingBonus)
-
-		else if (currentRingBonus < 10)
-		{
-			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010], u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
-		}
-		else
-		{
-			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
-		}
-
-	// Old method using built-in fonts instead of theme-specific PNG sprites
-		// u16 ringX = (currentRingBonus < 10) ? -19 : -21
-		// u16 textX = 9 // (currentRingBonus < 10) ? 9 : 9
-		// Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] + ringX, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", u16[0xffffb010] + textX, u16[0xffffb014] - 36, stringformat("+ %d", currentRingBonus), 0xffffffff, 2, 0, 0x9f01, 1, 1)
-	}
-}
-
-function void UpdateBackgroundScrolling.CGZ()
-{
-	u16 cameraXPos = camera.position.x.u16 + 0x4000 + (0x600 * s8(competition_mode.current_lap.player1))		// we use a camera shift to stop the moon from scrolling off screen early
-	s64 parallaxShift = -(cameraXPos * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
-	s16 yShift = 0 // camera.position.y.u16 / 56	// -8						// 56 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point. Alt idea: 28 and -32
-	Renderer.drawCustomSprite("cgz_background_sky", parallaxShift, 0 - yShift, 0, 0, 0x1100)
-	parallaxShift = -(cameraXPos * 240 / 0x1ff0) % 512
-	Renderer.drawCustomSprite("cgz_background_lights_veryfar", parallaxShift, 48 - yShift, 0, 0, 0x1100)
-	parallaxShift = -(cameraXPos * 480 / 0x1ff0) % 512
-	Renderer.drawCustomSprite("cgz_background_buildings_far", parallaxShift, 88 - yShift, 0, 0, 0x1100)
-	parallaxShift = -(cameraXPos * 960 / 0x1ff0) % 512
-	Renderer.drawCustomSprite("cgz_background_buildings_mid", parallaxShift, 104 - yShift, 0, 0, 0x1100)
-	parallaxShift = -(cameraXPos * 1920 / 0x1ff0) % 512
-	Renderer.drawCustomSprite("cgz_background_buildings_near", parallaxShift, 120 - yShift, 0, 0, 0x1100)
 }
 
 function void BonusStage.UpdateTimeRemaining()
@@ -152,7 +69,7 @@ function void BonusStage.UpdateTimeRemaining()
 	Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds / 10), px_timer + 8, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud)
 	Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds % 10), px_timer + 20, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud)	
 
-	// Sphere time running out digits
+	// Time running out digits
 	if (BS_remainingTime <= 600 && (level.framecounter.low & 0x08) && !freeze_time)
 	{
 	//	Renderer.drawCustomSprite(stringformat("sonic2_specialdigit_%d_red", seconds / 10), px_timer - 17, py_timer, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1)
@@ -168,7 +85,7 @@ function void BonusStage.UpdateTimeRemaining()
 		Renderer.drawCustomSprite(stringformat("bonus_timer_small_%d", centiseconds % 10), px_timer + 20, py_timer + 8, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, 0xff4040ff, 0x10000)	
 	}
 
-	// Sphere time bonus digits
+	// Time freeze digits
 	if (freeze_time)
 	{
 //		Renderer.drawCustomSprite("sonic2_timeframe", px_timer, py_timer + 6, 0, SPRITE_FLAG_PRIO, renderQueue_hud + 1, 0, alpha + 0x00ffff00, 0x10000)
@@ -201,28 +118,446 @@ function void BonusStage.UpdateTimeRemaining()
 	}
 }
 
+function void BonusStage.RenderLapNumber(u8 lapNum)
+{
+	u16 px = getScreenWidth() - 56
+	u16 py = 12
+	if (HUD.useMobileLivesDisplay())
+	{
+		py = getScreenHeight() - 32
+		if (time_attack == 3)	// emerald HUD is displayed
+			py -= 24
+	}
+	for (u32 value = lapNum;;)
+	{
+		Renderer.drawCustomSprite(stringformat("lap_%d", value % 10), px, py, 0x00, SPRITE_FLAG_PRIO, 0xe800)
+		px -= 16
+		value /= 10
+		if (value == 0)
+			break
+	}
+}
 
-
-
-
-
-
-
-constant array<u16> CGZ.LapBonuses =
+constant array<u16> BonusStage.LapBonuses =
 {
 	5, 5, 10, 10, 15, 15, 20, 20
 }
 
-function void BonusStage.AwardLapBonus()
+function void BonusStage.AwardLapBonus(u16 pole.x)
 {
-	ring_counter += CGZ.LapBonuses[min(competition_mode.current_lap.player2, 7)]
+	// Initialize the variable for tracking laps for background deformation
+	if (timer.alldata == 1)
+		backgroundCameraLoopCount = 0
+
+	if (!(u16[0xffffb010] >= pole.x && s8(competition_mode.current_lap.player1) > competition_mode.lap_count.player1 && s8(competition_mode.current_lap.player1) > 0))
+		return
+
+	ring_counter += BonusStage.LapBonuses[min(competition_mode.lap_count.player1, 7)]
 	hud.dirty.rings = 0x80
 	if (checkForExtraLifeByRings())
 	{
 		gainExtraLife()
 	}
 	playSound(0x63)		// star post trigger sound
-	if (competition_mode.current_lap.player2 != 0x7f)
-		++competition_mode.current_lap.player2
+	if (competition_mode.lap_count.player1 != 0x7f)
+		++competition_mode.lap_count.player1
 	u8[0xfffffff1] = 120	// use the free byte after level.start_location as a timer to display the LAP BONUS
+}
+
+function void BonusStage.RenderLapBonus()
+{
+	if (u8[0xfffffff1])	// LAP BONUS display timer
+	{
+		if (!global.game.paused)
+			--u8[0xfffffff1]	// decrement timer
+		u16 currentRingBonus = BonusStage.LapBonuses[min(competition_mode.lap_count.player1 - 1, 7)]
+
+		if (theme.hud == theme.saturn)
+			Saturn.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.flicky)
+			Flicky.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.south)
+			South.displayLapBonus(currentRingBonus)
+		else if (theme.hud == theme.westside)
+			Westside.displayLapBonus(currentRingBonus)
+
+		else if (currentRingBonus < 10)
+		{
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010], u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+		}
+		else
+		{
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+		}
+
+	// Old method using built-in fonts instead of theme-specific PNG sprites
+		// u16 ringX = (currentRingBonus < 10) ? -19 : -21
+		// u16 textX = 9 // (currentRingBonus < 10) ? 9 : 9
+		// Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] + ringX, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
+		// Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", u16[0xffffb010] + textX, u16[0xffffb014] - 36, stringformat("+ %d", currentRingBonus), 0xffffffff, 2, 0, 0x9f01, 1, 1)
+	}
+}
+
+
+
+
+
+
+function void ALZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.ALZ()
+	ALZ.Animatetar()
+	ALZ.DisplayLeaves()
+	ALZ.DisplayBottom()
+
+	Renderer.addSpriteMaskWorld(0x03f0, 0x0150, 0x05a0, 0x0030, 0xc000, 1)
+	Renderer.addSpriteMaskWorld(0x0540, 0x0000, 0x0030, 0x0100, 0xc000, 1)
+
+	Renderer.addSpriteMaskWorld(0x09f0, 0x0150, 0x05a0, 0x0030, 0xc000, 1)
+	Renderer.addSpriteMaskWorld(0x0b40, 0x0000, 0x0030, 0x0100, 0xc000, 1)
+
+	// Manage bonus stage timer
+	BonusStage.UpdateTimeRemaining()
+
+	// Set goal pole position and render it
+	u16 pole.x = 0x0660
+	u16 pole.y = 0x00f0
+	BonusStage.RenderGoalPole(pole.x, pole.y)
+	BonusStage.RenderGoalPole(pole.x - 0x0600, pole.y)
+	BonusStage.RenderGoalPole(pole.x + 0x0600, pole.y)
+
+	// Draw bonus bubbles
+	BonusStage.DrawBonusBubbles()
+
+	// Manage looping and laps
+	ALZ.ManageLaps()
+
+	// The current_lap value tracks the number of times the stage has looped from right to left
+	// and decrements whenever the stage loops left to right (backwards).
+	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
+	// Otherwise, render the lap_count value plus 1.
+	s8 lapNum = clamp(s8(competition_mode.lap_count.player1), 0, 0x7f) + 1
+	bool beforePole = (u16[0xffffb010] <= pole.x)
+	if (competition_mode.current_lap.player1 >= 0x80 || (lapNum == 1 && beforePole && competition_mode.current_lap.player1 == 0))
+		lapNum = 0
+	BonusStage.RenderLapNumber(lapNum)
+
+	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
+	BonusStage.AwardLapBonus(pole.x)
+
+	// Render LAP BONUS
+	BonusStage.RenderLapBonus()
+}
+
+function void UpdateBackgroundScrolling.ALZ()
+{
+	u16 cameraXPos = camera.position.x.u16 + (0x600 * s8(backgroundCameraLoopCount))
+	s64 parallaxShift = 0 // -(cameraXPos * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s16 yShift = camera.position.y.u16 / 9	- 8	// designed to match Sonic Origins vertical shift as closely as possible
+
+	Renderer.drawCustomSprite("alz_background_sky_line0", parallaxShift, -16 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_sky_line0", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+
+	// The highest layer of clouds moves one pixel to the left every 3 frames.
+	parallaxShift = -((cameraXPos * 40 / 0x0600) + (level.framecounter / 3)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line16", parallaxShift, 16 - yShift, 0, 0, 0x1100)
+
+	// The second-lowest layer of clouds moves one pixel to the left every 12 frames.
+	parallaxShift = -((cameraXPos * 8 / 0x0600) + (level.framecounter / 12)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line24", parallaxShift, 24 - yShift, 0, 0, 0x1100)
+
+	// The third-highest layer of clouds moves one pixel to the left every 3 frames.
+	parallaxShift = -((cameraXPos * 48 / 0x0600) + (level.framecounter / 3)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line32", parallaxShift, 32 - yShift, 0, 0, 0x1100)
+
+	// The third-lowest layer of clouds moves one pixel to the left every 7 frames.
+	parallaxShift = -((cameraXPos * 36 / 0x0600) + (level.framecounter / 7)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line40", parallaxShift, 40 - yShift, 0, 0, 0x1100)
+
+	// The second-lowest layer of clouds moves one pixel to the left every 4 frames.
+	parallaxShift = -((cameraXPos * 48 / 0x0600) + (level.framecounter / 4)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line48", parallaxShift, 48 - yShift, 0, 0, 0x1100)
+
+	// The lowest layer of clouds moves one pixel to the left every 8 frames.
+	parallaxShift = -((cameraXPos * 64 / 0x0600) + (level.framecounter / 8)) % 512
+	Renderer.drawCustomSprite("alz_background_clouds_line56", parallaxShift, 56 - yShift, 0, 0, 0x1100)
+
+
+
+	// Mountains move 96 (0x60) pixels per loop of the stage (0x0600 long)
+	parallaxShift = -(cameraXPos * 96 / 0x0600) % 512
+	Renderer.drawCustomSprite("alz_background_mountains_line64", parallaxShift, 64 - yShift, 0, 0, 0x1100)
+
+
+
+	// Farther trees across the lake move approximately 120 (0x78) pixels per loop of the stage (0x0600 long)
+	parallaxShift = -(cameraXPos * 120 / 0x0600) % 512
+	Renderer.drawCustomSprite("alz_background_fartrees_line110", parallaxShift, 110 - yShift, 0, 0, 0x1100)
+
+	// Nearer trees across the lake move exactly 144 (0x90) pixels per loop of the stage (0x0600 long)
+	parallaxShift = -(cameraXPos * 144 / 0x0600) % 512
+	Renderer.drawCustomSprite("alz_background_neartrees_line116", parallaxShift, 116 - yShift, 0, 0, 0x1100)
+
+
+	// The lake uses the nearer trees' scrolling when reflecting trees and the mountains' scrolling when reflecting mountains.
+	s64 rippleShiftIndex = (level.framecounter / 8) % 66	// Sonic 2 uses u8[0xfffffe0f], a.k.a. global.framecounter.low. Same address in S2 and S3. We use level.framecounter since that pauses with DAGE pausing.
+
+	Renderer.drawCustomSprite("alz_background_lake_line132", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  0) % 66], 132 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line133", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  1) % 66], 133 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line134", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  2) % 66], 134 - yShift, 0, 0, 0x1100)
+	
+	parallaxShift = -(cameraXPos * 96 / 0x0600) % 512
+	Renderer.drawCustomSprite("alz_background_lake_line135", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  3) % 66], 135 - yShift, 0, 0, 0x1100)
+	// Line 135 and 136 are combined into one image, as line 135 is simply a solid horizontal line of one color.
+	Renderer.drawCustomSprite("alz_background_lake_line137", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  5) % 66], 137 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line138", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  6) % 66], 138 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line139", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  7) % 66], 139 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line140", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  8) % 66], 140 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line141", parallaxShift + SwScrl_RippleData[(rippleShiftIndex +  9) % 66], 141 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line142", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 10) % 66], 142 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line143", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 11) % 66], 143 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line144", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 12) % 66], 144 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line145", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 13) % 66], 145 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line146", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 14) % 66], 146 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line147", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 15) % 66], 147 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line148", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 16) % 66], 148 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line149", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 17) % 66], 149 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line150", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 18) % 66], 150 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line151", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 19) % 66], 151 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line152", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 20) % 66], 152 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line153", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 21) % 66], 153 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line154", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 22) % 66], 154 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line155", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 23) % 66], 155 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line156", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 24) % 66], 156 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line157", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 25) % 66], 157 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line158", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 26) % 66], 158 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line159", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 27) % 66], 159 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line160", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 28) % 66], 160 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line161", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 29) % 66], 161 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line162", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 30) % 66], 162 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line163", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 31) % 66], 163 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line164", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 32) % 66], 164 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line165", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 33) % 66], 165 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line166", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 34) % 66], 166 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line167", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 35) % 66], 167 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line168", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 36) % 66], 168 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line169", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 37) % 66], 169 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line170", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 38) % 66], 170 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line171", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 39) % 66], 171 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line172", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 40) % 66], 172 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line173", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 41) % 66], 173 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line174", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 42) % 66], 174 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line175", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 43) % 66], 175 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line176", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 44) % 66], 176 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line177", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 45) % 66], 177 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line178", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 46) % 66], 178 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line179", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 47) % 66], 179 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line180", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 48) % 66], 180 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line181", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 49) % 66], 181 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line182", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 50) % 66], 182 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line183", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 51) % 66], 183 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line184", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 52) % 66], 184 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line185", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 53) % 66], 185 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line186", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 54) % 66], 186 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line187", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 55) % 66], 187 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line188", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 56) % 66], 188 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line189", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 57) % 66], 189 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line190", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 58) % 66], 190 - yShift, 0, 0, 0x1100)
+	Renderer.drawCustomSprite("alz_background_lake_line191", parallaxShift + SwScrl_RippleData[(rippleShiftIndex + 59) % 66], 191 - yShift, 0, 0, 0x1100)
+
+	// The near shore seems to move every second pixel the foreground moves.
+	parallaxShift = -(cameraXPos / 2) % 512
+	Renderer.drawCustomSprite("alz_background_nearshore_line192", parallaxShift, 192 - yShift, 0, 0, 0x1100)
+}
+
+function void ALZ.Animatetar()
+{
+	--animatedTileRender.animationTimer
+	if ((animatedTileRender.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
+	{
+		animatedTileRender.animationTimer = 10 - 1
+		animatedTileRender.animationFrame = (animatedTileRender.animationFrame + 1) % 3
+	}
+	Renderer.drawCustomSprite(stringformat("alz_tar_frame%d", animatedTileRender.animationFrame), 0x0990, 0x0130, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+	Renderer.drawCustomSprite(stringformat("alz_tar_frame%d", animatedTileRender.animationFrame), 0x09c0, 0x0130, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+	Renderer.drawCustomSprite("alz_tar_bottom", 0x0990, 0x0177, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+}
+
+function void ALZ.DisplayLeaves()
+{
+	Renderer.drawCustomSprite("alz_leaves_tarandswitch", 0x08d0 - 0x0600, 0x0000, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+
+	Renderer.drawCustomSprite("alz_leaves_start", 0x0600, 0x0000, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+	Renderer.drawCustomSprite("alz_leaves_loop", 0x07e0, 0x0000, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+	Renderer.drawCustomSprite("alz_leaves_tarandswitch", 0x08d0, 0x0000, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+
+	Renderer.drawCustomSprite("alz_leaves_start", 0x0600 + 0x0600, 0x0000, 0, SPRITE_FLAG_WORLDSPACE, 0xa001)
+}
+
+function void ALZ.DisplayBottom()
+{
+	Renderer.drawCustomSprite("alz_bottom3", 0x08d0 - 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+
+	Renderer.drawCustomSprite("alz_bottom0", 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+	Renderer.drawCustomSprite("alz_bottom1", 0x0780, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+	Renderer.drawCustomSprite("alz_bottom2", 0x0900, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+	Renderer.drawCustomSprite("alz_bottom3", 0x0a80, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+
+	Renderer.drawCustomSprite("alz_bottom0", 0x0600 + 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+}
+
+
+
+
+
+function void CGZ_CustomSprites()
+{
+	UpdateBackgroundScrolling.CGZ()
+
+	// Manage bonus stage timer
+	BonusStage.UpdateTimeRemaining()
+
+	// Set goal pole position and render it
+	u16 pole.x = 0x0690
+	u16 pole.y = 0x02a0
+	BonusStage.RenderGoalPole(pole.x, pole.y)
+
+	// Draw bonus bubbles
+	BonusStage.DrawBonusBubbles()
+
+	// Manage looping and laps
+	CGZ.ManageLaps()
+
+	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
+	// Otherwise, render the player2 value plus 1.
+	s8 lapNum = clamp(s8(competition_mode.lap_count.player1), 0, 0x7f) + 1
+	bool underStart = (u16[0xffffb010] > 0x0600 && u16[0xffffb010] < pole.x && u16[0xffffb014] < 0x02a8)
+	bool beforeStart = (u16[0xffffb010] <= 0x0600)
+	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && (underStart || beforeStart) && competition_mode.current_lap.player1 == 0))
+		lapNum = 0
+	BonusStage.RenderLapNumber(lapNum)
+
+	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
+	BonusStage.AwardLapBonus(pole.x)
+
+	// Render LAP BONUS
+	BonusStage.RenderLapBonus()
+}
+
+function void UpdateBackgroundScrolling.CGZ()
+{
+	u16 cameraXPos = camera.position.x.u16 + 0x4000 + (0x600 * s8(backgroundCameraLoopCount))		// we use a camera shift to stop the moon from scrolling off screen early
+	s64 parallaxShift = -(cameraXPos * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s16 yShift = 0 // camera.position.y.u16 / 56	// -8						// 56 is chosen for an appropriate amount of vertical scroll. -8 represents 8 pixels of extra sky shown above the usual highest point. Alt idea: 28 and -32
+	Renderer.drawCustomSprite("cgz_background_sky", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 240 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_lights_veryfar", parallaxShift, 48 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 480 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_far", parallaxShift, 88 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 960 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_mid", parallaxShift, 104 - yShift, 0, 0, 0x1100)
+	parallaxShift = -(cameraXPos * 1920 / 0x1ff0) % 512
+	Renderer.drawCustomSprite("cgz_background_buildings_near", parallaxShift, 120 - yShift, 0, 0, 0x1100)
+}
+
+function void ALZ.ManageLaps()
+{
+	u8[0xffffb037] |= 0x80		// set a flag saying the character cannot be hurt, although they can be knocked back
+	// If too far right
+	if (u16[0xffffb010] > 0x0660 + 0x0600)
+	{
+		u16[0xffffb010] -= 0x0600
+		u16[0xffffb010 + 0x4a] -= 0x0600
+		camera.position.x.u16 -= 0x0600
+		camera.foreground.x.u16 -= 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		++backgroundCameraLoopCount
+		++competition_mode.current_lap.player1
+		if (competition_mode.current_lap.player1 < competition_mode.lap_count.player1)	// we went backwards for more than one lap and then started forward again
+			competition_mode.current_lap.player1 = competition_mode.lap_count.player1	// in this case, act like we only went backwards one lap so the next forward lap counts
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] -= 0x0600
+		}
+	}
+	// If too far left
+	else if (u16[0xffffb010] < 0x0660)
+	{
+		u16[0xffffb010] += 0x0600
+		u16[0xffffb010 + 0x4a] += 0x0600
+		camera.position.x.u16 += 0x0600
+		camera.foreground.x.u16 += 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		--backgroundCameraLoopCount
+		if (competition_mode.current_lap.player1 != 0xff)
+			--competition_mode.current_lap.player1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] += 0x0600
+		}
+	}
+}
+
+function void CGZ.ManageLaps()
+{
+	u8[0xffffb037] |= 0x80		// set a flag saying the character cannot be hurt, although they can be knocked back
+	// If too far right
+	if (u16[0xffffb010] > 0x0980)
+	{
+		u16[0xffffb010] -= 0x0600
+		u16[0xffffb010 + 0x4a] -= 0x0600
+		camera.position.x.u16 -= 0x0600
+		camera.foreground.x.u16 -= 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		++backgroundCameraLoopCount
+		++competition_mode.current_lap.player1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] -= 0x0600
+		}
+	}
+	// If too far left
+	else if (u16[0xffffb010] < 0x0380)
+	{
+		u16[0xffffb010] += 0x0600
+		u16[0xffffb010 + 0x4a] += 0x0600
+		camera.position.x.u16 += 0x0600
+		camera.foreground.x.u16 += 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		--backgroundCameraLoopCount
+		--competition_mode.current_lap.player1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] += 0x0600
+		}
+	}
+	// If too high
+	else if (u16[0xffffb014] < 0x0180 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
+	{
+		u16[0xffffb014] += 0x0180
+		u16[0xffffb014 + 0x4a] += 0x0180
+		camera.position.y.u16 += 0x0180
+		camera.foreground.y.u16 += 0x0180
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+	}
+	// If too low
+	else if (u16[0xffffb014] > 0x0300 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
+	{
+		u16[0xffffb014] -= 0x0180
+		u16[0xffffb014 + 0x4a] -= 0x0180
+		camera.position.y.u16 -= 0x0180
+		camera.foreground.y.u16 -= 0x0180
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+	}
 }
