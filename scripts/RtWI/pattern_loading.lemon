@@ -2,7 +2,7 @@
 //# address-hook(0x085fde) end(0x085ff8)
 function void StartLoadingPatternsForZone()
 {	
-	if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
+	if (isNewBonusStage())
 		return
 
 	base.StartLoadingPatternsForZone()
@@ -33,7 +33,7 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		base.RequestLoadingPatterns()
 		return
 	}
-	if (unlock_act != s3_ALZ && unlock_act != s3_CGZ && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
+	if (!isNewBonusStage() && (D0.u16 == 0x01 || D0.u16 == 0x05 || D0.u16 == 0x07 || D0.u16 == 0x52))	// PLC_01 (Sonic), 05 (Knuckles), or 07/52 (Tails) character life icons, monitors, RING HUD, enemy points, star post
 	{
 		// Life icon art needed. Goes to 0xfa80.
 

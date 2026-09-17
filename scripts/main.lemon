@@ -215,7 +215,8 @@ constant u16 s2_EHZ = 1
 constant u16 s2_CPZ = 2
 constant u16 s2_ARZ = 3
 constant u16 s3_ALZ = 4
-constant u16 s3_CGZ = 5
+constant u16 s3_BPZ = 5
+constant u16 s3_CGZ = 6
 
 
 
@@ -799,7 +800,7 @@ function void TitleCard.Init()
 		// Death Egg Boss
 		D0 = 11
 	}
-	else if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)
+	else if (isNewBonusStage())
 	{
 		// Competition bonus stage
 		D0 = 20
@@ -868,7 +869,7 @@ function void InitHUDTheme()
 //# address-hook(0x006a76) end(0x006bd6)
 function void InitializeGameCharacters()
 {
-	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || unlock_act == s3_ALZ || unlock_act == s3_CGZ)	//    The CZ case is *also* handled in fn0067ee() so mods with their own InitializeGameCharacters() don't break things.
+	bool isBonusStage = ((global.zone_act >= 0x1300 && global.zone_act < 0x1600) || isNewBonusStage())	//    The CZ case is *also* handled in fn0067ee() so mods with their own InitializeGameCharacters() don't break things.
 	// One of the bonus stages?
 	if (isBonusStage)
 	{
@@ -892,7 +893,7 @@ function void InitializeGameCharacters()
 			u8[0xffffee30] = 0xff
 			return
 		}
-		else if (unlock_act == s3_ALZ || unlock_act == s3_CGZ)		// Competition bonus stage exiting, now handled in fn0067ee()
+		else if (isNewBonusStage())		// Competition bonus stage exiting, now handled in fn0067ee()
 		{
 			ring_counter = checkpoint.rings
 			extra_lives_granted = checkpoint.lives_granted
@@ -1311,7 +1312,7 @@ function u16 getTileAndAngle()
 		u8 tileForm = u8[A2 + tileType * 2]
 		if (tileForm != 0)
 		{
-			u32 angleArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_angles_address : 0x096000
+			u32 angleArray = (unlock_act && (!isNewBonusStage())) ? s2_angles_address : 0x096000
 			u8 angle = u8[angleArray + tileForm]
 			if (tile & 0x0400)	// Flip horizontally
 			{
@@ -1343,7 +1344,7 @@ function s16 getCollisionIndentX()
 			iy = 15 - iy
 		}
 
-		u32 xArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_heightmapsrotated_address : 0x097100
+		u32 xArray = (unlock_act && (!isNewBonusStage())) ? s2_heightmapsrotated_address : 0x097100
 		s16 indent = s8[xArray + (tileForm * 0x10) + iy]
 		if (indent != 0)
 		{
@@ -1372,7 +1373,7 @@ function s16 getCollisionIndentY()
 			ix = 15 - ix
 		}
 
-		u32 yArray = (unlock_act && (unlock_act != s3_ALZ && unlock_act != s3_CGZ)) ? s2_heightmaps_address : 0x096100
+		u32 yArray = (unlock_act && (!isNewBonusStage())) ? s2_heightmaps_address : 0x096100
 		s16 indent = s8[yArray + (tileForm * 0x10) + ix]
 		if (indent != 0)
 		{
@@ -1407,6 +1408,8 @@ function void fn0076a6()
 			System.loadExternalRawData("arz_collision", D0)
 		else if (unlock_act == s3_ALZ)
 			System.loadExternalRawData("alz_collision", D0)
+		else if (unlock_act == s3_BPZ)
+			System.loadExternalRawData("bpz_collision", D0)
 		else if (unlock_act == s3_CGZ)
 			System.loadExternalRawData("cgz_collision", D0)
 	}
@@ -4879,7 +4882,7 @@ function void Character.updateBonusEffects()
 function bool Character.performSuperTransformation()
 {
 	// In a new bonus stage?
-	if (unlock_act == s3_ALZ && unlock_act == s3_CGZ)
+	if (isNewBonusStage())
 		return false
 
 	// Already super?

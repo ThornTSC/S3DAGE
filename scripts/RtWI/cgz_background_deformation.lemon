@@ -2,6 +2,11 @@ global s8 backgroundCameraLoopCount
 global s8 animatedTileRender.animationTimer
 global u8 animatedTileRender.animationFrame
 
+function bool isNewBonusStage()
+{
+	return (unlock_act == s3_ALZ || unlock_act == s3_BPZ || unlock_act == s3_CGZ)
+}
+
 function void BonusStage.RenderGoalPole(u16 pole.x, u16 pole.y)
 {
 	u64 key = stringformat("timeattack_pole_0%d", ((level.framecounter / 6) & 0x03) + 1)
@@ -410,6 +415,16 @@ function void ALZ.DisplayBottom()
 
 	Renderer.drawCustomSprite("alz_bottom0", 0x0600 + 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
 }
+
+
+
+
+
+
+function void BPZ_CustomSprites()
+{
+}
+
 
 
 

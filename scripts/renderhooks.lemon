@@ -1157,7 +1157,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		if (unlock_act == s3_ALZ)
 			Renderer.drawCustomSprite("alz_springbase", px, py, 0x00, ((objA0.render_flags & render_flag.FLIP_X) ? SPRITE_FLAG_FLIP_X : 0) | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
-		else	// (unlock_act == s3_CGZ)
+		else	// if (unlock_act == s3_CGZ)
 			Renderer.drawCustomSprite("cgz_springbase", px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
 		return true
 	}

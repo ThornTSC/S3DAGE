@@ -17,7 +17,7 @@ function u16 getShield.targetInVRAM()
 // Function taken from objects\basics\shields.lemon
 function void Shield.sharedInit()
 {
-	if (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ)
+	if (unlock_act && !isNewBonusStage())
 		objA0.shield.art_offset += 0x1beb1e	// shift form S&K data location to S3 alone data location, where versions for Sonic 2's palette are injected
 
 	objA0.render_flags = render_flag.WORLD
@@ -37,8 +37,8 @@ function void Shield.sharedInit()
 //# alias(fn0187f0) deprecated
 function void Invincibility.Init()
 {
-	u32 invinStarsArtLoc = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
-	u16 invinStartArtLength = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? 0x240 : 0x200
+	u32 invinStarsArtLoc = (unlock_act && !isNewBonusStage()) ? 0x348d22 : 0x18a204	// Sonic 2 stars injected at the Sonic 3 alone stars location
+	u16 invinStartArtLength = (unlock_act && !isNewBonusStage()) ? 0x240 : 0x200
 	updateSpritePattern(invinStarsArtLoc, getShield.targetInVRAM(), invinStartArtLength)
 
 	D2 = 0
@@ -73,9 +73,9 @@ function void LightningShield.Init()
 	//if (!DIRECT_OBJECT_RENDERING)
 #endif
 	{
-		u32 sparksArtAddress = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
+		u32 sparksArtAddress = (unlock_act && !isNewBonusStage()) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
 		// Load sprite patterns for the sparks
-		if (!unlock_act || unlock_act == s3_ALZ || unlock_act == s3_CGZ || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
+		if (!unlock_act || isNewBonusStage() || !(u8[0xffffb02b] & char.bonus.INVINCIBLE))
 			updateSpritePattern(sparksArtAddress, getShield.targetInVRAM() + 0x3e0, 0x50)
 	}
 
@@ -121,7 +121,7 @@ function void Character.cancelSuperTransformation()
 		char.control_flags &= ~(control_flag.DISABLE_INTERACTION | control_flag.DISABLE_UPDATE)
 
 	// If lightning shield is active, reload sprite patterns for the sparks
-	u32 sparksArtAddress = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
+	u32 sparksArtAddress = (unlock_act && !isNewBonusStage()) ? 0x34e402 : 0x18f8e4	// Sparks in the Sonic 2 palette are injected at the Sonic 3 alone sparks location
 	if (u32[0xffffcce8] == 0x019732)
 	{
 		updateSpritePattern(sparksArtAddress, getShield.targetInVRAM() + 0x3e0, 0x50)
@@ -213,7 +213,7 @@ function void fn01937c()
 //# address-hook(0x019156) end(0x01919e)
 function void fn019156()
 {
-	u32 superStarsArtLoc = (unlock_act && unlock_act != s3_ALZ && unlock_act != s3_CGZ) ? 0x34a862 : 0x18bd44
+	u32 superStarsArtLoc = (unlock_act && !isNewBonusStage()) ? 0x34a862 : 0x18bd44
 	updateSpritePattern(superStarsArtLoc, getShield.targetInVRAM(), 0x01a0)
 
 	objA0.mapping_offset = 0x0192de

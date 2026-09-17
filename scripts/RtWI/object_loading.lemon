@@ -905,7 +905,7 @@ function void fn030a38()
 //# address-hook(0x04a1e6) end(0x04a212)
 function void fn04a1e6()
 {
-	if (unlock_act != s3_ALZ && unlock_act != s3_CGZ)
+	if (!isNewBonusStage())
 	{
 		base.fn04a1e6()
 		return

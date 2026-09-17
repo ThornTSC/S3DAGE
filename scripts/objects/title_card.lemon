@@ -40,7 +40,7 @@ function void TitleCard.Wait()
 
 	if (allocDynamicObjectAfterA0())
 	{
-		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == s3_ALZ || unlock_act == s3_CGZ))
+		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || isNewBonusStage())
 		{
 			// Bonus stage
 			A2 = 0x02dab4
@@ -129,7 +129,7 @@ function void TitleCard.Show()
 			}
 		}
 
-		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || (unlock_act == s3_ALZ || unlock_act == s3_CGZ))
+		if ((global.zone >= 0x13 && global.zone != 0x16 && global.zone_act != 0x1700) || isNewBonusStage())
 		{
 			// Do nothing for bonus stages and Hidden Palace emerald cave
 		}
