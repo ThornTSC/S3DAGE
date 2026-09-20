@@ -69,7 +69,7 @@ function void fn01c550()
 	{
 		u16[0xfffffc5e] = (palette_set >= 2  && !original_mode) ? 0x42c : 0x020e	// this sets the red color used on some types of flowers
 	}														 	// once the level fade-in is over (originally 0x020e)
-	if (camera.position.x.u16 >= 0x2b00)
+	if (camera.position.x.u16 >= 0x2a80)	// originall 0x2b00, adjusted for ultrawide
 	{
 		u16[0xfffffc5e] = 0x0004 // this changes the color again in the area of the hollow tree
 	}
