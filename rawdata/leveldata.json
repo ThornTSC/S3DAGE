@@ -408,6 +408,20 @@
     // Collision
     "alz_collision":  { "File": "../level/ALZ/Collision/1.bin" },
 
+  // BPZ
+    // Layout
+    "bpz_layout": { "File": "../level/BPZ/Layout/1.bin" },
+    "bpz_objects": { "File": "../level/BPZ/Object Pos/1.bin" },
+    "bpz_rings": { "File": "../level/BPZ/Ring Pos/1.bin" },
+
+    // Tiles + animation, blocks, chunks
+    "bpz_tiles":  { "File": "../level/BPZ/Tiles/Primary.bin" },
+    "bpz_blocks":  { "File": "../level/BPZ/Blocks/Primary.bin" },
+    "bpz_chunks_p":  { "File": "../level/BPZ/Chunks/Primary.bin" },
+
+    // Collision
+    "bpz_collision":  { "File": "../level/BPZ/Collision/1.bin" },
+
   // CGZ
     // Layout
     "cgz_layout": { "File": "../level/CGZ/Layout/1.bin" },

@@ -8422,6 +8422,7 @@ constant array<u16> UnlockAct.LevelSizes =
 	0x0000, 0x7fff, 0x0000, 0x0720,		// CPZ
 	0x0000, 0x38f0, 0x0180, 0x0620,		// ARZ
 	0x0000, 0x7fff, 0x0000, 0x00a0,		// ALZ
+	0x0000, 0x7fff, 0x0000, 0x0220,		// BPZ
 	0x0000, 0x7fff, 0x0000, 0x0720		// CGZ
 }
 
@@ -23175,6 +23176,8 @@ function bool Standalone.useMultiSampleCollision()
 		{
 			if (unlock_act == s2_CPZ)
 				CPZ.MultiSampleCollision()
+			else if (unlock_act == s3_BPZ)
+				BPZ.MultiSampleCollision()
 			
 			// MGZ 1
 //			Standalone.MultiSampleCollision.addRect(0x0880, 0x04c0, 0x0960, 0x0540)
@@ -23337,7 +23340,11 @@ function void CPZ.MultiSampleCollision()
 	}
 }
 
-
+function void BPZ.MultiSampleCollision()
+{
+	Standalone.MultiSampleCollision.addRect(0x03d0, 0x01c0, 0x0470, 0x0250)
+	Standalone.MultiSampleCollision.addRect(0x03d0 + 0x0300, 0x01c0, 0x0470 + 0x0300, 0x0250)
+}
 
 
 

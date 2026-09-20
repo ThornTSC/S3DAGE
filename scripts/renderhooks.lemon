@@ -1130,6 +1130,54 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 
+	// BPZ elephant block in single player. This is now handled in BPZ.DrawElephantBlocks(), as DrawObject() would not draw these large objects near the screen edges.
+//	if ((objA0.update_address == 0x035c72 || objA0.update_address == 0x035cca) && unlock_act)
+//	{
+//		u16 elephantXpos = (objA0.render_flags & 0x01) ? px + objA0.box_size.x + (u8[A0 + 0x34] & 0x01) : px - objA0.box_size.x - (u8[A0 + 0x34] & 0x01)
+//		Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos, py, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01), renderQueue)
+//		// Render object in other laps of the BPZ bonus stage. Unlockable act ID checked in case this is used outside of bonus stage in the future.
+//		if (unlock_act == s3_BPZ)
+//		{
+//			Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos - 0x0600, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+//			Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos - 0x0300, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+//			Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos + 0x0300, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+//			Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos + 0x0600, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+//		}
+//		return true
+//	}
+
+	// BPZ bumper in single player
+	if (objA0.update_address == 0x032ff0 && unlock_act)
+	{
+		u8 sprite = objA0.animation.sprite
+		if (sprite == 0 && palette_set < 2)
+			sprite = 2
+		Renderer.drawCustomSprite(stringformat("bpz_bumper_frame%d", sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		return true
+	}
+
+	// BPZ balloon in single player
+	if (objA0.update_address == 0x035db2 && unlock_act)
+	{
+		Renderer.drawCustomSprite("bpz_balloon_base", px, py + 0x1c, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		u8 sprite = objA0.animation.sprite
+		if (sprite == 6 && palette_set >= 2)
+			py += 2		// Origins alignment for this frame
+		if (sprite == 8 && palette_set >= 2)
+		{
+			if (objA0.animation.timer && objA0.state == 2)
+			{
+				sprite = 7
+				py += 3
+			}
+			else
+				py += 9		// Origins alignment for this frame	
+		}
+		if (sprite < 9)
+			Renderer.drawCustomSprite(stringformat("bpz_balloon_frame%d", sprite), px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+		return true
+	}
+
 	// CGZ triangle bumpers in single player
 	if (objA0.update_address == 0x032c92 && unlock_act)
 	{

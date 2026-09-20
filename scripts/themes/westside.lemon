@@ -800,15 +800,15 @@ function void Westside.displayLapBonus(u16 currentRingBonus)
 {
 	if (currentRingBonus < 10)
 	{
-		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-		Renderer.drawCustomSprite("westside_hud_plus", u16[0xffffb010] - 1, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 9, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
+		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+		Renderer.drawCustomSprite("westside_hud_plus", u16[0xffffb010] - 1, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 9, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
 	}
 	else
 	{
-		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-		Renderer.drawCustomSprite("westside_hud_plus", u16[0xffffb010] - 5, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
-		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 5, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
-		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 13, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)
+		Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+		Renderer.drawCustomSprite("westside_hud_plus", u16[0xffffb010] - 5, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 5, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
+		Renderer.drawCustomSprite(stringformat("westside_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 13, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
 	}
 }

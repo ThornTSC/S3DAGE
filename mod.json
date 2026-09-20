@@ -163,14 +163,14 @@
 			},
 			{
 				"InternalName": "BonusStage",
-				"DisplayName": "Bonus Stage",
+				"DisplayName": "Bonus Stages",
 				"Variable": "use_new_bonus",
 				"DefaultValue": "1",
 			 	"Category": "Gameplay Settings",
 				"Options":
 				{
-					"0": "Slot Machine",
-					"1": "New Stage (default)"
+					"0": "Classic Stages",
+					"1": "New Stages (default)"
 				}
 			},
 			{

@@ -173,6 +173,314 @@ function void fn032aae()
 	CheckForUnloadObject()
 }
 
+// BPZ Moving Elephant Bars
+
+//# address-hook(0x035bf8) end(0x035c6c)
+function void fn035bf8()
+{
+	objA0.mapping_offset = 0x035d5a
+	objA0.sprite_attributes = 0x0300
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0280
+	objA0.box_size.x = (!competition_mode.active) ? 0x48 : 0x30
+	objA0.box_size.y = (!competition_mode.active) ? 0x18 : 0x10
+	u16[A0 + 0x30] = objA0.position.x.u16
+	objA0.render_flags |= render_flag.COMPOUND
+	objA0.compound.count = 0x01
+
+	A2 = A0 + 0x18
+	u16[(A2+=2)-2] = objA0.position.x.u16
+	u16[(A2+=2)-2] = objA0.position.y.u16
+	u16[(A2+=2)-2] = 0
+
+	D0.u16 = objA0.subtype2c << 8
+	u16[A0 + 0x38] = D0.u16
+	objA0.flags2a |= 0x80
+	if (objA0.flags2a & 0x01)
+	{
+		u16[A0 + 0x34] = D0.u16
+		objA0.value3a = 0x01
+
+		objA0.update_address = 0x035cca
+		fn035cca()
+	}
+	else
+	{
+		objA0.update_address = 0x035c72
+		fn035c72()
+	}
+}
+
+//# address-hook(0x035c72) end(0x035cc4)
+function void fn035c72()
+{
+	fn035d22()
+
+	A2 = A0 + 0x18
+	D0.u16 = u16[A0 + 0x30]
+	D1.s16 = s8[A0 + 0x34]
+	D0.u16 -= D1.u16
+	u16[A2] = D0.u16
+	D0.u16 = u16[A0 + 0x30]
+	D1.s16 >>= 1
+	D0.u16 -= D1.u16
+	objA0.position.x.u16 = D0.u16
+	D1.u16 += 0x08
+	objA0.box_size.x = D1.u8
+	u16[A2 + 0x04] = 0
+	if (D1.u16 >= 0x20)
+	{
+		u16[A2 + 0x04] = 0x01
+	}
+	D1.u16 += 0x07
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16
+	++D3.u16
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	// Use DrawObject() as normal in Competition Mode
+//	if (competition_mode.active)
+//	{
+		DrawObject()
+//	}
+
+	// DrawObject() is insufficient in the BPZ bonus act, where the object can be out of drawing range
+	// while looking across a level loop or object repositioning. Rather than a renderhook, we must
+	// render the object directly in BPZ_CustomSprites() by locating it in memory.
+}
+
+
+//# address-hook(0x035cca) end(0x035d1c)
+function void fn035cca()
+{
+	fn035d22()
+
+	A2 = A0 + 0x18
+	D0.u16 = u16[A0 + 0x30]
+	D1.s16 = s8[A0 + 0x34]
+	D0.u16 += D1.u16
+	u16[A2] = D0.u16
+	D0.u16 = u16[A0 + 0x30]
+	D1.s16 >>= 1
+	D0.u16 += D1.u16
+	objA0.position.x.u16 = D0.u16
+	D1.u16 += 0x08
+	objA0.box_size.x = D1.u8
+	u16[A2 + 0x04] = 0
+	if (D1.u16 >= 0x20)
+	{
+		u16[A2 + 0x04] = 0x01
+	}
+	D1.u16 += 0x07
+	D2 = objA0.box_size.y
+	D3.u16 = D2.u16
+	++D3.u16
+	D4.u16 = objA0.position.x.u16
+	fn01dc56()
+
+	// Use DrawObject() as normal in Competition Mode
+//	if (competition_mode.active)
+//	{
+		DrawObject()
+//	}
+
+	// DrawObject() is insufficient in the BPZ bonus act, where the object can be out of drawing range
+	// while looking across a level loop or object repositioning. Rather than a renderhook, we must
+	// render the object directly in BPZ_CustomSprites() by locating it in memory.
+}
+
+//# address-hook(0x035d22) end(0x035d58)
+function void fn035d22()
+{
+	// Adjust this object for the two laps within one true loop of the BPZ bonus stage
+	if (unlock_act == s3_BPZ)
+	{
+		if (objA0.position.x.u16 < 0x0280 + 0x0300 && u16[0xffffb010] > 0x0280 + 0x0300)
+		{
+			objA0.position.x.u16 += 0x0300
+			u16[A0 + 0x30] += 0x0300
+			u16[A0 + 0x18] += 0x0300
+		}
+		else if (objA0.position.x.u16 > 0x0280 + 0x0300 && u16[0xffffb010] < 0x0280 + 0x0300)
+		{
+			objA0.position.x.u16 -= 0x0300
+			u16[A0 + 0x30] -= 0x0300
+			u16[A0 + 0x18] -= 0x0300
+		}
+	}
+
+	base.fn035d22()
+}
+
+// Bumpers (for BPZ, but code shared throughout the game)
+// If used outside of a bonus stage, make sure to use the single-player version
+// so that points are awarded and tracked properly.
+// This will also grant access to orbiting bumpers.
+
+//# address-hook(0x032df2) end(0x032eea)
+function void fn032df2()
+{
+	objA0.render_flags = render_flag.WORLD
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.sprite_priority = 0x80
+	objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.8x8_2)
+	u16[A0 + 0x30] = objA0.position.x.u16
+	objA0.value32 = objA0.position.y.u16
+
+	if (global.zone == 0x14)
+	{
+		objA0.mapping_offset = 0x0330a2
+		objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE3 | 0x02cd)
+		objA0.update_address = 0x032ef0
+		fn032ef0()
+		return
+	}
+
+	if (competition_mode.active || unlock_act == s3_BPZ)
+	{
+		objA0.mapping_offset = 0x2322ee
+		if (palette_set > 2 && !original_mode)
+			objA0.sprite_attributes = 0x0300	// Fix for wrong palette line usage, #contributed by Legobouwer
+		else
+			objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE1 | 0x0300)
+		if (unlock_act == s3_BPZ)
+		{
+			objA0.box_size.x = 0x18
+			objA0.box_size.y = 0x18
+			objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.12x12)
+		}
+		objA0.update_address = 0x032ff0
+		fn032ff0()
+		return
+	}
+
+	objA0.mapping_offset = 0x2322ce
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE2 | 0x0364)
+	if (objA0.subtype2c != 0)
+	{
+		// Orbiting bumpers
+		objA0.value26 = objA0.subtype2c		// Starting point on orbit path
+		objA0.update_address = 0x032e7e
+		fn032e7e()
+	}
+	else
+	{
+		// Still bumpers
+		objA0.update_address = 0x032eaa
+		fn032eaa()
+	}
+}
+
+//# address-hook(0x03301c) end(0x03307a)
+function void fn03301c()
+{
+	D1.u16 = objA0.position.x.u16 - objA1.position.x.u16
+	D2.u16 = objA0.position.y.u16 - objA1.position.y.u16
+	LookupAngleByVector()
+
+	D0.u16 += u8[0xfffffe04] & 0x03
+	LookupSinCos()
+
+	D1.s32 = s32(D1.s16) * -0x700
+	D1.s32 >>= 8
+	objA1.velocity.x = D1.u16
+
+	D0.s32 = s32(D0.s16) * -0x700
+	D0.s32 >>= 8
+	objA1.velocity.y = D0.u16
+
+	objA1.flags2a |= char.flag.IN_AIR
+	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.PUSHING)
+	u8[A1 + 0x40] = 0
+	objA0.state = 0x01
+
+	playSound((palette_set < 2) ? 0x7b : 0xaa)
+}
+
+// This function is for collision.flag.SPECIAL.
+// We need a special check for the larger BPZ bumpers and balloon to be valid here.
+//# address-hook(0x0103ba) end(0x01040a)
+function void fn0103ba()
+{
+	u8 var = (objA1.collision_attributes & collision_attributes.size)
+	if (var == collision.size.16x16 || var == collision.size.6x6 || var == collision.size.16x8 || var == collision.size.4x4_2 || (var >= collision.size.128x32 && var <= collision.size.4x4_2) || var == collision.size.24x24_2 || ((objA1.update_address == 0x32ff0 || objA1.update_address == 0x035db2) && unlock_act == s3_BPZ))
+	{
+		D1.u16 = A0 - 0xffffb000
+		if (D1.u16 != 0)
+		{
+			++u8[A1 + 0x29]
+		}
+		++u8[A1 + 0x29]
+	}
+}
+
+// BPZ balloon
+
+//# address-hook(0x035d80) end(0x035dac)
+function void fn035d80()
+{
+	objA0.mapping_offset = 0x035e9a
+	objA0.sprite_attributes = (sprite_attribute.PALETTE.LINE3 | 0x0300)
+	objA0.render_flags |= render_flag.WORLD
+	objA0.sprite_priority = 0x0200
+	objA0.box_size.x = 0x10
+	objA0.box_size.y = 0x10
+	objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.8x8_2)
+	if (!competition_mode.active)
+	{
+		objA0.box_size.x = 0x18
+		objA0.box_size.y = 0x18
+		objA0.collision_attributes = (collision.flag.SPECIAL | collision.size.12x12)
+	}
+	objA0.update_address = 0x035db2
+	fn035db2()
+}
+
+//# address-hook(0x035dde) end(0x035e46)
+function void fn035dde()
+{
+	D1.u16 = objA0.position.x.u16
+	D2.u16 = objA0.position.y.u16
+	D1.u16 -= u16[A1 + 0x10]
+	D2.u16 -= u16[A1 + 0x14]
+	LookupAngleByVector()
+	D1.u8 = D0.u8 - 0x20
+	if (D1.u8 < 0x40)
+	{
+		u16[A1 + 0x1a] = 0xf700
+		if (!competition_mode.active)
+			s16[A1 + 0x1a] = s16[A1 + 0x1a] * 4 / 3
+		objA0.state = 0x01
+	}
+	else
+	{
+		LookupSinCos()
+
+		D1.s32 = s32(D1.s16) * -0x0480
+		D1.s32 >>= 8
+		u16[A1 + 0x18] = D1.u16
+
+		D0.s32 = s32(D0.s16) * -0x0480
+		D0.s32 >>= 8
+		u16[A1 + 0x1a] = D0.u16
+
+		if (!competition_mode.active)
+		{
+			s16[A1 + 0x18] = s16[A1 + 0x18] * 4 / 3
+			s16[A1 + 0x1a] = s16[A1 + 0x1a] * 4 / 3
+		}
+
+		objA0.state = 0x02
+	}
+
+	u8[A1 + 0x2a] |= char.flag.IN_AIR
+	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.PUSHING)
+	u8[A1 + 0x40] = 0
+	playSound((palette_set < 2) ? 0x7b : 0x77)
+}
+
 // Yellow bumper objects in CGZ
 
 //# address-hook(0x032c6a) end(0x032d14)
@@ -939,7 +1247,16 @@ function void BonusBubble.Main()
 {
 	AddAsDynamicObject()
 	objA0.value42 = min(objA0.value42 + 16, 255)	// increment a value that handles the fade-in as bubbles respawn
-	// DrawObject() is not called. This is handled in CGZ_CustomSprites so the drawing in other loops of the level is handled properly.
+	// DrawObject() is not called. This is handled in CustomSprites functions so the drawing in other loops of the level is handled properly.
+
+
+	if (unlock_act == s3_BPZ)
+	{
+		if (objA0.position.x.u16 < 0x0280 + 0x0300 && u16[0xffffb010] > 0x0280 + 0x0300)
+			objA0.position.x.u16 += 0x0300
+		else if (objA0.position.x.u16 > 0x0280 + 0x0300 && u16[0xffffb010] < 0x0280 + 0x0300)
+			objA0.position.x.u16 -= 0x0300
+	}
 }
 
 //# address-hook(0x04a1ec)

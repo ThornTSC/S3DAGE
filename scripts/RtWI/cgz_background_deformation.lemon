@@ -1,6 +1,12 @@
 global s8 backgroundCameraLoopCount
 global s8 animatedTileRender.animationTimer
 global u8 animatedTileRender.animationFrame
+global s8 animatedTileRender2.animationTimer
+global u8 animatedTileRender2.animationFrame
+global s8 animatedTileRender3.animationTimer
+global u8 animatedTileRender3.animationFrame
+global s8 animatedTileRender4.animationTimer
+global u8 animatedTileRender4.animationFrame
 
 function bool isNewBonusStage()
 {
@@ -14,7 +20,41 @@ function void BonusStage.RenderGoalPole(u16 pole.x, u16 pole.y)
 	Renderer.drawCustomSprite(key, pole.x - camera.position.x.u16, pole.y - camera.position.y.u16 - 30, 0x00, flags, 0x9f00 - 1)
 }
 
-function void BonusStage.DrawBonusBubbles()
+function void ALZ.DrawBonusBubbles()
+{
+	u32 backupA0 = A0
+	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
+	{
+		if (u32[objAddress] == 0x04a1e6 && u8[objAddress + 0x05] == 2)	// check for bonus bubbles with a base state of 2
+		{
+			A0 = objAddress
+			u8 alpha = u8(objA0.value42)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)	
+		}
+	}
+	A0 = backupA0
+}
+
+function void BPZ.DrawBonusBubbles()
+{
+	u32 backupA0 = A0
+	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
+	{
+		if (u32[objAddress] == 0x04a1e6 && u8[objAddress + 0x05] == 2)	// check for bonus bubbles with a base state of 2
+		{
+			A0 = objAddress
+			u8 alpha = u8(objA0.value42)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
+		}
+	}
+	A0 = backupA0
+}
+
+function void CGZ.DrawBonusBubbles()
 {
 	u32 backupA0 = A0
 	for (u32 objAddress = 0xffffb094; objAddress < 0xffffd000; objAddress += 0x4a)
@@ -143,9 +183,34 @@ function void BonusStage.RenderLapNumber(u8 lapNum)
 	}
 }
 
+function bool BonusStage.IsNewLap(u16 pole.x)
+{
+	return (u16[0xffffb010] >= pole.x && s8(competition_mode.current_lap.player1) > competition_mode.lap_count.player1 && s8(competition_mode.current_lap.player1) > 0)
+}
+
+function bool BPZ.IsNewLap(u16 pole.x)
+{
+//	debugLog(stringformat("Player X: %x", u16[0xffffb010]))
+//	debugLog(stringformat("Pole X: %x", pole.x))
+//	debugLog(stringformat("Internal lap count: %x", competition_mode.current_lap.player1))
+//	debugLog(stringformat("Player laps completed: %x", competition_mode.lap_count.player1))
+//	debugLog(stringformat("Is second half lap: %x", u16[0xffffb010] >= pole.x + 0x0300))
+
+	if (u16[0xffffb010] < pole.x + 0x80 && (competition_mode.lap_count.player1 & 0x01))	// the + 0x80 allows a buffer in which we actually cross the pole during the check
+	{
+//		debugLog("Check 1")
+		return (u16[0xffffb010] >= pole.x && s8(2*competition_mode.current_lap.player1) > competition_mode.lap_count.player1 && s8(competition_mode.current_lap.player1) > 0)
+	}
+	else
+	{
+//		debugLog("Check 2")
+		return (u16[0xffffb010] >= pole.x + 0x0300 && s8(2*competition_mode.current_lap.player1 + 1) > competition_mode.lap_count.player1)
+	}
+}
+
 constant array<u16> BonusStage.LapBonuses =
 {
-	5, 5, 10, 10, 15, 15, 20, 20
+	5, 5, 10, 10, 15, 15, 20, 20, 25, 25
 }
 
 function void BonusStage.AwardLapBonus(u16 pole.x)
@@ -154,10 +219,14 @@ function void BonusStage.AwardLapBonus(u16 pole.x)
 	if (timer.alldata == 1)
 		backgroundCameraLoopCount = 0
 
-	if (!(u16[0xffffb010] >= pole.x && s8(competition_mode.current_lap.player1) > competition_mode.lap_count.player1 && s8(competition_mode.current_lap.player1) > 0))
+	// A new lap has started if the player is to the right of the pole, the current internal lap is greater than the displayed lap, and the lap counter isn't zero.
+	// BPZ maps two visual laps to one internal lap, requiring slightly different logic.
+	if (unlock_act != s3_BPZ && !BonusStage.IsNewLap(pole.x))
+		return
+	if (unlock_act == s3_BPZ && !BPZ.IsNewLap(pole.x))
 		return
 
-	ring_counter += BonusStage.LapBonuses[min(competition_mode.lap_count.player1, 7)]
+	ring_counter += BonusStage.LapBonuses[min(competition_mode.lap_count.player1, 9)]
 	hud.dirty.rings = 0x80
 	if (checkForExtraLifeByRings())
 	{
@@ -188,16 +257,16 @@ function void BonusStage.RenderLapBonus()
 
 		else if (currentRingBonus < 10)
 		{
-			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010], u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 19, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010], u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 10, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
 		}
 		else
 		{
-			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f01)	
-			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)	
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
-			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9f02)
+			Renderer.drawCustomSprite("hud_ring", u16[0xffffb010] - 23, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+			Renderer.drawCustomSprite("angel_hud_plus", u16[0xffffb010] - 4, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)	
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus / 10), u16[0xffffb010] + 6, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
+			Renderer.drawCustomSprite(stringformat("hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 37, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
 		}
 
 	// Old method using built-in fonts instead of theme-specific PNG sprites
@@ -216,7 +285,7 @@ function void BonusStage.RenderLapBonus()
 function void ALZ_CustomSprites()
 {
 	UpdateBackgroundScrolling.ALZ()
-	ALZ.Animatetar()
+	ALZ.AnimateTar()
 	ALZ.DisplayLeaves()
 	ALZ.DisplayBottom()
 
@@ -237,10 +306,16 @@ function void ALZ_CustomSprites()
 	BonusStage.RenderGoalPole(pole.x + 0x0600, pole.y)
 
 	// Draw bonus bubbles
-	BonusStage.DrawBonusBubbles()
+	ALZ.DrawBonusBubbles()
 
 	// Manage looping and laps
 	ALZ.ManageLaps()
+
+	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
+	BonusStage.AwardLapBonus(pole.x)
+
+	// Render LAP BONUS
+	BonusStage.RenderLapBonus()
 
 	// The current_lap value tracks the number of times the stage has looped from right to left
 	// and decrements whenever the stage loops left to right (backwards).
@@ -251,17 +326,11 @@ function void ALZ_CustomSprites()
 	if (competition_mode.current_lap.player1 >= 0x80 || (lapNum == 1 && beforePole && competition_mode.current_lap.player1 == 0))
 		lapNum = 0
 	BonusStage.RenderLapNumber(lapNum)
-
-	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
-	BonusStage.AwardLapBonus(pole.x)
-
-	// Render LAP BONUS
-	BonusStage.RenderLapBonus()
 }
 
 function void UpdateBackgroundScrolling.ALZ()
 {
-	u16 cameraXPos = camera.position.x.u16 + (0x600 * s8(backgroundCameraLoopCount))
+	u16 cameraXPos = camera.position.x.u16 + (0x0600 * s8(backgroundCameraLoopCount))
 	s64 parallaxShift = 0 // -(cameraXPos * 120 / 0x1ff0) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
 	s16 yShift = camera.position.y.u16 / 9	- 8	// designed to match Sonic Origins vertical shift as closely as possible
 
@@ -380,7 +449,7 @@ function void UpdateBackgroundScrolling.ALZ()
 	Renderer.drawCustomSprite("alz_background_nearshore_line192", parallaxShift, 192 - yShift, 0, 0, 0x1100)
 }
 
-function void ALZ.Animatetar()
+function void ALZ.AnimateTar()
 {
 	--animatedTileRender.animationTimer
 	if ((animatedTileRender.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
@@ -423,9 +492,223 @@ function void ALZ.DisplayBottom()
 
 function void BPZ_CustomSprites()
 {
+	UpdateBackgroundScrolling.BPZ()		// includes animations in background
+	BPZ.AnimateStarPoles()
+	BPZ.AnimateForegroundFlags()
+	BPZ.DrawLoopCovers()
+	BPZ.DrawGiraffeSigns()
+	BPZ.DrawSquareFlags()
+	BPZ.DrawElephantBlocks()
+
+	// Manage bonus stage timer
+	BonusStage.UpdateTimeRemaining()
+
+	// Set goal pole position and render it
+	u16 pole.x = 0x0390
+	u16 pole.y = 0x00b0
+	BonusStage.RenderGoalPole(pole.x, pole.y)
+	BonusStage.RenderGoalPole(pole.x - 0x0600, pole.y)
+	BonusStage.RenderGoalPole(pole.x - 0x0300, pole.y)
+	BonusStage.RenderGoalPole(pole.x + 0x0300, pole.y)
+	BonusStage.RenderGoalPole(pole.x + 0x0600, pole.y)
+
+	// Draw bonus bubbles
+	BPZ.DrawBonusBubbles()
+
+	// Manage looping and laps
+	BPZ.ManageLaps()
+
+	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
+	BonusStage.AwardLapBonus(pole.x)
+
+	// Render LAP BONUS
+	BonusStage.RenderLapBonus()
+
+	// The current_lap value tracks the number of times the stage has looped from right to left
+	// and decrements whenever the stage loops left to right (backwards).
+	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
+	// Otherwise, render the lap_count value plus 1.
+	s8 lapNum = clamp(s8(competition_mode.lap_count.player1), 0, 0x7f) + 1
+	bool beforePole = (u16[0xffffb010] <= pole.x)
+	if (competition_mode.current_lap.player1 >= 0x80 || (lapNum == 1 && beforePole && competition_mode.current_lap.player1 == 0))
+		lapNum = 0
+	BonusStage.RenderLapNumber(lapNum)
 }
 
+function void UpdateBackgroundScrolling.BPZ()
+{
+	u16 cameraXPos = camera.position.x.u16 + (0x0600 * s8(backgroundCameraLoopCount))
+	s64 parallaxShift = -(cameraXPos * 96 / 0x0300) % 512	// line shift calculations can exceed s16 after multiplication and must be done in a larger space
+	s32 yShift = 103 * camera.position.y.u16 / 400	// designed to match Sonic Origins vertical shift as closely as possible
 
+	Renderer.drawCustomSprite("bpz_background_stars", parallaxShift, 0 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos * 151 / 0x0300) % 512
+	Renderer.drawCustomSprite("bpz_background_clouds", parallaxShift, 120 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos * 194 / 0x0300) % 512
+	Renderer.drawCustomSprite("bpz_background_mountains", parallaxShift, 158 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos * 240 / 0x0300) % 512
+	Renderer.drawCustomSprite("bpz_background_coasters_far", parallaxShift, 168 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos * 288 / 0x0300) % 512
+	Renderer.drawCustomSprite("bpz_background_coasters_near", parallaxShift, 208 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos * 336 / 0x0300) % 512
+	Renderer.drawCustomSprite("bpz_background_treetops_lower", parallaxShift, 224 - yShift, 0, 0, 0x1100)
+
+	parallaxShift = -(cameraXPos / 2) % 512
+	Renderer.drawCustomSprite("bpz_background_near", parallaxShift, 232 - yShift, 0, 0, 0x1100)
+
+	// Animate background tent flags
+	--animatedTileRender.animationTimer
+	if ((animatedTileRender.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
+	{
+		animatedTileRender.animationTimer = 5 - 1
+		animatedTileRender.animationFrame = !animatedTileRender.animationFrame
+	}
+	Renderer.drawCustomSprite(stringformat("bpz_tentflags_frame%d", animatedTileRender.animationFrame), parallaxShift, 240 - yShift, 0, 0, 0x1100)
+
+	// Animate background yellow dot lights
+	--animatedTileRender2.animationTimer
+	if ((animatedTileRender2.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
+	{
+		animatedTileRender2.animationTimer = 3 - 1
+		animatedTileRender2.animationFrame = !animatedTileRender2.animationFrame
+	}
+	Renderer.drawCustomSprite(stringformat("bpz_yellowdots_frame%d", animatedTileRender2.animationFrame), parallaxShift, 296 - yShift, 0, 0, 0x1100)
+}
+
+function void BPZ.AnimateStarPoles()
+{
+	--animatedTileRender3.animationTimer
+	if ((animatedTileRender3.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
+	{
+		animatedTileRender3.animationTimer = 6 - 1
+		animatedTileRender3.animationFrame = (animatedTileRender3.animationFrame + 1) % 5
+	}
+	u8 frameToDraw = animatedTileRender3.animationFrame
+	u8 flags = SPRITE_FLAG_WORLDSPACE
+	if (frameToDraw == 3)
+	{
+		frameToDraw = 2
+		flags |= SPRITE_FLAG_FLIP_X
+	}
+	else if (frameToDraw == 4)
+	{
+		frameToDraw = 1
+		flags |= SPRITE_FLAG_FLIP_X
+	}
+
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_short_frame%d", frameToDraw), 0x0360 - 0x0300, 0x00e6, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x0360 - 0x0300, 0x02d2, 0, flags, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x02d0, 0x01fa, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_short_frame%d", frameToDraw), 0x0360, 0x00e6, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x0360, 0x02d2, 0, flags, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x02d0 + 0x0300, 0x01fa, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_short_frame%d", frameToDraw), 0x0360 + 0x0300, 0x00e6, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x0360 + 0x0300, 0x02d2, 0, flags, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x02d0 + 0x0600, 0x01fa, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_short_frame%d", frameToDraw), 0x0360 + 0x0600, 0x00e6, 0, flags, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_starpole_long_frame%d", frameToDraw), 0x0360 + 0x0600, 0x02d2, 0, flags, 0x3001)
+}
+
+function void BPZ.AnimateForegroundFlags()
+{
+	--animatedTileRender4.animationTimer
+	if ((animatedTileRender4.animationTimer < 0 || timer.alldata == 1) && !global.game.paused)
+	{
+		animatedTileRender4.animationTimer = 8 - 1
+		animatedTileRender4.animationFrame = (animatedTileRender4.animationFrame + 1) % 6
+	}
+
+	
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x036c - 0x0300, 0x0158, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x024c, 0x00c8, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x02c4, 0x0068, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_FLIP_X, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x036c, 0x0158, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x024c + 0x0300, 0x00c8, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x02c4 + 0x0300, 0x0068, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_FLIP_X, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x036c + 0x0300, 0x0158, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x024c + 0x0600, 0x00c8, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x02c4 + 0x0600, 0x0068, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_FLIP_X, 0x3001)
+	Renderer.drawCustomSprite(stringformat("bpz_foregroundflags_frame%d", animatedTileRender4.animationFrame), 0x036c + 0x0600, 0x0158, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+}
+
+function void BPZ.DrawLoopCovers()
+{
+	Renderer.drawCustomSprite("bpz_loopcover", 0x0390 - 0x0300, 0x0015, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+	Renderer.addSpriteMaskWorld(0x04b0 - 0x0300, 0x0000, 0x000c, 0x00e0, 0xc000, 1)
+
+	Renderer.drawCustomSprite("bpz_loopcover", 0x0390, 0x0015, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+	Renderer.addSpriteMaskWorld(0x04b0, 0x0000, 0x000c, 0x00e0, 0xc000, 1)
+	
+	Renderer.drawCustomSprite("bpz_loopcover", 0x0390 + 0x0300, 0x0015, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+	Renderer.addSpriteMaskWorld(0x04b0 + 0x0300, 0x0000, 0x000c, 0x00e0, 0xc000, 1)
+
+	Renderer.drawCustomSprite("bpz_loopcover", 0x0390 + 0x0600, 0x0015, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
+	Renderer.addSpriteMaskWorld(0x04b0 + 0x0600, 0x0000, 0x000c, 0x00e0, 0xc000, 1)
+}
+
+function void BPZ.DrawGiraffeSigns()
+{
+	Renderer.drawCustomSprite("bpz_giraffesign", 0x043f - 0x0300, 0x002c, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_giraffesign", 0x043f, 0x002c, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_giraffesign", 0x043f + 0x0300, 0x002c, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_giraffesign", 0x043f + 0x0600, 0x002c, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+}
+
+function void BPZ.DrawSquareFlags()
+{
+	Renderer.drawCustomSprite("bpz_flags_5_descend", 0x0450 - 0x0300, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_5_ascend", 0x0510 - 0x0300, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_4_ascend", 0x0529 - 0x0300, 0x0026, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite("bpz_flags_5_descend", 0x0450, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_5_ascend", 0x0510, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_4_ascend", 0x0529, 0x0026, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite("bpz_flags_5_descend", 0x0450 + 0x0300, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_5_ascend", 0x0510 + 0x0300, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_4_ascend", 0x0529 + 0x0300, 0x0026, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+
+	Renderer.drawCustomSprite("bpz_flags_5_descend", 0x0450 + 0x0600, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_5_ascend", 0x0510 + 0x0600, 0x0140, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+	Renderer.drawCustomSprite("bpz_flags_4_ascend", 0x0529 + 0x0600, 0x0026, 0, SPRITE_FLAG_WORLDSPACE, 0x3001)
+}
+
+function void BPZ.DrawElephantBlocks()
+{
+	u32 backupA0 = A0
+	A0 = 0xffffb094
+	for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+	{
+		if ((objA0.update_address == 0x035c72 || objA0.update_address == 0x035cca))
+		{
+			bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+			u16 elephantXpos = (objA0.render_flags & 0x01) ? objA0.position.x.u16 + objA0.box_size.x + (u8[A0 + 0x34] & 0x01) : objA0.position.x.u16 - objA0.box_size.x - (u8[A0 + 0x34] & 0x01)
+			u16 renderQueue = 0xa000
+			Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+			Renderer.drawCustomSprite("bpz_elephanttusk", u16[A0 + 0x30] + ((objA0.render_flags & 0x01) ? -12 : 12), objA0.position.y.u16 + 12, 0x00, SPRITE_FLAG_PRIO + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, 0xa001)
+			// Render object in other laps of the BPZ bonus stage. Unlockable act ID checked in case this is used outside of bonus stage in the future.
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos - 0x0600, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+				Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos - 0x0300, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+				Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos + 0x0300, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+				Renderer.drawCustomSprite("bpz_elephantblock", elephantXpos + 0x0600, objA0.position.y.u16, 0x00, (prioFlag ? SPRITE_FLAG_PRIO : 0) + (objA0.render_flags & 0x01) + SPRITE_FLAG_WORLDSPACE, renderQueue)
+			}
+		}
+	}
+	A0 = backupA0
+}
 
 
 
@@ -443,10 +726,16 @@ function void CGZ_CustomSprites()
 	BonusStage.RenderGoalPole(pole.x, pole.y)
 
 	// Draw bonus bubbles
-	BonusStage.DrawBonusBubbles()
+	CGZ.DrawBonusBubbles()
 
 	// Manage looping and laps
 	CGZ.ManageLaps()
+
+	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
+	BonusStage.AwardLapBonus(pole.x)
+
+	// Render LAP BONUS
+	BonusStage.RenderLapBonus()
 
 	// If it's 0 and the player is before the pole or the player1 value is -1, render 0.
 	// Otherwise, render the player2 value plus 1.
@@ -456,12 +745,6 @@ function void CGZ_CustomSprites()
 	if (competition_mode.current_lap.player1 == 0xff || (lapNum == 1 && (underStart || beforeStart) && competition_mode.current_lap.player1 == 0))
 		lapNum = 0
 	BonusStage.RenderLapNumber(lapNum)
-
-	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
-	BonusStage.AwardLapBonus(pole.x)
-
-	// Render LAP BONUS
-	BonusStage.RenderLapBonus()
 }
 
 function void UpdateBackgroundScrolling.CGZ()
@@ -520,11 +803,62 @@ function void ALZ.ManageLaps()
 	}
 }
 
+function void BPZ.ManageLaps()
+{
+	u8[0xffffb037] |= 0x80		// set a flag saying the character cannot be hurt, although they can be knocked back
+	// If too far right
+	if (u16[0xffffb010] > 0x0280 + 0x0600)
+	{
+		u16[0xffffb010] -= 0x0600
+		u16[0xffffb010 + 0x4a] -= 0x0600
+		camera.position.x.u16 -= 0x0600
+		camera.foreground.x.u16 -= 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		++backgroundCameraLoopCount
+		++competition_mode.current_lap.player1
+		if (competition_mode.current_lap.player1 < competition_mode.lap_count.player1 / 2)	// we went backwards for more than one lap and then started forward again
+			competition_mode.current_lap.player1 = competition_mode.lap_count.player1 / 2	// in this case, act like we only went backwards one lap so the next forward lap counts
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] -= 0x0600
+		}
+	}
+	// In the second half of an internal lap
+//	else if (u16[0xffffb010] > 0x0280 + 0x0300 && competition_mode.lap_count.player1)
+//	{
+//		++competition_mode.current_lap.player1
+//		if (competition_mode.current_lap.player1 < competition_mode.lap_count.player1)	// we went backwards for more than one lap and then started forward again
+//			competition_mode.current_lap.player1 = competition_mode.lap_count.player1	// in this case, act like we only went backwards one lap so the next forward lap counts
+//		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+//		{
+//			u16[0xffffe500 + offset] -= 0x0600
+//		}
+//	}
+	// If too far left
+	else if (u16[0xffffb010] < 0x0280)
+	{
+		u16[0xffffb010] += 0x0600
+		u16[0xffffb010 + 0x4a] += 0x0600
+		camera.position.x.u16 += 0x0600
+		camera.foreground.x.u16 += 0x0600
+		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
+		Level.GetCameraPosition()
+		--backgroundCameraLoopCount
+		if (competition_mode.current_lap.player1 != 0xff)
+			--competition_mode.current_lap.player1
+		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
+		{
+			u16[0xffffe500 + offset] += 0x0600
+		}
+	}
+}
+
 function void CGZ.ManageLaps()
 {
 	u8[0xffffb037] |= 0x80		// set a flag saying the character cannot be hurt, although they can be knocked back
 	// If too far right
-	if (u16[0xffffb010] > 0x0980)
+	if (u16[0xffffb010] > 0x0380 + 0x0600)
 	{
 		u16[0xffffb010] -= 0x0600
 		u16[0xffffb010 + 0x4a] -= 0x0600

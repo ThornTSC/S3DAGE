@@ -1,0 +1,59 @@
+{
+    "bpz_background":  { "File": "bpz_background.bmp"},
+
+    "bpz_background_stars": { "File": "bpz_background.bmp", "Rect": "0,0,1024,120" },
+    "bpz_background_clouds": { "File": "bpz_background.bmp", "Rect": "0,120,1024,38" },
+    "bpz_background_mountains": { "File": "bpz_background.bmp", "Rect": "0,158,1024,10" },
+    "bpz_background_coasters_far": { "File": "bpz_background.bmp", "Rect": "0,168,1024,40" },
+    "bpz_background_coasters_near": { "File": "bpz_background.bmp", "Rect": "0,208,1024,16" },
+    "bpz_background_treetops_lower": { "File": "bpz_background.bmp", "Rect": "0,224,1024,8" },    
+    "bpz_background_near": { "File": "bpz_background.bmp", "Rect": "0,232,1024,152" },
+
+    "bpz_giraffesign":  { "File": "bpz_giraffesign.bmp"},
+    "bpz_flags_4_ascend": { "File": "bpz_flags_4_ascend.bmp", "Center": "61,30" },
+    "bpz_flags_5_ascend": { "File": "bpz_flags_5_ascend.bmp", "Center": "84,36" },
+    "bpz_flags_5_descend": { "File": "bpz_flags_5_descend.bmp", "Center": "84,36" },
+    "bpz_loopcover": { "File": "bpz_loopcover.bmp" },
+
+    "bpz_tentflags_frame0": { "File": "bpz_tentflags.bmp", "Rect": "0,0,1024,32" },
+    "bpz_tentflags_frame1": { "File": "bpz_tentflags.bmp", "Rect": "0,32,1024,32" },
+
+    "bpz_yellowdots_frame0": { "File": "bpz_yellowdots.bmp", "Rect": "0,0,1024,40" },
+    "bpz_yellowdots_frame1": { "File": "bpz_yellowdots.bmp", "Rect": "0,40,1024,40" },
+    
+    "bpz_starpole_long_frame0": { "File": "bpz_starpole.bmp", "Rect": "0,0,36,60", "Center": "18,30" },
+    "bpz_starpole_long_frame1": { "File": "bpz_starpole.bmp", "Rect": "36,0,36,60", "Center": "18,30" },
+    "bpz_starpole_long_frame2": { "File": "bpz_starpole.bmp", "Rect": "72,0,36,60", "Center": "18,30" },
+
+    "bpz_starpole_short_frame0": { "File": "bpz_starpole.bmp", "Rect": "0,0,36,36", "Center": "18,18" },
+    "bpz_starpole_short_frame1": { "File": "bpz_starpole.bmp", "Rect": "36,0,36,36", "Center": "18,18" },
+    "bpz_starpole_short_frame2": { "File": "bpz_starpole.bmp", "Rect": "72,0,36,36", "Center": "18,18" },
+
+    "bpz_foregroundflags_frame0": { "File": "bpz_foregroundflags.bmp", "Rect": "0,0,48,93", "Center": "24,46" },
+    "bpz_foregroundflags_frame1": { "File": "bpz_foregroundflags.bmp", "Rect": "48,0,48,93", "Center": "24,46" },
+    "bpz_foregroundflags_frame2": { "File": "bpz_foregroundflags.bmp", "Rect": "96,0,48,93", "Center": "24,46" },
+    "bpz_foregroundflags_frame3": { "File": "bpz_foregroundflags.bmp", "Rect": "144,0,48,93", "Center": "24,46" },
+    "bpz_foregroundflags_frame4": { "File": "bpz_foregroundflags.bmp", "Rect": "192,0,48,93", "Center": "24,46" },
+    "bpz_foregroundflags_frame5": { "File": "bpz_foregroundflags.bmp", "Rect": "240,0,48,93", "Center": "24,46" },
+
+    "bpz_bumper_frame0": { "File": "bpz_bumper.bmp", "Rect": "0,0,36,36", "Center": "18,18" },
+    "bpz_bumper_frame1": { "File": "bpz_bumper.bmp", "Rect": "36,0,36,36", "Center": "18,18" },
+    "bpz_bumper_frame2": { "File": "bpz_bumper.bmp", "Rect": "72,0,36,36", "Center": "18,18" },
+
+    "bpz_elephantblock": { "File": "bpz_elephantblock.bmp", "Rect": "0,0,126,48", "Center": "0,24" },    // Unlike Origins or base S3&K, we cut 18 pixels off the right side to fit the block in the slot in the terrain
+    "bpz_elephanttusk": { "File": "bpz_elephanttusk.bmp", "Center": "10,13" },
+
+    // Origins heavily modifies the balloon relative to the original animation and timing. We loosely follow the S3&K design while using Origins frames and a custom frame.
+    "bpz_balloon_base": { "File": "bpz_balloon.bmp", "Rect": "0,0,8,7", "Center": "4,4" },
+    "bpz_balloon_frame0": { "File": "bpz_balloon.bmp", "Rect": "8,0,6,6", "Center": "3,-18" },
+    "bpz_balloon_frame1": { "File": "bpz_balloon.bmp", "Rect": "0,7,12,12", "Center": "6,-12" },
+    "bpz_balloon_frame2": { "File": "bpz_balloon.bmp", "Rect": "0,19,18,18", "Center": "9,-6" },
+    "bpz_balloon_frame3": { "File": "bpz_balloon.bmp", "Rect": "0,37,24,24", "Center": "12,0" },       // custom frame
+    "bpz_balloon_frame4": { "File": "bpz_balloon.bmp", "Rect": "18,0,36,36", "Center": "18,12" },
+    
+    "bpz_balloon_frame5": { "File": "bpz_balloon.bmp", "Rect": "98,0,48,48", "Center": "24,24" },       // The balloon is bigger in frame 5 than in 6, and the two frames swap when the balloon is fully inflated
+    "bpz_balloon_frame6": { "File": "bpz_balloon.bmp", "Rect": "54,0,44,44", "Center": "22,22" },       // The balloon actually floats one pixel above the base during this frame in the original game.
+
+    "bpz_balloon_frame7": { "File": "bpz_balloon.bmp", "Rect": "146,0,48,42", "Center": "24,21" },
+    "bpz_balloon_frame8": { "File": "bpz_balloon.bmp", "Rect": "194,0,68,31", "Center": "34,16" }       // Balloon popping needs to be positioned vertically at an appropriate location. Higher in S3&K than in Origins.
+}
