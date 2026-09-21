@@ -112,6 +112,8 @@
 	"saturn_time_stop_bonus": { "File": "saturn_hud.png", "Rect": "0,139,125,16", "Center": "62,8" },
 	"saturn_new_record": { "File": "saturn_hud.png", "Rect": "0,155,85,16", "Center": "43,8" },
 	"saturn_text_dev":  { "File": "saturn_text_dev.png"},	// small star medal pictures are stored with challenges menu pictures
+	"saturn_text_bonusexit":  { "File": "saturn_text_bonusexit.png"},
+
 
 	"saturn_smalldigit_0": { "File": "saturn_hud.png", "Rect":  "75,82,8,8" },
 	"saturn_smalldigit_1": { "File": "saturn_hud.png", "Rect":  "83,82,8,8" },

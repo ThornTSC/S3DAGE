@@ -797,3 +797,8 @@ function void Saturn.displayLapBonus(u16 currentRingBonus)
 		Renderer.drawCustomSprite(stringformat("saturn_hud_digit_%d", currentRingBonus % 10), u16[0xffffb010] + 14, u16[0xffffb014] - 39, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0xc002)
 	}
 }
+
+function void Saturn.displayExitPrompt(u16 px, u16 py)
+{
+	Renderer.drawCustomSprite("saturn_text_bonusexit", px + 9, py - 3, 0x00, SPRITE_FLAG_PRIO, 0xe800)
+}

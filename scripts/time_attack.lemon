@@ -1973,7 +1973,10 @@ function void RenderHUD_RedRings()
 		return
 
 	if (isNewBonusStage())
+	{
+		RenderHUD_ExitPrompt()		// Use the space meant for this HUD as a control prompt to exit in new bonus stages
 		return
+	}
 
 	redstarring_address = (global.zone >= 0x0c) ? 0x15 : (0x02 * global.zone.apparent) + global.act.apparent	// HPZ gets mapped to zone_act 0x0a01 (SSZ2) to avoid gaps in the data
 	if (unlock_act)
@@ -2086,6 +2089,30 @@ function void RenderHUD_RedRings()
 }
 
 
+function void RenderHUD_ExitPrompt()
+{
+	Challenge.checkExitShortcut()
+
+	if (!display_inputs)
+		return
+
+	u16 px = getScreenWidth() - 64
+	u16 py = getScreenHeight() - 16
+	if (getModeHUDPosition() >= 2)
+		py -= 2
+	
+	Renderer.drawSprite("@input_icon_button_back", px, py, 0, SPRITE_FLAG_PRIO, 0xe800)
+	if (theme.hud == theme.flicky)
+		Flicky.displayExitPrompt(px, py)
+	else if (theme.hud == theme.saturn)
+		Saturn.displayExitPrompt(px, py)
+	else if (theme.hud == theme.south)
+		South.displayExitPrompt(px, py)
+	else	// Westside and Angel use the same font here
+		Westside.displayExitPrompt(px, py)
+}
+
+
 
 // Render Marathon Mode HUD elements.
 // This is only the emerald count right now. The full-game timer is handed at the end of a frame.
@@ -2115,7 +2142,7 @@ function void RenderHUD_Marathon()
 			py = getScreenHeight() - emeraldDistFromBottomRight[2 * emeraldIndex - 1]
 			if (getModeHUDPosition() >= 2)
 				py -= 2
-			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || isNewBonusStage())
+			bool isBonusStage = ((global.zone >= 0x13 && global.zone <= 0x15) || (isNewBonusStage() && !display_inputs))	// only move the HUD in new bonus stages if the exit control prompt is not in place
 			if (isBonusStage || debug_mode.enabled || global.zone == 0x0c)	// before introduction of sidekick-allowed red star rings, included  || global.characters == 0 || (global.characters == 3 && useKnucklesAndTails)
 				py += 14
 
@@ -6984,7 +7011,7 @@ function void Challenge.checkRestartShortcut()
 	}
 }
 
-
+// We also use this function to exit a bonus stage early.
 function void Challenge.checkExitShortcut()
 {
 	if (Input.buttonPressed(BUTTON_BACK) && (global.zone < 0x0c || global.zone == 0x16) && !time_attack_end && !global.game.paused)
@@ -7003,9 +7030,14 @@ function void Challenge.checkExitShortcut()
 	if (exit_threshold > 1 && exit_timer > restart_timer)
 		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0xffff, 0, exit_timer * 8)
 
-	if (exit_timer == exit_threshold)
+	if ((exit_timer == exit_threshold) || (exit_timer == 1 && time_attack >= 3))		// in Marathon Modes, always use the faster setting
 	{
 		exit_timer = 0
+		if (isNewBonusStage())
+		{
+			BonusStage.Exit()
+			return
+		}
 		checkpoint.number = 0
 
 		camera.background.x = 0		// from function void restartLevel(), which Euka uses as the
