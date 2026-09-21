@@ -272,8 +272,8 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 	}
 	else if (unlock_act == s3_ALZ)
 	{
-		// Spikes and springs
-		Nemesis.loadDataToVRAM(0x1927fe, 0xb400)
+		// Spikes and springs are handled in ALZ_CustomSprites(), else level tiles overwrite them.
+		Nemesis.loadDataToVRAM(0x1927fe, 0x9280)
 
 		// Ring and sparkle
 		Nemesis.loadDataToVRAM(0x192aee, 0xd780)

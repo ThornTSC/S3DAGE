@@ -853,9 +853,9 @@ function void fn023b38()
 function void fn023c8e()
 {
 	fn023cdc()
-	if (unlock_act == s3_ALZ)	// must edit spring VRAM location and launch speed
+	if (unlock_act == s3_ALZ)	// edit spring VRAM location and launch speed
 	{
-		objA0.sprite_attributes = 0x05c0
+		objA0.sprite_attributes = 0x04b4
 		s16[A0 + 0x30] = -0x1000
 	}
 	objA0.position.y.u16 = u16[A0 + 0x34] + u8[A0 + 0x36]

@@ -28,6 +28,15 @@
 	"bonusbubble_6": { "File": "bonusbubbles.png", "Rect": "64,32,32,32", "Center": "16,16" },	// Bubble Shield
 	"bonusbubble_7": { "File": "bonusbubbles.png", "Rect": "96,32,32,32", "Center": "16,16" },	// Lightning Shield
 
+	"bonusbubble_new_0": { "File": "bonusbubbles_new.png", "Rect": " 0, 0,32,32", "Center": "16,16" },	// 1UP
+	"bonusbubble_new_1": { "File": "bonusbubbles_new.png", "Rect": "32, 0,32,32", "Center": "16,16" },	// Rep
+	"bonusbubble_new_2": { "File": "bonusbubbles_new.png", "Rect": "64, 0,32,32", "Center": "16,16" },	// Ring
+	"bonusbubble_new_3": { "File": "bonusbubbles_new.png", "Rect": "96, 0,32,32", "Center": "16,16" },	// Empty
+	"bonusbubble_new_4": { "File": "bonusbubbles_new.png", "Rect": " 0,32,32,32", "Center": "16,16" },	// Black
+	"bonusbubble_new_5": { "File": "bonusbubbles_new.png", "Rect": "32,32,32,32", "Center": "16,16" },	// Fire Shield
+	"bonusbubble_new_6": { "File": "bonusbubbles_new.png", "Rect": "64,32,32,32", "Center": "16,16" },	// Bubble Shield
+	"bonusbubble_new_7": { "File": "bonusbubbles_new.png", "Rect": "96,32,32,32", "Center": "16,16" },	// Lightning Shield
+
 	"lap_0": { "File": "bonus_hud.png", "Rect": "  0,0,16,24" },
 	"lap_1": { "File": "bonus_hud.png", "Rect": " 16,0,16,24" },
 	"lap_2": { "File": "bonus_hud.png", "Rect": " 32,0,16,24" },

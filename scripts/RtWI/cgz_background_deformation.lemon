@@ -31,9 +31,10 @@ function void ALZ.DrawBonusBubbles()
 		{
 			A0 = objAddress
 			u8 alpha = u8(objA0.value42)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)	
+			u64 key = (palette_set >= 2) ? stringformat("bonusbubble_new_%x", (objA0.subtype2c & 0x07)) : stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07))
+			Renderer.drawCustomSprite(key, objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)	
 		}
 	}
 	A0 = backupA0
@@ -48,9 +49,10 @@ function void BPZ.DrawBonusBubbles()
 		{
 			A0 = objAddress
 			u8 alpha = u8(objA0.value42)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
+			u64 key = (palette_set >= 2) ? stringformat("bonusbubble_new_%x", (objA0.subtype2c & 0x07)) : stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07))
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 - 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 + 0x0300, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
 		}
 	}
 	A0 = backupA0
@@ -65,11 +67,12 @@ function void CGZ.DrawBonusBubbles()
 		{
 			A0 = objAddress
 			u8 alpha = u8(objA0.value42)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16, objA0.position.y.u16 + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
-			Renderer.drawCustomSprite(stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07)), objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
+			u64 key = (palette_set >= 2) ? stringformat("bonusbubble_new_%x", (objA0.subtype2c & 0x07)) : stringformat("bonusbubble_%x", (objA0.subtype2c & 0x07))
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 - 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16, objA0.position.y.u16 - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16, objA0.position.y.u16 + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)
+			Renderer.drawCustomSprite(key, objA0.position.x.u16 + 0x0600, objA0.position.y.u16, 0x00, SPRITE_FLAG_WORLDSPACE, 0x4000, 0, alpha)		
 		}
 	}
 	A0 = backupA0
@@ -337,7 +340,10 @@ function void ALZ_CustomSprites()
 		lapNum = 0
 	BonusStage.RenderLapNumber(lapNum)
 
-
+	// ALZ has so many tiles that they overwrite spikes and springs in VRAM, leading to temporary graphics corruption when leaving the stage.
+	// To circumvent this, we leave a space in the tiles for this art to load before returning to the normal act.
+	if (timer.alldata == 1 && !global.game.paused)
+		Nemesis.loadDataToVRAM(0x1927fe, 0x9280)
 }
 
 function void UpdateBackgroundScrolling.ALZ()
