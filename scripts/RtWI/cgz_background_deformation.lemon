@@ -465,6 +465,20 @@ function void UpdateBackgroundScrolling.ALZ()
 	// The near shore seems to move every second pixel the foreground moves.
 	parallaxShift = -(cameraXPos / 2) % 512
 	Renderer.drawCustomSprite("alz_background_nearshore_line192", parallaxShift, 192 - yShift, 0, 0, 0x1100)
+
+	// Tint the background just a bit to complement the Revisited palette.
+//	if (palette_set >= 2)
+//	{
+		// Simple filter to exaggerate the sunset colors
+	//	Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x1101, 0, 0x204000ff, 0x10000)
+
+		// Experimental fade from sunset to darkness in lieu of above
+	//	u32 alpha = ((2700 - BS_remainingTime) / 50) << 24
+	//	debugLog(stringformat("%x", alpha))
+	//	Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x1101, 0, alpha + 0x4000ff, 0x10000)
+	//	Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x4001, 0, alpha + 0xc00000, 0x10000)
+	//	Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x4002, 0, alpha + 0x200000, 0x10000)
+//	}
 }
 
 function void ALZ.AnimateTar()
@@ -495,12 +509,12 @@ function void ALZ.DisplayBottom()
 {
 	Renderer.drawCustomSprite("alz_bottom3", 0x08d0 - 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
 
-	Renderer.drawCustomSprite("alz_bottom0", 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
-	Renderer.drawCustomSprite("alz_bottom1", 0x0780, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
-	Renderer.drawCustomSprite("alz_bottom2", 0x0900, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
-	Renderer.drawCustomSprite("alz_bottom3", 0x0a80, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+	Renderer.drawCustomSprite("alz_bottom0", 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+	Renderer.drawCustomSprite("alz_bottom1", 0x0780, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+	Renderer.drawCustomSprite("alz_bottom2", 0x0900, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
+	Renderer.drawCustomSprite("alz_bottom3", 0x0a80, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 
-	Renderer.drawCustomSprite("alz_bottom0", 0x0600 + 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
+	Renderer.drawCustomSprite("alz_bottom0", 0x0600 + 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0x4001)
 }
 
 function void BonusStage.ManageSwitchEffects()
@@ -652,6 +666,10 @@ function void UpdateBackgroundScrolling.BPZ()
 		animatedTileRender2.animationFrame = !animatedTileRender2.animationFrame
 	}
 	Renderer.drawCustomSprite(stringformat("bpz_yellowdots_frame%d", animatedTileRender2.animationFrame), parallaxShift, 296 - yShift, 0, 0, 0x1100)
+
+	// Tint the background just a bit to complement the Revisited palette.
+	if (palette_set >= 2)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x1101, 0, 0x0c4000ff, 0x10000)
 }
 
 function void BPZ.AnimateStarPoles()
@@ -838,6 +856,10 @@ function void UpdateBackgroundScrolling.CGZ()
 	Renderer.drawCustomSprite("cgz_background_buildings_mid", parallaxShift, 104 - yShift, 0, 0, 0x1100)
 	parallaxShift = -(cameraXPos * 1920 / 0x1ff0) % 512
 	Renderer.drawCustomSprite("cgz_background_buildings_near", parallaxShift, 120 - yShift, 0, 0, 0x1100)
+
+	// Tint the background just a bit to complement the Revisited palette.
+	if (palette_set >= 2)
+		Renderer.drawCustomSprite("whitescreen", 0, 0, 0, SPRITE_FLAG_PRIO, 0x1101, 0, 0x20400080, 0x10000)
 }
 
 function void ALZ.ManageLaps()

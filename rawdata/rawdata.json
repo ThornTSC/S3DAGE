@@ -30,6 +30,11 @@
   "PaletteHPZ1B":  { "File": "palettes/PaletteHPZ1B.bin" },
   "PaletteHPZ2A":  { "File": "palettes/PaletteHPZ2A.bin" },
   "PaletteHPZ2B":  { "File": "palettes/PaletteHPZ2B.bin" },
+  
+  // New bonus stage palettes
+  "PaletteALZ":  { "File": "palettes/PaletteALZ.bin" },
+  "PaletteBPZ":  { "File": "palettes/PaletteBPZ.bin" },
+  "PaletteCGZ":  { "File": "palettes/PaletteCGZ.bin" },
 
   // Zone water palettes
   "PaletteAIZ1Water":  { "File": "palettes/PaletteAIZ1Water.bin" },

@@ -278,7 +278,7 @@ function void BonusStage.RenderStaticRings()
 	u32 ringYAddress = 0x814006
 	u32 ringAnimStateAddress = 0xffff8602
 
-	u8 alpha = 255
+	u16 alpha = 255
 
 	// Check each ring in the level
 	while (u16[ringXAddress] != 0xffff)
@@ -312,8 +312,9 @@ function void BonusStage.RenderStaticRings()
 			animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
 			u64 key = stringformat("ring_0%d", animFrame)
 			u16 renderQueue = 0xa000
-
-			if (bonusSwitchEffectTimer < 64)
+			if (bonusSwitchEffectTimer > 420 - 32)
+				alpha = (420 - bonusSwitchEffectTimer) * 8
+			else if (bonusSwitchEffectTimer < 64)
 				alpha = bonusSwitchEffectTimer * 4
 			Renderer.drawCustomSprite(key, px, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
 			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
@@ -336,7 +337,9 @@ function void BonusStage.RenderStaticRings()
 			u32 src = A1 + animFrame * 8
 			u8 size = u8[src + 3]
 			u16 index = u16[src + 4]
-			if (bonusSwitchEffectTimer < 64)
+			if (bonusSwitchEffectTimer > 420 - 32)
+				alpha = (420 - bonusSwitchEffectTimer) * 8
+			else if (bonusSwitchEffectTimer < 64)
 				alpha = bonusSwitchEffectTimer * 4
 			px -= (camera.position.x.u16 + 8)
 			py -= (camera.position.y.u16 + 8)

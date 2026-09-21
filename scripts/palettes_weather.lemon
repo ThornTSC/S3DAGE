@@ -225,12 +225,18 @@ function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 		System.loadExternalRawData("s2_character_palette", dest)
 	else if (isNewBonusStage())
 	{
+		if (unlock_act == s3_ALZ && palette_set >= 2)
+			System.loadExternalRawData("PaletteALZ", 0xfffffca0, 0, 0x60, 1, 1)
+		else if (unlock_act == s3_BPZ && palette_set >= 2)
+			System.loadExternalRawData("PaletteBPZ", 0xfffffca0, 0, 0x60, 1, 1)
+		else if (unlock_act == s3_CGZ && palette_set >= 2)
+			System.loadExternalRawData("PaletteCGZ", 0xfffffca0, 0, 0x60, 1, 1)
 		System.loadExternalRawData("Palette0200", 0xfffffca0, 0, 0x20, 1, 1)		// temporary to get MGZ1 object palette line
-		if (unlock_act == s3_CGZ && palette_set >= 2)	// add prototype blues to CGZ background
-		{
-			u32[dest + 0x3a] += 0x02000200
-	//		u16[dest + 0x40] += 0x0200
-		}
+//		if (unlock_act == s3_CGZ && palette_set >= 2)	// add prototype blues to CGZ background
+//		{
+//			u32[dest + 0x3a] += 0x02000200
+//	//		u16[dest + 0x40] += 0x0200
+//		}
 	}
 
 	u32 destRaw = dest		// This is newly introduced to preserve dest for rawdata loading later.

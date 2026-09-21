@@ -723,7 +723,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		// Use smoother ring rotation
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
-		u8 alpha = 255
+		u16 alpha = 255
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
@@ -732,7 +732,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		
 		if (isNewBonusStage())
 		{
-			if (bonusSwitchEffectTimer < 64)
+			if (bonusSwitchEffectTimer > 420 - 32)
+				alpha = (420 - bonusSwitchEffectTimer) * 8
+			else if (bonusSwitchEffectTimer < 64)
 				alpha = bonusSwitchEffectTimer * 4
 			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
 			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
@@ -761,7 +763,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		// Use smoother ring rotation
 		u16 animFrame = (spilled_rings.progress >> 8) % 8
-		u8 alpha = min(255, u16(spilled_rings.speed) * 10)
+		u16 alpha = min(255, u16(spilled_rings.speed) * 10)
 		if (original_mode)
 		{
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
@@ -773,7 +775,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		
 		if (isNewBonusStage())
 		{
-			if (bonusSwitchEffectTimer < 64)
+			if (bonusSwitchEffectTimer > 420 - 32)
+				alpha = (420 - bonusSwitchEffectTimer) * 8
+			else if (bonusSwitchEffectTimer < 64)
 				alpha = bonusSwitchEffectTimer * 4
 			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
 			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
@@ -802,7 +806,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		// Use smoother ring rotation
 		u16 animFrame = ((objA0.animation.sprite * 4 + 3 - objA0.animation.timer) / 2) % 8
-		u8 alpha = 255
+		u16 alpha = 255
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
@@ -811,7 +815,9 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 
 		if (isNewBonusStage())
 		{
-			if (bonusSwitchEffectTimer < 64)
+			if (bonusSwitchEffectTimer > 420 - 32)
+				alpha = (420 - bonusSwitchEffectTimer) * 8
+			else if (bonusSwitchEffectTimer < 64)
 				alpha = bonusSwitchEffectTimer * 4
 			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
 			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
