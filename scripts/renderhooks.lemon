@@ -723,12 +723,36 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		// Use smoother ring rotation
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
+		u8 alpha = 255
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
-		if (unlock_act)
+		if (unlock_act && !isNewBonusStage())
 			key = stringformat("s2_ring_0%d", animFrame)
-		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, 255)
+		
+		if (isNewBonusStage())
+		{
+			if (bonusSwitchEffectTimer < 64)
+				alpha = bonusSwitchEffectTimer * 4
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px - 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawCustomSprite(key, px + 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px - 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+			else if (unlock_act == s3_CGZ)
+			{
+				Renderer.drawCustomSprite(key, px, py + 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px, py - 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+		}
+		else
+		{
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+		}
+		
 		return true
 	}
 
@@ -744,9 +768,32 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			alpha = 255			// no fading out in Original Mode
 		}
 		u64 key = stringformat("ring_0%d", animFrame)
-		if (unlock_act)
+		if (unlock_act && !isNewBonusStage())
 			key = stringformat("s2_ring_0%d", animFrame)
-		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+		
+		if (isNewBonusStage())
+		{
+			if (bonusSwitchEffectTimer < 64)
+				alpha = bonusSwitchEffectTimer * 4
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px - 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawCustomSprite(key, px + 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px - 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+			else if (unlock_act == s3_CGZ)
+			{
+				Renderer.drawCustomSprite(key, px, py + 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px, py - 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+		}
+		else
+		{
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+		}
+
 		return true
 	}
 
@@ -755,12 +802,36 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		// Use smoother ring rotation
 		u16 animFrame = ((objA0.animation.sprite * 4 + 3 - objA0.animation.timer) / 2) % 8
+		u8 alpha = 255
 		if (original_mode)
 			animFrame &= 0xfe	// remove the last bit to only draw original game frames in Original Mode
 		u64 key = stringformat("ring_0%d", animFrame)
-		if (unlock_act)
+		if (unlock_act && !isNewBonusStage())
 			key = stringformat("s2_ring_0%d", animFrame)
-		Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, 255)
+
+		if (isNewBonusStage())
+		{
+			if (bonusSwitchEffectTimer < 64)
+				alpha = bonusSwitchEffectTimer * 4
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px - 0x0600, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawCustomSprite(key, px + 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px - 0x0300, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+			else if (unlock_act == s3_CGZ)
+			{
+				Renderer.drawCustomSprite(key, px, py + 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px, py - 0x0180, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)				
+			}
+		}
+		else
+		{
+			Renderer.drawCustomSprite(key, px, py, 0x00, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue, 0, alpha)
+		}
+
 		return true
 	}
 

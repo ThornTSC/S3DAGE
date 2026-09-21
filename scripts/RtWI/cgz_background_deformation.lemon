@@ -1,4 +1,6 @@
 global s8 backgroundCameraLoopCount
+global u16 bonusSwitchEffectTimer
+global u16 bonusStageTotalRings
 global s8 animatedTileRender.animationTimer
 global u8 animatedTileRender.animationFrame
 global s8 animatedTileRender2.animationTimer
@@ -311,6 +313,9 @@ function void ALZ_CustomSprites()
 	// Manage looping and laps
 	ALZ.ManageLaps()
 
+	// Manage switch effects
+	BonusStage.ManageSwitchEffects()
+
 	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
 	BonusStage.AwardLapBonus(pole.x)
 
@@ -326,6 +331,8 @@ function void ALZ_CustomSprites()
 	if (competition_mode.current_lap.player1 >= 0x80 || (lapNum == 1 && beforePole && competition_mode.current_lap.player1 == 0))
 		lapNum = 0
 	BonusStage.RenderLapNumber(lapNum)
+
+
 }
 
 function void UpdateBackgroundScrolling.ALZ()
@@ -485,7 +492,60 @@ function void ALZ.DisplayBottom()
 	Renderer.drawCustomSprite("alz_bottom0", 0x0600 + 0x0600, 0x0170, 0, SPRITE_FLAG_WORLDSPACE, 0xc001)
 }
 
+function void BonusStage.ManageSwitchEffects()
+{
+	// Initialize timer to 0
+	if (timer.alldata <= 1)
+	{
+		bonusSwitchEffectTimer = 0
+		fillMemory_u16(0xffff8600 + 2, 2 * bonus.rings.state_table_size - 2, 0xffff)
+		return
+	}
 
+	// Delete rings if timer is 0
+	if (bonusSwitchEffectTimer)
+	{
+		--bonusSwitchEffectTimer
+		if (!bonusSwitchEffectTimer)
+		{
+			// Final timer sound
+			playSound(0xad)
+
+			// Delete stationary rings but not ring sparkles from recently collected rings
+			A0 = 0xffff8600
+			A1 = A0 + (2 * bonus.rings.state_table_size)
+			for (A0; A0 < A1; A0 += 2)
+			{
+				if (u16[A0] == 0)
+				{
+					u16[A0] = 0xffff
+				}
+			}
+
+			// Delete moving rings but not ring sparkles from recently collected rings
+			A0 = 0xffffb094
+			for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+			{
+				if (objA0.update_address == 0x01a88c)
+				{
+					UnloadObject()
+				}
+			}
+		}
+
+		// Play timer sounds
+		if (bonusSwitchEffectTimer == 360 || bonusSwitchEffectTimer == 300 || bonusSwitchEffectTimer == 240 || bonusSwitchEffectTimer == 180 || bonusSwitchEffectTimer == 150  || bonusSwitchEffectTimer == 120 || bonusSwitchEffectTimer == 90 || bonusSwitchEffectTimer == 60  || bonusSwitchEffectTimer == 45  || bonusSwitchEffectTimer == 30  || bonusSwitchEffectTimer == 15)
+			playSound(0xa7)
+	}
+
+	// Initialize extra rings when switch is hit and set them for removal them seven seconds later. The trap spring is handled separately.
+	// Do not reset the timer if it is already running, as this allows easy farming with a Lightning Shield in the CGZ bonus.
+	if (level.trigger00 && !bonusSwitchEffectTimer)
+	{
+		bonusSwitchEffectTimer = 420
+		zeroMemory(0xffff8600, 2 * bonus.rings.state_table_size)
+	}
+}
 
 
 
@@ -517,6 +577,9 @@ function void BPZ_CustomSprites()
 
 	// Manage looping and laps
 	BPZ.ManageLaps()
+
+	// Manage switch effects
+	BonusStage.ManageSwitchEffects()
 
 	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
 	BonusStage.AwardLapBonus(pole.x)
@@ -690,7 +753,7 @@ function void BPZ.DrawElephantBlocks()
 	A0 = 0xffffb094
 	for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
 	{
-		if ((objA0.update_address == 0x035c72 || objA0.update_address == 0x035cca))
+		if (objA0.update_address == 0x035c72 || objA0.update_address == 0x035cca)
 		{
 			bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
 			u16 elephantXpos = (objA0.render_flags & 0x01) ? objA0.position.x.u16 + objA0.box_size.x + (u8[A0 + 0x34] & 0x01) : objA0.position.x.u16 - objA0.box_size.x - (u8[A0 + 0x34] & 0x01)
@@ -730,6 +793,9 @@ function void CGZ_CustomSprites()
 
 	// Manage looping and laps
 	CGZ.ManageLaps()
+
+	// Manage switch effects
+	BonusStage.ManageSwitchEffects()
 
 	// Check for lap bonus award. In this function, we repurpose competition_mode.lap_count.player1 as a field to hold the highest awarded lap bonus
 	BonusStage.AwardLapBonus(pole.x)
@@ -783,6 +849,18 @@ function void ALZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] -= 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 -= 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] -= 0x0600
 	}
 	// If too far left
 	else if (u16[0xffffb010] < 0x0660)
@@ -800,6 +878,18 @@ function void ALZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] += 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 += 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] += 0x0600
 	}
 }
 
@@ -823,18 +913,19 @@ function void BPZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] -= 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 -= 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] -= 0x0600
 	}
-	// In the second half of an internal lap
-//	else if (u16[0xffffb010] > 0x0280 + 0x0300 && competition_mode.lap_count.player1)
-//	{
-//		++competition_mode.current_lap.player1
-//		if (competition_mode.current_lap.player1 < competition_mode.lap_count.player1)	// we went backwards for more than one lap and then started forward again
-//			competition_mode.current_lap.player1 = competition_mode.lap_count.player1	// in this case, act like we only went backwards one lap so the next forward lap counts
-//		for (u16 offset = 0; offset < 0x100; offset += 4)	// change the previous player 1 position table to prevent camera glitches with dashes
-//		{
-//			u16[0xffffe500 + offset] -= 0x0600
-//		}
-//	}
 	// If too far left
 	else if (u16[0xffffb010] < 0x0280)
 	{
@@ -851,6 +942,18 @@ function void BPZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] += 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 += 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] += 0x0600
 	}
 }
 
@@ -872,6 +975,18 @@ function void CGZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] -= 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 -= 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] -= 0x0600
 	}
 	// If too far left
 	else if (u16[0xffffb010] < 0x0380)
@@ -888,6 +1003,18 @@ function void CGZ.ManageLaps()
 		{
 			u16[0xffffe500 + offset] += 0x0600
 		}
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.x.u16 += 0x0600
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x10] += 0x0600
 	}
 	// If too high
 	else if (u16[0xffffb014] < 0x0180 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
@@ -898,6 +1025,18 @@ function void CGZ.ManageLaps()
 		camera.foreground.y.u16 += 0x0180
 		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
 		Level.GetCameraPosition()
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.y.u16 += 0x0180
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x14] += 0x0180
 	}
 	// If too low
 	else if (u16[0xffffb014] > 0x0300 && u16[0xffffb010] > 0x0480 && u16[0xffffb010] < 0x0580)
@@ -908,5 +1047,17 @@ function void CGZ.ManageLaps()
 		camera.foreground.y.u16 -= 0x0180
 		fillPlaneA_Default(camera.foreground.x.u16 - 0x40, camera.foreground.y.u16 - 0x40, getScreenWidth() + 0x80, getScreenHeight() + 0x80)
 		Level.GetCameraPosition()
+
+		// Shift any moving rings or lightning shield sparks with the player character
+		A0 = 0xffffb094
+		for (A0; A0 < 0xffffcfcb; A0 += 0x4a)
+		{
+			if (objA0.update_address == 0x01a88c || objA0.update_address == 0x01a920 || objA0.update_address == 0x019874)
+			{
+				objA0.position.y.u16 -= 0x0180
+			}
+		}
+		// Shift shield with player, else it vanishes for one frame
+		u16[0xffffcce8 + 0x14] -= 0x0180
 	}
 }

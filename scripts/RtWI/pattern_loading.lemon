@@ -275,13 +275,27 @@ function void RequestLoadingPatterns()	// PLC_0B is the format for PLC headers i
 		// Spikes and springs
 		Nemesis.loadDataToVRAM(0x1927fe, 0xb400)
 
+		// Ring and sparkle
+		Nemesis.loadDataToVRAM(0x192aee, 0xd780)
+
 		// Button (in custom VRAM location for stage)
 		Nemesis.loadDataToVRAM(0x190ac4, 0xbf40)
+	}
+	else if (unlock_act == s3_BPZ)
+	{
+		// Button
+		Nemesis.loadDataToVRAM(0x190ac4, 0x8ac0)
+
+		// Ring and sparkle
+		Nemesis.loadDataToVRAM(0x192aee, 0xd780)
 	}
 	else if (unlock_act == s3_CGZ)
 	{
 		// Button
 		Nemesis.loadDataToVRAM(0x190ac4, 0x8ac0)
+
+		// Ring and sparkle
+		Nemesis.loadDataToVRAM(0x192aee, 0xd780)
 
 		// Spikes and springs
 		Nemesis.loadDataToVRAM(0x1927fe, 0x9280)

@@ -1039,7 +1039,7 @@ function void fn023cdc()
 				if (u16[A0 + 0x36] >= springPosition.x)
 				{
 					u16[A0 + 0x36] = springPosition.x
-					u16[A0 + 0x3a] = 0xb4
+					u16[A0 + 0x3a] = (competition_mode.active) ? 0xb4 : 420		// longer timer in bonus stage
 				}
 			}
 		}
@@ -1048,7 +1048,12 @@ function void fn023cdc()
 	{
 		if (u16[A0 + 0x3a] != 0)
 		{
-			--u16[A0 + 0x3a]
+			// Sync the spring's movements with the switch timer. The initialization is still done below, however.
+			if (competition_mode.active)
+				--u16[A0 + 0x3a]
+			else
+				u16[A0 + 0x3a] = bonusSwitchEffectTimer
+
 			if (u16[A0 + 0x3a] == 0)
 			{
 				u16[A0 + 0x38] = 0
@@ -1062,7 +1067,7 @@ function void fn023cdc()
 				if (s16[A0 + 0x36] < 0)
 				{
 					u16[A0 + 0x36] = 0
-					u16[A0 + 0x3a] = 0xb4
+					u16[A0 + 0x3a] = (competition_mode.active) ? 0xb4 : 420		// longer timer in bonus stage
 				}
 			}
 			else

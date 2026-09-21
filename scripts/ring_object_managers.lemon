@@ -17,7 +17,7 @@ function void fn00eb1a()
 
 	zeroMemory(0xffffef80, 0x80)
 
-	if (global.zone == 0x14)
+	if (global.zone == 0x14 || isNewBonusStage())
 	{
 		zeroMemory(0xffff8600,  2 * bonus.rings.state_table_size)	// usually 0x400
 	}
@@ -41,6 +41,8 @@ function void fn00eb1a()
 	}
 
 	level.total_rings = D5.u16
+	if (isNewBonusStage())
+		bonusStageTotalRings = D5.u16
 	u16[0xffffff06] = 0
 }
 
@@ -78,7 +80,7 @@ function void InitStaticRings()
 	else
 	{
 		A1 = rings.around.first
-		A2 = 0x820000
+		A2 = (isNewBonusStage()) ? 0xffff8600 : 0x820000
 		D4.u16 = camera.position.x.u16 - 8
 		if (D4.s16 <= 0)
 			D4 = 1
@@ -100,7 +102,7 @@ function void InitStaticRings()
 	}
 }
 
-/# address-hook(0x00e942) end(0x00e992)
+//# address-hook(0x00e942) end(0x00e992)
 function void UpdateListOfRingsAround_Default()
 {
 	UpdateStaticRingsAnimation()
@@ -117,7 +119,7 @@ function void UpdateListOfRingsAround_Default()
 
 	A1 = rings.around.first
 	A2 = 0x820000 + rings.around.first.state
-	if (global.zone == 0x14)
+	if (global.zone == 0x14 || isNewBonusStage())
 		A2 = 0xffff0000 + rings.around.first.state
 	D4.u16 = max(s16(camera.position.x.u16) - borderLeft, 1)
 
@@ -157,7 +159,7 @@ function void UpdateListOfRingsAround_VerticalLayout()
 
 	A1 = rings.around.first
 	A2 = 0x820000 + rings.around.first.state
-	if (global.zone == 0x14)
+	if (global.zone == 0x14 || isNewBonusStage())
 		A2 = 0xffff0000 + rings.around.first.state
 	D4.u16 = max(s16(camera.position.y.u16) - 8, 1)
 
@@ -193,6 +195,12 @@ function void RenderStaticRings()
 {
 	if (global.game_mode == 0x2c || global.game_mode == 0x4c)
 		return
+	
+	if (isNewBonusStage())
+	{
+		BonusStage.RenderStaticRings()
+		return
+	}
 		
 	A0 = rings.around.first
 	u32 numRings = (rings.around.last - rings.around.first) / 4
@@ -249,7 +257,6 @@ function void RenderStaticRings()
 						Renderer.drawVdpSprite(px - 0x80, py - 0x80, size, index, 0xc000)
 					}
 				#endif
-
 					u16[A6 + 0] = py
 					 u8[A6 + 2] = size
 					u16[A6 + 4] = index
@@ -265,6 +272,95 @@ function void RenderStaticRings()
 	}
 }
 
+function void BonusStage.RenderStaticRings()
+{
+	u32 ringXAddress = 0x814004
+	u32 ringYAddress = 0x814006
+	u32 ringAnimStateAddress = 0xffff8602
+
+	u8 alpha = 255
+
+	// Check each ring in the level
+	while (u16[ringXAddress] != 0xffff)
+	{
+		// Ensure the rings are in the correct location in BPZ, which fits two player-facing laps in one internal lap
+		if (unlock_act == s3_BPZ)
+		{
+			if (u16[ringXAddress] < 0x0280 + 0x0300 && u16[0xffffb010] > 0x0280 + 0x0300)
+			{
+				u16[ringXAddress] += 0x0300
+			}
+			else if (u16[ringXAddress] > 0x0280 + 0x0300 && u16[0xffffb010] < 0x0280 + 0x0300)
+			{
+				u16[ringXAddress] -= 0x0300
+			}
+		}
+
+		// Prepare values for ring drawing
+		u16 px = u16[ringXAddress]
+		u16 py = u16[ringYAddress]
+		u8 animFrame = u16[ringAnimStateAddress] & 0xff
+		if (animFrame == 0)
+		{
+			// For non-collected rings, use rotating animation
+			animFrame = static_rings.animframe
+		}
+
+		// Render non-collected static rings
+		if (u16[ringAnimStateAddress] == 0)
+		{
+			animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
+			u64 key = stringformat("ring_0%d", animFrame)
+			u16 renderQueue = 0xa000
+
+			if (bonusSwitchEffectTimer < 64)
+				alpha = bonusSwitchEffectTimer * 4
+			Renderer.drawCustomSprite(key, px, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px + 0x0600, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
+			Renderer.drawCustomSprite(key, px - 0x0600, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawCustomSprite(key, px + 0x0300, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px - 0x0300, py, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)				
+			}
+			else if (unlock_act == s3_CGZ)
+			{
+				Renderer.drawCustomSprite(key, px, py + 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)
+				Renderer.drawCustomSprite(key, px, py - 0x0180, 0x00, SPRITE_FLAG_WORLDSPACE, renderQueue, 0, alpha)				
+			}
+		}
+		else if (u16[ringAnimStateAddress] != 0xffff)
+		{
+			// Render sparkles of collected static rings
+			A1 = 0x00ebee
+			u32 src = A1 + animFrame * 8
+			u8 size = u8[src + 3]
+			u16 index = u16[src + 4]
+			if (bonusSwitchEffectTimer < 64)
+				alpha = bonusSwitchEffectTimer * 4
+			px -= (camera.position.x.u16 + 8)
+			py -= (camera.position.y.u16 + 8)
+			Renderer.drawVdpSpriteWithAlpha(px, py, size, index, 0xc000, alpha)
+			Renderer.drawVdpSpriteWithAlpha(px + 0x0600, py, size, index, 0xc000, alpha)
+			Renderer.drawVdpSpriteWithAlpha(px - 0x0600, py, size, index, 0xc000, alpha)
+			if (unlock_act == s3_BPZ)
+			{
+				Renderer.drawVdpSpriteWithAlpha(px + 0x0300, py, size, index, 0xc000, alpha)
+				Renderer.drawVdpSpriteWithAlpha(px - 0x0300, py, size, index, 0xc000, alpha)
+			}
+			if (unlock_act == s3_CGZ)
+			{
+				Renderer.drawVdpSpriteWithAlpha(px, py + 0x0180, size, index, 0xc000, alpha)
+				Renderer.drawVdpSpriteWithAlpha(px, py - 0x0180, size, index, 0xc000, alpha)
+			}
+		}
+
+		ringXAddress += 4
+		ringYAddress += 4
+		ringAnimStateAddress += 2
+	}
+}
+
 //# address-hook(0x00e994) end(0x00e9c8)
 function void UpdateStaticRingsAnimation()
 {
@@ -275,7 +371,7 @@ function void UpdateStaticRingsAnimation()
 		if (u16[ringPointer] != 0)
 		{
 			A1 = 0x820000 + u16[ringPointer]
-			if (global.zone == 0x14)
+			if (global.zone == 0x14 || isNewBonusStage())
 				A1 = 0xffff0000 + u16[ringPointer]
 			--u8[A1]
 			if (u8[A1] == 0)
@@ -339,7 +435,7 @@ function void SonicUpdateRingCollection()
 	A1 = rings.around.first
 	A2 = rings.around.last
 	A4 = 0x820000 + rings.around.first.state
-	if (global.zone == 0x14)
+	if (global.zone == 0x14 || isNewBonusStage())
 		A4 = 0xffff0000 + rings.around.first.state
 
 	while (A1 != A2)
@@ -371,7 +467,6 @@ function void SonicUpdateRingCollection()
 				}
 			}
 		#endif
-
 			if (checkBoxOverlap(box.pos.x, box.pos.y, box.size.x, box.size.y, px, py, ring.size, ring.size))
 			{
 				if (char.bonus_effect & char.bonus.SHIELD_LIGHTNING)
