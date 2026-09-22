@@ -519,6 +519,9 @@ function void ALZ.DisplayBottom()
 
 function void BonusStage.ManageSwitchEffects()
 {
+	if (global.game.paused)
+		return
+
 	// Initialize timer to 0
 	if (timer.alldata <= 1)
 	{
