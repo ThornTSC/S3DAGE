@@ -2733,7 +2733,7 @@ function void fn079416()
 
 
 // Call the chosen palette if restarting from the star post in the LRZ2 boss.
-// Also disable palette cycle fix in Original Mode.
+// Also disable palette cycle fix in Original Mode and remove unneeded tiles if using new lava visuals.
 // Function taken from level\10_lrz\level_lrz.lemon
 //# address-hook(0x059a7e) end(0x059afe)
 function void InitLevelTiles.LRZ_Boss()
@@ -2779,6 +2779,23 @@ function void InitLevelTiles.LRZ_Boss()
 
 	Level.GetCameraPosition()
 	Level.InitialTilesFill()
+
+	// Remove the boss area lava tiles if using new visuals.
+	if (LRZ2_boss_lava_override && !original_mode)
+	{
+		u8[0xffff8088 + 0x200 + 0x1e] = 0
+		u8[0xffff8088 + 0x200 + 0x1f] = 0
+		u8[0xffff8088 + 0x200 + 0x20] = 0
+		u8[0xffff8088 + 0x200 + 0x21] = 0
+		u8[0xffff8088 + 0x200 + 0x22] = 0
+		u8[0xffff8088 + 0x200 + 0x23] = 0
+		u8[0xffff8088 + 0x200 + 0x2a] = 0
+		u8[0xffff8088 + 0x200 + 0x2b] = 0
+		u8[0xffff8088 + 0x200 + 0x2c] = 0
+		u8[0xffff8088 + 0x200 + 0x2d] = 0
+		u8[0xffff8088 + 0x200 + 0x2e] = 0
+		u8[0xffff8088 + 0x200 + 0x2f] = 0
+	}
 }
 
 

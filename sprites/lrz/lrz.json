@@ -1,3 +1,17 @@
 {
-    "lrz1_wallpathcover": { "File": "lrz1_wallpathcover.bmp" }
+    "lrz1_wallpathcover": { "File": "lrz1_wallpathcover.bmp" },
+
+    "lrz_lava_full": { "File": "lrz_lava_full.bmp" },
+    "lrz_lava_slice_0": { "File": "lrz_lava_full.bmp", "Rect": "0,0,16,256"},
+    "lrz_lava_slice_1": { "File": "lrz_lava_full.bmp", "Rect": "16,0,16,256"},
+    "lrz_lava_slice_2": { "File": "lrz_lava_full.bmp", "Rect": "32,0,16,256"},
+    "lrz_lava_slice_3": { "File": "lrz_lava_full.bmp", "Rect": "48,0,16,256"},
+    "lrz_lava_top_0": { "File": "lrz_lava_full.bmp", "Rect": "0,16,4,8"},
+    "lrz_lava_top_1": { "File": "lrz_lava_full.bmp", "Rect": "4,16,4,8"},
+    "lrz_lava_top_2": { "File": "lrz_lava_full.bmp", "Rect": "8,16,4,8"},
+    "lrz_lava_top_3": { "File": "lrz_lava_full.bmp", "Rect": "12,16,4,8"},
+    "lrz_lava_bottom_0": { "File": "lrz_lava_full.bmp", "Rect": "0,24,16,232", "Center": "0,-24"},
+    "lrz_lava_bottom_1": { "File": "lrz_lava_full.bmp", "Rect": "16,24,16,232", "Center": "0,-24"},
+    "lrz_lava_bottom_2": { "File": "lrz_lava_full.bmp", "Rect": "32,24,16,232", "Center": "0,-24"},
+    "lrz_lava_bottom_3": { "File": "lrz_lava_full.bmp", "Rect": "48,24,16,232", "Center": "0,-24"}
 }

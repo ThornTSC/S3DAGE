@@ -211,7 +211,8 @@ function void fn078c14()
 	}
 }
 
-// Ensure the call to 16x16 block drawing function fn059d24() receives the appropriate number of rows of blocks for the screen height
+// Ensure the call to 16x16 block drawing function fn059d24() receives the appropriate number of rows of blocks for the screen height.
+// Also render the slanting lava blocks using external graphics.
 //# address-hook(0x059d24) end(0x059d7e)
 function void fn059d24()
 {
@@ -260,6 +261,64 @@ function void fn059d24()
 		--D1.s16
 	}
 #endif
+
+	// Rendering the lava starts here.
+	// The pixel offsets for the heat effect are stored at 0xffffe000.
+	// The foreground lava here is actually background lava, so it uses the last byte of the u32 for the x-offset.
+	if (LRZ2_boss_lava_override && !original_mode)
+	{
+		A5 = 0xffffa800
+		
+		if (LRZ2_boss_lava_effect)
+		{
+			// Render the first slice out of bounds, to avoid empty pixels in the foreground
+			for (u16 i = getScreenHeight() + (0x20 - getScreenHeightExtend()) - u16[0xffffa800]; i < getScreenHeight(); ++i)
+			{
+				Renderer.setViewport(0, i, getScreenWidth(), 1, 0x9efe)
+				Renderer.drawSprite("lrz_lava_slice_3", -0x10 + (u32[0xffffe000 + i*4] & 1), getScreenHeight() + (0x20 - getScreenHeightExtend()) - u16[0xffffa800], 0x20, 0, 0x9efe)
+			}
+		}
+		
+		s16 grad = Math.roundToInt(0x10 * s16(u16[0xffffa800] - u16[0xffffa804]) / 16.0f)
+		
+		// Render the slanting lava
+		for (u8 row = 0; row < rows; ++row)
+		{
+			u16 layerShift = getScreenHeight() + 0x20 - getScreenHeightExtend() - u16[A5]
+			u16 rowPos = 0x10*u16(row)
+			
+			if (LRZ2_boss_lava_effect)
+			{
+				for (u16 k = layerShift; k < getScreenHeight(); ++k)
+				{
+					Renderer.setViewport(0, k, getScreenWidth(), 1, 0x9efe)
+					
+					Renderer.drawSprite(stringformat(LRZ2_boss_lava_surface ? "lrz_lava_bottom_%d" : "lrz_lava_slice_%d", row % 4), rowPos + (u32[0xffffe000 + k*4] & 1), layerShift, 0x20, 0, 0x9efe)
+					
+					if (LRZ2_boss_lava_surface && k < layerShift + 0x20)
+					{
+						for (u8 j = 0; j < 4; j++)
+						{
+							Renderer.drawSprite(stringformat("lrz_lava_top_%d", j), rowPos + j*4 + (u32[0xffffe000 + k*4] & 1), layerShift + 0x10 + (u8[0xffffeeda] == 0 ? -1 : 1) * (grad * (u8[0xffffeeda] == 0 ? (16 - j*4) : j*4)) / 0x10, 0x20, 0, 0x9efe)
+						}
+					}
+				}
+				Renderer.resetViewport(0x9eff)
+			}
+			else
+			{
+				Renderer.drawSprite(stringformat(LRZ2_boss_lava_surface ? "lrz_lava_bottom_%d" : "lrz_lava_slice_%d", row % 4), rowPos, layerShift, 0x20, 0, 0x9eff)
+				if (LRZ2_boss_lava_surface)
+				{
+					for (u8 j = 0; j < 4; j++)
+					{
+						Renderer.drawSprite(stringformat("lrz_lava_top_%d", j), rowPos + j*4, layerShift + 0x10 + (u8[0xffffeeda] == 0 ? -1 : 1) * (grad * (u8[0xffffeeda] == 0 ? (16 - j*4) : j*4)) / 0x10, 0x20, 0, 0x9eff)
+					}
+				}
+			}
+			A5 += 4
+		}
+	}
 }
 
 // In Original Mode, allow players to move while falling into the LRZ boss act.
@@ -593,5 +652,44 @@ function void fn059fdc()
 
 		D0 = u32[0xffffeee6]
 		u32[A1 + 0x10] += D0
+	}
+}
+
+
+// Render the boss area lava while it is not slanting.
+// The pixel offsets for the heat effect are stored at 0xffffe000.
+// The foreground lava here is actually background lava, so it uses the last byte of the u32 for the x-offset.
+//# address-hook(0x059c44) end(0x059c48)
+function void UpdateLevelScrolling.LRZ_Boss()
+{
+	if (!LRZ2_boss_lava_override || original_mode)
+	{
+		base.UpdateLevelScrolling.LRZ_Boss()
+		return
+	}
+	
+	u8 lavaOverride = level.scrolling_routine != 0x0c
+	
+	base.UpdateLevelScrolling.LRZ_Boss()
+
+	if (level.scrolling_routine != 0x0c || lavaOverride)
+	{
+		for (u16 i = 0; i < 6; i++)
+		{
+			if (LRZ2_boss_lava_effect)
+			{
+				for (u16 j = 0; j < getScreenHeight(); ++j)
+				{
+					Renderer.setViewport(0, j, getScreenWidth(), 1, 0x9efe)
+					Renderer.drawSprite("lrz_lava_full", 0x0a00 + i*0x80 + (u32[0xffffe000 + j*4] & 1), 0x0600, 0x20, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9efe)
+				}
+				
+				Renderer.resetViewport(0x9eff)
+			}
+			else
+			{
+				Renderer.drawSprite("lrz_lava_full", 0x0a00 + i*0x80, 0x0600, 0x20, SPRITE_FLAG_PRIO | SPRITE_FLAG_WORLDSPACE, 0x9efe)
+			}
+		}
 	}
 }

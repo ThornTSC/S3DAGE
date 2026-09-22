@@ -721,6 +721,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	// Dynamic ring (placed by debug mode, or those in Knuckles' SSZ)
 	if ((objA0.update_address == 0x01a51a) && objA0.base_state == 0x02)
 	{
+		// Adjust for LRZ2 slanting lava visuals
+		if ((LRZ2_boss_lava_override && global.zone_act == 0x1600 && level.scrolling_routine >= 0x0c) && objA0.base_state == 0x02 && !original_mode)
+			renderQueue = max(renderQueue, 0x9f00)
+
 		// Use smoother ring rotation
 		u16 animFrame = ((static_rings.animframe * 8 + 7 - static_rings.animtimer) / 4) % 8
 		u16 alpha = 255
@@ -761,6 +765,10 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	// Spilled ring
 	if ((objA0.update_address == 0x01a64a || objA0.update_address == 0x01a662) && objA0.base_state == 0x02)
 	{
+		// Adjust for LRZ2 slanting lava visuals
+		if ((LRZ2_boss_lava_override && global.zone_act == 0x1600 && level.scrolling_routine >= 0x0c) && objA0.base_state == 0x02 && !original_mode)
+			renderQueue = max(renderQueue, 0x9f00)
+
 		// Use smoother ring rotation
 		u16 animFrame = (spilled_rings.progress >> 8) % 8
 		u16 alpha = min(255, u16(spilled_rings.speed) * 10)
