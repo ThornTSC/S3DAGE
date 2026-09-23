@@ -254,7 +254,7 @@ function void BonusStage.RenderLapBonus()
 	{
 		if (!global.game.paused)
 			--u8[0xfffffff1]	// decrement timer
-		u16 currentRingBonus = BonusStage.LapBonuses[min(competition_mode.lap_count.player1 - 1, 7)]
+		u16 currentRingBonus = BonusStage.LapBonuses[min(competition_mode.lap_count.player1 - 1, 9)]
 
 		if (theme.hud == theme.saturn)
 			Saturn.displayLapBonus(currentRingBonus)
