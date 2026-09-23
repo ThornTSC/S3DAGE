@@ -19485,7 +19485,9 @@ function void fn04301c()
 	{
 		if (L_Spindash)
 		{
-			Renderer.drawCustomSprite("@input_icon_button_L", getScreenWidth()/2, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_L", getScreenWidth()/2 - 12, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("saturn_hud_slash", getScreenWidth()/2 - 4, 0x30, 0, SPRITE_FLAG_PRIO, 0xfffe)
+			Renderer.drawCustomSprite("@input_icon_button_R", getScreenWidth()/2 + 12, 0x38, 0, SPRITE_FLAG_PRIO, 0xfffe)
 		}
 		else
 		{
