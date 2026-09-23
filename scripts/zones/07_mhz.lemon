@@ -187,6 +187,36 @@ function void fn075a94()
 	Object.DrawOrUnload()
 }
 
+// Adjust where pollen particles spawn as cutscene Knuckles uses his switch
+//# address-hook(0x063324) end(0x06336e)
+function void fn063324()
+{
+	setupObjectAttributesFull(0x06646e)
+	objA0.update_address = 0x063372
+
+	GetRandomNumber()
+	if (original_mode)
+		D0.u16 %= getScreenWidth()
+	else
+	{
+		D0.u16 &= 0x01ff
+		if (D0.u16 >= getScreenWidth())
+		{
+			D0.u16 = (D0.u16 & 0x3f) * 4
+		}
+	}
+
+	objA0.position.x.u16 = camera.foreground.x.u16 + D0.u16
+	objA0.position.y.u16 = camera.foreground.y.u16 + getScreenHeight() + 8
+
+	A1 = 0xffff0000 + u16[A0 + 0x46]
+	D1 = u8[A1 + 0x39]
+	D1.s16 = -D1.s16 * 2
+	objA0.velocity.y = D1.u16
+
+	fn063372()
+}
+
 // MHZ2: don't adjust the camera maximum near the boss (as this inhibits Knuckles' gliding) in time attack modes.
 // Alter move_area.bottom and level.vertical_wrap values in MHZ2 in accordance with the new screen height.
 // Function taken from level\07_mhz\level_mhz.lemon
