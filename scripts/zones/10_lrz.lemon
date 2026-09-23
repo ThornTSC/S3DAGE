@@ -662,15 +662,18 @@ function void fn059fdc()
 //# address-hook(0x059c44) end(0x059c48)
 function void UpdateLevelScrolling.LRZ_Boss()
 {
-	if (!LRZ2_boss_lava_override || original_mode)
+	if (!global.game.paused)
 	{
+		if (!LRZ2_boss_lava_override || original_mode)
+		{
+			base.UpdateLevelScrolling.LRZ_Boss()
+			return
+		}
+		
 		base.UpdateLevelScrolling.LRZ_Boss()
-		return
 	}
-	
+
 	u8 lavaOverride = level.scrolling_routine != 0x0c
-	
-	base.UpdateLevelScrolling.LRZ_Boss()
 
 	if (level.scrolling_routine != 0x0c || lavaOverride)
 	{
@@ -692,4 +695,10 @@ function void UpdateLevelScrolling.LRZ_Boss()
 			}
 		}
 	}
+}
+
+function void LRZ2Boss_CustomSprites()
+{
+	fn059d24()
+	UpdateLevelScrolling.LRZ_Boss()
 }
