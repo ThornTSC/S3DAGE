@@ -2686,6 +2686,10 @@ function void fn0085b0()
 		{
 			A1 += 0x0130
 		}
+
+		// new if statement to switch to new Special Stage palette offset
+		if (palette_set >= 2 && !original_mode && green_spheres.active && !challenge_greenspheres && !speedSpheres)
+			A1 += 0x2cb80e	// distance between old and new offsets
 		copyMemory(A2 + 0x50, A1 + 0x20, 6)
 	}
 #endif
