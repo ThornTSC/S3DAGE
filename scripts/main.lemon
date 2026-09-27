@@ -8830,8 +8830,31 @@ function void fn01c78c()
 			if (original_mode)
 				move_area.left = 0x1040
 			camera.update_routine += 2
+			Level.GetCameraPosition()
+			fillPlaneA_Default(camera.foreground.x.u16, camera.foreground.y.u16, getScreenWidth() + 16, getScreenHeight())
 		}
 	}
+}
+
+// Do not allow the leftmost border of AIZ2 to be undone after returning from a bonus stage
+//# address-hook(0x0500b6) end(0x0500ce)
+function void UpdateLevelScrolling.AIZ2()
+{
+	if (!original_mode && global.zone_act.apparent == 0x0001)
+	{
+		if (move_area.bottom.target == 0x0580 || move_area.bottom.target == 0x0590 || move_area.bottom.target == 0x0620 || move_area.bottom.target == 0x0630)	// Sonic/Tails path
+		{
+			u16 targetLeftBorder = 0x1178
+			if (getScreenWidth() > 400)
+				targetLeftBorder -= (getScreenWidth() - 400)/2
+			if (camera.position.x.u16 >= targetLeftBorder)
+				move_area.left = targetLeftBorder
+		}
+		else if (move_area.bottom.target == 0x0820)	// Knux path
+			move_area.left = 0x10a8
+	}
+	
+	base.UpdateLevelScrolling.AIZ2()
 }
 
 // Correct the camera x minimum in AIZ2 on the Sonic path when playing as Knuckles outside of Original Mode.
