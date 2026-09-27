@@ -363,3 +363,64 @@ function void fn0777f0()
 		Boss.updateHitFlashing(3, 0x07826c, 0x078276, 0x078276, 0x01)
 	}
 }
+
+// Adjust camera position of act transition cutscene based on screen width
+//# address-hook(0x0778f2) end(0x077964)
+function void fn0778f2()
+{
+	move_area.left = camera.position.x.u16
+
+	// Wait for level results
+	if (level.wait_for_results)
+		return
+
+	objA0.update_address = 0x077966
+	stopCharacterWinPose(0xffffb000)
+	PlayMusicAfterLevelResults()
+	control.player1 = 0
+	player1.control_override = 0xff
+	objA0.countdown_value = 0
+	stopCharacterWinPose(0xffffb04a)
+
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x077a6e
+	}
+	if (allocDynamicObjectStd())
+	{
+		objA1.update_address = 0x0863c0
+	}
+
+	level.vertical_wrap = 0xff00
+	move_area.bottom.target = 0x0800
+	screenmover_target.right = 0x5440
+	if (!original_mode)
+	{
+ 		screenmover_target.right += getScreenExtend()/2
+		u8[0xffff8a23] = 0x12
+		u8[0xffff8ad3] = 0x12
+		u8[0xffff8b83] = 0x12
+		u8[0xffff8c33] = 0x12
+		u8[0xffff8133] = 0x12
+		u8[0xffff81e3] = 0x12
+		u8[0xffff8293] = 0x12
+		u8[0xffff8343] = 0x12
+		u8[0xffff83f3] = 0x12
+		u8[0xffff84a3] = 0x12
+		u8[0xffff8553] = 0x12
+		u8[0xffff8603] = 0x12
+		u8[0xffff86b3] = 0x12
+		u8[0xffff8763] = 0x12
+		u8[0xffff8813] = 0x12
+	}
+
+	if (allocDynamicObjectStd())
+	{
+		// Spawn screen mover for the right border
+		objA1.update_address = 0x084a48
+	}
+
+#if STANDALONE
+	Game.startSkippableCutscene()
+#endif
+}
