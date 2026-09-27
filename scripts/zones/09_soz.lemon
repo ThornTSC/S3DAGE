@@ -256,6 +256,86 @@ function void fn055c84()
 	level.scrolling_routine = 0
 }
 
+// Adjust position at which ghosts unload outside of Original Mode to prevent competing VRAM writes near boss
+//# address-hook(0x0564d4) end(0x0565c4)
+function void fn0564d4()
+{
+	if ((original_mode && (u16[0xffffb000 + 0x10] < 0x5000 || camera.position.y.u16 < 0x0500)) || (!original_mode && (u16[0xffffb000 + 0x10] < 0x5000 || u16[0xffffb000 + 0x14] < 0x04d0)))
+	{
+		fn0566d2()
+		fn0564e8()
+		return
+	}
+
+	u16[0xffffeede] = 0x5250
+	u16[0xffffeee0] = 0x06d8
+
+	A1 = 0xffff0000 + u16[A3]
+	D0.u16 = u16[A3 - 0x08] - 4
+	D1 = 0
+	D2 = 0x0f
+	while (D2.s16 >= 0)
+	{
+		D3 = 3
+		while (D3.s16 >= 0)
+		{
+			u8[A1+4] = u8[A1]
+			u8[A1] = 0
+			++A1
+			--D3.s16
+		}
+
+		A1 += D0.u16
+		--D2.s16
+	}
+
+	zeroMemory(0xffffa800, 0x200)
+	fn056706()
+	if (checkForMultiReturn())
+		return
+
+	A1 = 0xffffa800
+	D0 = 0x0c
+	while (D0.s16 >= 0)
+	{
+		u16[A1+2] = u16[A1] & 0xfff0
+		A1 += 4
+		--D0.s16
+	}
+
+	level.vertical_wrap = 0x0500
+	D0.u16 = 0x0680
+	move_area.bottom.current = D0.u16
+	move_area.bottom.target = D0.u16
+	move_area.right = 0x5140
+
+	push(A3)
+	push(A2)
+	push(A0)
+	push(D7)
+
+	Kosinski.addToDecompressionQueue(0x1b0720, 0xffff9ea0)
+
+	Kosinski.addToDMAQueue(0x1b0860, 0x62a0)
+
+	D7 = pop()
+	A0 = pop()
+	A2 = pop()
+	A3 = pop()
+
+	level.palettefx.timer_1 = 0x7fff
+	u8[0xfffff7c3] = 0
+	D0.u16 = level.palettefx.frame_4
+	D0.s8 = -D0.s8
+	level.palettefx.state = D0.u8
+	level.palettefx.timer_2 = 0
+	u8[0xfffff7f0] = 0x7f
+
+	fn056a12()
+	level.scrolling_routine += 4
+	fn0565f4()
+}
+
 // Implement visual fix for SOZ2 boss only outside of Original Mode
 //# address-hook(0x0777f0) end(0x077806)
 function void fn0777f0()
