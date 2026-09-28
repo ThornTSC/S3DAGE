@@ -4059,6 +4059,20 @@ function void loadChallengeRecords()
 			}
 			u32[prototypePerfectRecordAddress + 8] = 0x00ffffff									// reinitialize the Hard layout memory
 		}
+
+		// Fix an issue in which test data of 2'00"00 was set into the Prototype Special Stage 7 perfect record while verifying the above fix.
+		// If a record of exactly 2'00"00 was set, we can't wipe this record trying to catch the issue.
+		// But we can see if the non-perfect record is unset or somehow worse than 2'00"00 while the perfect record is 2'00"00, fixing most cases.
+		if (((u32[0x8301e0] & 0x00ffffff) >= 0x00020000) && ((u32[0x8301e4] & 0x00ffffff) == 0x00020000))
+		{
+			u32[0x8301e4] = 0x00ffffff
+
+			u64 datakey = "DAGE_SpecialTA"
+			u32 save_data_address = 0x830000
+
+			// Save fixed time
+			System.savePersistentData(save_data_address, datakey, 0x0200)
+		}
 	}
 
 	// Add Special Stage medals to medal count
@@ -7645,8 +7659,6 @@ function void Challenge.showEndInterface()
 
 function void Challenge.manageEndMenu()
 {
-	
-	u32[0x8301ec] = 0x00020000
 	if ((global.game_mode & 0x7f) > 0x50)	// we've returned to the main menu or Challenges menu
 		return
 
