@@ -266,7 +266,7 @@ function void fn02d47e()
 			// Normal difficulty: 1-7 Chaos, 9-15 Super
 			// Hard difficulty: 17-23 Chaos, 25-31 Super
 			// Super Emerald stages are not enabled yet!
-			challenge_greenspheres = global.next_bluespheres + 1
+			challenge_greenspheres = BlueSpheres.getNextOpenStageIndex() + 1
 			if (isMainCharacter(CHARACTER_KNUCKLES) && specialstages_knuckles)
 			{
 				// Use harder special stages
