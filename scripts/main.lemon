@@ -8783,8 +8783,27 @@ function void fn04fc46()
 
 
 
+// Ensure Original Mode uses the correct AIZ1 boss location check
+// Function taken from bosses\boss_aiz1.lemon
+//# address-hook(0x068a6e) end(0x068a90)
+function void fn068a6e()
+{
+	if (!original_mode)
+	{
+		// Choose boss area depending on which route has been taken, not the character selection
+		D5.u16 = (camera.position.y.u16 >= 0x03a0) ? 0x10c0 : 0x10e0
+		D5.u16 -= getScreenExtend()
+		move_area.right = D5.u16 + (getScreenWidth() - 320)
+	}
+	else
+		D5.u16 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x10c0 : 0x10e0
 
-
+	if (camera.position.x.u16 >= D5.u16)
+	{
+		objA0.countdown_callback = 0x068a94
+		fn068556()
+	}
+}
 
 
 // Correct the camera x minimum in AIZ2 on the Sonic path outside of Original Mode.
