@@ -19781,6 +19781,11 @@ function void LRZ1_CustomSprites()
 	{
 		Renderer.addSpriteMaskWorld(camera.position.x.u16, 0x0710 + 176, getScreenWidth(), getScreenHeight() - 176, 0x9e00, 1)	
 	}
+	if (Mods.isModActive("Stone 3 A.I.R.") && level.vertical_wrap == 0x0710 && getScreenHeightExtend())
+	{
+		level.vertical_wrap -= getScreenHeightExtend()
+		move_area.bottom.target = level.vertical_wrap
+	}
 }
 
 // Note that this function is NOT currently called by typical level routines; they are ONLY called in DAGE pausing!
