@@ -17745,12 +17745,21 @@ function void FBZ1_CustomSprites()
 	}
 
 	// Properly render approach to boss
-	if (level.trigger0f < 3 && !original_mode && time_attack != 1 && time_attack != 2)
+	if (level.trigger0f < 3 && !original_mode && time_attack != 1 && time_attack != 2 && !Mods.isModActive("Pink Burner") && !Mods.isModActive("Sawnic") && !Mods.isModActive("Stone 3 A.I.R."))
 	{
 		Renderer.drawCustomSprite("fbz_prison", 0x2f00, 0x05e0, 0, SPRITE_FLAG_WORLDSPACE | SPRITE_FLAG_PRIO, 0xa001)
 		Renderer.addSpriteMaskWorld(0x2ee0, 0x05b0, 0x40, 0x50, 0xa000, 1)
 		if (level.trigger0f > 0 && !global.game.paused)
 			++level.trigger0f
+	}
+
+	// Pink Burner (standalone and with Sawnic) has a few lingering ceiling and background wall chunks in its arena that need to be cleared out.
+	// Check for its unique left boss area boundary and that we haven't already adjusted the chunks.
+	else if ((Mods.isModActive("Pink Burner") || Mods.isModActive("Sawnic")) && ((move_area.left == 0x2e20 - 0xa8) && u16[0xffff8632] != 0) && camera.position.x.u16 >= 0x2e20)
+	{
+		u16[0xffff8632] = 0
+		u16[0xffff86ba] = 0
+		fillPlaneA_Default(camera.position.x.u16, camera.position.y.u16, getScreenWidth(), getScreenHeight())
 	}
 }
 

@@ -85,7 +85,7 @@ function void fn06eea8()
 function void fn06ef0e()
 {
 	base.fn06ef0e()
-	if (getScreenWidth() <= 400)
+	if (getScreenWidth() <= 400 || Mods.isModActive("Pink Burner") || Mods.isModActive("Sawnic"))
 		return
 
 	objA0.base_state = 0x04

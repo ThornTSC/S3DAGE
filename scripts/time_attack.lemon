@@ -2743,10 +2743,10 @@ function void RenderHUD_MedalTimes()
 // Function mimicked from maingame\hud\hud.lemon
 function void RenderHUD_Orig()
 {
-	if (Mods.isModActive("Megamix HUD"))	// popular mod that uses unique sprite keys for RINGS text display
+	if (Mods.isModActive("Megamix HUD") || Mods.isModActive("Sawnic"))	// popular mod that uses unique sprite keys for RINGS text display
 	{
-		RenderHUD()							// While most HUD mods are disabled in Classic Mode, this one uses scripting
-		return								// and is best not interfered with.
+		RenderHUD()							// While most HUD mods are disabled in Classic Mode, these two use scripting
+		return								// and are best not interfered with.
 	}
 
 	System.callFunctionByName("RenderBoostBar")	// 3D in 2D Shadow boost bar is in standard RenderHUD(), so we need a copy in the Challenges variant
