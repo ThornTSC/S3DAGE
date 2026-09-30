@@ -621,7 +621,7 @@ function void customMenu.mainControlLoop()
 					Audio.playAudio("jam_changeselection")
 				}
 			}
-			else if (selectedZoneAct == 0xffff && (unlock_flags & 0x0001))
+			else if (selectedZoneAct == 0xffff && ((unlock_flags & 0x0001) || cheatStars))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
 				Audio.playAudio("jam_changeselection")
@@ -689,7 +689,7 @@ function void customMenu.mainControlLoop()
 					Audio.playAudio("jam_changeselection")
 				}
 			}
-			else if (selectedZoneAct == 0xffff && (unlock_flags & 0x0001))
+			else if (selectedZoneAct == 0xffff && ((unlock_flags & 0x0001) || cheatStars))
 			{
 				selectedSpecialStageType = !selectedSpecialStageType
 				Audio.playAudio("jam_changeselection")
@@ -1151,7 +1151,7 @@ function void customMenu.displayRecords()
 			customMenu.displayRecordsSpecial()
 		else
 		{
-			if (!(unlock_flags & 0x0001))
+			if (!(unlock_flags & 0x0001) && !cheatStars)
 				customMenu.displayEndlessProgress(greenSphereProgressAddress, 65)
 				// Text lines used if both selections are shown but Speed Sphere is locked
 			//	Renderer.drawText("sonic_r_credits_small:shadow(1,1,0,1)", getScreenExtend() - 40 + 283, 138, "To unlock:", 0xffffffff, 1, 0, 0xfff1, 0, 1)
@@ -2096,15 +2096,15 @@ function void DataSelect.drawCustomPlanes()
 			Renderer.drawCustomSprite("blackscreen_optionsdim", getScreenExtend() - 40 + 8 + 114, 150 + 30, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 168)		// options border rectangle (66% opacity)
 		if (selectedZoneAct >= 0xff00)
 		{
-			if ((selectedZoneAct < 0xff18) || (selectedZoneAct == 0xffff && (unlock_flags & 0x0001)))
+			if ((selectedZoneAct < 0xff18) || (selectedZoneAct == 0xffff && ((unlock_flags & 0x0001) || cheatStars)))
 			{
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)			// Normal best times border rectangle (80% opacity)
-				if (!(selectedZoneAct == 0xffff && !(unlock_flags & 0x0001)))
+				if (!(selectedZoneAct == 0xffff && !(unlock_flags & 0x0001) && !cheatStars))
 					Renderer.drawCustomSprite("text_option_normalspecial", getScreenExtend() - 40 + 240, 16, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 0) ? selectionTint : nonSelectionTint, 0x10000)		// Normal text
 				Renderer.drawCustomSprite("blackscreen_specialbesttimesdim_rect", getScreenExtend() - 40 + 260 + 66, 14 + 47 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf002, 0, 204)		// Hard best times border rectangle (80% opacity)
 				if (selectedZoneAct < 0xffff)
 					Renderer.drawCustomSprite("text_option_hardspecial", getScreenExtend() - 40 + 240, 16 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? selectionTint : nonSelectionTint, 0x10000)		// Hard text
-				else if (unlock_flags & 0x0001)
+				else if ((unlock_flags & 0x0001) || cheatStars)
 					Renderer.drawCustomSprite("text_option_speedspecial", getScreenExtend() - 40 + 240, 16 + 102, 0x00, SPRITE_FLAG_PRIO, 0xf003, 0, (selectedMenuOption == 6 && selectedSpecialStageType == 1) ? selectionTint : nonSelectionTint, 0x10000)	// Speed text
 				
 				u32 normalStageSeen = (normalSpecialStagesAccessed & (1 << u32(selectedZoneAct & 0x00ff)))
@@ -2504,7 +2504,7 @@ function void DataSelect.drawCustomPlanes()
 			else
 			{
 				rectKey = (level.framecounter.low & 0x08) ? "rect_specialoption_yellow" : "rect_specialoption_red"			// change rectangle color every 8 frames
-				rectYPos = ((selectedZoneAct >= 0xff18 && selectedZoneAct != 0xffff) || (selectedZoneAct == 0xffff && !(unlock_flags & 0x0001))) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
+				rectYPos = ((selectedZoneAct >= 0xff18 && selectedZoneAct != 0xffff) || (selectedZoneAct == 0xffff && !(unlock_flags & 0x0001) && !cheatStars)) ? 11 + 51 : 11 + (102 * selectedSpecialStageType)
 				Renderer.drawCustomSprite(rectKey, getScreenExtend() - 40 + 257, rectYPos, 0x00, SPRITE_FLAG_PRIO, 0xf003)		// rectangle for character selection			
 			}
 		}
