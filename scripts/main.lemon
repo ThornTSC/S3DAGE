@@ -753,11 +753,32 @@ function void TitleCard.Init()
 	{
 		// Create the retracting spring object. Natural spawning means it may not load until after the switch is pressed, thus "ignoring" the switch on Lap 1.
 		u32 backupA1 = A1
+
 		A1 = 0xffffb40c
 		objA1.update_address = 0x023b38
 		objA1.position.x.u16 = 0x0470
 		objA1.position.y.u16 = 0x02a8
 		objA1.subtype2c = 0xe0
+
+		// Create the bonus bubbles near the horizontal loop on Lap 1. These gumballs appear to pop in on their first time approached otherwise.
+		A1 = 0xffffb456
+		objA1.update_address = 0x04a1e6
+		objA1.position.x.u16 = 0x08d8
+		objA1.position.y.u16 = 0x0240
+		objA1.subtype2c = 0x07
+
+		A1 = 0xffffb4a0
+		objA1.update_address = 0x04a1e6
+		objA1.position.x.u16 = 0x0420
+		objA1.position.y.u16 = 0x0310
+		objA1.subtype2c = 0x03
+
+		A1 = 0xffffb4ea
+		objA1.update_address = 0x04a1e6
+		objA1.position.x.u16 = 0x0448
+		objA1.position.y.u16 = 0x0240
+		objA1.subtype2c = 0x02
+
 		A1 = backupA1
 	}
 
