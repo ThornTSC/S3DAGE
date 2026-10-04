@@ -291,6 +291,6 @@ function void loadTASettings()
 		time_attack_hud.layout = 1
 		exit_threshold = 30
 	}
-	else if (exit_threshold == 1 || exit_threshold == 30)
+	else if (!(exit_threshold == 1 || exit_threshold == 30))
 		exit_threshold = 30
 }
